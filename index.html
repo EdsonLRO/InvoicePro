@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         ::-webkit-scrollbar { width: 8px; }
@@ -34,7 +35,7 @@
         <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
             <div class="text-center mb-8">
                 <h1 class="text-3xl font-bold tracking-tight text-indigo-600 mb-1">InvoicePro</h1>
-                <p class="text-sm text-slate-500">Invoicing that stays in your browser</p>
+                <p class="text-sm text-slate-500">Create and manage your invoices</p>
             </div>
 
             <div v-if="authMode === 'login'" class="space-y-5">
@@ -50,7 +51,7 @@
                     </div>
                     <input type="password" v-model="auth.password" @keyup.enter="login" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
-                <button @click="login" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Sign In</button>
+                <button @click="login" :disabled="authBusy" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Signing in...' : 'Sign In' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     Don't have an account? <button @click="authMode = 'register'" class="text-indigo-600 hover:underline font-medium">Create one</button>
                 </div>
@@ -59,49 +60,45 @@
             <div v-if="authMode === 'register'" class="space-y-5">
                 <h2 class="text-xl font-semibold">Create Account</h2>
                 <div class="bg-blue-50 text-blue-800 text-xs p-3 rounded-lg border border-blue-100">
-                    <strong>How your data is stored:</strong> This is a local app. Your invoices and customers are saved only in this browser and encrypted at rest using a key derived from your password &mdash; nothing is sent to a server. Because of this, if you lose your password the local data cannot be recovered. Don't rely on this as your only copy of important data.
+                    <strong>Before you start:</strong> Your account is created securely with our authentication provider, and you'll need to confirm your email address before signing in. Use a real email you can access.
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Valid Email Address</label>
+                    <label class="block text-sm font-medium mb-1">Email Address</label>
                     <input type="email" v-model="auth.username" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium mb-1">Master Password</label>
+                    <label class="block text-sm font-medium mb-1">Password</label>
                     <input type="password" v-model="auth.password" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <p class="text-xs text-slate-400 mt-1">At least 8 characters.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Confirm Password</label>
                     <input type="password" v-model="auth.confirm" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
-                <button @click="initiateRegistration" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Continue to Verification</button>
+                <button @click="register" :disabled="authBusy" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Creating account...' : 'Create Account' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     Already registered? <button @click="authMode = 'login'" class="text-indigo-600 hover:underline font-medium">Sign in</button>
                 </div>
             </div>
 
             <div v-if="authMode === 'verify'" class="space-y-5">
-                <h2 class="text-xl font-semibold">Confirm Code</h2>
+                <h2 class="text-xl font-semibold">Check your email</h2>
                 <div class="bg-emerald-50 text-emerald-800 text-sm p-4 rounded-lg border border-emerald-100">
-                    This is a local app, so no email is actually sent. A demo code has been generated and shown in a browser pop-up &mdash; enter it below to continue. (Real email verification will be added when the app moves to a hosted backend.)
+                    We've sent a confirmation link to <strong>{{ pendingEmail }}</strong>. Open that email and click the link to activate your account, then come back here and sign in. (Check your spam folder if you don't see it within a minute.)
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Enter 6-Digit Code</label>
-                    <input type="text" v-model="auth.code" maxlength="6" class="w-full border rounded-lg px-3 py-3 text-center tracking-widest text-lg font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
-                </div>
-                <button @click="verifyAndRegister" class="w-full bg-emerald-600 text-white py-2.5 rounded-lg hover:bg-emerald-700 font-medium transition shadow-sm">Complete Registration</button>
-                <div class="text-center text-sm text-slate-500 pt-4 border-t">
-                    <button @click="authMode = 'register'" class="text-indigo-600 hover:underline font-medium">Cancel and go back</button>
-                </div>
+                <button @click="authMode = 'login'" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Back to Sign In</button>
             </div>
 
             <div v-if="authMode === 'forgot'" class="space-y-5">
-                <h2 class="text-xl font-semibold text-red-600">Password Recovery</h2>
-                <div class="bg-red-50 text-red-800 text-sm p-4 rounded-lg border border-red-100 space-y-2">
-                    <p><strong>Your password can't be recovered</strong></p>
-                    <p>Your data is stored only in this browser and encrypted with a key derived from your password. There's no server and no copy of your password, so it can't be reset by email.</p>
-                    <p>If you've lost your password, the only option is to wipe the local data and start a new account.</p>
+                <h2 class="text-xl font-semibold">Reset your password</h2>
+                <div class="bg-blue-50 text-blue-800 text-sm p-4 rounded-lg border border-blue-100">
+                    Enter your account email and we'll send you a link to set a new password.
                 </div>
-                <button @click="factoryReset" class="w-full bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 font-medium transition shadow-sm">Wipe Data & Reset App</button>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Email Address</label>
+                    <input type="email" v-model="auth.username" @keyup.enter="sendPasswordReset" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <button @click="sendPasswordReset" :disabled="authBusy" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Sending...' : 'Send Reset Link' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     Remembered it? <button @click="authMode = 'login'" class="text-indigo-600 hover:underline font-medium">Return to sign in</button>
                 </div>
@@ -148,10 +145,10 @@
                 </div>
 
                 <div class="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-                    <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Security Protocols</h2>
+                    <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Change Password</h2>
                     
                     <div class="bg-amber-50 text-amber-800 text-sm p-4 rounded-lg border border-amber-200 mb-6">
-                        <strong>Note:</strong> Changing your password re-encrypts your locally stored data with the new password. Don't close the tab until it finishes.
+                        <strong>Note:</strong> Please enter you current password to confirm it's you, then proceed with changing your password.
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -175,7 +172,7 @@
 
                 <div class="bg-red-50 p-8 rounded-xl border border-red-200">
                     <h2 class="text-xl font-semibold text-red-700 mb-2">Session</h2>
-                    <p class="text-red-600 text-sm mb-6">Logging out clears your password from memory. You'll need it again to unlock your data on this browser.</p>
+                    <p class="text-red-600 text-sm mb-6">Logging out ends your session on this device. You'll need to sign in again to access your account.</p>
                     <button @click="confirmLogout" class="bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 font-medium shadow-sm transition">Log Out</button>
                 </div>
 
@@ -831,6 +828,18 @@
 </div>
 
 <script>
+    // =========================================================================
+    // SUPABASE CONFIGURATION
+    // Paste your two values from Supabase dashboard -> Settings -> API Keys.
+    // Both of these are safe to be in front-end code (the anon key is public;
+    // your data is protected by Row Level Security, not by hiding this key).
+    // Do NOT paste the service_role / secret key here.
+    // =========================================================================
+    const SUPABASE_URL = 'https://cuagwifetheefftleeup.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_sN8qt13wD8IZcDP222T6tA_ze5fxp-t';
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const { createApp } = Vue;
 
     createApp({
@@ -840,6 +849,10 @@
                 isLoggedIn: false,
                 authMode: 'login', 
                 auth: { username: '', password: '', confirm: '', code: '' },
+                currentUser: null,
+                pendingEmail: '',
+                authBusy: false,
+                dataLoading: false,
                 pendingAuth: null,
                 generatedCode: null,
                 encryptionKey: null,
@@ -885,18 +898,7 @@
         },
         computed: {
             totals() {
-                let subtotal = 0;
-                this.draft.items.forEach(item => {
-                    let lineTotal = item.qty * item.price;
-                    let discAmt = lineTotal * (item.discount / 100);
-                    subtotal += (lineTotal - discAmt);
-                });
-                let globalDiscountAmt = subtotal * ((this.draft.globalDiscount || 0) / 100);
-                let afterDiscount = subtotal - globalDiscountAmt;
-                let taxAmt = afterDiscount * ((this.draft.taxRate || 0) / 100);
-                let shipping = parseFloat(this.draft.shippingCost) || 0;
-                let tip = parseFloat(this.draft.tip) || 0;
-                return { subtotal, globalDiscountAmt, taxAmt, shipping, tip, grandTotal: afterDiscount + taxAmt + shipping + tip };
+                return this.calcTotals(this.draft);
             },
             draftPaid() { return (this.draft.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0); },
             draftBalance() { return this.totals.grandTotal - this.draftPaid; },
@@ -988,112 +990,182 @@
             }
         },
         methods: {
-            // ================= AUTHENTICATION & ENCRYPTION =================
-            initiateRegistration() {
-                if(!this.auth.username || !this.auth.password) return alert("All fields required");
-                if(this.auth.password !== this.auth.confirm) return alert("Passwords do not match");
-                if(localStorage.getItem('inv_auth_user')) return alert("An account already exists on this browser. Please reset data if forgotten.");
-                
-                // Simulate Email Verification
-                this.pendingAuth = { username: this.auth.username.toLowerCase(), password: this.auth.password };
-                this.generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
-                
-                alert(`--- SIMULATED EMAIL INBOX ---\n\nTo: ${this.pendingAuth.username}\nSubject: Verify your InvoicePro Account\n\nYour verification code is: ${this.generatedCode}`);
-                
+            // ================= AUTHENTICATION (Supabase Auth) =================
+            async register() {
+                const email = (this.auth.username || '').trim().toLowerCase();
+                if(!email || !this.auth.password) return alert("Email and password are required.");
+                if(this.auth.password !== this.auth.confirm) return alert("Passwords do not match.");
+                if(this.auth.password.length < 8) return alert("Password must be at least 8 characters.");
+                this.authBusy = true;
+                const { error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: this.auth.password,
+                    options: { emailRedirectTo: window.location.origin + window.location.pathname }
+                });
+                this.authBusy = false;
+                if(error) return alert("Registration failed: " + error.message);
+                this.pendingEmail = email;
                 this.authMode = 'verify';
             },
-            verifyAndRegister() {
-                if(this.auth.code !== this.generatedCode) return alert("Invalid verification code.");
-                
-                const userHash = CryptoJS.SHA256(this.pendingAuth.username + this.pendingAuth.password).toString();
-                localStorage.setItem('inv_auth_user', userHash);
-                localStorage.setItem('inv_user_email', this.pendingAuth.username);
-                
-                this.encryptionKey = this.pendingAuth.password; 
-                this.userProfileEmail = this.pendingAuth.username;
-                this.isLoggedIn = true;
-                this.saveAllData(); 
-            },
-            login() {
-                if(!this.auth.username || !this.auth.password) return alert("Enter credentials");
-                const savedHash = localStorage.getItem('inv_auth_user');
-                if(!savedHash) return alert("No account found. Please register.");
-                
-                const currentHash = CryptoJS.SHA256(this.auth.username.toLowerCase() + this.auth.password).toString();
-                if(savedHash === currentHash) {
-                    this.encryptionKey = this.auth.password;
-                    this.userProfileEmail = localStorage.getItem('inv_user_email') || this.auth.username.toLowerCase();
-                    this.isLoggedIn = true;
-                    this.loadEncryptedData();
-                } else {
-                    alert("Incorrect credentials.");
+            async login() {
+                const email = (this.auth.username || '').trim().toLowerCase();
+                if(!email || !this.auth.password) return alert("Enter your email and password.");
+                this.authBusy = true;
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: this.auth.password
+                });
+                this.authBusy = false;
+                if(error) {
+                    if(error.message && error.message.toLowerCase().includes('not confirmed'))
+                        return alert("Please confirm your email first. Check your inbox for the confirmation link.");
+                    return alert("Sign in failed: " + error.message);
                 }
+                this.onSignedIn(data.user);
             },
-            confirmLogout() {
-                if(confirm("Are you sure you want to securely log out? Your session keys will be cleared.")) {
+            async onSignedIn(user) {
+                this.currentUser = user;
+                this.userProfileEmail = user.email;
+                this.isLoggedIn = true;
+                this.auth = { username: '', password: '', confirm: '', code: '' };
+                await this.loadAllData();
+            },
+            async confirmLogout() {
+                if(confirm("Log out of InvoicePro?")) {
+                    await supabaseClient.auth.signOut();
                     this.isLoggedIn = false;
-                    this.encryptionKey = null;
+                    this.currentUser = null;
                     this.auth = { username: '', password: '', confirm: '', code: '' };
                     this.authMode = 'login';
                     this.activeTab = 'create';
                     this.editingExisting = false;
-                    // Clear state from memory
-                    this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '' };
+                    this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '' };
                     this.customers = []; this.savedItems = []; this.invoices = [];
                 }
             },
-            changePassword() {
-                if(this.pwdChange.old !== this.encryptionKey) return alert("Incorrect current password.");
-                if(this.pwdChange.new.length < 4) return alert("New password is too short.");
+            async sendPasswordReset() {
+                const email = (this.auth.username || '').trim().toLowerCase();
+                if(!email) return alert("Enter your email address above first, then click reset.");
+                this.authBusy = true;
+                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                    redirectTo: window.location.origin + window.location.pathname
+                });
+                this.authBusy = false;
+                if(error) return alert("Could not send reset email: " + error.message);
+                alert("If an account exists for that email, a password reset link has been sent. Check your inbox.");
+                this.authMode = 'login';
+            },
+            async changePassword() {
+                if(this.pwdChange.new.length < 8) return alert("New password must be at least 8 characters.");
                 if(this.pwdChange.new !== this.pwdChange.confirm) return alert("New passwords do not match.");
-                
-                // 1. Update Auth Hash
-                const newHash = CryptoJS.SHA256(this.userProfileEmail + this.pwdChange.new).toString();
-                localStorage.setItem('inv_auth_user', newHash);
-                
-                // 2. Change Key in Memory
-                this.encryptionKey = this.pwdChange.new;
-                
-                // 3. Re-encrypt Vault with New Key
-                this.saveAllData();
-                
-                alert("Password changed. Your local data has been re-encrypted with the new password.");
+                // Re-verify the current password before allowing a change
+                const { error: reauthError } = await supabaseClient.auth.signInWithPassword({
+                    email: this.userProfileEmail, password: this.pwdChange.old
+                });
+                if(reauthError) return alert("Current password is incorrect.");
+                const { error } = await supabaseClient.auth.updateUser({ password: this.pwdChange.new });
+                if(error) return alert("Could not change password: " + error.message);
+                alert("Password changed successfully.");
                 this.pwdChange = { old: '', new: '', confirm: '' };
             },
-            factoryReset() {
-                if(confirm("WARNING: This will permanently delete your account and ALL encrypted invoices/customers forever. Type 'DELETE' to confirm.")) {
-                    const check = prompt("Type DELETE to wipe data:");
-                    if(check === 'DELETE') {
-                        localStorage.removeItem('inv_auth_user');
-                        localStorage.removeItem('inv_user_email');
-                        localStorage.removeItem('inv_vault');
-                        alert("Data wiped. You may now register a new account.");
-                        this.authMode = 'register';
-                    }
+            async factoryReset() {
+                // Local-only reset of cached data on this browser. Does not delete the account.
+                if(confirm("This clears InvoicePro data cached in THIS browser. Your account is not deleted. Continue?")) {
+                    if(this.currentUser) localStorage.removeItem('inv_data_' + this.currentUser.id);
+                    alert("Local data cleared from this browser.");
                 }
             },
-            saveAllData() {
-                if(!this.encryptionKey) return;
-                const vault = {
-                    company: this.company, customers: this.customers, items: this.savedItems, invoices: this.invoices
-                };
-                const jsonString = JSON.stringify(vault);
-                const encrypted = CryptoJS.AES.encrypt(jsonString, this.encryptionKey).toString();
-                localStorage.setItem('inv_vault', encrypted);
+            // ================= DATA LAYER (Supabase database) =================
+            calcTotals(src) {
+                let subtotal = 0;
+                (src.items || []).forEach(item => {
+                    let lineTotal = (item.qty || 0) * (item.price || 0);
+                    let discAmt = lineTotal * ((item.discount || 0) / 100);
+                    subtotal += (lineTotal - discAmt);
+                });
+                let globalDiscountAmt = subtotal * ((src.globalDiscount || 0) / 100);
+                let afterDiscount = subtotal - globalDiscountAmt;
+                let taxAmt = afterDiscount * ((src.taxRate || 0) / 100);
+                let shipping = parseFloat(src.shippingCost) || 0;
+                let tip = parseFloat(src.tip) || 0;
+                return { subtotal, globalDiscountAmt, taxAmt, shipping, tip, grandTotal: afterDiscount + taxAmt + shipping + tip };
             },
-            loadEncryptedData() {
-                const encrypted = localStorage.getItem('inv_vault');
-                if(!encrypted) return;
+            isUuid(v) { return typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v); },
+
+            // --- mapping helpers: app object  <->  database row ---
+            rowToCustomer(r) {
+                return { id: r.id, name: r.name, address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '' };
+            },
+            customerToRow(c) {
+                return { name: c.name, address: c.address || null, phone: c.phone || null, mobile: c.mobile || null, email: c.email || null, tax_id: c.taxId || null, additional_info: c.additionalInfo || null };
+            },
+            rowToItem(r) {
+                return { id: r.id, name: r.name, description: r.description || '', price: Number(r.price) || 0 };
+            },
+            itemToRow(i) {
+                return { name: i.name, description: i.description || null, price: i.price || 0 };
+            },
+            rowToCompany(r) {
+                return { name: r.name || '', address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '', logo: r.logo_url || '', invoicePrefix: r.invoice_prefix || '', quotePrefix: r.quote_prefix || 'QUO-', creditPrefix: r.credit_prefix || 'CN-', defaultCurrency: r.default_currency || 'GBP', paymentDetails: r.payment_details || '', defaultNotes: r.default_notes || '', defaultTerms: r.default_terms || '', invoiceFooter: r.invoice_footer || '' };
+            },
+            companyToRow() {
+                const c = this.company;
+                return { user_id: this.currentUser.id, name: c.name || null, address: c.address || null, phone: c.phone || null, mobile: c.mobile || null, email: c.email || null, tax_id: c.taxId || null, additional_info: c.additionalInfo || null, logo_url: c.logo || null, invoice_prefix: c.invoicePrefix || '', quote_prefix: c.quotePrefix || 'QUO-', credit_prefix: c.creditPrefix || 'CN-', default_currency: c.defaultCurrency || 'GBP', payment_details: c.paymentDetails || null, default_notes: c.defaultNotes || null, default_terms: c.defaultTerms || null, invoice_footer: c.invoiceFooter || null, updated_at: new Date().toISOString() };
+            },
+            rowToInvoice(r) {
+                const inv = {
+                    id: r.id, docType: r.doc_type, number: r.number, status: r.status,
+                    date: r.issue_date, dueDate: r.due_date, poNumber: r.po_number || '',
+                    currency: r.currency || 'GBP', customer: r.customer_snapshot || null,
+                    items: r.items || [], payments: r.payments || [],
+                    globalDiscount: Number(r.global_discount) || 0, taxRate: Number(r.tax_rate) || 0,
+                    shippingCost: Number(r.shipping_cost) || 0, tip: Number(r.tip) || 0,
+                    notes: r.notes || '', terms: r.terms || ''
+                };
+                inv.totals = this.calcTotals(inv);
+                return inv;
+            },
+            invoiceToRow(inv) {
+                const cleanItems = (inv.items || []).map(i => ({ name: i.name || '', qty: i.qty || 0, unit: i.unit || '', price: i.price || 0, discount: i.discount || 0 }));
+                return {
+                    doc_type: inv.docType || 'invoice', number: String(inv.number), status: inv.status || 'Draft',
+                    issue_date: inv.date || null, due_date: inv.dueDate || null, po_number: inv.poNumber || null,
+                    currency: inv.currency || 'GBP',
+                    customer_id: (inv.customer && this.isUuid(inv.customer.id)) ? inv.customer.id : null,
+                    customer_snapshot: inv.customer || null,
+                    items: cleanItems, payments: inv.payments || [],
+                    global_discount: inv.globalDiscount || 0, tax_rate: inv.taxRate || 0,
+                    shipping_cost: inv.shippingCost || 0, tip: inv.tip || 0,
+                    notes: inv.notes || null, terms: inv.terms || null,
+                    grand_total: this.calcTotals(inv).grandTotal
+                };
+            },
+
+            async loadAllData() {
+                if (!this.currentUser) return;
+                this.dataLoading = true;
                 try {
-                    const decrypted = CryptoJS.AES.decrypt(encrypted, this.encryptionKey).toString(CryptoJS.enc.Utf8);
-                    const vault = JSON.parse(decrypted);
-                    this.company = vault.company || this.company;
-                    this.customers = vault.customers || [];
-                    this.savedItems = vault.items || [];
-                    this.invoices = vault.invoices || [];
+                    const [companyRes, custRes, itemRes, invRes] = await Promise.all([
+                        supabaseClient.from('company_settings').select('*').maybeSingle(),
+                        supabaseClient.from('customers').select('*').order('name'),
+                        supabaseClient.from('saved_items').select('*').order('name'),
+                        supabaseClient.from('invoices').select('*').order('created_at', { ascending: false })
+                    ]);
+                    if (companyRes.error) throw companyRes.error;
+                    if (custRes.error) throw custRes.error;
+                    if (itemRes.error) throw itemRes.error;
+                    if (invRes.error) throw invRes.error;
+
+                    if (companyRes.data) this.company = this.rowToCompany(companyRes.data);
+                    this.customers = (custRes.data || []).map(r => this.rowToCustomer(r));
+                    this.savedItems = (itemRes.data || []).map(r => this.rowToItem(r));
+                    this.invoices = (invRes.data || []).map(r => this.rowToInvoice(r));
                     this.draft = this.getEmptyDraft();
-                } catch(e) {
-                    alert("Failed to decrypt data. Key may be invalid or data corrupted.");
+                } catch (e) {
+                    console.error("Failed to load data:", e);
+                    alert("Could not load your data: " + (e.message || e));
+                } finally {
+                    this.dataLoading = false;
                 }
             },
 
@@ -1144,35 +1216,51 @@
                 this.draft.items[index].price = match.price;
                 this.draft.items[index].showSuggestions = false;
             },
-            saveAsNewPreset(index) {
+            async saveAsNewPreset(index) {
                 const item = this.draft.items[index];
-                this.savedItems.push({ name: item.name.trim(), description: '', price: item.price || 0 });
-                this.saveAllData();
+                const { data, error } = await supabaseClient.from('saved_items').insert(this.itemToRow({ name: item.name.trim(), description: '', price: item.price || 0 })).select().single();
+                if (error) { console.error(error); alert("Could not save preset: " + error.message); return; }
+                this.savedItems.push(this.rowToItem(data));
                 item.showSuggestions = false;
             },
             hideSuggestions(index) { setTimeout(() => this.draft.items[index].showSuggestions = false, 200); },
             calculateRowTotal(item) { const t = item.qty * item.price; return t - (t * (item.discount / 100)); },
             
-            saveInvoice() {
-                const inv = JSON.parse(JSON.stringify(this.draft));
-                inv.totals = this.totals;
-                if (!inv.status) inv.status = 'Draft';
-                if (!inv.docType) inv.docType = 'invoice';
-                const exIdx = this.invoices.findIndex(i => i.id === inv.id);
-                if(exIdx >= 0) this.invoices[exIdx] = inv; else this.invoices.unshift(inv);
-                this.saveAllData();
+            async saveInvoice() {
+                const ok = await this.persistDraft();
+                if (!ok) return;
                 this.draft = this.getEmptyDraft();
                 this.editingExisting = false;
                 this.activeTab = 'invoices';
             },
-            persistDraft() {
-                // Save the current draft in place without leaving the editor (used for recording payments)
+            async persistDraft() {
+                // Insert (new) or update (existing) the current draft in the database.
                 const inv = JSON.parse(JSON.stringify(this.draft));
-                inv.totals = this.totals;
+                if (!inv.status) inv.status = 'Draft';
                 if (!inv.docType) inv.docType = 'invoice';
-                const exIdx = this.invoices.findIndex(i => i.id === inv.id);
-                if (exIdx >= 0) this.invoices[exIdx] = inv; else this.invoices.unshift(inv);
-                this.saveAllData();
+                const row = this.invoiceToRow(inv);
+                const existing = this.isUuid(inv.id) ? this.invoices.find(i => i.id === inv.id) : null;
+                try {
+                    if (existing) {
+                        const { data, error } = await supabaseClient.from('invoices').update(row).eq('id', inv.id).select().single();
+                        if (error) throw error;
+                        const mapped = this.rowToInvoice(data);
+                        const idx = this.invoices.findIndex(i => i.id === inv.id);
+                        if (idx >= 0) this.invoices[idx] = mapped;
+                        this.draft = JSON.parse(JSON.stringify(mapped));
+                    } else {
+                        const { data, error } = await supabaseClient.from('invoices').insert(row).select().single();
+                        if (error) throw error;
+                        const mapped = this.rowToInvoice(data);
+                        this.invoices.unshift(mapped);
+                        this.draft.id = mapped.id; // adopt the database id so further edits update, not duplicate
+                    }
+                    return true;
+                } catch (e) {
+                    console.error("Save invoice failed:", e);
+                    alert("Could not save: " + (e.message || e));
+                    return false;
+                }
             },
             docTypeLabel(t) {
                 return { invoice: 'INVOICE', quote: 'QUOTE', credit: 'CREDIT NOTE' }[t || 'invoice'] || 'INVOICE';
@@ -1183,7 +1271,7 @@
             onDocTypeChange() {
                 if (!this.editingExisting) this.draft.number = this.generateNumber(this.draft.docType);
             },
-            recordPayment() {
+            async recordPayment() {
                 const amt = parseFloat(this.newPayment.amount);
                 if (!amt || amt <= 0) return alert("Enter a valid payment amount.");
                 if (!this.draft.payments) this.draft.payments = [];
@@ -1191,12 +1279,12 @@
                 if (this.draftBalance <= 0.001) this.draft.status = 'Paid';
                 else if (this.draft.status === 'Draft') this.draft.status = 'Sent';
                 this.newPayment = { amount: null, date: new Date().toISOString().split('T')[0], note: '' };
-                this.persistDraft();
+                await this.persistDraft();
             },
-            removePayment(index) {
+            async removePayment(index) {
                 this.draft.payments.splice(index, 1);
                 if (this.draftBalance > 0.001 && this.draft.status === 'Paid') this.draft.status = 'Sent';
-                this.persistDraft();
+                await this.persistDraft();
             },
             convertToInvoice(doc) {
                 const copy = JSON.parse(JSON.stringify(doc));
@@ -1244,10 +1332,12 @@
                 this.editingExisting = true;
                 this.activeTab = 'edit';
             },
-            deleteInvoice(inv) {
+            async deleteInvoice(inv) {
                 if(confirm("Delete this invoice?")) {
+                    const { error } = await supabaseClient.from('invoices').delete().eq('id', inv.id);
+                    if (error) return alert("Could not delete: " + error.message);
                     const i = this.invoices.findIndex(x => x.id === inv.id);
-                    if (i >= 0) { this.invoices.splice(i, 1); this.saveAllData(); }
+                    if (i >= 0) this.invoices.splice(i, 1);
                 }
             },
             amountPaid(inv) { return (inv.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0); },
@@ -1278,9 +1368,11 @@
                     'Cancelled': 'bg-slate-200 text-slate-500 line-through'
                 }[status] || 'bg-orange-100 text-orange-700';
             },
-            setStatus(inv, newStatus) {
+            async setStatus(inv, newStatus) {
+                const prev = inv.status;
                 inv.status = newStatus;
-                this.saveAllData();
+                const { error } = await supabaseClient.from('invoices').update({ status: newStatus }).eq('id', inv.id);
+                if (error) { inv.status = prev; alert("Could not update status: " + error.message); }
             },
             duplicateInvoice(inv) {
                 const copy = JSON.parse(JSON.stringify(inv));
@@ -1334,22 +1426,38 @@
                     this.showQuickCustomer = true;
                 }
             },
-            saveQuickCustomer() {
+            async saveQuickCustomer() {
                 if (!this.quickCustomer.name) return alert("Customer Name is required");
-                const c = { ...this.quickCustomer };
+                const { data, error } = await supabaseClient.from('customers').insert(this.customerToRow(this.quickCustomer)).select().single();
+                if (error) return alert("Could not save customer: " + error.message);
+                const c = this.rowToCustomer(data);
                 this.customers.push(c);
-                this.saveAllData();
+                this.customers.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
                 this.draft.customer = c; // auto-select the new customer on this invoice
                 this.showQuickCustomer = false;
             },
             closeQuickCustomer() { this.showQuickCustomer = false; },
-            saveCustomer() {
+            async saveCustomer() {
                 if(!this.customerForm.name) return alert("Customer Name is required");
-                if(this.editingCustomer !== null) this.customers[this.editingCustomer] = {...this.customerForm};
-                else this.customers.push({...this.customerForm});
-                this.saveAllData();
-                this.resetCustomerForm();
-                this.customerView = 'list';
+                const row = this.customerToRow(this.customerForm);
+                try {
+                    if (this.editingCustomer !== null) {
+                        const existing = this.customers[this.editingCustomer];
+                        const { data, error } = await supabaseClient.from('customers').update(row).eq('id', existing.id).select().single();
+                        if (error) throw error;
+                        this.customers[this.editingCustomer] = this.rowToCustomer(data);
+                    } else {
+                        const { data, error } = await supabaseClient.from('customers').insert(row).select().single();
+                        if (error) throw error;
+                        this.customers.push(this.rowToCustomer(data));
+                    }
+                    this.customers.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                    this.resetCustomerForm();
+                    this.customerView = 'list';
+                } catch (e) {
+                    console.error("Save customer failed:", e);
+                    alert("Could not save customer: " + (e.message || e));
+                }
             },
             editCustomer(customer) { 
                 this.editingCustomer = this.customers.indexOf(customer); 
@@ -1359,19 +1467,67 @@
                 });
                 this.customerView = 'form';
             },
-            deleteCustomer(customer) { if(confirm("Delete this customer?")) { const i = this.customers.indexOf(customer); if(i>=0){ this.customers.splice(i, 1); this.saveAllData(); } } },
+            async deleteCustomer(customer) {
+                if(confirm("Delete this customer?")) {
+                    const { error } = await supabaseClient.from('customers').delete().eq('id', customer.id);
+                    if (error) return alert("Could not delete customer: " + error.message);
+                    const i = this.customers.indexOf(customer);
+                    if(i>=0) this.customers.splice(i, 1);
+                }
+            },
             resetCustomerForm() { this.editingCustomer = null; this.customerForm = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' }; },
-            saveSavedItem() {
+            async saveSavedItem() {
                 if(!this.itemForm.name) return;
-                if(this.editingItem !== null) this.savedItems[this.editingItem] = {...this.itemForm};
-                else this.savedItems.push({...this.itemForm});
-                this.saveAllData();
-                this.resetItemForm();
+                const row = this.itemToRow(this.itemForm);
+                try {
+                    if (this.editingItem !== null) {
+                        const existing = this.savedItems[this.editingItem];
+                        const { data, error } = await supabaseClient.from('saved_items').update(row).eq('id', existing.id).select().single();
+                        if (error) throw error;
+                        this.savedItems[this.editingItem] = this.rowToItem(data);
+                    } else {
+                        const { data, error } = await supabaseClient.from('saved_items').insert(row).select().single();
+                        if (error) throw error;
+                        this.savedItems.push(this.rowToItem(data));
+                    }
+                    this.resetItemForm();
+                } catch (e) {
+                    console.error("Save item failed:", e);
+                    alert("Could not save item: " + (e.message || e));
+                }
             },
             editSavedItem(item) { this.editingItem = this.savedItems.indexOf(item); this.itemForm = {...item}; },
-            deleteSavedItem(item) { const i = this.savedItems.indexOf(item); if(i>=0){ this.savedItems.splice(i, 1); this.saveAllData(); } },
+            async deleteSavedItem(item) {
+                const { error } = await supabaseClient.from('saved_items').delete().eq('id', item.id);
+                if (error) return alert("Could not delete item: " + error.message);
+                const i = this.savedItems.indexOf(item);
+                if(i>=0) this.savedItems.splice(i, 1);
+            },
             resetItemForm() { this.editingItem = null; this.itemForm = { name: '', description: '', price: 0 }; },
-            saveCompanyDetails() { this.saveAllData(); alert("Settings saved."); }
+            async saveCompanyDetails() {
+                const { error } = await supabaseClient.from('company_settings').upsert(this.companyToRow(), { onConflict: 'user_id' });
+                if (error) { console.error(error); return alert("Could not save settings: " + error.message); }
+                alert("Settings saved.");
+            }
+        },
+        async mounted() {
+            // Restore an existing session on page load (keeps you logged in on refresh)
+            const { data } = await supabaseClient.auth.getSession();
+            if (data.session) {
+                this.onSignedIn(data.session.user);
+            }
+            // React to auth events: email-confirmation redirect, password recovery, sign-out
+            supabaseClient.auth.onAuthStateChange(async (event, session) => {
+                if (event === 'PASSWORD_RECOVERY') {
+                    const newPass = prompt("Enter a new password (at least 8 characters):");
+                    if (newPass && newPass.length >= 8) {
+                        const { error } = await supabaseClient.auth.updateUser({ password: newPass });
+                        alert(error ? ("Could not set password: " + error.message) : "Password updated. You are now signed in.");
+                    }
+                } else if (event === 'SIGNED_IN' && session && !this.isLoggedIn) {
+                    this.onSignedIn(session.user);
+                }
+            });
         }
     }).mount('#app');
 </script>
