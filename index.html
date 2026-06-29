@@ -411,7 +411,7 @@
                                             <ul class="py-1">
                                                 <li v-for="match in getMatches(item.name)" @mousedown.prevent="selectMatch(index, match)" class="px-4 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0">
                                                     <div class="font-medium text-sm text-slate-800">{{ match.name }}</div>
-                                                    <div class="text-xs text-slate-500">{{ getCurrencySymbol(draft.currency) }}{{ match.price.toFixed(2) }}</div>
+                                                    <div class="text-xs text-slate-500">{{ getCurrencySymbol(draft.currency) }}{{ (Number(match.price) || 0).toFixed(2) }}</div>
                                                 </li>
                                                 <li v-if="isNew(item.name)" @mousedown.prevent="saveAsNewPreset(index)" class="px-4 py-3 text-sm text-indigo-600 hover:bg-indigo-50 cursor-pointer font-medium flex items-center gap-2">
                                                     Save to items list
@@ -426,7 +426,7 @@
                                     </td>
                                     <td class="p-3 align-top">
                                         <input type="number" v-model.number="item.price" class="w-full border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-right">
-                                        <span class="pdf-text text-sm text-right">{{ getCurrencySymbol(draft.currency) }}{{ item.price.toFixed(2) }}</span>
+                                        <span class="pdf-text text-sm text-right">{{ getCurrencySymbol(draft.currency) }}{{ (Number(item.price) || 0).toFixed(2) }}</span>
                                     </td>
                                     <td class="p-3 align-top">
                                         <input type="number" v-model.number="item.discount" class="w-full border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center">
@@ -770,7 +770,7 @@
                                 <tr v-else-if="filteredItems.length === 0"><td colspan="3" class="p-8 text-center text-slate-400">No items match your search.</td></tr>
                                 <tr v-for="(item, idx) in filteredItems" :key="idx">
                                     <td class="p-4"><div class="font-medium">{{ item.name }}</div><div class="text-xs text-slate-500">{{ item.description }}</div></td>
-                                    <td class="p-4 font-medium">{{ getCurrencySymbol('GBP') }}{{ item.price.toFixed(2) }}</td>
+                                    <td class="p-4 font-medium">{{ getCurrencySymbol('GBP') }}{{ (Number(item.price) || 0).toFixed(2) }}</td>
                                     <td class="p-4 text-right space-x-3"><button @click="editSavedItem(item)" class="text-indigo-600 hover:text-indigo-800 text-sm">Edit</button><button @click="deleteSavedItem(item)" class="text-red-500 hover:text-red-700 text-sm">Delete</button></td>
                                 </tr>
                             </tbody>
@@ -1267,7 +1267,7 @@
                 item.showSuggestions = false;
             },
             hideSuggestions(index) { setTimeout(() => this.draft.items[index].showSuggestions = false, 200); },
-            calculateRowTotal(item) { const t = item.qty * item.price; return t - (t * (item.discount / 100)); },
+            calculateRowTotal(item) { const q = Number(item.qty) || 0; const p = Number(item.price) || 0; const d = Number(item.discount) || 0; const t = q * p; return t - (t * (d / 100)); },
             
             async saveInvoice() {
                 const ok = await this.persistDraft();
