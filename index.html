@@ -3,6 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Content-Security-Policy: restricts where code, styles, images and network
+         connections may come from, to limit the impact of any injected content. -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: blob: https:;
+        font-src 'self' data:;
+        connect-src 'self' https://*.supabase.co wss://*.supabase.co;
+        worker-src 'self';
+        manifest-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        upgrade-insecure-requests;
+    ">
+
     <title>InvoicePro</title>
 
     <!-- PWA: installable as an app on phones (Add to Home Screen) -->
@@ -14,13 +32,18 @@
     <meta name="apple-mobile-web-app-title" content="InvoicePro">
     <link rel="apple-touch-icon" href="./icon-192.png">
     <link rel="icon" type="image/png" href="./icon-192.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Self-hosted, pre-built stylesheet (replaces the dev-mode Tailwind CDN) -->
+    <link rel="stylesheet" href="./tailwind.css">
+
+    <!-- Third-party libraries: pinned to exact versions and verified with
+         Subresource Integrity (SRI). The browser refuses to run a file whose
+         fingerprint doesn't match, protecting against a tampered/compromised CDN. -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.4.21/dist/vue.global.prod.js" integrity="sha384-6pS1WSZJY7wOk6qQTa9C9U2W1/qzqL7iYoMil7qn9KFeN5fZDAwIExgCd7U5AH+X" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" integrity="sha384-JcnsjUPPylna1s1fvi1u12X5qjY5OL56iySh75FdtrwhO/SWXgMjoVqcKyIIWOLk" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js" integrity="sha384-b4JKVkST7Jkb2qRVyZEamH2WA+trxThEkVN6z3JXWfUDFNZd14MnE/qRvt/zy2J5" crossorigin="anonymous"></script>
 
     <style>
         ::-webkit-scrollbar { width: 8px; }
