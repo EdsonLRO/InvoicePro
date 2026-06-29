@@ -122,8 +122,20 @@
                 <button @click="authMode = 'login'" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Back to Sign In</button>
             </div>
 
-            <div v-if="authMode === 'forgot'" class="space-y-5">
-                <h2 class="text-xl font-semibold">Reset your password</h2>
+            <div v-if="authMode === 'mfa'" class="space-y-5">
+                <h2 class="text-xl font-semibold">Two-Factor Verification</h2>
+                <div class="bg-blue-50 text-blue-800 text-sm p-4 rounded-lg border border-blue-100">
+                    Enter the current 6-digit code from your authenticator app to finish signing in.
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">6-Digit Code</label>
+                    <input type="text" inputmode="numeric" maxlength="6" v-model="mfa.code" @keyup.enter="verifyMfaLogin" class="w-full border rounded-lg px-3 py-3 text-center tracking-widest text-lg font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <button @click="verifyMfaLogin" :disabled="authBusy" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Verifying...' : 'Verify & Sign In' }}</button>
+                <div class="text-center text-sm text-slate-500 pt-4 border-t">
+                    <button @click="authMode = 'login'" class="text-indigo-600 hover:underline font-medium">Cancel</button>
+                </div>
+            </div>
                 <div class="bg-blue-50 text-blue-800 text-sm p-4 rounded-lg border border-blue-100">
                     Enter your account email and we'll send you a link to set a new password.
                 </div>
@@ -209,6 +221,51 @@
                     </div>
                     <div class="mt-6">
                         <button @click="changePassword" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition">Change Password</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between mb-6 border-b pb-4 gap-3 flex-wrap">
+                        <h2 class="text-2xl font-semibold">Two-Factor Authentication</h2>
+                        <span v-if="mfa.enabled" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Enabled</span>
+                        <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">Off</span>
+                    </div>
+
+                    <p class="text-sm text-slate-600 mb-5">Add a second step at sign-in using an authenticator app (Google Authenticator, Authy, Microsoft Authenticator, etc.). Even if someone learns your password, they can't sign in without the code from your phone.</p>
+
+                    <!-- OFF, not currently enrolling -->
+                    <div v-if="!mfa.enabled && mfa.step === 'idle'">
+                        <button @click="startMfaEnroll" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Preparing...' : 'Enable Two-Factor' }}</button>
+                    </div>
+
+                    <!-- Enrolling: show QR + confirm code -->
+                    <div v-if="mfa.step === 'enrolling'" class="space-y-4">
+                        <ol class="text-sm text-slate-600 list-decimal list-inside space-y-1">
+                            <li>Open your authenticator app and scan this QR code.</li>
+                            <li>Enter the 6-digit code it shows to confirm.</li>
+                        </ol>
+                        <div class="flex flex-col sm:flex-row items-start gap-5">
+                            <img :src="mfa.qr" alt="Two-factor QR code" class="w-44 h-44 border border-slate-200 rounded-lg bg-white">
+                            <div class="text-sm text-slate-600">
+                                <p class="mb-1 font-medium">Can't scan?</p>
+                                <p class="mb-3">Enter this key manually in your app:</p>
+                                <code class="block bg-slate-100 px-3 py-2 rounded text-xs break-all">{{ mfa.secret }}</code>
+                            </div>
+                        </div>
+                        <div class="max-w-xs">
+                            <label class="block text-sm font-bold text-slate-600 mb-1">Enter 6-digit code</label>
+                            <input type="text" inputmode="numeric" maxlength="6" v-model="mfa.code" @keyup.enter="confirmMfaEnroll" class="w-full border rounded-lg px-3 py-2 text-center tracking-widest font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                        <div class="flex gap-3">
+                            <button @click="confirmMfaEnroll" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Verifying...' : 'Confirm & Enable' }}</button>
+                            <button @click="cancelMfaEnroll" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
+                        </div>
+                    </div>
+
+                    <!-- ON -->
+                    <div v-if="mfa.enabled && mfa.step === 'idle'">
+                        <p class="text-sm text-green-700 mb-4">Two-factor authentication is active on your account.</p>
+                        <button @click="disableMfa" :disabled="mfa.busy" class="bg-white border border-red-300 text-red-600 px-6 py-2.5 rounded-lg hover:bg-red-50 font-medium transition disabled:opacity-50">{{ mfa.busy ? 'Working...' : 'Turn Off Two-Factor' }}</button>
                     </div>
                 </div>
 
@@ -895,6 +952,7 @@
                 pendingEmail: '',
                 authBusy: false,
                 dataLoading: false,
+                mfa: { enabled: false, busy: false, step: 'idle', loginFactorId: null, verifiedFactorId: null, enrollFactorId: null, qr: '', secret: '', code: '' },
                 pendingAuth: null,
                 generatedCode: null,
                 encryptionKey: null,
@@ -1058,13 +1116,88 @@
                     email: email,
                     password: this.auth.password
                 });
-                this.authBusy = false;
                 if(error) {
+                    this.authBusy = false;
                     if(error.message && error.message.toLowerCase().includes('not confirmed'))
                         return alert("Please confirm your email first. Check your inbox for the confirmation link.");
                     return alert("Sign in failed: " + error.message);
                 }
+                // If this account has two-factor enabled, require the 6-digit code before proceeding
+                const { data: aal } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+                if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+                    const { data: factors } = await supabaseClient.auth.mfa.listFactors();
+                    const totp = factors && factors.totp && factors.totp[0];
+                    if (totp) {
+                        this.mfa.loginFactorId = totp.id;
+                        this.mfa.code = '';
+                        this.authMode = 'mfa';
+                        this.authBusy = false;
+                        return;
+                    }
+                }
+                this.authBusy = false;
                 this.onSignedIn(data.user);
+            },
+            async verifyMfaLogin() {
+                if (!/^\d{6}$/.test(this.mfa.code.trim())) return alert("Enter the 6-digit code from your authenticator app.");
+                this.authBusy = true;
+                const { error } = await supabaseClient.auth.mfa.challengeAndVerify({ factorId: this.mfa.loginFactorId, code: this.mfa.code.trim() });
+                this.authBusy = false;
+                if (error) return alert("Incorrect or expired code. Try the latest code from your app.");
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                this.mfa.code = '';
+                this.authMode = 'login';
+                this.onSignedIn(user);
+            },
+            async loadMfaStatus() {
+                try {
+                    const { data, error } = await supabaseClient.auth.mfa.listFactors();
+                    if (error) return;
+                    const verified = (data.totp || []).find(f => f.status === 'verified') || (data.totp || [])[0];
+                    this.mfa.enabled = !!verified;
+                    this.mfa.verifiedFactorId = verified ? verified.id : null;
+                } catch (e) { /* ignore */ }
+            },
+            async startMfaEnroll() {
+                this.mfa.busy = true;
+                // clean up any half-finished (unverified) factor first
+                try {
+                    const { data } = await supabaseClient.auth.mfa.listFactors();
+                    const unverified = (data.all || []).filter(f => f.status === 'unverified');
+                    for (const f of unverified) await supabaseClient.auth.mfa.unenroll({ factorId: f.id });
+                } catch (e) { /* ignore */ }
+                const { data, error } = await supabaseClient.auth.mfa.enroll({ factorType: 'totp' });
+                this.mfa.busy = false;
+                if (error) return alert("Could not start setup: " + error.message);
+                this.mfa.enrollFactorId = data.id;
+                this.mfa.qr = data.totp.qr_code;
+                this.mfa.secret = data.totp.secret;
+                this.mfa.code = '';
+                this.mfa.step = 'enrolling';
+            },
+            async confirmMfaEnroll() {
+                if (!/^\d{6}$/.test(this.mfa.code.trim())) return alert("Enter the 6-digit code shown in your authenticator app.");
+                this.mfa.busy = true;
+                const { error } = await supabaseClient.auth.mfa.challengeAndVerify({ factorId: this.mfa.enrollFactorId, code: this.mfa.code.trim() });
+                this.mfa.busy = false;
+                if (error) return alert("Incorrect or expired code. Try the latest code from your app.");
+                this.mfa.step = 'idle';
+                this.mfa.qr = ''; this.mfa.secret = ''; this.mfa.code = '';
+                await this.loadMfaStatus();
+                alert("Two-factor authentication is now enabled.");
+            },
+            cancelMfaEnroll() {
+                if (this.mfa.enrollFactorId) supabaseClient.auth.mfa.unenroll({ factorId: this.mfa.enrollFactorId }).catch(() => {});
+                this.mfa.step = 'idle'; this.mfa.qr = ''; this.mfa.secret = ''; this.mfa.code = ''; this.mfa.enrollFactorId = null;
+            },
+            async disableMfa() {
+                if (!confirm("Turn off two-factor authentication? Your account will be protected by password only.")) return;
+                this.mfa.busy = true;
+                const { error } = await supabaseClient.auth.mfa.unenroll({ factorId: this.mfa.verifiedFactorId });
+                this.mfa.busy = false;
+                if (error) return alert("Could not disable: " + error.message);
+                await this.loadMfaStatus();
+                alert("Two-factor authentication has been turned off.");
             },
             async onSignedIn(user) {
                 this.currentUser = user;
@@ -1072,6 +1205,7 @@
                 this.isLoggedIn = true;
                 this.auth = { username: '', password: '', confirm: '', code: '' };
                 await this.loadAllData();
+                this.loadMfaStatus();
             },
             async confirmLogout() {
                 if(confirm("Log out of InvoicePro?")) {
