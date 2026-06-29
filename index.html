@@ -4,22 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Content-Security-Policy: restricts where code, styles, images and network
-         connections may come from, to limit the impact of any injected content. -->
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
-        style-src 'self' 'unsafe-inline';
-        img-src 'self' data: blob: https:;
-        font-src 'self' data:;
-        connect-src 'self' https://*.supabase.co wss://*.supabase.co;
-        worker-src 'self';
-        manifest-src 'self';
-        object-src 'none';
-        base-uri 'self';
-        form-action 'self';
-        upgrade-insecure-requests;
-    ">
+    <!-- Content-Security-Policy temporarily removed for diagnosis. SRI, pinned
+         versions and self-hosted assets remain in place. CSP will be re-added
+         once we confirm what was causing the blank screen. -->
 
     <title>InvoicePro</title>
 
@@ -44,6 +31,9 @@
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha384-ZZ1pncU3bQe8y31yfZdMFdSpttDoPmOZg2wguVK9almUodir1PghgT0eY7Mrty8H" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js" integrity="sha384-b4JKVkST7Jkb2qRVyZEamH2WA+trxThEkVN6z3JXWfUDFNZd14MnE/qRvt/zy2J5" crossorigin="anonymous"></script>
+
+    <!-- Your project settings (uploaded once, never overwritten when index.html changes) -->
+    <script src="./config.js"></script>
 
     <style>
         ::-webkit-scrollbar { width: 8px; }
@@ -928,16 +918,27 @@
 
 <script>
     // =========================================================================
-    // SUPABASE CONFIGURATION
-    // Paste your two values from Supabase dashboard -> Settings -> API Keys.
-    // Both of these are safe to be in front-end code (the anon key is public;
-    // your data is protected by Row Level Security, not by hiding this key).
-    // Do NOT paste the service_role / secret key here.
+    // Startup checks — surface the real problem on screen instead of a blank page.
     // =========================================================================
-    const SUPABASE_URL = 'https://cuagwifetheefftleeup.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_sN8qt13wD8IZcDP222T6tA_ze5fxp-t';
+    (function () {
+        function fatal(msg) {
+            document.body.innerHTML =
+                '<div style="max-width:640px;margin:60px auto;font-family:system-ui,sans-serif;padding:24px;border:1px solid #fca5a5;background:#fef2f2;border-radius:12px;color:#7f1d1d">' +
+                '<h2 style="margin:0 0 8px">InvoicePro could not start</h2>' +
+                '<p style="margin:0 0 8px">' + msg + '</p>' +
+                '<p style="margin:0;font-size:13px;color:#991b1b">Open the browser console (F12) for technical details.</p></div>';
+            throw new Error(msg);
+        }
+        if (!window.supabase || !window.supabase.createClient) {
+            fatal('The Supabase library did not load. Check your internet connection and that the script tags are intact.');
+        }
+        if (!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+            fatal('config.js did not load (your Supabase URL/key are missing). Make sure config.js is in the SAME folder as index.html.');
+        }
+    })();
 
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Supabase connection — values come from config.js (uploaded once).
+    const supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
 
     const { createApp } = Vue;
 
@@ -1688,8 +1689,9 @@
             }
         },
         async mounted() {
-            // Register the service worker (enables "Add to Home Screen" / installable PWA)
-            if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+            // Register the service worker only on the live HTTPS site (not on
+            // localhost), so local development never serves stale cached files.
+            if ('serviceWorker' in navigator && location.protocol === 'https:') {
                 navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('Service worker registration failed:', err));
             }
             // Restore an existing session on page load (keeps you logged in on refresh)
