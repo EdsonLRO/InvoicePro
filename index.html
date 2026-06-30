@@ -199,10 +199,10 @@
                 </div>
 
                 <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
-                    <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Change Password</h2>
+                    <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Security</h2>
                     
                     <div class="bg-amber-50 text-amber-800 text-sm p-4 rounded-lg border border-amber-200 mb-6">
-                        <strong>Note:</strong> Please type your current password to confirm it's you.
+                        <strong>Note:</strong> You'll be asked for your current password to confirm it's you, then your password is updated securely with our authentication provider.
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1848,14 +1848,42 @@
             async exportPDF(inv) {
                 this.loadInvoice(inv);
                 this.isExportingPDF = true;
-                await this.$nextTick(); 
+                await this.$nextTick();
                 setTimeout(() => {
                     const el = document.getElementById('invoice-canvas');
-                    window.html2canvas(el, { scale: 2 }).then(canvas => {
+                    // Capture at a fixed desktop width so the PDF looks the same on phone or computer,
+                    // not at the device's screen width (which made mobile exports a tall, cut-off sliver).
+                    window.html2canvas(el, {
+                        scale: 2,
+                        windowWidth: 1024,
+                        onclone: (doc) => {
+                            const c = doc.getElementById('invoice-canvas');
+                            if (c) { c.style.width = '800px'; c.style.maxWidth = '800px'; c.style.margin = '0'; }
+                        }
+                    }).then(canvas => {
                         const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
-                        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), (canvas.height * pdf.internal.pageSize.getWidth()) / canvas.width);
+                        const pageW = pdf.internal.pageSize.getWidth();
+                        const pageH = pdf.internal.pageSize.getHeight();
+                        const imgW = pageW;
+                        const imgH = (canvas.height * imgW) / canvas.width;
+                        const imgData = canvas.toDataURL('image/png');
+                        // Place the image, adding extra A4 pages if the invoice is taller than one page.
+                        let heightLeft = imgH;
+                        let position = 0;
+                        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
+                        heightLeft -= pageH;
+                        while (heightLeft > 0) {
+                            position -= pageH;
+                            pdf.addPage();
+                            pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
+                            heightLeft -= pageH;
+                        }
                         pdf.save(`Invoice_${inv.number}.pdf`);
                         this.isExportingPDF = false;
+                    }).catch(err => {
+                        console.error('PDF export failed:', err);
+                        this.isExportingPDF = false;
+                        alert('Sorry, the PDF could not be generated. Please try again.');
                     });
                 }, 100);
             },
