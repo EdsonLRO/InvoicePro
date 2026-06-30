@@ -52,6 +52,8 @@
         .pdf-mode .pdf-bold-row, .pdf-mode .pdf-bold-row * { font-weight: 700 !important; }
         .no-spin::-webkit-outer-spin-button, .no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .no-spin { -moz-appearance: textfield; }
+        .pdf-mode tbody td { vertical-align: middle !important; padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; }
+        #invoice-canvas .font-bold.text-slate-400 { color: var(--brand) !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
@@ -167,7 +169,8 @@
                         <button @click="goToCreate" :class="{'bg-slate-800 text-white': activeTab === 'create', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'create'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Create Invoice</button>
                         <button @click="activeTab = 'invoices'" :class="{'bg-slate-800 text-white': activeTab === 'invoices', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'invoices'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">My Invoices</button>
                         <button @click="activeTab = 'customers'; customerView = 'list'" :class="{'bg-slate-800 text-white': activeTab === 'customers', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'customers'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Customers</button>
-                        <button @click="activeTab = 'items'" :class="{'bg-slate-800 text-white': activeTab === 'items', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'items'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Saved Items</button>
+                        <button @click="activeTab = 'items'; itemView = 'list'" :class="{'bg-slate-800 text-white': activeTab === 'items', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'items'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Saved Items</button>
+                        <button @click="activeTab = 'branding'" :class="{'bg-slate-800 text-white': activeTab === 'branding', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'branding'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Branding</button>
                         <button @click="activeTab = 'settings'" :class="{'bg-slate-800 text-white': activeTab === 'settings', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'settings'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Company Settings</button>
                         <button @click="activeTab = 'account'" :class="{'bg-slate-800 text-white': activeTab === 'account', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'account'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap border border-slate-700 md:ml-2 mt-1 md:mt-0">Account</button>
                     </nav>
@@ -353,12 +356,12 @@
                     </div>
                 </div>
 
-                <div id="invoice-canvas" :class="{'pdf-mode': isExportingPDF}" class="bg-white p-4 sm:p-6 lg:p-10 rounded-xl shadow-sm border border-slate-200 relative">
-                    <div class="flex justify-between items-start border-b pb-8 mb-8">
+                <div id="invoice-canvas" :class="{'pdf-mode': isExportingPDF}" :style="brandStyle" class="bg-white p-4 sm:p-6 lg:p-10 rounded-xl shadow-sm border border-slate-200 relative">
+                    <div v-if="company.logo" class="mb-6 flex" :class="{'justify-center': company.logoPosition === 'center', 'justify-end': company.logoPosition === 'right'}">
+                        <img :src="company.logo" alt="Logo" class="h-16 object-contain">
+                    </div>
+                    <div class="flex justify-between items-start border-b-2 pb-8 mb-8" :style="{ borderColor: 'var(--brand)' }">
                         <div>
-                            <div v-if="company.logo" class="mb-4">
-                                <img :src="company.logo" alt="Logo" class="h-16 object-contain">
-                            </div>
                             <h3 class="font-bold text-xl">{{ company.name }}</h3>
                             <div class="text-sm text-slate-500 mt-2 space-y-0.5">
                                 <p v-if="company.address">{{ company.address }}</p>
@@ -373,7 +376,7 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <h1 class="text-4xl font-bold text-slate-200 uppercase tracking-wider mb-2">{{ docTypeLabel(draft.docType) }}</h1>
+                            <h1 class="text-4xl font-bold uppercase tracking-wider mb-2" :style="{ color: 'var(--brand)' }">{{ docTypeLabel(draft.docType) }}</h1>
                             <div class="flex items-center justify-end gap-2 text-slate-600">
                                 <span class="font-medium">{{ docTypeNoun(draft.docType) }} #:</span>
                                 <input type="text" v-model="draft.number" class="border rounded px-2 py-1 w-28 text-right focus:ring-2 focus:ring-indigo-500 outline-none no-print">
@@ -439,17 +442,18 @@
                     <div class="mb-8 overflow-x-auto">
                         <table class="w-full text-left border-collapse min-w-[640px]">
                             <thead>
-                                <tr class="bg-slate-100 text-slate-600 text-sm uppercase pdf-bold-row">
+                                <tr class="text-sm uppercase pdf-bold-row" :style="{ backgroundColor: 'var(--brand)', color: 'var(--brand-text)' }">
                                     <th class="p-3 font-semibold rounded-tl-lg">Item / Description</th>
                                     <th class="p-3 w-72 font-semibold text-center">Qty / Unit</th>
                                     <th class="p-3 w-32 font-semibold text-center">Price</th>
                                     <th class="p-3 w-24 font-semibold text-center">Disc (%)</th>
+                                    <th class="p-3 w-24 font-semibold text-center">Tax (%)</th>
                                     <th class="p-3 w-32 font-semibold text-right">Total</th>
                                     <th class="p-3 w-10 rounded-tr-lg no-print"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(item, index) in draft.items" :key="index" :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'" class="border-b border-slate-200/50">
+                                <tr v-for="(item, index) in draft.items" :key="index" :style="index % 2 === 1 ? { backgroundColor: 'var(--brand-tint)' } : { backgroundColor: '#ffffff' }" class="border-b border-slate-200/50">
                                     <td class="pl-1 pr-3 py-3 relative align-top">
                                         <textarea v-model="item.name" @focus="item.showSuggestions = true" @blur="hideSuggestions(index)" rows="2" class="w-full border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none"></textarea>
                                         <span class="pdf-text text-sm">{{ item.name }}</span>
@@ -488,12 +492,16 @@
                                         <span class="pdf-text text-sm text-center">{{ item.qty }}<template v-if="item.unit"> {{ item.unit }}</template></span>
                                     </td>
                                     <td class="p-3 align-top">
-                                        <input type="number" v-model.number="item.price" class="w-full border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-right">
-                                        <span class="pdf-text text-sm text-right">{{ getCurrencySymbol(draft.currency) }}{{ (Number(item.price) || 0).toFixed(2) }}</span>
+                                        <input type="number" v-model.number="item.price" class="w-full border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center">
+                                        <span class="pdf-text text-sm text-center">{{ getCurrencySymbol(draft.currency) }}{{ (Number(item.price) || 0).toFixed(2) }}</span>
                                     </td>
                                     <td class="p-3 align-top">
                                         <input type="number" v-model.number="item.discount" class="w-full border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center">
                                         <span class="pdf-text text-sm text-center">{{ item.discount || '0' }}%</span>
+                                    </td>
+                                    <td class="p-3 align-top">
+                                        <input type="number" v-model.number="item.tax" min="0" class="w-full border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center">
+                                        <span class="pdf-text text-sm text-center">{{ item.tax || '0' }}%</span>
                                     </td>
                                     <td class="p-3 text-right font-medium text-slate-700 align-top pt-5">{{ getCurrencySymbol(draft.currency) }}{{ calculateRowTotal(item).toFixed(2) }}</td>
                                     <td class="p-3 text-center align-top pt-3 no-print">
@@ -523,7 +531,15 @@
                             </div>
                         </div>
                         
-                        <div class="w-full md:w-1/3 bg-slate-50 p-6 rounded-xl border border-slate-200">
+                        <div class="w-full md:w-1/3 p-6 rounded-xl border" :style="{ backgroundColor: 'var(--brand-tint)', borderColor: 'var(--brand)' }">
+                            <div class="no-print mb-4 pb-3 border-b border-slate-200">
+                                <span class="text-xs font-bold text-slate-500 uppercase block mb-2">Tax Mode</span>
+                                <div class="flex rounded-lg overflow-hidden border border-slate-300 text-xs">
+                                    <button @click="setTaxMode('exclusive')" :class="draft.taxMode !== 'inclusive' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600'" class="flex-1 px-2 py-1.5 font-medium transition">Add tax on top</button>
+                                    <button @click="setTaxMode('inclusive')" :class="draft.taxMode === 'inclusive' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-600'" class="flex-1 px-2 py-1.5 font-medium transition border-l border-slate-300">Prices include tax</button>
+                                </div>
+                            </div>
+                            <span v-if="draft.taxMode === 'inclusive'" class="pdf-text text-xs text-slate-500 mb-2 block">All prices include tax.</span>
                             <div class="flex justify-between items-center mb-3 text-sm">
                                 <span class="text-slate-600 font-medium">Subtotal</span>
                                 <span class="font-semibold">{{ getCurrencySymbol(draft.currency) }}{{ totals.subtotal.toFixed(2) }}</span>
@@ -538,14 +554,9 @@
                                 <span class="font-medium text-green-600" v-if="totals.globalDiscountAmt > 0">-{{ getCurrencySymbol(draft.currency) }}{{ totals.globalDiscountAmt.toFixed(2) }}</span>
                                 <span class="font-medium text-slate-400" v-else>{{ getCurrencySymbol(draft.currency) }}0.00</span>
                             </div>
-                            <div class="flex justify-between items-center mb-3 text-sm">
-                                <span class="text-slate-600 font-medium flex items-center gap-2">
-                                    Tax 
-                                    <span class="no-print text-xs font-normal text-slate-400">%</span>
-                                    <input type="number" v-model.number="draft.taxRate" class="border rounded px-2 py-1 w-16 text-right focus:ring-indigo-500 outline-none">
-                                    <span class="pdf-text text-xs text-slate-500">({{ draft.taxRate || 0 }}%)</span>
-                                </span>
-                                <span class="font-medium">{{ getCurrencySymbol(draft.currency) }}{{ totals.taxAmt.toFixed(2) }}</span>
+                            <div v-for="(amt, rate) in totals.taxByRate" :key="rate" class="flex justify-between items-center mb-3 text-sm">
+                                <span class="text-slate-600 font-medium">{{ totals.mode === 'inclusive' ? 'Incl. tax' : 'Tax' }} ({{ rate }}%)</span>
+                                <span class="font-medium">{{ getCurrencySymbol(draft.currency) }}{{ amt.toFixed(2) }}</span>
                             </div>
                             <div class="flex justify-between items-center mb-4 text-sm">
                                 <span class="text-slate-600 font-medium">Shipping</span>
@@ -555,17 +566,9 @@
                                     <span class="pdf-text">{{ getCurrencySymbol(draft.currency) }}{{ parseFloat(draft.shippingCost || 0).toFixed(2) }}</span>
                                 </span>
                             </div>
-                            <div class="flex justify-between items-center mb-4 text-sm">
-                                <span class="text-slate-600 font-medium">Tip</span>
-                                <span class="flex items-center gap-1 font-medium">
-                                    <span class="no-print">{{ getCurrencySymbol(draft.currency) }}</span>
-                                    <input type="number" v-model.number="draft.tip" class="border rounded px-2 py-1 w-20 text-right focus:ring-indigo-500 outline-none">
-                                    <span class="pdf-text">{{ getCurrencySymbol(draft.currency) }}{{ parseFloat(draft.tip || 0).toFixed(2) }}</span>
-                                </span>
-                            </div>
-                            <div class="flex justify-between mt-4 pt-4 border-t-2 border-slate-200 text-xl font-bold">
+                            <div class="flex justify-between mt-4 pt-4 border-t-2 text-xl font-bold" :style="{ borderColor: 'var(--brand)' }">
                                 <span>Total</span>
-                                <span class="text-indigo-600">{{ getCurrencySymbol(draft.currency) }}{{ totals.grandTotal.toFixed(2) }}</span>
+                                <span :style="{ color: 'var(--brand)' }">{{ getCurrencySymbol(draft.currency) }}{{ totals.grandTotal.toFixed(2) }}</span>
                             </div>
                             <div v-if="draftPaid > 0" class="flex justify-between items-center mt-3 text-sm">
                                 <span class="text-slate-600 font-medium">Amount Paid</span>
@@ -654,13 +657,13 @@
                 <div class="flex flex-wrap items-center gap-3 mb-5">
                     <input type="text" v-model="invoiceSearch" placeholder="Search by # or customer..." class="flex-1 min-w-[200px] border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
                     <select v-model="invoiceTypeFilter" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
-                        <option value="All">Type</option>
+                        <option value="All">All types</option>
                         <option value="invoice">Invoices</option>
                         <option value="quote">Quotes</option>
                         <option value="credit">Credit Notes</option>
                     </select>
                     <select v-model="invoiceStatusFilter" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
-                        <option value="All">Status</option>
+                        <option value="All">All statuses</option>
                         <option value="Draft">Draft</option>
                         <option value="Sent">Sent</option>
                         <option value="Partially Paid">Partially Paid</option>
@@ -808,36 +811,129 @@
             </div>
 
             <div v-show="activeTab === 'items'">
-                <h2 class="text-3xl font-semibold mb-6">Manage Saved Items</h2>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-                    <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit">
-                        <h3 class="font-bold mb-4">{{ editingItem !== null ? 'Edit Item' : 'Add New Item' }}</h3>
-                        <div class="space-y-4">
-                            <div><label class="block text-sm font-medium mb-1">Item Name</label><input type="text" v-model="itemForm.name" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
-                            <div><label class="block text-sm font-medium mb-1">Description (Optional)</label><textarea v-model="itemForm.description" rows="2" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
-                            <div><label class="block text-sm font-medium mb-1">Default Price</label><input type="number" v-model.number="itemForm.price" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
-                            <button @click="saveSavedItem" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition">Save Item</button>
-                            <button v-if="editingItem !== null" @click="resetItemForm" class="w-full bg-slate-200 text-slate-700 py-2 rounded-lg hover:bg-slate-300 transition">Cancel</button>
-                        </div>
+
+                <div v-if="itemView === 'list'">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-semibold">Manage Saved Items</h2>
+                        <button @click="newItem" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">+ New Item</button>
                     </div>
-                    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                        <div class="p-4 border-b border-slate-200">
-                            <input type="text" v-model="itemSearch" placeholder="Search saved items..." class="w-full max-w-md border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
-                        </div>
+
+                    <div class="mb-5">
+                        <input type="text" v-model="itemSearch" placeholder="Search saved items by name..." class="w-full max-w-md border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                         <table class="w-full text-left min-w-[520px]">
                             <thead class="bg-slate-50 border-b border-slate-200">
-                                <tr><th class="p-4 font-medium text-slate-500">Name</th><th class="p-4 font-medium text-slate-500">Price</th><th class="p-4 font-medium text-slate-500 text-right">Actions</th></tr>
+                                <tr>
+                                    <th class="p-4 font-medium text-slate-500">Name</th>
+                                    <th class="p-4 font-medium text-slate-500 text-right">Default Price</th>
+                                    <th class="p-4 font-medium text-slate-500 text-right">Actions</th>
+                                </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                <tr v-if="savedItems.length === 0"><td colspan="3" class="p-8 text-center text-slate-400">No saved items yet.</td></tr>
+                                <tr v-if="savedItems.length === 0"><td colspan="3" class="p-8 text-center text-slate-400">No saved items yet. Click &ldquo;+ New Item&rdquo; to add one.</td></tr>
                                 <tr v-else-if="filteredItems.length === 0"><td colspan="3" class="p-8 text-center text-slate-400">No items match your search.</td></tr>
-                                <tr v-for="(item, idx) in filteredItems" :key="idx">
-                                    <td class="p-4"><div class="font-medium">{{ item.name }}</div><div class="text-xs text-slate-500">{{ item.description }}</div></td>
-                                    <td class="p-4 font-medium">{{ getCurrencySymbol('GBP') }}{{ (Number(item.price) || 0).toFixed(2) }}</td>
-                                    <td class="p-4 text-right space-x-3"><button @click="editSavedItem(item)" class="text-indigo-600 hover:text-indigo-800 text-sm">Edit</button><button @click="deleteSavedItem(item)" class="text-red-500 hover:text-red-700 text-sm">Delete</button></td>
+                                <tr v-for="(item, idx) in filteredItems" :key="idx" class="hover:bg-slate-50">
+                                    <td class="p-4 align-top">
+                                        <div class="font-medium text-slate-800">{{ item.name }}</div>
+                                        <div v-if="item.description" class="text-xs text-slate-500 mt-1 whitespace-pre-line">{{ item.description }}</div>
+                                    </td>
+                                    <td class="p-4 align-top text-right font-medium text-slate-700">{{ getCurrencySymbol(company.defaultCurrency || 'GBP') }}{{ (Number(item.price) || 0).toFixed(2) }}</td>
+                                    <td class="p-4 text-right align-top space-x-3">
+                                        <button @click="editSavedItem(item)" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Edit</button>
+                                        <button @click="deleteSavedItem(item)" class="text-red-500 hover:text-red-700 text-sm font-medium">Delete</button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <div v-else class="max-w-2xl mx-auto">
+                    <div class="flex items-center gap-4 mb-6">
+                        <button @click="backToItems" class="flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors">&larr; Back to Items</button>
+                        <h2 class="text-3xl font-semibold">{{ editingItem !== null ? 'Edit Item' : 'New Item' }}</h2>
+                    </div>
+
+                    <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
+                        <div class="space-y-5">
+                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Item Name *</label><input type="text" v-model="itemForm.name" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Description (Optional)</label><textarea v-model="itemForm.description" rows="3" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
+                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Default Price</label><input type="number" v-model.number="itemForm.price" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
+                            <div class="pt-2 flex gap-3">
+                                <button @click="saveSavedItem" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Save Item</button>
+                                <button @click="backToItems" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-show="activeTab === 'branding'" class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-semibold mb-2">Branding</h2>
+                <p class="text-sm text-slate-500 mb-6">Choose your brand colour and logo position. The preview updates live, and these settings apply to every invoice, quote, and PDF you create.</p>
+
+                <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 mb-3">Brand Colour</label>
+                            <div class="flex flex-wrap items-center gap-2 mb-4">
+                                <button v-for="c in brandPresets" :key="c" @click="company.brandColor = c" type="button" :style="{ backgroundColor: c }" :class="company.brandColor === c ? 'ring-2 ring-offset-2 ring-slate-800' : ''" class="w-9 h-9 rounded-full border border-slate-200 transition" :title="c"></button>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <input type="color" v-model="company.brandColor" class="h-10 w-14 border rounded cursor-pointer" title="Pick a custom colour">
+                                <input type="text" v-model="company.brandColor" placeholder="#6366f1" class="w-32 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <span class="text-xs text-slate-500">or pick any colour</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 mb-3">Logo Position</label>
+                            <div class="flex gap-2">
+                                <button v-for="pos in ['left','center','right']" :key="pos" @click="company.logoPosition = pos" :class="company.logoPosition === pos ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-50'" class="px-4 py-2 rounded-lg border text-sm font-medium capitalize transition">{{ pos }}</button>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-2">Where your logo sits at the top of the invoice. Set a logo URL on the Company Settings page.</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 pt-6 border-t">
+                        <button @click="saveCompanyDetails" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Save Branding</button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-3 border-b border-slate-100 bg-slate-50 text-xs font-medium text-slate-500 uppercase tracking-wide">Live Preview</div>
+                    <div class="p-6" :style="brandStyle">
+                        <div class="mb-4 flex" :class="{'justify-center': company.logoPosition === 'center', 'justify-end': company.logoPosition === 'right'}">
+                            <img v-if="company.logo" :src="company.logo" class="h-12 object-contain" alt="Logo">
+                            <div v-else class="h-12 w-24 rounded bg-slate-100 flex items-center justify-center text-[10px] text-slate-400">YOUR LOGO</div>
+                        </div>
+                        <div class="flex justify-between items-start border-b-2 pb-4 mb-4" :style="{ borderColor: 'var(--brand)' }">
+                            <div>
+                                <div class="font-bold text-lg">{{ company.name || 'Your Company' }}</div>
+                                <div class="text-xs text-slate-500">{{ company.email || 'you@email.com' }}</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl font-bold uppercase tracking-wider" :style="{ color: 'var(--brand)' }">Invoice</div>
+                                <div class="text-xs text-slate-500">#INV-0001</div>
+                            </div>
+                        </div>
+                        <table class="w-full text-left text-xs mb-4">
+                            <thead>
+                                <tr :style="{ backgroundColor: 'var(--brand)', color: 'var(--brand-text)' }">
+                                    <th class="p-2">Item</th><th class="p-2 text-center">Qty</th><th class="p-2 text-right">Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-slate-100"><td class="p-2">Design work</td><td class="p-2 text-center">2</td><td class="p-2 text-right">£200.00</td></tr>
+                                <tr class="border-b border-slate-100"><td class="p-2">Consulting</td><td class="p-2 text-center">1.5 hrs</td><td class="p-2 text-right">£90.00</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="flex justify-end">
+                            <div class="w-1/2 p-4 rounded-lg border" :style="{ backgroundColor: 'var(--brand-tint)', borderColor: 'var(--brand)' }">
+                                <div class="flex justify-between text-xs mb-1"><span class="text-slate-600">Subtotal</span><span>£290.00</span></div>
+                                <div class="flex justify-between text-base font-bold pt-2 mt-1 border-t-2" :style="{ borderColor: 'var(--brand)' }"><span>Total</span><span :style="{ color: 'var(--brand)' }">£290.00</span></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -981,7 +1077,7 @@
                 mobileMenuOpen: false,
                 editingExisting: false,
                 isExportingPDF: false,
-                company: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '' },
+                company: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left' },
                 customers: [],
                 savedItems: [],
                 invoices: [],
@@ -992,6 +1088,9 @@
                 newPayment: { amount: null, date: new Date().toISOString().split('T')[0], note: '' },
                 customerForm: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' },
                 customerView: 'list',
+                itemView: 'list',
+                brandPresets: ['#6366f1', '#38bdf8', '#34d399', '#fb7185', '#fbbf24', '#a78bfa', '#f472b6', '#2dd4bf'],
+                lastTaxMode: 'exclusive',
                 editingCustomer: null,
                 showQuickCustomer: false,
                 quickCustomer: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' },
@@ -1015,6 +1114,27 @@
             };
         },
         computed: {
+            brandColor() { return this.company.brandColor || '#4f46e5'; },
+            brandRgb() {
+                let h = (this.brandColor || '').replace('#', '');
+                if (h.length === 3) h = h.split('').map(x => x + x).join('');
+                const n = parseInt(h, 16);
+                if (isNaN(n) || h.length !== 6) return { r: 79, g: 70, b: 229 };
+                return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+            },
+            brandText() {
+                // Relative luminance → choose dark or white text for contrast
+                const { r, g, b } = this.brandRgb;
+                const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                return lum > 0.62 ? '#1e293b' : '#ffffff';
+            },
+            brandTint() {
+                const { r, g, b } = this.brandRgb;
+                return `rgba(${r}, ${g}, ${b}, 0.10)`;
+            },
+            brandStyle() {
+                return { '--brand': this.brandColor, '--brand-text': this.brandText, '--brand-tint': this.brandTint };
+            },
             totals() {
                 return this.calcTotals(this.draft);
             },
@@ -1237,7 +1357,7 @@
                     this.authMode = 'login';
                     this.activeTab = 'create';
                     this.editingExisting = false;
-                    this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '' };
+                    this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left' };
                     this.customers = []; this.savedItems = []; this.invoices = [];
                 }
             },
@@ -1275,18 +1395,47 @@
             },
             // ================= DATA LAYER (Supabase database) =================
             calcTotals(src) {
-                let subtotal = 0;
+                const r2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
+                const mode = src.taxMode || 'exclusive';
+                let netSum = 0;          // sum of line nets (ex-tax), before global discount
+                let grossSum = 0;        // sum of line totals as entered, before global discount
+                const taxRaw = {};       // rate -> tax amount, before global discount
                 (src.items || []).forEach(item => {
-                    let lineTotal = (item.qty || 0) * (item.price || 0);
-                    let discAmt = lineTotal * ((item.discount || 0) / 100);
-                    subtotal += (lineTotal - discAmt);
+                    const qty = Number(item.qty) || 0;
+                    const price = Number(item.price) || 0;
+                    const disc = Number(item.discount) || 0;
+                    const rate = Number(item.tax) || 0;
+                    const afterDisc = (qty * price) * (1 - disc / 100); // line total as entered
+                    let lineNet, lineTax;
+                    if (mode === 'inclusive') {
+                        lineNet = afterDisc / (1 + rate / 100); // strip tax out
+                        lineTax = afterDisc - lineNet;
+                    } else {
+                        lineNet = afterDisc;                    // tax added on top
+                        lineTax = afterDisc * (rate / 100);
+                    }
+                    netSum += lineNet;
+                    grossSum += (mode === 'inclusive') ? afterDisc : (afterDisc + lineTax);
+                    if (rate > 0) taxRaw[rate] = (taxRaw[rate] || 0) + lineTax;
                 });
-                let globalDiscountAmt = subtotal * ((src.globalDiscount || 0) / 100);
-                let afterDiscount = subtotal - globalDiscountAmt;
-                let taxAmt = afterDiscount * ((src.taxRate || 0) / 100);
-                let shipping = parseFloat(src.shippingCost) || 0;
-                let tip = parseFloat(src.tip) || 0;
-                return { subtotal, globalDiscountAmt, taxAmt, shipping, tip, grandTotal: afterDiscount + taxAmt + shipping + tip };
+                const gd = Number(src.globalDiscount) || 0;
+                const gdFactor = 1 - gd / 100;
+                const base = (mode === 'inclusive') ? grossSum : netSum;
+                const subtotal = r2(base);
+                const globalDiscountAmt = r2(base * (gd / 100));
+                // scale per-rate tax by the global discount, then total it
+                const taxByRate = {};
+                let taxAmt = 0;
+                Object.keys(taxRaw).forEach(rt => {
+                    const v = r2(taxRaw[rt] * gdFactor);
+                    taxByRate[rt] = v;
+                    taxAmt = r2(taxAmt + v);
+                });
+                const shipping = parseFloat(src.shippingCost) || 0;
+                const grandTotal = (mode === 'inclusive')
+                    ? r2(grossSum * gdFactor + shipping)
+                    : r2(netSum * gdFactor + taxAmt + shipping);
+                return { subtotal, globalDiscountAmt, taxAmt, taxByRate, shipping, mode, grandTotal };
             },
             isUuid(v) { return typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v); },
 
@@ -1304,11 +1453,11 @@
                 return { name: i.name, description: i.description || null, price: i.price || 0 };
             },
             rowToCompany(r) {
-                return { name: r.name || '', address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '', logo: r.logo_url || '', invoicePrefix: r.invoice_prefix || '', quotePrefix: r.quote_prefix || 'QUO-', creditPrefix: r.credit_prefix || 'CN-', defaultCurrency: r.default_currency || 'GBP', paymentDetails: r.payment_details || '', defaultNotes: r.default_notes || '', defaultTerms: r.default_terms || '', invoiceFooter: r.invoice_footer || '' };
+                return { name: r.name || '', address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '', logo: r.logo_url || '', invoicePrefix: r.invoice_prefix || '', quotePrefix: r.quote_prefix || 'QUO-', creditPrefix: r.credit_prefix || 'CN-', defaultCurrency: r.default_currency || 'GBP', paymentDetails: r.payment_details || '', defaultNotes: r.default_notes || '', defaultTerms: r.default_terms || '', invoiceFooter: r.invoice_footer || '', brandColor: r.brand_color || '#4f46e5', logoPosition: r.logo_position || 'left' };
             },
             companyToRow() {
                 const c = this.company;
-                return { user_id: this.currentUser.id, name: c.name || null, address: c.address || null, phone: c.phone || null, mobile: c.mobile || null, email: c.email || null, tax_id: c.taxId || null, additional_info: c.additionalInfo || null, logo_url: c.logo || null, invoice_prefix: c.invoicePrefix || '', quote_prefix: c.quotePrefix || 'QUO-', credit_prefix: c.creditPrefix || 'CN-', default_currency: c.defaultCurrency || 'GBP', payment_details: c.paymentDetails || null, default_notes: c.defaultNotes || null, default_terms: c.defaultTerms || null, invoice_footer: c.invoiceFooter || null, updated_at: new Date().toISOString() };
+                return { user_id: this.currentUser.id, name: c.name || null, address: c.address || null, phone: c.phone || null, mobile: c.mobile || null, email: c.email || null, tax_id: c.taxId || null, additional_info: c.additionalInfo || null, logo_url: c.logo || null, invoice_prefix: c.invoicePrefix || '', quote_prefix: c.quotePrefix || 'QUO-', credit_prefix: c.creditPrefix || 'CN-', default_currency: c.defaultCurrency || 'GBP', payment_details: c.paymentDetails || null, default_notes: c.defaultNotes || null, default_terms: c.defaultTerms || null, invoice_footer: c.invoiceFooter || null, brand_color: c.brandColor || '#4f46e5', logo_position: c.logoPosition || 'left', updated_at: new Date().toISOString() };
             },
             rowToInvoice(r) {
                 const inv = {
@@ -1317,14 +1466,15 @@
                     currency: r.currency || 'GBP', customer: r.customer_snapshot || null,
                     items: r.items || [], payments: r.payments || [],
                     globalDiscount: Number(r.global_discount) || 0, taxRate: Number(r.tax_rate) || 0,
-                    shippingCost: Number(r.shipping_cost) || 0, tip: Number(r.tip) || 0,
+                    taxMode: r.tax_mode || 'exclusive',
+                    shippingCost: Number(r.shipping_cost) || 0,
                     notes: r.notes || '', terms: r.terms || ''
                 };
                 inv.totals = this.calcTotals(inv);
                 return inv;
             },
             invoiceToRow(inv) {
-                const cleanItems = (inv.items || []).map(i => ({ name: i.name || '', qty: i.qty || 0, unit: i.unit || '', price: i.price || 0, discount: i.discount || 0 }));
+                const cleanItems = (inv.items || []).map(i => ({ name: i.name || '', qty: i.qty || 0, unit: i.unit || '', price: i.price || 0, discount: i.discount || 0, tax: i.tax || 0 }));
                 return {
                     doc_type: inv.docType || 'invoice', number: String(inv.number), status: inv.status || 'Draft',
                     issue_date: inv.date || null, due_date: inv.dueDate || null, po_number: inv.poNumber || null,
@@ -1333,7 +1483,8 @@
                     customer_snapshot: inv.customer || null,
                     items: cleanItems, payments: inv.payments || [],
                     global_discount: inv.globalDiscount || 0, tax_rate: inv.taxRate || 0,
-                    shipping_cost: inv.shippingCost || 0, tip: inv.tip || 0,
+                    tax_mode: inv.taxMode || 'exclusive',
+                    shipping_cost: inv.shippingCost || 0, tip: 0,
                     notes: inv.notes || null, terms: inv.terms || null,
                     grand_total: this.calcTotals(inv).grandTotal
                 };
@@ -1376,8 +1527,8 @@
                     date: today, dueDate: today, poNumber: '',
                     notes: co.defaultNotes || '', terms: co.defaultTerms || '',
                     customer: null, status: 'Draft', currency: co.defaultCurrency || 'GBP',
-                    globalDiscount: 0, taxRate: 0, shippingCost: 0, tip: 0, payments: [],
-                    items: [ { name: '', qty: 1, unit: '', price: 0, discount: 0, showSuggestions: false, _h: '', _m: '', _custom: false } ]
+                    globalDiscount: 0, taxMode: this.lastTaxMode || 'exclusive', shippingCost: 0, payments: [],
+                    items: [ { name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false } ]
                 };
             },
             getCurrencySymbol(code) {
@@ -1402,7 +1553,8 @@
                 return prefix + String(maxNum + 1).padStart(4, '0');
             },
             generateInvoiceNumber() { return this.generateNumber('invoice'); },
-            addItem() { this.draft.items.push({ name: '', qty: 1, unit: '', price: 0, discount: 0, showSuggestions: false, _h: '', _m: '', _custom: false }); },
+            addItem() { this.draft.items.push({ name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false }); },
+            setTaxMode(m) { this.draft.taxMode = m; this.lastTaxMode = m; },
             isHrs(item) { return !!item.unit && item.unit.trim().toLowerCase() === 'hrs'; },
             unitSelectValue(item) {
                 const known = ['hrs', 'item', 'day', 'km', 'kg'];
@@ -1567,7 +1719,8 @@
                 if(this.draft.globalDiscount === undefined) this.draft.globalDiscount = 0;
                 if(this.draft.taxRate === undefined) this.draft.taxRate = 0;
                 if(this.draft.shippingCost === undefined) this.draft.shippingCost = 0;
-                if(this.draft.tip === undefined) this.draft.tip = 0;
+                if(this.draft.taxMode === undefined) this.draft.taxMode = 'exclusive';
+                (this.draft.items || []).forEach(it => { if (it.tax === undefined) it.tax = 0; });
                 if(!this.draft.payments) this.draft.payments = [];
                 if(!this.draft.docType) this.draft.docType = 'invoice';
                 if(!this.draft.currency) this.draft.currency = 'GBP';
@@ -1653,7 +1806,7 @@
                     "Customer Name": inv.customer ? inv.customer.name : '', "Status": this.effectiveStatus(inv),
                     "Currency": inv.currency || 'GBP', "Subtotal": inv.totals.subtotal,
                     "Discount": inv.totals.globalDiscountAmt, "Tax": inv.totals.taxAmt,
-                    "Shipping": inv.totals.shipping, "Tip": inv.totals.tip || 0, "Grand Total": inv.totals.grandTotal,
+                    "Shipping": inv.totals.shipping, "Grand Total": inv.totals.grandTotal,
                     "Amount Paid": this.amountPaid(inv), "Balance Due": this.balanceDue(inv)
                 }));
                 const wb = XLSX.utils.book_new();
@@ -1733,14 +1886,23 @@
                         if (error) throw error;
                         this.savedItems.push(this.rowToItem(data));
                     }
+                    this.savedItems.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
                     this.resetItemForm();
+                    this.itemView = 'list';
                 } catch (e) {
                     console.error("Save item failed:", e);
                     alert("Could not save item: " + (e.message || e));
                 }
             },
-            editSavedItem(item) { this.editingItem = this.savedItems.indexOf(item); this.itemForm = {...item}; },
+            newItem() { this.resetItemForm(); this.itemView = 'form'; },
+            backToItems() { this.resetItemForm(); this.itemView = 'list'; },
+            editSavedItem(item) {
+                this.editingItem = this.savedItems.indexOf(item);
+                this.itemForm = { name: item.name || '', description: item.description || '', price: item.price || 0 };
+                this.itemView = 'form';
+            },
             async deleteSavedItem(item) {
+                if(!confirm("Delete this saved item?")) return;
                 const { error } = await supabaseClient.from('saved_items').delete().eq('id', item.id);
                 if (error) return alert("Could not delete item: " + error.message);
                 const i = this.savedItems.indexOf(item);
@@ -1750,6 +1912,12 @@
             async saveCompanyDetails() {
                 const { error } = await supabaseClient.from('company_settings').upsert(this.companyToRow(), { onConflict: 'user_id' });
                 if (error) { console.error(error); return alert("Could not save settings: " + error.message); }
+                // If the current invoice is a new, unsaved one with empty notes/terms,
+                // apply the just-saved defaults so they take effect immediately.
+                if (!this.editingExisting && this.draft) {
+                    if (!this.draft.notes) this.draft.notes = this.company.defaultNotes || '';
+                    if (!this.draft.terms) this.draft.terms = this.company.defaultTerms || '';
+                }
                 alert("Settings saved.");
             }
         },

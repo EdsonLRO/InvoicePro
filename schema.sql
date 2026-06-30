@@ -36,6 +36,8 @@ create table public.company_settings (
     default_notes    text,
     default_terms    text,
     invoice_footer   text,
+    brand_color      text default '#4f46e5',
+    logo_position    text default 'left',
     updated_at       timestamptz default now()
 );
 
@@ -103,6 +105,7 @@ create table public.invoices (
 
     global_discount   numeric(12,2) default 0,
     tax_rate          numeric(6,3)  default 0,
+    tax_mode          text          default 'exclusive',
     shipping_cost     numeric(12,2) default 0,
     tip               numeric(12,2) default 0,
 
