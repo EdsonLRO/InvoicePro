@@ -199,10 +199,10 @@
                 </div>
 
                 <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
-                    <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Security</h2>
+                    <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Change Password</h2>
                     
                     <div class="bg-amber-50 text-amber-800 text-sm p-4 rounded-lg border border-amber-200 mb-6">
-                        <strong>Note:</strong> You'll be asked for your current password to confirm it's you, then your password is updated securely with our authentication provider.
+                        <strong>Note:</strong> Please type your current password to confirm it's you.
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -971,9 +971,27 @@
                             <textarea v-model="company.additionalInfo" rows="2" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
                         </div>
                         <div class="sm:col-span-2 border-t pt-6 mt-2">
-                            <label class="block text-sm font-bold text-slate-600 mb-1">Company Logo URL</label>
-                            <input type="text" v-model="company.logo" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <p class="text-xs text-slate-500 mt-1">Paste a public image link (PNG/JPG) to display it on your invoices.</p>
+                            <label class="block text-sm font-bold text-slate-600 mb-2">Company Logo</label>
+                            <div class="flex items-start gap-4 flex-wrap">
+                                <div class="w-28 h-20 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0">
+                                    <img v-if="company.logo" :src="company.logo" class="max-h-full max-w-full object-contain" alt="Logo preview">
+                                    <span v-else class="text-[10px] text-slate-400">No logo</span>
+                                </div>
+                                <div class="flex-1 min-w-[200px]">
+                                    <div class="flex items-center gap-3 mb-2 flex-wrap">
+                                        <label class="cursor-pointer bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-medium text-sm transition shadow-sm">
+                                            Upload from computer
+                                            <input type="file" accept="image/png, image/jpeg, image/webp, image/svg+xml" @change="onLogoUpload" class="hidden">
+                                        </label>
+                                        <button v-if="company.logo" @click="company.logo = ''" type="button" class="text-red-500 hover:text-red-700 text-sm font-medium">Remove</button>
+                                    </div>
+                                    <p class="text-xs text-slate-500">PNG, JPG, WebP or SVG. Large images are resized automatically (max ~500&nbsp;KB after resizing).</p>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Or paste an image link</label>
+                                <input type="text" v-model="logoUrlField" placeholder="https://..." class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
                         </div>
                     </div>
 
@@ -1134,6 +1152,10 @@
             },
             brandStyle() {
                 return { '--brand': this.brandColor, '--brand-text': this.brandText, '--brand-tint': this.brandTint };
+            },
+            logoUrlField: {
+                get() { const l = this.company.logo || ''; return l.startsWith('data:') ? '' : l; },
+                set(v) { this.company.logo = v; }
             },
             totals() {
                 return this.calcTotals(this.draft);
@@ -1555,6 +1577,44 @@
             generateInvoiceNumber() { return this.generateNumber('invoice'); },
             addItem() { this.draft.items.push({ name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false }); },
             setTaxMode(m) { this.draft.taxMode = m; this.lastTaxMode = m; },
+            onLogoUpload(e) {
+                const file = e.target.files && e.target.files[0];
+                if (!file) return;
+                const maxStored = 500 * 1024 * 1.4; // ~500 KB binary as base64 chars
+                const okTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+                if (!okTypes.includes(file.type)) { alert('Please choose a PNG, JPG, WebP or SVG image.'); e.target.value = ''; return; }
+                const reader = new FileReader();
+                reader.onerror = () => { alert('Could not read that file. Please try another.'); e.target.value = ''; };
+                reader.onload = () => {
+                    // SVG is vector text — store as-is (no canvas resize), just size-check
+                    if (file.type === 'image/svg+xml') {
+                        if (reader.result.length > maxStored) { alert('That logo file is too large. Please use one under about 500 KB.'); e.target.value = ''; return; }
+                        this.company.logo = reader.result;
+                        e.target.value = '';
+                        return;
+                    }
+                    const img = new Image();
+                    img.onerror = () => { alert('Could not read that image. Please try another file.'); e.target.value = ''; };
+                    img.onload = () => {
+                        const maxDim = 400; // logos never need to be larger than this
+                        let w = img.width, h = img.height;
+                        if (w > maxDim || h > maxDim) {
+                            if (w >= h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                            else { w = Math.round(w * maxDim / h); h = maxDim; }
+                        }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w; canvas.height = h;
+                        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                        let dataUrl = canvas.toDataURL('image/png'); // keep transparency
+                        if (dataUrl.length > maxStored) dataUrl = canvas.toDataURL('image/jpeg', 0.85); // fall back smaller
+                        if (dataUrl.length > maxStored) { alert('That logo is still too large after resizing. Please try a simpler or smaller image.'); e.target.value = ''; return; }
+                        this.company.logo = dataUrl;
+                        e.target.value = '';
+                    };
+                    img.src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            },
             isHrs(item) { return !!item.unit && item.unit.trim().toLowerCase() === 'hrs'; },
             unitSelectValue(item) {
                 const known = ['hrs', 'item', 'day', 'km', 'kg'];
