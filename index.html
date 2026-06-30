@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Content-Security-Policy temporarily removed for diagnosis. SRI, pinned
-         versions and self-hosted assets remain in place. CSP will be re-added
-         once we confirm what was causing the blank screen. -->
+    <!-- Content-Security-Policy: restricts where scripts, styles, images and network
+         connections may load from, limiting the impact of any injected content.
+         MUST stay on one line (newlines in a meta CSP can drop directives).
+         'unsafe-eval' is required because Vue compiles templates in the browser. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
 
     <title>InvoicePro</title>
 
@@ -48,6 +50,8 @@
         .pdf-mode .no-print { display: none !important; }
         .pdf-mode { border: none !important; box-shadow: none !important; }
         .pdf-mode .pdf-bold-row, .pdf-mode .pdf-bold-row * { font-weight: 700 !important; }
+        .no-spin::-webkit-outer-spin-button, .no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .no-spin { -moz-appearance: textfield; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
@@ -126,6 +130,9 @@
                     <button @click="authMode = 'login'" class="text-indigo-600 hover:underline font-medium">Cancel</button>
                 </div>
             </div>
+
+            <div v-if="authMode === 'forgot'" class="space-y-5">
+                <h2 class="text-xl font-semibold">Reset your password</h2>
                 <div class="bg-blue-50 text-blue-800 text-sm p-4 rounded-lg border border-blue-100">
                     Enter your account email and we'll send you a link to set a new password.
                 </div>
@@ -220,15 +227,10 @@
                         <span v-if="mfa.enabled" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Enabled</span>
                         <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">Off</span>
                     </div>
-
                     <p class="text-sm text-slate-600 mb-5">Add a second step at sign-in using an authenticator app (Google Authenticator, Authy, Microsoft Authenticator, etc.). Even if someone learns your password, they can't sign in without the code from your phone.</p>
-
-                    <!-- OFF, not currently enrolling -->
                     <div v-if="!mfa.enabled && mfa.step === 'idle'">
                         <button @click="startMfaEnroll" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Preparing...' : 'Enable Two-Factor' }}</button>
                     </div>
-
-                    <!-- Enrolling: show QR + confirm code -->
                     <div v-if="mfa.step === 'enrolling'" class="space-y-4">
                         <ol class="text-sm text-slate-600 list-decimal list-inside space-y-1">
                             <li>Open your authenticator app and scan this QR code.</li>
@@ -251,8 +253,6 @@
                             <button @click="cancelMfaEnroll" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
                         </div>
                     </div>
-
-                    <!-- ON -->
                     <div v-if="mfa.enabled && mfa.step === 'idle'">
                         <p class="text-sm text-green-700 mb-4">Two-factor authentication is active on your account.</p>
                         <button @click="disableMfa" :disabled="mfa.busy" class="bg-white border border-red-300 text-red-600 px-6 py-2.5 rounded-lg hover:bg-red-50 font-medium transition disabled:opacity-50">{{ mfa.busy ? 'Working...' : 'Turn Off Two-Factor' }}</button>
@@ -441,8 +441,8 @@
                             <thead>
                                 <tr class="bg-slate-100 text-slate-600 text-sm uppercase pdf-bold-row">
                                     <th class="p-3 font-semibold rounded-tl-lg">Item / Description</th>
-                                    <th class="p-3 w-24 font-semibold text-center">Qty</th>
-                                    <th class="p-3 w-32 font-semibold text-right">Price</th>
+                                    <th class="p-3 w-72 font-semibold text-center">Qty / Unit</th>
+                                    <th class="p-3 w-32 font-semibold text-center">Price</th>
                                     <th class="p-3 w-24 font-semibold text-center">Disc (%)</th>
                                     <th class="p-3 w-32 font-semibold text-right">Total</th>
                                     <th class="p-3 w-10 rounded-tr-lg no-print"></th>
@@ -450,8 +450,8 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(item, index) in draft.items" :key="index" :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'" class="border-b border-slate-200/50">
-                                    <td class="p-3 relative align-top">
-                                        <textarea v-model="item.name" @focus="item.showSuggestions = true" @blur="hideSuggestions(index)" rows="2" class="w-full border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none"></textarea>
+                                    <td class="pl-1 pr-3 py-3 relative align-top">
+                                        <textarea v-model="item.name" @focus="item.showSuggestions = true" @blur="hideSuggestions(index)" rows="2" class="w-full border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none"></textarea>
                                         <span class="pdf-text text-sm">{{ item.name }}</span>
 
                                         <div v-if="item.showSuggestions && item.name" class="no-print absolute z-50 left-2 right-2 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto">
@@ -466,9 +466,25 @@
                                             </ul>
                                         </div>
                                     </td>
-                                    <td class="p-3 align-top">
-                                        <input type="number" v-model.number="item.qty" class="w-full border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center">
-                                        <input type="text" v-model="item.unit" placeholder="unit" class="w-full border rounded px-2 py-1 mt-1 text-xs text-slate-500 focus:ring-2 focus:ring-indigo-500 outline-none text-center no-print">
+                                    <td class="px-2 py-3 align-top">
+                                        <div class="flex flex-wrap items-center justify-center gap-1 no-print">
+                                            <input type="number" v-model.number="item.qty" :readonly="isHrs(item)" :class="{'bg-slate-50 text-slate-400': isHrs(item)}" title="Quantity" class="no-spin w-14 border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center">
+                                            <select :value="unitSelectValue(item)" @change="onUnitSelect(item, $event.target.value)" title="Unit" class="w-20 border rounded px-1 py-2 text-xs text-slate-600 bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                                                <option value="">unit</option>
+                                                <option value="hrs">hrs</option>
+                                                <option value="item">item</option>
+                                                <option value="day">day</option>
+                                                <option value="km">km</option>
+                                                <option value="kg">kg</option>
+                                                <option value="__custom">Custom…</option>
+                                            </select>
+                                            <input v-if="isCustomUnit(item)" type="text" v-model="item.unit" placeholder="type unit" class="w-16 border rounded px-2 py-2 text-xs text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                            <template v-if="isHrs(item)">
+                                                <input type="number" min="0" v-model.number="item._h" @input="applyTime(item)" placeholder="h" title="Hours" class="no-spin w-12 border rounded px-1 py-2 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none">
+                                                <span class="text-slate-500 font-bold text-sm">:</span>
+                                                <input type="number" min="0" max="59" v-model.number="item._m" @input="applyTime(item)" placeholder="m" title="Minutes" class="no-spin w-12 border rounded px-1 py-2 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none">
+                                            </template>
+                                        </div>
                                         <span class="pdf-text text-sm text-center">{{ item.qty }}<template v-if="item.unit"> {{ item.unit }}</template></span>
                                     </td>
                                     <td class="p-3 align-top">
@@ -638,13 +654,13 @@
                 <div class="flex flex-wrap items-center gap-3 mb-5">
                     <input type="text" v-model="invoiceSearch" placeholder="Search by # or customer..." class="flex-1 min-w-[200px] border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
                     <select v-model="invoiceTypeFilter" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
-                        <option value="All">All types</option>
+                        <option value="All">Type</option>
                         <option value="invoice">Invoices</option>
                         <option value="quote">Quotes</option>
                         <option value="credit">Credit Notes</option>
                     </select>
                     <select v-model="invoiceStatusFilter" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
-                        <option value="All">All statuses</option>
+                        <option value="All">Status</option>
                         <option value="Draft">Draft</option>
                         <option value="Sent">Sent</option>
                         <option value="Partially Paid">Partially Paid</option>
@@ -1123,24 +1139,29 @@
                         return alert("Please confirm your email first. Check your inbox for the confirmation link.");
                     return alert("Sign in failed: " + error.message);
                 }
-                // If this account has two-factor enabled, require the 6-digit code before proceeding
-                const { data: aal } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
-                if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
-                    const { data: factors } = await supabaseClient.auth.mfa.listFactors();
-                    const totp = factors && factors.totp && factors.totp[0];
-                    if (totp) {
-                        this.mfa.loginFactorId = totp.id;
-                        this.mfa.code = '';
-                        this.authMode = 'mfa';
-                        this.authBusy = false;
-                        return;
-                    }
-                }
                 this.authBusy = false;
-                this.onSignedIn(data.user);
+                await this.routeAfterAuth(data.user);
+            },
+            async routeAfterAuth(user) {
+                // Single gate for completing sign-in: require a second factor if the
+                // account has one, otherwise finish logging in.
+                try {
+                    const { data: aal } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+                    if (aal && aal.currentLevel === 'aal1' && aal.nextLevel === 'aal2') {
+                        const { data: factors } = await supabaseClient.auth.mfa.listFactors();
+                        const totp = factors && factors.totp && (factors.totp.find(f => f.status === 'verified') || factors.totp[0]);
+                        if (totp) {
+                            this.mfa.loginFactorId = totp.id;
+                            this.mfa.code = '';
+                            this.authMode = 'mfa';
+                            return;
+                        }
+                    }
+                } catch (e) { console.warn('MFA check error:', e); }
+                this.onSignedIn(user);
             },
             async verifyMfaLogin() {
-                if (!/^\d{6}$/.test(this.mfa.code.trim())) return alert("Enter the 6-digit code from your authenticator app.");
+                if (!/^\d{6}$/.test((this.mfa.code || '').trim())) return alert("Enter the 6-digit code from your authenticator app.");
                 this.authBusy = true;
                 const { error } = await supabaseClient.auth.mfa.challengeAndVerify({ factorId: this.mfa.loginFactorId, code: this.mfa.code.trim() });
                 this.authBusy = false;
@@ -1161,10 +1182,9 @@
             },
             async startMfaEnroll() {
                 this.mfa.busy = true;
-                // clean up any half-finished (unverified) factor first
                 try {
                     const { data } = await supabaseClient.auth.mfa.listFactors();
-                    const unverified = (data.all || []).filter(f => f.status === 'unverified');
+                    const unverified = ((data && data.all) || []).filter(f => f.status === 'unverified');
                     for (const f of unverified) await supabaseClient.auth.mfa.unenroll({ factorId: f.id });
                 } catch (e) { /* ignore */ }
                 const { data, error } = await supabaseClient.auth.mfa.enroll({ factorType: 'totp' });
@@ -1177,7 +1197,7 @@
                 this.mfa.step = 'enrolling';
             },
             async confirmMfaEnroll() {
-                if (!/^\d{6}$/.test(this.mfa.code.trim())) return alert("Enter the 6-digit code shown in your authenticator app.");
+                if (!/^\d{6}$/.test((this.mfa.code || '').trim())) return alert("Enter the 6-digit code shown in your authenticator app.");
                 this.mfa.busy = true;
                 const { error } = await supabaseClient.auth.mfa.challengeAndVerify({ factorId: this.mfa.enrollFactorId, code: this.mfa.code.trim() });
                 this.mfa.busy = false;
@@ -1357,7 +1377,7 @@
                     notes: co.defaultNotes || '', terms: co.defaultTerms || '',
                     customer: null, status: 'Draft', currency: co.defaultCurrency || 'GBP',
                     globalDiscount: 0, taxRate: 0, shippingCost: 0, tip: 0, payments: [],
-                    items: [ { name: '', qty: 1, unit: '', price: 0, discount: 0, showSuggestions: false } ]
+                    items: [ { name: '', qty: 1, unit: '', price: 0, discount: 0, showSuggestions: false, _h: '', _m: '', _custom: false } ]
                 };
             },
             getCurrencySymbol(code) {
@@ -1382,7 +1402,51 @@
                 return prefix + String(maxNum + 1).padStart(4, '0');
             },
             generateInvoiceNumber() { return this.generateNumber('invoice'); },
-            addItem() { this.draft.items.push({ name: '', qty: 1, unit: '', price: 0, discount: 0, showSuggestions: false }); },
+            addItem() { this.draft.items.push({ name: '', qty: 1, unit: '', price: 0, discount: 0, showSuggestions: false, _h: '', _m: '', _custom: false }); },
+            isHrs(item) { return !!item.unit && item.unit.trim().toLowerCase() === 'hrs'; },
+            unitSelectValue(item) {
+                const known = ['hrs', 'item', 'day', 'km', 'kg'];
+                if (item._custom) return '__custom';
+                if (item.unit && known.includes(item.unit)) return item.unit;
+                if (item.unit) return '__custom';
+                return '';
+            },
+            isCustomUnit(item) {
+                const known = ['hrs', 'item', 'day', 'km', 'kg'];
+                return !!item._custom || (!!item.unit && !known.includes(item.unit));
+            },
+            onUnitSelect(item, val) {
+                if (val === '__custom') {
+                    item._custom = true;
+                    item.unit = '';
+                } else {
+                    item._custom = false;
+                    item.unit = val;
+                    this.onUnitChange(item);
+                }
+            },
+            applyTime(item) {
+                const h = Number(item._h) || 0;
+                const m = Number(item._m) || 0;
+                item.qty = Math.round((h + m / 60) * 10000) / 10000; // exact to the minute
+            },
+            onUnitChange(item) {
+                if (this.isHrs(item) && (item._h === '' || item._h == null) && (item._m === '' || item._m == null)) {
+                    const q = Number(item.qty) || 0;
+                    item._h = Math.floor(q);
+                    item._m = Math.round((q - Math.floor(q)) * 60);
+                }
+            },
+            syncTimeFields() {
+                // initialise the h/m helper boxes from the stored decimal quantity (for loaded invoices)
+                (this.draft.items || []).forEach(item => {
+                    if (this.isHrs(item) && (item._h === '' || item._h == null) && (item._m === '' || item._m == null)) {
+                        const q = Number(item.qty) || 0;
+                        item._h = Math.floor(q);
+                        item._m = Math.round((q - Math.floor(q)) * 60);
+                    }
+                });
+            },
             removeItem(index) {
                 this.draft.items.splice(index, 1);
                 if(this.draft.items.length === 0) this.addItem();
@@ -1507,6 +1571,7 @@
                 if(!this.draft.payments) this.draft.payments = [];
                 if(!this.draft.docType) this.draft.docType = 'invoice';
                 if(!this.draft.currency) this.draft.currency = 'GBP';
+                this.syncTimeFields();
                 this.editingExisting = true;
                 this.activeTab = 'edit';
             },
@@ -1697,18 +1762,18 @@
             // Restore an existing session on page load (keeps you logged in on refresh)
             const { data } = await supabaseClient.auth.getSession();
             if (data.session) {
-                this.onSignedIn(data.session.user);
+                await this.routeAfterAuth(data.session.user);
             }
-            // React to auth events: email-confirmation redirect, password recovery, sign-out
-            supabaseClient.auth.onAuthStateChange(async (event, session) => {
+            // React to auth events: password recovery only. (Normal sign-in is handled
+            // by login()/routeAfterAuth; handling SIGNED_IN here too would race with the
+            // MFA check and could bypass it.)
+            supabaseClient.auth.onAuthStateChange(async (event) => {
                 if (event === 'PASSWORD_RECOVERY') {
                     const newPass = prompt("Enter a new password (at least 8 characters):");
                     if (newPass && newPass.length >= 8) {
                         const { error } = await supabaseClient.auth.updateUser({ password: newPass });
                         alert(error ? ("Could not set password: " + error.message) : "Password updated. You are now signed in.");
                     }
-                } else if (event === 'SIGNED_IN' && session && !this.isLoggedIn) {
-                    this.onSignedIn(session.user);
                 }
             });
         }
