@@ -339,7 +339,7 @@
                         <button v-if="activeTab === 'edit'" @click="activeTab = 'invoices'" class="flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors">
                             &larr; Back to Invoices
                         </button>
-                        <h2 class="text-3xl font-semibold">{{ editingExisting ? 'Edit Invoice #' + draft.number : 'New Invoice' }}</h2>
+                        <h2 class="text-3xl font-semibold">{{ editingExisting ? 'Edit ' + docTypeNoun(draft.docType) + ' #' + draft.number : 'New ' + docTypeNoun(draft.docType) }}</h2>
                     </div>
                     <div class="flex items-center gap-3 flex-wrap">
                         <select v-model="draft.docType" @change="onDocTypeChange" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm font-medium">
@@ -347,12 +347,19 @@
                             <option value="quote">Quote</option>
                             <option value="credit">Credit Note</option>
                         </select>
+                        <select :value="draft.status || 'Draft'" @change="changeStatus($event.target.value)" title="Document status" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm font-medium">
+                            <option value="Draft">Draft</option>
+                            <option value="Sent">Sent</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
                         <button @click="newInvoice" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">+ New Invoice</button>
                         <button @click="clearAll" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">Clear All</button>
                         <select v-model="draft.currency" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
                             <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }} ({{ c.symbol }}) - {{ c.name }}</option>
                         </select>
-                        <button @click="saveInvoice" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-colors">Save Invoice</button>
+                        <button v-if="draft.docType === 'quote'" @click="convertToInvoice(draft)" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">Convert to Invoice</button>
+                        <button @click="saveInvoice" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-colors">Save {{ docTypeNoun(draft.docType) }}</button>
                     </div>
                 </div>
 
@@ -623,6 +630,29 @@
                         <div><span class="text-slate-500">Balance: </span><span class="font-semibold" :class="draftBalance > 0.001 ? 'text-red-600' : 'text-green-600'">{{ getCurrencySymbol(draft.currency) }}{{ draftBalance.toFixed(2) }}</span></div>
                     </div>
                 </div>
+
+                <div v-if="editingExisting" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-6 max-w-2xl">
+                    <div class="flex items-center justify-between mb-1 flex-wrap gap-3">
+                        <h3 class="text-lg font-semibold">Activity History</h3>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-4">A record of what has happened to this document, for your convenience. This is an activity history, not a tamper-proof audit log.</p>
+
+                    <ul v-if="draft.history && draft.history.length" class="space-y-3 mb-5 max-h-72 overflow-y-auto pr-2">
+                        <li v-for="(ev, i) in orderedHistory" :key="i" class="flex items-start gap-3 text-sm">
+                            <span class="text-lg leading-none">{{ historyIcon(ev.type) }}</span>
+                            <div>
+                                <div class="text-slate-700">{{ ev.text }}</div>
+                                <div class="text-xs text-slate-400">{{ formatHistoryTime(ev.ts) }}</div>
+                            </div>
+                        </li>
+                    </ul>
+                    <p v-else class="text-sm text-slate-400 mb-5">No activity recorded yet.</p>
+
+                    <div class="flex gap-2 pt-4 border-t border-slate-100">
+                        <input type="text" v-model="activityNote" @keyup.enter="addActivityNote" placeholder="Add a note (e.g. client requested changes)" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <button @click="addActivityNote" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-medium text-sm shadow-sm transition">Add Note</button>
+                    </div>
+                </div>
             </div>
 
             <div v-if="showQuickCustomer" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
@@ -717,13 +747,6 @@
                                 </td>
                                 <td class="p-4 text-right">
                                     <div class="flex justify-end items-center space-x-3">
-                                        <select :value="normalizedStatus(inv)" @change="setStatus(inv, $event.target.value)" class="border rounded px-2 py-1 text-xs text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
-                                            <option value="Draft">Draft</option>
-                                            <option value="Sent">Sent</option>
-                                            <option value="Paid">Paid</option>
-                                            <option value="Cancelled">Cancelled</option>
-                                        </select>
-                                        <span class="text-slate-300">|</span>
                                         <button v-if="inv.docType === 'quote'" @click="convertToInvoice(inv)" class="text-purple-600 hover:text-purple-800 text-sm font-medium">Convert</button>
                                         <button @click="duplicateInvoice(inv)" class="text-slate-500 hover:text-slate-800 text-sm font-medium">Duplicate</button>
                                         <button @click="exportPDF(inv)" class="text-emerald-600 hover:text-emerald-800 text-sm font-medium">PDF</button>
@@ -1104,6 +1127,7 @@
                 invoiceTypeFilter: 'All',
                 invoiceSort: 'date_desc',
                 newPayment: { amount: null, date: new Date().toISOString().split('T')[0], note: '' },
+                activityNote: '',
                 customerForm: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' },
                 customerView: 'list',
                 itemView: 'list',
@@ -1161,6 +1185,7 @@
                 return this.calcTotals(this.draft);
             },
             draftPaid() { return (this.draft.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0); },
+            orderedHistory() { return [...(this.draft.history || [])].reverse(); },
             draftBalance() { return this.totals.grandTotal - this.draftPaid; },
             filteredInvoices() {
                 let list = this.invoices.slice();
@@ -1486,7 +1511,7 @@
                     id: r.id, docType: r.doc_type, number: r.number, status: r.status,
                     date: r.issue_date, dueDate: r.due_date, poNumber: r.po_number || '',
                     currency: r.currency || 'GBP', customer: r.customer_snapshot || null,
-                    items: r.items || [], payments: r.payments || [],
+                    items: r.items || [], payments: r.payments || [], history: r.history || [],
                     globalDiscount: Number(r.global_discount) || 0, taxRate: Number(r.tax_rate) || 0,
                     taxMode: r.tax_mode || 'exclusive',
                     shippingCost: Number(r.shipping_cost) || 0,
@@ -1503,7 +1528,7 @@
                     currency: inv.currency || 'GBP',
                     customer_id: (inv.customer && this.isUuid(inv.customer.id)) ? inv.customer.id : null,
                     customer_snapshot: inv.customer || null,
-                    items: cleanItems, payments: inv.payments || [],
+                    items: cleanItems, payments: inv.payments || [], history: inv.history || [],
                     global_discount: inv.globalDiscount || 0, tax_rate: inv.taxRate || 0,
                     tax_mode: inv.taxMode || 'exclusive',
                     shipping_cost: inv.shippingCost || 0, tip: 0,
@@ -1550,6 +1575,7 @@
                     notes: co.defaultNotes || '', terms: co.defaultTerms || '',
                     customer: null, status: 'Draft', currency: co.defaultCurrency || 'GBP',
                     globalDiscount: 0, taxMode: this.lastTaxMode || 'exclusive', shippingCost: 0, payments: [],
+                    history: [ { ts: new Date().toISOString(), type: 'created', text: 'Document created' } ],
                     items: [ { name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false } ]
                 };
             },
@@ -1725,24 +1751,59 @@
             onDocTypeChange() {
                 if (!this.editingExisting) this.draft.number = this.generateNumber(this.draft.docType);
             },
+            addHistory(type, text) {
+                if (!this.draft.history) this.draft.history = [];
+                this.draft.history.push({ ts: new Date().toISOString(), type, text });
+            },
+            async changeStatus(newStatus) {
+                if ((this.draft.status || 'Draft') === newStatus) return;
+                this.draft.status = newStatus;
+                // For a brand-new, unsaved document just set the status locally; it saves with the doc.
+                if (!this.isUuid(this.draft.id)) return;
+                const labels = { Draft: 'Reverted to draft', Sent: 'Marked as sent', Paid: 'Marked as paid', Cancelled: 'Marked as cancelled' };
+                const types = { Draft: 'status', Sent: 'sent', Paid: 'paid', Cancelled: 'cancelled' };
+                this.addHistory(types[newStatus] || 'status', labels[newStatus] || ('Status changed to ' + newStatus));
+                await this.persistDraft();
+            },
+            async addActivityNote() {
+                const text = (this.activityNote || '').trim();
+                if (!text) return;
+                this.addHistory('note', text);
+                this.activityNote = '';
+                await this.persistDraft();
+            },
+            historyIcon(type) {
+                return { created: '📝', sent: '📤', converted: '🔄', payment: '💷', payment_removed: '➖', paid: '✅', cancelled: '🚫', status: '🏷️', note: '🗒️' }[type] || '•';
+            },
+            formatHistoryTime(ts) {
+                try { return new Date(ts).toLocaleString(); } catch (e) { return ts; }
+            },
             async recordPayment() {
                 const amt = parseFloat(this.newPayment.amount);
                 if (!amt || amt <= 0) return alert("Enter a valid payment amount.");
                 if (!this.draft.payments) this.draft.payments = [];
                 this.draft.payments.push({ amount: amt, date: this.newPayment.date || new Date().toISOString().split('T')[0], note: this.newPayment.note || '' });
+                const wasPaid = this.draft.status === 'Paid';
                 if (this.draftBalance <= 0.001) this.draft.status = 'Paid';
                 else if (this.draft.status === 'Draft') this.draft.status = 'Sent';
+                this.addHistory('payment', 'Payment of ' + this.getCurrencySymbol(this.draft.currency) + amt.toFixed(2) + ' recorded');
+                if (this.draft.status === 'Paid' && !wasPaid) this.addHistory('paid', 'Marked as fully paid');
                 this.newPayment = { amount: null, date: new Date().toISOString().split('T')[0], note: '' };
                 await this.persistDraft();
             },
             async removePayment(index) {
+                if (!confirm('Remove this payment? This cannot be undone.')) return;
+                const removed = this.draft.payments[index];
+                const amt = removed ? (parseFloat(removed.amount) || 0) : 0;
                 this.draft.payments.splice(index, 1);
                 if (this.draftBalance > 0.001 && this.draft.status === 'Paid') this.draft.status = 'Sent';
+                this.addHistory('payment_removed', 'Payment of ' + this.getCurrencySymbol(this.draft.currency) + amt.toFixed(2) + ' removed');
                 await this.persistDraft();
             },
             convertToInvoice(doc) {
                 const copy = JSON.parse(JSON.stringify(doc));
-                copy.id = Date.now();
+                // Convert in place: keep the same record id so saving UPDATES this document
+                // (the quote becomes an invoice) instead of creating a duplicate.
                 copy.docType = 'invoice';
                 copy.number = this.generateNumber('invoice');
                 copy.status = 'Draft';
@@ -1750,8 +1811,10 @@
                 const today = new Date().toISOString().split('T')[0];
                 copy.date = today; copy.dueDate = today;
                 delete copy.totals;
+                if (!copy.history) copy.history = [];
+                copy.history.push({ ts: new Date().toISOString(), type: 'converted', text: 'Converted from quote to invoice' });
                 this.draft = copy;
-                this.editingExisting = false;
+                this.editingExisting = this.isUuid(copy.id);
                 this.activeTab = 'create';
             },
             newInvoice() {
@@ -1782,6 +1845,7 @@
                 if(this.draft.taxMode === undefined) this.draft.taxMode = 'exclusive';
                 (this.draft.items || []).forEach(it => { if (it.tax === undefined) it.tax = 0; });
                 if(!this.draft.payments) this.draft.payments = [];
+                if(!this.draft.history) this.draft.history = [];
                 if(!this.draft.docType) this.draft.docType = 'invoice';
                 if(!this.draft.currency) this.draft.currency = 'GBP';
                 this.syncTimeFields();
