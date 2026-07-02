@@ -171,6 +171,7 @@
                         <button @click="activeTab = 'customers'; customerView = 'list'" :class="{'bg-slate-800 text-white': activeTab === 'customers', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'customers'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Customers</button>
                         <button @click="activeTab = 'items'; itemView = 'list'" :class="{'bg-slate-800 text-white': activeTab === 'items', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'items'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Saved Items</button>
                         <button @click="activeTab = 'branding'" :class="{'bg-slate-800 text-white': activeTab === 'branding', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'branding'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Branding</button>
+                        <button @click="activeTab = 'recurring'; recurringView = 'list'" :class="{'bg-slate-800 text-white': activeTab === 'recurring', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'recurring'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Recurring<span v-if="dueTemplates.length" class="ml-1.5 inline-flex items-center justify-center bg-amber-500 text-white text-[10px] font-bold rounded-full h-4 min-w-4 px-1">{{ dueTemplates.length }}</span></button>
                         <button @click="activeTab = 'settings'" :class="{'bg-slate-800 text-white': activeTab === 'settings', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'settings'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Company Settings</button>
                         <button @click="activeTab = 'account'" :class="{'bg-slate-800 text-white': activeTab === 'account', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'account'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap border border-slate-700 md:ml-2 mt-1 md:mt-0">Account</button>
                     </nav>
@@ -446,7 +447,7 @@
                         </div>
                     </div>
 
-                    <div class="mb-8 overflow-x-auto">
+                    <div class="mb-8 overflow-x-auto sm:overflow-visible">
                         <table class="w-full text-left border-collapse min-w-[640px]">
                             <thead>
                                 <tr class="text-sm uppercase pdf-bold-row" :style="{ backgroundColor: 'var(--brand)', color: 'var(--brand-text)' }">
@@ -593,6 +594,48 @@
                     </div>
                 </div>
 
+                <div v-if="draft.docType === 'invoice' && draft.repeat" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-6 max-w-2xl">
+                    <div class="flex items-center justify-between flex-wrap gap-3">
+                        <div>
+                            <h3 class="text-lg font-semibold flex items-center gap-2">🔁 Repeat this invoice</h3>
+                            <p class="text-xs text-slate-500 mt-1">Turn this into a recurring schedule that creates a new invoice automatically each period.</p>
+                        </div>
+                        <button type="button" @click="toggleRepeat" :class="draft.repeat.enabled ? 'bg-indigo-600' : 'bg-slate-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0">
+                            <span :class="draft.repeat.enabled ? 'translate-x-6' : 'translate-x-1'" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"></span>
+                        </button>
+                    </div>
+                    <div v-if="draft.repeat.enabled" class="mt-5 pt-5 border-t border-slate-100 space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-1">Frequency</label>
+                                <select v-model="draft.repeat.frequency" @change="suggestRepeatStart" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="quarterly">Quarterly</option>
+                                    <option value="yearly">Yearly</option>
+                                    <option value="custom">Custom…</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-1">Next invoice date</label>
+                                <input type="date" v-model="draft.repeat.startDate" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
+                        </div>
+                        <div v-if="draft.repeat.frequency === 'custom'" class="flex gap-2 items-end">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-1">Every</label>
+                                <input type="number" min="1" v-model.number="draft.repeat.customInterval" @change="suggestRepeatStart" class="w-24 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
+                            <select v-model="draft.repeat.customUnit" @change="suggestRepeatStart" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                                <option value="days">days</option>
+                                <option value="weeks">weeks</option>
+                                <option value="months">months</option>
+                            </select>
+                        </div>
+                        <p class="text-xs text-slate-500 bg-slate-50 rounded-lg p-3">This invoice covers the current period. The schedule will create the <span class="font-medium">next</span> invoice on the date above, then repeat. Manage or pause it any time on the <span class="font-medium">Recurring</span> page.</p>
+                    </div>
+                </div>
+
                 <div v-if="editingExisting" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-6 max-w-2xl">
                     <h3 class="text-lg font-semibold mb-1">Payments</h3>
                     <p class="text-sm text-slate-500 mb-4">Record full or partial payments. The balance and status update automatically.</p>
@@ -682,7 +725,29 @@
             </div>
 
             <div v-show="activeTab === 'invoices'">
-                <h2 class="text-3xl font-semibold mb-6">My Documents</h2>
+                <h2 class="text-3xl font-semibold mb-6">My Invoices</h2>
+
+                <div v-if="overdueInvoices.length" class="bg-red-50 border border-red-200 rounded-xl p-5 mb-6">
+                    <div class="flex items-center justify-between flex-wrap gap-3 mb-3">
+                        <div>
+                            <h3 class="font-semibold text-red-800">{{ overdueInvoices.length }} overdue invoice{{ overdueInvoices.length > 1 ? 's' : '' }} — {{ getCurrencySymbol(overdueInvoices[0].currency) }}{{ overdueOutstanding.toFixed(2) }} outstanding</h3>
+                            <p class="text-sm text-red-700 mt-0.5">Past their due date and not fully paid. Send a reminder and log it below.</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div v-for="inv in overdueInvoices" :key="inv.id" class="flex items-center justify-between gap-3 bg-white rounded-lg px-4 py-2.5 border border-red-100 flex-wrap">
+                            <div class="min-w-0">
+                                <span class="font-medium text-slate-800">#{{ inv.number }}</span>
+                                <span class="text-slate-500"> · {{ inv.customer ? inv.customer.name : '—' }}</span>
+                                <span class="text-red-600 font-medium"> · {{ daysOverdue(inv) }} day{{ daysOverdue(inv) === 1 ? '' : 's' }} overdue</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="font-semibold text-slate-700">{{ getCurrencySymbol(inv.currency) }}{{ invoiceOutstanding(inv).toFixed(2) }}</span>
+                                <button @click="openReminder(inv)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm transition-colors">Reminder</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="flex flex-wrap items-center gap-3 mb-5">
                     <input type="text" v-model="invoiceSearch" placeholder="Search by # or customer..." class="flex-1 min-w-[200px] border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
@@ -757,6 +822,21 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <div v-if="reminderModal.open" class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50" @click.self="reminderModal.open = false">
+                <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-lg font-semibold">Payment reminder</h3>
+                        <button @click="reminderModal.open = false" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+                    </div>
+                    <p class="text-xs text-slate-500 mb-4">The app can't email this yet — copy the text into your email, then log that you sent it so it's recorded in the invoice's history.</p>
+                    <textarea v-model="reminderModal.text" rows="9" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none mb-4"></textarea>
+                    <div class="flex gap-2 justify-end flex-wrap">
+                        <button @click="copyReminder" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors">{{ reminderModal.copied ? 'Copied!' : 'Copy text' }}</button>
+                        <button @click="logReminderSent" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors">Log reminder as sent</button>
+                    </div>
                 </div>
             </div>
 
@@ -961,6 +1041,165 @@
                 </div>
             </div>
 
+            <div v-show="activeTab === 'recurring'">
+                <!-- LIST VIEW -->
+                <div v-if="recurringView === 'list'">
+                    <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+                        <h2 class="text-3xl font-semibold">Recurring Invoices</h2>
+                        <p class="text-sm text-slate-500">Set up recurring on an invoice using <span class="font-medium">🔁 Repeat this invoice</span>. Manage your schedules here.</p>
+                    </div>
+
+                    <div v-if="dueTemplates.length" class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+                        <div class="flex items-center justify-between flex-wrap gap-3">
+                            <div>
+                                <h3 class="font-semibold text-amber-800">{{ dueTemplates.length }} recurring invoice{{ dueTemplates.length > 1 ? 's' : '' }} due</h3>
+                                <p class="text-sm text-amber-700 mt-0.5">Each will be created as a Sent invoice. If a schedule missed several periods, one invoice is generated to catch up.</p>
+                            </div>
+                            <button @click="generateAllDue" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-colors whitespace-nowrap">Generate all due</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                        <table class="w-full text-left min-w-[680px]">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-sm text-slate-500">
+                                <tr>
+                                    <th class="p-4 font-semibold">Name</th>
+                                    <th class="p-4 font-semibold">Customer</th>
+                                    <th class="p-4 font-semibold">Frequency</th>
+                                    <th class="p-4 font-semibold">Next invoice</th>
+                                    <th class="p-4 font-semibold">Status</th>
+                                    <th class="p-4 font-semibold text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr v-if="recurringTemplates.length === 0">
+                                    <td colspan="6" class="p-8 text-center text-slate-400">No recurring schedules yet. Create one from an invoice with "🔁 Repeat this invoice".</td>
+                                </tr>
+                                <tr v-for="t in recurringTemplates" :key="t.id" class="hover:bg-slate-50">
+                                    <td class="p-4 font-medium text-slate-800">{{ t.name || '(untitled)' }}</td>
+                                    <td class="p-4 text-slate-600">{{ t.customer ? t.customer.name : '—' }}</td>
+                                    <td class="p-4 text-slate-600">{{ recurFrequencyLabel(t) }}</td>
+                                    <td class="p-4"><span :class="isTemplateDue(t) ? 'text-red-600 font-semibold' : 'text-slate-600'">{{ t.nextRun }}</span></td>
+                                    <td class="p-4">
+                                        <button @click="toggleTemplateActive(t)" :class="t.active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'" class="px-3 py-1 rounded-full text-xs font-semibold transition-colors">{{ t.active ? 'Active' : 'Paused' }}</button>
+                                    </td>
+                                    <td class="p-4 text-right space-x-3 whitespace-nowrap">
+                                        <button @click="editTemplate(t)" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Edit</button>
+                                        <button @click="deleteTemplate(t)" class="text-red-500 hover:text-red-700 text-sm font-medium">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- FORM VIEW -->
+                <div v-else class="max-w-3xl mx-auto">
+                    <div class="flex items-center gap-4 mb-6">
+                        <button @click="backToRecurring" class="flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors">&larr; Back</button>
+                        <h2 class="text-3xl font-semibold">{{ editingTemplate !== null ? 'Edit Schedule' : 'New Schedule' }}</h2>
+                    </div>
+
+                    <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200 space-y-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 mb-1">Schedule name (optional)</label>
+                            <input v-model="recurringForm.name" placeholder="e.g. Monthly retainer — Acme Ltd" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 mb-1">Customer <span class="text-red-500">*</span></label>
+                            <select v-model="recurringForm.customer" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                                <option :value="null">— choose a customer —</option>
+                                <option v-for="c in customers" :key="c.id" :value="c">{{ c.name }}</option>
+                            </select>
+                            <p v-if="customers.length === 0" class="text-xs text-slate-400 mt-1">No customers yet — add one on the Customers page first.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-1">Frequency</label>
+                                <select v-model="recurringForm.frequency" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="quarterly">Quarterly</option>
+                                    <option value="yearly">Yearly</option>
+                                    <option value="custom">Custom…</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-1">Start date</label>
+                                <input type="date" v-model="recurringForm.startDate" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div v-if="recurringForm.frequency === 'custom'" class="flex gap-2 items-end">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-1">Every</label>
+                                <input type="number" min="1" v-model.number="recurringForm.customInterval" class="w-24 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
+                            <select v-model="recurringForm.customUnit" class="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
+                                <option value="days">days</option>
+                                <option value="weeks">weeks</option>
+                                <option value="months">months</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-slate-600 mb-2">Line items</label>
+                            <div v-for="(it, i) in recurringForm.items" :key="i" class="flex gap-2 mb-2 flex-wrap items-center">
+                                <div class="relative flex-1 min-w-[140px]">
+                                    <input v-model="it.name" @focus="it.showSuggestions = true" @blur="hideTemplateSuggestions(i)" placeholder="Description" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <div v-if="it.showSuggestions && it.name && getMatches(it.name).length" class="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto">
+                                        <ul class="py-1">
+                                            <li v-for="match in getMatches(it.name)" @mousedown.prevent="selectTemplateMatch(i, match)" class="px-4 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0">
+                                                <div class="font-medium text-sm text-slate-800">{{ match.name }}</div>
+                                                <div class="text-xs text-slate-500">{{ getCurrencySymbol(recurringForm.currency) }}{{ (Number(match.price) || 0).toFixed(2) }}</div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <input type="number" v-model.number="it.qty" placeholder="Qty" class="w-16 border rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-indigo-500 outline-none no-spin">
+                                <input type="text" v-model="it.unit" placeholder="unit" class="w-16 border rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <input type="number" v-model.number="it.price" placeholder="Price" class="w-24 border rounded-lg px-2 py-2 text-sm text-right focus:ring-2 focus:ring-indigo-500 outline-none no-spin">
+                                <input type="number" v-model.number="it.tax" placeholder="Tax%" class="w-16 border rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-indigo-500 outline-none no-spin">
+                                <button @click="removeTemplateItem(i)" class="text-red-500 hover:text-red-700 px-1 font-bold">✕</button>
+                            </div>
+                            <button @click="addTemplateItem" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mt-1">+ Add item</button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-1">Notes</label>
+                                <textarea v-model="recurringForm.notes" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-1">Terms</label>
+                                <textarea v-model="recurringForm.terms" rows="2" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 pt-2 border-t border-slate-100">
+                            <button @click="saveTemplate" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors mt-4">Save Schedule</button>
+                            <button @click="backToRecurring" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-lg font-medium transition-colors mt-4">Cancel</button>
+                        </div>
+                    </div>
+
+                    <div v-if="editingTemplate !== null && recurringForm.history && recurringForm.history.length" class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200 mt-6">
+                        <h3 class="text-lg font-semibold mb-1">Schedule History</h3>
+                        <p class="text-xs text-slate-400 mb-4">A record of changes to this schedule and invoices it has generated. Activity history, not a tamper-proof audit log.</p>
+                        <ul class="space-y-3 max-h-72 overflow-y-auto pr-2">
+                            <li v-for="(ev, i) in [...recurringForm.history].reverse()" :key="i" class="flex items-start gap-3 text-sm">
+                                <span class="text-lg leading-none">{{ historyIcon(ev.type) }}</span>
+                                <div>
+                                    <div class="text-slate-700">{{ ev.text }}</div>
+                                    <div class="text-xs text-slate-400">{{ formatHistoryTime(ev.ts) }}</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <div v-show="activeTab === 'settings'" class="max-w-3xl mx-auto">
                 <h2 class="text-3xl font-semibold mb-6">Company Settings</h2>
                 <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200 space-y-6">
@@ -1128,6 +1367,11 @@
                 invoiceSort: 'date_desc',
                 newPayment: { amount: null, date: new Date().toISOString().split('T')[0], note: '' },
                 activityNote: '',
+                reminderModal: { open: false, inv: null, text: '', copied: false },
+                recurringTemplates: [],
+                recurringView: 'list',
+                editingTemplate: null,
+                recurringForm: null,
                 customerForm: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' },
                 customerView: 'list',
                 itemView: 'list',
@@ -1186,6 +1430,18 @@
             },
             draftPaid() { return (this.draft.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0); },
             orderedHistory() { return [...(this.draft.history || [])].reverse(); },
+            dueTemplates() {
+                const today = new Date().toISOString().split('T')[0];
+                const p = s => { const [y,m,d] = String(s).split('-').map(Number); return new Date(Date.UTC(y, m-1, d)); };
+                return (this.recurringTemplates || []).filter(t => t.active !== false && t.nextRun && p(t.nextRun) <= p(today));
+            },
+            overdueInvoices() {
+                return (this.invoices || []).filter(inv => inv.docType === 'invoice' && this.effectiveStatus(inv) === 'Overdue')
+                    .sort((a, b) => this.daysOverdue(b) - this.daysOverdue(a));
+            },
+            overdueOutstanding() {
+                return this.overdueInvoices.reduce((s, inv) => s + this.invoiceOutstanding(inv), 0);
+            },
             draftBalance() { return this.totals.grandTotal - this.draftPaid; },
             filteredInvoices() {
                 let list = this.invoices.slice();
@@ -1557,6 +1813,11 @@
                     this.savedItems = (itemRes.data || []).map(r => this.rowToItem(r));
                     this.invoices = (invRes.data || []).map(r => this.rowToInvoice(r));
                     this.draft = this.getEmptyDraft();
+                    // Recurring templates — best effort; the table may not exist until the setup SQL is run.
+                    try {
+                        const recRes = await supabaseClient.from('recurring_templates').select('*').order('created_at', { ascending: false });
+                        if (!recRes.error) this.recurringTemplates = (recRes.data || []).map(r => this.rowToTemplate(r));
+                    } catch (recErr) { console.warn('Recurring templates unavailable (run recurring_setup.sql):', recErr); }
                 } catch (e) {
                     console.error("Failed to load data:", e);
                     alert("Could not load your data: " + (e.message || e));
@@ -1576,6 +1837,7 @@
                     customer: null, status: 'Draft', currency: co.defaultCurrency || 'GBP',
                     globalDiscount: 0, taxMode: this.lastTaxMode || 'exclusive', shippingCost: 0, payments: [],
                     history: [ { ts: new Date().toISOString(), type: 'created', text: 'Document created' } ],
+                    repeat: { enabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: today, _created: false },
                     items: [ { name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false } ]
                 };
             },
@@ -1707,17 +1969,60 @@
             calculateRowTotal(item) { const q = Number(item.qty) || 0; const p = Number(item.price) || 0; const d = Number(item.discount) || 0; const t = q * p; return t - (t * (d / 100)); },
             
             async saveInvoice() {
+                const repeat = this.draft.repeat ? JSON.parse(JSON.stringify(this.draft.repeat)) : null;
+                const invSnapshot = JSON.parse(JSON.stringify(this.draft));
                 const ok = await this.persistDraft();
                 if (!ok) return;
+                if (repeat && repeat.enabled && !repeat._created) {
+                    try { await this.createScheduleFromInvoice(invSnapshot, repeat); }
+                    catch (e) { console.error('Schedule create failed:', e); alert('Invoice saved, but the recurring schedule could not be created: ' + (e.message || e)); }
+                }
                 this.draft = this.getEmptyDraft();
                 this.editingExisting = false;
                 this.activeTab = 'invoices';
+            },
+            recurFreqShort(r) {
+                if (r.frequency === 'custom') return 'every ' + (r.customInterval || 1) + ' ' + (r.customUnit || 'months');
+                return { weekly: 'weekly', monthly: 'monthly', quarterly: 'quarterly', yearly: 'yearly' }[r.frequency] || r.frequency;
+            },
+            suggestRepeatStart() {
+                // Option B: the invoice being created covers the current period, so the schedule
+                // starts NEXT period — one frequency-step after this invoice's date.
+                const base = this.draft.date || new Date().toISOString().split('T')[0];
+                const r = this.draft.repeat;
+                this.draft.repeat.startDate = this.recurAdvance(base, { frequency: r.frequency, customInterval: r.customInterval, customUnit: r.customUnit, startDate: base });
+            },
+            toggleRepeat() {
+                this.draft.repeat.enabled = !this.draft.repeat.enabled;
+                if (this.draft.repeat.enabled) this.suggestRepeatStart();
+            },
+            async createScheduleFromInvoice(inv, repeat) {
+                const start = repeat.startDate || new Date().toISOString().split('T')[0];
+                const tpl = {
+                    id: Date.now(),
+                    name: (inv.customer ? inv.customer.name : 'Recurring') + ' — ' + this.recurFreqShort(repeat),
+                    customer: inv.customer || null,
+                    items: (inv.items || []).map(i => ({ name: i.name || '', qty: i.qty || 0, unit: i.unit || '', price: i.price || 0, discount: i.discount || 0, tax: i.tax || 0 })),
+                    currency: inv.currency || 'GBP',
+                    globalDiscount: inv.globalDiscount || 0, taxMode: inv.taxMode || 'exclusive', shippingCost: inv.shippingCost || 0,
+                    notes: inv.notes || '', terms: inv.terms || '',
+                    frequency: repeat.frequency || 'monthly', customInterval: repeat.customInterval || 1, customUnit: repeat.customUnit || 'months',
+                    startDate: start, nextRun: start, active: true, lastGenerated: null, generatedCount: 0,
+                    history: [ { ts: new Date().toISOString(), type: 'created', text: 'Schedule created from invoice #' + (inv.number || '') } ]
+                };
+                const row = this.templateToRow(tpl);
+                const { data, error } = await supabaseClient.from('recurring_templates').insert(row).select().single();
+                if (error) throw error;
+                this.recurringTemplates.unshift(this.rowToTemplate(data));
+                alert('Recurring schedule created. You can manage or pause it on the Recurring page.');
             },
             async persistDraft() {
                 // Insert (new) or update (existing) the current draft in the database.
                 const inv = JSON.parse(JSON.stringify(this.draft));
                 if (!inv.status) inv.status = 'Draft';
                 if (!inv.docType) inv.docType = 'invoice';
+                // `repeat` is a UI-only field (not a DB column); keep it so re-assigning draft doesn't drop it.
+                const priorRepeat = this.draft.repeat || { enabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: inv.date, _created: false };
                 const row = this.invoiceToRow(inv);
                 const existing = this.isUuid(inv.id) ? this.invoices.find(i => i.id === inv.id) : null;
                 try {
@@ -1728,6 +2033,7 @@
                         const idx = this.invoices.findIndex(i => i.id === inv.id);
                         if (idx >= 0) this.invoices[idx] = mapped;
                         this.draft = JSON.parse(JSON.stringify(mapped));
+                        this.draft.repeat = priorRepeat;
                     } else {
                         const { data, error } = await supabaseClient.from('invoices').insert(row).select().single();
                         if (error) throw error;
@@ -1773,7 +2079,7 @@
                 await this.persistDraft();
             },
             historyIcon(type) {
-                return { created: '📝', sent: '📤', converted: '🔄', payment: '💷', payment_removed: '➖', paid: '✅', cancelled: '🚫', status: '🏷️', note: '🗒️' }[type] || '•';
+                return { created: '📝', sent: '📤', converted: '🔄', payment: '💷', payment_removed: '➖', paid: '✅', cancelled: '🚫', status: '🏷️', recurring: '🔁', reminder: '📨', edited: '✏️', paused: '⏸️', resumed: '▶️', generated: '🧾', note: '🗒️' }[type] || '•';
             },
             formatHistoryTime(ts) {
                 try { return new Date(ts).toLocaleString(); } catch (e) { return ts; }
@@ -1822,6 +2128,244 @@
                 this.editingExisting = false;
                 this.activeTab = 'create';
             },
+
+            // ================= RECURRING TEMPLATES =================
+            recurDaysInMonth(y, m) { return new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); },
+            recurParse(s) { const [y, m, d] = String(s).split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); },
+            recurISO(d) { return d.toISOString().split('T')[0]; },
+            recurAdvance(nextRunStr, tpl) {
+                const d = this.recurParse(nextRunStr);
+                const anchorDay = Number(String(tpl.startDate).split('-')[2]);
+                let unit, n;
+                switch (tpl.frequency) {
+                    case 'weekly':    unit = 'days';   n = 7;  break;
+                    case 'monthly':   unit = 'months'; n = 1;  break;
+                    case 'quarterly': unit = 'months'; n = 3;  break;
+                    case 'yearly':    unit = 'months'; n = 12; break;
+                    case 'custom':    unit = tpl.customUnit; n = Number(tpl.customInterval) || 1; break;
+                    default:          unit = 'months'; n = 1;
+                }
+                if (unit === 'days')  { d.setUTCDate(d.getUTCDate() + n);     return this.recurISO(d); }
+                if (unit === 'weeks') { d.setUTCDate(d.getUTCDate() + n * 7); return this.recurISO(d); }
+                let y = d.getUTCFullYear(), m = d.getUTCMonth() + n;
+                y += Math.floor(m / 12); m = ((m % 12) + 12) % 12;
+                const day = Math.min(anchorDay, this.recurDaysInMonth(y, m));
+                return this.recurISO(new Date(Date.UTC(y, m, day)));
+            },
+            recurCatchUp(tpl, todayStr) {
+                let nr = tpl.nextRun;
+                let due = false;
+                if (this.recurParse(nr) <= this.recurParse(todayStr)) {
+                    due = true;
+                    let guard = 0;
+                    while (this.recurParse(nr) <= this.recurParse(todayStr) && guard < 2000) { nr = this.recurAdvance(nr, tpl); guard++; }
+                }
+                return { due, newNextRun: nr };
+            },
+            rowToTemplate(r) {
+                return {
+                    id: r.id, name: r.name || '', customer: r.customer_snapshot || null, items: r.items || [],
+                    currency: r.currency || 'GBP', globalDiscount: Number(r.global_discount) || 0,
+                    taxMode: r.tax_mode || 'exclusive', shippingCost: Number(r.shipping_cost) || 0,
+                    notes: r.notes || '', terms: r.terms || '',
+                    frequency: r.frequency || 'monthly', customInterval: r.custom_interval || 1, customUnit: r.custom_unit || 'months',
+                    startDate: r.start_date, nextRun: r.next_run, active: r.active !== false,
+                    lastGenerated: r.last_generated || null, generatedCount: r.generated_count || 0,
+                    history: r.history || []
+                };
+            },
+            templateToRow(t) {
+                const cleanItems = (t.items || []).map(i => ({ name: i.name || '', qty: i.qty || 0, unit: i.unit || '', price: i.price || 0, discount: i.discount || 0, tax: i.tax || 0 }));
+                return {
+                    name: t.name || null, customer_snapshot: t.customer || null, items: cleanItems,
+                    currency: t.currency || 'GBP', global_discount: t.globalDiscount || 0,
+                    tax_mode: t.taxMode || 'exclusive', shipping_cost: t.shippingCost || 0,
+                    notes: t.notes || null, terms: t.terms || null,
+                    frequency: t.frequency || 'monthly', custom_interval: t.customInterval || 1, custom_unit: t.customUnit || 'months',
+                    start_date: t.startDate, next_run: t.nextRun, active: t.active !== false,
+                    last_generated: t.lastGenerated || null, generated_count: t.generatedCount || 0,
+                    history: t.history || [],
+                    updated_at: new Date().toISOString()
+                };
+            },
+            getEmptyTemplate() {
+                const today = new Date().toISOString().split('T')[0];
+                const co = this.company || {};
+                return {
+                    id: Date.now(), name: '', customer: null,
+                    items: [ { name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false } ],
+                    currency: co.defaultCurrency || 'GBP', globalDiscount: 0, taxMode: this.lastTaxMode || 'exclusive', shippingCost: 0,
+                    notes: co.defaultNotes || '', terms: co.defaultTerms || '',
+                    frequency: 'monthly', customInterval: 1, customUnit: 'months',
+                    startDate: today, nextRun: today, active: true, lastGenerated: null, generatedCount: 0,
+                    history: [ { ts: new Date().toISOString(), type: 'created', text: 'Schedule created' } ]
+                };
+            },
+            newTemplate() { this.recurringForm = this.getEmptyTemplate(); this.editingTemplate = null; this.recurringView = 'form'; },
+            editTemplate(t) { this.recurringForm = JSON.parse(JSON.stringify(t)); this.editingTemplate = this.recurringTemplates.indexOf(t); this.recurringView = 'form'; },
+            backToRecurring() { this.recurringView = 'list'; this.recurringForm = null; this.editingTemplate = null; },
+            addTemplateItem() { this.recurringForm.items.push({ name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false }); },
+            removeTemplateItem(i) { this.recurringForm.items.splice(i, 1); },
+            selectTemplateMatch(i, match) {
+                this.recurringForm.items[i].name = match.name;
+                this.recurringForm.items[i].price = match.price;
+                this.recurringForm.items[i].showSuggestions = false;
+            },
+            hideTemplateSuggestions(i) { setTimeout(() => { if (this.recurringForm && this.recurringForm.items[i]) this.recurringForm.items[i].showSuggestions = false; }, 200); },
+            recurFrequencyLabel(t) {
+                if (t.frequency === 'custom') return 'Every ' + (t.customInterval || 1) + ' ' + (t.customUnit || 'months');
+                return { weekly: 'Weekly', monthly: 'Monthly', quarterly: 'Quarterly', yearly: 'Yearly' }[t.frequency] || t.frequency;
+            },
+            isTemplateDue(t) {
+                const today = new Date().toISOString().split('T')[0];
+                const p = s => { const [y,m,d] = String(s).split('-').map(Number); return new Date(Date.UTC(y, m-1, d)); };
+                return t.active !== false && t.nextRun && p(t.nextRun) <= p(today);
+            },
+            async saveTemplate() {
+                const t = this.recurringForm;
+                if (!t.customer) return alert('Please choose a customer for this recurring schedule.');
+                if (!t.startDate) return alert('Please set a start date.');
+                // On first save, next_run starts at the start date.
+                if (this.editingTemplate === null) t.nextRun = t.startDate;
+                try {
+                    const existing = this.isUuid(t.id) ? this.recurringTemplates.find(x => x.id === t.id) : null;
+                    // Log integrity-relevant changes to the schedule's own history.
+                    if (existing) {
+                        if (!t.history) t.history = [];
+                        const changes = [];
+                        if ((existing.name || '') !== (t.name || '')) changes.push('name');
+                        if (this.recurFrequencyLabel(existing) !== this.recurFrequencyLabel(t)) changes.push('frequency (now ' + this.recurFrequencyLabel(t) + ')');
+                        if ((existing.customer && existing.customer.name) !== (t.customer && t.customer.name)) changes.push('customer');
+                        if (JSON.stringify((existing.items || []).map(i => [i.name, i.qty, i.price, i.tax, i.discount, i.unit])) !== JSON.stringify((t.items || []).map(i => [i.name, i.qty, i.price, i.tax, i.discount, i.unit]))) changes.push('line items');
+                        if (String(existing.startDate) !== String(t.startDate)) changes.push('start date');
+                        changes.forEach(c => t.history.push({ ts: new Date().toISOString(), type: 'edited', text: 'Changed ' + c }));
+                    }
+                    const row = this.templateToRow(t);
+                    if (existing) {
+                        const { data, error } = await supabaseClient.from('recurring_templates').update(row).eq('id', t.id).select().single();
+                        if (error) throw error;
+                        const idx = this.recurringTemplates.findIndex(x => x.id === t.id);
+                        if (idx >= 0) this.recurringTemplates[idx] = this.rowToTemplate(data);
+                    } else {
+                        const { data, error } = await supabaseClient.from('recurring_templates').insert(row).select().single();
+                        if (error) throw error;
+                        this.recurringTemplates.unshift(this.rowToTemplate(data));
+                    }
+                    this.backToRecurring();
+                } catch (e) { console.error('Save template failed:', e); alert('Could not save schedule: ' + (e.message || e)); }
+            },
+            async toggleTemplateActive(t) {
+                t.active = !t.active;
+                if (!t.history) t.history = [];
+                t.history.push({ ts: new Date().toISOString(), type: t.active ? 'resumed' : 'paused', text: t.active ? 'Schedule resumed' : 'Schedule paused' });
+                try {
+                    const { error } = await supabaseClient.from('recurring_templates').update({ active: t.active, history: t.history, updated_at: new Date().toISOString() }).eq('id', t.id);
+                    if (error) throw error;
+                } catch (e) { t.active = !t.active; t.history.pop(); alert('Could not update: ' + (e.message || e)); }
+            },
+            async deleteTemplate(t) {
+                if (!confirm('Delete this recurring schedule? Invoices already generated from it are kept.')) return;
+                const { error } = await supabaseClient.from('recurring_templates').delete().eq('id', t.id);
+                if (error) return alert('Could not delete: ' + error.message);
+                const i = this.recurringTemplates.indexOf(t);
+                if (i >= 0) this.recurringTemplates.splice(i, 1);
+            },
+            async generateFromTemplate(t) {
+                // Build a normal invoice from the template, mark it Sent, note its origin.
+                const today = new Date().toISOString().split('T')[0];
+                const inv = {
+                    id: Date.now(), docType: 'invoice', number: this.generateNumber('invoice'),
+                    date: today, dueDate: today, poNumber: '', status: 'Sent',
+                    customer: t.customer ? JSON.parse(JSON.stringify(t.customer)) : null,
+                    currency: t.currency || 'GBP',
+                    items: JSON.parse(JSON.stringify(t.items || [])),
+                    payments: [],
+                    globalDiscount: t.globalDiscount || 0, taxMode: t.taxMode || 'exclusive', shippingCost: t.shippingCost || 0,
+                    notes: t.notes || '', terms: t.terms || '',
+                    history: [
+                        { ts: new Date().toISOString(), type: 'created', text: 'Document created' },
+                        { ts: new Date().toISOString(), type: 'recurring', text: 'Generated from recurring schedule' + (t.name ? ' "' + t.name + '"' : '') },
+                        { ts: new Date().toISOString(), type: 'sent', text: 'Marked as sent' }
+                    ]
+                };
+                const row = this.invoiceToRow(inv);
+                const { data, error } = await supabaseClient.from('invoices').insert(row).select().single();
+                if (error) throw error;
+                const mapped = this.rowToInvoice(data);
+                this.invoices.unshift(mapped); // so the next generated number increments
+                return mapped;
+            },
+            async generateAllDue() {
+                const today = new Date().toISOString().split('T')[0];
+                const due = this.dueTemplates;
+                if (due.length === 0) return;
+                let count = 0;
+                for (const t of due) {
+                    try {
+                        const created = await this.generateFromTemplate(t);
+                        const res = this.recurCatchUp(t, today);
+                        t.nextRun = res.newNextRun;
+                        t.lastGenerated = today;
+                        t.generatedCount = (t.generatedCount || 0) + 1;
+                        if (!t.history) t.history = [];
+                        t.history.push({ ts: new Date().toISOString(), type: 'generated', text: 'Generated invoice #' + (created ? created.number : '') });
+                        await supabaseClient.from('recurring_templates').update({
+                            next_run: t.nextRun, last_generated: t.lastGenerated, generated_count: t.generatedCount, history: t.history, updated_at: new Date().toISOString()
+                        }).eq('id', t.id);
+                        count++;
+                    } catch (e) { console.error('Generate failed for template', t.id, e); }
+                }
+                if (count > 0) alert(count + ' invoice' + (count > 1 ? 's' : '') + ' generated and marked as Sent. Find them in My Invoices.');
+            },
+
+            // ================= OVERDUE REMINDERS =================
+            invoiceOutstanding(inv) {
+                const total = inv.totals ? inv.totals.grandTotal : 0;
+                return Math.max(0, total - this.amountPaid(inv));
+            },
+            daysOverdue(inv) {
+                if (!inv.dueDate) return 0;
+                const today = new Date().toISOString().split('T')[0];
+                const p = s => { const [y,m,d] = String(s).split('-').map(Number); return Date.UTC(y, m-1, d); };
+                return Math.max(0, Math.floor((p(today) - p(inv.dueDate)) / 86400000));
+            },
+            reminderText(inv) {
+                const cust = inv.customer ? inv.customer.name : 'there';
+                const sym = this.getCurrencySymbol(inv.currency);
+                const amt = this.invoiceOutstanding(inv).toFixed(2);
+                const days = this.daysOverdue(inv);
+                const co = (this.company && this.company.name) ? this.company.name : '';
+                let msg = 'Hi ' + cust + ',\n\n';
+                msg += 'This is a friendly reminder that invoice #' + inv.number + ' for ' + sym + amt + ' was due on ' + inv.dueDate + ' and is now ' + days + ' day' + (days === 1 ? '' : 's') + ' overdue.\n\n';
+                msg += 'We would be grateful if you could arrange payment at your earliest convenience. If you have already paid, please disregard this message.\n\n';
+                msg += 'Thank you' + (co ? (',\n' + co) : '');
+                return msg;
+            },
+            openReminder(inv) {
+                this.reminderModal = { open: true, inv, text: this.reminderText(inv), copied: false };
+            },
+            async copyReminder() {
+                try {
+                    await navigator.clipboard.writeText(this.reminderModal.text);
+                    this.reminderModal.copied = true;
+                    setTimeout(() => { this.reminderModal.copied = false; }, 2000);
+                } catch (e) {
+                    alert('Could not copy automatically. Please select the text and copy it manually.');
+                }
+            },
+            async logReminderSent() {
+                const inv = this.reminderModal.inv;
+                if (!inv) return;
+                if (!inv.history) inv.history = [];
+                inv.history.push({ ts: new Date().toISOString(), type: 'reminder', text: 'Payment reminder sent (' + this.daysOverdue(inv) + ' days overdue)' });
+                try {
+                    const { error } = await supabaseClient.from('invoices').update({ history: inv.history, updated_at: new Date().toISOString() }).eq('id', inv.id);
+                    if (error) throw error;
+                    if (this.draft && this.draft.id === inv.id) this.draft.history = JSON.parse(JSON.stringify(inv.history));
+                    this.reminderModal.open = false;
+                } catch (e) { alert('Could not log the reminder: ' + (e.message || e)); }
+            },
+
             goToCreate() {
                 if (this.activeTab === 'edit' || this.editingExisting) {
                     this.newInvoice();
@@ -1846,6 +2390,7 @@
                 (this.draft.items || []).forEach(it => { if (it.tax === undefined) it.tax = 0; });
                 if(!this.draft.payments) this.draft.payments = [];
                 if(!this.draft.history) this.draft.history = [];
+                if(!this.draft.repeat) this.draft.repeat = { enabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: (this.draft.date || new Date().toISOString().split('T')[0]), _created: false };
                 if(!this.draft.docType) this.draft.docType = 'invoice';
                 if(!this.draft.currency) this.draft.currency = 'GBP';
                 this.syncTimeFields();
