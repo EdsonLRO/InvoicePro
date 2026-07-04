@@ -452,7 +452,7 @@
                             <thead>
                                 <tr class="text-sm uppercase pdf-bold-row" :style="{ backgroundColor: 'var(--brand)', color: 'var(--brand-text)' }">
                                     <th class="p-3 font-semibold rounded-tl-lg min-w-[200px]">Item / Description</th>
-                                    <th class="p-3 w-72 font-semibold text-center">Qty / Unit</th>
+                                    <th class="p-3 w-72 min-w-[180px] font-semibold text-center">Qty / Unit</th>
                                     <th class="p-3 w-32 font-semibold text-center">Price</th>
                                     <th class="p-3 w-24 font-semibold text-center">Disc (%)</th>
                                     <th class="p-3 w-24 font-semibold text-center">Tax (%)</th>
@@ -479,19 +479,21 @@
                                         </div>
                                     </td>
                                     <td class="px-2 py-3 align-top">
-                                        <div class="flex flex-wrap items-center justify-center gap-1 no-print">
-                                            <input type="number" v-model.number="item.qty" :readonly="isHrs(item)" :class="{'bg-slate-50 text-slate-400': isHrs(item)}" title="Quantity" class="no-spin w-20 border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center">
-                                            <select :value="unitSelectValue(item)" @change="onUnitSelect(item, $event.target.value)" title="Unit" class="w-20 border rounded px-1 py-2 text-xs text-slate-600 bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
-                                                <option value="">unit</option>
-                                                <option value="hrs">hrs</option>
-                                                <option value="item">item</option>
-                                                <option value="day">day</option>
-                                                <option value="km">km</option>
-                                                <option value="kg">kg</option>
-                                                <option value="__custom">Custom…</option>
-                                            </select>
-                                            <input v-if="isCustomUnit(item)" type="text" v-model="item.unit" placeholder="type unit" class="w-16 border rounded px-2 py-2 text-xs text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none">
-                                            <div v-if="isHrs(item)" class="flex items-center justify-center gap-1 basis-full mt-1">
+                                        <div class="flex flex-col items-center gap-1 no-print">
+                                            <div class="flex items-center justify-center gap-1">
+                                                <input type="number" v-model.number="item.qty" :readonly="isHrs(item)" :class="{'bg-slate-50 text-slate-400': isHrs(item)}" title="Quantity" class="no-spin w-20 border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center">
+                                                <select :value="unitSelectValue(item)" @change="onUnitSelect(item, $event.target.value)" title="Unit" class="w-20 border rounded px-1 py-2 text-xs text-slate-600 bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                                                    <option value="">unit</option>
+                                                    <option value="hrs">hrs</option>
+                                                    <option value="item">item</option>
+                                                    <option value="day">day</option>
+                                                    <option value="km">km</option>
+                                                    <option value="kg">kg</option>
+                                                    <option value="__custom">Custom…</option>
+                                                </select>
+                                            </div>
+                                            <input v-if="isCustomUnit(item)" type="text" v-model="item.unit" placeholder="type unit" class="w-40 border rounded px-2 py-2 text-xs text-slate-600 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                            <div v-if="isHrs(item)" class="flex items-center justify-center gap-1">
                                                 <input type="number" min="0" v-model.number="item._h" @input="applyTime(item)" placeholder="h" title="Hours" class="no-spin w-14 border rounded px-1 py-2 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none">
                                                 <span class="text-slate-500 font-bold text-sm">:</span>
                                                 <input type="number" min="0" max="59" v-model.number="item._m" @input="applyTime(item)" placeholder="m" title="Minutes" class="no-spin w-14 border rounded px-1 py-2 text-xs text-center focus:ring-2 focus:ring-indigo-500 outline-none">
