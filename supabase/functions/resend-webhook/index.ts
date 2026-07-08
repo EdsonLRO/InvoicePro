@@ -91,8 +91,10 @@ function eventText(type: string, to: string | null): string {
     "email.delivery_delayed": `Email delivery delayed${suffix}`,
     "email.bounced": `Email bounced${suffix}`,
     "email.complained": `Spam complaint received${suffix}`,
+    "email.failed": `Email failed${suffix}`,
     "email.opened": `Email opened${suffix}`,
     "email.clicked": `Email link clicked${suffix}`,
+    "email.received": `Email received${suffix}`,
   };
   return map[type] || `Email event: ${type}${suffix}`;
 }
@@ -168,6 +170,7 @@ Deno.serve(async (req) => {
     "email.delivery_delayed",
     "email.bounced",
     "email.complained",
+    "email.failed",
   ]);
   if (historyTypes.has(type)) {
     const { data: inv, error: invError } = await admin.from("invoices")

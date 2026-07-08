@@ -682,6 +682,15 @@
                         <h3 class="text-lg font-semibold">Activity History</h3>
                     </div>
                     <p class="text-xs text-slate-400 mb-4">A record of what has happened to this document, for your convenience. This is an activity history, not a tamper-proof audit log.</p>
+                    <div v-if="emailStatusFor(draft.id)" class="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+                        <div class="flex items-center justify-between gap-3 flex-wrap">
+                            <div>
+                                <div class="font-semibold text-slate-700">Email status</div>
+                                <div class="text-slate-500">{{ emailStatusFor(draft.id).detail }}</div>
+                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold" :class="emailStatusClass(emailStatusFor(draft.id).state)">{{ emailStatusFor(draft.id).label }}</span>
+                        </div>
+                    </div>
 
                     <ul v-if="draft.history && draft.history.length" class="space-y-3 mb-5 max-h-72 overflow-y-auto pr-2">
                         <li v-for="(ev, i) in orderedHistory" :key="i" class="flex items-start gap-3 text-sm">
@@ -812,6 +821,9 @@
                                 </td>
                                 <td class="p-4">
                                     <span class="px-2 py-1 rounded text-xs font-bold uppercase" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
+                                    <div v-if="emailStatusFor(inv.id)" class="mt-1 text-xs">
+                                        <span class="px-2 py-0.5 rounded-full font-medium" :class="emailStatusClass(emailStatusFor(inv.id).state)">{{ emailStatusFor(inv.id).label }}</span>
+                                    </div>
                                 </td>
                                 <td class="p-4 text-right">
                                     <div class="flex justify-end items-center space-x-3">
@@ -1365,6 +1377,7 @@
                 customers: [],
                 savedItems: [],
                 invoices: [],
+                auditEvents: [],
                 invoiceSearch: '',
                 invoiceStatusFilter: 'All',
                 invoiceTypeFilter: 'All',
@@ -1435,6 +1448,16 @@
             },
             draftPaid() { return (this.draft.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0); },
             orderedHistory() { return [...(this.draft.history || [])].reverse(); },
+            emailEventsByDocument() {
+                const map = {};
+                (this.auditEvents || []).forEach(ev => {
+                    if (!ev.object_id) return;
+                    if (!map[ev.object_id]) map[ev.object_id] = [];
+                    map[ev.object_id].push(ev);
+                });
+                Object.keys(map).forEach(id => map[id].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))));
+                return map;
+            },
             dueTemplates() {
                 const today = new Date().toISOString().split('T')[0];
                 const p = s => { const [y,m,d] = String(s).split('-').map(Number); return new Date(Date.UTC(y, m-1, d)); };
@@ -1820,6 +1843,7 @@
                     this.customers = (custRes.data || []).map(r => this.rowToCustomer(r));
                     this.savedItems = (itemRes.data || []).map(r => this.rowToItem(r));
                     this.invoices = (invRes.data || []).map(r => this.rowToInvoice(r));
+                    await this.loadAuditEvents();
                     this.draft = this.getEmptyDraft();
                     // Recurring templates — best effort; the table may not exist until the setup SQL is run.
                     try {
@@ -1831,6 +1855,20 @@
                     alert("Could not load your data: " + (e.message || e));
                 } finally {
                     this.dataLoading = false;
+                }
+            },
+            async loadAuditEvents() {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('audit_events')
+                        .select('event_type, object_id, provider, provider_event_id, created_at, metadata')
+                        .eq('object_type', 'invoice')
+                        .in('event_type', ['document_email_sent', 'email_sent', 'email_delivered', 'email_delivery_delayed', 'email_bounced', 'email_complained', 'email_failed', 'email_opened', 'email_clicked', 'email_received'])
+                        .order('created_at', { ascending: false })
+                        .limit(500);
+                    if (!error) this.auditEvents = data || [];
+                } catch (e) {
+                    console.warn('Audit events unavailable:', e);
                 }
             },
 
@@ -2069,6 +2107,49 @@
                 if (!this.draft.history) this.draft.history = [];
                 this.draft.history.push({ ts: new Date().toISOString(), type, text });
             },
+            emailStatusFor(id) {
+                const events = this.emailEventsByDocument[id] || [];
+                if (!events.length) return null;
+                const rank = {
+                    email_complained: 7,
+                    email_failed: 7,
+                    email_bounced: 6,
+                    email_delivery_delayed: 5,
+                    email_delivered: 4,
+                    email_sent: 3,
+                    document_email_sent: 2,
+                    email_opened: 1,
+                    email_clicked: 1,
+                    email_received: 1
+                };
+                let best = events[0];
+                events.forEach(ev => { if ((rank[ev.event_type] || 0) > (rank[best.event_type] || 0)) best = ev; });
+                const meta = best.metadata || {};
+                const to = meta.to || (meta.raw && meta.raw.data && meta.raw.data.to && meta.raw.data.to[0]) || '';
+                const labels = {
+                    document_email_sent: 'Email sent',
+                    email_sent: 'Email sent',
+                    email_delivered: 'Delivered',
+                    email_delivery_delayed: 'Delayed',
+                    email_bounced: 'Bounced',
+                    email_complained: 'Complaint',
+                    email_failed: 'Failed',
+                    email_opened: 'Opened',
+                    email_clicked: 'Clicked',
+                    email_received: 'Received'
+                };
+                const state = best.event_type;
+                const label = labels[state] || 'Email event';
+                const detail = label + (to ? (' to ' + to) : '') + (best.created_at ? (' on ' + this.formatHistoryTime(best.created_at)) : '');
+                return { state, label, detail, event: best };
+            },
+            emailStatusClass(state) {
+                if (state === 'email_delivered') return 'bg-green-100 text-green-700';
+                if (state === 'email_bounced' || state === 'email_complained' || state === 'email_failed') return 'bg-red-100 text-red-700';
+                if (state === 'email_delivery_delayed') return 'bg-amber-100 text-amber-700';
+                if (state === 'email_sent' || state === 'document_email_sent') return 'bg-blue-100 text-blue-700';
+                return 'bg-slate-100 text-slate-600';
+            },
             applyInvoiceRow(row) {
                 const mapped = this.rowToInvoice(row);
                 const idx = this.invoices.findIndex(i => i.id === mapped.id);
@@ -2112,6 +2193,7 @@
                     if (error) throw error;
                     if (data && data.error) throw new Error(data.error);
                     if (data && data.invoice) this.applyInvoiceRow(data.invoice);
+                    await this.loadAuditEvents();
                     alert('Email sent to ' + to + '.');
                 } catch (e) {
                     console.error('Email send failed:', e);

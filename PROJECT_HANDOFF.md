@@ -299,7 +299,8 @@ Near-term (in rough order):
 3. **Email phase. Provider chosen: Resend.** Follow `EMAIL_PHASE.md`.
    - Done: `mail.tallyo.co.uk` Resend sending domain and manual invoice/quote/credit-note email through `send-document-email`.
    - Done: `resend-webhook` delivery tracking writes `email_sent` and `email_delivered` audit events.
-   - Next: polish user-visible delivery status in the app.
+   - Webhook listens for `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.clicked`, `email.failed`, `email.opened`, and `email.received`.
+   - Done: user-visible delivery status in the invoice list and document activity panel.
    - Later: automated recurring invoice emails and overdue reminders after manual sending and webhooks are stable.
 4. **Compliance groundwork** before emailing real customers (privacy policy, consent/unsubscribe, data-subject rights).
 5. Optional hardening: wire up append-only audit events, formal backups, MFA recovery codes, password-strength/breach checks.

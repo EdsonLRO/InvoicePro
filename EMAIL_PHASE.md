@@ -14,7 +14,9 @@ Build transactional email first. Do not start automated reminders until manual i
 - Done: `audit_events` table applied.
 - Done: `resend-webhook` Edge Function receiving signed Resend events.
 - Verified: `document_email_sent`, `email_sent`, and `email_delivered` audit events are recorded with document/user tags.
-- Next: polish how delivery status appears in the app, then plan automated recurring invoice emails and overdue reminders.
+- Done: delivery status appears in the invoice list and document activity panel.
+- Resend webhook currently listens for: `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.clicked`, `email.failed`, `email.opened`, and `email.received`.
+- Next: plan automated recurring invoice emails and overdue reminders.
 
 ## Stage 1 - Resend And DNS Setup
 
@@ -71,7 +73,8 @@ Webhook responsibilities:
 - Accept Resend webhook POSTs.
 - Verify webhook signatures with `RESEND_WEBHOOK_SECRET` once configured.
 - Store events idempotently by Resend event/email ID.
-- Log delivered, bounced, failed, complained, opened, or clicked events where relevant.
+- Store signed Resend events for `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.clicked`, `email.failed`, `email.opened`, and `email.received`.
+- Log delivered, delayed, bounced, failed, or complained events into document history where relevant.
 - Never mark a document as sent/delivered from an unverified webhook.
 
 Implementation status:
@@ -79,7 +82,9 @@ Implementation status:
 - `resend-webhook` exists and is deployed.
 - Resend webhook URL: `https://cuagwifetheefftleeup.supabase.co/functions/v1/resend-webhook`.
 - Events confirmed in `audit_events`: `email_sent`, `email_delivered`.
+- Configured Resend events: `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.clicked`, `email.failed`, `email.opened`, `email.received`.
 - Delivery/failure events are also eligible to write lightweight invoice history entries for user-visible status.
+- The app reads `audit_events` and shows email status badges such as Email sent, Delivered, Delayed, Bounced, Failed, Complaint, Opened, Clicked, or Received.
 
 ## Stage 4 - Automated Sending
 
