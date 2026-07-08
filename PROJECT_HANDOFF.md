@@ -296,11 +296,11 @@ Always describe security as "controls implemented + honest limitations", never a
 Near-term (in rough order):
 1. **Keep Tallyo rebrand hygiene**. Visible app text, manifest, and icons are done; keep repo/URL unchanged unless Supabase Auth URLs are updated at the same time.
 2. **Safety foundation before real users:** follow `SECURITY_OPERATIONS.md` for backup/restore, basic data-protection groundwork, and trusted audit-event planning.
-3. **Email phase (biggest remaining work). Provider chosen: Resend.** Follow `EMAIL_PHASE.md`.
-   - Stage 1: connect `mail.tallyo.co.uk` to Resend; add **SPF, DKIM, DMARC** DNS records; send a test email.
-   - Stage 2: manual invoice/quote/credit-note email through the `send-document-email` Edge Function.
-   - Stage 3: **delivery tracking** via Resend webhooks → real "Delivered/Opened" events in Activity History.
-   - Stage 4: automated recurring invoice emails and overdue reminders after manual sending and webhooks are stable.
+3. **Email phase. Provider chosen: Resend.** Follow `EMAIL_PHASE.md`.
+   - Done: `mail.tallyo.co.uk` Resend sending domain and manual invoice/quote/credit-note email through `send-document-email`.
+   - Done: `resend-webhook` delivery tracking writes `email_sent` and `email_delivered` audit events.
+   - Next: polish user-visible delivery status in the app.
+   - Later: automated recurring invoice emails and overdue reminders after manual sending and webhooks are stable.
 4. **Compliance groundwork** before emailing real customers (privacy policy, consent/unsubscribe, data-subject rights).
 5. Optional hardening: wire up append-only audit events, formal backups, MFA recovery codes, password-strength/breach checks.
 6. Optional: link invoices to their recurring schedule (dedup guard); repo/URL rename to Tallyo (with Supabase Auth URL updates).

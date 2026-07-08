@@ -6,6 +6,16 @@ Implementation plan for adding Resend email to Tallyo in safe stages.
 
 Build transactional email first. Do not start automated reminders until manual invoice sending, event logging, and failure handling work reliably.
 
+## Current Status
+
+- Done: Resend sending domain `mail.tallyo.co.uk`.
+- Done: manual `send-document-email` Edge Function.
+- Done: in-app Email action for saved documents.
+- Done: `audit_events` table applied.
+- Done: `resend-webhook` Edge Function receiving signed Resend events.
+- Verified: `document_email_sent`, `email_sent`, and `email_delivered` audit events are recorded with document/user tags.
+- Next: polish how delivery status appears in the app, then plan automated recurring invoice emails and overdue reminders.
+
 ## Stage 1 - Resend And DNS Setup
 
 User/provider work:
@@ -63,6 +73,13 @@ Webhook responsibilities:
 - Store events idempotently by Resend event/email ID.
 - Log delivered, bounced, failed, complained, opened, or clicked events where relevant.
 - Never mark a document as sent/delivered from an unverified webhook.
+
+Implementation status:
+
+- `resend-webhook` exists and is deployed.
+- Resend webhook URL: `https://cuagwifetheefftleeup.supabase.co/functions/v1/resend-webhook`.
+- Events confirmed in `audit_events`: `email_sent`, `email_delivered`.
+- Delivery/failure events are also eligible to write lightweight invoice history entries for user-visible status.
 
 ## Stage 4 - Automated Sending
 
