@@ -44,39 +44,59 @@ function formatMoney(code: string, amount: unknown) {
   return `${currencySymbol(code)}${(Number(amount) || 0).toFixed(2)}`;
 }
 
-function calcGrandTotal(inv: any): number {
+function r2(n: number): number {
+  return Math.round((n + Number.EPSILON) * 100) / 100;
+}
+
+function calcTotals(inv: any) {
   const items = inv.items || [];
-  const exclusive = (inv.tax_mode || "exclusive") === "exclusive";
+  const mode = inv.tax_mode || "exclusive";
   let netSum = 0;
   let grossSum = 0;
-  let tax = 0;
+  const taxRaw: Record<string, number> = {};
   for (const item of items) {
     const qty = Number(item.qty) || 0;
     const price = Number(item.price) || 0;
     const discount = Number(item.discount) || 0;
     const rate = Number(item.tax) || 0;
-    const line = qty * price * (1 - discount / 100);
-    if (exclusive) {
-      netSum += line;
-      tax += line * rate / 100;
+    const afterDisc = qty * price * (1 - discount / 100);
+    let lineNet;
+    let lineTax;
+    if (mode === "inclusive") {
+      lineNet = rate ? afterDisc / (1 + rate / 100) : afterDisc;
+      lineTax = afterDisc - lineNet;
     } else {
-      const net = rate ? line / (1 + rate / 100) : line;
-      grossSum += line;
-      netSum += net;
-      tax += line - net;
+      lineNet = afterDisc;
+      lineTax = afterDisc * (rate / 100);
     }
+    netSum += lineNet;
+    grossSum += mode === "inclusive" ? afterDisc : afterDisc + lineTax;
+    if (rate > 0) taxRaw[String(rate)] = (taxRaw[String(rate)] || 0) + lineTax;
   }
   const discount = Number(inv.global_discount) || 0;
   const shipping = Number(inv.shipping_cost) || 0;
   const factor = 1 - discount / 100;
-  const total = exclusive ? (netSum * factor + tax + shipping) : (grossSum * factor + shipping);
-  return Math.round(total * 100) / 100;
+  const base = mode === "inclusive" ? grossSum : netSum;
+  const subtotal = r2(base);
+  const globalDiscountAmt = r2(base * (discount / 100));
+  const taxByRate: Record<string, number> = {};
+  let taxAmt = 0;
+  for (const rate of Object.keys(taxRaw)) {
+    const v = r2(taxRaw[rate] * factor);
+    taxByRate[rate] = v;
+    taxAmt = r2(taxAmt + v);
+  }
+  const grandTotal = mode === "inclusive"
+    ? r2(grossSum * factor + shipping)
+    : r2(netSum * factor + taxAmt + shipping);
+  return { subtotal, globalDiscountAmt, taxAmt, taxByRate, shipping, mode, grandTotal };
 }
 
 function buildEmail(inv: any, company: any) {
   const noun = docTypeNoun(inv.doc_type);
   const currency = inv.currency || "GBP";
-  const total = Number(inv.grand_total) || calcGrandTotal(inv);
+  const totals = calcTotals(inv);
+  const total = Number(inv.grand_total) || totals.grandTotal;
   const customer = inv.customer_snapshot || {};
   const companyName = company?.name || "Tallyo";
   const subject = `${noun} #${inv.number} from ${companyName}`;
@@ -91,9 +111,14 @@ function buildEmail(inv: any, company: any) {
       unit: item.unit || "",
       price,
       discount,
+      tax: Number(item.tax) || 0,
       total: lineTotal,
     };
   });
+
+  const taxLabel = Object.keys(totals.taxByRate).length === 1
+    ? `Tax (${Object.keys(totals.taxByRate)[0]}%)`
+    : "Tax";
 
   const textLines = [
     `Hi ${customer.name || "there"},`,
@@ -106,8 +131,16 @@ function buildEmail(inv: any, company: any) {
     `Total: ${formatMoney(currency, total)}`,
     "",
     "Items:",
-    ...lines.map((line) => `- ${line.name}: ${line.qty}${line.unit ? ` ${line.unit}` : ""} x ${formatMoney(currency, line.price)} = ${formatMoney(currency, line.total)}`),
+    ...lines.map((line) => `- ${line.name}: ${line.qty}${line.unit ? ` ${line.unit}` : ""} x ${formatMoney(currency, line.price)}${line.discount ? `, ${line.discount}% discount` : ""}${line.tax ? `, ${line.tax}% tax` : ""} = ${formatMoney(currency, line.total)} before tax`),
+    "",
+    "Summary:",
+    `Subtotal: ${formatMoney(currency, totals.subtotal)}`,
   ];
+
+  if (totals.globalDiscountAmt > 0) textLines.push(`Discount: -${formatMoney(currency, totals.globalDiscountAmt)}`);
+  if (totals.taxAmt > 0) textLines.push(`${taxLabel}: ${formatMoney(currency, totals.taxAmt)}`);
+  if (totals.shipping > 0) textLines.push(`Shipping: ${formatMoney(currency, totals.shipping)}`);
+  textLines.push(`Total: ${formatMoney(currency, total)}`);
 
   if (inv.notes) textLines.push("", "Notes:", String(inv.notes));
   if (inv.terms) textLines.push("", "Terms:", String(inv.terms));
@@ -119,7 +152,20 @@ function buildEmail(inv: any, company: any) {
       <td style="padding:10px;border-bottom:1px solid #e5e7eb;">${escapeHtml(line.name)}</td>
       <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(line.qty)}${line.unit ? ` ${escapeHtml(line.unit)}` : ""}</td>
       <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(formatMoney(currency, line.price))}</td>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${line.discount ? `${escapeHtml(line.discount)}%` : "-"}</td>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${line.tax ? `${escapeHtml(line.tax)}%` : "-"}</td>
       <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(formatMoney(currency, line.total))}</td>
+    </tr>`).join("");
+
+  const summaryRows = [
+    ["Subtotal", totals.subtotal, ""],
+    ...(totals.globalDiscountAmt > 0 ? [["Discount", totals.globalDiscountAmt, "-"]] : []),
+    ...(totals.taxAmt > 0 ? [[taxLabel, totals.taxAmt, ""]] : []),
+    ...(totals.shipping > 0 ? [["Shipping", totals.shipping, ""]] : []),
+  ].map(([label, amount, prefix]) => `
+    <tr>
+      <td style="padding:6px 0;color:#475569;">${escapeHtml(label)}</td>
+      <td style="padding:6px 0;text-align:right;font-weight:600;">${escapeHtml(prefix)}${escapeHtml(formatMoney(currency, amount))}</td>
     </tr>`).join("");
 
   const html = `
@@ -138,10 +184,21 @@ function buildEmail(inv: any, company: any) {
             <th style="padding:10px;text-align:left;">Item</th>
             <th style="padding:10px;text-align:right;">Qty</th>
             <th style="padding:10px;text-align:right;">Price</th>
+            <th style="padding:10px;text-align:right;">Disc</th>
+            <th style="padding:10px;text-align:right;">Tax</th>
             <th style="padding:10px;text-align:right;">Total</th>
           </tr>
         </thead>
         <tbody>${itemRows}</tbody>
+      </table>
+      <table style="width:280px;margin:4px 0 22px auto;border-collapse:collapse;">
+        <tbody>
+          ${summaryRows}
+          <tr>
+            <td style="padding:10px 0;border-top:2px solid #cbd5e1;font-size:18px;font-weight:700;">Total</td>
+            <td style="padding:10px 0;border-top:2px solid #cbd5e1;text-align:right;font-size:18px;font-weight:700;">${escapeHtml(formatMoney(currency, total))}</td>
+          </tr>
+        </tbody>
       </table>
       ${inv.notes ? `<h2 style="font-size:16px;margin-top:20px;">Notes</h2><p>${escapeHtml(inv.notes).replaceAll("\n", "<br>")}</p>` : ""}
       ${inv.terms ? `<h2 style="font-size:16px;margin-top:20px;">Terms</h2><p>${escapeHtml(inv.terms).replaceAll("\n", "<br>")}</p>` : ""}
