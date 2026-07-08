@@ -859,7 +859,7 @@
                     <div class="flex gap-2 justify-end flex-wrap">
                         <button @click="copyReminder" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors">{{ reminderModal.copied ? 'Copied!' : 'Copy text' }}</button>
                         <button @click="sendReminderEmail" :disabled="reminderModal.sending" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50">{{ reminderModal.sending ? 'Sending...' : 'Email reminder' }}</button>
-                        <button @click="logReminderSent" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors">Log reminder as sent</button>
+                        <button v-if="!reminderAlreadyEmailed(reminderModal.inv)" @click="logReminderSent" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors">Log reminder as sent</button>
                     </div>
                 </div>
             </div>
@@ -2509,6 +2509,9 @@
             },
             openReminder(inv) {
                 this.reminderModal = { open: true, inv, text: this.reminderText(inv), copied: false, sending: false };
+            },
+            reminderAlreadyEmailed(inv) {
+                return !!(inv && Array.isArray(inv.history) && inv.history.some(ev => ev && ev.type === 'reminder' && String(ev.text || '').startsWith('Payment reminder emailed to ')));
             },
             async copyReminder() {
                 try {

@@ -36,8 +36,12 @@ function validEmail(value: unknown): value is string {
   return typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+function currencySymbol(code: string) {
+  return ({ GBP: "£", EUR: "€", USD: "$" } as Record<string, string>)[code] || `${code} `;
+}
+
 function formatMoney(code: string, amount: unknown) {
-  return `${code || "GBP"} ${(Number(amount) || 0).toFixed(2)}`;
+  return `${currencySymbol(code || "GBP")}${(Number(amount) || 0).toFixed(2)}`;
 }
 
 function toDateOnly(value: Date) {
