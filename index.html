@@ -54,6 +54,18 @@
         .no-spin { -moz-appearance: textfield; }
         .pdf-mode tbody td { vertical-align: middle !important; padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; }
         #invoice-canvas .font-bold.text-slate-400 { color: var(--brand) !important; }
+        @media (max-width: 1024px) {
+            .invoice-table-frame {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+            }
+            .invoice-table-frame table {
+                min-width: 1120px;
+            }
+            .recurring-table-frame table {
+                min-width: 980px;
+            }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans antialiased">
@@ -812,7 +824,7 @@
                     </div>
                 </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="invoice-table-frame bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <table class="w-full text-left" style="table-layout: fixed;">
                         <colgroup>
                             <col style="width: 3%;">
@@ -1163,7 +1175,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                    <div class="recurring-table-frame bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                         <table class="w-full text-left min-w-[760px]">
                             <thead class="bg-slate-50 border-b border-slate-200 text-sm text-slate-500">
                                 <tr>
