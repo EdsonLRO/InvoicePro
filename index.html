@@ -690,12 +690,12 @@
                     </div>
                     <p class="text-xs text-slate-400 mb-4">A record of what has happened to this document, for your convenience. This is an activity history, not a tamper-proof audit log.</p>
                     <div v-if="emailStatusFor(draft.id)" class="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
-                        <div class="flex items-center justify-between gap-3 flex-wrap">
-                            <div>
-                                <div class="font-semibold text-slate-700">Email status</div>
+                        <div class="flex items-center justify-between gap-4 flex-wrap">
+                            <div class="font-semibold text-slate-700">Email status</div>
+                            <div class="flex items-center gap-3 flex-wrap justify-end text-right">
                                 <div class="text-slate-500">{{ emailStatusFor(draft.id).detail }}</div>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold" :class="emailStatusClass(emailStatusFor(draft.id).state)">{{ emailStatusFor(draft.id).label }}</span>
                             </div>
-                            <span class="px-2.5 py-1 rounded-full text-xs font-bold" :class="emailStatusClass(emailStatusFor(draft.id).state)">{{ emailStatusFor(draft.id).label }}</span>
                         </div>
                     </div>
 
@@ -812,7 +812,7 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left min-w-[760px]">
                         <thead class="bg-slate-50 border-b border-slate-200">
                             <tr>
@@ -835,7 +835,7 @@
                                 <td class="p-4">
                                     <span class="px-2 py-1 rounded text-xs font-medium" :class="(inv.docType||'invoice')==='invoice' ? 'bg-indigo-50 text-indigo-600' : (inv.docType==='quote' ? 'bg-purple-50 text-purple-600' : 'bg-teal-50 text-teal-600')">{{ docTypeNoun(inv.docType) }}</span>
                                 </td>
-                                <td class="p-4 font-medium"><button @click="loadInvoice(inv)" class="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors">#{{ inv.number }}</button></td>
+                                <td class="p-4 font-medium whitespace-nowrap"><button @click="loadInvoice(inv)" class="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors whitespace-nowrap">#{{ inv.number }}</button></td>
                                 <td class="p-4 text-slate-600">{{ inv.date }}</td>
                                 <td class="p-4 text-slate-600">{{ inv.dueDate }}</td>
                                 <td class="p-4 text-slate-600">{{ inv.customer ? inv.customer.name : 'Unknown' }}</td>
@@ -894,23 +894,34 @@
                         <button @click="newCustomer" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">+ New Customer</button>
                     </div>
 
-                    <div class="mb-5">
-                        <input type="text" v-model="customerSearch" placeholder="Search customers by name, email, phone..." class="w-full max-w-md border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                    <div class="mb-5 flex items-center gap-3 flex-wrap">
+                        <input type="text" v-model="customerSearch" @input="resetCustomerListState" placeholder="Search customers by name, email, phone..." class="w-full max-w-md border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                        <div v-if="selectedCustomers.length" class="flex items-center gap-2 flex-wrap bg-indigo-50 border border-slate-200 rounded-lg px-3 py-2">
+                            <span class="text-sm font-semibold text-indigo-600">{{ selectedCustomers.length }} selected</span>
+                            <button @click="bulkDeleteCustomers" :disabled="customerBulkBusy" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Delete</button>
+                        </div>
+                        <div class="flex items-center gap-2 ml-auto">
+                            <button @click="changePage('customer', -1)" :disabled="customerPage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                            <span class="text-sm text-slate-500">{{ pageInfo(customerTotalPages, customerPage) }}</span>
+                            <button @click="changePage('customer', 1)" :disabled="customerPage >= customerTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
+                        </div>
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                         <table class="w-full text-left min-w-[760px]">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
+                                    <th class="p-4 w-10"><input type="checkbox" :checked="currentCustomerPageSelected" @change="toggleCustomerPageSelection($event.target.checked)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
                                     <th class="p-4 font-medium text-slate-500">Name</th>
                                     <th class="p-4 font-medium text-slate-500">Contact Info</th>
                                     <th class="p-4 font-medium text-slate-500 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                <tr v-if="customers.length === 0"><td colspan="3" class="p-8 text-center text-slate-400">No customers saved yet.</td></tr>
-                                <tr v-else-if="filteredCustomers.length === 0"><td colspan="3" class="p-8 text-center text-slate-400">No customers match your search.</td></tr>
-                                <tr v-for="(customer, idx) in filteredCustomers" :key="idx" class="hover:bg-slate-50">
+                                <tr v-if="customers.length === 0"><td colspan="4" class="p-8 text-center text-slate-400">No customers saved yet.</td></tr>
+                                <tr v-else-if="filteredCustomers.length === 0"><td colspan="4" class="p-8 text-center text-slate-400">No customers match your search.</td></tr>
+                                <tr v-for="(customer, idx) in paginatedCustomers" :key="customer.id || idx" class="hover:bg-slate-50">
+                                    <td class="p-4 align-top"><input type="checkbox" :value="customer.id" v-model="selectedCustomers" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></td>
                                     <td class="p-4 align-top">
                                         <div class="font-medium text-slate-800">{{ customer.name }}</div>
                                         <div v-if="customer.taxId" class="text-xs text-slate-400 mt-1">Tax ID: {{ customer.taxId }}</div>
@@ -928,6 +939,11 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 mt-3">
+                        <button @click="changePage('customer', -1)" :disabled="customerPage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                        <span class="text-sm text-slate-500">{{ pageInfo(customerTotalPages, customerPage) }}</span>
+                        <button @click="changePage('customer', 1)" :disabled="customerPage >= customerTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
                     </div>
                 </div>
 
@@ -1473,6 +1489,9 @@
                 recurringForm: null,
                 customerForm: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' },
                 customerView: 'list',
+                customerPage: 1,
+                selectedCustomers: [],
+                customerBulkBusy: false,
                 itemView: 'list',
                 brandPresets: ['#6366f1', '#38bdf8', '#34d399', '#fb7185', '#fbbf24', '#a78bfa', '#f472b6', '#2dd4bf'],
                 lastTaxMode: 'exclusive',
@@ -1654,6 +1673,20 @@
                     ['name', 'email', 'phone', 'mobile', 'address', 'taxId'].some(k => (c[k] || '').toLowerCase().includes(q))
                 );
             },
+            customerTotalPages() {
+                return Math.max(1, Math.ceil(this.filteredCustomers.length / 20));
+            },
+            paginatedCustomers() {
+                const page = Math.min(Math.max(this.customerPage || 1, 1), this.customerTotalPages);
+                const start = (page - 1) * 20;
+                return this.filteredCustomers.slice(start, start + 20);
+            },
+            currentCustomerPageSelected() {
+                return this.paginatedCustomers.length > 0 && this.paginatedCustomers.every(customer => this.selectedCustomers.includes(customer.id));
+            },
+            selectedCustomerRows() {
+                return this.selectedCustomers.map(id => this.customers.find(customer => customer.id === id)).filter(Boolean);
+            },
             filteredItems() {
                 const q = this.itemSearch.trim().toLowerCase();
                 if (!q) return this.savedItems;
@@ -1709,6 +1742,10 @@
                 this.itemPage = 1;
                 this.selectedItems = [];
             },
+            resetCustomerListState() {
+                this.customerPage = 1;
+                this.selectedCustomers = [];
+            },
             togglePageSelection(rows, selectedKey, checked) {
                 const ids = rows.map(row => row.id).filter(Boolean);
                 if (checked) {
@@ -1723,6 +1760,9 @@
             },
             toggleItemPageSelection(checked) {
                 this.togglePageSelection(this.paginatedItems, 'selectedItems', checked);
+            },
+            toggleCustomerPageSelection(checked) {
+                this.togglePageSelection(this.paginatedCustomers, 'selectedCustomers', checked);
             },
             toggleRecurringPageSelection(checked) {
                 this.togglePageSelection(this.paginatedRecurringTemplates, 'selectedRecurring', checked);
@@ -3021,6 +3061,24 @@
                     if (error) return alert("Could not delete customer: " + error.message);
                     const i = this.customers.indexOf(customer);
                     if(i>=0) this.customers.splice(i, 1);
+                    this.selectedCustomers = this.selectedCustomers.filter(id => id !== customer.id);
+                }
+            },
+            async bulkDeleteCustomers() {
+                const rows = this.selectedCustomerRows;
+                if (!rows.length) return;
+                if (!confirm('Delete ' + rows.length + ' selected customer' + (rows.length === 1 ? '' : 's') + '?')) return;
+                this.customerBulkBusy = true;
+                try {
+                    const ids = rows.map(customer => customer.id);
+                    const { error } = await supabaseClient.from('customers').delete().in('id', ids);
+                    if (error) throw error;
+                    this.customers = this.customers.filter(customer => !ids.includes(customer.id));
+                    this.selectedCustomers = [];
+                } catch (e) {
+                    alert('Could not delete selected customers: ' + (e.message || e));
+                } finally {
+                    this.customerBulkBusy = false;
                 }
             },
             resetCustomerForm() { this.editingCustomer = null; this.customerForm = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' }; },
