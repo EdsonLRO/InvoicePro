@@ -837,7 +837,7 @@
                                 <th class="p-4 font-medium text-slate-500">Total</th>
                                 <th class="p-4 font-medium text-slate-500">Status</th>
                                 <th class="p-4 font-medium text-slate-500">Email</th>
-                                <th class="p-4 font-medium text-slate-500 text-right">Actions</th>
+                                <th class="p-4 font-medium text-slate-500 text-right" style="transform: translateX(-50px);">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
@@ -863,7 +863,7 @@
                                     <span v-if="emailStatusFor(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium" style="white-space: nowrap;" :class="emailStatusClass(emailStatusFor(inv.id).state)">{{ emailStatusFor(inv.id).label }}</span>
                                 </td>
                                 <td class="p-4 text-right whitespace-nowrap">
-                                    <div class="flex justify-end items-center space-x-3">
+                                    <div class="flex justify-end items-center space-x-3" style="transform: translateX(-50px);">
                                         <button v-if="inv.docType === 'quote'" @click="convertToInvoice(inv)" class="text-purple-600 hover:text-purple-800 text-sm font-medium">Convert</button>
                                         <button @click="duplicateInvoice(inv)" class="text-slate-500 hover:text-slate-800 text-sm font-medium">Duplicate</button>
                                         <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id" class="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50">{{ emailSendingId === inv.id ? 'Sending...' : 'Email' }}</button>
