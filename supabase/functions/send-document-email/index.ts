@@ -1,0 +1,270 @@
+// send-document-email - manual transactional document email via Resend.
+// The browser asks to send a saved document; this function authenticates the
+// caller, verifies document ownership, sends the email, and records history.
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+function json(body: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function validEmail(value: unknown): value is string {
+  return typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function docTypeNoun(docType: string) {
+  return ({ invoice: "Invoice", quote: "Quote", credit: "Credit Note" } as Record<string, string>)[docType] || "Invoice";
+}
+
+function currencySymbol(code: string) {
+  return ({ GBP: "£", EUR: "€", USD: "$" } as Record<string, string>)[code] || `${code} `;
+}
+
+function formatMoney(code: string, amount: unknown) {
+  return `${currencySymbol(code)}${(Number(amount) || 0).toFixed(2)}`;
+}
+
+function calcGrandTotal(inv: any): number {
+  const items = inv.items || [];
+  const exclusive = (inv.tax_mode || "exclusive") === "exclusive";
+  let netSum = 0;
+  let grossSum = 0;
+  let tax = 0;
+  for (const item of items) {
+    const qty = Number(item.qty) || 0;
+    const price = Number(item.price) || 0;
+    const discount = Number(item.discount) || 0;
+    const rate = Number(item.tax) || 0;
+    const line = qty * price * (1 - discount / 100);
+    if (exclusive) {
+      netSum += line;
+      tax += line * rate / 100;
+    } else {
+      const net = rate ? line / (1 + rate / 100) : line;
+      grossSum += line;
+      netSum += net;
+      tax += line - net;
+    }
+  }
+  const discount = Number(inv.global_discount) || 0;
+  const shipping = Number(inv.shipping_cost) || 0;
+  const factor = 1 - discount / 100;
+  const total = exclusive ? (netSum * factor + tax + shipping) : (grossSum * factor + shipping);
+  return Math.round(total * 100) / 100;
+}
+
+function buildEmail(inv: any, company: any) {
+  const noun = docTypeNoun(inv.doc_type);
+  const currency = inv.currency || "GBP";
+  const total = Number(inv.grand_total) || calcGrandTotal(inv);
+  const customer = inv.customer_snapshot || {};
+  const companyName = company?.name || "Tallyo";
+  const subject = `${noun} #${inv.number} from ${companyName}`;
+  const lines = (inv.items || []).map((item: any) => {
+    const qty = Number(item.qty) || 0;
+    const price = Number(item.price) || 0;
+    const discount = Number(item.discount) || 0;
+    const lineTotal = qty * price * (1 - discount / 100);
+    return {
+      name: item.name || "Item",
+      qty,
+      unit: item.unit || "",
+      price,
+      discount,
+      total: lineTotal,
+    };
+  });
+
+  const textLines = [
+    `Hi ${customer.name || "there"},`,
+    "",
+    `Please find ${noun.toLowerCase()} #${inv.number} from ${companyName}.`,
+    "",
+    `${noun}: #${inv.number}`,
+    `Issue date: ${inv.issue_date || ""}`,
+    `Due date: ${inv.due_date || ""}`,
+    `Total: ${formatMoney(currency, total)}`,
+    "",
+    "Items:",
+    ...lines.map((line) => `- ${line.name}: ${line.qty}${line.unit ? ` ${line.unit}` : ""} x ${formatMoney(currency, line.price)} = ${formatMoney(currency, line.total)}`),
+  ];
+
+  if (inv.notes) textLines.push("", "Notes:", String(inv.notes));
+  if (inv.terms) textLines.push("", "Terms:", String(inv.terms));
+  if (company?.payment_details) textLines.push("", "Payment details:", String(company.payment_details));
+  textLines.push("", "Thank you", companyName);
+
+  const itemRows = lines.map((line) => `
+    <tr>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;">${escapeHtml(line.name)}</td>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(line.qty)}${line.unit ? ` ${escapeHtml(line.unit)}` : ""}</td>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(formatMoney(currency, line.price))}</td>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(formatMoney(currency, line.total))}</td>
+    </tr>`).join("");
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.5;max-width:680px;margin:0 auto;">
+      <h1 style="font-size:22px;margin:0 0 12px;">${escapeHtml(noun)} #${escapeHtml(inv.number)}</h1>
+      <p>Hi ${escapeHtml(customer.name || "there")},</p>
+      <p>Please find ${escapeHtml(noun.toLowerCase())} #${escapeHtml(inv.number)} from ${escapeHtml(companyName)}.</p>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:18px 0;">
+        <p style="margin:0 0 6px;"><strong>Issue date:</strong> ${escapeHtml(inv.issue_date || "")}</p>
+        <p style="margin:0 0 6px;"><strong>Due date:</strong> ${escapeHtml(inv.due_date || "")}</p>
+        <p style="margin:0;font-size:18px;"><strong>Total:</strong> ${escapeHtml(formatMoney(currency, total))}</p>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin:18px 0;">
+        <thead>
+          <tr style="background:#0f172a;color:#ffffff;">
+            <th style="padding:10px;text-align:left;">Item</th>
+            <th style="padding:10px;text-align:right;">Qty</th>
+            <th style="padding:10px;text-align:right;">Price</th>
+            <th style="padding:10px;text-align:right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>${itemRows}</tbody>
+      </table>
+      ${inv.notes ? `<h2 style="font-size:16px;margin-top:20px;">Notes</h2><p>${escapeHtml(inv.notes).replaceAll("\n", "<br>")}</p>` : ""}
+      ${inv.terms ? `<h2 style="font-size:16px;margin-top:20px;">Terms</h2><p>${escapeHtml(inv.terms).replaceAll("\n", "<br>")}</p>` : ""}
+      ${company?.payment_details ? `<h2 style="font-size:16px;margin-top:20px;">Payment details</h2><p>${escapeHtml(company.payment_details).replaceAll("\n", "<br>")}</p>` : ""}
+      <p style="margin-top:24px;">Thank you<br>${escapeHtml(companyName)}</p>
+    </div>`;
+
+  return { subject, text: textLines.join("\n"), html };
+}
+
+async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
+  try {
+    const { error } = await admin.from("audit_events").insert(payload);
+    if (error) console.warn("audit event insert skipped", error.message);
+  } catch (e) {
+    console.warn("audit event insert skipped", String(e));
+  }
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+
+  const resendKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendKey) return json({ error: "Email service is not configured" }, 500);
+
+  const authHeader = req.headers.get("Authorization") || "";
+  if (!authHeader.startsWith("Bearer ")) return json({ error: "Missing authorization" }, 401);
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const userClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authHeader } } });
+  const admin = createClient(supabaseUrl, serviceKey);
+
+  const { data: userData, error: userError } = await userClient.auth.getUser();
+  if (userError || !userData?.user) return json({ error: "Invalid session" }, 401);
+
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return json({ error: "Invalid JSON body" }, 400);
+  }
+
+  const documentId = String(body.documentId || "");
+  const to = String(body.to || "").trim();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(documentId)) {
+    return json({ error: "Invalid document ID" }, 400);
+  }
+  if (!validEmail(to)) return json({ error: "Enter a valid recipient email address" }, 400);
+
+  const { data: inv, error: invError } = await admin.from("invoices").select("*").eq("id", documentId).maybeSingle();
+  if (invError) return json({ error: invError.message }, 500);
+  if (!inv || inv.user_id !== userData.user.id) return json({ error: "Document not found" }, 404);
+  if (inv.status === "Cancelled") return json({ error: "Cancelled documents cannot be emailed" }, 400);
+
+  const { data: company } = await admin.from("company_settings").select("*").eq("user_id", userData.user.id).maybeSingle();
+  const email = buildEmail(inv, company || {});
+  const resendPayload = {
+    from: FROM_EMAIL,
+    to: [to],
+    subject: email.subject,
+    html: email.html,
+    text: email.text,
+    tags: [
+      { name: "category", value: "document_email" },
+      { name: "document_id", value: documentId },
+      { name: "user_id", value: userData.user.id },
+    ],
+  };
+
+  const resendResponse = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(resendPayload),
+  });
+  const resendBody = await resendResponse.json().catch(() => ({}));
+  if (!resendResponse.ok) {
+    await insertAuditEvent(admin, {
+      user_id: userData.user.id,
+      actor_user_id: userData.user.id,
+      event_type: "email_send_failed",
+      object_type: "invoice",
+      object_id: documentId,
+      source: "edge_function",
+      provider: "resend",
+      metadata: { to, status: resendResponse.status, response: resendBody },
+    });
+    return json({ error: resendBody?.message || "Email could not be sent" }, 502);
+  }
+
+  const nowISO = new Date().toISOString();
+  const history = Array.isArray(inv.history) ? inv.history : [];
+  history.push({
+    ts: nowISO,
+    type: "sent",
+    text: `Emailed to ${to}`,
+  });
+
+  const nextStatus = inv.status === "Draft" ? "Sent" : inv.status;
+  const { data: updated, error: updateError } = await admin.from("invoices")
+    .update({ history, status: nextStatus, updated_at: nowISO })
+    .eq("id", documentId)
+    .eq("user_id", userData.user.id)
+    .select("*")
+    .single();
+  if (updateError) return json({ error: updateError.message }, 500);
+
+  await insertAuditEvent(admin, {
+    user_id: userData.user.id,
+    actor_user_id: userData.user.id,
+    event_type: "document_email_sent",
+    object_type: "invoice",
+    object_id: documentId,
+    source: "edge_function",
+    provider: "resend",
+    provider_event_id: resendBody?.id || null,
+    metadata: { to, from: FROM_EMAIL, subject: email.subject },
+  });
+
+  return json({ ok: true, emailId: resendBody?.id || null, invoice: updated });
+});

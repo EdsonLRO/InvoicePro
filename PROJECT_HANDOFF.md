@@ -147,6 +147,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `recurring_setup.sql` | Creates `recurring_templates` table + its RLS (idempotent). |
 | `supabase/functions/generate-recurring/index.ts` | Edge Function (Deno/TS) that generates due recurring invoices. Deployed to Supabase. |
 | `SECURITY_OPERATIONS.md` | Practical backup, restore, data-protection, email, payment, and release gates before real users. |
+| `EMAIL_PHASE.md` | Staged Resend email plan: DNS setup, manual sending, webhooks, then automation. |
 | Tailwind build inputs | `tailwind.config.js` + a Tailwind input CSS file used by the CLI to produce `tailwind.css`. **Unknown / needs confirmation:** exact input filename in the repo. |
 | Threat model docs | Separate before/after STRIDE threat models + a plain-English security write-up exist as project artifacts. |
 
@@ -295,11 +296,11 @@ Always describe security as "controls implemented + honest limitations", never a
 Near-term (in rough order):
 1. **Keep Tallyo rebrand hygiene**. Visible app text, manifest, and icons are done; keep repo/URL unchanged unless Supabase Auth URLs are updated at the same time.
 2. **Safety foundation before real users:** follow `SECURITY_OPERATIONS.md` for backup/restore, basic data-protection groundwork, and trusted audit-event planning.
-3. **Email phase (biggest remaining work). Provider chosen: Resend.**
-   - Stage 1: connect `tallyo.co.uk` to Resend; add **SPF, DKIM, DMARC** DNS records; send a test email.
-   - Stage 2: auto-send invoices on creation/generation.
-   - Stage 3: **automated overdue reminders** (reuse the scheduled-function pattern; this is deferred until email works).
-   - Stage 4: **delivery tracking** via Resend webhooks → real "Delivered/Opened" events in Activity History.
+3. **Email phase (biggest remaining work). Provider chosen: Resend.** Follow `EMAIL_PHASE.md`.
+   - Stage 1: connect `mail.tallyo.co.uk` to Resend; add **SPF, DKIM, DMARC** DNS records; send a test email.
+   - Stage 2: manual invoice/quote/credit-note email through the `send-document-email` Edge Function.
+   - Stage 3: **delivery tracking** via Resend webhooks → real "Delivered/Opened" events in Activity History.
+   - Stage 4: automated recurring invoice emails and overdue reminders after manual sending and webhooks are stable.
 4. **Compliance groundwork** before emailing real customers (privacy policy, consent/unsubscribe, data-subject rights).
 5. Optional hardening: wire up append-only audit events, formal backups, MFA recovery codes, password-strength/breach checks.
 6. Optional: link invoices to their recurring schedule (dedup guard); repo/URL rename to Tallyo (with Supabase Auth URL updates).

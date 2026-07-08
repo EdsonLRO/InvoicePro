@@ -360,6 +360,7 @@
                             <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }} ({{ c.symbol }}) - {{ c.name }}</option>
                         </select>
                         <button v-if="draft.docType === 'quote'" @click="convertToInvoice(draft)" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">Convert to Invoice</button>
+                        <button @click="sendDocumentEmail(draft)" :disabled="emailSendingId === draft.id || emailSendingId === 'draft'" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm disabled:opacity-50">{{ (emailSendingId === draft.id || emailSendingId === 'draft') ? 'Sending...' : 'Email' }}</button>
                         <button @click="saveInvoice" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-colors">Save {{ docTypeNoun(draft.docType) }}</button>
                     </div>
                 </div>
@@ -816,6 +817,7 @@
                                     <div class="flex justify-end items-center space-x-3">
                                         <button v-if="inv.docType === 'quote'" @click="convertToInvoice(inv)" class="text-purple-600 hover:text-purple-800 text-sm font-medium">Convert</button>
                                         <button @click="duplicateInvoice(inv)" class="text-slate-500 hover:text-slate-800 text-sm font-medium">Duplicate</button>
+                                        <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id" class="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50">{{ emailSendingId === inv.id ? 'Sending...' : 'Email' }}</button>
                                         <button @click="exportPDF(inv)" class="text-emerald-600 hover:text-emerald-800 text-sm font-medium">PDF</button>
                                         <span class="text-slate-300">|</span>
                                         <button @click="deleteInvoice(inv)" class="text-red-500 hover:text-red-700 text-sm font-medium">Delete</button>
@@ -1367,6 +1369,7 @@
                 invoiceStatusFilter: 'All',
                 invoiceTypeFilter: 'All',
                 invoiceSort: 'date_desc',
+                emailSendingId: null,
                 newPayment: { amount: null, date: new Date().toISOString().split('T')[0], note: '' },
                 activityNote: '',
                 reminderModal: { open: false, inv: null, text: '', copied: false },
@@ -2065,6 +2068,57 @@
             addHistory(type, text) {
                 if (!this.draft.history) this.draft.history = [];
                 this.draft.history.push({ ts: new Date().toISOString(), type, text });
+            },
+            applyInvoiceRow(row) {
+                const mapped = this.rowToInvoice(row);
+                const idx = this.invoices.findIndex(i => i.id === mapped.id);
+                if (idx >= 0) this.invoices[idx] = mapped;
+                else this.invoices.unshift(mapped);
+                if (this.draft && this.draft.id === mapped.id) this.draft = JSON.parse(JSON.stringify(mapped));
+                return mapped;
+            },
+            async sendDocumentEmail(inv) {
+                if (!inv) return;
+                if (inv.status === 'Cancelled') return alert('Cancelled documents cannot be emailed.');
+                const defaultEmail = inv.customer && inv.customer.email ? inv.customer.email : '';
+                const to = (prompt('Send ' + this.docTypeNoun(inv.docType) + ' #' + (inv.number || '') + ' to:', defaultEmail) || '').trim();
+                if (!to) return;
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return alert('Enter a valid email address.');
+
+                let target = inv;
+                const isCurrentDraft = this.draft && inv.id === this.draft.id;
+                if (!this.isUuid(inv.id) || isCurrentDraft) {
+                    const repeat = this.draft.repeat ? JSON.parse(JSON.stringify(this.draft.repeat)) : null;
+                    const invSnapshot = JSON.parse(JSON.stringify(this.draft));
+                    this.emailSendingId = this.isUuid(inv.id) ? inv.id : 'draft';
+                    const ok = await this.persistDraft();
+                    if (!ok) { this.emailSendingId = null; return; }
+                    if (repeat && repeat.enabled && !repeat._created) {
+                        try { await this.createScheduleFromInvoice(invSnapshot, repeat); if (this.draft.repeat) this.draft.repeat._created = true; }
+                        catch (e) { console.error('Schedule create failed:', e); alert('Document saved and email will continue, but the recurring schedule could not be created: ' + (e.message || e)); }
+                    }
+                    target = this.draft;
+                }
+                if (!this.isUuid(target.id)) {
+                    this.emailSendingId = null;
+                    return alert('Save this document before emailing it.');
+                }
+
+                this.emailSendingId = target.id;
+                try {
+                    const { data, error } = await supabaseClient.functions.invoke('send-document-email', {
+                        body: { documentId: target.id, to }
+                    });
+                    if (error) throw error;
+                    if (data && data.error) throw new Error(data.error);
+                    if (data && data.invoice) this.applyInvoiceRow(data.invoice);
+                    alert('Email sent to ' + to + '.');
+                } catch (e) {
+                    console.error('Email send failed:', e);
+                    alert('Could not send email: ' + (e.message || e));
+                } finally {
+                    this.emailSendingId = null;
+                }
             },
             async changeStatus(newStatus) {
                 if ((this.draft.status || 'Draft') === newStatus) return;
