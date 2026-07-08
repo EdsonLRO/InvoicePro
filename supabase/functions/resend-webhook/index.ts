@@ -122,6 +122,7 @@ Deno.serve(async (req) => {
   const data = payload.data || {};
   const providerEventId = String(payload.id || payload.event_id || data.id || data.email_id || "");
   const providerEmailId = data.email_id ? String(data.email_id) : null;
+  const auditProviderEventId = `${type}:${providerEventId || providerEmailId || crypto.randomUUID()}`;
   const tags = data.tags || payload.tags;
   const userId = getTag(tags, "user_id");
   const documentId = getTag(tags, "document_id");
@@ -154,7 +155,7 @@ Deno.serve(async (req) => {
     object_id: documentId,
     source: "provider_webhook",
     provider: "resend",
-    provider_event_id: providerEventId || providerEmailId,
+    provider_event_id: auditProviderEventId,
     metadata,
   });
   if (auditError && !String(auditError.message || "").includes("duplicate")) {
