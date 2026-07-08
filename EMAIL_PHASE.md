@@ -54,12 +54,12 @@ Browser responsibilities:
 
 ## Stage 3 - Delivery And Failure Webhooks
 
-Build a second Edge Function, tentatively `resend-webhook`.
+Build a second Edge Function, `resend-webhook`.
 
 Webhook responsibilities:
 
 - Accept Resend webhook POSTs.
-- Verify webhook signatures once configured.
+- Verify webhook signatures with `RESEND_WEBHOOK_SECRET` once configured.
 - Store events idempotently by Resend event/email ID.
 - Log delivered, bounced, failed, complained, opened, or clicked events where relevant.
 - Never mark a document as sent/delivered from an unverified webhook.
