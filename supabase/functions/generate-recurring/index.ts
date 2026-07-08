@@ -1,8 +1,10 @@
-// generate-recurring — scheduled Edge Function
+// generate-recurring - scheduled Edge Function
 // Finds active recurring schedules that are due, generates one invoice each,
-// advances next_run, and logs to the schedule's history.
+// optionally emails generated invoices, advances next_run, and logs history.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 
 // ---- date helpers (same logic as the browser app) ----
 function daysInMonth(y: number, m: number) { return new Date(Date.UTC(y, m + 1, 0)).getUTCDate(); }
@@ -39,32 +41,205 @@ function catchUp(tpl: any, today: string) {
   return { due, newNextRun: nr };
 }
 
-// ---- totals (mirrors the app so generated invoices are consistent) ----
-function calcGrandTotal(tpl: any): number {
-  const items = tpl.items || [];
-  const exclusive = (tpl.tax_mode || "exclusive") === "exclusive";
-  let sub = 0, tax = 0;
-  for (const it of items) {
-    const qty = Number(it.qty) || 0, price = Number(it.price) || 0;
-    const disc = Number(it.discount) || 0, rate = Number(it.tax) || 0;
-    const line = qty * price * (1 - disc / 100);
-    if (exclusive) { sub += line; tax += line * rate / 100; }
-    else { const net = line / (1 + rate / 100); sub += net; tax += line - net; }
-  }
-  const shipping = Number(tpl.shipping_cost) || 0;
-  const gd = Number(tpl.global_discount) || 0;
-  const afterDiscount = sub - (sub * gd / 100);
-  return Math.round((afterDiscount + tax + shipping) * 100) / 100;
+// ---- totals and email rendering ----
+function r2(n: number): number {
+  return Math.round((n + Number.EPSILON) * 100) / 100;
 }
 
-// ---- next invoice number, per user, per doc type, WITH the user's prefix ----
+function calcTotals(inv: any) {
+  const items = inv.items || [];
+  const mode = inv.tax_mode || "exclusive";
+  let netSum = 0;
+  let grossSum = 0;
+  const taxRaw: Record<string, number> = {};
+  for (const item of items) {
+    const qty = Number(item.qty) || 0;
+    const price = Number(item.price) || 0;
+    const discount = Number(item.discount) || 0;
+    const rate = Number(item.tax) || 0;
+    const afterDisc = qty * price * (1 - discount / 100);
+    let lineNet;
+    let lineTax;
+    if (mode === "inclusive") {
+      lineNet = rate ? afterDisc / (1 + rate / 100) : afterDisc;
+      lineTax = afterDisc - lineNet;
+    } else {
+      lineNet = afterDisc;
+      lineTax = afterDisc * (rate / 100);
+    }
+    netSum += lineNet;
+    grossSum += mode === "inclusive" ? afterDisc : afterDisc + lineTax;
+    if (rate > 0) taxRaw[String(rate)] = (taxRaw[String(rate)] || 0) + lineTax;
+  }
+  const discount = Number(inv.global_discount) || 0;
+  const shipping = Number(inv.shipping_cost) || 0;
+  const factor = 1 - discount / 100;
+  const base = mode === "inclusive" ? grossSum : netSum;
+  const subtotal = r2(base);
+  const globalDiscountAmt = r2(base * (discount / 100));
+  const taxByRate: Record<string, number> = {};
+  let taxAmt = 0;
+  for (const rate of Object.keys(taxRaw)) {
+    const v = r2(taxRaw[rate] * factor);
+    taxByRate[rate] = v;
+    taxAmt = r2(taxAmt + v);
+  }
+  const grandTotal = mode === "inclusive"
+    ? r2(grossSum * factor + shipping)
+    : r2(netSum * factor + taxAmt + shipping);
+  return { subtotal, globalDiscountAmt, taxAmt, taxByRate, shipping, grandTotal };
+}
+
+function calcGrandTotal(tpl: any): number {
+  return calcTotals({
+    items: tpl.items || [],
+    global_discount: tpl.global_discount || 0,
+    tax_mode: tpl.tax_mode || "exclusive",
+    shipping_cost: tpl.shipping_cost || 0,
+  }).grandTotal;
+}
+
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function validEmail(value: unknown): value is string {
+  return typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function currencySymbol(code: string) {
+  return ({ GBP: "£", EUR: "€", USD: "$" } as Record<string, string>)[code] || `${code} `;
+}
+
+function formatMoney(code: string, amount: unknown) {
+  return `${currencySymbol(code)}${(Number(amount) || 0).toFixed(2)}`;
+}
+
+function buildEmail(inv: any, company: any) {
+  const currency = inv.currency || "GBP";
+  const totals = calcTotals(inv);
+  const total = Number(inv.grand_total) || totals.grandTotal;
+  const customer = inv.customer_snapshot || {};
+  const companyName = company?.name || "Tallyo";
+  const subject = `Invoice #${inv.number} from ${companyName}`;
+  const lines = (inv.items || []).map((item: any) => {
+    const qty = Number(item.qty) || 0;
+    const price = Number(item.price) || 0;
+    const discount = Number(item.discount) || 0;
+    const lineTotal = qty * price * (1 - discount / 100);
+    return {
+      name: item.name || "Item",
+      qty,
+      unit: item.unit || "",
+      price,
+      discount,
+      tax: Number(item.tax) || 0,
+      total: lineTotal,
+    };
+  });
+
+  const taxLabel = Object.keys(totals.taxByRate).length === 1
+    ? `Tax (${Object.keys(totals.taxByRate)[0]}%)`
+    : "Tax";
+
+  const textLines = [
+    `Hi ${customer.name || "there"},`,
+    "",
+    `Please find invoice #${inv.number} from ${companyName}.`,
+    "",
+    `Invoice: #${inv.number}`,
+    `Issue date: ${inv.issue_date || ""}`,
+    `Due date: ${inv.due_date || ""}`,
+    `Total: ${formatMoney(currency, total)}`,
+    "",
+    "Items:",
+    ...lines.map((line) => `- ${line.name}: ${line.qty}${line.unit ? ` ${line.unit}` : ""} x ${formatMoney(currency, line.price)}${line.discount ? `, ${line.discount}% discount` : ""}${line.tax ? `, ${line.tax}% tax` : ""} = ${formatMoney(currency, line.total)} before tax`),
+    "",
+    "Summary:",
+    `Subtotal: ${formatMoney(currency, totals.subtotal)}`,
+  ];
+  if (totals.globalDiscountAmt > 0) textLines.push(`Discount: -${formatMoney(currency, totals.globalDiscountAmt)}`);
+  if (totals.taxAmt > 0) textLines.push(`${taxLabel}: ${formatMoney(currency, totals.taxAmt)}`);
+  if (totals.shipping > 0) textLines.push(`Shipping: ${formatMoney(currency, totals.shipping)}`);
+  textLines.push(`Total: ${formatMoney(currency, total)}`);
+  if (inv.notes) textLines.push("", "Notes:", String(inv.notes));
+  if (inv.terms) textLines.push("", "Terms:", String(inv.terms));
+  if (company?.payment_details) textLines.push("", "Payment details:", String(company.payment_details));
+  textLines.push("", "Thank you", companyName);
+
+  const itemRows = lines.map((line) => `
+    <tr>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;">${escapeHtml(line.name)}</td>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(line.qty)}${line.unit ? ` ${escapeHtml(line.unit)}` : ""}</td>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(formatMoney(currency, line.price))}</td>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${line.discount ? `${escapeHtml(line.discount)}%` : "-"}</td>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${line.tax ? `${escapeHtml(line.tax)}%` : "-"}</td>
+      <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(formatMoney(currency, line.total))}</td>
+    </tr>`).join("");
+
+  const summaryValues: Array<[string, number, string]> = [
+    ["Subtotal", totals.subtotal, ""],
+    ...(totals.globalDiscountAmt > 0 ? [["Discount", totals.globalDiscountAmt, "-"] as [string, number, string]] : []),
+    ...(totals.taxAmt > 0 ? [[taxLabel, totals.taxAmt, ""] as [string, number, string]] : []),
+    ...(totals.shipping > 0 ? [["Shipping", totals.shipping, ""] as [string, number, string]] : []),
+  ];
+  const summaryRows = summaryValues.map(([label, amount, prefix]) => `
+    <tr>
+      <td style="padding:6px 0;color:#475569;">${escapeHtml(label)}</td>
+      <td style="padding:6px 0;text-align:right;font-weight:600;">${escapeHtml(prefix)}${escapeHtml(formatMoney(currency, amount))}</td>
+    </tr>`).join("");
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.5;max-width:680px;margin:0 auto;">
+      <h1 style="font-size:22px;margin:0 0 12px;">Invoice #${escapeHtml(inv.number)}</h1>
+      <p>Hi ${escapeHtml(customer.name || "there")},</p>
+      <p>Please find invoice #${escapeHtml(inv.number)} from ${escapeHtml(companyName)}.</p>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:18px 0;">
+        <p style="margin:0 0 6px;"><strong>Issue date:</strong> ${escapeHtml(inv.issue_date || "")}</p>
+        <p style="margin:0 0 6px;"><strong>Due date:</strong> ${escapeHtml(inv.due_date || "")}</p>
+        <p style="margin:0;font-size:18px;"><strong>Total:</strong> ${escapeHtml(formatMoney(currency, total))}</p>
+      </div>
+      <table style="width:100%;border-collapse:collapse;margin:18px 0;">
+        <thead>
+          <tr style="background:#0f172a;color:#ffffff;">
+            <th style="padding:10px;text-align:left;">Item</th>
+            <th style="padding:10px;text-align:right;">Qty</th>
+            <th style="padding:10px;text-align:right;">Price</th>
+            <th style="padding:10px;text-align:right;">Disc</th>
+            <th style="padding:10px;text-align:right;">Tax</th>
+            <th style="padding:10px;text-align:right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>${itemRows}</tbody>
+      </table>
+      <table style="width:280px;margin:4px 0 22px auto;border-collapse:collapse;">
+        <tbody>
+          ${summaryRows}
+          <tr>
+            <td style="padding:10px 0;border-top:2px solid #cbd5e1;font-size:18px;font-weight:700;">Total</td>
+            <td style="padding:10px 0;border-top:2px solid #cbd5e1;text-align:right;font-size:18px;font-weight:700;">${escapeHtml(formatMoney(currency, total))}</td>
+          </tr>
+        </tbody>
+      </table>
+      ${inv.notes ? `<h2 style="font-size:16px;margin-top:20px;">Notes</h2><p>${escapeHtml(inv.notes).replaceAll("\n", "<br>")}</p>` : ""}
+      ${inv.terms ? `<h2 style="font-size:16px;margin-top:20px;">Terms</h2><p>${escapeHtml(inv.terms).replaceAll("\n", "<br>")}</p>` : ""}
+      ${company?.payment_details ? `<h2 style="font-size:16px;margin-top:20px;">Payment details</h2><p>${escapeHtml(company.payment_details).replaceAll("\n", "<br>")}</p>` : ""}
+      <p style="margin-top:24px;">Thank you<br>${escapeHtml(companyName)}</p>
+    </div>`;
+
+  return { subject, text: textLines.join("\n"), html };
+}
+
 async function nextNumber(admin: any, userId: string): Promise<string> {
-  // Look up this user's invoice prefix from their company settings.
   const { data: settings } = await admin.from("company_settings")
     .select("invoice_prefix").eq("user_id", userId).single();
   const prefix = (settings?.invoice_prefix ?? "") as string;
 
-  // Find the highest existing invoice number for this user.
   const { data } = await admin.from("invoices")
     .select("number").eq("user_id", userId).eq("doc_type", "invoice");
   let max = 0;
@@ -75,27 +250,71 @@ async function nextNumber(admin: any, userId: string): Promise<string> {
   return prefix + String(max + 1).padStart(4, "0");
 }
 
+async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
+  try {
+    const { error } = await admin.from("audit_events").insert(payload);
+    if (error) console.warn("audit event insert skipped", error.message);
+  } catch (e) {
+    console.warn("audit event insert skipped", String(e));
+  }
+}
+
+async function sendInvoiceEmail(resendKey: string, invoice: any, company: any, to: string, userId: string) {
+  const email = buildEmail(invoice, company || {});
+  const resendResponse = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: [to],
+      subject: email.subject,
+      html: email.html,
+      text: email.text,
+      tags: [
+        { name: "category", value: "document_email" },
+        { name: "document_id", value: invoice.id },
+        { name: "user_id", value: userId },
+      ],
+    }),
+  });
+  const body = await resendResponse.json().catch(() => ({}));
+  return { ok: resendResponse.ok, status: resendResponse.status, body, subject: email.subject };
+}
+
 Deno.serve(async (_req) => {
   const admin = createClient(
     Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,   // privileged key — server-side only
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+  const resendKey = Deno.env.get("RESEND_API_KEY") || "";
 
   const today = toISO(new Date());
   const nowISO = new Date().toISOString();
 
-  // Find active schedules that are due (across ALL users).
   const { data: due, error } = await admin.from("recurring_templates")
     .select("*").eq("active", true).lte("next_run", today);
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
 
   let generated = 0;
+  let emailed = 0;
+  let emailSkipped = 0;
+  let emailFailed = 0;
+
   for (const tpl of (due || [])) {
     try {
-      const number = await nextNumber(admin, tpl.user_id);
+      const userId = String(tpl.user_id || "");
+      if (!userId) {
+        console.error("template missing user_id", tpl.id);
+        continue;
+      }
+
+      const number = await nextNumber(admin, userId);
       const invoice = {
-        user_id: tpl.user_id,                        // <-- critical: stamp the schedule's owner
+        user_id: userId,
         doc_type: "invoice",
         number,
         status: "Sent",
@@ -112,26 +331,84 @@ Deno.serve(async (_req) => {
         terms: tpl.terms || null,
         grand_total: calcGrandTotal(tpl),
         history: [
-          { ts: nowISO, type: "created",   text: "Document created" },
+          { ts: nowISO, type: "created", text: "Document created" },
           { ts: nowISO, type: "recurring", text: "Generated automatically from recurring schedule" + (tpl.name ? ` "${tpl.name}"` : "") },
-          { ts: nowISO, type: "sent",      text: "Marked as sent" },
+          { ts: nowISO, type: "sent", text: "Marked as sent" },
         ],
       };
 
-      const { error: insErr } = await admin.from("invoices").insert(invoice);
-      if (insErr) { console.error("insert failed", tpl.id, insErr.message); continue; }
+      const { data: inserted, error: insErr } = await admin.from("invoices").insert(invoice).select("*").single();
+      if (insErr) {
+        console.error("insert failed", tpl.id, insErr.message);
+        continue;
+      }
 
       const res = catchUp(tpl, today);
-      const hist = tpl.history || [];
+      const hist = Array.isArray(tpl.history) ? tpl.history : [];
       hist.push({ ts: nowISO, type: "generated", text: `Generated invoice #${number} (scheduled)` });
+
+      if (tpl.email_enabled === true) {
+        const to = String(tpl.customer_snapshot?.email || "").trim();
+        if (!validEmail(to)) {
+          emailSkipped++;
+          hist.push({ ts: nowISO, type: "email", text: `Automatic email skipped for invoice #${number}: customer has no valid email address` });
+        } else if (!resendKey) {
+          emailSkipped++;
+          hist.push({ ts: nowISO, type: "email", text: `Automatic email skipped for invoice #${number}: email service is not configured` });
+        } else {
+          const { data: company } = await admin.from("company_settings").select("*").eq("user_id", userId).maybeSingle();
+          const sentAt = new Date().toISOString();
+          const sendResult = await sendInvoiceEmail(resendKey, inserted, company || {}, to, userId);
+          if (sendResult.ok) {
+            emailed++;
+            const invoiceHistory = Array.isArray(inserted.history) ? inserted.history : [];
+            invoiceHistory.push({ ts: sentAt, type: "sent", text: `Emailed to ${to}` });
+            await admin.from("invoices")
+              .update({ history: invoiceHistory, updated_at: sentAt })
+              .eq("id", inserted.id)
+              .eq("user_id", userId);
+            hist.push({ ts: sentAt, type: "email", text: `Emailed invoice #${number} to ${to}` });
+            await insertAuditEvent(admin, {
+              user_id: userId,
+              actor_user_id: userId,
+              event_type: "document_email_sent",
+              object_type: "invoice",
+              object_id: inserted.id,
+              source: "edge_function",
+              provider: "resend",
+              provider_event_id: sendResult.body?.id || null,
+              metadata: { to, from: FROM_EMAIL, subject: sendResult.subject, automated: true, recurring_template_id: tpl.id },
+            });
+          } else {
+            emailFailed++;
+            const invoiceHistory = Array.isArray(inserted.history) ? inserted.history : [];
+            invoiceHistory.push({ ts: sentAt, type: "email", text: `Automatic email failed to ${to}` });
+            await admin.from("invoices")
+              .update({ history: invoiceHistory, updated_at: sentAt })
+              .eq("id", inserted.id)
+              .eq("user_id", userId);
+            hist.push({ ts: sentAt, type: "email", text: `Automatic email failed for invoice #${number}` });
+            await insertAuditEvent(admin, {
+              user_id: userId,
+              actor_user_id: userId,
+              event_type: "email_send_failed",
+              object_type: "invoice",
+              object_id: inserted.id,
+              source: "edge_function",
+              provider: "resend",
+              metadata: { to, status: sendResult.status, response: sendResult.body, automated: true, recurring_template_id: tpl.id },
+            });
+          }
+        }
+      }
 
       await admin.from("recurring_templates").update({
         next_run: res.newNextRun,
         last_generated: today,
         generated_count: (tpl.generated_count || 0) + 1,
         history: hist,
-        updated_at: nowISO,
-      }).eq("id", tpl.id);
+        updated_at: new Date().toISOString(),
+      }).eq("id", tpl.id).eq("user_id", userId);
 
       generated++;
     } catch (e) {
@@ -139,7 +416,7 @@ Deno.serve(async (_req) => {
     }
   }
 
-  return new Response(JSON.stringify({ ok: true, generated, checked: (due || []).length }), {
+  return new Response(JSON.stringify({ ok: true, generated, emailed, emailSkipped, emailFailed, checked: (due || []).length }), {
     headers: { "Content-Type": "application/json" },
   });
 });

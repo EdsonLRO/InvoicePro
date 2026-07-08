@@ -635,6 +635,13 @@
                                 <option value="months">months</option>
                             </select>
                         </div>
+                        <label class="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 cursor-pointer">
+                            <input type="checkbox" v-model="draft.repeat.emailEnabled" class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-700">Email generated invoices automatically</span>
+                                <span class="block text-xs text-slate-500 mt-0.5">Only runs when the customer has an email address. Delivery will be tracked in activity history.</span>
+                            </span>
+                        </label>
                         <p class="text-xs text-slate-500 bg-slate-50 rounded-lg p-3">This invoice covers the current period. The schedule will create the <span class="font-medium">next</span> invoice on the date above, then repeat. Manage or pause it any time on the <span class="font-medium">Recurring</span> page.</p>
                     </div>
                 </div>
@@ -1069,7 +1076,7 @@
                         <div class="flex items-center justify-between flex-wrap gap-3">
                             <div>
                                 <h3 class="font-semibold text-amber-800">{{ dueTemplates.length }} recurring invoice{{ dueTemplates.length > 1 ? 's' : '' }} due</h3>
-                                <p class="text-sm text-amber-700 mt-0.5">Each will be created as a Sent invoice. If a schedule missed several periods, one invoice is generated to catch up.</p>
+                                <p class="text-sm text-amber-700 mt-0.5">This manual catch-up creates Sent invoices in the app. Automatic email is handled by the scheduled server run.</p>
                             </div>
                             <button @click="generateAllDue" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-colors whitespace-nowrap">Generate all due</button>
                         </div>
@@ -1083,19 +1090,23 @@
                                     <th class="p-4 font-semibold">Customer</th>
                                     <th class="p-4 font-semibold">Frequency</th>
                                     <th class="p-4 font-semibold">Next invoice</th>
+                                    <th class="p-4 font-semibold">Email</th>
                                     <th class="p-4 font-semibold">Status</th>
                                     <th class="p-4 font-semibold text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
                                 <tr v-if="recurringTemplates.length === 0">
-                                    <td colspan="6" class="p-8 text-center text-slate-400">No recurring schedules yet. Create one from an invoice with "🔁 Repeat this invoice".</td>
+                                    <td colspan="7" class="p-8 text-center text-slate-400">No recurring schedules yet. Create one from an invoice with "🔁 Repeat this invoice".</td>
                                 </tr>
                                 <tr v-for="t in recurringTemplates" :key="t.id" class="hover:bg-slate-50">
                                     <td class="p-4 font-medium text-slate-800">{{ t.name || '(untitled)' }}</td>
                                     <td class="p-4 text-slate-600">{{ t.customer ? t.customer.name : '—' }}</td>
                                     <td class="p-4 text-slate-600">{{ recurFrequencyLabel(t) }}</td>
                                     <td class="p-4"><span :class="isTemplateDue(t) ? 'text-red-600 font-semibold' : 'text-slate-600'">{{ t.nextRun }}</span></td>
+                                    <td class="p-4">
+                                        <span :class="t.emailEnabled ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'" class="px-3 py-1 rounded-full text-xs font-semibold">{{ t.emailEnabled ? 'Auto-email' : 'Manual' }}</span>
+                                    </td>
                                     <td class="p-4">
                                         <button @click="toggleTemplateActive(t)" :class="t.active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'" class="px-3 py-1 rounded-full text-xs font-semibold transition-colors">{{ t.active ? 'Active' : 'Paused' }}</button>
                                     </td>
@@ -1159,6 +1170,14 @@
                                 <option value="months">months</option>
                             </select>
                         </div>
+
+                        <label class="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 cursor-pointer">
+                            <input type="checkbox" v-model="recurringForm.emailEnabled" class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                            <span>
+                                <span class="block text-sm font-semibold text-slate-700">Email generated invoices automatically</span>
+                                <span class="block text-xs text-slate-500 mt-0.5">Generated invoices are still created if email is off or the customer has no email address.</span>
+                            </span>
+                        </label>
 
                         <div>
                             <label class="block text-sm font-bold text-slate-600 mb-2">Line items</label>
@@ -1883,7 +1902,7 @@
                     customer: null, status: 'Draft', currency: co.defaultCurrency || 'GBP',
                     globalDiscount: 0, taxMode: this.lastTaxMode || 'exclusive', shippingCost: 0, payments: [],
                     history: [ { ts: new Date().toISOString(), type: 'created', text: 'Document created' } ],
-                    repeat: { enabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: today, _created: false },
+                    repeat: { enabled: false, emailEnabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: today, _created: false },
                     items: [ { name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false } ]
                 };
             },
@@ -2053,6 +2072,7 @@
                     globalDiscount: inv.globalDiscount || 0, taxMode: inv.taxMode || 'exclusive', shippingCost: inv.shippingCost || 0,
                     notes: inv.notes || '', terms: inv.terms || '',
                     frequency: repeat.frequency || 'monthly', customInterval: repeat.customInterval || 1, customUnit: repeat.customUnit || 'months',
+                    emailEnabled: repeat.emailEnabled === true,
                     startDate: start, nextRun: start, active: true, lastGenerated: null, generatedCount: 0,
                     history: [ { ts: new Date().toISOString(), type: 'created', text: 'Schedule created from invoice #' + (inv.number || '') } ]
                 };
@@ -2068,7 +2088,7 @@
                 if (!inv.status) inv.status = 'Draft';
                 if (!inv.docType) inv.docType = 'invoice';
                 // `repeat` is a UI-only field (not a DB column); keep it so re-assigning draft doesn't drop it.
-                const priorRepeat = this.draft.repeat || { enabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: inv.date, _created: false };
+                const priorRepeat = this.draft.repeat || { enabled: false, emailEnabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: inv.date, _created: false };
                 const row = this.invoiceToRow(inv);
                 const existing = this.isUuid(inv.id) ? this.invoices.find(i => i.id === inv.id) : null;
                 try {
@@ -2310,6 +2330,7 @@
                     taxMode: r.tax_mode || 'exclusive', shippingCost: Number(r.shipping_cost) || 0,
                     notes: r.notes || '', terms: r.terms || '',
                     frequency: r.frequency || 'monthly', customInterval: r.custom_interval || 1, customUnit: r.custom_unit || 'months',
+                    emailEnabled: r.email_enabled === true,
                     startDate: r.start_date, nextRun: r.next_run, active: r.active !== false,
                     lastGenerated: r.last_generated || null, generatedCount: r.generated_count || 0,
                     history: r.history || []
@@ -2323,6 +2344,7 @@
                     tax_mode: t.taxMode || 'exclusive', shipping_cost: t.shippingCost || 0,
                     notes: t.notes || null, terms: t.terms || null,
                     frequency: t.frequency || 'monthly', custom_interval: t.customInterval || 1, custom_unit: t.customUnit || 'months',
+                    email_enabled: t.emailEnabled === true,
                     start_date: t.startDate, next_run: t.nextRun, active: t.active !== false,
                     last_generated: t.lastGenerated || null, generated_count: t.generatedCount || 0,
                     history: t.history || [],
@@ -2338,6 +2360,7 @@
                     currency: co.defaultCurrency || 'GBP', globalDiscount: 0, taxMode: this.lastTaxMode || 'exclusive', shippingCost: 0,
                     notes: co.defaultNotes || '', terms: co.defaultTerms || '',
                     frequency: 'monthly', customInterval: 1, customUnit: 'months',
+                    emailEnabled: false,
                     startDate: today, nextRun: today, active: true, lastGenerated: null, generatedCount: 0,
                     history: [ { ts: new Date().toISOString(), type: 'created', text: 'Schedule created' } ]
                 };
@@ -2379,6 +2402,7 @@
                         if ((existing.customer && existing.customer.name) !== (t.customer && t.customer.name)) changes.push('customer');
                         if (JSON.stringify((existing.items || []).map(i => [i.name, i.qty, i.price, i.tax, i.discount, i.unit])) !== JSON.stringify((t.items || []).map(i => [i.name, i.qty, i.price, i.tax, i.discount, i.unit]))) changes.push('line items');
                         if (String(existing.startDate) !== String(t.startDate)) changes.push('start date');
+                        if ((existing.emailEnabled === true) !== (t.emailEnabled === true)) changes.push(t.emailEnabled ? 'automatic email enabled' : 'automatic email disabled');
                         changes.forEach(c => t.history.push({ ts: new Date().toISOString(), type: 'edited', text: 'Changed ' + c }));
                     }
                     const row = this.templateToRow(t);
@@ -2456,7 +2480,7 @@
                         count++;
                     } catch (e) { console.error('Generate failed for template', t.id, e); }
                 }
-                if (count > 0) alert(count + ' invoice' + (count > 1 ? 's' : '') + ' generated and marked as Sent. Find them in My Invoices.');
+                if (count > 0) alert(count + ' invoice' + (count > 1 ? 's' : '') + ' generated and marked as Sent. Automatic email only runs from the scheduled server automation.');
             },
 
             // ================= OVERDUE REMINDERS =================
@@ -2531,7 +2555,8 @@
                 (this.draft.items || []).forEach(it => { if (it.tax === undefined) it.tax = 0; });
                 if(!this.draft.payments) this.draft.payments = [];
                 if(!this.draft.history) this.draft.history = [];
-                if(!this.draft.repeat) this.draft.repeat = { enabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: (this.draft.date || new Date().toISOString().split('T')[0]), _created: false };
+                if(!this.draft.repeat) this.draft.repeat = { enabled: false, emailEnabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: (this.draft.date || new Date().toISOString().split('T')[0]), _created: false };
+                if(this.draft.repeat.emailEnabled === undefined) this.draft.repeat.emailEnabled = false;
                 if(!this.draft.docType) this.draft.docType = 'invoice';
                 if(!this.draft.currency) this.draft.currency = 'GBP';
                 this.syncTimeFields();
