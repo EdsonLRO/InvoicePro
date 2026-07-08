@@ -813,43 +813,44 @@
                 </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                    <table class="w-full text-left" style="min-width: 1160px;">
+                    <table class="w-full text-left" style="min-width: 1440px;">
                         <thead class="bg-slate-50 border-b border-slate-200">
                             <tr>
-                                <th class="p-4 font-medium text-slate-500 w-10"><input type="checkbox" :checked="currentInvoicePageSelected" @change="toggleInvoicePageSelection($event.target.checked)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
-                                <th class="p-4 font-medium text-slate-500">Type</th>
-                                <th class="p-4 font-medium text-slate-500">Number</th>
-                                <th class="p-4 font-medium text-slate-500">Date</th>
-                                <th class="p-4 font-medium text-slate-500">Due Date</th>
-                                <th class="p-4 font-medium text-slate-500" style="width: 120px;">Customer</th>
-                                <th class="p-4 font-medium text-slate-500">Total</th>
-                                <th class="p-4 font-medium text-slate-500" style="width: 240px; min-width: 240px;">Status</th>
+                                <th class="p-4 font-medium text-slate-500 w-10" style="width: 48px;"><input type="checkbox" :checked="currentInvoicePageSelected" @change="toggleInvoicePageSelection($event.target.checked)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 110px;">Type</th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 160px;">Number</th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 130px;">Date</th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 130px;">Due Date</th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 190px;">Customer</th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 130px;">Total</th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 120px;">Status</th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 180px;">Email</th>
                                 <th class="p-4 font-medium text-slate-500 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            <tr v-if="invoices.length === 0"><td colspan="9" class="p-8 text-center text-slate-400">No documents saved yet.</td></tr>
-                            <tr v-else-if="filteredInvoices.length === 0"><td colspan="9" class="p-8 text-center text-slate-400">No documents match your filters.</td></tr>
+                            <tr v-if="invoices.length === 0"><td colspan="10" class="p-8 text-center text-slate-400">No documents saved yet.</td></tr>
+                            <tr v-else-if="filteredInvoices.length === 0"><td colspan="10" class="p-8 text-center text-slate-400">No documents match your filters.</td></tr>
                             <tr v-for="inv in paginatedInvoices" :key="inv.id" class="hover:bg-slate-50">
                                 <td class="p-4"><input type="checkbox" :value="inv.id" v-model="selectedInvoices" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></td>
                                 <td class="p-4">
                                     <span class="px-2 py-1 rounded text-xs font-medium" :class="(inv.docType||'invoice')==='invoice' ? 'bg-indigo-50 text-indigo-600' : (inv.docType==='quote' ? 'bg-purple-50 text-purple-600' : 'bg-teal-50 text-teal-600')">{{ docTypeNoun(inv.docType) }}</span>
                                 </td>
                                 <td class="p-4 font-medium whitespace-nowrap"><button @click="loadInvoice(inv)" class="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors whitespace-nowrap">#{{ inv.number }}</button></td>
-                                <td class="p-4 text-slate-600">{{ inv.date }}</td>
-                                <td class="p-4 text-slate-600">{{ inv.dueDate }}</td>
-                                <td class="p-4 text-slate-600" style="width: 120px; max-width: 120px; white-space: normal; word-break: break-word;">{{ inv.customer ? inv.customer.name : 'Unknown' }}</td>
-                                <td class="p-4 font-medium">
+                                <td class="p-4 text-slate-600 whitespace-nowrap">{{ inv.date }}</td>
+                                <td class="p-4 text-slate-600 whitespace-nowrap">{{ inv.dueDate }}</td>
+                                <td class="p-4 text-slate-600" style="width: 190px; max-width: 190px; white-space: normal; word-break: break-word;">{{ inv.customer ? inv.customer.name : 'Unknown' }}</td>
+                                <td class="p-4 font-medium whitespace-nowrap">
                                     {{ getCurrencySymbol(inv.currency) }}{{ inv.totals.grandTotal.toFixed(2) }}
                                     <div v-if="amountPaid(inv) > 0 && balanceDue(inv) > 0.001" class="text-xs text-red-500 font-normal">Bal: {{ getCurrencySymbol(inv.currency) }}{{ balanceDue(inv).toFixed(2) }}</div>
                                 </td>
-                                <td class="p-4" style="width: 240px; min-width: 240px; white-space: nowrap;">
-                                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: nowrap; white-space: nowrap;">
-                                        <span class="px-2 py-1 rounded text-xs font-bold uppercase" style="white-space: nowrap;" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
-                                        <span v-if="emailStatusFor(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium" style="white-space: nowrap;" :class="emailStatusClass(emailStatusFor(inv.id).state)">{{ emailStatusFor(inv.id).label }}</span>
-                                    </div>
+                                <td class="p-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 rounded text-xs font-bold uppercase" style="white-space: nowrap;" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
                                 </td>
-                                <td class="p-4 text-right">
+                                <td class="p-4 whitespace-nowrap">
+                                    <span v-if="emailStatusFor(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium" style="white-space: nowrap;" :class="emailStatusClass(emailStatusFor(inv.id).state)">{{ emailStatusFor(inv.id).label }}</span>
+                                </td>
+                                <td class="p-4 text-right whitespace-nowrap">
                                     <div class="flex justify-end items-center space-x-3">
                                         <button v-if="inv.docType === 'quote'" @click="convertToInvoice(inv)" class="text-purple-600 hover:text-purple-800 text-sm font-medium">Convert</button>
                                         <button @click="duplicateInvoice(inv)" class="text-slate-500 hover:text-slate-800 text-sm font-medium">Duplicate</button>
