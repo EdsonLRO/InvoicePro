@@ -690,11 +690,11 @@
                     </div>
                     <p class="text-xs text-slate-400 mb-4">A record of what has happened to this document, for your convenience. This is an activity history, not a tamper-proof audit log.</p>
                     <div v-if="emailStatusFor(draft.id)" class="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
-                        <div class="flex items-center justify-between gap-4 flex-wrap">
+                        <div class="flex items-center justify-between gap-4">
                             <div class="font-semibold text-slate-700">Email status</div>
-                            <div class="flex items-center gap-3 flex-wrap justify-end text-right">
+                            <div class="flex items-center gap-3 justify-end text-right">
                                 <div class="text-slate-500">{{ emailStatusFor(draft.id).detail }}</div>
-                                <span class="px-2.5 py-1 rounded-full text-xs font-bold" :class="emailStatusClass(emailStatusFor(draft.id).state)">{{ emailStatusFor(draft.id).label }}</span>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap" :class="emailStatusClass(emailStatusFor(draft.id).state)">{{ emailStatusFor(draft.id).label }}</span>
                             </div>
                         </div>
                     </div>
@@ -821,9 +821,9 @@
                                 <th class="p-4 font-medium text-slate-500">Number</th>
                                 <th class="p-4 font-medium text-slate-500">Date</th>
                                 <th class="p-4 font-medium text-slate-500">Due Date</th>
-                                <th class="p-4 font-medium text-slate-500">Customer</th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 140px;">Customer</th>
                                 <th class="p-4 font-medium text-slate-500">Total</th>
-                                <th class="p-4 font-medium text-slate-500">Status</th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 190px; min-width: 190px;">Status</th>
                                 <th class="p-4 font-medium text-slate-500 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -838,15 +838,15 @@
                                 <td class="p-4 font-medium whitespace-nowrap"><button @click="loadInvoice(inv)" class="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors whitespace-nowrap">#{{ inv.number }}</button></td>
                                 <td class="p-4 text-slate-600">{{ inv.date }}</td>
                                 <td class="p-4 text-slate-600">{{ inv.dueDate }}</td>
-                                <td class="p-4 text-slate-600">{{ inv.customer ? inv.customer.name : 'Unknown' }}</td>
+                                <td class="p-4 text-slate-600" style="width: 140px; max-width: 140px; white-space: normal; word-break: break-word;">{{ inv.customer ? inv.customer.name : 'Unknown' }}</td>
                                 <td class="p-4 font-medium">
                                     {{ getCurrencySymbol(inv.currency) }}{{ inv.totals.grandTotal.toFixed(2) }}
                                     <div v-if="amountPaid(inv) > 0 && balanceDue(inv) > 0.001" class="text-xs text-red-500 font-normal">Bal: {{ getCurrencySymbol(inv.currency) }}{{ balanceDue(inv).toFixed(2) }}</div>
                                 </td>
-                                <td class="p-4">
-                                    <div class="flex items-center gap-2 flex-wrap">
+                                <td class="p-4 whitespace-nowrap" style="width: 190px; min-width: 190px;">
+                                    <div class="flex items-center gap-2 flex-nowrap">
                                         <span class="px-2 py-1 rounded text-xs font-bold uppercase" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
-                                        <span v-if="emailStatusFor(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium" :class="emailStatusClass(emailStatusFor(inv.id).state)">{{ emailStatusFor(inv.id).label }}</span>
+                                        <span v-if="emailStatusFor(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap" :class="emailStatusClass(emailStatusFor(inv.id).state)">{{ emailStatusFor(inv.id).label }}</span>
                                     </div>
                                 </td>
                                 <td class="p-4 text-right">
