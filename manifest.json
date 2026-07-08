@@ -1,6 +1,6 @@
 {
-  "name": "InvoicePro",
-  "short_name": "InvoicePro",
+  "name": "Tallyo",
+  "short_name": "Tallyo",
   "description": "Create and manage your invoices.",
   "start_url": "./",
   "scope": "./",

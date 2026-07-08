@@ -2,7 +2,7 @@
 
 > How Supabase is used in this app. For another developer or AI coding agent.
 > Read before touching auth, the database, RLS, the Edge Function, or the scheduler.
-> The app is currently named **InvoicePro** in code and is being rebranded to **Tallyo**.
+> The public app brand is now **Tallyo**. The original **InvoicePro** name remains in the repo/URL context and some historical/internal references.
 >
 > **This document has been verified against the live database** (column list, RLS policies, and the cron job were exported from the running project, not just read from `schema.sql`).
 

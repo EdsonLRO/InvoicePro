@@ -11,15 +11,14 @@ Tallyo is a **secure invoice, customer, payment, recurring invoice, and business
 
 The app is currently a **Vue 3 single-page front-end** (one `index.html` file) backed by **Supabase** (Postgres, Auth, Row Level Security, Edge Functions). It is deployed as a static site (GitHub Pages) and is PWA-enabled.
 
-**Note:** the code still uses the old name `InvoicePro`. The public brand is now **Tallyo**.
+**Note:** the visible app brand is now **Tallyo**. The old name `InvoicePro` remains in the repo/folder name, historical docs, and some non-user-facing internals.
 
 ---
 
 ## 2. Brand rules
 
 - Public brand name is **Tallyo**. Domain: **tallyo.co.uk**.
-- The code currently says **InvoicePro** in user-facing places. Replace user-facing occurrences with **Tallyo**.
-- **Prioritise the visible InvoicePro → Tallyo rebrand first** (see First Tasks).
+- User-facing branding should say **Tallyo**. Keep any remaining `InvoicePro` references only where they are historical, repo/URL-related, or clearly non-user-facing.
 - Do **not** rename the GitHub repository or change the live URL without also updating Supabase Auth allowed/redirect URLs — doing so will break authentication.
 - Keep wording **plain, professional, and direct**. No hype, no buzzwords, no exclamation-heavy copy.
 - Do not change the "Change Password" box wording: it must ask for the user's **Current Password**, with the note *"Please enter your current password to confirm it's you."*
@@ -126,11 +125,9 @@ Security is a core part of this product. Treat it as a first-class requirement, 
 ## 11. First tasks Codex should perform
 
 1. **Read the code first:** `index.html`, `config.js`, `schema.sql`, `recurring_setup.sql`, and the recurring Edge Function. Confirm anything marked "Unknown / needs confirmation" from the source, not assumptions.
-2. **Do the visible InvoicePro → Tallyo rebrand (highest priority, low risk):**
-   - Replace user-facing "InvoicePro" with "Tallyo" in `index.html` (title, `apple-mobile-web-app-title`, header, sidebar wordmark, startup-error text, and the two confirm dialogs).
-   - Update `manifest.json` name/short_name.
-   - Replace `icon-192.png` and `icon-512.png` with Tallyo icons.
-   - Do **not** rename the repo/URL.
+2. **Maintain the visible Tallyo rebrand:**
+   - Keep user-facing app text, `manifest.json`, and PWA icons branded as Tallyo.
+   - Do **not** rename the repo/URL unless Supabase Auth allowed/redirect URLs are updated at the same time.
 3. **Verify nothing broke:** load the app, sign in, create an invoice, mark Sent, record a payment, export a PDF — confirm no regressions.
 4. **Re-verify recurring automation** if any backend/function change was made (function deployed; cron job active).
 5. Only then move on to roadmap work (e.g. the email-sending phase), keeping security rules intact.

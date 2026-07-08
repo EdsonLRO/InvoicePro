@@ -10,7 +10,7 @@
          'unsafe-eval' is required because Vue compiles templates in the browser. -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
 
-    <title>InvoicePro</title>
+    <title>Tallyo</title>
 
     <!-- PWA: installable as an app on phones (Add to Home Screen) -->
     <link rel="manifest" href="./manifest.json">
@@ -18,7 +18,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="InvoicePro">
+    <meta name="apple-mobile-web-app-title" content="Tallyo">
     <link rel="apple-touch-icon" href="./icon-192.png">
     <link rel="icon" type="image/png" href="./icon-192.png">
 
@@ -63,7 +63,7 @@
     <div v-if="!isLoggedIn" class="flex-1 flex items-center justify-center bg-slate-900 p-6">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
             <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold tracking-tight text-indigo-600 mb-1">InvoicePro</h1>
+                <h1 class="text-3xl font-bold tracking-tight text-indigo-600 mb-1">Tallyo</h1>
                 <p class="text-sm text-slate-500">Create and manage your invoices</p>
             </div>
 
@@ -154,7 +154,7 @@
         <header class="bg-slate-900 text-white shadow-md z-20 flex-shrink-0">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 relative">
                 <div class="h-16 flex items-center justify-between">
-                    <div class="text-2xl font-bold tracking-tight text-indigo-400">InvoicePro</div>
+                    <div class="text-2xl font-bold tracking-tight text-indigo-400">Tallyo</div>
                     <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 -mr-2 text-slate-300 hover:text-white" aria-label="Menu">
                         <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                         <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -1318,7 +1318,7 @@
         function fatal(msg) {
             document.body.innerHTML =
                 '<div style="max-width:640px;margin:60px auto;font-family:system-ui,sans-serif;padding:24px;border:1px solid #fca5a5;background:#fef2f2;border-radius:12px;color:#7f1d1d">' +
-                '<h2 style="margin:0 0 8px">InvoicePro could not start</h2>' +
+                '<h2 style="margin:0 0 8px">Tallyo could not start</h2>' +
                 '<p style="margin:0 0 8px">' + msg + '</p>' +
                 '<p style="margin:0;font-size:13px;color:#991b1b">Open the browser console (F12) for technical details.</p></div>';
             throw new Error(msg);
@@ -1657,7 +1657,7 @@
                 this.loadMfaStatus();
             },
             async confirmLogout() {
-                if(confirm("Log out of InvoicePro?")) {
+                if(confirm("Log out of Tallyo?")) {
                     await supabaseClient.auth.signOut();
                     this.isLoggedIn = false;
                     this.currentUser = null;
@@ -1696,7 +1696,7 @@
             },
             async factoryReset() {
                 // Local-only reset of cached data on this browser. Does not delete the account.
-                if(confirm("This clears InvoicePro data cached in THIS browser. Your account is not deleted. Continue?")) {
+                if(confirm("This clears Tallyo data cached in THIS browser. Your account is not deleted. Continue?")) {
                     if(this.currentUser) localStorage.removeItem('inv_data_' + this.currentUser.id);
                     alert("Local data cleared from this browser.");
                 }

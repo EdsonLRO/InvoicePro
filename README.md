@@ -2,7 +2,7 @@
 
 A secure **invoice, customer, payment, recurring invoice, and business-records workspace** for small businesses.
 
-> **Note:** the code currently uses the original name **InvoicePro**; the public brand is **Tallyo** (rebrand in progress). Domain: **tallyo.co.uk**.
+> **Note:** the public brand is **Tallyo**. The original project/repo name **InvoicePro** still appears in historical docs and some non-user-facing internals. Domain: **tallyo.co.uk**.
 
 ---
 
@@ -21,7 +21,7 @@ It is designed to be simple, mobile-friendly, and secure. It suits freelancers, 
 - Core invoicing, customers, payments, recurring billing, and activity history are working.
 - Recurring invoice generation runs automatically via a scheduled cloud function.
 - Email sending is **not yet implemented** (invoice delivery and overdue reminders are currently manual — the app drafts the text for you to send).
-- Rebrand from InvoicePro → Tallyo is **in progress** (visible names and icons not fully updated yet).
+- Visible rebrand from InvoicePro → Tallyo is complete in the app UI, PWA manifest, and app icons. The repo/URL has not been renamed.
 - Not production-hardened for paying customers; see the security overview and roadmap.
 
 ---
@@ -136,7 +136,7 @@ _(These are currently supplied via `config.js`.)_
 
 ## 9. Development roadmap
 
-1. **Finish the Tallyo rebrand** — update visible names, `manifest.json`, and app icons. (Do not rename the repo/URL without updating Supabase Auth URLs.)
+1. **Keep Tallyo rebrand hygiene** — leave the repo/URL unchanged unless Supabase Auth URLs are updated at the same time.
 2. **Email phase (largest remaining work), provider: Resend**
    - Connect `tallyo.co.uk`; add SPF, DKIM, DMARC; send a test email.
    - Auto-send invoices on creation/generation.

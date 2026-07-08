@@ -11,22 +11,22 @@ Tallyo is a secure, single-page web application for running the money-and-record
 
 It is built as a real, working product **and** as a security-focused portfolio piece. The security engineering is deliberately thorough and documented (before/after threat models exist separately). The app started life as an insecure browser-only prototype and was hardened into a proper client + backend architecture.
 
-**In the code the app is still named `InvoicePro`. The public brand is now `Tallyo`.** Renaming is in progress (see section 2).
+**The public brand is now `Tallyo`.** The visible app UI, PWA manifest, and app icons have been rebranded. The original `InvoicePro` name still exists in the repo/folder name, historical docs, and some non-user-facing internals.
 
 ---
 
 ## 2. Product name and rebrand status
 
-- **Current name in code:** `InvoicePro` (appears in `index.html` title, header, sidebar wordmark, a startup-error message, and two confirm dialogs — 7 occurrences total, plus `manifest.json`).
+- **Visible app brand:** `Tallyo` in `index.html`, `manifest.json`, and PWA icons.
 - **New public brand:** **Tallyo**
 - **Domain owned:** **tallyo.co.uk** (registered; not yet configured for hosting or email).
-- **Rebrand status:** NOT yet applied in code. Visible text still says InvoicePro.
+- **Rebrand status:** visible UI text, PWA metadata, and app icons are rebranded to Tallyo. The repo/live URL is deliberately unchanged.
 - **GitHub repo / live URL:** currently uses the `InvoicePro` repo name (GitHub Pages). **Deliberately not renamed yet** — renaming the repo changes the live URL and would require updating Supabase Auth allowed/redirect URLs. Treat repo/URL rename as a separate, careful task.
 
-**Rebrand checklist (not yet done):**
-- Replace visible "InvoicePro" → "Tallyo" in `index.html` (`<title>`, `apple-mobile-web-app-title` meta, header `<h1>`, sidebar wordmark, the "could not start" message, and the logout/clear-data confirm dialogs).
-- Update `manifest.json` app name/short_name.
-- Replace app icons `icon-192.png` and `icon-512.png` with Tallyo icons.
+**Rebrand checklist:**
+- Done: replaced visible "InvoicePro" → "Tallyo" in `index.html` (`<title>`, `apple-mobile-web-app-title` meta, header `<h1>`, sidebar wordmark, the "could not start" message, and the logout/clear-data confirm dialogs).
+- Done: updated `manifest.json` app name/short_name.
+- Done: replaced app icons `icon-192.png` and `icon-512.png` with Tallyo icons.
 - Do **not** rename the GitHub repo/URL yet without also updating Supabase Auth URLs.
 
 ---
@@ -139,12 +139,14 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `index.html` | The entire front-end app (Vue 3 markup + inline logic). Source of truth for UI/behaviour. |
 | `tailwind.css` | Compiled, self-hosted Tailwind stylesheet. Must be rebuilt when new classes are added. |
 | `config.js` | Holds public Supabase URL + publishable/anon key. **No secret keys.** |
-| `manifest.json` | PWA metadata (name, icons). Needs Tallyo rename. |
+| `manifest.json` | PWA metadata (name, icons). Rebranded to Tallyo. |
 | `service-worker.js` | PWA caching / offline. Caches aggressively (hard-refresh after deploy). |
-| `icon-192.png`, `icon-512.png` | PWA icons. Need Tallyo replacements. |
+| `icon-192.png`, `icon-512.png` | Tallyo PWA icons. |
 | `schema.sql` | Full Postgres schema: tables, RLS policies, new-user trigger. |
+| `supabase/audit_events.sql` | Draft append-only audit-events table for future email/payment/server-side events. Not wired into the app yet. |
 | `recurring_setup.sql` | Creates `recurring_templates` table + its RLS (idempotent). |
 | `supabase/functions/generate-recurring/index.ts` | Edge Function (Deno/TS) that generates due recurring invoices. Deployed to Supabase. |
+| `SECURITY_OPERATIONS.md` | Practical backup, restore, data-protection, email, payment, and release gates before real users. |
 | Tailwind build inputs | `tailwind.config.js` + a Tailwind input CSS file used by the CLI to produce `tailwind.css`. **Unknown / needs confirmation:** exact input filename in the repo. |
 | Threat model docs | Separate before/after STRIDE threat models + a plain-English security write-up exist as project artifacts. |
 
@@ -278,7 +280,7 @@ Always describe security as "controls implemented + honest limitations", never a
 
 ## 17. Known bugs or rough edges
 
-- **Rebrand incomplete:** app still says "InvoicePro" in UI, manifest, and icons.
+- **Historical naming remains:** repo/folder name and historical threat-model docs still reference InvoicePro; the visible UI, manifest, and icons use Tallyo.
 - **Generated invoice numbering** was historically inconsistent (plain number vs prefixed); the Edge Function now prepends the user's prefix — verify consistency across app-generated and server-generated invoices.
 - **Service-worker caching** can serve stale files after deploy; requires hard-refresh / Incognito to confirm changes. Easy to mistake for "deploy didn't work".
 - **Mobile item row** was iteratively tuned (qty/unit stacking, price/disc/tax widths, suggestion-dropdown clipping). Re-test on small screens after any table/layout change.
@@ -291,15 +293,16 @@ Always describe security as "controls implemented + honest limitations", never a
 ## 18. Product roadmap
 
 Near-term (in rough order):
-1. **Finish the Tallyo rebrand** (text, manifest, icons). Keep repo/URL unchanged for now.
-2. **Email phase (biggest remaining work). Provider chosen: Resend.**
+1. **Keep Tallyo rebrand hygiene**. Visible app text, manifest, and icons are done; keep repo/URL unchanged unless Supabase Auth URLs are updated at the same time.
+2. **Safety foundation before real users:** follow `SECURITY_OPERATIONS.md` for backup/restore, basic data-protection groundwork, and trusted audit-event planning.
+3. **Email phase (biggest remaining work). Provider chosen: Resend.**
    - Stage 1: connect `tallyo.co.uk` to Resend; add **SPF, DKIM, DMARC** DNS records; send a test email.
    - Stage 2: auto-send invoices on creation/generation.
    - Stage 3: **automated overdue reminders** (reuse the scheduled-function pattern; this is deferred until email works).
    - Stage 4: **delivery tracking** via Resend webhooks → real "Delivered/Opened" events in Activity History.
-3. **Compliance groundwork** once emailing real customers (privacy policy, consent/unsubscribe, data-subject rights).
-4. Optional hardening: append-only audit log, formal backups, MFA recovery codes, password-strength/breach checks.
-5. Optional: link invoices to their recurring schedule (dedup guard); repo/URL rename to Tallyo (with Supabase Auth URL updates).
+4. **Compliance groundwork** before emailing real customers (privacy policy, consent/unsubscribe, data-subject rights).
+5. Optional hardening: wire up append-only audit events, formal backups, MFA recovery codes, password-strength/breach checks.
+6. Optional: link invoices to their recurring schedule (dedup guard); repo/URL rename to Tallyo (with Supabase Auth URL updates).
 
 ---
 
@@ -326,7 +329,7 @@ Near-term (in rough order):
 
 1. **Read `index.html`, `schema.sql`, `recurring_setup.sql`, and the Edge Function** to understand real structure before changing anything. Trust the code over assumptions.
 2. **Confirm the unknowns**: exact Supabase project URL/keys location (`config.js`), Tailwind input filename, and third-party library versions.
-3. **Do the Tallyo rebrand** (visible text in `index.html`, `manifest.json`, icons) — low-risk, high-visibility. Keep the "Change Password" wording exactly as specified.
+3. **Verify Tallyo rebrand hygiene** after UI changes. Keep visible app text, `manifest.json`, and icons branded as Tallyo, and keep the "Change Password" wording exactly as specified.
 4. **Re-verify the recurring automation** (function deploys; cron job registered/active) after any backend change.
 5. **Set up the local/Codex workflow**: rebuild Tailwind when classes change; after deploy, hard-refresh/Incognito to bypass the service worker.
 6. When touching invoices/templates, **respect the column-name mapping** in section 13 (`customer_snapshot`, `issue_date`, `grand_total`, `history`).

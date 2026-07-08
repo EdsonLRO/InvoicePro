@@ -1,7 +1,7 @@
 # Tallyo — Security Story (formerly InvoicePro)
 
 > How an app that only *felt* secure was hardened, phase by phase, into something genuinely defensible — told in plain English.
-> **Tallyo** is the current public brand; the project was originally built as **InvoicePro**, and the code still uses that name during the rebrand.
+> **Tallyo** is the current public brand; the project was originally built as **InvoicePro**, which still appears in historical context.
 
 ---
 

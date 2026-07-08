@@ -1,10 +1,10 @@
-// InvoicePro service worker
+// Tallyo service worker
 // Strategy: NETWORK-FIRST for the app's own pages/assets, so when you publish an
 // update users get the new version immediately (the cache is only a fallback for
 // when the device is offline). Requests to other origins (Supabase, CDNs) are left
 // alone and always go straight to the network.
 
-const CACHE = 'invoicepro-v1';
+const CACHE = 'tallyo-v1';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting(); // activate the new service worker right away
