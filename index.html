@@ -813,7 +813,7 @@
                 </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                    <table class="w-full text-left min-w-[760px]">
+                    <table class="w-full text-left" style="min-width: 1160px;">
                         <thead class="bg-slate-50 border-b border-slate-200">
                             <tr>
                                 <th class="p-4 font-medium text-slate-500 w-10"><input type="checkbox" :checked="currentInvoicePageSelected" @change="toggleInvoicePageSelection($event.target.checked)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
@@ -821,9 +821,9 @@
                                 <th class="p-4 font-medium text-slate-500">Number</th>
                                 <th class="p-4 font-medium text-slate-500">Date</th>
                                 <th class="p-4 font-medium text-slate-500">Due Date</th>
-                                <th class="p-4 font-medium text-slate-500" style="width: 140px;">Customer</th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 120px;">Customer</th>
                                 <th class="p-4 font-medium text-slate-500">Total</th>
-                                <th class="p-4 font-medium text-slate-500" style="width: 190px; min-width: 190px;">Status</th>
+                                <th class="p-4 font-medium text-slate-500" style="width: 240px; min-width: 240px;">Status</th>
                                 <th class="p-4 font-medium text-slate-500 text-right">Actions</th>
                             </tr>
                         </thead>
@@ -838,15 +838,15 @@
                                 <td class="p-4 font-medium whitespace-nowrap"><button @click="loadInvoice(inv)" class="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors whitespace-nowrap">#{{ inv.number }}</button></td>
                                 <td class="p-4 text-slate-600">{{ inv.date }}</td>
                                 <td class="p-4 text-slate-600">{{ inv.dueDate }}</td>
-                                <td class="p-4 text-slate-600" style="width: 140px; max-width: 140px; white-space: normal; word-break: break-word;">{{ inv.customer ? inv.customer.name : 'Unknown' }}</td>
+                                <td class="p-4 text-slate-600" style="width: 120px; max-width: 120px; white-space: normal; word-break: break-word;">{{ inv.customer ? inv.customer.name : 'Unknown' }}</td>
                                 <td class="p-4 font-medium">
                                     {{ getCurrencySymbol(inv.currency) }}{{ inv.totals.grandTotal.toFixed(2) }}
                                     <div v-if="amountPaid(inv) > 0 && balanceDue(inv) > 0.001" class="text-xs text-red-500 font-normal">Bal: {{ getCurrencySymbol(inv.currency) }}{{ balanceDue(inv).toFixed(2) }}</div>
                                 </td>
-                                <td class="p-4 whitespace-nowrap" style="width: 190px; min-width: 190px;">
-                                    <div class="flex items-center gap-2 flex-nowrap">
-                                        <span class="px-2 py-1 rounded text-xs font-bold uppercase" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
-                                        <span v-if="emailStatusFor(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap" :class="emailStatusClass(emailStatusFor(inv.id).state)">{{ emailStatusFor(inv.id).label }}</span>
+                                <td class="p-4" style="width: 240px; min-width: 240px; white-space: nowrap;">
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: nowrap; white-space: nowrap;">
+                                        <span class="px-2 py-1 rounded text-xs font-bold uppercase" style="white-space: nowrap;" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
+                                        <span v-if="emailStatusFor(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium" style="white-space: nowrap;" :class="emailStatusClass(emailStatusFor(inv.id).state)">{{ emailStatusFor(inv.id).label }}</span>
                                     </div>
                                 </td>
                                 <td class="p-4 text-right">
