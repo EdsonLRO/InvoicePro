@@ -769,14 +769,14 @@
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3 mb-5">
-                    <input type="text" v-model="invoiceSearch" placeholder="Search by # or customer..." class="flex-1 min-w-[200px] border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
-                    <select v-model="invoiceTypeFilter" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                    <input type="text" v-model="invoiceSearch" @input="resetInvoiceListState" placeholder="Search by # or customer..." class="flex-1 min-w-[200px] border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                    <select v-model="invoiceTypeFilter" @change="resetInvoiceListState" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
                         <option value="All">All types</option>
                         <option value="invoice">Invoices</option>
                         <option value="quote">Quotes</option>
                         <option value="credit">Credit Notes</option>
                     </select>
-                    <select v-model="invoiceStatusFilter" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                    <select v-model="invoiceStatusFilter" @change="resetInvoiceListState" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
                         <option value="All">All statuses</option>
                         <option value="Draft">Draft</option>
                         <option value="Sent">Sent</option>
@@ -785,7 +785,7 @@
                         <option value="Paid">Paid</option>
                         <option value="Cancelled">Cancelled</option>
                     </select>
-                    <select v-model="invoiceSort" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                    <select v-model="invoiceSort" @change="resetInvoiceListState" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
                         <option value="date_desc">Newest first</option>
                         <option value="date_asc">Oldest first</option>
                         <option value="amount_desc">Amount: high to low</option>
@@ -797,10 +797,26 @@
                     <button @click="newInvoice" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors">+ New Invoice</button>
                 </div>
 
+                <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                    <div v-if="selectedInvoices.length" class="flex items-center gap-2 flex-wrap bg-indigo-50 border border-slate-200 rounded-lg px-3 py-2">
+                        <span class="text-sm font-semibold text-indigo-600">{{ selectedInvoices.length }} selected</span>
+                        <button @click="bulkDuplicateInvoices" :disabled="invoiceBulkBusy" class="bg-white border border-slate-300 text-indigo-600 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Duplicate</button>
+                        <button @click="bulkEmailInvoices" :disabled="invoiceBulkBusy" class="bg-white border border-slate-300 text-indigo-600 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Email</button>
+                        <button @click="bulkPdfInvoices" :disabled="invoiceBulkBusy" class="bg-white border border-slate-300 text-indigo-600 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">PDF</button>
+                        <button @click="bulkDeleteInvoices" :disabled="invoiceBulkBusy" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Delete</button>
+                    </div>
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button @click="changePage('invoice', -1)" :disabled="invoicePage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                        <span class="text-sm text-slate-500">{{ pageInfo(invoiceTotalPages, invoicePage) }}</span>
+                        <button @click="changePage('invoice', 1)" :disabled="invoicePage >= invoiceTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
                     <table class="w-full text-left min-w-[760px]">
                         <thead class="bg-slate-50 border-b border-slate-200">
                             <tr>
+                                <th class="p-4 font-medium text-slate-500 w-10"><input type="checkbox" :checked="currentInvoicePageSelected" @change="toggleInvoicePageSelection($event.target.checked)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
                                 <th class="p-4 font-medium text-slate-500">Type</th>
                                 <th class="p-4 font-medium text-slate-500">Number</th>
                                 <th class="p-4 font-medium text-slate-500">Date</th>
@@ -812,9 +828,10 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100">
-                            <tr v-if="invoices.length === 0"><td colspan="8" class="p-8 text-center text-slate-400">No documents saved yet.</td></tr>
-                            <tr v-else-if="filteredInvoices.length === 0"><td colspan="8" class="p-8 text-center text-slate-400">No documents match your filters.</td></tr>
-                            <tr v-for="inv in filteredInvoices" :key="inv.id" class="hover:bg-slate-50">
+                            <tr v-if="invoices.length === 0"><td colspan="9" class="p-8 text-center text-slate-400">No documents saved yet.</td></tr>
+                            <tr v-else-if="filteredInvoices.length === 0"><td colspan="9" class="p-8 text-center text-slate-400">No documents match your filters.</td></tr>
+                            <tr v-for="inv in paginatedInvoices" :key="inv.id" class="hover:bg-slate-50">
+                                <td class="p-4"><input type="checkbox" :value="inv.id" v-model="selectedInvoices" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></td>
                                 <td class="p-4">
                                     <span class="px-2 py-1 rounded text-xs font-medium" :class="(inv.docType||'invoice')==='invoice' ? 'bg-indigo-50 text-indigo-600' : (inv.docType==='quote' ? 'bg-purple-50 text-purple-600' : 'bg-teal-50 text-teal-600')">{{ docTypeNoun(inv.docType) }}</span>
                                 </td>
@@ -845,6 +862,11 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <div class="flex items-center justify-end gap-2 mt-3">
+                    <button @click="changePage('invoice', -1)" :disabled="invoicePage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                    <span class="text-sm text-slate-500">{{ pageInfo(invoiceTotalPages, invoicePage) }}</span>
+                    <button @click="changePage('invoice', 1)" :disabled="invoicePage >= invoiceTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
                 </div>
             </div>
 
@@ -945,23 +967,35 @@
                         <button @click="newItem" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">+ New Item</button>
                     </div>
 
-                    <div class="mb-5">
-                        <input type="text" v-model="itemSearch" placeholder="Search saved items by name..." class="w-full max-w-md border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                    <div class="mb-5 flex items-center gap-3 flex-wrap">
+                        <input type="text" v-model="itemSearch" @input="resetItemListState" placeholder="Search saved items by name..." class="w-full max-w-md border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                        <div v-if="selectedItems.length" class="flex items-center gap-2 flex-wrap bg-indigo-50 border border-slate-200 rounded-lg px-3 py-2">
+                            <span class="text-sm font-semibold text-indigo-600">{{ selectedItems.length }} selected</span>
+                            <button @click="bulkChangeItemPrice" :disabled="itemBulkBusy" class="bg-white border border-slate-300 text-indigo-600 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Change price</button>
+                            <button @click="bulkDeleteItems" :disabled="itemBulkBusy" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Delete</button>
+                        </div>
+                        <div class="flex items-center gap-2 ml-auto">
+                            <button @click="changePage('item', -1)" :disabled="itemPage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                            <span class="text-sm text-slate-500">{{ pageInfo(itemTotalPages, itemPage) }}</span>
+                            <button @click="changePage('item', 1)" :disabled="itemPage >= itemTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
+                        </div>
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                        <table class="w-full text-left min-w-[520px]">
+                        <table class="w-full text-left min-w-[580px]">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
+                                    <th class="p-4 font-medium text-slate-500 w-10"><input type="checkbox" :checked="currentItemPageSelected" @change="toggleItemPageSelection($event.target.checked)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
                                     <th class="p-4 font-medium text-slate-500">Name</th>
                                     <th class="p-4 font-medium text-slate-500 text-right">Default Price</th>
                                     <th class="p-4 font-medium text-slate-500 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                <tr v-if="savedItems.length === 0"><td colspan="3" class="p-8 text-center text-slate-400">No saved items yet. Click &ldquo;+ New Item&rdquo; to add one.</td></tr>
-                                <tr v-else-if="filteredItems.length === 0"><td colspan="3" class="p-8 text-center text-slate-400">No items match your search.</td></tr>
-                                <tr v-for="(item, idx) in filteredItems" :key="idx" class="hover:bg-slate-50">
+                                <tr v-if="savedItems.length === 0"><td colspan="4" class="p-8 text-center text-slate-400">No saved items yet. Click &ldquo;+ New Item&rdquo; to add one.</td></tr>
+                                <tr v-else-if="filteredItems.length === 0"><td colspan="4" class="p-8 text-center text-slate-400">No items match your search.</td></tr>
+                                <tr v-for="item in paginatedItems" :key="item.id" class="hover:bg-slate-50">
+                                    <td class="p-4 align-top"><input type="checkbox" :value="item.id" v-model="selectedItems" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></td>
                                     <td class="p-4 align-top">
                                         <div class="font-medium text-slate-800">{{ item.name }}</div>
                                         <div v-if="item.description" class="text-xs text-slate-500 mt-1 whitespace-pre-line">{{ item.description }}</div>
@@ -974,6 +1008,11 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 mt-3">
+                        <button @click="changePage('item', -1)" :disabled="itemPage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                        <span class="text-sm text-slate-500">{{ pageInfo(itemTotalPages, itemPage) }}</span>
+                        <button @click="changePage('item', 1)" :disabled="itemPage >= itemTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
                     </div>
                 </div>
 
@@ -1083,10 +1122,23 @@
                         </div>
                     </div>
 
+                    <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                        <div v-if="selectedRecurring.length" class="flex items-center gap-2 flex-wrap bg-indigo-50 border border-slate-200 rounded-lg px-3 py-2">
+                            <span class="text-sm font-semibold text-indigo-600">{{ selectedRecurring.length }} selected</span>
+                            <button @click="bulkDeleteRecurring" :disabled="recurringBulkBusy" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Delete</button>
+                        </div>
+                        <div class="flex items-center gap-2 ml-auto">
+                            <button @click="changePage('recurring', -1)" :disabled="recurringPage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                            <span class="text-sm text-slate-500">{{ pageInfo(recurringTotalPages, recurringPage) }}</span>
+                            <button @click="changePage('recurring', 1)" :disabled="recurringPage >= recurringTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
+                        </div>
+                    </div>
+
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                        <table class="w-full text-left min-w-[680px]">
+                        <table class="w-full text-left min-w-[760px]">
                             <thead class="bg-slate-50 border-b border-slate-200 text-sm text-slate-500">
                                 <tr>
+                                    <th class="p-4 font-semibold w-10"><input type="checkbox" :checked="currentRecurringPageSelected" @change="toggleRecurringPageSelection($event.target.checked)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
                                     <th class="p-4 font-semibold">Name</th>
                                     <th class="p-4 font-semibold">Customer</th>
                                     <th class="p-4 font-semibold">Frequency</th>
@@ -1098,9 +1150,10 @@
                             </thead>
                             <tbody class="divide-y divide-slate-100">
                                 <tr v-if="recurringTemplates.length === 0">
-                                    <td colspan="7" class="p-8 text-center text-slate-400">No recurring schedules yet. Create one from an invoice with "🔁 Repeat this invoice".</td>
+                                    <td colspan="8" class="p-8 text-center text-slate-400">No recurring schedules yet. Create one from an invoice with "🔁 Repeat this invoice".</td>
                                 </tr>
-                                <tr v-for="t in recurringTemplates" :key="t.id" class="hover:bg-slate-50">
+                                <tr v-for="t in paginatedRecurringTemplates" :key="t.id" class="hover:bg-slate-50">
+                                    <td class="p-4"><input type="checkbox" :value="t.id" v-model="selectedRecurring" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></td>
                                     <td class="p-4 font-medium text-slate-800">{{ t.name || '(untitled)' }}</td>
                                     <td class="p-4 text-slate-600">{{ t.customer ? t.customer.name : '—' }}</td>
                                     <td class="p-4 text-slate-600">{{ recurFrequencyLabel(t) }}</td>
@@ -1118,6 +1171,11 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                    <div class="flex items-center justify-end gap-2 mt-3">
+                        <button @click="changePage('recurring', -1)" :disabled="recurringPage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                        <span class="text-sm text-slate-500">{{ pageInfo(recurringTotalPages, recurringPage) }}</span>
+                        <button @click="changePage('recurring', 1)" :disabled="recurringPage >= recurringTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
                     </div>
                 </div>
 
@@ -1402,6 +1460,9 @@
                 invoiceStatusFilter: 'All',
                 invoiceTypeFilter: 'All',
                 invoiceSort: 'date_desc',
+                invoicePage: 1,
+                selectedInvoices: [],
+                invoiceBulkBusy: false,
                 emailSendingId: null,
                 newPayment: { amount: null, date: new Date().toISOString().split('T')[0], note: '' },
                 activityNote: '',
@@ -1421,7 +1482,13 @@
                 itemForm: { name: '', description: '', price: 0 },
                 customerSearch: '',
                 itemSearch: '',
+                itemPage: 1,
+                selectedItems: [],
+                itemBulkBusy: false,
                 editingItem: null,
+                recurringPage: 1,
+                selectedRecurring: [],
+                recurringBulkBusy: false,
                 currencies: [
                     { code: 'GBP', symbol: '£', name: 'British Pound' },
                     { code: 'USD', symbol: '$', name: 'US Dollar' },
@@ -1522,6 +1589,20 @@
                 });
                 return list;
             },
+            invoiceTotalPages() {
+                return Math.max(1, Math.ceil(this.filteredInvoices.length / 20));
+            },
+            paginatedInvoices() {
+                const page = Math.min(Math.max(this.invoicePage || 1, 1), this.invoiceTotalPages);
+                const start = (page - 1) * 20;
+                return this.filteredInvoices.slice(start, start + 20);
+            },
+            currentInvoicePageSelected() {
+                return this.paginatedInvoices.length > 0 && this.paginatedInvoices.every(inv => this.selectedInvoices.includes(inv.id));
+            },
+            selectedInvoiceRows() {
+                return this.selectedInvoices.map(id => this.invoices.find(inv => inv.id === id)).filter(Boolean);
+            },
             dashboardStats() {
                 const today = new Date().toISOString().split('T')[0];
                 const ym = today.slice(0, 7);
@@ -1579,9 +1660,73 @@
                 return this.savedItems.filter(i =>
                     (i.name || '').toLowerCase().includes(q) || (i.description || '').toLowerCase().includes(q)
                 );
+            },
+            itemTotalPages() {
+                return Math.max(1, Math.ceil(this.filteredItems.length / 20));
+            },
+            paginatedItems() {
+                const page = Math.min(Math.max(this.itemPage || 1, 1), this.itemTotalPages);
+                const start = (page - 1) * 20;
+                return this.filteredItems.slice(start, start + 20);
+            },
+            currentItemPageSelected() {
+                return this.paginatedItems.length > 0 && this.paginatedItems.every(item => this.selectedItems.includes(item.id));
+            },
+            selectedItemRows() {
+                return this.selectedItems.map(id => this.savedItems.find(item => item.id === id)).filter(Boolean);
+            },
+            recurringTotalPages() {
+                return Math.max(1, Math.ceil(this.recurringTemplates.length / 20));
+            },
+            paginatedRecurringTemplates() {
+                const page = Math.min(Math.max(this.recurringPage || 1, 1), this.recurringTotalPages);
+                const start = (page - 1) * 20;
+                return this.recurringTemplates.slice(start, start + 20);
+            },
+            currentRecurringPageSelected() {
+                return this.paginatedRecurringTemplates.length > 0 && this.paginatedRecurringTemplates.every(t => this.selectedRecurring.includes(t.id));
+            },
+            selectedRecurringRows() {
+                return this.selectedRecurring.map(id => this.recurringTemplates.find(t => t.id === id)).filter(Boolean);
             }
         },
         methods: {
+            pageInfo(total, page) {
+                const safeTotal = Math.max(1, total || 1);
+                const safePage = Math.min(Math.max(page || 1, 1), safeTotal);
+                return 'Page ' + safePage + ' of ' + safeTotal;
+            },
+            changePage(kind, delta) {
+                const key = kind + 'Page';
+                const total = this[kind + 'TotalPages'];
+                this[key] = Math.min(Math.max((this[key] || 1) + delta, 1), total);
+            },
+            resetInvoiceListState() {
+                this.invoicePage = 1;
+                this.selectedInvoices = [];
+            },
+            resetItemListState() {
+                this.itemPage = 1;
+                this.selectedItems = [];
+            },
+            togglePageSelection(rows, selectedKey, checked) {
+                const ids = rows.map(row => row.id).filter(Boolean);
+                if (checked) {
+                    const set = new Set([...(this[selectedKey] || []), ...ids]);
+                    this[selectedKey] = Array.from(set);
+                } else {
+                    this[selectedKey] = (this[selectedKey] || []).filter(id => !ids.includes(id));
+                }
+            },
+            toggleInvoicePageSelection(checked) {
+                this.togglePageSelection(this.paginatedInvoices, 'selectedInvoices', checked);
+            },
+            toggleItemPageSelection(checked) {
+                this.togglePageSelection(this.paginatedItems, 'selectedItems', checked);
+            },
+            toggleRecurringPageSelection(checked) {
+                this.togglePageSelection(this.paginatedRecurringTemplates, 'selectedRecurring', checked);
+            },
             // ================= AUTHENTICATION (Supabase Auth) =================
             async register() {
                 const email = (this.auth.username || '').trim().toLowerCase();
@@ -2223,6 +2368,99 @@
                     this.emailSendingId = null;
                 }
             },
+            async bulkDuplicateInvoices() {
+                const rows = this.selectedInvoiceRows;
+                if (!rows.length) return;
+                this.invoiceBulkBusy = true;
+                let created = 0;
+                try {
+                    for (const inv of rows) {
+                        const copy = JSON.parse(JSON.stringify(inv));
+                        copy.id = Date.now() + created;
+                        copy.docType = copy.docType || 'invoice';
+                        copy.number = this.generateNumber(copy.docType);
+                        copy.status = 'Draft';
+                        copy.payments = [];
+                        const today = new Date().toISOString().split('T')[0];
+                        copy.date = today;
+                        copy.dueDate = today;
+                        copy.history = [{ ts: new Date().toISOString(), type: 'created', text: 'Duplicated from #' + (inv.number || '') }];
+                        delete copy.totals;
+                        const { data, error } = await supabaseClient.from('invoices').insert(this.invoiceToRow(copy)).select().single();
+                        if (error) throw error;
+                        this.invoices.unshift(this.rowToInvoice(data));
+                        created++;
+                    }
+                    this.selectedInvoices = [];
+                    alert(created + ' document' + (created === 1 ? '' : 's') + ' duplicated as drafts.');
+                } catch (e) {
+                    alert('Bulk duplicate stopped: ' + (e.message || e));
+                } finally {
+                    this.invoiceBulkBusy = false;
+                }
+            },
+            async bulkEmailInvoices() {
+                const rows = this.selectedInvoiceRows;
+                if (!rows.length) return;
+                if (!confirm('Email ' + rows.length + ' selected document' + (rows.length === 1 ? '' : 's') + ' to their saved customer email addresses?')) return;
+                this.invoiceBulkBusy = true;
+                let sent = 0, skipped = 0, failed = 0;
+                try {
+                    for (const inv of rows) {
+                        const to = inv.customer && inv.customer.email ? String(inv.customer.email).trim() : '';
+                        if (inv.status === 'Cancelled' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) { skipped++; continue; }
+                        try {
+                            const { data, error } = await supabaseClient.functions.invoke('send-document-email', {
+                                body: { documentId: inv.id, to }
+                            });
+                            if (error) throw error;
+                            if (data && data.error) throw new Error(data.error);
+                            if (data && data.invoice) this.applyInvoiceRow(data.invoice);
+                            sent++;
+                        } catch (e) {
+                            console.error('Bulk email failed for', inv.id, e);
+                            failed++;
+                        }
+                    }
+                    await this.loadAuditEvents();
+                    this.selectedInvoices = [];
+                    alert('Email complete. Sent ' + sent + ', skipped ' + skipped + ', failed ' + failed + '.');
+                } finally {
+                    this.invoiceBulkBusy = false;
+                }
+            },
+            async bulkPdfInvoices() {
+                const rows = this.selectedInvoiceRows;
+                if (!rows.length) return;
+                this.invoiceBulkBusy = true;
+                let exported = 0, failed = 0;
+                try {
+                    for (const inv of rows) {
+                        try { await this.exportPDF(inv); exported++; }
+                        catch (e) { console.error('Bulk PDF failed for', inv.id, e); failed++; }
+                    }
+                    alert('PDF export complete. Exported ' + exported + ', failed ' + failed + '.');
+                } finally {
+                    this.invoiceBulkBusy = false;
+                }
+            },
+            async bulkDeleteInvoices() {
+                const rows = this.selectedInvoiceRows;
+                if (!rows.length) return;
+                if (!confirm('Delete ' + rows.length + ' selected document' + (rows.length === 1 ? '' : 's') + '? This cannot be undone.')) return;
+                this.invoiceBulkBusy = true;
+                try {
+                    const ids = rows.map(inv => inv.id);
+                    const { error } = await supabaseClient.from('invoices').delete().in('id', ids);
+                    if (error) throw error;
+                    this.invoices = this.invoices.filter(inv => !ids.includes(inv.id));
+                    this.selectedInvoices = [];
+                } catch (e) {
+                    alert('Could not delete selected documents: ' + (e.message || e));
+                } finally {
+                    this.invoiceBulkBusy = false;
+                }
+            },
             async changeStatus(newStatus) {
                 if ((this.draft.status || 'Draft') === newStatus) return;
                 this.draft.status = newStatus;
@@ -2435,6 +2673,24 @@
                 if (error) return alert('Could not delete: ' + error.message);
                 const i = this.recurringTemplates.indexOf(t);
                 if (i >= 0) this.recurringTemplates.splice(i, 1);
+                this.selectedRecurring = this.selectedRecurring.filter(id => id !== t.id);
+            },
+            async bulkDeleteRecurring() {
+                const rows = this.selectedRecurringRows;
+                if (!rows.length) return;
+                if (!confirm('Delete ' + rows.length + ' selected recurring schedule' + (rows.length === 1 ? '' : 's') + '? Invoices already generated are kept.')) return;
+                this.recurringBulkBusy = true;
+                try {
+                    const ids = rows.map(t => t.id);
+                    const { error } = await supabaseClient.from('recurring_templates').delete().in('id', ids);
+                    if (error) throw error;
+                    this.recurringTemplates = this.recurringTemplates.filter(t => !ids.includes(t.id));
+                    this.selectedRecurring = [];
+                } catch (e) {
+                    alert('Could not delete selected schedules: ' + (e.message || e));
+                } finally {
+                    this.recurringBulkBusy = false;
+                }
             },
             async generateFromTemplate(t) {
                 // Build a normal invoice from the template, mark it Sent, note its origin.
@@ -2597,6 +2853,7 @@
                     if (error) return alert("Could not delete: " + error.message);
                     const i = this.invoices.findIndex(x => x.id === inv.id);
                     if (i >= 0) this.invoices.splice(i, 1);
+                    this.selectedInvoices = this.selectedInvoices.filter(id => id !== inv.id);
                 }
             },
             amountPaid(inv) { return (inv.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0); },
@@ -2652,43 +2909,47 @@
                 this.loadInvoice(inv);
                 this.isExportingPDF = true;
                 await this.$nextTick();
-                setTimeout(() => {
-                    const el = document.getElementById('invoice-canvas');
-                    // Capture at a fixed desktop width so the PDF looks the same on phone or computer,
-                    // not at the device's screen width (which made mobile exports a tall, cut-off sliver).
-                    window.html2canvas(el, {
-                        scale: 2,
-                        windowWidth: 1024,
-                        onclone: (doc) => {
-                            const c = doc.getElementById('invoice-canvas');
-                            if (c) { c.style.width = '800px'; c.style.maxWidth = '800px'; c.style.margin = '0'; }
-                        }
-                    }).then(canvas => {
-                        const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
-                        const pageW = pdf.internal.pageSize.getWidth();
-                        const pageH = pdf.internal.pageSize.getHeight();
-                        const imgW = pageW;
-                        const imgH = (canvas.height * imgW) / canvas.width;
-                        const imgData = canvas.toDataURL('image/png');
-                        // Place the image, adding extra A4 pages if the invoice is taller than one page.
-                        let heightLeft = imgH;
-                        let position = 0;
-                        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
-                        heightLeft -= pageH;
-                        while (heightLeft > 0) {
-                            position -= pageH;
-                            pdf.addPage();
+                return new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        const el = document.getElementById('invoice-canvas');
+                        // Capture at a fixed desktop width so the PDF looks the same on phone or computer,
+                        // not at the device's screen width (which made mobile exports a tall, cut-off sliver).
+                        window.html2canvas(el, {
+                            scale: 2,
+                            windowWidth: 1024,
+                            onclone: (doc) => {
+                                const c = doc.getElementById('invoice-canvas');
+                                if (c) { c.style.width = '800px'; c.style.maxWidth = '800px'; c.style.margin = '0'; }
+                            }
+                        }).then(canvas => {
+                            const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+                            const pageW = pdf.internal.pageSize.getWidth();
+                            const pageH = pdf.internal.pageSize.getHeight();
+                            const imgW = pageW;
+                            const imgH = (canvas.height * imgW) / canvas.width;
+                            const imgData = canvas.toDataURL('image/png');
+                            // Place the image, adding extra A4 pages if the invoice is taller than one page.
+                            let heightLeft = imgH;
+                            let position = 0;
                             pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
                             heightLeft -= pageH;
-                        }
-                        pdf.save(`Invoice_${inv.number}.pdf`);
-                        this.isExportingPDF = false;
-                    }).catch(err => {
-                        console.error('PDF export failed:', err);
-                        this.isExportingPDF = false;
-                        alert('Sorry, the PDF could not be generated. Please try again.');
-                    });
-                }, 100);
+                            while (heightLeft > 0) {
+                                position -= pageH;
+                                pdf.addPage();
+                                pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
+                                heightLeft -= pageH;
+                            }
+                            pdf.save(`Invoice_${inv.number}.pdf`);
+                            this.isExportingPDF = false;
+                            resolve();
+                        }).catch(err => {
+                            console.error('PDF export failed:', err);
+                            this.isExportingPDF = false;
+                            alert('Sorry, the PDF could not be generated. Please try again.');
+                            reject(err);
+                        });
+                    }, 100);
+                });
             },
             exportExcel() {
                 if(this.invoices.length === 0) return;
@@ -2798,6 +3059,48 @@
                 if (error) return alert("Could not delete item: " + error.message);
                 const i = this.savedItems.indexOf(item);
                 if(i>=0) this.savedItems.splice(i, 1);
+                this.selectedItems = this.selectedItems.filter(id => id !== item.id);
+            },
+            async bulkDeleteItems() {
+                const rows = this.selectedItemRows;
+                if (!rows.length) return;
+                if (!confirm('Delete ' + rows.length + ' selected saved item' + (rows.length === 1 ? '' : 's') + '?')) return;
+                this.itemBulkBusy = true;
+                try {
+                    const ids = rows.map(item => item.id);
+                    const { error } = await supabaseClient.from('saved_items').delete().in('id', ids);
+                    if (error) throw error;
+                    this.savedItems = this.savedItems.filter(item => !ids.includes(item.id));
+                    this.selectedItems = [];
+                } catch (e) {
+                    alert('Could not delete selected items: ' + (e.message || e));
+                } finally {
+                    this.itemBulkBusy = false;
+                }
+            },
+            async bulkChangeItemPrice() {
+                const rows = this.selectedItemRows;
+                if (!rows.length) return;
+                const value = prompt('Set the same price for ' + rows.length + ' selected item' + (rows.length === 1 ? '' : 's') + ':', rows[0].price || 0);
+                if (value === null) return;
+                const price = parseFloat(value);
+                if (!Number.isFinite(price) || price < 0) return alert('Enter a valid price.');
+                this.itemBulkBusy = true;
+                try {
+                    const ids = rows.map(item => item.id);
+                    const { data, error } = await supabaseClient.from('saved_items').update({ price }).in('id', ids).select();
+                    if (error) throw error;
+                    (data || []).forEach(row => {
+                        const idx = this.savedItems.findIndex(item => item.id === row.id);
+                        if (idx >= 0) this.savedItems[idx] = this.rowToItem(row);
+                    });
+                    this.selectedItems = [];
+                    alert('Updated ' + rows.length + ' saved item price' + (rows.length === 1 ? '' : 's') + '.');
+                } catch (e) {
+                    alert('Could not update selected item prices: ' + (e.message || e));
+                } finally {
+                    this.itemBulkBusy = false;
+                }
             },
             resetItemForm() { this.editingItem = null; this.itemForm = { name: '', description: '', price: 0 }; },
             async saveCompanyDetails() {
