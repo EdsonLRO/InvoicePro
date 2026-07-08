@@ -90,8 +90,8 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 - Email delivery tracking is live through signed Resend webhooks and the app shows delivery status badges.
 - Opt-in recurring invoice auto-email exists in code and needs the `email_enabled` SQL migration + Edge Function redeploy before use.
 - Overdue panel on the invoices list: overdue invoices, days overdue, outstanding amounts.
-- Reminder modal: **drafts reminder text**, copy-to-clipboard, and "Log reminder as sent" (writes a history event).
-- Overdue reminder email automation is not built yet.
+- Reminder modal: drafts reminder text, can email it through Resend, copy-to-clipboard, or "Log reminder as sent" (writes a history event).
+- Scheduled overdue reminder email automation is not built yet.
 
 **Records / other**
 - Customers address book; Saved Items catalogue.
@@ -107,7 +107,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 2. **Quote then convert:** Create a quote → send → later open it → Convert to Invoice (in place) → save.
 3. **Take payment:** Open invoice → Record Payment → status auto-updates; overpayment/removal handled with confirmation and logging.
 4. **Set up recurring billing:** Create an invoice → toggle "Repeat this invoice" → choose frequency → optionally enable automatic email → save (schedule created, first future run set automatically). Manage/pause on the Recurring page.
-5. **Chase overdue:** Invoices list → overdue panel → open reminder modal → copy drafted text → send manually → log reminder.
+5. **Chase overdue:** Invoices list → overdue panel → open reminder modal → email the reminder through Tallyo, or copy drafted text and log manual sending.
 6. **Brand documents:** Branding page → set colour, upload logo, choose position → applies to documents and PDFs.
 7. **Records/history:** Open any document → Activity History timeline; recurring schedules have their own Schedule History.
 
@@ -150,6 +150,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `recurring_setup.sql` | Creates `recurring_templates` table + its RLS (idempotent). |
 | `supabase/recurring_email_enabled.sql` | Small idempotent migration that adds opt-in automatic email to recurring schedules. |
 | `supabase/functions/generate-recurring/index.ts` | Edge Function (Deno/TS) that generates due recurring invoices. Deployed to Supabase. |
+| `supabase/functions/send-reminder-email/index.ts` | Edge Function (Deno/TS) that sends one authenticated overdue payment reminder via Resend. |
 | `SECURITY_OPERATIONS.md` | Practical backup, restore, data-protection, email, payment, and release gates before real users. |
 | `EMAIL_PHASE.md` | Staged Resend email plan: DNS setup, manual sending, webhooks, then automation. |
 | Tailwind build inputs | `tailwind.config.js` + a Tailwind input CSS file used by the CLI to produce `tailwind.css`. **Unknown / needs confirmation:** exact input filename in the repo. |
@@ -279,7 +280,7 @@ supabase functions deploy generate-recurring
 - **No formal backups** on the current free tier; no documented retention/restore.
 - **MFA has no recovery/backup codes**; no password-strength/breach checks at signup yet.
 - **CSP allows one permissive setting** the in-browser Vue template compilation requires (`unsafe-eval`) — a documented trade-off.
-- **Overdue reminder emails are not automated yet**; the current reminder tool drafts text and logs manual reminder activity.
+- **Scheduled overdue reminder emails are not automated yet**; the current reminder tool can send one manual reminder email at a time and log reminder activity.
 - **Unknown / needs confirmation:** whether any clickjacking/frame-protection headers are set (GitHub Pages limits response headers).
 
 Always describe security as "controls implemented + honest limitations", never as "secure/compliant".
@@ -309,7 +310,8 @@ Near-term (in rough order):
    - Webhook listens for `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.clicked`, `email.failed`, `email.opened`, and `email.received`.
    - Done: user-visible delivery status in the invoice list and document activity panel.
    - In progress: opt-in automatic recurring invoice email. Run `supabase/recurring_email_enabled.sql`, redeploy `generate-recurring`, and test one schedule.
-   - Later: overdue reminder automation after recurring auto-email is verified.
+   - In progress: manual overdue reminder email through `send-reminder-email`; deploy and test one overdue invoice.
+   - Later: scheduled overdue reminder automation after manual reminders are verified.
 4. **Compliance groundwork** before emailing real customers (privacy policy, consent/unsubscribe, data-subject rights).
 5. Optional hardening: wire up append-only audit events, formal backups, MFA recovery codes, password-strength/breach checks.
 6. Optional: link invoices to their recurring schedule (dedup guard); repo/URL rename to Tallyo (with Supabase Auth URL updates).
@@ -355,6 +357,6 @@ Near-term (in rough order):
 - **Do not** change the "Change Password" box wording (must reference the **Current Password**; note: *"Please enter your current password to confirm it's you."*).
 - **Do not** break the DB column mapping (e.g. writing `customer` instead of `customer_snapshot`, `date` instead of `issue_date`, or a `totals` object instead of `grand_total`).
 - **Do not** weaken Row Level Security, remove SRI/CSP, or run the Edge Function without stamping each generated invoice with the correct `user_id` (the service key bypasses RLS — attribution must be explicit).
-- **Do not** assume overdue reminder email automation exists; manual document email does work through Resend.
+- **Do not** assume scheduled overdue reminder email automation exists; manual document and manual reminder email do work through Resend once their functions are deployed.
 - **Do not** rely on the service worker serving fresh files; always account for cache after deploys.
 

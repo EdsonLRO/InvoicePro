@@ -16,6 +16,12 @@ verify_jwt = true
 import_map = "./functions/send-document-email/deno.json"
 entrypoint = "./functions/send-document-email/index.ts"
 
+[functions.send-reminder-email]
+enabled = true
+verify_jwt = true
+import_map = "./functions/send-reminder-email/deno.json"
+entrypoint = "./functions/send-reminder-email/index.ts"
+
 [functions.resend-webhook]
 enabled = true
 verify_jwt = false

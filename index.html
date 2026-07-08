@@ -854,10 +854,11 @@
                         <h3 class="text-lg font-semibold">Payment reminder</h3>
                         <button @click="reminderModal.open = false" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
                     </div>
-                    <p class="text-xs text-slate-500 mb-4">The app can't email this yet — copy the text into your email, then log that you sent it so it's recorded in the invoice's history.</p>
+                    <p class="text-xs text-slate-500 mb-4">Email the reminder to the customer on this invoice, or copy the text if you want to send it another way.</p>
                     <textarea v-model="reminderModal.text" rows="9" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none mb-4"></textarea>
                     <div class="flex gap-2 justify-end flex-wrap">
                         <button @click="copyReminder" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors">{{ reminderModal.copied ? 'Copied!' : 'Copy text' }}</button>
+                        <button @click="sendReminderEmail" :disabled="reminderModal.sending" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50">{{ reminderModal.sending ? 'Sending...' : 'Email reminder' }}</button>
                         <button @click="logReminderSent" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors">Log reminder as sent</button>
                     </div>
                 </div>
@@ -1404,7 +1405,7 @@
                 emailSendingId: null,
                 newPayment: { amount: null, date: new Date().toISOString().split('T')[0], note: '' },
                 activityNote: '',
-                reminderModal: { open: false, inv: null, text: '', copied: false },
+                reminderModal: { open: false, inv: null, text: '', copied: false, sending: false },
                 recurringTemplates: [],
                 recurringView: 'list',
                 editingTemplate: null,
@@ -2507,7 +2508,7 @@
                 return msg;
             },
             openReminder(inv) {
-                this.reminderModal = { open: true, inv, text: this.reminderText(inv), copied: false };
+                this.reminderModal = { open: true, inv, text: this.reminderText(inv), copied: false, sending: false };
             },
             async copyReminder() {
                 try {
@@ -2529,6 +2530,30 @@
                     if (this.draft && this.draft.id === inv.id) this.draft.history = JSON.parse(JSON.stringify(inv.history));
                     this.reminderModal.open = false;
                 } catch (e) { alert('Could not log the reminder: ' + (e.message || e)); }
+            },
+            async sendReminderEmail() {
+                const inv = this.reminderModal.inv;
+                if (!inv) return;
+                if (!this.isUuid(inv.id)) return alert('Save this invoice before emailing a reminder.');
+                const to = inv.customer && inv.customer.email ? inv.customer.email : '';
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return alert('This customer does not have a valid email address.');
+                this.reminderModal.sending = true;
+                try {
+                    const { data, error } = await supabaseClient.functions.invoke('send-reminder-email', {
+                        body: { documentId: inv.id, message: this.reminderModal.text }
+                    });
+                    if (error) throw error;
+                    if (data && data.error) throw new Error(data.error);
+                    if (data && data.invoice) this.applyInvoiceRow(data.invoice);
+                    await this.loadAuditEvents();
+                    this.reminderModal.open = false;
+                    alert('Reminder emailed to ' + to + '.');
+                } catch (e) {
+                    console.error('Reminder email failed:', e);
+                    alert('Could not send reminder: ' + (e.message || e));
+                } finally {
+                    this.reminderModal.sending = false;
+                }
             },
 
             goToCreate() {
