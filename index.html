@@ -813,7 +813,7 @@
                 </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                    <table class="w-full text-left" style="min-width: 1440px; table-layout: fixed;">
+                    <table class="w-full text-left" style="min-width: 1280px; table-layout: fixed;">
                         <colgroup>
                             <col style="width: 40px;">
                             <col style="width: 80px;">
@@ -821,10 +821,10 @@
                             <col style="width: 115px;">
                             <col style="width: 120px;">
                             <col style="width: 180px;">
-                            <col style="width: 120px;">
-                            <col style="width: 90px;">
-                            <col style="width: 20px;">
-                            <col>
+                            <col style="width: 110px;">
+                            <col style="width: 85px;">
+                            <col style="width: 115px;">
+                            <col style="width: 315px;">
                         </colgroup>
                         <thead class="bg-slate-50 border-b border-slate-200">
                             <tr>
@@ -851,7 +851,7 @@
                                 <td class="p-4 font-medium whitespace-nowrap"><button @click="loadInvoice(inv)" class="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors whitespace-nowrap">#{{ inv.number }}</button></td>
                                 <td class="p-4 text-slate-600 whitespace-nowrap">{{ inv.date }}</td>
                                 <td class="p-4 text-slate-600 whitespace-nowrap">{{ inv.dueDate }}</td>
-                                <td class="p-4 text-slate-600" style="width: 190px; max-width: 190px; white-space: normal; word-break: break-word;">{{ inv.customer ? inv.customer.name : 'Unknown' }}</td>
+                                <td class="p-4 text-slate-600" style="width: 180px; max-width: 180px; white-space: normal; word-break: break-word;">{{ inv.customer ? inv.customer.name : 'Unknown' }}</td>
                                 <td class="p-4 font-medium whitespace-nowrap">
                                     {{ getCurrencySymbol(inv.currency) }}{{ inv.totals.grandTotal.toFixed(2) }}
                                     <div v-if="amountPaid(inv) > 0 && balanceDue(inv) > 0.001" class="text-xs text-red-500 font-normal">Bal: {{ getCurrencySymbol(inv.currency) }}{{ balanceDue(inv).toFixed(2) }}</div>
