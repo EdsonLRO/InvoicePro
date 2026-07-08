@@ -820,9 +820,9 @@
                                     <div v-if="amountPaid(inv) > 0 && balanceDue(inv) > 0.001" class="text-xs text-red-500 font-normal">Bal: {{ getCurrencySymbol(inv.currency) }}{{ balanceDue(inv).toFixed(2) }}</div>
                                 </td>
                                 <td class="p-4">
-                                    <span class="px-2 py-1 rounded text-xs font-bold uppercase" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
-                                    <div v-if="emailStatusFor(inv.id)" class="mt-1 text-xs">
-                                        <span class="px-2 py-0.5 rounded-full font-medium" :class="emailStatusClass(emailStatusFor(inv.id).state)">{{ emailStatusFor(inv.id).label }}</span>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="px-2 py-1 rounded text-xs font-bold uppercase" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
+                                        <span v-if="emailStatusFor(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium" :class="emailStatusClass(emailStatusFor(inv.id).state)">{{ emailStatusFor(inv.id).label }}</span>
                                     </div>
                                 </td>
                                 <td class="p-4 text-right">
