@@ -120,6 +120,16 @@ function formatMoney(code: string, amount: unknown) {
   return `${currencySymbol(code)}${(Number(amount) || 0).toFixed(2)}`;
 }
 
+type EmailLine = {
+  name: string;
+  qty: number;
+  unit: string;
+  price: number;
+  discount: number;
+  tax: number;
+  total: number;
+};
+
 function buildEmail(inv: any, company: any) {
   const currency = inv.currency || "GBP";
   const totals = calcTotals(inv);
@@ -158,7 +168,7 @@ function buildEmail(inv: any, company: any) {
     `Total: ${formatMoney(currency, total)}`,
     "",
     "Items:",
-    ...lines.map((line) => `- ${line.name}: ${line.qty}${line.unit ? ` ${line.unit}` : ""} x ${formatMoney(currency, line.price)}${line.discount ? `, ${line.discount}% discount` : ""}${line.tax ? `, ${line.tax}% tax` : ""} = ${formatMoney(currency, line.total)} before tax`),
+    ...lines.map((line: EmailLine) => `- ${line.name}: ${line.qty}${line.unit ? ` ${line.unit}` : ""} x ${formatMoney(currency, line.price)}${line.discount ? `, ${line.discount}% discount` : ""}${line.tax ? `, ${line.tax}% tax` : ""} = ${formatMoney(currency, line.total)} before tax`),
     "",
     "Summary:",
     `Subtotal: ${formatMoney(currency, totals.subtotal)}`,
@@ -172,7 +182,7 @@ function buildEmail(inv: any, company: any) {
   if (company?.payment_details) textLines.push("", "Payment details:", String(company.payment_details));
   textLines.push("", "Thank you", companyName);
 
-  const itemRows = lines.map((line) => `
+  const itemRows = lines.map((line: EmailLine) => `
     <tr>
       <td style="padding:10px;border-bottom:1px solid #e5e7eb;">${escapeHtml(line.name)}</td>
       <td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(line.qty)}${line.unit ? ` ${escapeHtml(line.unit)}` : ""}</td>
