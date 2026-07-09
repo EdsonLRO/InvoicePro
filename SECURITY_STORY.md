@@ -110,6 +110,39 @@ The most involved piece: making recurring invoices generate *on their own*, on a
 
 ---
 
+## Phase 8 - Email that reaches customers without exposing secrets
+
+**The need.** An invoicing app is much more useful when it can actually send invoices and reminders. But email adds a new security boundary: the browser must never see the email provider API key, and customer-contact automation must not become a blunt "email everyone" switch.
+
+**What was done.**
+- Resend is used from Supabase Edge Functions only; the browser never sees `RESEND_API_KEY`.
+- The sending domain is `mail.tallyo.co.uk`, with SPF/DKIM/DMARC work handled through DNS.
+- Manual document email is server-side, checks the signed-in user owns the document, and records activity.
+- Resend webhooks are signed and store provider events in `audit_events`, so delivery/failure status comes from the provider rather than the browser.
+- Recurring invoice email is opt-in per recurring schedule.
+- Overdue reminder automation is opt-in per invoice, with per-invoice first-send, repeat, and maximum-reminder settings. Company settings are defaults only.
+
+**Why it matters.** This keeps the email credential server-side, makes delivery status verifiable, and reduces accidental customer contact. The product decision is also a security decision: automation should express clear user intent, not surprise-send emails because a global switch was left on.
+
+---
+
+## Phase 9 - Stripe payments with a verified trust chain
+
+**The need.** Taking card payments means handling money-related state. The browser can ask for a payment link, but it must never be able to mark an invoice as paid. Only Stripe, through a verified webhook, should be trusted to confirm payment.
+
+**What was done.**
+- Stripe Checkout sessions are created server-side with `STRIPE_SECRET_KEY`; the browser never sees the secret key.
+- The app can create full-balance Checkout sessions, and invoice emails can include full-balance or seller-approved deposit links.
+- Customers cannot enter arbitrary partial-payment amounts; deposits are controlled by the seller.
+- The Stripe webhook verifies Stripe's signature before doing anything.
+- The webhook processes only `checkout.session.completed` for payment recording.
+- The webhook checks invoice/user metadata, amount, currency, duplicate events, and that the Checkout session was previously created and logged by Tallyo.
+- Stripe-confirmed payments are locked from manual removal in the app.
+
+**Why it matters.** This creates a clear trust chain: Tallyo creates a Checkout session, Stripe confirms the signed completion event, and only then does Tallyo update the invoice. That is much stronger than trusting a browser redirect or accepting every Stripe payment event shape.
+
+---
+
 ## Current limitations (told honestly)
 
 A credible security posture isn't about claiming perfection — it's about knowing exactly where you stand. A few things are deliberately still on the list:
@@ -119,7 +152,8 @@ A credible security posture isn't about claiming perfection — it's about knowi
 - **No formal backups** on the current free hosting tier; free-tier projects can also pause and stop the scheduled job.
 - **MFA has no recovery/backup codes**, and there's no password-strength or breach-password check at signup yet.
 - **The content-security-policy allows one permissive setting** the in-browser framework needs — a documented trade-off rather than a hidden one.
-- **No email sending yet**, so notifications and reminders are drafted for the user to send manually rather than sent automatically.
+- **Payment lifecycle is incomplete.** Successful Stripe Checkout payments are handled, but refunds, disputes, chargebacks, and asynchronous failure states are future work.
+- **Email/payment automation depends on configuration.** DNS, secrets, provider webhooks, and scheduled jobs must stay correctly configured.
 
 Naming these plainly is the point. It's the difference between marketing and a genuine assessment.
 
@@ -127,8 +161,8 @@ Naming these plainly is the point. It's the difference between marketing and a g
 
 ## Future improvements
 
-- **Email sending** (via a dedicated provider) with proper domain authentication (SPF, DKIM, DMARC) — enabling automatic invoice delivery and overdue reminders.
-- **Automated overdue reminders** once email exists (the detection already works in-app; only sending is missing).
+- **Refund/dispute/chargeback awareness** for Stripe payment lifecycle events.
+- **Production email hardening** such as tightening DMARC policy once all legitimate senders are confirmed.
 - **Append-only audit logging** for a tamper-resistant record of sensitive actions.
 - **Formal backups / retention** and a documented restore process.
 - **MFA recovery codes** and stronger signup checks (password strength / breach lookup).

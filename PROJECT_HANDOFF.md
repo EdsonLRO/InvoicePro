@@ -72,7 +72,12 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 - Global discount, shipping cost.
 
 **Payments & status**
-- Record/remove payments (remove requires confirmation and is logged).
+- Record/remove manual payments (remove requires confirmation and is logged).
+- Stripe Checkout payment links are implemented through server-side Edge Functions.
+- App Pay by Card creates a full-balance Checkout session.
+- Invoice emails can include full-balance links and seller-approved deposit links.
+- Customers cannot choose arbitrary partial-payment amounts; deposit amounts are seller-controlled.
+- Signed Stripe webhook records confirmed payments, supports deposit + remaining balance flows, and locks Stripe-confirmed payments from manual removal.
 - Status: Draft / Sent / Paid / Cancelled (selector in the top toolbar); auto-marks Paid when balance reaches zero.
 - Status badge shown in the invoices list.
 
@@ -88,10 +93,11 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 **Email and overdue reminders**
 - Manual document email is live through Resend for saved invoices/quotes/credit notes.
 - Email delivery tracking is live through signed Resend webhooks and the app shows delivery status badges.
-- Opt-in recurring invoice auto-email exists in code and needs the `email_enabled` SQL migration + Edge Function redeploy before use.
+- Opt-in recurring invoice auto-email exists through `recurring_templates.email_enabled`.
 - Overdue panel on the invoices list: overdue invoices, days overdue, outstanding amounts.
-- Reminder modal: drafts reminder text, can email it through Resend, copy-to-clipboard, or "Log reminder as sent" (writes a history event).
-- Scheduled overdue reminder email automation is not built yet.
+- Reminder modal: drafts reminder text, can email it through Resend or copy it. The email action logs activity history automatically.
+- Scheduled overdue reminder automation exists through `send-overdue-reminders`.
+- Overdue reminders are opt-in per invoice, not a global company-wide switch. Company Settings only stores reminder defaults used to pre-fill new invoices.
 
 **Records / other**
 - Customers address book; Saved Items catalogue.
@@ -112,6 +118,8 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 7. **Records/history:** Open any document → Activity History timeline; recurring schedules have their own Schedule History.
 
 ---
+
+**Current payment/reminder note:** payments can now be manual or Stripe-confirmed. Stripe payments are recorded by a signed webhook and locked from manual removal. Overdue reminders are now opt-in per invoice, with company settings used only as schedule defaults.
 
 ## 7. Current tech stack
 
@@ -149,10 +157,18 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `supabase/audit_events.sql` | Append-only audit-events table used by email sends and Resend webhooks. |
 | `recurring_setup.sql` | Creates `recurring_templates` table + its RLS (idempotent). |
 | `supabase/recurring_email_enabled.sql` | Small idempotent migration that adds opt-in automatic email to recurring schedules. |
+| `supabase/invoice_overdue_reminders.sql` | Adds per-invoice overdue reminder opt-in and cadence columns. |
+| `supabase/invoice_payment_options.sql` | Adds invoice payment-link options for full balance vs seller-approved deposit. |
 | `supabase/functions/generate-recurring/index.ts` | Edge Function (Deno/TS) that generates due recurring invoices. Deployed to Supabase. |
+| `supabase/functions/send-document-email/index.ts` | Edge Function (Deno/TS) that sends invoices/quotes/credit notes by Resend and can attach PDFs/payment links. |
 | `supabase/functions/send-reminder-email/index.ts` | Edge Function (Deno/TS) that sends one authenticated overdue payment reminder via Resend. |
+| `supabase/functions/send-overdue-reminders/index.ts` | Scheduled Edge Function (Deno/TS) that sends per-invoice opt-in overdue reminders. |
+| `supabase/functions/resend-webhook/index.ts` | Signed Resend webhook receiver for delivery/failure/open/click events. |
+| `supabase/functions/create-stripe-checkout/index.ts` | Authenticated Edge Function (Deno/TS) that creates Stripe Checkout sessions from the app. |
+| `supabase/functions/stripe-webhook/index.ts` | Signed Stripe webhook receiver that records verified Checkout payments. |
 | `SECURITY_OPERATIONS.md` | Practical backup, restore, data-protection, email, payment, and release gates before real users. |
 | `EMAIL_PHASE.md` | Staged Resend email plan: DNS setup, manual sending, webhooks, then automation. |
+| `ROADMAP_EMAIL_PAYMENTS.md` | Current implementation state, deploy checks, and remaining work for email/payments. |
 | Tailwind build inputs | `tailwind.config.js` + a Tailwind input CSS file used by the CLI to produce `tailwind.css`. **Unknown / needs confirmation:** exact input filename in the repo. |
 | Threat model docs | Separate before/after STRIDE threat models + a plain-English security write-up exist as project artifacts. |
 
@@ -269,6 +285,9 @@ supabase functions deploy generate-recurring
 - **Customer snapshot model** keeps historical invoices correct and avoids live links to personal data that may later be erased.
 - **Secrets hygiene:** only public/publishable keys in front-end (`config.js`); **service role key never in source** (runtime-injected). The scheduler uses only the publishable key (least privilege), stored **encrypted in Supabase Vault**, read at runtime by the cron job.
 - **Email secrets hygiene:** Resend API and webhook signing secrets live only as Supabase Edge Function secrets; browser code never sees them.
+- **Payment secrets hygiene:** Stripe secret and webhook signing secrets live only as Supabase Edge Function secrets; browser code never sees them.
+- **Stripe webhook hardening:** invoice payment updates come only from signed `checkout.session.completed` events, and the webhook checks that the Checkout session was created/logged by Tallyo before recording payment.
+- **Customer-contact automation is opt-in:** recurring auto-email is schedule-level opt-in; overdue reminder automation is invoice-level opt-in.
 - **Activity history** per document and per recurring schedule (lightweight record; see limitations).
 
 ---
@@ -280,7 +299,8 @@ supabase functions deploy generate-recurring
 - **No formal backups** on the current free tier; no documented retention/restore.
 - **MFA has no recovery/backup codes**; no password-strength/breach checks at signup yet.
 - **CSP allows one permissive setting** the in-browser Vue template compilation requires (`unsafe-eval`) — a documented trade-off.
-- **Scheduled overdue reminder emails are not automated yet**; the current reminder tool can send one manual reminder email at a time and log reminder activity.
+- **Stripe/refund lifecycle is incomplete:** successful Checkout payments are handled, but refunds, disputes, chargebacks, and failed asynchronous payment states are future work.
+- **Email/payment automation depends on external configuration:** DNS, Resend/Stripe secrets, webhooks, and cron jobs must stay correctly configured.
 - **Unknown / needs confirmation:** whether any clickjacking/frame-protection headers are set (GitHub Pages limits response headers).
 
 Always describe security as "controls implemented + honest limitations", never as "secure/compliant".
@@ -304,14 +324,17 @@ Always describe security as "controls implemented + honest limitations", never a
 Near-term (in rough order):
 1. **Keep Tallyo rebrand hygiene**. Visible app text, manifest, and icons are done; keep repo/URL unchanged unless Supabase Auth URLs are updated at the same time.
 2. **Safety foundation before real users:** follow `SECURITY_OPERATIONS.md` for backup/restore, basic data-protection groundwork, and trusted audit-event planning.
-3. **Email phase. Provider chosen: Resend.** Follow `EMAIL_PHASE.md`.
+3. **Email/payment phase.** Follow `EMAIL_PHASE.md` and `ROADMAP_EMAIL_PAYMENTS.md`.
    - Done: `mail.tallyo.co.uk` Resend sending domain and manual invoice/quote/credit-note email through `send-document-email`.
    - Done: `resend-webhook` delivery tracking writes Resend email lifecycle audit events.
    - Webhook listens for `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.clicked`, `email.failed`, `email.opened`, and `email.received`.
    - Done: user-visible delivery status in the invoice list and document activity panel.
-   - In progress: opt-in automatic recurring invoice email. Run `supabase/recurring_email_enabled.sql`, redeploy `generate-recurring`, and test one schedule.
-   - In progress: manual overdue reminder email through `send-reminder-email`; deploy and test one overdue invoice.
-   - Later: scheduled overdue reminder automation after manual reminders are verified.
+   - Done in code: opt-in automatic recurring invoice email.
+   - Done in code: manual overdue reminder email through `send-reminder-email`.
+   - Done in code: scheduled overdue reminder automation, opt-in per invoice.
+   - Done in code: Stripe Checkout full-balance and seller-approved deposit payments.
+   - Done in code: hardened Stripe webhook records verified Checkout payments.
+   - Next: refund/dispute/chargeback awareness, formal backups, and portfolio/security documentation polish.
 4. **Compliance groundwork** before emailing real customers (privacy policy, consent/unsubscribe, data-subject rights).
 5. Optional hardening: wire up append-only audit events, formal backups, MFA recovery codes, password-strength/breach checks.
 6. Optional: link invoices to their recurring schedule (dedup guard); repo/URL rename to Tallyo (with Supabase Auth URL updates).
@@ -333,7 +356,7 @@ Near-term (in rough order):
 - No pricing is implemented or finalised. **Unknown / needs confirmation.**
 - Likely shape (to be decided): a free tier for basic single-user invoicing, with a low-cost paid tier unlocking recurring automation, email sending, branding, and higher limits.
 - Note real underlying costs before pricing: domain, Supabase tier (free tier pauses on inactivity), and email provider (Resend free tier ~3,000 emails/month, paid from ~$20/month).
-- Do not build billing/payment collection until the product and compliance basics are ready.
+- Do not build Tallyo subscription billing/platform-fee collection until the product and compliance basics are ready. Stripe customer invoice payments already exist for the current single-business/test-mode flow.
 
 ---
 
@@ -357,6 +380,6 @@ Near-term (in rough order):
 - **Do not** change the "Change Password" box wording (must reference the **Current Password**; note: *"Please enter your current password to confirm it's you."*).
 - **Do not** break the DB column mapping (e.g. writing `customer` instead of `customer_snapshot`, `date` instead of `issue_date`, or a `totals` object instead of `grand_total`).
 - **Do not** weaken Row Level Security, remove SRI/CSP, or run the Edge Function without stamping each generated invoice with the correct `user_id` (the service key bypasses RLS — attribution must be explicit).
-- **Do not** assume scheduled overdue reminder email automation exists; manual document and manual reminder email do work through Resend once their functions are deployed.
+- **Do not** assume automation should run globally; recurring email and overdue reminders are explicit opt-ins. Overdue reminders are per invoice.
 - **Do not** rely on the service worker serving fresh files; always account for cache after deploys.
 

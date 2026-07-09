@@ -4,7 +4,7 @@ Operational security checklist for moving Tallyo from a working prototype into a
 
 ## Current Priority
 
-Before adding Resend or Stripe, keep the current app stable and make sure there is a recovery path if data is lost or a privileged automation misbehaves.
+Email and Stripe test-mode payments now exist. Current priority is to keep the working flows stable, keep secrets server-side, and build a recovery path before real customer use.
 
 ## Backup And Restore
 
@@ -68,21 +68,22 @@ Manual email gate:
 Automation gate:
 
 - Delivery/failure webhooks are verified and idempotent.
-- Reminder rules are defined.
-- Paid and cancelled invoices are excluded.
-- Rate limits or abuse controls exist.
+- Reminder rules are defined per invoice, pre-filled from company defaults.
+- Paid, draft, and cancelled invoices are excluded.
+- Automatic reminders are opt-in per invoice, not a global blanket setting.
+- Rate limits or abuse controls exist before real users.
 
 ## Payments Phase Gates
 
-Do not build Stripe until the account model is decided.
+Stripe is implemented for the current single-business/test-mode portfolio flow. Do not move to real customers until the account model and compliance position are decided.
 
-Decision needed:
+Still-to-decide before production/commercial use:
 
 - Single Stripe account for one business, or Stripe Connect for many businesses.
 - Whether Tallyo takes platform fees.
-- Supported currencies.
-- Partial payment policy.
-- Refund and dispute handling.
+- Supported currencies beyond the current invoice currency flow.
+- Refund, dispute, chargeback, and failed-payment handling.
+- Terms, privacy, cancellation, and payment dispute wording for real customers.
 
 Payment security requirements:
 
@@ -91,7 +92,18 @@ Payment security requirements:
 - Webhook signatures are verified.
 - Webhooks are idempotent.
 - Every payment event is tied to both `invoice_id` and `user_id`.
+- Webhook payment updates are accepted only for Checkout sessions previously created and logged by Tallyo.
+- Amount and currency are checked before updating invoice payments.
 - Already-paid invoices cannot be accidentally paid twice without clear handling.
+- Stripe-confirmed payments are locked from manual removal in the app.
+- Seller-approved deposits are allowed; arbitrary customer-entered payment amounts are not.
+
+Current implementation notes:
+
+- `create-stripe-checkout` creates app-initiated full-balance Checkout sessions.
+- `send-document-email` can create email payment links for full balance and seller-approved deposit amounts.
+- `stripe-webhook` verifies Stripe signatures, accepts `checkout.session.completed`, checks the Tallyo-created checkout audit event, updates invoice payments, and logs activity/audit events.
+- Subscribe Tallyo only to the Stripe event types it needs. For current payment recording, `checkout.session.completed` is sufficient. Other Stripe lifecycle events such as `payment_intent.succeeded`, `charge.succeeded`, and `charge.updated` are expected in Stripe history but should not independently mark invoices paid.
 
 ## Secret Handling
 

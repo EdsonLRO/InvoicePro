@@ -4,7 +4,7 @@
 > Read before touching auth, the database, RLS, the Edge Function, or the scheduler.
 > The public app brand is now **Tallyo**. The original **InvoicePro** name remains in the repo/URL context and some historical/internal references.
 >
-> **This document has been verified against the live database** (column list, RLS policies, and the cron job were exported from the running project, not just read from `schema.sql`).
+> Parts of this document were verified against the live database earlier (column list, RLS policies, and cron jobs). Newer email/payment migrations are documented from repo SQL files and should be confirmed against the target Supabase project after they are run.
 
 ---
 
@@ -13,7 +13,7 @@
 - **Backend platform:** Supabase — Postgres database, Supabase Auth, Row Level Security (RLS), Edge Functions, Vault, and Postgres scheduling (`pg_cron` + `pg_net`).
 - **Region:** eu-west-2 (West Europe / London).
 - **Front-end connection:** the Vue 3 single-page app (`index.html`) talks directly to Supabase via the Supabase JS client, using the **public/publishable (anon) key**. All data access is scoped per user by RLS.
-- **Server-side:** a scheduled **Edge Function** (`generate-recurring`) generates recurring invoices using the **service role key** (server-side only).
+- **Server-side:** Edge Functions handle recurring invoice generation, email delivery, overdue reminders, and Stripe Checkout/webhooks using server-side secrets.
 - **Project URL:** `https://cuagwifetheefftleeup.supabase.co` (public base URL; confirmed from the live cron job command). The publishable key and full config live in `config.js` in the repo.
 
 ---
@@ -65,6 +65,7 @@ All in the `public` schema. All have RLS enabled and are scoped to the owning us
 - `saved_items`
 - `invoices`
 - `recurring_templates`
+- `audit_events`
 
 ---
 
@@ -102,6 +103,16 @@ All in the `public` schema. All have RLS enabled and are scoped to the owning us
 - **RLS:** own rows only.
 - **Column-name cautions (app field ≠ DB column):** customer is **`customer_snapshot`** (not `customer`); issue date is **`issue_date`** (not `date`); total is **`grand_total`** (not a `totals` object).
 - **Notes:** a `tip` column exists (numeric, default 0) — legacy/optional; not prominently used in the current UI. Invoice numbering uses the user's `invoice_prefix`. **Unknown / needs confirmation:** the unique index on `(user_id, doc_type, number)` is defined in `schema.sql` but was not included in the exports provided — confirm with `pg_indexes` if needed.
+
+**Newer invoice migrations:** if applied, `supabase/invoice_payment_options.sql` adds `online_payment_mode` and `deposit_amount`; `supabase/invoice_overdue_reminders.sql` adds `overdue_reminders_enabled`, `overdue_first_reminder_days`, `overdue_repeat_reminder_days`, and `overdue_max_reminders`.
+
+**Payment/reminder notes:** `online_payment_mode` + `deposit_amount` control emailed Stripe payment links. The overdue reminder columns control per-invoice automatic reminder opt-in and cadence; Company Settings only provides defaults.
+
+### `audit_events`
+- **Purpose:** trusted server-side/provider event log for email and payments.
+- **Writers:** Edge Functions and verified provider webhooks using the service role key. The browser should not insert/update/delete audit events.
+- **Used by:** Resend send/delivery events, Stripe checkout-created/payment-completed events, and app-visible email status badges.
+- **Security note:** invoice `history` remains a useful user-facing activity log, but it is not tamper-proof. Use `audit_events` for stronger provider-backed records.
 
 ### `recurring_templates`
 - **Purpose:** recurring-billing schedules — a recipe that spawns invoices. NOT an invoice itself.
@@ -150,6 +161,21 @@ Policy names follow the pattern `own <table> - <command>` (e.g. `own invoices - 
 - **Deploy:** `supabase functions deploy generate-recurring`.
 - **Critical rule:** because RLS does not protect this path, correct per-user attribution (`user_id`) must be enforced in code for every write.
 
+Other current Edge Functions:
+
+- `send-document-email` - authenticated user function; sends documents through Resend, can attach a PDF, and can create Stripe payment links.
+- `send-reminder-email` - authenticated user function; sends one manual overdue reminder and logs history.
+- `send-overdue-reminders` - scheduled function protected by `AUTOMATION_SECRET`; sends only for invoices explicitly opted in to automatic reminders.
+- `resend-webhook` - verifies Resend webhook signatures and records email lifecycle events.
+- `create-stripe-checkout` - authenticated user function; creates Stripe Checkout sessions for the caller's own invoice.
+- `stripe-webhook` - verifies Stripe signatures and accepts `checkout.session.completed` only when the Checkout session was created/logged by Tallyo.
+
+Deploy after edits:
+
+```
+supabase functions deploy <function-name>
+```
+
 ---
 
 ## 11. Scheduled jobs / cron jobs
@@ -176,6 +202,12 @@ Policy names follow the pattern `own <table> - <command>` (e.g. `own invoices - 
   order by start_time desc limit 5;
   ```
 - **Caveat:** on the Supabase free tier, a paused/inactive project will not run cron.
+
+Additional scheduled job:
+
+- **Job:** `send-overdue-reminders-daily`, schedule commonly **`0 9 * * *`** (09:00 UTC daily), calls `send-overdue-reminders`.
+- It should send the `x-automation-secret` header using a secret value, never a committed value.
+- Verify it separately with `cron.job` and `cron.job_run_details` after registering or changing it.
 
 ---
 
@@ -204,8 +236,15 @@ Names only — never commit real values.
 **Vault (secret name, not a value):**
 - `project_anon_key`
 
-**Future (email phase — not yet used):**
 - e.g. `RESEND_API_KEY` — server-side only when added; never client-side or committed.
+
+**Current custom Edge Function secrets (names only):**
+- `RESEND_API_KEY`
+- `RESEND_WEBHOOK_SECRET`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `AUTOMATION_SECRET`
+- `APP_BASE_URL`
 
 Provide a `.env.example` with placeholders if env files are introduced; never commit a real `.env`.
 
@@ -252,6 +291,8 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 - **Unknown / needs confirmation:** custom SMTP config, exact JWT/session expiry, and whether any response security headers (e.g. frame protection) are set (GitHub Pages limits headers).
 
 ---
+
+Additional current limitation: successful Stripe Checkout payments are handled, but refunds, disputes, chargebacks, and asynchronous failure states are future work and must be designed before real customer use.
 
 ## 17. What Codex must not break
 
