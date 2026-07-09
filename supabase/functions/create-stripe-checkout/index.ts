@@ -101,6 +101,7 @@ Deno.serve(async (req) => {
   const currency = String(inv.currency || "GBP").toLowerCase();
   const amountMinor = Math.round(outstanding * 100);
   if (!Number.isFinite(amountMinor) || amountMinor < 1) return json({ error: "Invoice balance is too small to pay online" }, 400);
+  const checkoutAmount = amountMinor / 100;
 
   const params = new URLSearchParams();
   params.set("mode", "payment");
@@ -142,7 +143,7 @@ Deno.serve(async (req) => {
     provider_event_id: stripeBody?.id || null,
     metadata: {
       invoice_number: inv.number || null,
-      amount: outstanding,
+      amount: checkoutAmount,
       currency: inv.currency || "GBP",
       customer_email: validEmail(customer.email) ? customer.email.trim() : null,
     },

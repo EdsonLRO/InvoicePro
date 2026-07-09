@@ -12,6 +12,20 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+type InvoicePayment = {
+  amount?: unknown;
+};
+
+type EmailLine = {
+  name: string;
+  qty: number;
+  unit: string;
+  price: number;
+  discount: number;
+  tax: number;
+  total: number;
+};
+
 function json(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -42,6 +56,17 @@ function currencySymbol(code: string) {
 
 function formatMoney(code: string, amount: unknown) {
   return `${currencySymbol(code)}${(Number(amount) || 0).toFixed(2)}`;
+}
+
+function amountPaid(payments: unknown): number {
+  if (!Array.isArray(payments)) return 0;
+  return payments.reduce((sum: number, payment: InvoicePayment) => {
+    return sum + (Number(payment?.amount) || 0);
+  }, 0);
+}
+
+function outstandingAmount(inv: any): number {
+  return Math.max(0, (Number(inv.grand_total) || 0) - amountPaid(inv.payments));
 }
 
 function r2(n: number): number {
@@ -92,15 +117,16 @@ function calcTotals(inv: any) {
   return { subtotal, globalDiscountAmt, taxAmt, taxByRate, shipping, mode, grandTotal };
 }
 
-function buildEmail(inv: any, company: any) {
+function buildEmail(inv: any, company: any, paymentUrl: string | null = null, paymentAmount: number | null = null) {
   const noun = docTypeNoun(inv.doc_type);
   const currency = inv.currency || "GBP";
   const totals = calcTotals(inv);
   const total = Number(inv.grand_total) || totals.grandTotal;
+  const onlineAmount = Number(paymentAmount) || total;
   const customer = inv.customer_snapshot || {};
   const companyName = company?.name || "Tallyo";
   const subject = `${noun} #${inv.number} from ${companyName}`;
-  const lines = (inv.items || []).map((item: any) => {
+  const lines: EmailLine[] = (inv.items || []).map((item: any): EmailLine => {
     const qty = Number(item.qty) || 0;
     const price = Number(item.price) || 0;
     const discount = Number(item.discount) || 0;
@@ -141,6 +167,7 @@ function buildEmail(inv: any, company: any) {
   if (totals.taxAmt > 0) textLines.push(`${taxLabel}: ${formatMoney(currency, totals.taxAmt)}`);
   if (totals.shipping > 0) textLines.push(`Shipping: ${formatMoney(currency, totals.shipping)}`);
   textLines.push(`Total: ${formatMoney(currency, total)}`);
+  if (paymentUrl) textLines.push("", `Pay online: ${paymentUrl}`);
 
   if (inv.notes) textLines.push("", "Notes:", String(inv.notes));
   if (inv.terms) textLines.push("", "Terms:", String(inv.terms));
@@ -200,6 +227,7 @@ function buildEmail(inv: any, company: any) {
           </tr>
         </tbody>
       </table>
+      ${paymentUrl ? `<p style="margin:22px 0;text-align:center;"><a href="${escapeHtml(paymentUrl)}" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;font-weight:700;border-radius:8px;padding:12px 18px;">Pay ${escapeHtml(formatMoney(currency, onlineAmount))} now</a></p>` : ""}
       ${inv.notes ? `<h2 style="font-size:16px;margin-top:20px;">Notes</h2><p>${escapeHtml(inv.notes).replaceAll("\n", "<br>")}</p>` : ""}
       ${inv.terms ? `<h2 style="font-size:16px;margin-top:20px;">Terms</h2><p>${escapeHtml(inv.terms).replaceAll("\n", "<br>")}</p>` : ""}
       ${company?.payment_details ? `<h2 style="font-size:16px;margin-top:20px;">Payment details</h2><p>${escapeHtml(company.payment_details).replaceAll("\n", "<br>")}</p>` : ""}
@@ -216,6 +244,68 @@ async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
   } catch (e) {
     console.warn("audit event insert skipped", String(e));
   }
+}
+
+async function createStripeCheckoutUrl(inv: any, userId: string, to: string, admin: any): Promise<string | null> {
+  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+  const appUrl = Deno.env.get("APP_BASE_URL")?.replace(/\/+$/, "");
+  if (!stripeKey || !appUrl) return null;
+  if (inv.doc_type !== "invoice" || inv.status === "Cancelled" || inv.status === "Paid") return null;
+
+  const outstanding = outstandingAmount(inv);
+  const amountMinor = Math.round(outstanding * 100);
+  if (!Number.isFinite(amountMinor) || amountMinor < 1) return null;
+
+  const currency = String(inv.currency || "GBP").toLowerCase();
+  const params = new URLSearchParams();
+  params.set("mode", "payment");
+  params.set("success_url", `${appUrl}?payment=success&invoice=${encodeURIComponent(inv.id)}`);
+  params.set("cancel_url", `${appUrl}?payment=cancelled&invoice=${encodeURIComponent(inv.id)}`);
+  params.set("client_reference_id", String(inv.id));
+  params.set("line_items[0][price_data][currency]", currency);
+  params.set("line_items[0][price_data][unit_amount]", String(amountMinor));
+  params.set("line_items[0][price_data][product_data][name]", `Invoice #${inv.number || inv.id}`);
+  params.set("line_items[0][quantity]", "1");
+  params.set("metadata[invoice_id]", String(inv.id));
+  params.set("metadata[user_id]", userId);
+  params.set("metadata[invoice_number]", String(inv.number || ""));
+  params.set("payment_intent_data[metadata][invoice_id]", String(inv.id));
+  params.set("payment_intent_data[metadata][user_id]", userId);
+  if (validEmail(to)) params.set("customer_email", to.trim());
+
+  const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${stripeKey}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: params,
+  });
+  const stripeBody = await stripeResponse.json().catch(() => ({}));
+  if (!stripeResponse.ok) {
+    console.warn("Stripe Checkout link skipped", stripeBody?.error?.message || stripeResponse.status);
+    return null;
+  }
+
+  await insertAuditEvent(admin, {
+    user_id: userId,
+    actor_user_id: userId,
+    event_type: "stripe_checkout_created",
+    object_type: "invoice",
+    object_id: inv.id,
+    source: "edge_function",
+    provider: "stripe",
+    provider_event_id: stripeBody?.id || null,
+    metadata: {
+      invoice_number: inv.number || null,
+      amount: amountMinor / 100,
+      currency: inv.currency || "GBP",
+      customer_email: to,
+      channel: "document_email",
+    },
+  });
+
+  return stripeBody?.url || null;
 }
 
 Deno.serve(async (req) => {
@@ -257,7 +347,9 @@ Deno.serve(async (req) => {
   if (inv.status === "Cancelled") return json({ error: "Cancelled documents cannot be emailed" }, 400);
 
   const { data: company } = await admin.from("company_settings").select("*").eq("user_id", userData.user.id).maybeSingle();
-  const email = buildEmail(inv, company || {});
+  const outstanding = outstandingAmount(inv);
+  const paymentUrl = await createStripeCheckoutUrl(inv, userData.user.id, to, admin);
+  const email = buildEmail(inv, company || {}, paymentUrl, outstanding);
   const resendPayload = {
     from: FROM_EMAIL,
     to: [to],

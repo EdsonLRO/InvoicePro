@@ -669,7 +669,8 @@
                                 <span class="text-slate-400 ml-3">{{ p.date }}</span>
                                 <span v-if="p.note" class="text-slate-500 ml-3 italic">{{ p.note }}</span>
                             </div>
-                            <button @click="removePayment(i)" class="text-red-500 hover:text-red-700 text-xs font-medium">Remove</button>
+                            <span v-if="p.provider === 'stripe'" class="text-xs font-medium text-slate-400">Locked</span>
+                            <button v-else @click="removePayment(i)" class="text-red-500 hover:text-red-700 text-xs font-medium">Remove</button>
                         </div>
                     </div>
                     <p v-else class="text-sm text-slate-400 mb-4">No payments recorded yet.</p>
@@ -2636,8 +2637,9 @@
                 await this.persistDraft();
             },
             async removePayment(index) {
-                if (!confirm('Remove this payment? This cannot be undone.')) return;
                 const removed = this.draft.payments[index];
+                if (removed && removed.provider === 'stripe') return alert('Stripe payments are provider-confirmed and cannot be removed manually.');
+                if (!confirm('Remove this payment? This cannot be undone.')) return;
                 const amt = removed ? (parseFloat(removed.amount) || 0) : 0;
                 this.draft.payments.splice(index, 1);
                 if (this.draftBalance > 0.001 && this.draft.status === 'Paid') this.draft.status = 'Sent';
