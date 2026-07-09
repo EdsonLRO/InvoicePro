@@ -103,6 +103,11 @@ create table public.invoices (
     -- payments: [{ amount, date, note }, ...]
     payments          jsonb not null default '[]'::jsonb,
 
+    online_payment_mode text not null default 'full'
+                          check (online_payment_mode in ('full','deposit')),
+    deposit_amount    numeric(12,2) not null default 0
+                          check (deposit_amount >= 0),
+
     global_discount   numeric(12,2) default 0,
     tax_rate          numeric(6,3)  default 0,
     tax_mode          text          default 'exclusive',

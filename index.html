@@ -692,6 +692,26 @@
                         <button @click="openStripeCheckout(draft)" :disabled="stripeCheckoutBusyId === draft.id || draftBalance <= 0.001 || draft.docType !== 'invoice' || draft.status === 'Cancelled'" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50">{{ stripeCheckoutBusyId === draft.id ? 'Opening...' : 'Pay by Card' }}</button>
                     </div>
 
+                    <div v-if="draft.docType === 'invoice'" class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                        <div class="flex flex-col sm:flex-row sm:items-end gap-3">
+                            <div class="flex-1">
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email payment option</label>
+                                <select v-model="draft.onlinePaymentMode" class="border rounded-lg px-3 py-2 text-sm w-full bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <option value="full">Full balance only</option>
+                                    <option value="deposit">Allow seller-approved deposit</option>
+                                </select>
+                            </div>
+                            <div v-if="draft.onlinePaymentMode === 'deposit'" class="w-full sm:w-44">
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Deposit amount</label>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-sm text-slate-500">{{ getCurrencySymbol(draft.currency) }}</span>
+                                    <input type="number" min="0" :max="Math.max(0, draftBalance).toFixed(2)" step="0.01" v-model.number="draft.depositAmount" @blur="normalizeDeposit" class="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-indigo-500 outline-none">
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2">{{ draft.onlinePaymentMode === 'deposit' ? 'Invoice emails can offer this deposit and the full balance. The customer cannot choose an arbitrary amount.' : 'Invoice emails collect the current outstanding balance.' }}</p>
+                    </div>
+
                     <div class="flex gap-8 mt-5 pt-4 border-t border-slate-100 text-sm">
                         <div><span class="text-slate-500">Paid: </span><span class="font-semibold text-green-600">{{ getCurrencySymbol(draft.currency) }}{{ draftPaid.toFixed(2) }}</span></div>
                         <div><span class="text-slate-500">Balance: </span><span class="font-semibold" :class="draftBalance > 0.001 ? 'text-red-600' : 'text-green-600'">{{ getCurrencySymbol(draft.currency) }}{{ draftBalance.toFixed(2) }}</span></div>
@@ -2063,6 +2083,8 @@
                     date: r.issue_date, dueDate: r.due_date, poNumber: r.po_number || '',
                     currency: r.currency || 'GBP', customer: r.customer_snapshot || null,
                     items: r.items || [], payments: r.payments || [], history: r.history || [],
+                    onlinePaymentMode: r.online_payment_mode || 'full',
+                    depositAmount: Number(r.deposit_amount) || 0,
                     globalDiscount: Number(r.global_discount) || 0, taxRate: Number(r.tax_rate) || 0,
                     taxMode: r.tax_mode || 'exclusive',
                     shippingCost: Number(r.shipping_cost) || 0,
@@ -2080,6 +2102,8 @@
                     customer_id: (inv.customer && this.isUuid(inv.customer.id)) ? inv.customer.id : null,
                     customer_snapshot: inv.customer || null,
                     items: cleanItems, payments: inv.payments || [], history: inv.history || [],
+                    online_payment_mode: inv.onlinePaymentMode === 'deposit' ? 'deposit' : 'full',
+                    deposit_amount: Math.min(Math.max(Number(inv.depositAmount) || 0, 0), Math.max(this.balanceDue(inv), 0)),
                     global_discount: inv.globalDiscount || 0, tax_rate: inv.taxRate || 0,
                     tax_mode: inv.taxMode || 'exclusive',
                     shipping_cost: inv.shippingCost || 0, tip: 0,
@@ -2146,6 +2170,7 @@
                     notes: co.defaultNotes || '', terms: co.defaultTerms || '',
                     customer: null, status: 'Draft', currency: co.defaultCurrency || 'GBP',
                     globalDiscount: 0, taxMode: this.lastTaxMode || 'exclusive', shippingCost: 0, payments: [],
+                    onlinePaymentMode: 'full', depositAmount: 0,
                     history: [ { ts: new Date().toISOString(), type: 'created', text: 'Document created' } ],
                     repeat: { enabled: false, emailEnabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: today, _created: false },
                     items: [ { name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false } ]
@@ -2329,6 +2354,7 @@
             },
             async persistDraft() {
                 // Insert (new) or update (existing) the current draft in the database.
+                this.normalizeDeposit();
                 const inv = JSON.parse(JSON.stringify(this.draft));
                 if (!inv.status) inv.status = 'Draft';
                 if (!inv.docType) inv.docType = 'invoice';
@@ -2635,6 +2661,16 @@
                 if (this.draft.status === 'Paid' && !wasPaid) this.addHistory('paid', 'Marked as fully paid');
                 this.newPayment = { amount: null, date: new Date().toISOString().split('T')[0], note: '' };
                 await this.persistDraft();
+            },
+            normalizeDeposit() {
+                if (!this.draft) return;
+                if (this.draft.onlinePaymentMode !== 'deposit') {
+                    this.draft.depositAmount = 0;
+                    return;
+                }
+                const max = Math.max(this.draftBalance, 0);
+                const amount = Math.max(Number(this.draft.depositAmount) || 0, 0);
+                this.draft.depositAmount = Math.min(amount, max);
             },
             async removePayment(index) {
                 const removed = this.draft.payments[index];

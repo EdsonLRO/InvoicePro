@@ -26,6 +26,13 @@ type EmailLine = {
   total: number;
 };
 
+type PaymentLink = {
+  label: string;
+  url: string;
+  amount: number;
+  kind: string;
+};
+
 function json(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -56,6 +63,15 @@ function currencySymbol(code: string) {
 
 function formatMoney(code: string, amount: unknown) {
   return `${currencySymbol(code)}${(Number(amount) || 0).toFixed(2)}`;
+}
+
+function formatMoneyAscii(code: string, amount: unknown) {
+  return `${code || "GBP"} ${(Number(amount) || 0).toFixed(2)}`;
+}
+
+function brandColor(company: any): string {
+  const color = String(company?.brand_color || "#4f46e5").trim();
+  return /^#[0-9a-f]{6}$/i.test(color) ? color : "#4f46e5";
 }
 
 function amountPaid(payments: unknown): number {
@@ -117,12 +133,12 @@ function calcTotals(inv: any) {
   return { subtotal, globalDiscountAmt, taxAmt, taxByRate, shipping, mode, grandTotal };
 }
 
-function buildEmail(inv: any, company: any, paymentUrl: string | null = null, paymentAmount: number | null = null) {
+function buildEmail(inv: any, company: any, paymentLinks: PaymentLink[] = []) {
   const noun = docTypeNoun(inv.doc_type);
   const currency = inv.currency || "GBP";
+  const color = brandColor(company);
   const totals = calcTotals(inv);
   const total = Number(inv.grand_total) || totals.grandTotal;
-  const onlineAmount = Number(paymentAmount) || total;
   const customer = inv.customer_snapshot || {};
   const companyName = company?.name || "Tallyo";
   const subject = `${noun} #${inv.number} from ${companyName}`;
@@ -167,7 +183,10 @@ function buildEmail(inv: any, company: any, paymentUrl: string | null = null, pa
   if (totals.taxAmt > 0) textLines.push(`${taxLabel}: ${formatMoney(currency, totals.taxAmt)}`);
   if (totals.shipping > 0) textLines.push(`Shipping: ${formatMoney(currency, totals.shipping)}`);
   textLines.push(`Total: ${formatMoney(currency, total)}`);
-  if (paymentUrl) textLines.push("", `Pay online: ${paymentUrl}`);
+  if (paymentLinks.length) {
+    textLines.push("", "Pay online:");
+    paymentLinks.forEach((link) => textLines.push(`- ${link.label}: ${link.url}`));
+  }
 
   if (inv.notes) textLines.push("", "Notes:", String(inv.notes));
   if (inv.terms) textLines.push("", "Terms:", String(inv.terms));
@@ -207,7 +226,7 @@ function buildEmail(inv: any, company: any, paymentUrl: string | null = null, pa
       </div>
       <table style="width:100%;border-collapse:collapse;margin:18px 0;">
         <thead>
-          <tr style="background:#0f172a;color:#ffffff;">
+          <tr style="background:${escapeHtml(color)};color:#ffffff;">
             <th style="padding:10px;text-align:left;">Item</th>
             <th style="padding:10px;text-align:right;">Qty</th>
             <th style="padding:10px;text-align:right;">Price</th>
@@ -222,12 +241,12 @@ function buildEmail(inv: any, company: any, paymentUrl: string | null = null, pa
         <tbody>
           ${summaryRows}
           <tr>
-            <td style="padding:10px 0;border-top:2px solid #cbd5e1;font-size:18px;font-weight:700;">Total</td>
-            <td style="padding:10px 0;border-top:2px solid #cbd5e1;text-align:right;font-size:18px;font-weight:700;">${escapeHtml(formatMoney(currency, total))}</td>
+            <td style="padding:10px 0;border-top:2px solid ${escapeHtml(color)};font-size:18px;font-weight:700;">Total</td>
+            <td style="padding:10px 0;border-top:2px solid ${escapeHtml(color)};text-align:right;font-size:18px;font-weight:700;">${escapeHtml(formatMoney(currency, total))}</td>
           </tr>
         </tbody>
       </table>
-      ${paymentUrl ? `<p style="margin:22px 0;text-align:center;"><a href="${escapeHtml(paymentUrl)}" style="display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;font-weight:700;border-radius:8px;padding:12px 18px;">Pay ${escapeHtml(formatMoney(currency, onlineAmount))} now</a></p>` : ""}
+      ${paymentLinks.length ? `<div style="margin:22px 0;text-align:center;">${paymentLinks.map((link) => `<a href="${escapeHtml(link.url)}" style="display:inline-block;background:${escapeHtml(color)};color:#ffffff;text-decoration:none;font-weight:700;border-radius:8px;padding:12px 18px;margin:4px;">${escapeHtml(link.label)}</a>`).join("")}</div>` : ""}
       ${inv.notes ? `<h2 style="font-size:16px;margin-top:20px;">Notes</h2><p>${escapeHtml(inv.notes).replaceAll("\n", "<br>")}</p>` : ""}
       ${inv.terms ? `<h2 style="font-size:16px;margin-top:20px;">Terms</h2><p>${escapeHtml(inv.terms).replaceAll("\n", "<br>")}</p>` : ""}
       ${company?.payment_details ? `<h2 style="font-size:16px;margin-top:20px;">Payment details</h2><p>${escapeHtml(company.payment_details).replaceAll("\n", "<br>")}</p>` : ""}
@@ -235,6 +254,90 @@ function buildEmail(inv: any, company: any, paymentUrl: string | null = null, pa
     </div>`;
 
   return { subject, text: textLines.join("\n"), html };
+}
+
+function pdfEscape(value: unknown): string {
+  return String(value ?? "")
+    .normalize("NFKD")
+    .replace(/[^\x20-\x7E]/g, "")
+    .replace(/\\/g, "\\\\")
+    .replace(/\(/g, "\\(")
+    .replace(/\)/g, "\\)");
+}
+
+function buildPdfBase64(inv: any, company: any): string {
+  const noun = docTypeNoun(inv.doc_type);
+  const currency = inv.currency || "GBP";
+  const totals = calcTotals(inv);
+  const total = Number(inv.grand_total) || totals.grandTotal;
+  const customer = inv.customer_snapshot || {};
+  const companyName = company?.name || "Tallyo";
+  const lines = [
+    `${noun} #${inv.number || ""}`,
+    companyName,
+    "",
+    `Bill to: ${customer.name || ""}`,
+    customer.address || "",
+    customer.email || "",
+    "",
+    `Issue date: ${inv.issue_date || ""}`,
+    `Due date: ${inv.due_date || ""}`,
+    `Total: ${formatMoneyAscii(currency, total)}`,
+    "",
+    "Items",
+    ...((inv.items || []).map((item: any) => {
+      const qty = Number(item.qty) || 0;
+      const price = Number(item.price) || 0;
+      const discount = Number(item.discount) || 0;
+      const lineTotal = qty * price * (1 - discount / 100);
+      return `${item.name || "Item"} | Qty ${qty}${item.unit ? ` ${item.unit}` : ""} | ${formatMoneyAscii(currency, price)} | Total ${formatMoneyAscii(currency, lineTotal)}`;
+    })),
+    "",
+    `Subtotal: ${formatMoneyAscii(currency, totals.subtotal)}`,
+    ...(totals.globalDiscountAmt > 0 ? [`Discount: -${formatMoneyAscii(currency, totals.globalDiscountAmt)}`] : []),
+    ...(totals.taxAmt > 0 ? [`Tax: ${formatMoneyAscii(currency, totals.taxAmt)}`] : []),
+    ...(totals.shipping > 0 ? [`Shipping: ${formatMoneyAscii(currency, totals.shipping)}`] : []),
+    `Total: ${formatMoneyAscii(currency, total)}`,
+    ...(inv.notes ? ["", "Notes", String(inv.notes)] : []),
+    ...(inv.terms ? ["", "Terms", String(inv.terms)] : []),
+    ...(company?.payment_details ? ["", "Payment details", String(company.payment_details)] : []),
+  ].filter((line) => line != null);
+
+  const content = [
+    "BT",
+    "/F1 16 Tf",
+    "50 790 Td",
+    ...lines.flatMap((line, index) => {
+      const escaped = pdfEscape(line);
+      const font = index === 0 ? ["/F1 16 Tf"] : index === 1 ? ["/F1 11 Tf"] : [];
+      return [...font, `(${escaped}) Tj`, "0 -18 Td"];
+    }),
+    "ET",
+  ].join("\n");
+
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    `<< /Length ${content.length} >>\nstream\n${content}\nendstream`,
+  ];
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  objects.forEach((object, index) => {
+    offsets.push(pdf.length);
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  });
+  const xref = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  offsets.slice(1).forEach((offset) => {
+    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
+  });
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+
+  let binary = "";
+  for (let i = 0; i < pdf.length; i++) binary += String.fromCharCode(pdf.charCodeAt(i) & 0xff);
+  return btoa(binary);
 }
 
 async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
@@ -246,14 +349,15 @@ async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
   }
 }
 
-async function createStripeCheckoutUrl(inv: any, userId: string, to: string, admin: any): Promise<string | null> {
+async function createStripeCheckoutUrl(inv: any, userId: string, to: string, admin: any, amount: number, kind: string): Promise<string | null> {
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
   const appUrl = Deno.env.get("APP_BASE_URL")?.replace(/\/+$/, "");
   if (!stripeKey || !appUrl) return null;
   if (inv.doc_type !== "invoice" || inv.status === "Cancelled" || inv.status === "Paid") return null;
 
   const outstanding = outstandingAmount(inv);
-  const amountMinor = Math.round(outstanding * 100);
+  const safeAmount = Math.min(Math.max(Number(amount) || 0, 0), outstanding);
+  const amountMinor = Math.round(safeAmount * 100);
   if (!Number.isFinite(amountMinor) || amountMinor < 1) return null;
 
   const currency = String(inv.currency || "GBP").toLowerCase();
@@ -269,8 +373,10 @@ async function createStripeCheckoutUrl(inv: any, userId: string, to: string, adm
   params.set("metadata[invoice_id]", String(inv.id));
   params.set("metadata[user_id]", userId);
   params.set("metadata[invoice_number]", String(inv.number || ""));
+  params.set("metadata[payment_kind]", kind);
   params.set("payment_intent_data[metadata][invoice_id]", String(inv.id));
   params.set("payment_intent_data[metadata][user_id]", userId);
+  params.set("payment_intent_data[metadata][payment_kind]", kind);
   if (validEmail(to)) params.set("customer_email", to.trim());
 
   const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
@@ -302,10 +408,29 @@ async function createStripeCheckoutUrl(inv: any, userId: string, to: string, adm
       currency: inv.currency || "GBP",
       customer_email: to,
       channel: "document_email",
+      payment_kind: kind,
     },
   });
 
   return stripeBody?.url || null;
+}
+
+async function createPaymentLinks(inv: any, userId: string, to: string, admin: any): Promise<PaymentLink[]> {
+  const outstanding = outstandingAmount(inv);
+  if (outstanding <= 0.001) return [];
+
+  const links: PaymentLink[] = [];
+  const mode = String(inv.online_payment_mode || "full");
+  const deposit = Math.min(Math.max(Number(inv.deposit_amount) || 0, 0), outstanding);
+
+  if (mode === "deposit" && deposit > 0.001 && deposit < outstanding - 0.001) {
+    const depositUrl = await createStripeCheckoutUrl(inv, userId, to, admin, deposit, "deposit");
+    if (depositUrl) links.push({ label: `Pay deposit ${formatMoney(inv.currency || "GBP", deposit)} now`, url: depositUrl, amount: deposit, kind: "deposit" });
+  }
+
+  const fullUrl = await createStripeCheckoutUrl(inv, userId, to, admin, outstanding, "full_balance");
+  if (fullUrl) links.push({ label: `Pay full balance ${formatMoney(inv.currency || "GBP", outstanding)} now`, url: fullUrl, amount: outstanding, kind: "full_balance" });
+  return links;
 }
 
 Deno.serve(async (req) => {
@@ -347,15 +472,21 @@ Deno.serve(async (req) => {
   if (inv.status === "Cancelled") return json({ error: "Cancelled documents cannot be emailed" }, 400);
 
   const { data: company } = await admin.from("company_settings").select("*").eq("user_id", userData.user.id).maybeSingle();
-  const outstanding = outstandingAmount(inv);
-  const paymentUrl = await createStripeCheckoutUrl(inv, userData.user.id, to, admin);
-  const email = buildEmail(inv, company || {}, paymentUrl, outstanding);
+  const paymentLinks = await createPaymentLinks(inv, userData.user.id, to, admin);
+  const email = buildEmail(inv, company || {}, paymentLinks);
+  const filenameNumber = String(inv.number || "invoice").replace(/[^a-z0-9_-]+/gi, "-");
   const resendPayload = {
     from: FROM_EMAIL,
     to: [to],
     subject: email.subject,
     html: email.html,
     text: email.text,
+    attachments: [
+      {
+        filename: `${docTypeNoun(inv.doc_type).replaceAll(" ", "-")}-${filenameNumber}.pdf`,
+        content: buildPdfBase64(inv, company || {}),
+      },
+    ],
     tags: [
       { name: "category", value: "document_email" },
       { name: "document_id", value: documentId },
