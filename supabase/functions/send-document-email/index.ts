@@ -360,10 +360,7 @@ function buildPdfBase64(inv: any, company: any): string {
     target.push(pdfRect(40, 74, 515, 1, "0.900 0.920 0.950"));
     target.push(pdfText(footerText, 235, 48, 8, muted));
   };
-  const addContinuationHeader = (target: string[]) => {
-    target.push(pdfText(`${noun} #${inv.number || ""}`, 40, 785, 13, text, "F2"));
-    target.push(pdfText(companyName, 40, 768, 8, muted));
-  };
+  const addContinuationHeader = (_target: string[]) => {};
   const finishPage = () => {
     addFooter(commands);
     pages.push(commands);
@@ -411,7 +408,17 @@ function buildPdfBase64(inv: any, company: any): string {
 
   const items = Array.isArray(inv.items) ? inv.items : [];
   let itemIndex = 0;
+  let itemsOnPage = 0;
   while (itemIndex < items.length) {
+    if (itemIndex === items.length - 1 && itemsOnPage > 0 && y - 32 < 300) {
+      commands.push(pdfRect(40, y + 10, 515, 1, "0.900 0.920 0.950"));
+      finishPage();
+      addContinuationHeader(commands);
+      y = 775;
+      addTableHeader(commands, y);
+      y -= 35;
+      itemsOnPage = 0;
+    }
     const item = items[itemIndex];
     const qty = Number(item.qty) || 0;
     const unit = item.unit ? ` ${item.unit}` : "";
@@ -428,25 +435,21 @@ function buildPdfBase64(inv: any, company: any): string {
     commands.push(pdfText(formatMoneyAscii(currency, lineTotal), 500, y, 8, text, "F2"));
     y -= 32;
     itemIndex++;
-    if (itemIndex < items.length && y < 150) {
+    itemsOnPage++;
+    if (itemIndex < items.length && y < 180) {
       commands.push(pdfRect(40, y + 10, 515, 1, "0.900 0.920 0.950"));
       finishPage();
       addContinuationHeader(commands);
-      y = 720;
+      y = 775;
       addTableHeader(commands, y);
       y -= 35;
+      itemsOnPage = 0;
     }
   }
 
   commands.push(pdfRect(40, y + 10, 515, 1, "0.900 0.920 0.950"));
 
-  if (y < 330) {
-    finishPage();
-    addContinuationHeader(commands);
-    y = 650;
-  }
-
-  let detailY = Math.min(y - 50, 430);
+  let detailY = y - 45;
   commands.push(pdfText("NOTES", 40, detailY, 8, faint, "F2"));
   commands.push(pdfText(shorten(inv.notes || "", 58), 40, detailY - 18, 8, muted));
   detailY -= 44;
