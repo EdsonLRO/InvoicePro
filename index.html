@@ -658,6 +658,41 @@
                     </div>
                 </div>
 
+                <div v-if="draft.docType === 'invoice'" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-6 max-w-2xl">
+                    <div class="flex items-center justify-between flex-wrap gap-3">
+                        <div>
+                            <h3 class="text-lg font-semibold">Automatic reminders</h3>
+                            <p class="text-xs text-slate-500 mt-1">Opt in per invoice. The scheduled server run only sends after this invoice is saved and overdue.</p>
+                        </div>
+                        <button type="button" @click="toggleOverdueReminders" :class="draft.overdueRemindersEnabled ? 'bg-indigo-600' : 'bg-slate-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0">
+                            <span :class="draft.overdueRemindersEnabled ? 'translate-x-6' : 'translate-x-1'" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"></span>
+                        </button>
+                    </div>
+                    <div v-if="draft.overdueRemindersEnabled" class="mt-5 pt-5 border-t border-slate-100 space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-1">First reminder after</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" min="1" max="365" v-model.number="draft.overdueFirstReminderDays" @blur="normalizeReminderSchedule" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <span class="text-sm text-slate-500">days</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-1">Repeat every</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="number" min="1" max="365" v-model.number="draft.overdueRepeatReminderDays" @blur="normalizeReminderSchedule" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <span class="text-sm text-slate-500">days</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-600 mb-1">Maximum reminders</label>
+                                <input type="number" min="1" max="24" v-model.number="draft.overdueMaxReminders" @blur="normalizeReminderSchedule" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 bg-slate-50 rounded-lg p-3">Requires a saved invoice, customer email address, unpaid balance, and overdue status. Sent reminders are logged in activity history.</p>
+                    </div>
+                </div>
+
                 <div v-if="editingExisting" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-6 max-w-2xl">
                     <h3 class="text-lg font-semibold mb-1">Payments</h3>
                     <p class="text-sm text-slate-500 mb-4">Record full or partial payments, or open a Stripe card checkout. The balance and status update automatically.</p>
@@ -786,7 +821,8 @@
                     <div class="flex items-center justify-between flex-wrap gap-3 mb-3">
                         <div>
                             <h3 class="font-semibold text-red-800">{{ overdueInvoices.length }} overdue invoice{{ overdueInvoices.length > 1 ? 's' : '' }} — {{ getCurrencySymbol(overdueInvoices[0].currency) }}{{ overdueOutstanding.toFixed(2) }} outstanding</h3>
-                            <p v-if="company.overdueRemindersEnabled" class="text-sm text-red-700 mt-0.5">Automatic overdue reminders are enabled.</p>
+                            <p v-if="overdueAutomaticCount === overdueInvoices.length" class="text-sm text-red-700 mt-0.5">Automatic reminders are enabled for these invoices.</p>
+                            <p v-else-if="overdueAutomaticCount" class="text-sm text-red-700 mt-0.5">Automatic reminders are enabled where marked. Send manual reminders for the rest.</p>
                             <p v-else class="text-sm text-red-700 mt-0.5">Past their due date and not fully paid. Send a reminder below.</p>
                         </div>
                     </div>
@@ -799,7 +835,7 @@
                             </div>
                             <div class="flex items-center gap-3">
                                 <span class="font-semibold text-slate-700">{{ getCurrencySymbol(inv.currency) }}{{ invoiceOutstanding(inv).toFixed(2) }}</span>
-                                <span v-if="company.overdueRemindersEnabled" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-sm font-medium">Automatic</span>
+                                <span v-if="inv.overdueRemindersEnabled" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-sm font-medium">Automatic</span>
                                 <button v-else @click="openReminder(inv)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm transition-colors">Reminder</button>
                             </div>
                         </div>
@@ -1453,15 +1489,8 @@
                                 <textarea v-model="company.defaultTerms" rows="2" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
                             </div>
                             <div class="sm:col-span-2 border-t pt-6 mt-2">
-                                <h3 class="text-lg font-semibold mb-1">Email Automation</h3>
-                                <p class="text-sm text-slate-500 mb-5">Automatic overdue reminders only send for saved invoices with a customer email address.</p>
-                                <label class="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4">
-                                    <input type="checkbox" v-model="company.overdueRemindersEnabled" class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
-                                    <span>
-                                        <span class="block text-sm font-semibold text-slate-700">Automatically email overdue payment reminders</span>
-                                        <span class="block text-xs text-slate-500 mt-0.5">The scheduled server run checks overdue invoices and logs each reminder in activity history.</span>
-                                    </span>
-                                </label>
+                                <h3 class="text-lg font-semibold mb-1">Reminder defaults</h3>
+                                <p class="text-sm text-slate-500 mb-5">Used to pre-fill the Automatic reminders schedule on new invoices. Each invoice still needs to be opted in separately.</p>
                                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div>
                                         <label class="block text-sm font-bold text-slate-600 mb-1">First reminder after</label>
@@ -1548,7 +1577,7 @@
                 mobileMenuOpen: false,
                 editingExisting: false,
                 isExportingPDF: false,
-                company: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueRemindersEnabled: false, overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 },
+                company: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 },
                 customers: [],
                 savedItems: [],
                 invoices: [],
@@ -1657,6 +1686,9 @@
             },
             overdueOutstanding() {
                 return this.overdueInvoices.reduce((s, inv) => s + this.invoiceOutstanding(inv), 0);
+            },
+            overdueAutomaticCount() {
+                return this.overdueInvoices.filter(inv => inv.overdueRemindersEnabled === true).length;
             },
             anySuggestionOpen() {
                 return (this.draft.items || []).some(it => it.showSuggestions && it.name);
@@ -2017,7 +2049,7 @@
                     this.activeTab = 'create';
                     window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
                     this.editingExisting = false;
-                    this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueRemindersEnabled: false, overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 };
+                    this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 };
                     this.customers = []; this.savedItems = []; this.invoices = [];
                 }
             },
@@ -2113,11 +2145,11 @@
                 return { name: i.name, description: i.description || null, price: i.price || 0 };
             },
             rowToCompany(r) {
-                return { name: r.name || '', address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '', logo: r.logo_url || '', invoicePrefix: r.invoice_prefix || '', quotePrefix: r.quote_prefix || 'QUO-', creditPrefix: r.credit_prefix || 'CN-', defaultCurrency: r.default_currency || 'GBP', paymentDetails: r.payment_details || '', defaultNotes: r.default_notes || '', defaultTerms: r.default_terms || '', invoiceFooter: r.invoice_footer || '', brandColor: r.brand_color || '#4f46e5', logoPosition: r.logo_position || 'left', overdueRemindersEnabled: r.overdue_reminders_enabled === true, overdueFirstReminderDays: Number(r.overdue_first_reminder_days) || 3, overdueRepeatReminderDays: Number(r.overdue_repeat_reminder_days) || 7, overdueMaxReminders: Number(r.overdue_max_reminders) || 3 };
+                return { name: r.name || '', address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '', logo: r.logo_url || '', invoicePrefix: r.invoice_prefix || '', quotePrefix: r.quote_prefix || 'QUO-', creditPrefix: r.credit_prefix || 'CN-', defaultCurrency: r.default_currency || 'GBP', paymentDetails: r.payment_details || '', defaultNotes: r.default_notes || '', defaultTerms: r.default_terms || '', invoiceFooter: r.invoice_footer || '', brandColor: r.brand_color || '#4f46e5', logoPosition: r.logo_position || 'left', overdueFirstReminderDays: Number(r.overdue_first_reminder_days) || 3, overdueRepeatReminderDays: Number(r.overdue_repeat_reminder_days) || 7, overdueMaxReminders: Number(r.overdue_max_reminders) || 3 };
             },
             companyToRow() {
                 const c = this.company;
-                return { user_id: this.currentUser.id, name: c.name || null, address: c.address || null, phone: c.phone || null, mobile: c.mobile || null, email: c.email || null, tax_id: c.taxId || null, additional_info: c.additionalInfo || null, logo_url: c.logo || null, invoice_prefix: c.invoicePrefix || '', quote_prefix: c.quotePrefix || 'QUO-', credit_prefix: c.creditPrefix || 'CN-', default_currency: c.defaultCurrency || 'GBP', payment_details: c.paymentDetails || null, default_notes: c.defaultNotes || null, default_terms: c.defaultTerms || null, invoice_footer: c.invoiceFooter || null, brand_color: c.brandColor || '#4f46e5', logo_position: c.logoPosition || 'left', overdue_reminders_enabled: c.overdueRemindersEnabled === true, overdue_first_reminder_days: Math.min(Math.max(Number(c.overdueFirstReminderDays) || 3, 1), 365), overdue_repeat_reminder_days: Math.min(Math.max(Number(c.overdueRepeatReminderDays) || 7, 1), 365), overdue_max_reminders: Math.min(Math.max(Number(c.overdueMaxReminders) || 3, 1), 24), updated_at: new Date().toISOString() };
+                return { user_id: this.currentUser.id, name: c.name || null, address: c.address || null, phone: c.phone || null, mobile: c.mobile || null, email: c.email || null, tax_id: c.taxId || null, additional_info: c.additionalInfo || null, logo_url: c.logo || null, invoice_prefix: c.invoicePrefix || '', quote_prefix: c.quotePrefix || 'QUO-', credit_prefix: c.creditPrefix || 'CN-', default_currency: c.defaultCurrency || 'GBP', payment_details: c.paymentDetails || null, default_notes: c.defaultNotes || null, default_terms: c.defaultTerms || null, invoice_footer: c.invoiceFooter || null, brand_color: c.brandColor || '#4f46e5', logo_position: c.logoPosition || 'left', overdue_first_reminder_days: Math.min(Math.max(Number(c.overdueFirstReminderDays) || 3, 1), 365), overdue_repeat_reminder_days: Math.min(Math.max(Number(c.overdueRepeatReminderDays) || 7, 1), 365), overdue_max_reminders: Math.min(Math.max(Number(c.overdueMaxReminders) || 3, 1), 24), updated_at: new Date().toISOString() };
             },
             rowToInvoice(r) {
                 const inv = {
@@ -2127,6 +2159,10 @@
                     items: r.items || [], payments: r.payments || [], history: r.history || [],
                     onlinePaymentMode: r.online_payment_mode || 'full',
                     depositAmount: Number(r.deposit_amount) || 0,
+                    overdueRemindersEnabled: r.overdue_reminders_enabled === true,
+                    overdueFirstReminderDays: Number(r.overdue_first_reminder_days) || Number(this.company.overdueFirstReminderDays) || 3,
+                    overdueRepeatReminderDays: Number(r.overdue_repeat_reminder_days) || Number(this.company.overdueRepeatReminderDays) || 7,
+                    overdueMaxReminders: Number(r.overdue_max_reminders) || Number(this.company.overdueMaxReminders) || 3,
                     globalDiscount: Number(r.global_discount) || 0, taxRate: Number(r.tax_rate) || 0,
                     taxMode: r.tax_mode || 'exclusive',
                     shippingCost: Number(r.shipping_cost) || 0,
@@ -2146,6 +2182,10 @@
                     items: cleanItems, payments: inv.payments || [], history: inv.history || [],
                     online_payment_mode: inv.onlinePaymentMode === 'deposit' ? 'deposit' : 'full',
                     deposit_amount: Math.min(Math.max(Number(inv.depositAmount) || 0, 0), Math.max(this.balanceDue(inv), 0)),
+                    overdue_reminders_enabled: inv.overdueRemindersEnabled === true,
+                    overdue_first_reminder_days: Math.min(Math.max(Number(inv.overdueFirstReminderDays) || Number(this.company.overdueFirstReminderDays) || 3, 1), 365),
+                    overdue_repeat_reminder_days: Math.min(Math.max(Number(inv.overdueRepeatReminderDays) || Number(this.company.overdueRepeatReminderDays) || 7, 1), 365),
+                    overdue_max_reminders: Math.min(Math.max(Number(inv.overdueMaxReminders) || Number(this.company.overdueMaxReminders) || 3, 1), 24),
                     global_discount: inv.globalDiscount || 0, tax_rate: inv.taxRate || 0,
                     tax_mode: inv.taxMode || 'exclusive',
                     shipping_cost: inv.shippingCost || 0, tip: 0,
@@ -2213,6 +2253,10 @@
                     customer: null, status: 'Draft', currency: co.defaultCurrency || 'GBP',
                     globalDiscount: 0, taxMode: this.lastTaxMode || 'exclusive', shippingCost: 0, payments: [],
                     onlinePaymentMode: 'full', depositAmount: 0,
+                    overdueRemindersEnabled: false,
+                    overdueFirstReminderDays: Number(co.overdueFirstReminderDays) || 3,
+                    overdueRepeatReminderDays: Number(co.overdueRepeatReminderDays) || 7,
+                    overdueMaxReminders: Number(co.overdueMaxReminders) || 3,
                     history: [ { ts: new Date().toISOString(), type: 'created', text: 'Document created' } ],
                     repeat: { enabled: false, emailEnabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: today, _created: false },
                     items: [ { name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false } ]
@@ -2397,6 +2441,7 @@
             async persistDraft() {
                 // Insert (new) or update (existing) the current draft in the database.
                 this.normalizeDeposit();
+                this.normalizeReminderSchedule();
                 const inv = JSON.parse(JSON.stringify(this.draft));
                 if (!inv.status) inv.status = 'Draft';
                 if (!inv.docType) inv.docType = 'invoice';
@@ -2588,6 +2633,7 @@
                         copy.number = this.generateNumber(copy.docType);
                         copy.status = 'Draft';
                         copy.payments = [];
+                        copy.overdueRemindersEnabled = false;
                         const today = new Date().toISOString().split('T')[0];
                         copy.date = today;
                         copy.dueDate = today;
@@ -2714,6 +2760,16 @@
                 const amount = Math.max(Number(this.draft.depositAmount) || 0, 0);
                 this.draft.depositAmount = Math.min(amount, max);
             },
+            normalizeReminderSchedule() {
+                if (!this.draft) return;
+                this.draft.overdueFirstReminderDays = Math.min(Math.max(Number(this.draft.overdueFirstReminderDays) || Number(this.company.overdueFirstReminderDays) || 3, 1), 365);
+                this.draft.overdueRepeatReminderDays = Math.min(Math.max(Number(this.draft.overdueRepeatReminderDays) || Number(this.company.overdueRepeatReminderDays) || 7, 1), 365);
+                this.draft.overdueMaxReminders = Math.min(Math.max(Number(this.draft.overdueMaxReminders) || Number(this.company.overdueMaxReminders) || 3, 1), 24);
+            },
+            toggleOverdueReminders() {
+                this.draft.overdueRemindersEnabled = !this.draft.overdueRemindersEnabled;
+                if (this.draft.overdueRemindersEnabled) this.normalizeReminderSchedule();
+            },
             async removePayment(index) {
                 const removed = this.draft.payments[index];
                 if (removed && removed.provider === 'stripe') return alert('Stripe payments are provider-confirmed and cannot be removed manually.');
@@ -2732,6 +2788,7 @@
                 copy.number = this.generateNumber('invoice');
                 copy.status = 'Draft';
                 copy.payments = [];
+                copy.overdueRemindersEnabled = false;
                 const today = new Date().toISOString().split('T')[0];
                 copy.date = today; copy.dueDate = today;
                 delete copy.totals;
@@ -3046,6 +3103,10 @@
                 if(this.draft.repeat.emailEnabled === undefined) this.draft.repeat.emailEnabled = false;
                 if(!this.draft.docType) this.draft.docType = 'invoice';
                 if(!this.draft.currency) this.draft.currency = 'GBP';
+                if(this.draft.overdueRemindersEnabled === undefined) this.draft.overdueRemindersEnabled = false;
+                if(!this.draft.overdueFirstReminderDays) this.draft.overdueFirstReminderDays = Number(this.company.overdueFirstReminderDays) || 3;
+                if(!this.draft.overdueRepeatReminderDays) this.draft.overdueRepeatReminderDays = Number(this.company.overdueRepeatReminderDays) || 7;
+                if(!this.draft.overdueMaxReminders) this.draft.overdueMaxReminders = Number(this.company.overdueMaxReminders) || 3;
                 this.syncTimeFields();
                 this.editingExisting = true;
                 this.navigateTo('edit');
@@ -3100,6 +3161,7 @@
                 copy.number = this.generateNumber(copy.docType);
                 copy.status = 'Draft';
                 copy.payments = [];
+                copy.overdueRemindersEnabled = false;
                 const today = new Date().toISOString().split('T')[0];
                 copy.date = today;
                 copy.dueDate = today;

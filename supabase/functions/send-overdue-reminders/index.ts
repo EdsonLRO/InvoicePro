@@ -1,5 +1,5 @@
 // send-overdue-reminders - scheduled Edge Function
-// Sends overdue payment reminders only for users who explicitly enabled automation.
+// Sends overdue payment reminders only for invoices explicitly opted in to automation.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -168,39 +168,45 @@ Deno.serve(async (req) => {
   const nowISO = new Date().toISOString();
 
   const { data: settings, error: settingsError } = await admin.from("company_settings")
-    .select("*")
-    .eq("overdue_reminders_enabled", true);
+    .select("*");
   if (settingsError) return json({ error: settingsError.message }, 500);
+  const settingsByUser = new Map<string, any>();
+  for (const company of settings || []) {
+    const userId = String(company.user_id || "");
+    if (userId) settingsByUser.set(userId, company);
+  }
 
   let checked = 0;
   let sent = 0;
   let skipped = 0;
   let failed = 0;
 
-  for (const company of settings || []) {
-    const userId = String(company.user_id || "");
-    if (!userId) continue;
+  const { data: invoices, error: invoiceError } = await admin.from("invoices")
+    .select("*")
+    .eq("overdue_reminders_enabled", true)
+    .eq("doc_type", "invoice")
+    .not("due_date", "is", null)
+    .lte("due_date", today);
 
-    const firstDays = Math.max(1, Number(company.overdue_first_reminder_days) || 3);
-    const repeatDays = Math.max(1, Number(company.overdue_repeat_reminder_days) || 7);
-    const maxReminders = Math.max(1, Number(company.overdue_max_reminders) || 3);
+  if (invoiceError) return json({ error: invoiceError.message }, 500);
 
-    const { data: invoices, error: invoiceError } = await admin.from("invoices")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("doc_type", "invoice")
-      .not("due_date", "is", null)
-      .lte("due_date", today);
+  const activeUsers = new Set<string>();
 
-    if (invoiceError) {
-      failed++;
-      console.error("invoice lookup failed", userId, invoiceError.message);
-      continue;
-    }
-
-    for (const inv of invoices || []) {
+  for (const inv of invoices || []) {
       checked++;
-      if (inv.status === "Paid" || inv.status === "Cancelled") {
+      const userId = String(inv.user_id || "");
+      if (!userId) {
+        skipped++;
+        continue;
+      }
+      activeUsers.add(userId);
+      const company = settingsByUser.get(userId) || {};
+
+      const firstDays = Math.max(1, Number(inv.overdue_first_reminder_days) || Number(company.overdue_first_reminder_days) || 3);
+      const repeatDays = Math.max(1, Number(inv.overdue_repeat_reminder_days) || Number(company.overdue_repeat_reminder_days) || 7);
+      const maxReminders = Math.max(1, Number(inv.overdue_max_reminders) || Number(company.overdue_max_reminders) || 3);
+
+      if (inv.status === "Draft" || inv.status === "Paid" || inv.status === "Cancelled") {
         skipped++;
         continue;
       }
@@ -305,8 +311,7 @@ Deno.serve(async (req) => {
       });
 
       sent++;
-    }
   }
 
-  return json({ ok: true, users: (settings || []).length, checked, sent, skipped, failed });
+  return json({ ok: true, users: activeUsers.size, checked, sent, skipped, failed });
 });
