@@ -786,7 +786,8 @@
                     <div class="flex items-center justify-between flex-wrap gap-3 mb-3">
                         <div>
                             <h3 class="font-semibold text-red-800">{{ overdueInvoices.length }} overdue invoice{{ overdueInvoices.length > 1 ? 's' : '' }} — {{ getCurrencySymbol(overdueInvoices[0].currency) }}{{ overdueOutstanding.toFixed(2) }} outstanding</h3>
-                            <p class="text-sm text-red-700 mt-0.5">Past their due date and not fully paid. Send a reminder and log it below.</p>
+                            <p v-if="company.overdueRemindersEnabled" class="text-sm text-red-700 mt-0.5">Automatic overdue reminders are enabled.</p>
+                            <p v-else class="text-sm text-red-700 mt-0.5">Past their due date and not fully paid. Send a reminder below.</p>
                         </div>
                     </div>
                     <div class="space-y-2">
@@ -798,7 +799,8 @@
                             </div>
                             <div class="flex items-center gap-3">
                                 <span class="font-semibold text-slate-700">{{ getCurrencySymbol(inv.currency) }}{{ invoiceOutstanding(inv).toFixed(2) }}</span>
-                                <button @click="openReminder(inv)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm transition-colors">Reminder</button>
+                                <span v-if="company.overdueRemindersEnabled" class="bg-red-100 text-red-700 px-3 py-1.5 rounded-lg text-sm font-medium">Automatic</span>
+                                <button v-else @click="openReminder(inv)" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm transition-colors">Reminder</button>
                             </div>
                         </div>
                     </div>
@@ -930,7 +932,6 @@
                     <div class="flex gap-2 justify-end flex-wrap">
                         <button @click="copyReminder" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors">{{ reminderModal.copied ? 'Copied!' : 'Copy text' }}</button>
                         <button @click="sendReminderEmail" :disabled="reminderModal.sending" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50">{{ reminderModal.sending ? 'Sending...' : 'Email reminder' }}</button>
-                        <button v-if="!reminderAlreadyEmailed(reminderModal.inv)" @click="logReminderSent" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors">Log reminder as sent</button>
                     </div>
                 </div>
             </div>
@@ -2983,9 +2984,6 @@
             openReminder(inv) {
                 this.reminderModal = { open: true, inv, text: this.reminderText(inv), copied: false, sending: false };
             },
-            reminderAlreadyEmailed(inv) {
-                return !!(inv && Array.isArray(inv.history) && inv.history.some(ev => ev && ev.type === 'reminder' && String(ev.text || '').startsWith('Payment reminder emailed to ')));
-            },
             async copyReminder() {
                 try {
                     await navigator.clipboard.writeText(this.reminderModal.text);
@@ -2994,18 +2992,6 @@
                 } catch (e) {
                     alert('Could not copy automatically. Please select the text and copy it manually.');
                 }
-            },
-            async logReminderSent() {
-                const inv = this.reminderModal.inv;
-                if (!inv) return;
-                if (!inv.history) inv.history = [];
-                inv.history.push({ ts: new Date().toISOString(), type: 'reminder', text: 'Payment reminder sent (' + this.daysOverdue(inv) + ' days overdue)' });
-                try {
-                    const { error } = await supabaseClient.from('invoices').update({ history: inv.history, updated_at: new Date().toISOString() }).eq('id', inv.id);
-                    if (error) throw error;
-                    if (this.draft && this.draft.id === inv.id) this.draft.history = JSON.parse(JSON.stringify(inv.history));
-                    this.reminderModal.open = false;
-                } catch (e) { alert('Could not log the reminder: ' + (e.message || e)); }
             },
             async sendReminderEmail() {
                 const inv = this.reminderModal.inv;
