@@ -702,11 +702,11 @@
                     </div>
                     <p class="text-xs text-slate-400 mb-4">A record of what has happened to this document, for your convenience. This is an activity history, not a tamper-proof audit log.</p>
                     <div v-if="emailStatusFor(draft.id)" class="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
-                        <div class="flex items-center justify-between gap-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                             <div class="font-semibold text-slate-700">Email status</div>
-                            <div class="flex items-center gap-3 justify-end text-right">
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 sm:justify-end text-left sm:text-right">
                                 <div class="text-slate-500">{{ emailStatusFor(draft.id).detail }}</div>
-                                <span class="px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap" :class="emailStatusClass(emailStatusFor(draft.id).state)">{{ emailStatusFor(draft.id).label }}</span>
+                                <span class="self-start sm:self-auto px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap" :class="emailStatusClass(emailStatusFor(draft.id).state)">{{ emailStatusFor(draft.id).label }}</span>
                             </div>
                         </div>
                     </div>
@@ -2982,12 +2982,34 @@
                         window.html2canvas(el, {
                             scale: 2,
                             windowWidth: 1024,
+                            windowHeight: Math.max(1600, el.scrollHeight + 500),
+                            width: 800,
+                            scrollX: 0,
+                            scrollY: 0,
                             onclone: (doc) => {
+                                doc.documentElement.style.width = '1024px';
+                                doc.documentElement.style.overflow = 'visible';
+                                doc.body.style.width = '1024px';
+                                doc.body.style.overflow = 'visible';
+                                const app = doc.getElementById('app');
+                                if (app) {
+                                    app.style.width = '1024px';
+                                    app.style.height = 'auto';
+                                    app.style.overflow = 'visible';
+                                }
+                                const main = doc.querySelector('main');
+                                if (main) {
+                                    main.style.width = '1024px';
+                                    main.style.height = 'auto';
+                                    main.style.overflow = 'visible';
+                                }
                                 const c = doc.getElementById('invoice-canvas');
                                 if (c) {
                                     c.style.width = '800px';
+                                    c.style.minWidth = '800px';
                                     c.style.maxWidth = '800px';
                                     c.style.margin = '0';
+                                    c.style.overflow = 'visible';
                                     this.addPdfRowPageBreaks(c);
                                 }
                             }
