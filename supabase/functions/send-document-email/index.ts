@@ -461,14 +461,17 @@ function buildPdfBase64(inv: any, company: any): string {
     commands.push(pdfText(shorten(line, 58), 40, detailY - 18 - index * 12, 8, text));
   });
 
-  let summaryY = Math.min(y - 40, 410);
-  commands.push(pdfRect(365, summaryY - 112, 190, 120, veryFaint, border));
   const summaryRows = [
     ["Subtotal", totals.subtotal],
     ["Discount", -totals.globalDiscountAmt],
     ...(totals.taxAmt > 0 ? [["Tax", totals.taxAmt]] : []),
     ["Shipping", totals.shipping],
   ] as [string, number][];
+  const totalBoxTop = Math.min(y - 32, 418);
+  const totalBoxHeight = 120;
+  const totalBoxBottom = totalBoxTop - totalBoxHeight;
+  let summaryY = (totalBoxTop + totalBoxBottom + (summaryRows.length * 19) + 24) / 2;
+  commands.push(pdfRect(365, totalBoxBottom, 190, totalBoxHeight, veryFaint, border));
   summaryRows.forEach(([label, amount]) => {
     commands.push(pdfText(label, 392, summaryY, 8, muted));
     commands.push(pdfText(formatMoneyAscii(currency, amount), 470, summaryY, 8, amount < 0 ? muted : text, "F2"));
