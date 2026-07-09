@@ -689,7 +689,6 @@
                             <input type="text" v-model="newPayment.note" placeholder="e.g. Bank transfer" class="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
                         <button @click="recordPayment" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors">Record Payment</button>
-                        <button @click="openStripeCheckout(draft)" :disabled="stripeCheckoutBusyId === draft.id || draftBalance <= 0.001 || draft.docType !== 'invoice' || draft.status === 'Cancelled'" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50">{{ stripeCheckoutBusyId === draft.id ? 'Opening...' : 'Pay by Card' }}</button>
                     </div>
 
                     <div v-if="draft.docType === 'invoice'" class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
@@ -712,9 +711,12 @@
                         <p class="text-xs text-slate-500 mt-2">{{ draft.onlinePaymentMode === 'deposit' ? 'Invoice emails can offer this deposit and the full balance. The customer cannot choose an arbitrary amount.' : 'Invoice emails collect the current outstanding balance.' }}</p>
                     </div>
 
-                    <div class="flex gap-8 mt-5 pt-4 border-t border-slate-100 text-sm">
-                        <div><span class="text-slate-500">Paid: </span><span class="font-semibold text-green-600">{{ getCurrencySymbol(draft.currency) }}{{ draftPaid.toFixed(2) }}</span></div>
-                        <div><span class="text-slate-500">Balance: </span><span class="font-semibold" :class="draftBalance > 0.001 ? 'text-red-600' : 'text-green-600'">{{ getCurrencySymbol(draft.currency) }}{{ draftBalance.toFixed(2) }}</span></div>
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-5 pt-4 border-t border-slate-100 text-sm">
+                        <div class="flex gap-8">
+                            <div><span class="text-slate-500">Paid: </span><span class="font-semibold text-green-600">{{ getCurrencySymbol(draft.currency) }}{{ draftPaid.toFixed(2) }}</span></div>
+                            <div><span class="text-slate-500">Balance: </span><span class="font-semibold" :class="draftBalance > 0.001 ? 'text-red-600' : 'text-green-600'">{{ getCurrencySymbol(draft.currency) }}{{ draftBalance.toFixed(2) }}</span></div>
+                        </div>
+                        <button @click="openStripeCheckout(draft)" :disabled="stripeCheckoutBusyId === draft.id || draftBalance <= 0.001 || draft.docType !== 'invoice' || draft.status === 'Cancelled'" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50">{{ stripeCheckoutBusyId === draft.id ? 'Opening...' : 'Pay by Card' }}</button>
                     </div>
                 </div>
 
