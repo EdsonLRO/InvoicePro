@@ -33,6 +33,10 @@ function formatMoney(code: string, amount: unknown) {
   return `${currencySymbol(code || "GBP")}${(Number(amount) || 0).toFixed(2)}`;
 }
 
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
+
 async function hmacSha256Hex(secret: string, payload: string): Promise<string> {
   const key = await crypto.subtle.importKey(
     "raw",
@@ -83,6 +87,26 @@ async function auditEventExists(admin: any, providerEventId: string): Promise<bo
   return Boolean(data);
 }
 
+async function verifiedCheckoutSession(admin: any, sessionId: string, invoiceId: string, userId: string, amount: number): Promise<boolean> {
+  const { data, error } = await admin.from("audit_events")
+    .select("metadata")
+    .eq("event_type", "stripe_checkout_created")
+    .eq("object_type", "invoice")
+    .eq("object_id", invoiceId)
+    .eq("user_id", userId)
+    .eq("provider", "stripe")
+    .eq("provider_event_id", sessionId)
+    .maybeSingle();
+  if (error) {
+    console.warn("checkout session lookup failed", error.message);
+    return false;
+  }
+  if (!data) return false;
+  const expectedAmount = Number(data.metadata?.amount);
+  if (!Number.isFinite(expectedAmount)) return true;
+  return Math.abs(expectedAmount - amount) < 0.01;
+}
+
 async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
   try {
     const { error } = await admin.from("audit_events").insert(payload);
@@ -99,6 +123,17 @@ async function handleCheckoutCompleted(admin: any, event: any) {
   const invoiceId = String(session.metadata?.invoice_id || session.client_reference_id || "");
   const userId = String(session.metadata?.user_id || "");
   if (!invoiceId || !userId) return { ignored: "missing Tallyo metadata" };
+  if (!isUuid(invoiceId) || !isUuid(userId)) return { ignored: "invalid Tallyo metadata" };
+  if (!session.id) return { ignored: "missing checkout session ID" };
+
+  const currency = String(session.currency || "GBP").toUpperCase();
+  const amount = Math.round((Number(session.amount_total) || 0)) / 100;
+  if (!Number.isFinite(amount) || amount <= 0) return { ignored: "invalid payment amount" };
+  const paymentKind = String(session.metadata?.payment_kind || "");
+  const paymentLabel = paymentKind === "deposit" ? "Stripe deposit payment" : "Stripe card payment";
+
+  const knownCheckout = await verifiedCheckoutSession(admin, String(session.id), invoiceId, userId, amount);
+  if (!knownCheckout) return { ignored: "checkout session was not created by Tallyo" };
 
   const { data: inv, error: invError } = await admin.from("invoices")
     .select("*")
@@ -118,15 +153,13 @@ async function handleCheckoutCompleted(admin: any, event: any) {
   });
   if (alreadyRecorded) return { ok: true, duplicate: true };
 
-  const currency = String(session.currency || inv.currency || "GBP").toUpperCase();
-  const amount = Math.round((Number(session.amount_total) || 0)) / 100;
-  if (!Number.isFinite(amount) || amount <= 0) return { ignored: "invalid payment amount" };
+  if (currency !== String(inv.currency || "GBP").toUpperCase()) return { ignored: "currency mismatch" };
 
   const nowISO = new Date().toISOString();
   const payment = {
     amount,
     date: nowISO.split("T")[0],
-    note: "Stripe card payment",
+    note: `${paymentLabel} confirmed`,
     provider: "stripe",
     providerEventId: event.id,
     providerSessionId: session.id || null,
@@ -142,14 +175,14 @@ async function handleCheckoutCompleted(admin: any, event: any) {
   history.push({
     ts: nowISO,
     type: "payment",
-    text: `Stripe payment of ${formatMoney(currency, amount)} recorded`,
+    text: `${paymentLabel} of ${formatMoney(currency, amount)} confirmed`,
     providerMarker: `stripe:${event.id}`,
   });
   if (nextStatus === "Paid" && inv.status !== "Paid") {
     history.push({
       ts: nowISO,
       type: "paid",
-      text: "Marked as fully paid by Stripe payment",
+      text: "Invoice fully paid by Stripe payment",
       providerMarker: `stripe-paid:${event.id}`,
     });
   }
@@ -174,6 +207,7 @@ async function handleCheckoutCompleted(admin: any, event: any) {
       payment_intent: session.payment_intent || null,
       amount,
       currency,
+      payment_kind: paymentKind || null,
       invoice_number: inv.number || null,
       customer_email: session.customer_details?.email || session.customer_email || null,
     },

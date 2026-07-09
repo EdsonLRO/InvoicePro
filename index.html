@@ -698,14 +698,16 @@
                     <p class="text-sm text-slate-500 mb-4">Record full or partial payments, or open a Stripe card checkout. The balance and status update automatically.</p>
 
                     <div v-if="draft.payments && draft.payments.length" class="divide-y divide-slate-100 mb-4 border border-slate-100 rounded-lg">
-                        <div v-for="(p, i) in draft.payments" :key="i" class="flex items-center justify-between px-4 py-2 text-sm">
-                            <div>
+                        <div v-for="(p, i) in draft.payments" :key="i" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-2 text-sm">
+                            <div class="min-w-0">
                                 <span class="font-medium text-slate-800">{{ getCurrencySymbol(draft.currency) }}{{ parseFloat(p.amount).toFixed(2) }}</span>
                                 <span class="text-slate-400 ml-3">{{ p.date }}</span>
                                 <span v-if="p.note" class="text-slate-500 ml-3 italic">{{ p.note }}</span>
                             </div>
-                            <span v-if="p.provider === 'stripe'" class="text-xs font-medium text-slate-400">Locked</span>
-                            <button v-else @click="removePayment(i)" class="text-red-500 hover:text-red-700 text-xs font-medium">Remove</button>
+                            <div class="flex items-center gap-2 self-start sm:self-auto">
+                                <span v-if="p.provider === 'stripe'" class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs font-semibold">Stripe confirmed</span>
+                                <button v-else @click="removePayment(i)" class="text-red-500 hover:text-red-700 text-xs font-medium">Remove</button>
+                            </div>
                         </div>
                     </div>
                     <p v-else class="text-sm text-slate-400 mb-4">No payments recorded yet.</p>
@@ -751,7 +753,7 @@
                             <div><span class="text-slate-500">Paid: </span><span class="font-semibold text-green-600">{{ getCurrencySymbol(draft.currency) }}{{ draftPaid.toFixed(2) }}</span></div>
                             <div><span class="text-slate-500">Balance: </span><span class="font-semibold" :class="draftBalance > 0.001 ? 'text-red-600' : 'text-green-600'">{{ getCurrencySymbol(draft.currency) }}{{ draftBalance.toFixed(2) }}</span></div>
                         </div>
-                        <button @click="openStripeCheckout(draft)" :disabled="stripeCheckoutBusyId === draft.id || draftBalance <= 0.001 || draft.docType !== 'invoice' || draft.status === 'Cancelled'" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50 w-full">{{ stripeCheckoutBusyId === draft.id ? 'Opening...' : 'Pay by Card' }}</button>
+                        <button @click="openStripeCheckout(draft)" :disabled="stripeCheckoutBusyId === draft.id || draftBalance <= 0.001 || draft.docType !== 'invoice' || draft.status === 'Cancelled'" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50 w-full">{{ draftBalance <= 0.001 ? 'Paid' : (stripeCheckoutBusyId === draft.id ? 'Opening...' : 'Pay by Card') }}</button>
                     </div>
                 </div>
 

@@ -115,8 +115,10 @@ Deno.serve(async (req) => {
   params.set("metadata[invoice_id]", documentId);
   params.set("metadata[user_id]", userData.user.id);
   params.set("metadata[invoice_number]", String(inv.number || ""));
+  params.set("metadata[payment_kind]", "full_balance");
   params.set("payment_intent_data[metadata][invoice_id]", documentId);
   params.set("payment_intent_data[metadata][user_id]", userData.user.id);
+  params.set("payment_intent_data[metadata][payment_kind]", "full_balance");
   if (validEmail(customer.email)) params.set("customer_email", customer.email.trim());
 
   const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
@@ -146,6 +148,8 @@ Deno.serve(async (req) => {
       amount: checkoutAmount,
       currency: inv.currency || "GBP",
       customer_email: validEmail(customer.email) ? customer.email.trim() : null,
+      channel: "app",
+      payment_kind: "full_balance",
     },
   });
 
