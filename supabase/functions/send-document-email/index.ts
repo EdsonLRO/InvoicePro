@@ -265,6 +265,29 @@ function pdfEscape(value: unknown): string {
     .replace(/\)/g, "\\)");
 }
 
+function hexToPdfRgb(color: string): string {
+  const fallback = "#4f46e5";
+  const safe = /^#[0-9a-f]{6}$/i.test(color) ? color : fallback;
+  const r = parseInt(safe.slice(1, 3), 16) / 255;
+  const g = parseInt(safe.slice(3, 5), 16) / 255;
+  const b = parseInt(safe.slice(5, 7), 16) / 255;
+  return `${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)}`;
+}
+
+function pdfText(value: unknown, x: number, y: number, size = 10, color = "0.070 0.090 0.150", font = "F1"): string {
+  return `BT\n${color} rg\n/${font} ${size} Tf\n${x} ${y} Td\n(${pdfEscape(value)}) Tj\nET`;
+}
+
+function pdfRect(x: number, y: number, w: number, h: number, fill: string, stroke: string | null = null): string {
+  const strokePart = stroke ? `${stroke} RG\n${x} ${y} ${w} ${h} re B` : `${x} ${y} ${w} ${h} re f`;
+  return `q\n${fill} rg\n${strokePart}\nQ`;
+}
+
+function shorten(value: unknown, max = 56): string {
+  const text = String(value ?? "");
+  return text.length > max ? `${text.slice(0, max - 3)}...` : text;
+}
+
 function buildPdfBase64(inv: any, company: any): string {
   const noun = docTypeNoun(inv.doc_type);
   const currency = inv.currency || "GBP";
@@ -272,55 +295,96 @@ function buildPdfBase64(inv: any, company: any): string {
   const total = Number(inv.grand_total) || totals.grandTotal;
   const customer = inv.customer_snapshot || {};
   const companyName = company?.name || "Tallyo";
-  const lines = [
-    `${noun} #${inv.number || ""}`,
-    companyName,
-    "",
-    `Bill to: ${customer.name || ""}`,
-    customer.address || "",
-    customer.email || "",
-    "",
-    `Issue date: ${inv.issue_date || ""}`,
-    `Due date: ${inv.due_date || ""}`,
-    `Total: ${formatMoneyAscii(currency, total)}`,
-    "",
-    "Items",
-    ...((inv.items || []).map((item: any) => {
-      const qty = Number(item.qty) || 0;
-      const price = Number(item.price) || 0;
-      const discount = Number(item.discount) || 0;
-      const lineTotal = qty * price * (1 - discount / 100);
-      return `${item.name || "Item"} | Qty ${qty}${item.unit ? ` ${item.unit}` : ""} | ${formatMoneyAscii(currency, price)} | Total ${formatMoneyAscii(currency, lineTotal)}`;
-    })),
-    "",
-    `Subtotal: ${formatMoneyAscii(currency, totals.subtotal)}`,
-    ...(totals.globalDiscountAmt > 0 ? [`Discount: -${formatMoneyAscii(currency, totals.globalDiscountAmt)}`] : []),
-    ...(totals.taxAmt > 0 ? [`Tax: ${formatMoneyAscii(currency, totals.taxAmt)}`] : []),
-    ...(totals.shipping > 0 ? [`Shipping: ${formatMoneyAscii(currency, totals.shipping)}`] : []),
-    `Total: ${formatMoneyAscii(currency, total)}`,
-    ...(inv.notes ? ["", "Notes", String(inv.notes)] : []),
-    ...(inv.terms ? ["", "Terms", String(inv.terms)] : []),
-    ...(company?.payment_details ? ["", "Payment details", String(company.payment_details)] : []),
-  ].filter((line) => line != null);
+  const brand = hexToPdfRgb(brandColor(company));
+  const text = "0.070 0.090 0.150";
+  const muted = "0.390 0.455 0.560";
+  const light = "0.965 0.973 0.984";
+  const border = "0.820 0.850 0.900";
+  const commands: string[] = [];
 
-  const content = [
-    "BT",
-    "/F1 16 Tf",
-    "50 790 Td",
-    ...lines.flatMap((line, index) => {
-      const escaped = pdfEscape(line);
-      const font = index === 0 ? ["/F1 16 Tf"] : index === 1 ? ["/F1 11 Tf"] : [];
-      return [...font, `(${escaped}) Tj`, "0 -18 Td"];
-    }),
-    "ET",
-  ].join("\n");
+  commands.push(pdfRect(0, 785, 595, 57, brand));
+  commands.push(pdfText(`${noun} #${inv.number || ""}`, 40, 814, 22, "1 1 1", "F2"));
+  commands.push(pdfText(companyName, 40, 797, 10, "1 1 1"));
+
+  commands.push(pdfRect(385, 660, 160, 90, light, border));
+  commands.push(pdfText("Issue date", 405, 725, 9, muted, "F2"));
+  commands.push(pdfText(inv.issue_date || "", 475, 725, 9, text));
+  commands.push(pdfText("Due date", 405, 704, 9, muted, "F2"));
+  commands.push(pdfText(inv.due_date || "", 475, 704, 9, text));
+  commands.push(pdfText("Total", 405, 678, 14, text, "F2"));
+  commands.push(pdfText(formatMoneyAscii(currency, total), 475, 678, 14, text, "F2"));
+
+  commands.push(pdfText("Bill to", 40, 736, 10, muted, "F2"));
+  commands.push(pdfText(customer.name || "Customer", 40, 716, 13, text, "F2"));
+  if (customer.address) commands.push(pdfText(shorten(customer.address, 52), 40, 698, 10, muted));
+  if (customer.email) commands.push(pdfText(customer.email, 40, 682, 10, muted));
+
+  const tableX = 40;
+  let y = 610;
+  commands.push(pdfRect(tableX, y, 505, 26, brand));
+  commands.push(pdfText("Item", 52, y + 9, 9, "1 1 1", "F2"));
+  commands.push(pdfText("Qty", 290, y + 9, 9, "1 1 1", "F2"));
+  commands.push(pdfText("Price", 345, y + 9, 9, "1 1 1", "F2"));
+  commands.push(pdfText("Disc", 405, y + 9, 9, "1 1 1", "F2"));
+  commands.push(pdfText("Tax", 455, y + 9, 9, "1 1 1", "F2"));
+  commands.push(pdfText("Total", 505, y + 9, 9, "1 1 1", "F2"));
+
+  y -= 28;
+  (inv.items || []).slice(0, 14).forEach((item: any, index: number) => {
+    const qty = Number(item.qty) || 0;
+    const price = Number(item.price) || 0;
+    const discount = Number(item.discount) || 0;
+    const tax = Number(item.tax) || 0;
+    const lineTotal = qty * price * (1 - discount / 100);
+    if (index % 2 === 0) commands.push(pdfRect(tableX, y - 8, 505, 26, "0.985 0.988 0.992"));
+    commands.push(pdfText(shorten(item.name || "Item", 42), 52, y, 9, text));
+    commands.push(pdfText(String(qty), 292, y, 9, text));
+    commands.push(pdfText(formatMoneyAscii(currency, price), 340, y, 9, text));
+    commands.push(pdfText(discount ? `${discount}%` : "-", 410, y, 9, text));
+    commands.push(pdfText(tax ? `${tax}%` : "-", 458, y, 9, text));
+    commands.push(pdfText(formatMoneyAscii(currency, lineTotal), 492, y, 9, text));
+    y -= 26;
+  });
+
+  let summaryY = Math.min(y - 22, 430);
+  const summaryRows = [
+    ["Subtotal", totals.subtotal],
+    ...(totals.globalDiscountAmt > 0 ? [["Discount", -totals.globalDiscountAmt]] : []),
+    ...(totals.taxAmt > 0 ? [["Tax", totals.taxAmt]] : []),
+    ...(totals.shipping > 0 ? [["Shipping", totals.shipping]] : []),
+  ] as [string, number][];
+  summaryRows.forEach(([label, amount]) => {
+    commands.push(pdfText(label, 370, summaryY, 10, muted));
+    commands.push(pdfText(formatMoneyAscii(currency, amount), 470, summaryY, 10, text, "F2"));
+    summaryY -= 18;
+  });
+  commands.push(pdfRect(365, summaryY + 5, 180, 2, brand));
+  summaryY -= 20;
+  commands.push(pdfText("Total", 370, summaryY, 15, text, "F2"));
+  commands.push(pdfText(formatMoneyAscii(currency, total), 465, summaryY, 15, text, "F2"));
+
+  let detailY = Math.min(summaryY - 50, 300);
+  if (company?.payment_details) {
+    commands.push(pdfText("Payment details", 40, detailY, 12, text, "F2"));
+    detailY -= 18;
+    String(company.payment_details).split("\n").slice(0, 6).forEach((line) => {
+      commands.push(pdfText(shorten(line, 78), 40, detailY, 9, text));
+      detailY -= 15;
+    });
+  }
+  if (inv.notes) {
+    detailY -= 10;
+    commands.push(pdfText("Notes", 40, detailY, 12, text, "F2"));
+    commands.push(pdfText(shorten(inv.notes, 92), 40, detailY - 18, 9, text));
+  }
 
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>",
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-    `<< /Length ${content.length} >>\nstream\n${content}\nendstream`,
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>",
+    `<< /Length ${commands.join("\n").length} >>\nstream\n${commands.join("\n")}\nendstream`,
   ];
   let pdf = "%PDF-1.4\n";
   const offsets = [0];
