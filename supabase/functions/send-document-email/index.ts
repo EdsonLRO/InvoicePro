@@ -288,104 +288,24 @@ function shorten(value: unknown, max = 56): string {
   return text.length > max ? `${text.slice(0, max - 3)}...` : text;
 }
 
-function buildPdfBase64(inv: any, company: any): string {
-  const noun = docTypeNoun(inv.doc_type);
-  const currency = inv.currency || "GBP";
-  const totals = calcTotals(inv);
-  const total = Number(inv.grand_total) || totals.grandTotal;
-  const customer = inv.customer_snapshot || {};
-  const companyName = company?.name || "Tallyo";
-  const brand = hexToPdfRgb(brandColor(company));
-  const text = "0.070 0.090 0.150";
-  const muted = "0.390 0.455 0.560";
-  const light = "0.965 0.973 0.984";
-  const border = "0.820 0.850 0.900";
-  const commands: string[] = [];
-
-  commands.push(pdfRect(0, 785, 595, 57, brand));
-  commands.push(pdfText(`${noun} #${inv.number || ""}`, 40, 814, 22, "1 1 1", "F2"));
-  commands.push(pdfText(companyName, 40, 797, 10, "1 1 1"));
-
-  commands.push(pdfRect(385, 660, 160, 90, light, border));
-  commands.push(pdfText("Issue date", 405, 725, 9, muted, "F2"));
-  commands.push(pdfText(inv.issue_date || "", 475, 725, 9, text));
-  commands.push(pdfText("Due date", 405, 704, 9, muted, "F2"));
-  commands.push(pdfText(inv.due_date || "", 475, 704, 9, text));
-  commands.push(pdfText("Total", 405, 678, 14, text, "F2"));
-  commands.push(pdfText(formatMoneyAscii(currency, total), 475, 678, 14, text, "F2"));
-
-  commands.push(pdfText("Bill to", 40, 736, 10, muted, "F2"));
-  commands.push(pdfText(customer.name || "Customer", 40, 716, 13, text, "F2"));
-  if (customer.address) commands.push(pdfText(shorten(customer.address, 52), 40, 698, 10, muted));
-  if (customer.email) commands.push(pdfText(customer.email, 40, 682, 10, muted));
-
-  const tableX = 40;
-  let y = 610;
-  commands.push(pdfRect(tableX, y, 505, 26, brand));
-  commands.push(pdfText("Item", 52, y + 9, 9, "1 1 1", "F2"));
-  commands.push(pdfText("Qty", 290, y + 9, 9, "1 1 1", "F2"));
-  commands.push(pdfText("Price", 345, y + 9, 9, "1 1 1", "F2"));
-  commands.push(pdfText("Disc", 405, y + 9, 9, "1 1 1", "F2"));
-  commands.push(pdfText("Tax", 455, y + 9, 9, "1 1 1", "F2"));
-  commands.push(pdfText("Total", 505, y + 9, 9, "1 1 1", "F2"));
-
-  y -= 28;
-  (inv.items || []).slice(0, 14).forEach((item: any, index: number) => {
-    const qty = Number(item.qty) || 0;
-    const price = Number(item.price) || 0;
-    const discount = Number(item.discount) || 0;
-    const tax = Number(item.tax) || 0;
-    const lineTotal = qty * price * (1 - discount / 100);
-    if (index % 2 === 0) commands.push(pdfRect(tableX, y - 8, 505, 26, "0.985 0.988 0.992"));
-    commands.push(pdfText(shorten(item.name || "Item", 42), 52, y, 9, text));
-    commands.push(pdfText(String(qty), 292, y, 9, text));
-    commands.push(pdfText(formatMoneyAscii(currency, price), 340, y, 9, text));
-    commands.push(pdfText(discount ? `${discount}%` : "-", 410, y, 9, text));
-    commands.push(pdfText(tax ? `${tax}%` : "-", 458, y, 9, text));
-    commands.push(pdfText(formatMoneyAscii(currency, lineTotal), 492, y, 9, text));
-    y -= 26;
-  });
-
-  let summaryY = Math.min(y - 22, 430);
-  const summaryRows = [
-    ["Subtotal", totals.subtotal],
-    ...(totals.globalDiscountAmt > 0 ? [["Discount", -totals.globalDiscountAmt]] : []),
-    ...(totals.taxAmt > 0 ? [["Tax", totals.taxAmt]] : []),
-    ...(totals.shipping > 0 ? [["Shipping", totals.shipping]] : []),
-  ] as [string, number][];
-  summaryRows.forEach(([label, amount]) => {
-    commands.push(pdfText(label, 370, summaryY, 10, muted));
-    commands.push(pdfText(formatMoneyAscii(currency, amount), 470, summaryY, 10, text, "F2"));
-    summaryY -= 18;
-  });
-  commands.push(pdfRect(365, summaryY + 5, 180, 2, brand));
-  summaryY -= 20;
-  commands.push(pdfText("Total", 370, summaryY, 15, text, "F2"));
-  commands.push(pdfText(formatMoneyAscii(currency, total), 465, summaryY, 15, text, "F2"));
-
-  let detailY = Math.min(summaryY - 50, 300);
-  if (company?.payment_details) {
-    commands.push(pdfText("Payment details", 40, detailY, 12, text, "F2"));
-    detailY -= 18;
-    String(company.payment_details).split("\n").slice(0, 6).forEach((line) => {
-      commands.push(pdfText(shorten(line, 78), 40, detailY, 9, text));
-      detailY -= 15;
-    });
-  }
-  if (inv.notes) {
-    detailY -= 10;
-    commands.push(pdfText("Notes", 40, detailY, 12, text, "F2"));
-    commands.push(pdfText(shorten(inv.notes, 92), 40, detailY - 18, 9, text));
-  }
-
-  const objects = [
+function buildPdfFromPages(pages: string[][]): string {
+  const objects: string[] = [
     "<< /Type /Catalog /Pages 2 0 R >>",
-    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>",
+    "",
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
     "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>",
-    `<< /Length ${commands.join("\n").length} >>\nstream\n${commands.join("\n")}\nendstream`,
   ];
+  const kids: string[] = [];
+  pages.forEach((pageCommands) => {
+    const content = pageCommands.join("\n");
+    const pageObjectNumber = objects.length + 1;
+    const contentObjectNumber = pageObjectNumber + 1;
+    kids.push(`${pageObjectNumber} 0 R`);
+    objects.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${contentObjectNumber} 0 R >>`);
+    objects.push(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);
+  });
+  objects[1] = `<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${pages.length} >>`;
+
   let pdf = "%PDF-1.4\n";
   const offsets = [0];
   objects.forEach((object, index) => {
@@ -402,6 +322,162 @@ function buildPdfBase64(inv: any, company: any): string {
   let binary = "";
   for (let i = 0; i < pdf.length; i++) binary += String.fromCharCode(pdf.charCodeAt(i) & 0xff);
   return btoa(binary);
+}
+
+function companyLines(company: any): string[] {
+  return [
+    company?.address,
+    company?.phone || company?.mobile,
+    company?.email,
+  ].filter((line) => String(line || "").trim()).map((line) => String(line));
+}
+
+function customerLines(customer: any): string[] {
+  return [
+    customer?.address,
+    customer?.phone || customer?.mobile,
+    customer?.email,
+  ].filter((line) => String(line || "").trim()).map((line) => String(line));
+}
+
+function buildPdfBase64(inv: any, company: any): string {
+  const noun = docTypeNoun(inv.doc_type);
+  const currency = inv.currency || "GBP";
+  const totals = calcTotals(inv);
+  const total = Number(inv.grand_total) || totals.grandTotal;
+  const customer = inv.customer_snapshot || {};
+  const companyName = company?.name || "Tallyo";
+  const brand = hexToPdfRgb(brandColor(company));
+  const text = "0.070 0.090 0.150";
+  const muted = "0.390 0.455 0.560";
+  const faint = "0.875 0.900 0.965";
+  const veryFaint = "0.965 0.973 0.984";
+  const border = "0.820 0.850 0.900";
+  const pages: string[][] = [];
+  let commands: string[] = [];
+  const footerText = company?.invoice_footer || "Thank you for your business.";
+  const addFooter = (target: string[]) => {
+    target.push(pdfRect(40, 74, 515, 1, "0.900 0.920 0.950"));
+    target.push(pdfText(footerText, 235, 48, 8, muted));
+  };
+  const addContinuationHeader = (target: string[]) => {
+    target.push(pdfText(`${noun} #${inv.number || ""}`, 40, 785, 13, text, "F2"));
+    target.push(pdfText(companyName, 40, 768, 8, muted));
+  };
+  const finishPage = () => {
+    addFooter(commands);
+    pages.push(commands);
+    commands = [];
+  };
+  const addTableHeader = (target: string[], headerY: number) => {
+    target.push(pdfRect(tableX, headerY, 515, 32, brand));
+    target.push(pdfText("ITEM / DESCRIPTION", 50, headerY + 12, 8, "1 1 1", "F2"));
+    target.push(pdfText("QTY / UNIT", 235, headerY + 12, 8, "1 1 1", "F2"));
+    target.push(pdfText("PRICE", 338, headerY + 12, 8, "1 1 1", "F2"));
+    target.push(pdfText("DISC", 405, headerY + 17, 8, "1 1 1", "F2"));
+    target.push(pdfText("(%)", 412, headerY + 7, 8, "1 1 1", "F2"));
+    target.push(pdfText("TAX", 455, headerY + 17, 8, "1 1 1", "F2"));
+    target.push(pdfText("(%)", 461, headerY + 7, 8, "1 1 1", "F2"));
+    target.push(pdfText("TOTAL", 510, headerY + 12, 8, "1 1 1", "F2"));
+  };
+
+  commands.push(pdfText(companyName, 40, 780, 13, text, "F2"));
+  companyLines(company).slice(0, 4).forEach((line, index) => {
+    commands.push(pdfText(shorten(line, 42), 40, 762 - index * 13, 8, muted));
+  });
+
+  commands.push(pdfText(noun.toUpperCase(), 425, 775, 24, faint, "F2"));
+  commands.push(pdfText(`${noun} #:`, 425, 755, 9, text, "F2"));
+  commands.push(pdfText(inv.number || "", 478, 755, 9, text));
+  commands.push(pdfRect(40, 716, 515, 1.2, border));
+
+  commands.push(pdfText("BILL TO", 40, 686, 8, faint, "F2"));
+  commands.push(pdfText(customer.name || "Customer", 40, 670, 11, text, "F2"));
+  customerLines(customer).slice(0, 4).forEach((line, index) => {
+    commands.push(pdfText(shorten(line, 42), 40, 654 - index * 13, 8, muted));
+  });
+
+  commands.push(pdfText("DATE", 295, 686, 8, faint, "F2"));
+  commands.push(pdfText(inv.issue_date || "-", 295, 670, 8, text, "F2"));
+  commands.push(pdfText("DUE DATE", 420, 686, 8, faint, "F2"));
+  commands.push(pdfText(inv.due_date || "-", 420, 670, 8, text, "F2"));
+  commands.push(pdfText("PO NUMBER", 295, 632, 8, faint, "F2"));
+  commands.push(pdfText(inv.po_number || "-", 295, 616, 8, text));
+
+  const tableX = 40;
+  let y = 575;
+  addTableHeader(commands, y);
+  y -= 35;
+
+  const items = Array.isArray(inv.items) ? inv.items : [];
+  let itemIndex = 0;
+  while (itemIndex < items.length) {
+    const item = items[itemIndex];
+    const qty = Number(item.qty) || 0;
+    const unit = item.unit ? ` ${item.unit}` : "";
+    const price = Number(item.price) || 0;
+    const discount = Number(item.discount) || 0;
+    const tax = Number(item.tax) || 0;
+    const lineTotal = qty * price * (1 - discount / 100);
+    if (itemIndex % 2 === 0) commands.push(pdfRect(tableX, y - 9, 515, 30, "0.985 0.988 0.992"));
+    commands.push(pdfText(shorten(item.name || "Item", 44), 50, y, 8, text));
+    commands.push(pdfText(`${qty}${unit}`, 250, y, 8, text));
+    commands.push(pdfText(formatMoneyAscii(currency, price), 332, y, 8, text));
+    commands.push(pdfText(discount ? `${discount}%` : "0%", 410, y, 8, text));
+    commands.push(pdfText(tax ? `${tax}%` : "0%", 458, y, 8, text));
+    commands.push(pdfText(formatMoneyAscii(currency, lineTotal), 500, y, 8, text, "F2"));
+    y -= 32;
+    itemIndex++;
+    if (itemIndex < items.length && y < 150) {
+      commands.push(pdfRect(40, y + 10, 515, 1, "0.900 0.920 0.950"));
+      finishPage();
+      addContinuationHeader(commands);
+      y = 720;
+      addTableHeader(commands, y);
+      y -= 35;
+    }
+  }
+
+  commands.push(pdfRect(40, y + 10, 515, 1, "0.900 0.920 0.950"));
+
+  if (y < 330) {
+    finishPage();
+    addContinuationHeader(commands);
+    y = 650;
+  }
+
+  let detailY = Math.min(y - 50, 430);
+  commands.push(pdfText("NOTES", 40, detailY, 8, faint, "F2"));
+  commands.push(pdfText(shorten(inv.notes || "", 58), 40, detailY - 18, 8, muted));
+  detailY -= 44;
+  commands.push(pdfText("TERMS", 40, detailY, 8, faint, "F2"));
+  commands.push(pdfText(shorten(inv.terms || "", 58), 40, detailY - 18, 8, muted));
+  detailY -= 44;
+  commands.push(pdfText("PAYMENT DETAILS", 40, detailY, 8, faint, "F2"));
+  String(company?.payment_details || "").split("\n").slice(0, 6).forEach((line, index) => {
+    commands.push(pdfText(shorten(line, 58), 40, detailY - 18 - index * 12, 8, text));
+  });
+
+  let summaryY = Math.min(y - 40, 410);
+  commands.push(pdfRect(365, summaryY - 112, 190, 120, veryFaint, border));
+  const summaryRows = [
+    ["Subtotal", totals.subtotal],
+    ["Discount", -totals.globalDiscountAmt],
+    ...(totals.taxAmt > 0 ? [["Tax", totals.taxAmt]] : []),
+    ["Shipping", totals.shipping],
+  ] as [string, number][];
+  summaryRows.forEach(([label, amount]) => {
+    commands.push(pdfText(label, 392, summaryY, 8, muted));
+    commands.push(pdfText(formatMoneyAscii(currency, amount), 470, summaryY, 8, amount < 0 ? muted : text, "F2"));
+    summaryY -= 19;
+  });
+  commands.push(pdfRect(385, summaryY + 5, 150, 1.2, brand));
+  summaryY -= 24;
+  commands.push(pdfText("Total", 402, summaryY, 12, text, "F2"));
+  commands.push(pdfText(formatMoneyAscii(currency, total), 460, summaryY, 12, brand, "F2"));
+
+  finishPage();
+  return buildPdfFromPages(pages);
 }
 
 async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
