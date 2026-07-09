@@ -177,15 +177,15 @@
                                 absolute md:static left-0 right-0 top-full md:top-auto
                                 bg-slate-900 md:bg-transparent px-4 md:px-0 pt-2 pb-4 md:py-0
                                 border-t border-slate-800 md:border-0 shadow-lg md:shadow-none z-30">
-                        <button @click="activeTab = 'dashboard'" :class="{'bg-slate-800 text-white': activeTab === 'dashboard', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'dashboard'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Dashboard</button>
+                        <button @click="navigateTo('dashboard')" :class="{'bg-slate-800 text-white': activeTab === 'dashboard', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'dashboard'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Dashboard</button>
                         <button @click="goToCreate" :class="{'bg-slate-800 text-white': activeTab === 'create', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'create'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Create Invoice</button>
-                        <button @click="activeTab = 'invoices'" :class="{'bg-slate-800 text-white': activeTab === 'invoices', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'invoices'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">My Invoices</button>
-                        <button @click="activeTab = 'customers'; customerView = 'list'" :class="{'bg-slate-800 text-white': activeTab === 'customers', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'customers'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Customers</button>
-                        <button @click="activeTab = 'items'; itemView = 'list'" :class="{'bg-slate-800 text-white': activeTab === 'items', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'items'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Saved Items</button>
-                        <button @click="activeTab = 'branding'" :class="{'bg-slate-800 text-white': activeTab === 'branding', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'branding'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Branding</button>
-                        <button @click="activeTab = 'recurring'; recurringView = 'list'" :class="{'bg-slate-800 text-white': activeTab === 'recurring', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'recurring'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Recurring<span v-if="dueTemplates.length" class="ml-1.5 inline-flex items-center justify-center bg-amber-500 text-white text-[10px] font-bold rounded-full h-4 min-w-4 px-1">{{ dueTemplates.length }}</span></button>
-                        <button @click="activeTab = 'settings'" :class="{'bg-slate-800 text-white': activeTab === 'settings', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'settings'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Company Settings</button>
-                        <button @click="activeTab = 'account'" :class="{'bg-slate-800 text-white': activeTab === 'account', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'account'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap border border-slate-700 md:ml-2 mt-1 md:mt-0">Account</button>
+                        <button @click="navigateTo('invoices')" :class="{'bg-slate-800 text-white': activeTab === 'invoices', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'invoices'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">My Invoices</button>
+                        <button @click="navigateTo('customers')" :class="{'bg-slate-800 text-white': activeTab === 'customers', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'customers'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Customers</button>
+                        <button @click="navigateTo('items')" :class="{'bg-slate-800 text-white': activeTab === 'items', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'items'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Saved Items</button>
+                        <button @click="navigateTo('branding')" :class="{'bg-slate-800 text-white': activeTab === 'branding', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'branding'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Branding</button>
+                        <button @click="navigateTo('recurring')" :class="{'bg-slate-800 text-white': activeTab === 'recurring', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'recurring'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Recurring<span v-if="dueTemplates.length" class="ml-1.5 inline-flex items-center justify-center bg-amber-500 text-white text-[10px] font-bold rounded-full h-4 min-w-4 px-1">{{ dueTemplates.length }}</span></button>
+                        <button @click="navigateTo('settings')" :class="{'bg-slate-800 text-white': activeTab === 'settings', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'settings'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Company Settings</button>
+                        <button @click="navigateTo('account')" :class="{'bg-slate-800 text-white': activeTab === 'account', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'account'}" class="w-full md:w-auto text-left md:text-center px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap border border-slate-700 md:ml-2 mt-1 md:mt-0">Account</button>
                     </nav>
                 </div>
             </div>
@@ -349,7 +349,7 @@
             <div v-show="activeTab === 'create' || activeTab === 'edit'">
                 <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
                     <div class="flex items-center gap-4">
-                        <button v-if="activeTab === 'edit'" @click="activeTab = 'invoices'" class="flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors">
+                        <button v-if="activeTab === 'edit'" @click="navigateTo('invoices')" class="flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors">
                             &larr; Back to Invoices
                         </button>
                         <h2 class="text-3xl font-semibold">{{ editingExisting ? 'Edit ' + docTypeNoun(draft.docType) + ' #' + draft.number : 'New ' + docTypeNoun(draft.docType) }}</h2>
@@ -1848,6 +1848,43 @@
             toggleRecurringPageSelection(checked) {
                 this.togglePageSelection(this.paginatedRecurringTemplates, 'selectedRecurring', checked);
             },
+            routeTabs() {
+                return ['dashboard', 'create', 'edit', 'invoices', 'customers', 'items', 'branding', 'recurring', 'settings', 'account'];
+            },
+            tabFromHash() {
+                const key = (window.location.hash || '').replace(/^#\/?/, '').split(/[/?&]/)[0];
+                return this.routeTabs().includes(key) ? key : 'create';
+            },
+            routeUrl(tab) {
+                return `${window.location.pathname}${window.location.search}#${tab}`;
+            },
+            applyRoute(tab) {
+                let nextTab = this.routeTabs().includes(tab) ? tab : 'create';
+                if (nextTab === 'edit' && !this.editingExisting) nextTab = 'invoices';
+                this.activeTab = nextTab;
+                this.mobileMenuOpen = false;
+                if (nextTab === 'customers') this.customerView = 'list';
+                if (nextTab === 'items') this.itemView = 'list';
+                if (nextTab === 'recurring') {
+                    this.recurringView = 'list';
+                    this.recurringForm = null;
+                    this.editingTemplate = null;
+                }
+            },
+            navigateTo(tab, options = {}) {
+                this.applyRoute(tab);
+                const nextHash = `#${this.activeTab}`;
+                if (window.location.hash === nextHash) return;
+                if (options.replace) {
+                    window.history.replaceState(null, '', this.routeUrl(this.activeTab));
+                } else {
+                    window.location.hash = this.activeTab;
+                }
+            },
+            handleHashChange() {
+                if (!this.isLoggedIn) return;
+                this.applyRoute(this.tabFromHash());
+            },
             // ================= AUTHENTICATION (Supabase Auth) =================
             async register() {
                 const email = (this.auth.username || '').trim().toLowerCase();
@@ -1967,6 +2004,7 @@
                 this.auth = { username: '', password: '', confirm: '', code: '' };
                 await this.loadAllData();
                 this.loadMfaStatus();
+                this.navigateTo(this.tabFromHash(), { replace: !window.location.hash });
             },
             async confirmLogout() {
                 if(confirm("Log out of Tallyo?")) {
@@ -1976,6 +2014,7 @@
                     this.auth = { username: '', password: '', confirm: '', code: '' };
                     this.authMode = 'login';
                     this.activeTab = 'create';
+                    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
                     this.editingExisting = false;
                     this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueRemindersEnabled: false, overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 };
                     this.customers = []; this.savedItems = []; this.invoices = [];
@@ -2316,7 +2355,7 @@
                 }
                 this.draft = this.getEmptyDraft();
                 this.editingExisting = false;
-                this.activeTab = 'invoices';
+                this.navigateTo('invoices');
             },
             recurFreqShort(r) {
                 if (r.frequency === 'custom') return 'every ' + (r.customInterval || 1) + ' ' + (r.customUnit || 'months');
@@ -2699,12 +2738,12 @@
                 copy.history.push({ ts: new Date().toISOString(), type: 'converted', text: 'Converted from quote to invoice' });
                 this.draft = copy;
                 this.editingExisting = this.isUuid(copy.id);
-                this.activeTab = 'create';
+                this.navigateTo('create');
             },
             newInvoice() {
                 this.draft = this.getEmptyDraft();
                 this.editingExisting = false;
-                this.activeTab = 'create';
+                this.navigateTo('create');
             },
 
             // ================= RECURRING TEMPLATES =================
@@ -2997,7 +3036,7 @@
                 if (this.activeTab === 'edit' || this.editingExisting) {
                     this.newInvoice();
                 } else {
-                    this.activeTab = 'create';
+                    this.navigateTo('create');
                 }
             },
             clearAll() {
@@ -3023,7 +3062,7 @@
                 if(!this.draft.currency) this.draft.currency = 'GBP';
                 this.syncTimeFields();
                 this.editingExisting = true;
-                this.activeTab = 'edit';
+                this.navigateTo('edit');
             },
             async deleteInvoice(inv) {
                 if(confirm("Delete this invoice?")) {
@@ -3081,7 +3120,7 @@
                 delete copy.totals;
                 this.draft = copy;
                 this.editingExisting = false;
-                this.activeTab = 'create';
+                this.navigateTo('create');
             },
             async exportPDF(inv) {
                 this.loadInvoice(inv);
@@ -3366,6 +3405,7 @@
             }
         },
         async mounted() {
+            window.addEventListener('hashchange', this.handleHashChange);
             // Register the service worker only on the live HTTPS site (not on
             // localhost), so local development never serves stale cached files.
             if ('serviceWorker' in navigator && location.protocol === 'https:') {
