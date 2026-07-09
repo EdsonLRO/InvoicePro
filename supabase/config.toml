@@ -33,3 +33,15 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/resend-webhook/deno.json"
 entrypoint = "./functions/resend-webhook/index.ts"
+
+[functions.create-stripe-checkout]
+enabled = true
+verify_jwt = true
+import_map = "./functions/create-stripe-checkout/deno.json"
+entrypoint = "./functions/create-stripe-checkout/index.ts"
+
+[functions.stripe-webhook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/stripe-webhook/deno.json"
+entrypoint = "./functions/stripe-webhook/index.ts"

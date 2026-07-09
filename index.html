@@ -660,7 +660,7 @@
 
                 <div v-if="editingExisting" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mt-6 max-w-2xl">
                     <h3 class="text-lg font-semibold mb-1">Payments</h3>
-                    <p class="text-sm text-slate-500 mb-4">Record full or partial payments. The balance and status update automatically.</p>
+                    <p class="text-sm text-slate-500 mb-4">Record full or partial payments, or open a Stripe card checkout. The balance and status update automatically.</p>
 
                     <div v-if="draft.payments && draft.payments.length" class="divide-y divide-slate-100 mb-4 border border-slate-100 rounded-lg">
                         <div v-for="(p, i) in draft.payments" :key="i" class="flex items-center justify-between px-4 py-2 text-sm">
@@ -688,6 +688,7 @@
                             <input type="text" v-model="newPayment.note" placeholder="e.g. Bank transfer" class="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
                         <button @click="recordPayment" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors">Record Payment</button>
+                        <button @click="openStripeCheckout(draft)" :disabled="stripeCheckoutBusyId === draft.id || draftBalance <= 0.001 || draft.docType !== 'invoice' || draft.status === 'Cancelled'" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50">{{ stripeCheckoutBusyId === draft.id ? 'Opening...' : 'Pay by Card' }}</button>
                     </div>
 
                     <div class="flex gap-8 mt-5 pt-4 border-t border-slate-100 text-sm">
@@ -1536,6 +1537,7 @@
                 selectedInvoices: [],
                 invoiceBulkBusy: false,
                 emailSendingId: null,
+                stripeCheckoutBusyId: null,
                 newPayment: { amount: null, date: new Date().toISOString().split('T')[0], note: '' },
                 activityNote: '',
                 reminderModal: { open: false, inv: null, text: '', copied: false, sending: false },
@@ -2462,6 +2464,46 @@
                     alert('Could not send email: ' + (e.message || e));
                 } finally {
                     this.emailSendingId = null;
+                }
+            },
+            async openStripeCheckout(inv) {
+                if (!inv) return;
+                if ((inv.docType || 'invoice') !== 'invoice') return alert('Only invoices can be paid by card.');
+                if (inv.status === 'Cancelled') return alert('Cancelled invoices cannot be paid by card.');
+
+                let target = inv;
+                const isCurrentDraft = this.draft && inv.id === this.draft.id;
+                if (isCurrentDraft) {
+                    this.stripeCheckoutBusyId = this.isUuid(inv.id) ? inv.id : 'draft';
+                    const ok = await this.persistDraft();
+                    if (!ok) { this.stripeCheckoutBusyId = null; return; }
+                    target = this.draft;
+                }
+
+                if (!this.isUuid(target.id)) {
+                    this.stripeCheckoutBusyId = null;
+                    return alert('Save this invoice before creating a card payment link.');
+                }
+                if (this.balanceDue(target) <= 0.001) {
+                    this.stripeCheckoutBusyId = null;
+                    return alert('This invoice is already paid.');
+                }
+
+                this.stripeCheckoutBusyId = target.id;
+                try {
+                    const { data, error } = await supabaseClient.functions.invoke('create-stripe-checkout', {
+                        body: { documentId: target.id }
+                    });
+                    if (error) throw error;
+                    if (data && data.error) throw new Error(data.error);
+                    if (!data || !data.url) throw new Error('Stripe did not return a checkout link.');
+                    window.open(data.url, '_blank', 'noopener');
+                    await this.loadAuditEvents();
+                } catch (e) {
+                    console.error('Stripe checkout failed:', e);
+                    alert('Could not open card payment: ' + (e.message || e));
+                } finally {
+                    this.stripeCheckoutBusyId = null;
                 }
             },
             async bulkDuplicateInvoices() {
