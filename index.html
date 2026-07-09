@@ -461,7 +461,7 @@
                     </div>
 
                     <div class="mb-8" :class="anySuggestionOpen ? 'overflow-visible' : 'overflow-x-auto sm:overflow-visible'">
-                        <table class="w-full text-left border-collapse min-w-[640px]">
+                        <table class="pdf-line-items w-full text-left border-collapse min-w-[640px]">
                             <thead>
                                 <tr class="text-sm uppercase pdf-bold-row" :style="{ backgroundColor: 'var(--brand)', color: 'var(--brand-text)' }">
                                     <th class="p-3 font-semibold rounded-tl-lg min-w-[200px]">Item / Description</th>
@@ -2984,7 +2984,12 @@
                             windowWidth: 1024,
                             onclone: (doc) => {
                                 const c = doc.getElementById('invoice-canvas');
-                                if (c) { c.style.width = '800px'; c.style.maxWidth = '800px'; c.style.margin = '0'; }
+                                if (c) {
+                                    c.style.width = '800px';
+                                    c.style.maxWidth = '800px';
+                                    c.style.margin = '0';
+                                    this.addPdfRowPageBreaks(c);
+                                }
                             }
                         }).then(canvas => {
                             const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
@@ -3014,6 +3019,33 @@
                             reject(err);
                         });
                     }, 100);
+                });
+            },
+            addPdfRowPageBreaks(container) {
+                const table = container.querySelector('.pdf-line-items');
+                if (!table) return;
+                const body = table.querySelector('tbody');
+                const rows = Array.from(body ? body.querySelectorAll('tr') : []);
+                if (!body || rows.length < 2) return;
+
+                const pageHeightPx = 800 * (297 / 210); // A4 height at the fixed 800px PDF capture width.
+                const topGapPx = 24;
+                const bottomGapPx = 24;
+                const containerTop = container.getBoundingClientRect().top;
+
+                rows.forEach(row => {
+                    const rect = row.getBoundingClientRect();
+                    const rowTop = rect.top - containerTop;
+                    const rowHeight = rect.height;
+                    const pageOffset = rowTop % pageHeightPx;
+
+                    if (pageOffset > topGapPx && pageOffset + rowHeight > pageHeightPx - bottomGapPx) {
+                        const spacerHeight = (pageHeightPx - pageOffset) + topGapPx;
+                        const spacer = row.ownerDocument.createElement('tr');
+                        spacer.className = 'pdf-page-spacer';
+                        spacer.innerHTML = '<td colspan="7" style="height:' + spacerHeight + 'px; padding:0; border:0; background:#ffffff;"></td>';
+                        body.insertBefore(spacer, row);
+                    }
                 });
             },
             exportExcel() {
