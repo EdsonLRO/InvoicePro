@@ -22,6 +22,12 @@ verify_jwt = true
 import_map = "./functions/send-reminder-email/deno.json"
 entrypoint = "./functions/send-reminder-email/index.ts"
 
+[functions.send-overdue-reminders]
+enabled = true
+verify_jwt = false
+import_map = "./functions/send-overdue-reminders/deno.json"
+entrypoint = "./functions/send-overdue-reminders/index.ts"
+
 [functions.resend-webhook]
 enabled = true
 verify_jwt = false

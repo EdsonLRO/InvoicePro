@@ -1427,6 +1427,37 @@
                                 <label class="block text-sm font-bold text-slate-600 mb-1">Default Terms (e.g. late fees)</label>
                                 <textarea v-model="company.defaultTerms" rows="2" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
                             </div>
+                            <div class="sm:col-span-2 border-t pt-6 mt-2">
+                                <h3 class="text-lg font-semibold mb-1">Email Automation</h3>
+                                <p class="text-sm text-slate-500 mb-5">Automatic overdue reminders only send for saved invoices with a customer email address.</p>
+                                <label class="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-lg p-4 mb-4">
+                                    <input type="checkbox" v-model="company.overdueRemindersEnabled" class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                    <span>
+                                        <span class="block text-sm font-semibold text-slate-700">Automatically email overdue payment reminders</span>
+                                        <span class="block text-xs text-slate-500 mt-0.5">The scheduled server run checks overdue invoices and logs each reminder in activity history.</span>
+                                    </span>
+                                </label>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-bold text-slate-600 mb-1">First reminder after</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="number" min="1" max="365" v-model.number="company.overdueFirstReminderDays" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                            <span class="text-sm text-slate-500">days</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-slate-600 mb-1">Repeat every</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="number" min="1" max="365" v-model.number="company.overdueRepeatReminderDays" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                            <span class="text-sm text-slate-500">days</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-slate-600 mb-1">Maximum reminders</label>
+                                        <input type="number" min="1" max="24" v-model.number="company.overdueMaxReminders" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    </div>
+                                </div>
+                            </div>
                             <div class="sm:col-span-2">
                                 <label class="block text-sm font-bold text-slate-600 mb-1">Footer / Thank-You Message</label>
                                 <input type="text" v-model="company.invoiceFooter" placeholder="e.g. Thank you for your business!" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -1492,7 +1523,7 @@
                 mobileMenuOpen: false,
                 editingExisting: false,
                 isExportingPDF: false,
-                company: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left' },
+                company: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueRemindersEnabled: false, overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 },
                 customers: [],
                 savedItems: [],
                 invoices: [],
@@ -1921,7 +1952,7 @@
                     this.authMode = 'login';
                     this.activeTab = 'create';
                     this.editingExisting = false;
-                    this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left' };
+                    this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueRemindersEnabled: false, overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 };
                     this.customers = []; this.savedItems = []; this.invoices = [];
                 }
             },
@@ -2017,11 +2048,11 @@
                 return { name: i.name, description: i.description || null, price: i.price || 0 };
             },
             rowToCompany(r) {
-                return { name: r.name || '', address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '', logo: r.logo_url || '', invoicePrefix: r.invoice_prefix || '', quotePrefix: r.quote_prefix || 'QUO-', creditPrefix: r.credit_prefix || 'CN-', defaultCurrency: r.default_currency || 'GBP', paymentDetails: r.payment_details || '', defaultNotes: r.default_notes || '', defaultTerms: r.default_terms || '', invoiceFooter: r.invoice_footer || '', brandColor: r.brand_color || '#4f46e5', logoPosition: r.logo_position || 'left' };
+                return { name: r.name || '', address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '', logo: r.logo_url || '', invoicePrefix: r.invoice_prefix || '', quotePrefix: r.quote_prefix || 'QUO-', creditPrefix: r.credit_prefix || 'CN-', defaultCurrency: r.default_currency || 'GBP', paymentDetails: r.payment_details || '', defaultNotes: r.default_notes || '', defaultTerms: r.default_terms || '', invoiceFooter: r.invoice_footer || '', brandColor: r.brand_color || '#4f46e5', logoPosition: r.logo_position || 'left', overdueRemindersEnabled: r.overdue_reminders_enabled === true, overdueFirstReminderDays: Number(r.overdue_first_reminder_days) || 3, overdueRepeatReminderDays: Number(r.overdue_repeat_reminder_days) || 7, overdueMaxReminders: Number(r.overdue_max_reminders) || 3 };
             },
             companyToRow() {
                 const c = this.company;
-                return { user_id: this.currentUser.id, name: c.name || null, address: c.address || null, phone: c.phone || null, mobile: c.mobile || null, email: c.email || null, tax_id: c.taxId || null, additional_info: c.additionalInfo || null, logo_url: c.logo || null, invoice_prefix: c.invoicePrefix || '', quote_prefix: c.quotePrefix || 'QUO-', credit_prefix: c.creditPrefix || 'CN-', default_currency: c.defaultCurrency || 'GBP', payment_details: c.paymentDetails || null, default_notes: c.defaultNotes || null, default_terms: c.defaultTerms || null, invoice_footer: c.invoiceFooter || null, brand_color: c.brandColor || '#4f46e5', logo_position: c.logoPosition || 'left', updated_at: new Date().toISOString() };
+                return { user_id: this.currentUser.id, name: c.name || null, address: c.address || null, phone: c.phone || null, mobile: c.mobile || null, email: c.email || null, tax_id: c.taxId || null, additional_info: c.additionalInfo || null, logo_url: c.logo || null, invoice_prefix: c.invoicePrefix || '', quote_prefix: c.quotePrefix || 'QUO-', credit_prefix: c.creditPrefix || 'CN-', default_currency: c.defaultCurrency || 'GBP', payment_details: c.paymentDetails || null, default_notes: c.defaultNotes || null, default_terms: c.defaultTerms || null, invoice_footer: c.invoiceFooter || null, brand_color: c.brandColor || '#4f46e5', logo_position: c.logoPosition || 'left', overdue_reminders_enabled: c.overdueRemindersEnabled === true, overdue_first_reminder_days: Math.min(Math.max(Number(c.overdueFirstReminderDays) || 3, 1), 365), overdue_repeat_reminder_days: Math.min(Math.max(Number(c.overdueRepeatReminderDays) || 7, 1), 365), overdue_max_reminders: Math.min(Math.max(Number(c.overdueMaxReminders) || 3, 1), 24), updated_at: new Date().toISOString() };
             },
             rowToInvoice(r) {
                 const inv = {
