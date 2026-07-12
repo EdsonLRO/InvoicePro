@@ -64,7 +64,7 @@ Current app-action coverage:
 
 Remaining audit hardening:
 
-- Expand coverage to company/settings changes, privileged automation failures, and backup/restore operations.
+- Company/settings saves are now logged at a privacy-safe category level. Expand remaining coverage to privileged automation failures and backup/restore operations.
 
 ## Email Phase Gates
 

@@ -1653,6 +1653,7 @@
                 editingExisting: false,
                 isExportingPDF: false,
                 company: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 },
+                companyAuditSnapshot: null,
                 customers: [],
                 savedItems: [],
                 invoices: [],
@@ -2172,6 +2173,7 @@
                 window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
                 this.editingExisting = false;
                 this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 };
+                this.companyAuditSnapshot = null;
                 this.customers = []; this.savedItems = []; this.invoices = [];
                 this.auditEvents = [];
                 this.mfa = { enabled: false, busy: false, step: 'idle', loginFactorId: null, verifiedFactorId: null, enrollFactorId: null, qr: '', secret: '', code: '' };
@@ -2474,6 +2476,7 @@
                     if (invRes.error) throw invRes.error;
 
                     if (companyRes.data) this.company = this.rowToCompany(companyRes.data);
+                    this.companyAuditSnapshot = this.cloneCompanyForAudit();
                     this.customers = (custRes.data || []).map(r => this.rowToCustomer(r));
                     this.savedItems = (itemRes.data || []).map(r => this.rowToItem(r));
                     this.invoices = (invRes.data || []).map(r => this.rowToInvoice(r));
@@ -2759,6 +2762,44 @@
                 } catch (e) {
                     console.warn('Audit event skipped:', eventType, e && (e.message || e));
                 }
+            },
+            cloneCompanyForAudit(company = this.company) {
+                return {
+                    name: company.name || '',
+                    address: company.address || '',
+                    phone: company.phone || '',
+                    mobile: company.mobile || '',
+                    email: company.email || '',
+                    taxId: company.taxId || '',
+                    additionalInfo: company.additionalInfo || '',
+                    logo: company.logo || '',
+                    invoicePrefix: company.invoicePrefix || '',
+                    quotePrefix: company.quotePrefix || 'QUO-',
+                    creditPrefix: company.creditPrefix || 'CN-',
+                    defaultCurrency: company.defaultCurrency || 'GBP',
+                    paymentDetails: company.paymentDetails || '',
+                    defaultNotes: company.defaultNotes || '',
+                    defaultTerms: company.defaultTerms || '',
+                    invoiceFooter: company.invoiceFooter || '',
+                    brandColor: company.brandColor || '#4f46e5',
+                    logoPosition: company.logoPosition || 'left',
+                    overdueFirstReminderDays: Number(company.overdueFirstReminderDays) || 3,
+                    overdueRepeatReminderDays: Number(company.overdueRepeatReminderDays) || 7,
+                    overdueMaxReminders: Number(company.overdueMaxReminders) || 3
+                };
+            },
+            companySettingsAuditMetadata(before, after) {
+                const changed = keys => keys.some(key => String(before[key] ?? '') !== String(after[key] ?? ''));
+                const meta = {
+                    business_profile_changed: changed(['name', 'address', 'phone', 'mobile', 'email', 'taxId', 'additionalInfo']),
+                    branding_changed: changed(['logo', 'brandColor', 'logoPosition']),
+                    numbering_changed: changed(['invoicePrefix', 'quotePrefix', 'creditPrefix', 'defaultCurrency']),
+                    document_defaults_changed: changed(['defaultNotes', 'defaultTerms', 'invoiceFooter']),
+                    payment_instructions_changed: changed(['paymentDetails']),
+                    overdue_defaults_changed: changed(['overdueFirstReminderDays', 'overdueRepeatReminderDays', 'overdueMaxReminders'])
+                };
+                meta.changed_count = Object.values(meta).filter(Boolean).length;
+                return meta;
             },
             emailStatusFor(id) {
                 const events = this.emailEventsByDocument[id] || [];
@@ -3898,8 +3939,15 @@
             },
             resetItemForm() { this.editingItem = null; this.itemForm = { name: '', description: '', price: 0 }; },
             async saveCompanyDetails() {
+                const before = this.companyAuditSnapshot || this.cloneCompanyForAudit();
+                const after = this.cloneCompanyForAudit();
+                const auditMetadata = this.companySettingsAuditMetadata(before, after);
                 const { error } = await supabaseClient.from('company_settings').upsert(this.companyToRow(), { onConflict: 'user_id' });
                 if (error) { console.error(error); return alert("Could not save settings: " + error.message); }
+                this.companyAuditSnapshot = after;
+                if (auditMetadata.changed_count > 0) {
+                    await this.logAppAuditEvent('company_settings_updated', 'company_settings', null, auditMetadata);
+                }
                 // If the current invoice is a new, unsaved one with empty notes/terms,
                 // apply the just-saved defaults so they take effect immediately.
                 if (!this.editingExisting && this.draft) {

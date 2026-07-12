@@ -307,7 +307,7 @@ supabase functions deploy generate-recurring
 ## 16. Known security limitations (state honestly; do not overclaim)
 
 - **No GDPR-compliance claim.** The app is **not** certified or "fully compliant". Real data-protection groundwork (privacy policy, lawful basis, data-subject rights, consent/unsubscribe, breach process, registration) is **future work** and required before onboarding real paying customers.
-- **Activity history is not a tamper-proof audit log** — it lives in editable records. Provider events and selected sensitive app actions now use append-only `audit_events`, but full monitoring/compliance audit coverage is still future work.
+- **Activity history is not a tamper-proof audit log** — it lives in editable records. Provider events and selected sensitive app actions now use append-only `audit_events`; company/settings saves are logged by category only, without storing the actual settings values. Full monitoring/compliance audit coverage is still future work.
 - **No formal backups** on the current free tier; no documented retention/restore.
 - **MFA has no recovery/backup codes**; the app has local password-strength checks, but Supabase Auth password policy/rate-limit settings and breached-password screening still need confirmation before real onboarding.
 - **CSP allows one permissive setting** the in-browser Vue template compilation requires (`unsafe-eval`) — a documented trade-off.
@@ -349,7 +349,7 @@ Near-term (in rough order):
    - Done: hardened Stripe webhook records verified Checkout payments and includes refund/dispute/failed-payment awareness.
    - Done: in-app Stripe refund requests through a server-side Edge Function.
    - Current payment caveat: Stripe should still be treated as test/development until explicitly moved to live mode.
-4. **Current hardening priorities:** finish Stripe sandbox replay testing for refund-failure/dispute/chargeback awareness; formal backup/restore test; expand audit coverage to settings/automation/backup events; MFA recovery/session-revocation planning; Supabase Auth password policy/breached-password checks; final mobile/PDF regression pass.
+4. **Current hardening priorities:** finish Stripe sandbox replay testing for refund-failure/dispute/chargeback awareness; formal backup/restore test; expand audit coverage to privileged automation failures and backup/restore evidence; MFA recovery/session-revocation planning; Supabase Auth password policy/breached-password checks; final mobile/PDF regression pass.
 5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, export/deletion process, consent/unsubscribe where relevant, and breach response notes.
 6. Optional app polish: link invoices to their recurring schedule (dedup guard); clearer payment-state wording; repo/URL rename to Tallyo only with Supabase Auth URL updates.
 7. Future phase, deliberately deferred: public website, paid Tallyo subscriptions, plan tiers, server-enforced entitlements, workspaces/teams/RBAC, and SaaS billing.

@@ -153,7 +153,7 @@ Policy names follow the pattern `own <table> - <command>` where applicable, for 
 - Browser clients should not insert, update, or delete audit events.
 - Trusted Edge Functions and verified provider webhooks insert audit events with the service role key.
 - Updates/deletes are blocked by trigger in `supabase/audit_events.sql`.
-- `log-app-event` records selected authenticated user actions such as deletes, exports, payment removal, MFA/password changes, and recurring schedule changes with privacy-safe metadata.
+- `log-app-event` records selected authenticated user actions such as deletes, exports, payment removal, MFA/password changes, session logout scope, recurring schedule changes, and company/settings saves with privacy-safe metadata.
 - Reconfirm the live policy/trigger state after applying or changing this migration.
 
 ---
@@ -302,7 +302,7 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 - **Audit events** now cover provider events and selected sensitive app actions, but broader monitoring, alerting, and compliance evidence are still future work.
 - **No formal backups** on the current free tier; free-tier projects can pause and stop cron.
 - **MFA has no recovery/backup codes**; the app has local password-strength checks, but Supabase Auth password policy/rate-limit settings and breached-password screening still need confirmation.
-- **No "log out from all devices" control yet**; this should be added as a verified server-side session-revocation flow.
+- **All-devices logout exists** with current-password confirmation, MFA when required, an app audit event, and Supabase global sign-out. A stronger future version could add email-code confirmation and server-side revocation evidence.
 - **CSP** allows one permissive setting the in-browser Vue template compiler needs (documented trade-off).
 - **Data protection:** the app is **built with data protection principles in mind**, but is **not** certified or "GDPR compliant." Formal compliance work (privacy policy, lawful basis, data-subject rights, retention, breach process) is future work — do not claim compliance.
 - **Unknown / needs confirmation:** custom SMTP config, exact JWT/session expiry, and whether any response security headers (e.g. frame protection) are set (GitHub Pages limits headers).

@@ -14,6 +14,9 @@ const allowedEvents = new Set([
   "account_password_changed",
   "account_mfa_enabled",
   "account_mfa_disabled",
+  "account_logout_local",
+  "account_logout_all_devices",
+  "company_settings_updated",
   "document_deleted",
   "document_bulk_deleted",
   "document_pdf_exported",
@@ -32,6 +35,7 @@ const allowedEvents = new Set([
 
 const allowedObjectTypes = new Set([
   "account",
+  "company_settings",
   "invoice",
   "document",
   "customer",

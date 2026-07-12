@@ -174,7 +174,7 @@ The future public website, Tallyo subscriptions, plan tiers, workspaces, teams, 
 A credible security posture isn't about claiming perfection — it's about knowing exactly where you stand. A few things are deliberately still on the list:
 
 - **Not certified as compliant.** The app is **built with data protection principles in mind**, but it is **not** formally "GDPR compliant." Real compliance groundwork — a privacy policy, lawful basis, data-subject rights (access/erasure/portability), retention, and a breach process — is future work and would be required before onboarding real paying customers.
-- **Activity history is convenient, not tamper-proof** — provider events and selected sensitive app actions now go into append-only `audit_events`, but this is not yet a complete monitoring/compliance audit system.
+- **Activity history is convenient, not tamper-proof** — provider events and selected sensitive app actions now go into append-only `audit_events`. Company/settings saves are logged only as changed categories, not raw bank details, notes, addresses, or other sensitive values. This is still not a complete monitoring/compliance audit system.
 - **No formal backups** on the current free hosting tier; free-tier projects can also pause and stop the scheduled job.
 - **MFA has no recovery/backup codes.** The app now has local password-strength checks for new passwords, but Supabase Auth password policy settings and breached-password screening still need confirmation before real onboarding.
 - **All-devices logout exists but can be strengthened.** It currently uses current-password confirmation plus MFA when required before Supabase global sign-out. A future production hardening step would be an email-code confirmation flow before revocation.
@@ -192,7 +192,7 @@ Naming these plainly is the point. It's the difference between marketing and a g
 
 - **Refund/dispute/chargeback replay testing** for Stripe payment lifecycle events.
 - **Production email hardening** such as tightening DMARC policy once all legitimate senders are confirmed.
-- **More append-only audit logging** for settings changes, automation failures, backup/restore evidence, and other sensitive actions.
+- **More append-only audit logging** for automation failures, backup/restore evidence, and other sensitive actions.
 - **Formal backups / retention** and a documented restore process.
 - **MFA recovery codes** and stronger Auth-level signup checks (server-side password policy / breach lookup).
 - **Data-protection groundwork** (privacy policy, consent/unsubscribe, data-subject request handling) before taking real customers.
