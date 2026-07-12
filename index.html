@@ -697,6 +697,11 @@
                     <h3 class="text-lg font-semibold mb-1">Payments</h3>
                     <p class="text-sm text-slate-500 mb-4">Record full or partial payments, or open a Stripe card checkout. The balance and status update automatically.</p>
 
+                    <div v-if="paymentAttentionFor(draft)" class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                        <div class="font-semibold">Payment attention</div>
+                        <div>{{ paymentAttentionFor(draft).text }}</div>
+                    </div>
+
                     <div v-if="draft.payments && draft.payments.length" class="divide-y divide-slate-100 mb-4 border border-slate-100 rounded-lg">
                         <div v-for="(p, i) in draft.payments" :key="i" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-2 text-sm">
                             <div class="min-w-0">
@@ -2765,6 +2770,18 @@
                 const amount = Number(payment && payment.amount);
                 if (payment && (payment.lifecycleEvent === 'refund' || note.includes('refund') || amount < 0)) return 'Stripe refund';
                 return 'Stripe confirmed';
+            },
+            paymentAttentionFor(inv) {
+                const events = [...((inv && inv.history) || [])].reverse();
+                for (const ev of events) {
+                    const type = ev && ev.type;
+                    const text = String((ev && ev.text) || '').toLowerCase();
+                    if (type === 'dispute' && (text.includes('closed') || text.includes('reinstated'))) return null;
+                    if (type === 'payment_failed' || type === 'dispute' || (type === 'refund' && text.includes('failed'))) {
+                        return { text: ev.text || 'Payment provider event needs attention.' };
+                    }
+                }
+                return null;
             },
             stripePaymentKey(payment, index) {
                 return ((payment && payment.providerPaymentIntentId) || 'stripe') + ':' + index;
