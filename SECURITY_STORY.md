@@ -168,7 +168,7 @@ The future public website, Tallyo subscriptions, plan tiers, workspaces, teams, 
 A credible security posture isn't about claiming perfection — it's about knowing exactly where you stand. A few things are deliberately still on the list:
 
 - **Not certified as compliant.** The app is **built with data protection principles in mind**, but it is **not** formally "GDPR compliant." Real compliance groundwork — a privacy policy, lawful basis, data-subject rights (access/erasure/portability), retention, and a breach process — is future work and would be required before onboarding real paying customers.
-- **Activity history is convenient, not tamper-proof** — a true append-only audit log would be a further step.
+- **Activity history is convenient, not tamper-proof** — provider events and selected sensitive app actions now go into append-only `audit_events`, but this is not yet a complete monitoring/compliance audit system.
 - **No formal backups** on the current free hosting tier; free-tier projects can also pause and stop the scheduled job.
 - **MFA has no recovery/backup codes**, and there's no password-strength or breach-password check at signup yet.
 - **The content-security-policy allows one permissive setting** the in-browser framework needs — a documented trade-off rather than a hidden one.
@@ -185,7 +185,7 @@ Naming these plainly is the point. It's the difference between marketing and a g
 
 - **Refund/dispute/chargeback replay testing** for Stripe payment lifecycle events.
 - **Production email hardening** such as tightening DMARC policy once all legitimate senders are confirmed.
-- **Append-only audit logging** for a tamper-resistant record of sensitive actions.
+- **More append-only audit logging** for settings changes, automation failures, backup/restore evidence, and other sensitive actions.
 - **Formal backups / retention** and a documented restore process.
 - **MFA recovery codes** and stronger signup checks (password strength / breach lookup).
 - **Data-protection groundwork** (privacy policy, consent/unsubscribe, data-subject request handling) before taking real customers.

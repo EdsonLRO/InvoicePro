@@ -30,9 +30,8 @@ function isUuid(value: string): boolean {
 }
 
 function isStripeRefund(payment: InvoicePayment): boolean {
-  const note = String(payment.note || "").toLowerCase();
   return payment.provider === "stripe" &&
-    (payment.lifecycleEvent === "refund" || Number(payment.amount) < 0 || note.includes("refund"));
+    (payment.lifecycleEvent === "refund" || Number(payment.amount) < 0);
 }
 
 function refundableForPayment(payments: InvoicePayment[], payment: InvoicePayment): number {

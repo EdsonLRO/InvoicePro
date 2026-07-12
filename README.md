@@ -80,12 +80,13 @@ Security is a core focus. Implemented controls include:
 - **Secrets hygiene:** only public/publishable keys are used client-side. Service role, Resend, Stripe, and webhook secrets stay server-side.
 - **Signed webhooks** for Resend and Stripe provider events.
 - **Provider-backed audit events** for email and Stripe activity.
+- **Authenticated app audit events** for selected sensitive actions such as deletes, exports, payment removal, MFA changes, password changes, and recurring schedule changes.
 
 Honest limitations:
 
 - The app is **built with data-protection principles in mind**, but it is **not** formally GDPR compliant and must not be described as such.
 - Activity history is useful, but not a tamper-proof audit log.
-- Wider append-only audit logging for sensitive app actions is still future work.
+- Append-only audit logging now covers provider events and selected sensitive app actions, but it is not yet a complete security monitoring or compliance audit system.
 - Formal backups and restore testing are not complete.
 - MFA recovery/backup codes are not implemented.
 - Stripe refund requests plus refund, dispute, chargeback, and failed-payment lifecycle handling are deployed and subscribed in the sandbox webhook destination, but still need broader replay testing and live-mode readiness before real customer use.
@@ -177,7 +178,7 @@ Current app/security work:
 
 1. Finish Stripe sandbox replay testing for refunds, disputes, chargebacks, failed/asynchronous states, and clearer UI wording where needed.
 2. Add a formal backup and restore plan, then run a restore test.
-3. Expand append-only audit logging for sensitive actions beyond provider events.
+3. Expand append-only audit logging further, especially privileged automation failures and settings changes.
 4. Add MFA recovery/backup-code planning and stronger account recovery controls.
 5. Add password-strength and breached-password checks where supported.
 6. Complete privacy/data-protection groundwork before real customer use.

@@ -2058,6 +2058,7 @@
                 this.mfa.step = 'idle';
                 this.mfa.qr = ''; this.mfa.secret = ''; this.mfa.code = '';
                 await this.loadMfaStatus();
+                await this.logAppAuditEvent('account_mfa_enabled', 'account', null, {});
                 alert("Two-factor authentication is now enabled.");
             },
             cancelMfaEnroll() {
@@ -2071,6 +2072,7 @@
                 this.mfa.busy = false;
                 if (error) return alert("Could not disable: " + error.message);
                 await this.loadMfaStatus();
+                await this.logAppAuditEvent('account_mfa_disabled', 'account', null, {});
                 alert("Two-factor authentication has been turned off.");
             },
             async onSignedIn(user) {
@@ -2118,6 +2120,7 @@
                 if(reauthError) return alert("Current password is incorrect.");
                 const { error } = await supabaseClient.auth.updateUser({ password: this.pwdChange.new });
                 if(error) return alert("Could not change password: " + error.message);
+                await this.logAppAuditEvent('account_password_changed', 'account', null, {});
                 alert("Password changed successfully.");
                 this.pwdChange = { old: '', new: '', confirm: '' };
             },
@@ -2528,6 +2531,17 @@
                 if (!this.draft.history) this.draft.history = [];
                 this.draft.history.push({ ts: new Date().toISOString(), type, text });
             },
+            async logAppAuditEvent(eventType, objectType, objectId, metadata) {
+                try {
+                    const { error, data } = await supabaseClient.functions.invoke('log-app-event', {
+                        body: { eventType, objectType, objectId, metadata: metadata || {} }
+                    });
+                    if (error) throw error;
+                    if (data && data.error) throw new Error(data.error);
+                } catch (e) {
+                    console.warn('Audit event skipped:', eventType, e && (e.message || e));
+                }
+            },
             emailStatusFor(id) {
                 const events = this.emailEventsByDocument[id] || [];
                 if (!events.length) return null;
@@ -2738,8 +2752,11 @@
                 let exported = 0, failed = 0;
                 try {
                     for (const inv of rows) {
-                        try { await this.exportPDF(inv); exported++; }
+                        try { await this.exportPDF(inv, false); exported++; }
                         catch (e) { console.error('Bulk PDF failed for', inv.id, e); failed++; }
+                    }
+                    if (exported > 0) {
+                        await this.logAppAuditEvent('document_bulk_pdf_exported', 'document', null, { count: exported, failed });
                     }
                     alert('PDF export complete. Exported ' + exported + ', failed ' + failed + '.');
                 } finally {
@@ -2757,6 +2774,7 @@
                     if (error) throw error;
                     this.invoices = this.invoices.filter(inv => !ids.includes(inv.id));
                     this.selectedInvoices = [];
+                    await this.logAppAuditEvent('document_bulk_deleted', 'document', null, { count: ids.length });
                 } catch (e) {
                     alert('Could not delete selected documents: ' + (e.message || e));
                 } finally {
@@ -2929,7 +2947,13 @@
                 this.draft.payments.splice(index, 1);
                 if (this.draftBalance > 0.001 && this.draft.status === 'Paid') this.draft.status = 'Sent';
                 this.addHistory('payment_removed', 'Payment of ' + this.getCurrencySymbol(this.draft.currency) + amt.toFixed(2) + ' removed');
-                await this.persistDraft();
+                const saved = await this.persistDraft();
+                if (saved && this.isUuid(this.draft.id)) {
+                    await this.logAppAuditEvent('manual_payment_removed', 'invoice', this.draft.id, {
+                        amount: Math.round((amt + Number.EPSILON) * 100) / 100,
+                        currency: this.draft.currency || 'GBP'
+                    });
+                }
             },
             convertToInvoice(doc) {
                 const copy = JSON.parse(JSON.stringify(doc));
@@ -3091,6 +3115,7 @@
                 try {
                     const { error } = await supabaseClient.from('recurring_templates').update({ active: t.active, history: t.history, updated_at: new Date().toISOString() }).eq('id', t.id);
                     if (error) throw error;
+                    await this.logAppAuditEvent(t.active ? 'recurring_schedule_resumed' : 'recurring_schedule_paused', 'recurring_template', t.id, {});
                 } catch (e) { t.active = !t.active; t.history.pop(); alert('Could not update: ' + (e.message || e)); }
             },
             async deleteTemplate(t) {
@@ -3100,6 +3125,7 @@
                 const i = this.recurringTemplates.indexOf(t);
                 if (i >= 0) this.recurringTemplates.splice(i, 1);
                 this.selectedRecurring = this.selectedRecurring.filter(id => id !== t.id);
+                await this.logAppAuditEvent('recurring_schedule_deleted', 'recurring_template', t.id, {});
             },
             async bulkDeleteRecurring() {
                 const rows = this.selectedRecurringRows;
@@ -3112,6 +3138,7 @@
                     if (error) throw error;
                     this.recurringTemplates = this.recurringTemplates.filter(t => !ids.includes(t.id));
                     this.selectedRecurring = [];
+                    await this.logAppAuditEvent('recurring_schedule_bulk_deleted', 'recurring_template', null, { count: ids.length });
                 } catch (e) {
                     alert('Could not delete selected schedules: ' + (e.message || e));
                 } finally {
@@ -3269,6 +3296,10 @@
                     const i = this.invoices.findIndex(x => x.id === inv.id);
                     if (i >= 0) this.invoices.splice(i, 1);
                     this.selectedInvoices = this.selectedInvoices.filter(id => id !== inv.id);
+                    await this.logAppAuditEvent('document_deleted', 'document', inv.id, {
+                        docType: inv.docType || 'invoice',
+                        status: this.effectiveStatus(inv)
+                    });
                 }
             },
             amountPaid(inv) { return (inv.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0); },
@@ -3321,7 +3352,7 @@
                 this.editingExisting = false;
                 this.navigateTo('create');
             },
-            async exportPDF(inv) {
+            async exportPDF(inv, audit = true) {
                 this.loadInvoice(inv);
                 this.isExportingPDF = true;
                 await this.$nextTick();
@@ -3384,6 +3415,12 @@
                             }
                             pdf.save(`Invoice_${inv.number}.pdf`);
                             this.isExportingPDF = false;
+                            if (audit && this.isUuid(inv.id)) {
+                                this.logAppAuditEvent('document_pdf_exported', 'document', inv.id, {
+                                    docType: inv.docType || 'invoice',
+                                    status: this.effectiveStatus(inv)
+                                });
+                            }
                             resolve();
                         }).catch(err => {
                             console.error('PDF export failed:', err);
@@ -3492,6 +3529,7 @@
                     const i = this.customers.indexOf(customer);
                     if(i>=0) this.customers.splice(i, 1);
                     this.selectedCustomers = this.selectedCustomers.filter(id => id !== customer.id);
+                    await this.logAppAuditEvent('customer_deleted', 'customer', customer.id, {});
                 }
             },
             async bulkDeleteCustomers() {
@@ -3505,6 +3543,7 @@
                     if (error) throw error;
                     this.customers = this.customers.filter(customer => !ids.includes(customer.id));
                     this.selectedCustomers = [];
+                    await this.logAppAuditEvent('customer_bulk_deleted', 'customer', null, { count: ids.length });
                 } catch (e) {
                     alert('Could not delete selected customers: ' + (e.message || e));
                 } finally {
@@ -3548,6 +3587,7 @@
                 const i = this.savedItems.indexOf(item);
                 if(i>=0) this.savedItems.splice(i, 1);
                 this.selectedItems = this.selectedItems.filter(id => id !== item.id);
+                await this.logAppAuditEvent('saved_item_deleted', 'saved_item', item.id, {});
             },
             async bulkDeleteItems() {
                 const rows = this.selectedItemRows;
@@ -3560,6 +3600,7 @@
                     if (error) throw error;
                     this.savedItems = this.savedItems.filter(item => !ids.includes(item.id));
                     this.selectedItems = [];
+                    await this.logAppAuditEvent('saved_item_bulk_deleted', 'saved_item', null, { count: ids.length });
                 } catch (e) {
                     alert('Could not delete selected items: ' + (e.message || e));
                 } finally {
@@ -3583,6 +3624,10 @@
                         if (idx >= 0) this.savedItems[idx] = this.rowToItem(row);
                     });
                     this.selectedItems = [];
+                    await this.logAppAuditEvent('saved_item_bulk_price_changed', 'saved_item', null, {
+                        count: ids.length,
+                        price
+                    });
                     alert('Updated ' + rows.length + ' saved item price' + (rows.length === 1 ? '' : 's') + '.');
                 } catch (e) {
                     alert('Could not update selected item prices: ' + (e.message || e));

@@ -24,6 +24,7 @@ Implemented:
 - Branded PDF invoices and email PDF attachments.
 - Activity history for documents and recurring schedules.
 - Provider-backed `audit_events` for email and Stripe events.
+- Authenticated app-action `audit_events` for selected sensitive actions.
 - Supabase Auth, email confirmation, optional TOTP MFA, RLS, CSP, SRI, and server-side secrets.
 - Stripe failed-payment, refund, refund-failure, and dispute lifecycle awareness in the webhook.
 
@@ -32,7 +33,7 @@ Still to finish before treating the app as customer-ready:
 - Finish Stripe replay testing for refund-failure, failed/asynchronous payment, and dispute events in sandbox.
 - Decide the operational chargeback/refund policy and customer support process.
 - Formal backup and restore plan, with at least one restore test.
-- Stronger append-only audit logging for sensitive app actions beyond provider events.
+- Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations.
 - MFA recovery/backup codes or a documented recovery process.
 - Password-strength and breached-password checks where supported.
 - Privacy policy, terms, retention position, export/deletion process, and breach process.
@@ -78,7 +79,7 @@ Strong controls already implemented:
 Known limits:
 
 - Activity history is useful, but not tamper-proof.
-- `audit_events` is stronger for provider events, but broader sensitive-action audit logging is still future work.
+- `audit_events` now covers provider events and selected sensitive app actions, but it is not a full compliance/SIEM audit system.
 - MFA is implemented, but recovery codes and stronger recovery procedures are not finished.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
 - Formal backups, restore testing, privacy operations, and incident response are not complete.

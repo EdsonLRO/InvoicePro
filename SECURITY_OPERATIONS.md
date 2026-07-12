@@ -42,7 +42,7 @@ Needed before inviting real users:
 
 ## Audit Events
 
-The existing per-invoice and per-schedule `history` fields are useful activity history, but they are not tamper-proof. For email and Stripe provider events, trusted server-side events now use `public.audit_events`.
+The existing per-invoice and per-schedule `history` fields are useful activity history, but they are not tamper-proof. Trusted provider events and selected sensitive app actions now use `public.audit_events`.
 
 Design rule:
 
@@ -51,13 +51,18 @@ Design rule:
 - Edge Functions and verified provider webhooks should insert audit events with the service role key.
 - Events should be append-only.
 - Provider webhooks should use unique provider event IDs to prevent duplicate processing.
+- The app uses `log-app-event` for selected authenticated user actions. This is stronger than editable browser history, but it is still user-action audit logging, not independent provider evidence.
 
 SQL lives in `supabase/audit_events.sql`.
 
+Current app-action coverage:
+
+- Account password changes, MFA enable/disable, document deletes, PDF exports, manual payment removal, customer deletes, saved-item deletes/price changes, and recurring schedule pause/resume/delete.
+- Keep audit metadata privacy-safe. Do not store passwords, tokens, full card data, full exported documents, or unnecessary customer PII in logs.
+
 Remaining audit hardening:
 
-- Expand append-only audit coverage beyond provider events to sensitive app actions such as invoice deletion, customer deletion, settings changes, MFA changes, export events, and privileged automation failures.
-- Keep audit metadata privacy-safe. Do not store passwords, tokens, full card data, full exported documents, or unnecessary customer PII in logs.
+- Expand coverage to company/settings changes, privileged automation failures, and backup/restore operations.
 
 ## Email Phase Gates
 

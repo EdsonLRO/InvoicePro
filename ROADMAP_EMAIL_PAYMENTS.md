@@ -128,7 +128,7 @@ Near term:
 Later:
 
 - Formal backup and restore testing.
-- Append-only audit log hardening.
+- Further append-only audit log hardening for settings changes, automation failures, and backup/restore evidence.
 - MFA recovery codes.
 - Password strength and breached-password checks.
 - Privacy policy, terms, data export/erasure process, retention policy, and breach process before real customer onboarding.
