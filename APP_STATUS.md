@@ -16,7 +16,7 @@ Implemented:
 - Customers and saved items.
 - Manual payments and Stripe-confirmed invoice payments.
 - Stripe Checkout payment links for full balance and seller-approved deposits.
-- In code: in-app Stripe refund requests through a server-side Edge Function.
+- In-app Stripe refund requests through a server-side Edge Function.
 - Recurring invoices with server-side scheduled generation.
 - Resend email sending for documents and overdue reminders.
 - Signed Resend webhook delivery tracking.
@@ -25,11 +25,11 @@ Implemented:
 - Activity history for documents and recurring schedules.
 - Provider-backed `audit_events` for email and Stripe events.
 - Supabase Auth, email confirmation, optional TOTP MFA, RLS, CSP, SRI, and server-side secrets.
-- In code: Stripe failed-payment, refund, refund-failure, and dispute lifecycle awareness in the webhook.
+- Stripe failed-payment, refund, refund-failure, and dispute lifecycle awareness in the webhook.
 
 Still to finish before treating the app as customer-ready:
 
-- Deploy and test Stripe refund requests plus failed-payment, refund, refund-failure, and dispute lifecycle handling against the live Stripe webhook destination.
+- Finish Stripe replay testing for refund-failure, failed/asynchronous payment, and dispute events in sandbox.
 - Decide the operational chargeback/refund policy and customer support process.
 - Formal backup and restore plan, with at least one restore test.
 - Stronger append-only audit logging for sensitive app actions beyond provider events.
@@ -47,7 +47,7 @@ Do not send payment links to real customers until:
 
 - Stripe live keys and live webhook secret are configured intentionally.
 - The live webhook destination is verified.
-- Refund, dispute, failed-payment, and chargeback behavior is deployed, tested, and documented.
+- Refund, dispute, failed-payment, and chargeback behavior is tested and documented in live mode.
 - Terms, privacy, refund, and support processes are ready.
 - Backup/restore and incident response basics are in place.
 

@@ -114,11 +114,12 @@ Current implementation notes:
 - `send-document-email` can create email payment links for full balance and seller-approved deposit amounts.
 - `stripe-webhook` verifies Stripe signatures, accepts `checkout.session.completed` and `checkout.session.async_payment_succeeded` for payment recording, checks the Tallyo-created checkout audit event, updates invoice payments, and logs activity/audit events.
 - The webhook also handles `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, `refund.failed`, and key dispute events for lifecycle awareness. Failed payments and disputes are logged; successful refunds are recorded as locked negative Stripe payment entries and can reopen the invoice balance.
-- Subscribe Tallyo only to the Stripe event types it needs. Other Stripe lifecycle events such as `payment_intent.succeeded`, `charge.succeeded`, `charge.updated`, and `charge.refunded` are expected in Stripe history but should not independently mark invoices paid.
+- Current sandbox Stripe webhook destination is subscribed only to the 11 event types Tallyo handles: Checkout completed/succeeded/failed async events, refund created/updated/failed events, and charge dispute created/updated/closed/funds withdrawn/funds reinstated events.
+- Other Stripe lifecycle events such as `payment_intent.succeeded`, `charge.succeeded`, `charge.updated`, and `charge.refunded` are expected in Stripe history but should not independently mark invoices paid.
 
 Next payment hardening:
 
-- Deploy and test the new refund, dispute, and failed/asynchronous payment awareness.
+- Finish sandbox replay testing for refund-failure, failed/asynchronous payment, and dispute events.
 - Keep card data out of Tallyo; continue using Stripe-hosted Checkout.
 - Test duplicate/replayed webhook events.
 - Confirm failed or unexpected payment events never mark invoices paid.

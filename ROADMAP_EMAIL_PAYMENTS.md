@@ -17,8 +17,8 @@ Current boundary: this document covers invoice/customer payment features inside 
 - Done: delivery, failure, bounce, complaint, open, click, and received events are stored in `audit_events`.
 - Done: invoice list and activity history show email status.
 - Done: manual overdue reminder email through `send-reminder-email`.
-- Done in code: recurring invoices can auto-email generated invoices when the schedule is opted in.
-- Done in code: overdue reminder automation is opt-in per invoice, with per-invoice cadence and maximum-reminder settings.
+- Done: recurring invoices can auto-email generated invoices when the schedule is opted in.
+- Done: overdue reminder automation is opt-in per invoice, with per-invoice cadence and maximum-reminder settings.
 
 ### Payments
 
@@ -28,10 +28,11 @@ Current boundary: this document covers invoice/customer payment features inside 
 - Done: customers cannot choose arbitrary partial-payment amounts.
 - Done: signed Stripe webhook receiver `stripe-webhook`.
 - Done: Stripe-confirmed payments are recorded on the invoice and locked from manual removal.
-- Done in code: in-app Stripe refund requests through `create-stripe-refund`.
+- Done: in-app Stripe refund requests through `create-stripe-refund`.
 - Done: Stripe webhook hardening checks the signature, event type, invoice/user metadata, Tallyo-created checkout audit event, amount, currency, and duplicate events.
-- Done in code: Stripe async payment failure, refund, refund-failure, and dispute lifecycle awareness.
-- Done in code: successful Stripe refunds are recorded as locked negative payment entries and can reopen the invoice balance.
+- Done: Stripe async payment failure, refund, refund-failure, and dispute lifecycle awareness.
+- Done: successful Stripe refunds are recorded as locked negative payment entries and can reopen the invoice balance.
+- Done: Stripe sandbox webhook destination is subscribed to the 11 events Tallyo currently handles.
 - Current caveat: Stripe should still be treated as test/development unless live mode is explicitly approved and configured.
 
 ## Required deploy/setup checks
@@ -53,6 +54,20 @@ Edge Functions:
 - `create-stripe-checkout`
 - `create-stripe-refund`
 - `stripe-webhook`
+
+Stripe webhook destination events:
+
+- `checkout.session.completed`
+- `checkout.session.async_payment_succeeded`
+- `checkout.session.async_payment_failed`
+- `refund.created`
+- `refund.updated`
+- `refund.failed`
+- `charge.dispute.created`
+- `charge.dispute.updated`
+- `charge.dispute.closed`
+- `charge.dispute.funds_withdrawn`
+- `charge.dispute.funds_reinstated`
 
 Secrets:
 
@@ -106,7 +121,7 @@ Near term:
 - Update screenshots and portfolio notes to include email, per-invoice reminders, deposits, and hardened Stripe webhooks.
 - Add a concise payment threat model section to the security story.
 - Consider clearer UI wording for remaining-balance payments after a deposit.
-- Deploy and test Stripe in-app refund requests plus refund, dispute, and failed/asynchronous payment awareness before real customer use.
+- Finish sandbox replay testing for refund-failure, failed/asynchronous payment, and dispute awareness before real customer use.
 - Add a private/admin-facing reminder that Stripe is in test mode until live mode is intentionally configured.
 - Keep README, handoff, security story, Supabase handoff, and operations docs in sync with the real app state.
 

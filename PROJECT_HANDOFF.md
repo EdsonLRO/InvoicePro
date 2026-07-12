@@ -302,7 +302,7 @@ supabase functions deploy generate-recurring
 - **No formal backups** on the current free tier; no documented retention/restore.
 - **MFA has no recovery/backup codes**; no password-strength/breach checks at signup yet.
 - **CSP allows one permissive setting** the in-browser Vue template compilation requires (`unsafe-eval`) — a documented trade-off.
-- **Stripe lifecycle needs end-to-end testing:** the repo includes failed-payment, refund, and dispute awareness, but these paths still need deployment, Stripe event subscription, replay testing, and operational policy before real customer use.
+- **Stripe lifecycle needs more end-to-end testing:** failed-payment, refund, refund-failure, and dispute awareness are deployed and the sandbox Stripe webhook destination is subscribed to the needed events, but replay testing and operational policy are still needed before real customer use.
 - **Email/payment automation depends on external configuration:** DNS, Resend/Stripe secrets, webhooks, and cron jobs must stay correctly configured.
 - **Unknown / needs confirmation:** whether any clickjacking/frame-protection headers are set (GitHub Pages limits response headers).
 
@@ -338,9 +338,9 @@ Near-term (in rough order):
    - Done: scheduled overdue reminder automation, opt-in per invoice.
    - Done: Stripe Checkout full-balance and seller-approved deposit payments.
    - Done: hardened Stripe webhook records verified Checkout payments and includes refund/dispute/failed-payment awareness.
-   - Done in code: in-app Stripe refund requests through a server-side Edge Function.
+   - Done: in-app Stripe refund requests through a server-side Edge Function.
    - Current payment caveat: Stripe should still be treated as test/development until explicitly moved to live mode.
-4. **Current hardening priorities:** deploy/test Stripe refund/dispute/chargeback awareness; formal backup/restore test; broader append-only audit logging for sensitive actions; MFA recovery planning; password-strength/breach checks; final mobile/PDF regression pass.
+4. **Current hardening priorities:** finish Stripe sandbox replay testing for refund-failure/dispute/chargeback awareness; formal backup/restore test; broader append-only audit logging for sensitive actions; MFA recovery planning; password-strength/breach checks; final mobile/PDF regression pass.
 5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, export/deletion process, consent/unsubscribe where relevant, and breach response notes.
 6. Optional app polish: link invoices to their recurring schedule (dedup guard); clearer payment-state wording; repo/URL rename to Tallyo only with Supabase Auth URL updates.
 7. Future phase, deliberately deferred: public website, paid Tallyo subscriptions, plan tiers, server-enforced entitlements, workspaces/teams/RBAC, and SaaS billing.

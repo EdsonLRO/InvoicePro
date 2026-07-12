@@ -25,7 +25,7 @@ It is designed to be simple, mobile-friendly, and security-conscious. It suits f
 - Overdue reminder email is implemented, with automation enabled per invoice.
 - Stripe Checkout invoice payments are implemented for full-balance and seller-approved deposit flows.
 - Stripe payment confirmation is handled by a signed webhook and Stripe-confirmed payments are locked from manual removal.
-- In-app Stripe refund requests are implemented in code through a server-side Edge Function.
+- In-app Stripe refund requests are implemented through a server-side Edge Function.
 - Stripe should still be treated as test/development until explicitly moved to live mode.
 - Visible rebrand from InvoicePro to Tallyo is complete in the app UI, PWA manifest, and app icons. The repo/URL has not been renamed.
 - The app is not yet ready for real paid public use until backup/restore, privacy operations, payment lifecycle handling, and release gates are completed.
@@ -88,7 +88,7 @@ Honest limitations:
 - Wider append-only audit logging for sensitive app actions is still future work.
 - Formal backups and restore testing are not complete.
 - MFA recovery/backup codes are not implemented.
-- Stripe refund requests plus refund, dispute, chargeback, and failed-payment lifecycle handling exist in code, but still need deployment, event subscription, and replay testing before real customer use.
+- Stripe refund requests plus refund, dispute, chargeback, and failed-payment lifecycle handling are deployed and subscribed in the sandbox webhook destination, but still need broader replay testing and live-mode readiness before real customer use.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
 
 For the full plain-English security narrative, see `SECURITY_STORY.md`.
@@ -175,7 +175,7 @@ For full details, see `SUPABASE_HANDOFF.md`.
 
 Current app/security work:
 
-1. Deploy and test Stripe invoice-payment lifecycle handling: refunds, disputes, chargebacks, failed/asynchronous states, and clearer UI wording where needed.
+1. Finish Stripe sandbox replay testing for refunds, disputes, chargebacks, failed/asynchronous states, and clearer UI wording where needed.
 2. Add a formal backup and restore plan, then run a restore test.
 3. Expand append-only audit logging for sensitive actions beyond provider events.
 4. Add MFA recovery/backup-code planning and stronger account recovery controls.

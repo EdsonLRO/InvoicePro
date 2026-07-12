@@ -152,7 +152,7 @@ Tallyo now has the core app features working: documents, customers, saved items,
 
 The next security work is not to rush into a public SaaS website. The next work is to finish the current app properly:
 
-- deploy and test Stripe refund, dispute, chargeback, and failed-payment awareness;
+- finish sandbox replay testing for Stripe refund-failure, dispute, chargeback, and failed-payment awareness;
 - prove backup and restore;
 - expand append-only audit events beyond provider webhooks;
 - improve MFA recovery and password hardening;
@@ -172,7 +172,7 @@ A credible security posture isn't about claiming perfection — it's about knowi
 - **No formal backups** on the current free hosting tier; free-tier projects can also pause and stop the scheduled job.
 - **MFA has no recovery/backup codes**, and there's no password-strength or breach-password check at signup yet.
 - **The content-security-policy allows one permissive setting** the in-browser framework needs — a documented trade-off rather than a hidden one.
-- **Payment lifecycle still needs production testing.** The repo now includes in-app Stripe refund requests plus failed-payment, refund, refund-failure, and dispute awareness, but it must be deployed, subscribed to the right Stripe events, and tested with real webhook payloads before real customer use.
+- **Payment lifecycle still needs production testing.** The repo now includes deployed in-app Stripe refund requests plus failed-payment, refund, refund-failure, and dispute awareness, and the sandbox Stripe webhook destination is subscribed to the needed events. It still needs broader replay testing and live-mode readiness before real customer use.
 - **Stripe should still be treated as test/development** unless live mode is explicitly approved and configured. Real customer payment links should wait for payment lifecycle handling, backups, terms/privacy/refund processes, and operational readiness.
 - **Email/payment automation depends on configuration.** DNS, secrets, provider webhooks, and scheduled jobs must stay correctly configured.
 - **SaaS subscriptions are not implemented.** Current Stripe work is for customers paying invoices. Future Tallyo subscription billing, entitlements, workspaces, and teams are separate future architecture work.
@@ -183,7 +183,7 @@ Naming these plainly is the point. It's the difference between marketing and a g
 
 ## Future improvements
 
-- **Refund/dispute/chargeback testing** for Stripe payment lifecycle events.
+- **Refund/dispute/chargeback replay testing** for Stripe payment lifecycle events.
 - **Production email hardening** such as tightening DMARC policy once all legitimate senders are confirmed.
 - **Append-only audit logging** for a tamper-resistant record of sensitive actions.
 - **Formal backups / retention** and a documented restore process.

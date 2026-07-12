@@ -178,6 +178,7 @@ Other current Edge Functions:
 - `create-stripe-checkout` - authenticated user function; creates Stripe Checkout sessions for the caller's own invoice.
 - `create-stripe-refund` - authenticated user function; requests Stripe refunds for the caller's own confirmed Stripe payment rows.
 - `stripe-webhook` - verifies Stripe signatures; records Checkout completion only when the Checkout session was created/logged by Tallyo; logs failed-payment/dispute/refund-failure lifecycle events; records successful refunds as locked negative Stripe payment entries.
+- Current sandbox Stripe webhook events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, `refund.failed`, `charge.dispute.created`, `charge.dispute.updated`, `charge.dispute.closed`, `charge.dispute.funds_withdrawn`, and `charge.dispute.funds_reinstated`.
 
 Deploy after edits:
 
@@ -301,7 +302,7 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 
 ---
 
-Additional current limitation: Stripe in-app refund requests and failed-payment/refund/dispute awareness exist in the repo, but they still need deployment, Stripe event subscription, replay testing, and operational policy before real customer use.
+Additional current limitation: Stripe in-app refund requests and failed-payment/refund/dispute awareness are deployed and subscribed in the sandbox webhook destination, but still need broader replay testing, live-mode setup, and operational policy before real customer use.
 
 ## 17. What Codex must not break
 
