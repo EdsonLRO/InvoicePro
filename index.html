@@ -1927,24 +1927,44 @@
             routeTabs() {
                 return ['dashboard', 'create', 'edit', 'invoices', 'customers', 'items', 'branding', 'recurring', 'settings', 'account'];
             },
-            tabFromHash() {
+            routeKeyFromHash() {
                 const key = (window.location.hash || '').replace(/^#\/?/, '').split(/[/?&]/)[0];
+                return key || 'create';
+            },
+            tabFromRouteKey(routeKey) {
+                const key = String(routeKey || '').split('-')[0];
                 return this.routeTabs().includes(key) ? key : 'create';
             },
-            routeUrl(tab) {
-                return `${window.location.pathname}${window.location.search}#${tab}`;
+            tabFromHash() {
+                return this.tabFromRouteKey(this.routeKeyFromHash());
             },
-            applyRoute(tab) {
+            routeUrl(routeKey) {
+                return `${window.location.pathname}${window.location.search}#${routeKey}`;
+            },
+            applyRoute(tab, routeKey = null) {
                 let nextTab = this.routeTabs().includes(tab) ? tab : 'create';
                 if (nextTab === 'edit' && !this.editingExisting) nextTab = 'invoices';
                 this.activeTab = nextTab;
                 this.mobileMenuOpen = false;
-                if (nextTab === 'customers') this.customerView = 'list';
-                if (nextTab === 'items') this.itemView = 'list';
+                const key = routeKey || nextTab;
+                if (nextTab === 'customers' && !(key === 'customers-form' && this.customerView === 'form')) this.customerView = 'list';
+                if (nextTab === 'items' && !(key === 'items-form' && this.itemView === 'form')) this.itemView = 'list';
                 if (nextTab === 'recurring') {
-                    this.recurringView = 'list';
-                    this.recurringForm = null;
-                    this.editingTemplate = null;
+                    const keepForm = key === 'recurring-form' && this.recurringView === 'form' && this.recurringForm;
+                    if (!keepForm) {
+                        this.recurringView = 'list';
+                        this.recurringForm = null;
+                        this.editingTemplate = null;
+                    }
+                }
+            },
+            setRouteKey(routeKey, options = {}) {
+                const nextHash = `#${routeKey}`;
+                if (window.location.hash === nextHash) return;
+                if (options.replace) {
+                    window.history.replaceState(null, '', this.routeUrl(routeKey));
+                } else {
+                    window.location.hash = routeKey;
                 }
             },
             navigateTo(tab, options = {}) {
@@ -1959,7 +1979,8 @@
             },
             handleHashChange() {
                 if (!this.isLoggedIn) return;
-                this.applyRoute(this.tabFromHash());
+                const routeKey = this.routeKeyFromHash();
+                this.applyRoute(this.tabFromRouteKey(routeKey), routeKey);
             },
             // ================= AUTHENTICATION (Supabase Auth) =================
             passwordPolicyMessage(password, email = '') {
@@ -3104,9 +3125,24 @@
                     history: [ { ts: new Date().toISOString(), type: 'created', text: 'Schedule created' } ]
                 };
             },
-            newTemplate() { this.recurringForm = this.getEmptyTemplate(); this.editingTemplate = null; this.recurringView = 'form'; },
-            editTemplate(t) { this.recurringForm = JSON.parse(JSON.stringify(t)); this.editingTemplate = this.recurringTemplates.indexOf(t); this.recurringView = 'form'; },
-            backToRecurring() { this.recurringView = 'list'; this.recurringForm = null; this.editingTemplate = null; },
+            newTemplate() {
+                this.recurringForm = this.getEmptyTemplate();
+                this.editingTemplate = null;
+                this.recurringView = 'form';
+                this.setRouteKey('recurring-form');
+            },
+            editTemplate(t) {
+                this.recurringForm = JSON.parse(JSON.stringify(t));
+                this.editingTemplate = this.recurringTemplates.indexOf(t);
+                this.recurringView = 'form';
+                this.setRouteKey('recurring-form');
+            },
+            backToRecurring() {
+                this.recurringView = 'list';
+                this.recurringForm = null;
+                this.editingTemplate = null;
+                this.setRouteKey('recurring', { replace: true });
+            },
             addTemplateItem() { this.recurringForm.items.push({ name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false }); },
             removeTemplateItem(i) { this.recurringForm.items.splice(i, 1); },
             selectTemplateMatch(i, match) {
@@ -3522,8 +3558,16 @@
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "Invoices");
                 XLSX.writeFile(wb, "Invoices_Export.xlsx");
             },
-            newCustomer() { this.resetCustomerForm(); this.customerView = 'form'; },
-            backToCustomers() { this.resetCustomerForm(); this.customerView = 'list'; },
+            newCustomer() {
+                this.resetCustomerForm();
+                this.customerView = 'form';
+                this.setRouteKey('customers-form');
+            },
+            backToCustomers() {
+                this.resetCustomerForm();
+                this.customerView = 'list';
+                this.setRouteKey('customers', { replace: true });
+            },
             onCustomerSelect() {
                 if (this.draft.customer === '__new__') {
                     this.draft.customer = null;
@@ -3559,6 +3603,7 @@
                     this.customers.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
                     this.resetCustomerForm();
                     this.customerView = 'list';
+                    this.setRouteKey('customers', { replace: true });
                 } catch (e) {
                     console.error("Save customer failed:", e);
                     alert("Could not save customer: " + (e.message || e));
@@ -3571,6 +3616,7 @@
                     if(this.customerForm[k] === undefined) this.customerForm[k] = '';
                 });
                 this.customerView = 'form';
+                this.setRouteKey('customers-form');
             },
             async deleteCustomer(customer) {
                 if(confirm("Delete this customer?")) {
@@ -3618,17 +3664,27 @@
                     this.savedItems.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
                     this.resetItemForm();
                     this.itemView = 'list';
+                    this.setRouteKey('items', { replace: true });
                 } catch (e) {
                     console.error("Save item failed:", e);
                     alert("Could not save item: " + (e.message || e));
                 }
             },
-            newItem() { this.resetItemForm(); this.itemView = 'form'; },
-            backToItems() { this.resetItemForm(); this.itemView = 'list'; },
+            newItem() {
+                this.resetItemForm();
+                this.itemView = 'form';
+                this.setRouteKey('items-form');
+            },
+            backToItems() {
+                this.resetItemForm();
+                this.itemView = 'list';
+                this.setRouteKey('items', { replace: true });
+            },
             editSavedItem(item) {
                 this.editingItem = this.savedItems.indexOf(item);
                 this.itemForm = { name: item.name || '', description: item.description || '', price: item.price || 0 };
                 this.itemView = 'form';
+                this.setRouteKey('items-form');
             },
             async deleteSavedItem(item) {
                 if(!confirm("Delete this saved item?")) return;
