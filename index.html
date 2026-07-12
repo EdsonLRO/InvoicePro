@@ -711,7 +711,7 @@
                             </div>
                             <div class="flex items-center gap-2 self-start sm:self-auto">
                                 <span v-if="p.provider === 'stripe'" class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs font-semibold">{{ stripePaymentBadge(p) }}</span>
-                                <button v-if="isStripeRefundablePayment(p)" @click="requestStripeRefund(i)" :disabled="stripeRefundBusyKey === stripePaymentKey(p, i)" class="text-amber-600 hover:text-amber-700 disabled:opacity-50 text-xs font-medium">{{ stripeRefundBusyKey === stripePaymentKey(p, i) ? 'Refunding...' : 'Refund' }}</button>
+                                <button v-if="isStripeRefundablePayment(p)" @click="openStripeRefundModal(i)" :disabled="stripeRefundBusyKey === stripePaymentKey(p, i)" class="text-amber-600 hover:text-amber-700 disabled:opacity-50 text-xs font-medium">{{ stripeRefundBusyKey === stripePaymentKey(p, i) ? 'Refunding...' : 'Refund' }}</button>
                                 <button v-if="p.provider !== 'stripe'" @click="removePayment(i)" class="text-red-500 hover:text-red-700 text-xs font-medium">Remove</button>
                             </div>
                         </div>
@@ -976,6 +976,39 @@
                     <div class="flex gap-2 justify-end flex-wrap">
                         <button @click="copyReminder" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors">{{ reminderModal.copied ? 'Copied!' : 'Copy text' }}</button>
                         <button @click="sendReminderEmail" :disabled="reminderModal.sending" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50">{{ reminderModal.sending ? 'Sending...' : 'Email reminder' }}</button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="refundModal.open" class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50" @click.self="closeStripeRefundModal">
+                <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div>
+                            <h3 class="text-lg font-semibold">Stripe refund</h3>
+                            <p class="text-xs text-slate-500 mt-1">Request a full or partial refund for this confirmed Stripe payment.</p>
+                        </div>
+                        <button @click="closeStripeRefundModal" :disabled="refundModal.submitting" class="text-slate-400 hover:text-slate-700 text-xl leading-none disabled:opacity-50">&times;</button>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 mb-4 text-sm">
+                        <div class="flex justify-between gap-3">
+                            <span class="text-slate-500">Invoice</span>
+                            <span class="font-semibold text-slate-800">#{{ draft.number }}</span>
+                        </div>
+                        <div class="flex justify-between gap-3 mt-2">
+                            <span class="text-slate-500">Refundable</span>
+                            <span class="font-semibold text-slate-800">{{ getCurrencySymbol(draft.currency) }}{{ Number(refundModal.max || 0).toFixed(2) }}</span>
+                        </div>
+                    </div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Refund amount</label>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-slate-500">{{ getCurrencySymbol(draft.currency) }}</span>
+                        <input type="number" min="0.01" :max="refundModal.max" step="0.01" v-model.number="refundModal.amount" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <p v-if="refundModal.error" class="text-sm text-red-600 mb-3">{{ refundModal.error }}</p>
+                    <p class="text-xs text-slate-500 mb-5">Stripe processes the money movement. Tallyo updates this invoice only after the signed Stripe webhook confirms the refund.</p>
+                    <div class="flex gap-2 justify-end flex-wrap">
+                        <button @click="closeStripeRefundModal" :disabled="refundModal.submitting" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors disabled:opacity-50">Cancel</button>
+                        <button @click="submitStripeRefund" :disabled="refundModal.submitting" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50">{{ refundModal.submitting ? 'Requesting...' : 'Request refund' }}</button>
                     </div>
                 </div>
             </div>
@@ -1603,6 +1636,7 @@
                 newPayment: { amount: null, date: new Date().toISOString().split('T')[0], note: '' },
                 activityNote: '',
                 reminderModal: { open: false, inv: null, text: '', copied: false, sending: false },
+                refundModal: { open: false, paymentIndex: null, amount: 0, max: 0, error: '', submitting: false },
                 recurringTemplates: [],
                 recurringView: 'list',
                 editingTemplate: null,
@@ -2804,22 +2838,50 @@
             isStripeRefundablePayment(payment) {
                 return this.refundableStripePaymentAmount(payment) > 0.001;
             },
-            async requestStripeRefund(index) {
+            openStripeRefundModal(index) {
                 if (!this.draft || !this.isUuid(this.draft.id)) return alert('Save this invoice before refunding a Stripe payment.');
                 const payment = (this.draft.payments || [])[index];
                 const refundable = this.refundableStripePaymentAmount(payment);
                 if (refundable <= 0.001) return alert('This Stripe payment has no refundable balance left.');
 
+                this.refundModal = {
+                    open: true,
+                    paymentIndex: index,
+                    amount: refundable,
+                    max: refundable,
+                    error: '',
+                    submitting: false
+                };
+            },
+            closeStripeRefundModal() {
+                if (this.refundModal.submitting) return;
+                this.refundModal = { open: false, paymentIndex: null, amount: 0, max: 0, error: '', submitting: false };
+            },
+            async submitStripeRefund() {
+                if (!this.refundModal.open) return;
+                if (!this.draft || !this.isUuid(this.draft.id)) {
+                    this.refundModal.error = 'Save this invoice before refunding a Stripe payment.';
+                    return;
+                }
+
+                const index = this.refundModal.paymentIndex;
+                const payment = (this.draft.payments || [])[index];
+                const refundable = this.refundableStripePaymentAmount(payment);
+                const amount = Number(this.refundModal.amount);
                 const symbol = this.getCurrencySymbol(this.draft.currency);
-                const raw = prompt('Refund amount for this Stripe payment:', refundable.toFixed(2));
-                if (raw === null) return;
-                const amount = Number(raw);
-                if (!Number.isFinite(amount) || amount <= 0) return alert('Enter a valid refund amount.');
-                if (amount > refundable + 0.001) return alert('Maximum refundable amount is ' + symbol + refundable.toFixed(2) + '.');
-                if (!confirm('Request a Stripe refund of ' + symbol + amount.toFixed(2) + '? Stripe will process the refund and Tallyo will update this invoice from the signed webhook.')) return;
+                if (!Number.isFinite(amount) || amount <= 0) {
+                    this.refundModal.error = 'Enter a valid refund amount.';
+                    return;
+                }
+                if (amount > refundable + 0.001) {
+                    this.refundModal.error = 'Maximum refundable amount is ' + symbol + refundable.toFixed(2) + '.';
+                    return;
+                }
 
                 const busyKey = this.stripePaymentKey(payment, index);
                 this.stripeRefundBusyKey = busyKey;
+                this.refundModal.submitting = true;
+                this.refundModal.error = '';
                 try {
                     const { data, error } = await supabaseClient.functions.invoke('create-stripe-refund', {
                         body: { documentId: this.draft.id, paymentIndex: index, amount }
@@ -2829,12 +2891,15 @@
 
                     await new Promise(resolve => setTimeout(resolve, 1500));
                     try { await this.refreshInvoiceFromDatabase(this.draft.id); } catch (refreshErr) { console.warn('Invoice refresh after refund failed:', refreshErr); }
+                    this.refundModal.submitting = false;
+                    this.closeStripeRefundModal();
                     alert('Refund requested. If the invoice has not updated yet, refresh again in a few seconds while Stripe sends the webhook.');
                 } catch (e) {
                     console.error('Stripe refund failed:', e);
-                    alert('Could not request Stripe refund: ' + (e.message || e));
+                    this.refundModal.error = 'Could not request Stripe refund: ' + (e.message || e);
                 } finally {
                     this.stripeRefundBusyKey = null;
+                    this.refundModal.submitting = false;
                 }
             },
             normalizeDeposit() {
