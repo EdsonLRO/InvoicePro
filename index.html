@@ -223,11 +223,6 @@
                             <label class="block text-sm font-bold text-slate-600 mb-1">Current Password</label>
                             <input type="password" v-model="pwdChange.old" class="w-full md:w-1/2 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
-                        <div v-if="mfa.enabled" class="col-span-full">
-                            <label class="block text-sm font-bold text-slate-600 mb-1">Authenticator Code</label>
-                            <input type="text" inputmode="numeric" maxlength="6" v-model="pwdChange.mfaCode" class="w-full md:w-1/2 border rounded-lg px-3 py-2 text-center tracking-widest font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <p class="text-xs text-slate-500 mt-1">Required because two-factor authentication is enabled.</p>
-                        </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-600 mb-1">New Password</label>
                             <input type="password" v-model="pwdChange.new" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -355,9 +350,6 @@
             <div v-show="activeTab === 'create' || activeTab === 'edit'">
                 <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
                     <div class="flex items-center gap-4">
-                        <button v-if="activeTab === 'edit'" @click="navigateTo('invoices')" class="flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors">
-                            &larr; Back to Invoices
-                        </button>
                         <h2 class="text-3xl font-semibold">{{ editingExisting ? 'Edit ' + docTypeNoun(draft.docType) + ' #' + draft.number : 'New ' + docTypeNoun(draft.docType) }}</h2>
                     </div>
                     <div class="flex items-center gap-3 flex-wrap">
@@ -1087,7 +1079,6 @@
 
                 <div v-else class="max-w-2xl mx-auto">
                     <div class="flex items-center gap-4 mb-6">
-                        <button @click="backToCustomers" class="flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors">&larr; Back to Customers</button>
                         <h2 class="text-3xl font-semibold">{{ editingCustomer !== null ? 'Edit Customer' : 'New Customer' }}</h2>
                     </div>
 
@@ -1172,7 +1163,6 @@
 
                 <div v-else class="max-w-2xl mx-auto">
                     <div class="flex items-center gap-4 mb-6">
-                        <button @click="backToItems" class="flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors">&larr; Back to Items</button>
                         <h2 class="text-3xl font-semibold">{{ editingItem !== null ? 'Edit Item' : 'New Item' }}</h2>
                     </div>
 
@@ -1336,7 +1326,6 @@
                 <!-- FORM VIEW -->
                 <div v-else class="max-w-3xl mx-auto">
                     <div class="flex items-center gap-4 mb-6">
-                        <button @click="backToRecurring" class="flex items-center gap-1 text-slate-500 hover:text-slate-800 font-medium text-sm transition-colors">&larr; Back</button>
                         <h2 class="text-3xl font-semibold">{{ editingTemplate !== null ? 'Edit Schedule' : 'New Schedule' }}</h2>
                     </div>
 
@@ -1622,7 +1611,7 @@
                 generatedCode: null,
                 encryptionKey: null,
                 userProfileEmail: '',
-                pwdChange: { old: '', new: '', confirm: '', mfaCode: '' },
+                pwdChange: { old: '', new: '', confirm: '' },
 
                 // App State
                 activeTab: 'create',
@@ -2140,7 +2129,7 @@
                 if (aal && aal.currentLevel === 'aal2') return;
                 if (!aal || aal.nextLevel !== 'aal2') return;
 
-                const cleanCode = String(code || '').trim();
+                const cleanCode = String(code || prompt('Enter the 6-digit code from your authenticator app to finish changing your password.') || '').trim();
                 if (!/^\d{6}$/.test(cleanCode)) throw new Error('Enter the 6-digit code from your authenticator app.');
 
                 const { data: factors, error: factorsError } = await supabaseClient.auth.mfa.listFactors();
@@ -2161,14 +2150,13 @@
                 const passwordIssue = this.passwordPolicyMessage(this.pwdChange.new, this.userProfileEmail);
                 if(passwordIssue) return alert(passwordIssue);
                 if(this.pwdChange.new !== this.pwdChange.confirm) return alert("New passwords do not match.");
-                if(this.mfa.enabled && !/^\d{6}$/.test((this.pwdChange.mfaCode || '').trim())) return alert("Enter the 6-digit code from your authenticator app.");
                 // Re-verify the current password before allowing a change
                 const { error: reauthError } = await supabaseClient.auth.signInWithPassword({
                     email: this.userProfileEmail, password: this.pwdChange.old
                 });
                 if(reauthError) return alert("Current password is incorrect.");
                 try {
-                    await this.completeMfaForCurrentSession(this.pwdChange.mfaCode);
+                    await this.completeMfaForCurrentSession();
                 } catch (e) {
                     return alert("Could not verify authenticator code: " + (e.message || e));
                 }
@@ -2176,7 +2164,7 @@
                 if(error) return alert("Could not change password: " + error.message);
                 await this.logAppAuditEvent('account_password_changed', 'account', null, {});
                 alert("Password changed successfully.");
-                this.pwdChange = { old: '', new: '', confirm: '', mfaCode: '' };
+                this.pwdChange = { old: '', new: '', confirm: '' };
             },
             async factoryReset() {
                 // Local-only reset of cached data on this browser. Does not delete the account.

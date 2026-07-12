@@ -206,7 +206,7 @@ npx tailwindcss -c tailwind.config.js -i <tailwind-input.css> -o tailwind.css --
 4. All data requests run as the authenticated user; **Row Level Security** restricts every query to that user's own rows.
 5. A "Change Password" flow exists in the app.
    - **Preserved wording (do not change):** the Change Password box asks for the user's **Current Password**, and its note reads: *"Please enter your current password to confirm it's you."* Keep the title "Change Password" and keep the note consistent with the field.
-   - If MFA is enabled, changing password also requires a fresh authenticator code so Supabase can upgrade the reauthenticated session to AAL2 before `updateUser`.
+   - If MFA is enabled, changing password prompts for a fresh authenticator code after current-password reauth so Supabase can upgrade the session to AAL2 before `updateUser`.
 
 ---
 
