@@ -223,6 +223,11 @@
                             <label class="block text-sm font-bold text-slate-600 mb-1">Current Password</label>
                             <input type="password" v-model="pwdChange.old" class="w-full md:w-1/2 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
+                        <div v-if="mfa.enabled" class="col-span-full">
+                            <label class="block text-sm font-bold text-slate-600 mb-1">Authenticator Code</label>
+                            <input type="text" inputmode="numeric" maxlength="6" v-model="pwdChange.mfaCode" class="w-full md:w-1/2 border rounded-lg px-3 py-2 text-center tracking-widest font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <p class="text-xs text-slate-500 mt-1">Required because two-factor authentication is enabled.</p>
+                        </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-600 mb-1">New Password</label>
                             <input type="password" v-model="pwdChange.new" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -1617,7 +1622,7 @@
                 generatedCode: null,
                 encryptionKey: null,
                 userProfileEmail: '',
-                pwdChange: { old: '', new: '', confirm: '' },
+                pwdChange: { old: '', new: '', confirm: '', mfaCode: '' },
 
                 // App State
                 activeTab: 'create',
@@ -2129,20 +2134,49 @@
                 alert("If an account exists for that email, a password reset link has been sent. Check your inbox.");
                 this.authMode = 'login';
             },
+            async completeMfaForCurrentSession(code) {
+                const { data: aal, error: aalError } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+                if (aalError) throw aalError;
+                if (aal && aal.currentLevel === 'aal2') return;
+                if (!aal || aal.nextLevel !== 'aal2') return;
+
+                const cleanCode = String(code || '').trim();
+                if (!/^\d{6}$/.test(cleanCode)) throw new Error('Enter the 6-digit code from your authenticator app.');
+
+                const { data: factors, error: factorsError } = await supabaseClient.auth.mfa.listFactors();
+                if (factorsError) throw factorsError;
+                const totp = factors && factors.totp && (factors.totp.find(f => f.status === 'verified') || factors.totp[0]);
+                if (!totp) throw new Error('No verified authenticator factor was found for this account.');
+
+                const { data: challenge, error: challengeError } = await supabaseClient.auth.mfa.challenge({ factorId: totp.id });
+                if (challengeError) throw challengeError;
+                const { error: verifyError } = await supabaseClient.auth.mfa.verify({
+                    factorId: totp.id,
+                    challengeId: challenge.id,
+                    code: cleanCode
+                });
+                if (verifyError) throw verifyError;
+            },
             async changePassword() {
                 const passwordIssue = this.passwordPolicyMessage(this.pwdChange.new, this.userProfileEmail);
                 if(passwordIssue) return alert(passwordIssue);
                 if(this.pwdChange.new !== this.pwdChange.confirm) return alert("New passwords do not match.");
+                if(this.mfa.enabled && !/^\d{6}$/.test((this.pwdChange.mfaCode || '').trim())) return alert("Enter the 6-digit code from your authenticator app.");
                 // Re-verify the current password before allowing a change
                 const { error: reauthError } = await supabaseClient.auth.signInWithPassword({
                     email: this.userProfileEmail, password: this.pwdChange.old
                 });
                 if(reauthError) return alert("Current password is incorrect.");
+                try {
+                    await this.completeMfaForCurrentSession(this.pwdChange.mfaCode);
+                } catch (e) {
+                    return alert("Could not verify authenticator code: " + (e.message || e));
+                }
                 const { error } = await supabaseClient.auth.updateUser({ password: this.pwdChange.new });
                 if(error) return alert("Could not change password: " + error.message);
                 await this.logAppAuditEvent('account_password_changed', 'account', null, {});
                 alert("Password changed successfully.");
-                this.pwdChange = { old: '', new: '', confirm: '' };
+                this.pwdChange = { old: '', new: '', confirm: '', mfaCode: '' };
             },
             async factoryReset() {
                 // Local-only reset of cached data on this browser. Does not delete the account.

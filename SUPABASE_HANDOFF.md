@@ -43,6 +43,7 @@
 
 - Supabase Auth supports password reset via a reset email link.
 - The app also has an in-app **"Change Password"** feature for a signed-in user. Its box asks for the user's **Current Password**, with the note *"Please enter your current password to confirm it's you."* — keep this wording consistent with the field.
+- When MFA is enabled, Change Password must verify a fresh TOTP code after the current-password reauth. Supabase requires an AAL2 session before password updates on MFA accounts.
 - **Unknown / needs confirmation:** whether the logged-out "forgot password" reset flow is wired in the UI, or only the signed-in change-password flow. Verify in `index.html`.
 
 ---

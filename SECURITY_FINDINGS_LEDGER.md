@@ -42,6 +42,17 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Residual risk:** Client-side checks are not a replacement for Supabase Auth password policy, rate limiting, breached-password screening, MFA recovery planning, or monitoring.
 - **Evidence:** Commit `02ee05e` (`Strengthen local password checks`).
 
+### SEC-LOG-003 - MFA password change failed without AAL2 re-verification
+
+- **Date:** 2026-07-12
+- **Classification:** vulnerable / account security correctness
+- **Finding:** Change Password rechecked the current password with `signInWithPassword`, but on MFA-enabled accounts that creates an AAL1 session. The app then called `updateUser` before completing a fresh MFA challenge, so Supabase rejected the password update with an AAL2-required error.
+- **Impact:** MFA-protected users could not change their password from the app, and the failure was confusing.
+- **Change:** Added an authenticator-code field when MFA is enabled and completed a Supabase MFA challenge/verify step after current-password reauth and before `updateUser`.
+- **Verification:** Ran `git diff --check`; reviewed against Supabase MFA/AAL docs. Manual browser test still required on the deployed app.
+- **Residual risk:** MFA recovery/backup flow is still not implemented; Auth-level password policy and breached-password protection still need dashboard confirmation.
+- **Evidence:** This fix commit; manual browser test pending.
+
 ## Open Follow-Ups
 
 - Confirm Supabase Auth password policy, JWT/session expiry, and rate-limit settings.
