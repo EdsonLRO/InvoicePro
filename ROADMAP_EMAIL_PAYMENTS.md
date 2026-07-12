@@ -119,10 +119,10 @@ Stripe:
 Near term:
 
 - Update screenshots and portfolio notes to include email, per-invoice reminders, deposits, and hardened Stripe webhooks.
-- Add a concise payment threat model section to the security story.
-- Consider clearer UI wording for remaining-balance payments after a deposit.
+- Done: added a concise payment threat model section to the security story.
+- Done: payment list shows clearer remaining-balance wording after a seller-approved deposit.
 - Finish sandbox replay testing for refund-failure, failed/asynchronous payment, and dispute awareness before real customer use.
-- Add a private/admin-facing reminder that Stripe is in test mode until live mode is intentionally configured.
+- Done: app payment panel shows a private/admin-facing reminder that Stripe is in test/development until live mode is intentionally configured.
 - Keep README, handoff, security story, Supabase handoff, and operations docs in sync with the real app state.
 
 Later:

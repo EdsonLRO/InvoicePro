@@ -144,6 +144,8 @@ The most involved piece: making recurring invoices generate *on their own*, on a
 
 **Why it matters.** This creates a clear trust chain: Tallyo creates a Checkout session, Stripe confirms the signed completion event, and only then does Tallyo update the invoice. That is much stronger than trusting a browser redirect or accepting every Stripe payment event shape.
 
+**Payment threat model in plain English.** The main risks are fake payment confirmations, replayed webhook events, cross-user invoice updates, wrong amounts, wrong currencies, arbitrary customer-chosen deposits, and refunds being treated as trusted just because the browser says so. Tallyo reduces those risks by keeping Stripe secrets server-side, verifying webhook signatures, checking event idempotency, matching Stripe metadata back to a known Tallyo-created Checkout session, validating invoice ownership and expected amount/currency, locking Stripe-confirmed rows from manual deletion, and waiting for signed Stripe refund events before changing invoice balance. The honest remaining risk is operational: Stripe is still a sandbox/test setup until live-mode configuration, replay testing, refund/dispute procedures, backup/restore evidence, and policy/legal groundwork are complete.
+
 ---
 
 ## Current boundary - finish the app before SaaS conversion

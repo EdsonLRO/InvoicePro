@@ -697,6 +697,11 @@
                     <h3 class="text-lg font-semibold mb-1">Payments</h3>
                     <p class="text-sm text-slate-500 mb-4">Record full or partial payments, or open a Stripe card checkout. The balance and status update automatically.</p>
 
+                    <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                        <div class="font-semibold">Stripe test mode</div>
+                        <div>Card payments are still in test/development until live Stripe mode, policies, backups, and final checks are intentionally approved.</div>
+                    </div>
+
                     <div v-if="paymentAttentionFor(draft)" class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                         <div class="font-semibold">Payment attention</div>
                         <div>{{ paymentAttentionFor(draft).text }}</div>
@@ -707,7 +712,7 @@
                             <div class="min-w-0">
                                 <span class="font-medium text-slate-800">{{ getCurrencySymbol(draft.currency) }}{{ parseFloat(p.amount).toFixed(2) }}</span>
                                 <span class="text-slate-400 ml-3">{{ p.date }}</span>
-                                <span v-if="p.note" class="text-slate-500 ml-3 italic">{{ p.note }}</span>
+                                <span v-if="paymentNoteLabel(p, i)" class="text-slate-500 ml-3 italic">{{ paymentNoteLabel(p, i) }}</span>
                             </div>
                             <div class="flex items-center gap-2 self-start sm:self-auto">
                                 <span v-if="p.provider === 'stripe'" class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs font-semibold">{{ stripePaymentBadge(p) }}</span>
@@ -2822,6 +2827,14 @@
                 if (payment && payment.lifecycleEvent === 'refund_failed_reversal') return 'Stripe refund failed';
                 if (payment && (payment.lifecycleEvent === 'refund' || amount < 0)) return 'Stripe refund';
                 return 'Stripe confirmed';
+            },
+            paymentNoteLabel(payment, index) {
+                const note = String((payment && payment.note) || '');
+                if (!payment || payment.provider !== 'stripe' || note !== 'Stripe card payment confirmed') return note;
+                const hasEarlierDeposit = (this.draft.payments || [])
+                    .slice(0, Math.max(0, index))
+                    .some(p => p && p.provider === 'stripe' && Number(p.amount) > 0 && String(p.note || '').toLowerCase().includes('deposit'));
+                return hasEarlierDeposit ? 'Stripe remaining balance payment confirmed' : note;
             },
             paymentAttentionFor(inv) {
                 const events = [...((inv && inv.history) || [])].reverse();
