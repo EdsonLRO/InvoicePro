@@ -213,6 +213,7 @@ npx tailwindcss -c tailwind.config.js -i <tailwind-input.css> -o tailwind.css --
 - User enrolls an authenticator; once enabled, sign-in requires password **and** the current TOTP code.
 - Verified end-to-end, including that an incorrect code is rejected.
 - **Not implemented:** MFA recovery/backup codes. SMS and email MFA are not implemented (and email MFA is considered weaker; not planned as a priority).
+- **Future account safety:** add "log out from all devices" as a server-side session-revocation flow. It should send an email verification code/link first, revoke sessions only after confirmation, and record an `account_sessions_revoked` audit event.
 
 ---
 
@@ -341,7 +342,7 @@ Near-term (in rough order):
    - Done: hardened Stripe webhook records verified Checkout payments and includes refund/dispute/failed-payment awareness.
    - Done: in-app Stripe refund requests through a server-side Edge Function.
    - Current payment caveat: Stripe should still be treated as test/development until explicitly moved to live mode.
-4. **Current hardening priorities:** finish Stripe sandbox replay testing for refund-failure/dispute/chargeback awareness; formal backup/restore test; expand audit coverage to settings/automation/backup events; MFA recovery planning; password-strength/breach checks; final mobile/PDF regression pass.
+4. **Current hardening priorities:** finish Stripe sandbox replay testing for refund-failure/dispute/chargeback awareness; formal backup/restore test; expand audit coverage to settings/automation/backup events; MFA recovery/session-revocation planning; password-strength/breach checks; final mobile/PDF regression pass.
 5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, export/deletion process, consent/unsubscribe where relevant, and breach response notes.
 6. Optional app polish: link invoices to their recurring schedule (dedup guard); clearer payment-state wording; repo/URL rename to Tallyo only with Supabase Auth URL updates.
 7. Future phase, deliberately deferred: public website, paid Tallyo subscriptions, plan tiers, server-enforced entitlements, workspaces/teams/RBAC, and SaaS billing.

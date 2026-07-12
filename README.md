@@ -179,7 +179,7 @@ Current app/security work:
 1. Finish Stripe sandbox replay testing for refunds, disputes, chargebacks, failed/asynchronous states, and clearer UI wording where needed.
 2. Add a formal backup and restore plan, then run a restore test.
 3. Expand append-only audit logging further, especially privileged automation failures and settings changes.
-4. Add MFA recovery/backup-code planning and stronger account recovery controls.
+4. Add MFA recovery/backup-code planning, stronger account recovery controls, and a server-side "log out from all devices" flow confirmed by email code.
 5. Add password-strength and breached-password checks where supported.
 6. Complete privacy/data-protection groundwork before real customer use.
 7. Keep security docs, screenshots, and portfolio evidence in sync with the real app.

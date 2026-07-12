@@ -35,6 +35,7 @@ Still to finish before treating the app as customer-ready:
 - Formal backup and restore plan, with at least one restore test.
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations.
 - MFA recovery/backup codes or a documented recovery process.
+- Future "log out from all devices" safety flow with email-code confirmation and server-side session revocation.
 - Password-strength and breached-password checks where supported.
 - Privacy policy, terms, retention position, export/deletion process, and breach process.
 - Final mobile and PDF regression pass.

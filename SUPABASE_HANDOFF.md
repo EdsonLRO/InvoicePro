@@ -53,6 +53,7 @@
 - Flow: user enrolls an authenticator app; once enabled, sign-in requires password **and** the current TOTP code.
 - Verified end-to-end including rejection of an incorrect code.
 - **Not implemented:** MFA recovery/backup codes. SMS and email MFA are not implemented.
+- **Future account safety:** add "log out from all devices" through Edge Functions, not directly from the browser. The flow should send an email verification code/link, confirm it server-side, revoke active sessions/refresh tokens, and write an `account_sessions_revoked` audit event.
 - **Unknown / needs confirmation:** exact enrollment/verification UI location in `index.html`.
 
 ---
@@ -299,6 +300,7 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 - **Audit events** now cover provider events and selected sensitive app actions, but broader monitoring, alerting, and compliance evidence are still future work.
 - **No formal backups** on the current free tier; free-tier projects can pause and stop cron.
 - **MFA has no recovery/backup codes**; no password-strength/breach check at signup.
+- **No "log out from all devices" control yet**; this should be added as a verified server-side session-revocation flow.
 - **CSP** allows one permissive setting the in-browser Vue template compiler needs (documented trade-off).
 - **Data protection:** the app is **built with data protection principles in mind**, but is **not** certified or "GDPR compliant." Formal compliance work (privacy policy, lawful basis, data-subject rights, retention, breach process) is future work — do not claim compliance.
 - **Unknown / needs confirmation:** custom SMTP config, exact JWT/session expiry, and whether any response security headers (e.g. frame protection) are set (GitHub Pages limits headers).
