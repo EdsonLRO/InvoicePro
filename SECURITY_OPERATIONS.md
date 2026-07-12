@@ -4,7 +4,9 @@ Operational security checklist for moving Tallyo from a working prototype into a
 
 ## Current Priority
 
-Email and Stripe test-mode payments now exist. Current priority is to keep the working flows stable, keep secrets server-side, and build a recovery path before real customer use.
+Email, opt-in reminder automation, recurring auto-email, and Stripe invoice-payment flows now exist for the current app. Current priority is to keep those working flows stable, keep secrets server-side, test the new Stripe lifecycle handling, and build a recovery path before real customer use.
+
+Future SaaS subscription billing, plan tiers, workspaces, RBAC, and the public marketing website are deliberately deferred. They should not interrupt the current app/security finishing workflow.
 
 ## Backup And Restore
 
@@ -40,7 +42,7 @@ Needed before inviting real users:
 
 ## Audit Events
 
-The existing per-invoice and per-schedule `history` fields are useful activity history, but they are not tamper-proof. For email and payments, add trusted server-side events in `public.audit_events`.
+The existing per-invoice and per-schedule `history` fields are useful activity history, but they are not tamper-proof. For email and Stripe provider events, trusted server-side events now use `public.audit_events`.
 
 Design rule:
 
@@ -50,7 +52,12 @@ Design rule:
 - Events should be append-only.
 - Provider webhooks should use unique provider event IDs to prevent duplicate processing.
 
-Draft SQL lives in `supabase/audit_events.sql`.
+SQL lives in `supabase/audit_events.sql`.
+
+Remaining audit hardening:
+
+- Expand append-only audit coverage beyond provider events to sensitive app actions such as invoice deletion, customer deletion, settings changes, MFA changes, export events, and privileged automation failures.
+- Keep audit metadata privacy-safe. Do not store passwords, tokens, full card data, full exported documents, or unnecessary customer PII in logs.
 
 ## Email Phase Gates
 
@@ -75,14 +82,14 @@ Automation gate:
 
 ## Payments Phase Gates
 
-Stripe is implemented for the current single-business/test-mode portfolio flow. Do not move to real customers until the account model and compliance position are decided.
+Stripe is implemented for the current invoice-payment flow. Treat it as test/development until live mode is intentionally approved and configured. Do not move to real customer payment links until the lifecycle, recovery, and compliance basics below are ready.
 
 Still-to-decide before production/commercial use:
 
-- Single Stripe account for one business, or Stripe Connect for many businesses.
-- Whether Tallyo takes platform fees.
+- Whether this remains a single-business invoice-payment app flow or later becomes a multi-business SaaS/Stripe Connect platform.
+- Whether Tallyo ever takes platform fees. This is future SaaS work, not current app finishing.
 - Supported currencies beyond the current invoice currency flow.
-- Refund, dispute, chargeback, and failed-payment handling.
+- Refund, dispute, chargeback, failed-payment, and customer support handling.
 - Terms, privacy, cancellation, and payment dispute wording for real customers.
 
 Payment security requirements:
@@ -102,8 +109,17 @@ Current implementation notes:
 
 - `create-stripe-checkout` creates app-initiated full-balance Checkout sessions.
 - `send-document-email` can create email payment links for full balance and seller-approved deposit amounts.
-- `stripe-webhook` verifies Stripe signatures, accepts `checkout.session.completed`, checks the Tallyo-created checkout audit event, updates invoice payments, and logs activity/audit events.
-- Subscribe Tallyo only to the Stripe event types it needs. For current payment recording, `checkout.session.completed` is sufficient. Other Stripe lifecycle events such as `payment_intent.succeeded`, `charge.succeeded`, and `charge.updated` are expected in Stripe history but should not independently mark invoices paid.
+- `stripe-webhook` verifies Stripe signatures, accepts `checkout.session.completed` and `checkout.session.async_payment_succeeded` for payment recording, checks the Tallyo-created checkout audit event, updates invoice payments, and logs activity/audit events.
+- The webhook also handles `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, and key dispute events for lifecycle awareness. Failed payments and disputes are logged; successful refunds are recorded as locked negative Stripe payment entries and can reopen the invoice balance.
+- Subscribe Tallyo only to the Stripe event types it needs. Other Stripe lifecycle events such as `payment_intent.succeeded`, `charge.succeeded`, `charge.updated`, and `charge.refunded` are expected in Stripe history but should not independently mark invoices paid.
+
+Next payment hardening:
+
+- Deploy and test the new refund, dispute, and failed/asynchronous payment awareness.
+- Keep card data out of Tallyo; continue using Stripe-hosted Checkout.
+- Test duplicate/replayed webhook events.
+- Confirm failed or unexpected payment events never mark invoices paid.
+- Keep a clear distinction between customer invoice payments and future Tallyo SaaS subscription billing.
 
 ## Secret Handling
 

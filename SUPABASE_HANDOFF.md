@@ -1,4 +1,4 @@
-# SUPABASE_HANDOFF.md — Tallyo (code name: InvoicePro)
+﻿# SUPABASE_HANDOFF.md — Tallyo (code name: InvoicePro)
 
 > How Supabase is used in this app. For another developer or AI coding agent.
 > Read before touching auth, the database, RLS, the Edge Function, or the scheduler.
@@ -15,6 +15,7 @@
 - **Front-end connection:** the Vue 3 single-page app (`index.html`) talks directly to Supabase via the Supabase JS client, using the **public/publishable (anon) key**. All data access is scoped per user by RLS.
 - **Server-side:** Edge Functions handle recurring invoice generation, email delivery, overdue reminders, and Stripe Checkout/webhooks using server-side secrets.
 - **Project URL:** `https://cuagwifetheefftleeup.supabase.co` (public base URL; confirmed from the live cron job command). The publishable key and full config live in `config.js` in the repo.
+- **Current boundary:** this handoff describes the current app. Future SaaS subscriptions, workspaces, teams, RBAC, and Tallyo platform billing are deferred and should not be mixed into ordinary app-finishing work.
 
 ---
 
@@ -126,7 +127,7 @@ All in the `public` schema. All have RLS enabled and are scoped to the owning us
 
 ## 8. RLS policies summary
 
-**Verified against the live database.** RLS is enabled on all five tables. Each table has **four PERMISSIVE policies** (SELECT, INSERT, UPDATE, DELETE), all scoped to the current user:
+**Verified against the live database for the original core user-owned tables.** RLS is enabled on the core business tables. Those tables use policies scoped to the current user:
 
 | Command | Rule |
 |---|---|
@@ -135,16 +136,23 @@ All in the `public` schema. All have RLS enabled and are scoped to the owning us
 | UPDATE | `using (auth.uid() = user_id)` **and** `with check (auth.uid() = user_id)` |
 | DELETE | `using (auth.uid() = user_id)` |
 
-Policy names follow the pattern `own <table> - <command>` (e.g. `own invoices - select`). Roles: `{public}` (evaluated against the authenticated `auth.uid()`).
+Policy names follow the pattern `own <table> - <command>` where applicable, for example `own invoices - select`. Roles are evaluated against the authenticated `auth.uid()`.
 
-- 20 policies total (4 × 5 tables), all confirmed present and correctly scoped.
+- Core user-owned tables use the `auth.uid() = user_id` pattern.
 - `auth.uid()` is the verified logged-in user's ID from Supabase Auth; it cannot be forged by the client.
 - With RLS enabled and no matching policy, the default is deny-all.
 - **Do not** disable RLS or broaden a policy without a clear, documented reason.
-- **Service role caveat:** the Edge Function uses the service role key, which **bypasses RLS entirely** — which is why it must explicitly stamp `user_id` on every row it writes (see §10).
+- **Service role caveat:** Edge Functions using the service role key bypass RLS entirely, which is why they must explicitly stamp `user_id` on every row they write.
+
+`audit_events` is different by design:
+
+- Users may read their own audit events.
+- Browser clients should not insert, update, or delete audit events.
+- Trusted Edge Functions and verified provider webhooks insert audit events with the service role key.
+- Updates/deletes are blocked by trigger in `supabase/audit_events.sql`.
+- Reconfirm the live policy/trigger state after applying or changing this migration.
 
 ---
-
 ## 9. Storage buckets, if any
 
 - **No Supabase Storage buckets are known to be in use.** Logos are handled either as a pasted URL or uploaded and **embedded** (base64) directly, not stored in a bucket.
@@ -168,7 +176,7 @@ Other current Edge Functions:
 - `send-overdue-reminders` - scheduled function protected by `AUTOMATION_SECRET`; sends only for invoices explicitly opted in to automatic reminders.
 - `resend-webhook` - verifies Resend webhook signatures and records email lifecycle events.
 - `create-stripe-checkout` - authenticated user function; creates Stripe Checkout sessions for the caller's own invoice.
-- `stripe-webhook` - verifies Stripe signatures and accepts `checkout.session.completed` only when the Checkout session was created/logged by Tallyo.
+- `stripe-webhook` - verifies Stripe signatures; records Checkout completion only when the Checkout session was created/logged by Tallyo; logs failed-payment/dispute lifecycle events; records successful refunds as locked negative Stripe payment entries.
 
 Deploy after edits:
 
@@ -292,7 +300,7 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 
 ---
 
-Additional current limitation: successful Stripe Checkout payments are handled, but refunds, disputes, chargebacks, and asynchronous failure states are future work and must be designed before real customer use.
+Additional current limitation: Stripe failed-payment, refund, and dispute awareness exists in the repo, but it still needs deployment, Stripe event subscription, replay testing, and operational policy before real customer use.
 
 ## 17. What Codex must not break
 

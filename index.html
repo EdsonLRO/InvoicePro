@@ -705,7 +705,7 @@
                                 <span v-if="p.note" class="text-slate-500 ml-3 italic">{{ p.note }}</span>
                             </div>
                             <div class="flex items-center gap-2 self-start sm:self-auto">
-                                <span v-if="p.provider === 'stripe'" class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs font-semibold">Stripe confirmed</span>
+                                <span v-if="p.provider === 'stripe'" class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs font-semibold">{{ stripePaymentBadge(p) }}</span>
                                 <button v-else @click="removePayment(i)" class="text-red-500 hover:text-red-700 text-xs font-medium">Remove</button>
                             </div>
                         </div>
@@ -2734,7 +2734,7 @@
                 await this.persistDraft();
             },
             historyIcon(type) {
-                return { created: '📝', sent: '📤', converted: '🔄', payment: '💷', payment_removed: '➖', paid: '✅', cancelled: '🚫', status: '🏷️', recurring: '🔁', reminder: '📨', edited: '✏️', paused: '⏸️', resumed: '▶️', generated: '🧾', note: '🗒️' }[type] || '•';
+                return { created: '📝', sent: '📤', converted: '🔄', payment: '💷', payment_failed: '⚠️', refund: '↩️', dispute: '⚠️', payment_removed: '➖', paid: '✅', cancelled: '🚫', status: '🏷️', recurring: '🔁', reminder: '📨', edited: '✏️', paused: '⏸️', resumed: '▶️', generated: '🧾', note: '🗒️' }[type] || '•';
             },
             formatHistoryTime(ts) {
                 try { return new Date(ts).toLocaleString(); } catch (e) { return ts; }
@@ -2751,6 +2751,12 @@
                 if (this.draft.status === 'Paid' && !wasPaid) this.addHistory('paid', 'Marked as fully paid');
                 this.newPayment = { amount: null, date: new Date().toISOString().split('T')[0], note: '' };
                 await this.persistDraft();
+            },
+            stripePaymentBadge(payment) {
+                const note = String((payment && payment.note) || '').toLowerCase();
+                const amount = Number(payment && payment.amount);
+                if (payment && (payment.lifecycleEvent === 'refund' || note.includes('refund') || amount < 0)) return 'Stripe refund';
+                return 'Stripe confirmed';
             },
             normalizeDeposit() {
                 if (!this.draft) return;

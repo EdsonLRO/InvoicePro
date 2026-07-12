@@ -1,8 +1,10 @@
 # ROADMAP_EMAIL_PAYMENTS.md - Tallyo
 
-Current roadmap and status for customer email, reminders, and Stripe payments.
+Current roadmap and status for customer email, reminders, and Stripe invoice payments in the existing app.
 
 This is a working implementation note, not a compliance claim. Do not put API keys, webhook secrets, or live credentials in this file.
+
+Current boundary: this document covers invoice/customer payment features inside the current Tallyo app. It does not cover future Tallyo SaaS subscription billing, plan tiers, teams, RBAC, or the public marketing website.
 
 ## Current status
 
@@ -27,6 +29,9 @@ This is a working implementation note, not a compliance claim. Do not put API ke
 - Done: signed Stripe webhook receiver `stripe-webhook`.
 - Done: Stripe-confirmed payments are recorded on the invoice and locked from manual removal.
 - Done: Stripe webhook hardening checks the signature, event type, invoice/user metadata, Tallyo-created checkout audit event, amount, currency, and duplicate events.
+- Done in code: Stripe async payment failure, refund, and dispute lifecycle awareness.
+- Done in code: successful Stripe refunds are recorded as locked negative payment entries and can reopen the invoice balance.
+- Current caveat: Stripe should still be treated as test/development unless live mode is explicitly approved and configured.
 
 ## Required deploy/setup checks
 
@@ -86,6 +91,9 @@ Stripe:
 - Test an email deposit link and then a remaining-balance link.
 - Confirm Stripe payments are locked from manual removal.
 - Confirm the webhook only updates invoices for Checkout sessions Tallyo created and logged.
+- Trigger or replay a Stripe refund event and confirm the invoice balance reopens correctly.
+- Trigger or replay a failed/asynchronous payment event and confirm it logs history without marking the invoice paid.
+- Trigger or replay a dispute event and confirm it logs awareness without changing paid status automatically.
 
 ## Remaining work
 
@@ -94,15 +102,18 @@ Near term:
 - Update screenshots and portfolio notes to include email, per-invoice reminders, deposits, and hardened Stripe webhooks.
 - Add a concise payment threat model section to the security story.
 - Consider clearer UI wording for remaining-balance payments after a deposit.
+- Deploy and test Stripe refund, dispute, and failed/asynchronous payment awareness before real customer use.
+- Add a private/admin-facing reminder that Stripe is in test mode until live mode is intentionally configured.
+- Keep README, handoff, security story, Supabase handoff, and operations docs in sync with the real app state.
 
 Later:
 
-- Refund, dispute, and chargeback awareness.
 - Formal backup and restore testing.
 - Append-only audit log hardening.
 - MFA recovery codes.
 - Password strength and breached-password checks.
 - Privacy policy, terms, data export/erasure process, retention policy, and breach process before real customer onboarding.
+- Future SaaS subscription billing, plan tiers, workspaces, teams, RBAC, and public website.
 
 ## Production caveats
 

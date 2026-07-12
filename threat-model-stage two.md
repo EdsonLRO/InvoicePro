@@ -1,4 +1,4 @@
-# InvoicePro — Threat Model & Security Baseline (v2, post-remediation)
+﻿# InvoicePro — Threat Model & Security Baseline (v2, post-remediation)
 
 **Document type:** Application threat model / security assessment — "after" model
 **Subject:** InvoicePro — invoicing web app (Vue 3 front-end + Supabase backend)
@@ -8,13 +8,16 @@
 
 > **Purpose of this document.** The v1 baseline recorded the app as originally built — a single browser origin holding the password, the encryption key, and all plaintext data together, pulling executable code from six external sources with no integrity checking. This v2 model re-draws the system around its new server boundary and walks the findings register from **Open → Remediated**, stating honestly what is fixed, what is reduced, and what remains open. Read alongside v1, the two show the security journey rather than just a snapshot.
 
+
+> **Current-status note:** this is a historical post-remediation model for the core Auth/RLS/backend migration stage. Since this snapshot, Tallyo has added Resend email, signed email webhooks, opt-in overdue reminder automation, Stripe Checkout invoice payments, signed Stripe webhooks, seller-approved deposits, and provider-backed `audit_events`. Use `APP_STATUS.md`, `SECURITY_STORY.md`, `ROADMAP_EMAIL_PAYMENTS.md`, and `PROJECT_HANDOFF.md` for the current app state.
+
 ---
 
 ## 1. Scope & methodology
 
 **In scope:** the client-side application; the Supabase backend (authentication, database, row-level access control); the connection between them; third-party script dependencies; multi-factor authentication; and the data handled.
 
-**Out of scope (for this model):** payment processing and automated email sending (not yet built); formal data-protection compliance work (tracked separately — see §7). Hosting is in scope only as static file delivery via GitHub Pages.
+**Out of scope (for this historical model):** payment processing and automated email sending, because they were not yet built when this model was captured; formal data-protection compliance work (tracked separately - see section 7). Hosting is in scope only as static file delivery via GitHub Pages.
 
 **Approach.** Unchanged from v1: decompose the system into a data-flow diagram with trust boundaries, examine each element against the six STRIDE categories, rate findings qualitatively (`Likelihood × Impact`), and map to OWASP Top 10 (2021). The risk-rating scale is identical to v1.
 

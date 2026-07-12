@@ -153,6 +153,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `manifest.json` | PWA metadata (name, icons). Rebranded to Tallyo. |
 | `service-worker.js` | PWA caching / offline. Caches aggressively (hard-refresh after deploy). |
 | `icon-192.png`, `icon-512.png` | Tallyo PWA icons. |
+| `APP_STATUS.md` | Short current-stage source of truth: what is implemented, what remains, and what is deferred to future SaaS work. |
 | `schema.sql` | Full Postgres schema: tables, RLS policies, new-user trigger. |
 | `supabase/audit_events.sql` | Append-only audit-events table used by email sends and Resend webhooks. |
 | `recurring_setup.sql` | Creates `recurring_templates` table + its RLS (idempotent). |
@@ -286,7 +287,7 @@ supabase functions deploy generate-recurring
 - **Secrets hygiene:** only public/publishable keys in front-end (`config.js`); **service role key never in source** (runtime-injected). The scheduler uses only the publishable key (least privilege), stored **encrypted in Supabase Vault**, read at runtime by the cron job.
 - **Email secrets hygiene:** Resend API and webhook signing secrets live only as Supabase Edge Function secrets; browser code never sees them.
 - **Payment secrets hygiene:** Stripe secret and webhook signing secrets live only as Supabase Edge Function secrets; browser code never sees them.
-- **Stripe webhook hardening:** invoice payment updates come only from signed `checkout.session.completed` events, and the webhook checks that the Checkout session was created/logged by Tallyo before recording payment.
+- **Stripe webhook hardening:** invoice payment updates come only from signed Checkout completion events, and the webhook checks that the Checkout session was created/logged by Tallyo before recording payment. Refund, failed-payment, and dispute lifecycle events are logged only when they map back to a known Tallyo Stripe payment.
 - **Customer-contact automation is opt-in:** recurring auto-email is schedule-level opt-in; overdue reminder automation is invoice-level opt-in.
 - **Activity history** per document and per recurring schedule (lightweight record; see limitations).
 
@@ -299,7 +300,7 @@ supabase functions deploy generate-recurring
 - **No formal backups** on the current free tier; no documented retention/restore.
 - **MFA has no recovery/backup codes**; no password-strength/breach checks at signup yet.
 - **CSP allows one permissive setting** the in-browser Vue template compilation requires (`unsafe-eval`) — a documented trade-off.
-- **Stripe/refund lifecycle is incomplete:** successful Checkout payments are handled, but refunds, disputes, chargebacks, and failed asynchronous payment states are future work.
+- **Stripe lifecycle needs end-to-end testing:** the repo includes failed-payment, refund, and dispute awareness, but these paths still need deployment, Stripe event subscription, replay testing, and operational policy before real customer use.
 - **Email/payment automation depends on external configuration:** DNS, Resend/Stripe secrets, webhooks, and cron jobs must stay correctly configured.
 - **Unknown / needs confirmation:** whether any clickjacking/frame-protection headers are set (GitHub Pages limits response headers).
 
@@ -322,29 +323,31 @@ Always describe security as "controls implemented + honest limitations", never a
 ## 18. Product roadmap
 
 Near-term (in rough order):
-1. **Keep Tallyo rebrand hygiene**. Visible app text, manifest, and icons are done; keep repo/URL unchanged unless Supabase Auth URLs are updated at the same time.
-2. **Safety foundation before real users:** follow `SECURITY_OPERATIONS.md` for backup/restore, basic data-protection groundwork, and trusted audit-event planning.
-3. **Email/payment phase.** Follow `EMAIL_PHASE.md` and `ROADMAP_EMAIL_PAYMENTS.md`.
+1. **Finish the current app, not the future SaaS website.** Keep the app stable and secure before starting Tallyo subscription billing, team workspaces, RBAC, or the public marketing site.
+2. **Keep Tallyo rebrand hygiene.** Visible app text, manifest, and icons are done; keep repo/URL unchanged unless Supabase Auth URLs are updated at the same time.
+3. **Email/payment phase is implemented for the current app.** Follow `EMAIL_PHASE.md` and `ROADMAP_EMAIL_PAYMENTS.md` for current status and tests.
    - Done: `mail.tallyo.co.uk` Resend sending domain and manual invoice/quote/credit-note email through `send-document-email`.
+   - Done: PDF attachment in document emails, using the app-style invoice format.
    - Done: `resend-webhook` delivery tracking writes Resend email lifecycle audit events.
    - Webhook listens for `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.clicked`, `email.failed`, `email.opened`, and `email.received`.
    - Done: user-visible delivery status in the invoice list and document activity panel.
-   - Done in code: opt-in automatic recurring invoice email.
-   - Done in code: manual overdue reminder email through `send-reminder-email`.
-   - Done in code: scheduled overdue reminder automation, opt-in per invoice.
-   - Done in code: Stripe Checkout full-balance and seller-approved deposit payments.
-   - Done in code: hardened Stripe webhook records verified Checkout payments.
-   - Next: refund/dispute/chargeback awareness, formal backups, and portfolio/security documentation polish.
-4. **Compliance groundwork** before emailing real customers (privacy policy, consent/unsubscribe, data-subject rights).
-5. Optional hardening: wire up append-only audit events, formal backups, MFA recovery codes, password-strength/breach checks.
-6. Optional: link invoices to their recurring schedule (dedup guard); repo/URL rename to Tallyo (with Supabase Auth URL updates).
+   - Done: opt-in automatic recurring invoice email.
+   - Done: manual overdue reminder email through `send-reminder-email`.
+   - Done: scheduled overdue reminder automation, opt-in per invoice.
+   - Done: Stripe Checkout full-balance and seller-approved deposit payments.
+   - Done: hardened Stripe webhook records verified Checkout payments and includes refund/dispute/failed-payment awareness.
+   - Current payment caveat: Stripe should still be treated as test/development until explicitly moved to live mode.
+4. **Current hardening priorities:** deploy/test Stripe refund/dispute/chargeback awareness; formal backup/restore test; broader append-only audit logging for sensitive actions; MFA recovery planning; password-strength/breach checks; final mobile/PDF regression pass.
+5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, export/deletion process, consent/unsubscribe where relevant, and breach response notes.
+6. Optional app polish: link invoices to their recurring schedule (dedup guard); clearer payment-state wording; repo/URL rename to Tallyo only with Supabase Auth URL updates.
+7. Future phase, deliberately deferred: public website, paid Tallyo subscriptions, plan tiers, server-enforced entitlements, workspaces/teams/RBAC, and SaaS billing.
 
 ---
 
 ## 19. Website / landing page direction
 
-- A public marketing/landing site does not yet exist. **Unknown / needs confirmation.**
-- Suggested direction: a simple, fast landing page at **tallyo.co.uk** describing Tallyo as a secure invoicing + business-records workspace for small businesses, freelancers, tradespeople, consultants, and custom-order businesses.
+- A public marketing/landing site does not yet exist and is deliberately deferred until the current app and security hardening work are finished.
+- Future suggested direction: a simple, fast landing page at **tallyo.co.uk** describing Tallyo as a secure invoicing + business-records workspace for small businesses, freelancers, tradespeople, consultants, and custom-order businesses.
 - Lead with the real benefits: professional invoices/quotes, recurring billing, payment tracking, and honest security. Use custom printing only as one example, not the headline.
 - Keep security claims honest (no "GDPR compliant"/"bank-grade"/"unhackable"). Describe actual controls.
 - Include a clear call to action (sign up / try it) and a link to the app.
@@ -353,10 +356,10 @@ Near-term (in rough order):
 
 ## 20. Pricing direction
 
-- No pricing is implemented or finalised. **Unknown / needs confirmation.**
-- Likely shape (to be decided): a free tier for basic single-user invoicing, with a low-cost paid tier unlocking recurring automation, email sending, branding, and higher limits.
-- Note real underlying costs before pricing: domain, Supabase tier (free tier pauses on inactivity), and email provider (Resend free tier ~3,000 emails/month, paid from ~$20/month).
-- Do not build Tallyo subscription billing/platform-fee collection until the product and compliance basics are ready. Stripe customer invoice payments already exist for the current single-business/test-mode flow.
+- No Tallyo subscription pricing is implemented or finalised.
+- Pricing and SaaS entitlements are future-phase product decisions, not current app-finishing work.
+- Do not build Tallyo subscription billing, platform-fee collection, team workspaces, or plan enforcement until the current app security work and compliance basics are ready.
+- Stripe customer invoice payments already exist for the current app flow, but should be treated as test/development until live mode is explicitly approved and configured.
 
 ---
 

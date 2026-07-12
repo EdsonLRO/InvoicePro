@@ -11,6 +11,8 @@ Tallyo is a **secure invoice, customer, payment, recurring invoice, and business
 
 The app is currently a **Vue 3 single-page front-end** (one `index.html` file) backed by **Supabase** (Postgres, Auth, Row Level Security, Edge Functions). It is deployed as a static site (GitHub Pages) and is PWA-enabled.
 
+**Current development boundary:** finish the existing app and its security hardening first. The public website, paid Tallyo subscriptions, plan tiers, workspaces/teams/RBAC, and SaaS billing are future-phase work and must not be started unless the user explicitly asks to begin that phase.
+
 **Note:** the visible app brand is now **Tallyo**. The old name `InvoicePro` remains in the repo/folder name, historical docs, and some non-user-facing internals.
 
 ---
@@ -99,12 +101,14 @@ Security is a core part of this product. Treat it as a first-class requirement, 
 
 ## 9. Marketing website direction
 
-- A public landing site does not yet exist. **Unknown / needs confirmation.**
-- Suggested direction for **tallyo.co.uk**: a simple, fast landing page describing Tallyo as a secure invoicing and business-records workspace for small businesses, freelancers, tradespeople, consultants, and custom-order businesses.
+- A public landing site does not yet exist and is deliberately deferred until the app/security hardening work is finished.
+- Future suggested direction for **tallyo.co.uk**: a simple, fast landing page describing Tallyo as a secure invoicing and business-records workspace for small businesses, freelancers, tradespeople, consultants, and custom-order businesses.
 - Lead with real benefits: professional invoices/quotes, recurring billing, payment tracking, and honest security.
 - Use custom printing only as **one example**, never the headline.
 - Security wording must be honest: describe actual controls (Supabase Auth, MFA, RLS, CSP, SRI). Do **not** say "GDPR compliant"; use **"built with data protection principles in mind"**.
 - Clear call to action (sign up / try the app) and a link to the app.
+
+Do not introduce Tallyo subscription billing, workspaces, RBAC, or SaaS entitlements during ordinary app-finishing tasks. Those belong to the later SaaS conversion phase.
 
 ---
 
@@ -130,7 +134,7 @@ Security is a core part of this product. Treat it as a first-class requirement, 
    - Do **not** rename the repo/URL unless Supabase Auth allowed/redirect URLs are updated at the same time.
 3. **Verify nothing broke:** load the app, sign in, create an invoice, mark Sent, record a payment, export a PDF — confirm no regressions.
 4. **Re-verify recurring automation** if any backend/function change was made (function deployed; cron job active).
-5. Only then move on to roadmap work (e.g. the email-sending phase), keeping security rules intact.
+5. Only then move on to the current app-hardening roadmap: Stripe lifecycle handling, backup/restore, append-only audit events, MFA recovery planning, password hardening, and documentation updates. Keep SaaS subscriptions/website work deferred unless explicitly requested.
 
 ---
 

@@ -6,6 +6,8 @@ Implementation plan and current state for Resend email and payment-link email fl
 
 Transactional email is live. Automated sending is now opt-in and scoped carefully so customer contact is deliberate rather than global.
 
+This document covers email inside the current invoicing app: document sending, recurring invoice auto-email, overdue reminders, and email lifecycle tracking. Future SaaS subscription emails, plan billing emails, team invitations, and marketing-site emails are separate future work.
+
 ## Current Status
 
 - Done: Resend sending domain `mail.tallyo.co.uk`.

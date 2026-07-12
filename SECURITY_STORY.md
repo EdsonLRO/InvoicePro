@@ -135,11 +135,30 @@ The most involved piece: making recurring invoices generate *on their own*, on a
 - The app can create full-balance Checkout sessions, and invoice emails can include full-balance or seller-approved deposit links.
 - Customers cannot enter arbitrary partial-payment amounts; deposits are controlled by the seller.
 - The Stripe webhook verifies Stripe's signature before doing anything.
-- The webhook processes only `checkout.session.completed` for payment recording.
+- The webhook processes signed Checkout completion events for payment recording, including asynchronous Checkout success.
 - The webhook checks invoice/user metadata, amount, currency, duplicate events, and that the Checkout session was previously created and logged by Tallyo.
 - Stripe-confirmed payments are locked from manual removal in the app.
+- Failed asynchronous payments and disputes are logged as lifecycle events instead of marking invoices paid.
+- Successful Stripe refunds are recorded as locked negative Stripe payment entries, so the invoice balance can reopen without pretending the original card payment never happened.
 
 **Why it matters.** This creates a clear trust chain: Tallyo creates a Checkout session, Stripe confirms the signed completion event, and only then does Tallyo update the invoice. That is much stronger than trusting a browser redirect or accepting every Stripe payment event shape.
+
+---
+
+## Current boundary - finish the app before SaaS conversion
+
+Tallyo now has the core app features working: documents, customers, saved items, recurring invoices, email, overdue reminders, Stripe invoice payments, PDFs, branding, and activity history.
+
+The next security work is not to rush into a public SaaS website. The next work is to finish the current app properly:
+
+- deploy and test Stripe refund, dispute, chargeback, and failed-payment awareness;
+- prove backup and restore;
+- expand append-only audit events beyond provider webhooks;
+- improve MFA recovery and password hardening;
+- keep documentation and threat models aligned with the real app;
+- complete basic privacy and operational groundwork before real customer use.
+
+The future public website, Tallyo subscriptions, plan tiers, workspaces, teams, RBAC, and SaaS billing are valid future goals, but they are a separate phase. Mixing them into the current finishing work would increase risk and make the security story harder to verify.
 
 ---
 
@@ -152,8 +171,10 @@ A credible security posture isn't about claiming perfection — it's about knowi
 - **No formal backups** on the current free hosting tier; free-tier projects can also pause and stop the scheduled job.
 - **MFA has no recovery/backup codes**, and there's no password-strength or breach-password check at signup yet.
 - **The content-security-policy allows one permissive setting** the in-browser framework needs — a documented trade-off rather than a hidden one.
-- **Payment lifecycle is incomplete.** Successful Stripe Checkout payments are handled, but refunds, disputes, chargebacks, and asynchronous failure states are future work.
+- **Payment lifecycle still needs production testing.** The repo now includes Stripe failed-payment, refund, and dispute awareness, but it must be deployed, subscribed to the right Stripe events, and tested with real webhook payloads before real customer use.
+- **Stripe should still be treated as test/development** unless live mode is explicitly approved and configured. Real customer payment links should wait for payment lifecycle handling, backups, terms/privacy/refund processes, and operational readiness.
 - **Email/payment automation depends on configuration.** DNS, secrets, provider webhooks, and scheduled jobs must stay correctly configured.
+- **SaaS subscriptions are not implemented.** Current Stripe work is for customers paying invoices. Future Tallyo subscription billing, entitlements, workspaces, and teams are separate future architecture work.
 
 Naming these plainly is the point. It's the difference between marketing and a genuine assessment.
 
@@ -161,12 +182,13 @@ Naming these plainly is the point. It's the difference between marketing and a g
 
 ## Future improvements
 
-- **Refund/dispute/chargeback awareness** for Stripe payment lifecycle events.
+- **Refund/dispute/chargeback testing** for Stripe payment lifecycle events.
 - **Production email hardening** such as tightening DMARC policy once all legitimate senders are confirmed.
 - **Append-only audit logging** for a tamper-resistant record of sensitive actions.
 - **Formal backups / retention** and a documented restore process.
 - **MFA recovery codes** and stronger signup checks (password strength / breach lookup).
 - **Data-protection groundwork** (privacy policy, consent/unsubscribe, data-subject request handling) before taking real customers.
+- **Future SaaS architecture** (public website, Tallyo subscriptions, plan tiers, workspaces, teams/RBAC, and server-enforced entitlements) after the current app is finished and hardened.
 
 ---
 
