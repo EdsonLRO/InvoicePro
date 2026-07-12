@@ -2800,9 +2800,9 @@
                 await this.persistDraft();
             },
             stripePaymentBadge(payment) {
-                const note = String((payment && payment.note) || '').toLowerCase();
                 const amount = Number(payment && payment.amount);
-                if (payment && (payment.lifecycleEvent === 'refund' || note.includes('refund') || amount < 0)) return 'Stripe refund';
+                if (payment && payment.lifecycleEvent === 'refund_failed_reversal') return 'Stripe refund failed';
+                if (payment && (payment.lifecycleEvent === 'refund' || amount < 0)) return 'Stripe refund';
                 return 'Stripe confirmed';
             },
             paymentAttentionFor(inv) {
@@ -2821,9 +2821,8 @@
                 return ((payment && payment.providerPaymentIntentId) || 'stripe') + ':' + index;
             },
             isStripeRefundPayment(payment) {
-                const note = String((payment && payment.note) || '').toLowerCase();
                 const amount = Number(payment && payment.amount);
-                return payment && payment.provider === 'stripe' && (payment.lifecycleEvent === 'refund' || note.includes('refund') || amount < 0);
+                return payment && payment.provider === 'stripe' && (payment.lifecycleEvent === 'refund' || amount < 0);
             },
             refundableStripePaymentAmount(payment) {
                 if (!payment || payment.provider !== 'stripe' || this.isStripeRefundPayment(payment)) return 0;

@@ -331,6 +331,18 @@ async function handleRefund(admin: any, event: any) {
   const refundSucceeded = refundStatus === "succeeded";
   const refundFailed = event.type === "refund.failed" || refundStatus === "failed";
   const eventType = refundSucceeded ? "stripe_refund_succeeded" : refundFailed ? "stripe_refund_failed" : "stripe_refund_updated";
+  const recordedRefund = payments.find((payment) =>
+    payment?.provider === "stripe" &&
+    payment.providerRefundId === refundId &&
+    payment.lifecycleEvent === "refund" &&
+    Number(payment.amount) < 0
+  );
+  const failedRefundReversed = payments.some((payment) =>
+    payment?.provider === "stripe" &&
+    payment.providerRefundId === refundId &&
+    payment.lifecycleEvent === "refund_failed_reversal" &&
+    Number(payment.amount) > 0
+  );
 
   if (refundSucceeded && !alreadyRecorded) {
     payments.push({
@@ -349,6 +361,24 @@ async function handleRefund(admin: any, event: any) {
       type: "refund",
       text: `Stripe refund of ${formatMoney(currency, refundAmount)} confirmed`,
       providerMarker: `stripe-refund:${event.id}`,
+    });
+  } else if (refundFailed && recordedRefund && !failedRefundReversed) {
+    payments.push({
+      amount: Math.abs(Number(recordedRefund.amount) || refundAmount),
+      date: nowISO.split("T")[0],
+      note: "Stripe refund failed reversal",
+      provider: "stripe",
+      providerEventId: event.id,
+      providerRefundId: refundId,
+      providerPaymentIntentId: paymentIntentId,
+      lifecycleEvent: "refund_failed_reversal",
+      currency,
+    });
+    history.push({
+      ts: nowISO,
+      type: "refund",
+      text: `Stripe refund failed for ${formatMoney(currency, refundAmount)}; invoice balance restored`,
+      providerMarker: `stripe-refund-failed-reversal:${event.id}`,
     });
   } else {
     history.push({
