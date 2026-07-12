@@ -44,6 +44,8 @@ Needed before inviting real users:
 
 The existing per-invoice and per-schedule `history` fields are useful activity history, but they are not tamper-proof. Trusted provider events and selected sensitive app actions now use `public.audit_events`.
 
+Security findings, remediation decisions, verification evidence, and residual risk are tracked in `SECURITY_FINDINGS_LEDGER.md`. Update that ledger for meaningful findings, high-impact hardening, accepted risks, and follow-up evidence. Do not put secrets or unnecessary customer data in it.
+
 Design rule:
 
 - The browser may read its own audit events.
