@@ -299,7 +299,7 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 - **Activity history** (`history` columns) is a convenience log, **not a tamper-proof audit log** — it lives in user-editable rows.
 - **Audit events** now cover provider events and selected sensitive app actions, but broader monitoring, alerting, and compliance evidence are still future work.
 - **No formal backups** on the current free tier; free-tier projects can pause and stop cron.
-- **MFA has no recovery/backup codes**; no password-strength/breach check at signup.
+- **MFA has no recovery/backup codes**; the app has local password-strength checks, but Supabase Auth password policy/rate-limit settings and breached-password screening still need confirmation.
 - **No "log out from all devices" control yet**; this should be added as a verified server-side session-revocation flow.
 - **CSP** allows one permissive setting the in-browser Vue template compiler needs (documented trade-off).
 - **Data protection:** the app is **built with data protection principles in mind**, but is **not** certified or "GDPR compliant." Formal compliance work (privacy policy, lawful basis, data-subject rights, retention, breach process) is future work — do not claim compliance.

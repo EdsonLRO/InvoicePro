@@ -172,7 +172,7 @@ A credible security posture isn't about claiming perfection — it's about knowi
 - **Not certified as compliant.** The app is **built with data protection principles in mind**, but it is **not** formally "GDPR compliant." Real compliance groundwork — a privacy policy, lawful basis, data-subject rights (access/erasure/portability), retention, and a breach process — is future work and would be required before onboarding real paying customers.
 - **Activity history is convenient, not tamper-proof** — provider events and selected sensitive app actions now go into append-only `audit_events`, but this is not yet a complete monitoring/compliance audit system.
 - **No formal backups** on the current free hosting tier; free-tier projects can also pause and stop the scheduled job.
-- **MFA has no recovery/backup codes**, and there's no password-strength or breach-password check at signup yet.
+- **MFA has no recovery/backup codes.** The app now has local password-strength checks for new passwords, but Supabase Auth password policy settings and breached-password screening still need confirmation before real onboarding.
 - **The content-security-policy allows one permissive setting** the in-browser framework needs — a documented trade-off rather than a hidden one.
 - **Payment lifecycle still needs production testing.** The repo now includes deployed in-app Stripe refund requests plus failed-payment, refund, refund-failure, and dispute awareness, and the sandbox Stripe webhook destination is subscribed to the needed events. It still needs broader replay testing and live-mode readiness before real customer use.
 - **Stripe should still be treated as test/development** unless live mode is explicitly approved and configured. Real customer payment links should wait for payment lifecycle handling, backups, terms/privacy/refund processes, and operational readiness.
@@ -189,7 +189,7 @@ Naming these plainly is the point. It's the difference between marketing and a g
 - **Production email hardening** such as tightening DMARC policy once all legitimate senders are confirmed.
 - **More append-only audit logging** for settings changes, automation failures, backup/restore evidence, and other sensitive actions.
 - **Formal backups / retention** and a documented restore process.
-- **MFA recovery codes** and stronger signup checks (password strength / breach lookup).
+- **MFA recovery codes** and stronger Auth-level signup checks (server-side password policy / breach lookup).
 - **Data-protection groundwork** (privacy policy, consent/unsubscribe, data-subject request handling) before taking real customers.
 - **Future SaaS architecture** (public website, Tallyo subscriptions, plan tiers, workspaces, teams/RBAC, and server-enforced entitlements) after the current app is finished and hardened.
 

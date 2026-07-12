@@ -110,7 +110,7 @@
                 <div>
                     <label class="block text-sm font-medium mb-1">Password</label>
                     <input type="password" v-model="auth.password" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                    <p class="text-xs text-slate-400 mt-1">At least 8 characters.</p>
+                    <p class="text-xs text-slate-400 mt-1">Use at least 12 characters. A longer passphrase is fine; avoid common words and your email.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Confirm Password</label>
@@ -226,6 +226,7 @@
                         <div>
                             <label class="block text-sm font-bold text-slate-600 mb-1">New Password</label>
                             <input type="password" v-model="pwdChange.new" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <p class="text-xs text-slate-500 mt-1">Use at least 12 characters. A longer passphrase is fine; avoid common words and your email.</p>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-600 mb-1">Confirm New Password</label>
@@ -1967,11 +1968,24 @@
                 this.applyRoute(this.tabFromHash());
             },
             // ================= AUTHENTICATION (Supabase Auth) =================
+            passwordPolicyMessage(password, email = '') {
+                const value = String(password || '');
+                if (value.length < 12) return 'Password must be at least 12 characters.';
+                const lower = value.toLowerCase();
+                const emailName = String(email || '').split('@')[0].toLowerCase();
+                if (emailName.length >= 3 && lower.includes(emailName)) return 'Password must not include your email name.';
+                const commonTerms = ['password', 'qwerty', 'letmein', 'welcome', 'admin', 'tallyo', 'invoicepro', '12345678', '123456789', '1234567890'];
+                if (commonTerms.some(term => lower.includes(term))) return 'Password is too easy to guess. Avoid common words, app names, and simple number patterns.';
+                const classes = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter(re => re.test(value)).length;
+                if (value.length < 16 && classes < 3) return 'Use a longer passphrase, or mix at least three of lowercase, uppercase, numbers, and symbols.';
+                return '';
+            },
             async register() {
                 const email = (this.auth.username || '').trim().toLowerCase();
                 if(!email || !this.auth.password) return alert("Email and password are required.");
                 if(this.auth.password !== this.auth.confirm) return alert("Passwords do not match.");
-                if(this.auth.password.length < 8) return alert("Password must be at least 8 characters.");
+                const passwordIssue = this.passwordPolicyMessage(this.auth.password, email);
+                if(passwordIssue) return alert(passwordIssue);
                 this.authBusy = true;
                 const { error } = await supabaseClient.auth.signUp({
                     email: email,
@@ -2116,7 +2130,8 @@
                 this.authMode = 'login';
             },
             async changePassword() {
-                if(this.pwdChange.new.length < 8) return alert("New password must be at least 8 characters.");
+                const passwordIssue = this.passwordPolicyMessage(this.pwdChange.new, this.userProfileEmail);
+                if(passwordIssue) return alert(passwordIssue);
                 if(this.pwdChange.new !== this.pwdChange.confirm) return alert("New passwords do not match.");
                 // Re-verify the current password before allowing a change
                 const { error: reauthError } = await supabaseClient.auth.signInWithPassword({
@@ -3678,10 +3693,13 @@
             // MFA check and could bypass it.)
             supabaseClient.auth.onAuthStateChange(async (event) => {
                 if (event === 'PASSWORD_RECOVERY') {
-                    const newPass = prompt("Enter a new password (at least 8 characters):");
-                    if (newPass && newPass.length >= 8) {
+                    const newPass = prompt("Enter a new password (at least 12 characters):");
+                    const passwordIssue = this.passwordPolicyMessage(newPass, this.userProfileEmail);
+                    if (newPass && !passwordIssue) {
                         const { error } = await supabaseClient.auth.updateUser({ password: newPass });
                         alert(error ? ("Could not set password: " + error.message) : "Password updated. You are now signed in.");
+                    } else if (newPass) {
+                        alert(passwordIssue);
                     }
                 }
             });

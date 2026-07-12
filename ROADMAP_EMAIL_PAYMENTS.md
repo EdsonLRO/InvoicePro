@@ -130,7 +130,7 @@ Later:
 - Formal backup and restore testing.
 - Further append-only audit log hardening for settings changes, automation failures, and backup/restore evidence.
 - MFA recovery codes.
-- Password strength and breached-password checks.
+- Supabase Auth password policy confirmation and breached-password checks.
 - Privacy policy, terms, data export/erasure process, retention policy, and breach process before real customer onboarding.
 - Future SaaS subscription billing, plan tiers, workspaces, teams, RBAC, and public website.
 
