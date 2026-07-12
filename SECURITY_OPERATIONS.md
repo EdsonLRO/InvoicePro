@@ -103,14 +103,17 @@ Payment security requirements:
 - Amount and currency are checked before updating invoice payments.
 - Already-paid invoices cannot be accidentally paid twice without clear handling.
 - Stripe-confirmed payments are locked from manual removal in the app.
+- In-app Stripe refund requests go through a server-side Edge Function; the browser never calls Stripe directly.
+- Invoice balances still change only after the signed Stripe refund webhook confirms the refund.
 - Seller-approved deposits are allowed; arbitrary customer-entered payment amounts are not.
 
 Current implementation notes:
 
 - `create-stripe-checkout` creates app-initiated full-balance Checkout sessions.
+- `create-stripe-refund` requests a full or partial Stripe refund for one of the user's own confirmed Stripe payment rows.
 - `send-document-email` can create email payment links for full balance and seller-approved deposit amounts.
 - `stripe-webhook` verifies Stripe signatures, accepts `checkout.session.completed` and `checkout.session.async_payment_succeeded` for payment recording, checks the Tallyo-created checkout audit event, updates invoice payments, and logs activity/audit events.
-- The webhook also handles `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, and key dispute events for lifecycle awareness. Failed payments and disputes are logged; successful refunds are recorded as locked negative Stripe payment entries and can reopen the invoice balance.
+- The webhook also handles `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, `refund.failed`, and key dispute events for lifecycle awareness. Failed payments and disputes are logged; successful refunds are recorded as locked negative Stripe payment entries and can reopen the invoice balance.
 - Subscribe Tallyo only to the Stripe event types it needs. Other Stripe lifecycle events such as `payment_intent.succeeded`, `charge.succeeded`, `charge.updated`, and `charge.refunded` are expected in Stripe history but should not independently mark invoices paid.
 
 Next payment hardening:

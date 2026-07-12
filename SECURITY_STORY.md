@@ -138,6 +138,7 @@ The most involved piece: making recurring invoices generate *on their own*, on a
 - The webhook processes signed Checkout completion events for payment recording, including asynchronous Checkout success.
 - The webhook checks invoice/user metadata, amount, currency, duplicate events, and that the Checkout session was previously created and logged by Tallyo.
 - Stripe-confirmed payments are locked from manual removal in the app.
+- In code, refund requests are made through a server-side Edge Function, not directly from the browser.
 - Failed asynchronous payments and disputes are logged as lifecycle events instead of marking invoices paid.
 - Successful Stripe refunds are recorded as locked negative Stripe payment entries, so the invoice balance can reopen without pretending the original card payment never happened.
 
@@ -171,7 +172,7 @@ A credible security posture isn't about claiming perfection — it's about knowi
 - **No formal backups** on the current free hosting tier; free-tier projects can also pause and stop the scheduled job.
 - **MFA has no recovery/backup codes**, and there's no password-strength or breach-password check at signup yet.
 - **The content-security-policy allows one permissive setting** the in-browser framework needs — a documented trade-off rather than a hidden one.
-- **Payment lifecycle still needs production testing.** The repo now includes Stripe failed-payment, refund, and dispute awareness, but it must be deployed, subscribed to the right Stripe events, and tested with real webhook payloads before real customer use.
+- **Payment lifecycle still needs production testing.** The repo now includes in-app Stripe refund requests plus failed-payment, refund, refund-failure, and dispute awareness, but it must be deployed, subscribed to the right Stripe events, and tested with real webhook payloads before real customer use.
 - **Stripe should still be treated as test/development** unless live mode is explicitly approved and configured. Real customer payment links should wait for payment lifecycle handling, backups, terms/privacy/refund processes, and operational readiness.
 - **Email/payment automation depends on configuration.** DNS, secrets, provider webhooks, and scheduled jobs must stay correctly configured.
 - **SaaS subscriptions are not implemented.** Current Stripe work is for customers paying invoices. Future Tallyo subscription billing, entitlements, workspaces, and teams are separate future architecture work.

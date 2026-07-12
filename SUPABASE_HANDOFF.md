@@ -176,7 +176,8 @@ Other current Edge Functions:
 - `send-overdue-reminders` - scheduled function protected by `AUTOMATION_SECRET`; sends only for invoices explicitly opted in to automatic reminders.
 - `resend-webhook` - verifies Resend webhook signatures and records email lifecycle events.
 - `create-stripe-checkout` - authenticated user function; creates Stripe Checkout sessions for the caller's own invoice.
-- `stripe-webhook` - verifies Stripe signatures; records Checkout completion only when the Checkout session was created/logged by Tallyo; logs failed-payment/dispute lifecycle events; records successful refunds as locked negative Stripe payment entries.
+- `create-stripe-refund` - authenticated user function; requests Stripe refunds for the caller's own confirmed Stripe payment rows.
+- `stripe-webhook` - verifies Stripe signatures; records Checkout completion only when the Checkout session was created/logged by Tallyo; logs failed-payment/dispute/refund-failure lifecycle events; records successful refunds as locked negative Stripe payment entries.
 
 Deploy after edits:
 
@@ -300,7 +301,7 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 
 ---
 
-Additional current limitation: Stripe failed-payment, refund, and dispute awareness exists in the repo, but it still needs deployment, Stripe event subscription, replay testing, and operational policy before real customer use.
+Additional current limitation: Stripe in-app refund requests and failed-payment/refund/dispute awareness exist in the repo, but they still need deployment, Stripe event subscription, replay testing, and operational policy before real customer use.
 
 ## 17. What Codex must not break
 

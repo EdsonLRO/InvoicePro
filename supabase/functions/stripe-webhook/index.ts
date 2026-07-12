@@ -327,8 +327,10 @@ async function handleRefund(admin: any, event: any) {
   if (!Number.isFinite(refundAmount) || refundAmount <= 0) return { ignored: "invalid refund amount" };
 
   const alreadyRecorded = payments.some((payment) => payment?.provider === "stripe" && payment.providerRefundId === refundId);
-  const refundSucceeded = String(refund.status || "").toLowerCase() === "succeeded";
-  const eventType = refundSucceeded ? "stripe_refund_succeeded" : "stripe_refund_updated";
+  const refundStatus = String(refund.status || "").toLowerCase();
+  const refundSucceeded = refundStatus === "succeeded";
+  const refundFailed = event.type === "refund.failed" || refundStatus === "failed";
+  const eventType = refundSucceeded ? "stripe_refund_succeeded" : refundFailed ? "stripe_refund_failed" : "stripe_refund_updated";
 
   if (refundSucceeded && !alreadyRecorded) {
     payments.push({
@@ -486,7 +488,7 @@ Deno.serve(async (req) => {
     if (event.type === "checkout.session.async_payment_failed") {
       return json(await handleCheckoutPaymentFailed(admin, event));
     }
-    if (event.type === "refund.created" || event.type === "refund.updated") {
+    if (event.type === "refund.created" || event.type === "refund.updated" || event.type === "refund.failed") {
       return json(await handleRefund(admin, event));
     }
     if (

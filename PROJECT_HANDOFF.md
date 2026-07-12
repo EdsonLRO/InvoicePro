@@ -78,6 +78,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 - Invoice emails can include full-balance links and seller-approved deposit links.
 - Customers cannot choose arbitrary partial-payment amounts; deposit amounts are seller-controlled.
 - Signed Stripe webhook records confirmed payments, supports deposit + remaining balance flows, and locks Stripe-confirmed payments from manual removal.
+- In code: users can request full or partial Stripe refunds from the invoice payment list; Stripe still confirms the refund through the signed webhook before Tallyo changes invoice balance.
 - Status: Draft / Sent / Paid / Cancelled (selector in the top toolbar); auto-marks Paid when balance reaches zero.
 - Status badge shown in the invoices list.
 
@@ -166,6 +167,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `supabase/functions/send-overdue-reminders/index.ts` | Scheduled Edge Function (Deno/TS) that sends per-invoice opt-in overdue reminders. |
 | `supabase/functions/resend-webhook/index.ts` | Signed Resend webhook receiver for delivery/failure/open/click events. |
 | `supabase/functions/create-stripe-checkout/index.ts` | Authenticated Edge Function (Deno/TS) that creates Stripe Checkout sessions from the app. |
+| `supabase/functions/create-stripe-refund/index.ts` | Authenticated Edge Function (Deno/TS) that requests Stripe refunds for the user's own confirmed Stripe payment rows. |
 | `supabase/functions/stripe-webhook/index.ts` | Signed Stripe webhook receiver that records verified Checkout payments. |
 | `SECURITY_OPERATIONS.md` | Practical backup, restore, data-protection, email, payment, and release gates before real users. |
 | `EMAIL_PHASE.md` | Staged Resend email plan: DNS setup, manual sending, webhooks, then automation. |
@@ -287,7 +289,7 @@ supabase functions deploy generate-recurring
 - **Secrets hygiene:** only public/publishable keys in front-end (`config.js`); **service role key never in source** (runtime-injected). The scheduler uses only the publishable key (least privilege), stored **encrypted in Supabase Vault**, read at runtime by the cron job.
 - **Email secrets hygiene:** Resend API and webhook signing secrets live only as Supabase Edge Function secrets; browser code never sees them.
 - **Payment secrets hygiene:** Stripe secret and webhook signing secrets live only as Supabase Edge Function secrets; browser code never sees them.
-- **Stripe webhook hardening:** invoice payment updates come only from signed Checkout completion events, and the webhook checks that the Checkout session was created/logged by Tallyo before recording payment. Refund, failed-payment, and dispute lifecycle events are logged only when they map back to a known Tallyo Stripe payment.
+- **Stripe webhook hardening:** invoice payment updates come only from signed Checkout completion events, and the webhook checks that the Checkout session was created/logged by Tallyo before recording payment. Refund, refund-failure, failed-payment, and dispute lifecycle events are logged only when they map back to a known Tallyo Stripe payment.
 - **Customer-contact automation is opt-in:** recurring auto-email is schedule-level opt-in; overdue reminder automation is invoice-level opt-in.
 - **Activity history** per document and per recurring schedule (lightweight record; see limitations).
 
@@ -336,6 +338,7 @@ Near-term (in rough order):
    - Done: scheduled overdue reminder automation, opt-in per invoice.
    - Done: Stripe Checkout full-balance and seller-approved deposit payments.
    - Done: hardened Stripe webhook records verified Checkout payments and includes refund/dispute/failed-payment awareness.
+   - Done in code: in-app Stripe refund requests through a server-side Edge Function.
    - Current payment caveat: Stripe should still be treated as test/development until explicitly moved to live mode.
 4. **Current hardening priorities:** deploy/test Stripe refund/dispute/chargeback awareness; formal backup/restore test; broader append-only audit logging for sensitive actions; MFA recovery planning; password-strength/breach checks; final mobile/PDF regression pass.
 5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, export/deletion process, consent/unsubscribe where relevant, and breach response notes.

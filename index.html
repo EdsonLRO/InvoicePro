@@ -706,7 +706,8 @@
                             </div>
                             <div class="flex items-center gap-2 self-start sm:self-auto">
                                 <span v-if="p.provider === 'stripe'" class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs font-semibold">{{ stripePaymentBadge(p) }}</span>
-                                <button v-else @click="removePayment(i)" class="text-red-500 hover:text-red-700 text-xs font-medium">Remove</button>
+                                <button v-if="isStripeRefundablePayment(p)" @click="requestStripeRefund(i)" :disabled="stripeRefundBusyKey === stripePaymentKey(p, i)" class="text-amber-600 hover:text-amber-700 disabled:opacity-50 text-xs font-medium">{{ stripeRefundBusyKey === stripePaymentKey(p, i) ? 'Refunding...' : 'Refund' }}</button>
+                                <button v-if="p.provider !== 'stripe'" @click="removePayment(i)" class="text-red-500 hover:text-red-700 text-xs font-medium">Remove</button>
                             </div>
                         </div>
                     </div>
@@ -1593,6 +1594,7 @@
                 invoiceBulkBusy: false,
                 emailSendingId: null,
                 stripeCheckoutBusyId: null,
+                stripeRefundBusyKey: null,
                 newPayment: { amount: null, date: new Date().toISOString().split('T')[0], note: '' },
                 activityNote: '',
                 reminderModal: { open: false, inv: null, text: '', copied: false, sending: false },
@@ -2538,6 +2540,12 @@
                 if (this.draft && this.draft.id === mapped.id) this.draft = JSON.parse(JSON.stringify(mapped));
                 return mapped;
             },
+            async refreshInvoiceFromDatabase(id) {
+                if (!this.isUuid(id)) return null;
+                const { data, error } = await supabaseClient.from('invoices').select('*').eq('id', id).maybeSingle();
+                if (error) throw error;
+                return data ? this.applyInvoiceRow(data) : null;
+            },
             async sendDocumentEmail(inv) {
                 if (!inv) return;
                 if (inv.status === 'Cancelled') return alert('Cancelled documents cannot be emailed.');
@@ -2757,6 +2765,60 @@
                 const amount = Number(payment && payment.amount);
                 if (payment && (payment.lifecycleEvent === 'refund' || note.includes('refund') || amount < 0)) return 'Stripe refund';
                 return 'Stripe confirmed';
+            },
+            stripePaymentKey(payment, index) {
+                return ((payment && payment.providerPaymentIntentId) || 'stripe') + ':' + index;
+            },
+            isStripeRefundPayment(payment) {
+                const note = String((payment && payment.note) || '').toLowerCase();
+                const amount = Number(payment && payment.amount);
+                return payment && payment.provider === 'stripe' && (payment.lifecycleEvent === 'refund' || note.includes('refund') || amount < 0);
+            },
+            refundableStripePaymentAmount(payment) {
+                if (!payment || payment.provider !== 'stripe' || this.isStripeRefundPayment(payment)) return 0;
+                const intent = String(payment.providerPaymentIntentId || '');
+                const paid = Number(payment.amount) || 0;
+                if (!intent || paid <= 0) return 0;
+                const refunded = (this.draft.payments || [])
+                    .filter(p => this.isStripeRefundPayment(p) && String(p.providerPaymentIntentId || '') === intent)
+                    .reduce((sum, p) => sum + Math.abs(Number(p.amount) || 0), 0);
+                return Math.max(0, Math.round((paid - refunded + Number.EPSILON) * 100) / 100);
+            },
+            isStripeRefundablePayment(payment) {
+                return this.refundableStripePaymentAmount(payment) > 0.001;
+            },
+            async requestStripeRefund(index) {
+                if (!this.draft || !this.isUuid(this.draft.id)) return alert('Save this invoice before refunding a Stripe payment.');
+                const payment = (this.draft.payments || [])[index];
+                const refundable = this.refundableStripePaymentAmount(payment);
+                if (refundable <= 0.001) return alert('This Stripe payment has no refundable balance left.');
+
+                const symbol = this.getCurrencySymbol(this.draft.currency);
+                const raw = prompt('Refund amount for this Stripe payment:', refundable.toFixed(2));
+                if (raw === null) return;
+                const amount = Number(raw);
+                if (!Number.isFinite(amount) || amount <= 0) return alert('Enter a valid refund amount.');
+                if (amount > refundable + 0.001) return alert('Maximum refundable amount is ' + symbol + refundable.toFixed(2) + '.');
+                if (!confirm('Request a Stripe refund of ' + symbol + amount.toFixed(2) + '? Stripe will process the refund and Tallyo will update this invoice from the signed webhook.')) return;
+
+                const busyKey = this.stripePaymentKey(payment, index);
+                this.stripeRefundBusyKey = busyKey;
+                try {
+                    const { data, error } = await supabaseClient.functions.invoke('create-stripe-refund', {
+                        body: { documentId: this.draft.id, paymentIndex: index, amount }
+                    });
+                    if (error) throw error;
+                    if (data && data.error) throw new Error(data.error);
+
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    try { await this.refreshInvoiceFromDatabase(this.draft.id); } catch (refreshErr) { console.warn('Invoice refresh after refund failed:', refreshErr); }
+                    alert('Refund requested. If the invoice has not updated yet, refresh again in a few seconds while Stripe sends the webhook.');
+                } catch (e) {
+                    console.error('Stripe refund failed:', e);
+                    alert('Could not request Stripe refund: ' + (e.message || e));
+                } finally {
+                    this.stripeRefundBusyKey = null;
+                }
             },
             normalizeDeposit() {
                 if (!this.draft) return;
