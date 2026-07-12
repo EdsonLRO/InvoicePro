@@ -277,11 +277,29 @@
                 </div>
 
                 <div class="bg-red-50 p-5 sm:p-8 rounded-xl border border-red-200">
-                    <h2 class="text-xl font-semibold text-red-700 mb-2">Session</h2>
-                    <p class="text-red-600 text-sm mb-6">Logging out ends your session on this device. You'll need to sign in again to access your account.</p>
-                    <button @click="confirmLogout" class="bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 font-medium shadow-sm transition">Log Out</button>
+                    <h2 class="text-xl font-semibold text-red-700 mb-2">Session Controls</h2>
+                    <p class="text-red-600 text-sm mb-6">Choose whether to end only this browser session or revoke refresh tokens for every signed-in device.</p>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <button @click="confirmLogoutLocal" class="bg-white border border-red-300 text-red-700 px-6 py-3 rounded-lg hover:bg-red-50 font-medium transition">Log Out This Device</button>
+                        <button @click="confirmLogoutAllDevices" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 font-medium shadow-sm transition">Log Out All Devices</button>
+                    </div>
+                    <p class="text-xs text-red-500 mt-3">All-devices logout asks for your password, and MFA too when enabled.</p>
                 </div>
 
+            </div>
+
+            <div v-if="sessionConfirm.visible" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4">
+                <div class="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md p-6">
+                    <h2 class="text-xl font-semibold text-slate-800 mb-2">Confirm all-devices logout</h2>
+                    <p class="text-sm text-slate-600 mb-5">Enter your current password before ending sessions on every device.</p>
+                    <label class="block text-sm font-bold text-slate-600 mb-1">Current password</label>
+                    <input type="password" v-model="sessionConfirm.password" @keyup.enter="submitSessionPasswordConfirm" class="w-full border rounded-lg px-3 py-3 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <p v-if="sessionConfirm.error" class="text-sm text-red-600 mt-2">{{ sessionConfirm.error }}</p>
+                    <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                        <button @click="submitSessionPasswordConfirm" :disabled="sessionConfirm.busy" class="flex-1 bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 font-medium shadow-sm transition disabled:opacity-50">{{ sessionConfirm.busy ? 'Checking...' : 'Continue' }}</button>
+                        <button @click="cancelSessionPasswordConfirm" :disabled="sessionConfirm.busy" class="flex-1 bg-slate-100 text-slate-600 px-5 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition disabled:opacity-50">Cancel</button>
+                    </div>
+                </div>
             </div>
 
             <div v-if="mfaPasswordConfirm.visible" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4">
@@ -1622,6 +1640,7 @@
                 dataLoading: false,
                 mfa: { enabled: false, busy: false, step: 'idle', loginFactorId: null, verifiedFactorId: null, enrollFactorId: null, qr: '', secret: '', code: '' },
                 mfaPasswordConfirm: { visible: false, busy: false, code: '', error: '', title: 'Confirm with authenticator', message: 'Enter the 6-digit code from your authenticator app.' },
+                sessionConfirm: { visible: false, busy: false, password: '', error: '' },
                 pendingAuth: null,
                 generatedCode: null,
                 encryptionKey: null,
@@ -2144,18 +2163,82 @@
                 this.loadMfaStatus();
                 this.navigateTo(this.tabFromHash(), { replace: !window.location.hash });
             },
-            async confirmLogout() {
-                if(confirm("Log out of Tallyo?")) {
-                    await supabaseClient.auth.signOut();
-                    this.isLoggedIn = false;
-                    this.currentUser = null;
-                    this.auth = { username: '', password: '', confirm: '', code: '' };
-                    this.authMode = 'login';
-                    this.activeTab = 'create';
-                    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
-                    this.editingExisting = false;
-                    this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 };
-                    this.customers = []; this.savedItems = []; this.invoices = [];
+            clearSignedOutState() {
+                this.isLoggedIn = false;
+                this.currentUser = null;
+                this.auth = { username: '', password: '', confirm: '', code: '' };
+                this.authMode = 'login';
+                this.activeTab = 'create';
+                window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+                this.editingExisting = false;
+                this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 };
+                this.customers = []; this.savedItems = []; this.invoices = [];
+                this.auditEvents = [];
+                this.mfa = { enabled: false, busy: false, step: 'idle', loginFactorId: null, verifiedFactorId: null, enrollFactorId: null, qr: '', secret: '', code: '' };
+                this.pwdChange = { old: '', new: '', confirm: '' };
+                this.sessionConfirm = { visible: false, busy: false, password: '', error: '' };
+            },
+            async signOutWithScope(scope) {
+                const { error } = await supabaseClient.auth.signOut({ scope });
+                if (error) throw error;
+                this.clearSignedOutState();
+            },
+            async confirmLogoutLocal() {
+                if(!confirm("Log out of Tallyo on this device only?")) return;
+                try {
+                    await this.logAppAuditEvent('account_logout_local', 'account', null, {});
+                    await this.signOutWithScope('local');
+                } catch (e) {
+                    alert("Could not log out: " + (e.message || e));
+                }
+            },
+            requestSessionPasswordConfirm() {
+                this.sessionConfirm = { visible: true, busy: false, password: '', error: '' };
+                return new Promise((resolve, reject) => {
+                    this.resolveSessionPasswordConfirm = resolve;
+                    this.rejectSessionPasswordConfirm = reject;
+                });
+            },
+            submitSessionPasswordConfirm() {
+                const password = String(this.sessionConfirm.password || '');
+                if (!password) {
+                    this.sessionConfirm.error = 'Enter your current password.';
+                    return;
+                }
+                this.sessionConfirm.visible = false;
+                if (this.resolveSessionPasswordConfirm) this.resolveSessionPasswordConfirm(password);
+                this.resolveSessionPasswordConfirm = null;
+                this.rejectSessionPasswordConfirm = null;
+                this.sessionConfirm = { visible: false, busy: false, password: '', error: '' };
+            },
+            cancelSessionPasswordConfirm() {
+                this.sessionConfirm.visible = false;
+                if (this.rejectSessionPasswordConfirm) this.rejectSessionPasswordConfirm(new Error('All-devices logout cancelled.'));
+                this.resolveSessionPasswordConfirm = null;
+                this.rejectSessionPasswordConfirm = null;
+                this.sessionConfirm = { visible: false, busy: false, password: '', error: '' };
+            },
+            async confirmLogoutAllDevices() {
+                if(!confirm("Log out of Tallyo on every device? You'll need to sign in again everywhere.")) return;
+                try {
+                    const password = await this.requestSessionPasswordConfirm();
+                    const { error: reauthError } = await supabaseClient.auth.signInWithPassword({
+                        email: this.userProfileEmail,
+                        password
+                    });
+                    if (reauthError) return alert("Current password is incorrect.");
+                    if (await this.currentSessionNeedsMfa()) {
+                        const code = await this.requestPasswordMfaCode({
+                            title: 'Confirm all-devices logout',
+                            message: 'Enter the 6-digit code from your authenticator app before ending sessions on every device.'
+                        });
+                        await this.completeMfaForCurrentSession(code);
+                    }
+                    await this.logAppAuditEvent('account_logout_all_devices', 'account', null, {});
+                    await this.signOutWithScope('global');
+                    alert("You have been logged out on all devices.");
+                } catch (e) {
+                    alert("Could not log out all devices: " + (e.message || e));
                 }
             },
             async sendPasswordReset() {

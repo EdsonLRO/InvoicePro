@@ -58,6 +58,10 @@ The rest of this document is the journey from there to something you can actuall
 
 ---
 
+**Session safety added later.** The Account page now separates **Log Out This Device** from **Log Out All Devices**. That matters because the two actions are not the same risk. Logging out one browser should be easy and local. Logging out every device is a stronger security action, so the app asks for the current password and, where MFA is active, the authenticator code before using Supabase's global sign-out. In plain terms: ordinary exit is simple; account-wide session revocation gets a stronger check.
+
+---
+
 ## Phase 4 — Trusting the code the browser runs (CSP and SRI)
 
 **The weakness.** The app loaded several scripts from outside sources with no way to check they hadn't been altered. If any one of those sources were compromised, malicious code would run with full trust inside the app — able to read the password and quietly steal everything. This was the single highest-risk issue in the original design.
@@ -173,6 +177,7 @@ A credible security posture isn't about claiming perfection — it's about knowi
 - **Activity history is convenient, not tamper-proof** — provider events and selected sensitive app actions now go into append-only `audit_events`, but this is not yet a complete monitoring/compliance audit system.
 - **No formal backups** on the current free hosting tier; free-tier projects can also pause and stop the scheduled job.
 - **MFA has no recovery/backup codes.** The app now has local password-strength checks for new passwords, but Supabase Auth password policy settings and breached-password screening still need confirmation before real onboarding.
+- **All-devices logout exists but can be strengthened.** It currently uses current-password confirmation plus MFA when required before Supabase global sign-out. A future production hardening step would be an email-code confirmation flow before revocation.
 - **The content-security-policy allows one permissive setting** the in-browser framework needs — a documented trade-off rather than a hidden one.
 - **Payment lifecycle still needs production testing.** The repo now includes deployed in-app Stripe refund requests plus failed-payment, refund, refund-failure, and dispute awareness, and the sandbox Stripe webhook destination is subscribed to the needed events. It still needs broader replay testing and live-mode readiness before real customer use.
 - **Stripe should still be treated as test/development** unless live mode is explicitly approved and configured. Real customer payment links should wait for payment lifecycle handling, backups, terms/privacy/refund processes, and operational readiness.

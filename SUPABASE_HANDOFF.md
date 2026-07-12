@@ -54,7 +54,8 @@
 - Flow: user enrolls an authenticator app; once enabled, sign-in requires password **and** the current TOTP code.
 - Verified end-to-end including rejection of an incorrect code.
 - **Not implemented:** MFA recovery/backup codes. SMS and email MFA are not implemented.
-- **Future account safety:** add "log out from all devices" through Edge Functions, not directly from the browser. The flow should send an email verification code/link, confirm it server-side, revoke active sessions/refresh tokens, and write an `account_sessions_revoked` audit event.
+- **Implemented account safety:** the Account page now separates local sign-out from all-devices sign-out. Local sign-out uses Supabase `scope: 'local'`. All-devices sign-out requires the current password, asks for MFA when AAL2 is required, writes an app audit event, then uses Supabase global sign-out to revoke refresh tokens across devices.
+- **Future account safety:** optionally upgrade all-devices sign-out to an Edge Function backed email verification code/link flow before revocation, with a dedicated `account_sessions_revoked`-style audit event.
 - **Unknown / needs confirmation:** exact enrollment/verification UI location in `index.html`.
 
 ---

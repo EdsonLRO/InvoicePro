@@ -70,6 +70,7 @@ Strong controls already implemented:
 - Supabase Auth with server-side password hashing.
 - Real email confirmation.
 - Optional TOTP MFA.
+- Explicit local logout and all-devices logout, with password confirmation and MFA when required for all-devices logout.
 - Database-enforced Row Level Security.
 - Public keys only in the browser; secrets stay server-side.
 - Edge Functions for privileged email, recurring, and Stripe work.
@@ -82,6 +83,7 @@ Known limits:
 - Activity history is useful, but not tamper-proof.
 - `audit_events` now covers provider events and selected sensitive app actions, but it is not a full compliance/SIEM audit system.
 - MFA is implemented, but recovery codes and stronger recovery procedures are not finished.
+- All-devices logout exists, but a future email-code confirmation flow would be stronger for production account recovery/security UX.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
 - Formal backups, restore testing, privacy operations, and incident response are not complete.
 - The app must not claim GDPR compliance or full security.

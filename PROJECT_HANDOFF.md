@@ -207,6 +207,9 @@ npx tailwindcss -c tailwind.config.js -i <tailwind-input.css> -o tailwind.css --
 5. A "Change Password" flow exists in the app.
    - **Preserved wording (do not change):** the Change Password box asks for the user's **Current Password**, and its note reads: *"Please enter your current password to confirm it's you."* Keep the title "Change Password" and keep the note consistent with the field.
    - If MFA is enabled, changing password prompts for a fresh authenticator code after current-password reauth so Supabase can upgrade the session to AAL2 before `updateUser`.
+6. Account session controls are explicit:
+   - **Log Out This Device** calls Supabase sign-out with `scope: 'local'`.
+   - **Log Out All Devices** asks for the current password, asks for MFA when the account/session requires AAL2, records an audit event, then calls global sign-out to revoke refresh tokens across devices.
 
 ---
 
@@ -216,7 +219,8 @@ npx tailwindcss -c tailwind.config.js -i <tailwind-input.css> -o tailwind.css --
 - User enrolls an authenticator; once enabled, sign-in requires password **and** the current TOTP code.
 - Verified end-to-end, including that an incorrect code is rejected.
 - **Not implemented:** MFA recovery/backup codes. SMS and email MFA are not implemented (and email MFA is considered weaker; not planned as a priority).
-- **Future account safety:** add "log out from all devices" as a server-side session-revocation flow. It should send an email verification code/link first, revoke sessions only after confirmation, and record an `account_sessions_revoked` audit event.
+- **Implemented account safety:** "Log Out All Devices" exists in the Account page and uses current-password reauth plus MFA when required before Supabase global sign-out.
+- **Future account safety:** consider upgrading all-devices logout to a server-side email verification code/link flow before revocation. Keep this separate from normal local logout and record a dedicated `account_sessions_revoked`-style audit event if added.
 
 ---
 
