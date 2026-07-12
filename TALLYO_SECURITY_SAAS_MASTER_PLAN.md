@@ -1,7 +1,7 @@
 # Tallyo Security Remediation, SaaS Conversion and Agent Governance Plan
 
-**Project:** Tallyo (`EdsonLRO/InvoicePro`)  
-**Repository baseline:** `main` through commit `24015a3a48b5ecf0a2e8e5e6c6ef96b37c4f614c`, reviewed 12 July 2026  
+**Project:** Tallyo (`EdsonLRO/InvoicePro`)
+**Repository baseline:** `main` through commit `24015a3a48b5ecf0a2e8e5e6c6ef96b37c4f614c`, reviewed 12 July 2026
 **Status:** Living governance document. Update whenever implementation, vendors, architecture, risks or launch scope change.
 
 ## 1. Purpose
@@ -40,7 +40,7 @@ Confirmed unfinished before customer-ready or live-payment use:
 
 ## 3. Non-negotiable rule: report before repair
 
-Codex must not silently patch a security issue when first identified. It must first produce a pre-remediation report and classify the finding as one of:
+Codex must not silently patch a meaningful security finding when first identified. It must first record a pre-remediation report and classify the finding as one of:
 
 - `validated — approved to fix`;
 - `validated — defer with accepted risk`;
@@ -64,7 +64,9 @@ The report must include:
 11. documents that must be updated;
 12. recommendation and unresolved decisions.
 
-After approval, Codex must reproduce or encode the issue, implement the narrowest complete fix, add regression coverage, rerun the original failure and at least one bypass variant, prove legitimate behaviour remains, update every affected document and issue a post-remediation report with exact commands and results.
+This rule is intended for material security findings, architectural risk decisions and high-impact remediations. It should not block routine safe fixes, formatting cleanup, documentation corrections, test updates or reversible hardening already covered by explicit autonomous execution permission.
+
+When approval is required by the current operating permission or project owner, Codex must stop before the blocked action. The current standing permission is recorded in `AUTONOMOUS_EXECUTION_PERMISSION.md`. Otherwise, after recording the assessment, Codex may implement the narrowest complete fix, add regression coverage, rerun the original failure and at least one bypass variant where practical, prove legitimate behaviour remains, update every affected document and issue a post-remediation report with exact commands and results.
 
 A finding is not `fixed` while any material security or compatibility check is unknown.
 
@@ -72,102 +74,102 @@ A finding is not `fixed` while any material security or compatibility check is u
 
 ### SEC-001 — MFA assurance checks must fail closed
 
-**Status:** Revalidate against current code.  
+**Status:** Revalidate against current code.
 If the Supabase Authenticator Assurance Level check errors or returns an unknown state, the app must remain restricted or sign out. Full application initialisation must occur only after the required assurance level is proven. Test fresh login, restored sessions, API/network failure, expired sessions, wrong TOTP, valid TOTP and non-enrolled accounts.
 
 ### SEC-002 — Sensitive operations need trusted AAL2 enforcement
 
-**Status:** Open design requirement.  
+**Status:** Open design requirement.
 RLS ownership checks do not automatically prove MFA assurance. Define operations that require AAL2 and enforce them through trusted database functions, policies or Edge Functions. Candidates include MFA removal, account recovery, session revocation, bulk export, destructive account actions, future team/role administration and high-risk billing changes.
 
 ### SEC-003 — CSP remains transitional
 
-**Status:** Known limitation.  
+**Status:** Known limitation.
 The single-file Vue architecture still requires a permissive CSP setting. Move toward compiled assets and the Vue runtime build, remove unsafe directives where practical, restrict exact production origins, use response headers on a suitable host and test the policy in report-only mode before enforcement.
 
 ### SEC-004 — Recurring generation is server-side but concurrency guarantees need proof
 
-**Status:** Implemented; verification/hardening required.  
+**Status:** Implemented; verification/hardening required.
 Prove that concurrent invocations and retries cannot generate duplicates. Confirm idempotency or uniqueness controls, consistent invoice creation and schedule advancement, safe tenant attribution, partial-failure handling, audit events for privileged failures and operational behaviour when the Supabase project pauses.
 
 ### SEC-005 — Audit coverage is partial
 
-**Status:** Partially remediated.  
+**Status:** Partially remediated.
 Provider events and selected app actions are append-only, while document activity history remains intentionally mutable. Expand protected audit events to remaining sensitive actions, security settings, automation failures, session revocation, account recovery and backup/restore activity. Define retention, access, correlation IDs, alerting and safe metadata rules.
 
 ### SEC-006 — Financial integrity must be server-validated
 
-**Status:** Revalidate current implementation.  
+**Status:** Revalidate current implementation.
 The server must validate line items, quantities, discounts, tax, currency, payment amounts and status transitions. Stripe-confirmed state must remain provider-authoritative. Prevent inconsistent states such as `Paid` with an unexplained balance and preserve calculation-version evidence.
 
 ### SEC-007 — Tenant relationships must become workspace-bound before teams
 
-**Status:** Future SaaS control.  
+**Status:** Future SaaS control.
 When workspaces are introduced, invoices, customers, items, subscriptions and roles must reference a common workspace boundary. Use composite tenant keys or equivalent constraints and direct cross-workspace tests.
 
 ### SEC-008 — Schema changes must be migration-safe
 
-**Status:** Open engineering-control requirement.  
+**Status:** Open engineering-control requirement.
 Use ordered Supabase migrations with repeatable environment setup, drift checks, rollback/forward-fix procedures and CI validation. One-time schema scripts must not be treated as the deployment system.
 
 ### SEC-009 — Password and abuse controls are incomplete
 
-**Status:** Open.  
+**Status:** Open.
 Document and test signup/login/reset throttling, breached-password checks, password strength, bot controls, suspicious-login monitoring and email-delivery abuse protections. Do not imply that server-side password hashing alone solves account abuse.
 
 ### SEC-010 — MFA recovery and disablement require stronger controls
 
-**Status:** Open.  
+**Status:** Open.
 Create recovery or a documented support process with strong identity verification. Require recent AAL2 or reauthentication for MFA removal. Log recovery and factor changes. Avoid insecure administrator shortcuts.
 
 ### SEC-011 — Backup and restoration are not proven
 
-**Status:** Launch blocker.  
+**Status:** Launch blocker.
 Define backup scope, frequency, encryption, retention, access, regional considerations, recovery objectives and ownership. Perform and document a restore test. Include Edge Function configuration, migrations, secrets inventory and operational runbooks without storing secret values.
 
 ### SEC-012 — Future subscription entitlements must be server-enforced
 
-**Status:** Future SaaS control.  
+**Status:** Future SaaS control.
 Plan limits and paid features must be enforced in trusted backend/database boundaries, not only hidden in the UI. The entitlement source of truth must derive from verified subscription state and support grace, past-due, cancelled and read-only states.
 
 ### SEC-013 — Stripe invoice payments exist; Tallyo subscription billing is separate future work
 
-**Status:** Partially remediated / future SaaS control.  
+**Status:** Partially remediated / future SaaS control.
 Current invoice-payment flows use server-created Checkout, signed webhooks and server-side refunds, with failed-payment/refund/dispute awareness. Finish sandbox replay tests and define operational refund, dispute and chargeback policy before live use. Future Tallyo plan subscriptions require separate webhook idempotency, customer mapping, entitlement state and lifecycle rules.
 
 ### SEC-014 — Workspace and role architecture must precede team subscriptions
 
-**Status:** Future SaaS control.  
+**Status:** Future SaaS control.
 Model workspace ownership, membership, invitations, roles, least privilege, subscription ownership and removal behaviour before offering multi-user plans. RLS tests must cover every role and cross-tenant path.
 
 ### SEC-015 — Privacy and legal operations are unfinished
 
-**Status:** Launch blocker.  
+**Status:** Launch blocker.
 Complete a data map, controller/processor role analysis, Privacy Notice, Terms, retention schedule, export/access/deletion process, vendor register, breach process, refund/dispute wording and evidence of operational execution. Never claim “GDPR compliant” without formal review.
 
 ### SEC-016 — Exports create unmanaged plaintext copies
 
-**Status:** Residual risk requiring transparent controls.  
+**Status:** Residual risk requiring transparent controls.
 Warn users that downloaded PDF/XLSX files are outside Tallyo’s technical control. Avoid unnecessary fields, log sensitive bulk exports where appropriate and document user responsibility and deletion limitations.
 
 ### SEC-017 — Supply-chain management needs an operational process
 
-**Status:** Partially remediated.  
+**Status:** Partially remediated.
 Pinned dependencies, SRI and self-hosted Tailwind are strong controls. Add routine vulnerability scanning, update cadence, provenance review, lockfiles/build reproducibility and emergency dependency response.
 
 ### SEC-018 — Monitoring and incident response are incomplete
 
-**Status:** Launch blocker.  
+**Status:** Launch blocker.
 Define monitored events, severity, owners, alert channels, evidence preservation, containment, communication, legal assessment and post-incident review. Logging without alerts and response ownership is not an operational detection system.
 
 ### SEC-019 — The single-file frontend limits assurance
 
-**Status:** Known architectural debt.  
+**Status:** Known architectural debt.
 Split the application into testable modules and a build pipeline. Separate authentication, data access, invoices, payments, recurring jobs, exports and account security. This supports stronger CSP, tests and reviewability.
 
 ### SEC-020 — Documentation must remain synchronised with implementation
 
-**Status:** Continuous control.  
+**Status:** Continuous control.
 Every material change must update `APP_STATUS.md`, `PROJECT_HANDOFF.md`, `README.md`, `SUPABASE_HANDOFF.md`, `SECURITY_STORY.md`, threat models, runbooks and this register as applicable. Claims must distinguish implemented, verified, partial, planned and unknown states.
 
 ## 5. Future SaaS architecture

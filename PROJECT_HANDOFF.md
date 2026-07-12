@@ -155,6 +155,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `service-worker.js` | PWA caching / offline. Caches aggressively (hard-refresh after deploy). |
 | `icon-192.png`, `icon-512.png` | Tallyo PWA icons. |
 | `APP_STATUS.md` | Short current-stage source of truth: what is implemented, what remains, and what is deferred to future SaaS work. |
+| `AUTONOMOUS_EXECUTION_PERMISSION.md` | Standing owner permission for autonomous safe development, testing, documentation, Supabase, Git, and deployment-preparation work, plus manual-approval boundaries. |
 | `schema.sql` | Full Postgres schema: tables, RLS policies, new-user trigger. |
 | `supabase/audit_events.sql` | Append-only audit-events table used by provider events and selected sensitive app actions. |
 | `recurring_setup.sql` | Creates `recurring_templates` table + its RLS (idempotent). |
