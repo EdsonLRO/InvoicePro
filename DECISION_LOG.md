@@ -13,6 +13,8 @@ Statuses: Proposed, Accepted, Superseded, Deferred, Rejected.
 | 2026-07-10 | Finish current app and security hardening before SaaS website/subscription work. | Accepted | Keeps risk low and preserves a clear portfolio/security story. |
 | 2026-07-12 | Add explicit local logout and all-devices logout; keep email-code logout as future hardening. | Accepted | Current flow uses current-password reauth and MFA when required; email-code flow needs careful production design. |
 | 2026-07-13 | Stay on Supabase free tier for now; upgrade to Pro when backup/restore/live-readiness work requires it. | Accepted | Free tier is acceptable for development but not enough for real customer readiness. |
+| 2026-07-13 | Use one Owner, one Master Orchestrator, eight specialist functional agents, and three model/work modes. | Accepted | Functional roles define responsibility; Luna, Terra, and Sol define work mode. Actual concurrency depends on environment capability, so one Codex process may perform roles sequentially without claiming background agents are running. |
+| 2026-07-13 | Make computer use read-only by default and require explicit Owner approval at material production, financial, legal, identity, secret, or irreversible boundaries. | Accepted | Dashboard access must not silently expand standing repository permission. Safe reversible test-environment changes remain allowed only under the recorded policy. |
 
 ## Pending Decisions
 

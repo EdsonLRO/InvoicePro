@@ -2,6 +2,7 @@
 
 > How Supabase is used in this app. For another developer or AI coding agent.
 > Read before touching auth, the database, RLS, the Edge Function, or the scheduler.
+> Also read `AUTOMATION_MODEL_ORCHESTRATION.md` for Backend/Supabase ownership, Sol review boundaries, task locks, and handoffs. Dashboard inspection or change follows `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
 > The public app brand is now **Tallyo**. The original **InvoicePro** name remains in the repo/URL context and some historical/internal references.
 >
 > Parts of this document were verified against the live database earlier (column list, RLS policies, and cron jobs). Newer email/payment migrations are documented from repo SQL files and should be confirmed against the target Supabase project after they are run.
@@ -322,6 +323,7 @@ Additional current limitation: Stripe in-app refund requests and failed-payment/
 - **Unique invoice numbering** — respect `(user_id, doc_type, number)` uniqueness and the `invoice_prefix`.
 - **Auth URLs** — don't change the site URL without updating Supabase Auth settings.
 - **Change Password wording** — keep the Current Password field and its note.
+- **Governance boundary** — Supabase Auth, RLS, service-role, Vault, secret, restore, and destructive work requires the assigned Backend/Supabase role, task/path lock, evidence, and Sol review where defined. Computer use defaults to Read only.
 
 ---
 
