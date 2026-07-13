@@ -2,6 +2,9 @@
 
 This is the short source-of-truth for where Tallyo is right now.
 
+For autonomous execution rules, model/work-mode routing, approval boundaries, and context-efficiency guidance, see `AUTOMATION_MODEL_ORCHESTRATION.md`.
+For capability tracking and release gates, see `PRODUCT_COMPLETION_LEDGER.md` and `RELEASE_READINESS.md`.
+
 ## Current focus
 
 Finish the existing app and its security hardening before starting the future SaaS website/subscription platform.
@@ -40,6 +43,7 @@ Still to finish before treating the app as customer-ready:
 - Privacy policy, terms, retention position, export/deletion process, and breach process.
 - Final mobile and PDF regression pass.
 - Documentation/screenshots/portfolio evidence kept in sync with the real app.
+- Keep `DECISION_LOG.md`, `PRODUCT_COMPLETION_LEDGER.md`, and `RELEASE_READINESS.md` updated as the app moves toward live readiness.
 
 ## Current payment status
 

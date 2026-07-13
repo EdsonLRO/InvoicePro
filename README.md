@@ -31,6 +31,9 @@ It is designed to be simple, mobile-friendly, and security-conscious. It suits f
 - The app is not yet ready for real paid public use until backup/restore, privacy operations, payment lifecycle handling, and release gates are completed.
 
 For the short current-stage source of truth, see `APP_STATUS.md`.
+For autonomous development rules, see `AUTOMATION_MODEL_ORCHESTRATION.md`.
+For completion and release tracking, see `PRODUCT_COMPLETION_LEDGER.md` and `RELEASE_READINESS.md`.
+For owner, product, security, and operations decisions, see `DECISION_LOG.md`.
 
 ---
 

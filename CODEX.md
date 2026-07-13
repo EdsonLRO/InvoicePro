@@ -2,6 +2,7 @@
 
 > Instructions for an AI coding agent (Codex) working on this repository.
 > Read this before making changes. When unsure, ask or mark **Unknown / needs confirmation** rather than guessing.
+> Also read `AUTOMATION_MODEL_ORCHESTRATION.md` for autonomous task selection, approval boundaries, and model/work-mode routing.
 
 ---
 
@@ -128,13 +129,14 @@ Do not introduce Tallyo subscription billing, workspaces, RBAC, or SaaS entitlem
 
 ## 11. First tasks Codex should perform
 
-1. **Read the code first:** `index.html`, `config.js`, `schema.sql`, `recurring_setup.sql`, and the recurring Edge Function. Confirm anything marked "Unknown / needs confirmation" from the source, not assumptions.
-2. **Maintain the visible Tallyo rebrand:**
+1. **Read the current sources of truth first:** `APP_STATUS.md`, `PRODUCT_COMPLETION_LEDGER.md`, `DECISION_LOG.md`, `RELEASE_READINESS.md`, and `AUTOMATION_MODEL_ORCHESTRATION.md`.
+2. **Read the code before implementation:** `index.html`, `config.js`, `schema.sql`, `recurring_setup.sql`, and the relevant Edge Function. Confirm anything marked "Unknown / needs confirmation" from the source, not assumptions.
+3. **Maintain the visible Tallyo rebrand:**
    - Keep user-facing app text, `manifest.json`, and PWA icons branded as Tallyo.
    - Do **not** rename the repo/URL unless Supabase Auth allowed/redirect URLs are updated at the same time.
-3. **Verify nothing broke:** load the app, sign in, create an invoice, mark Sent, record a payment, export a PDF — confirm no regressions.
-4. **Re-verify recurring automation** if any backend/function change was made (function deployed; cron job active).
-5. Only then move on to the current app-hardening roadmap: Stripe lifecycle handling, backup/restore, append-only audit events, MFA recovery planning, password hardening, and documentation updates. Keep SaaS subscriptions/website work deferred unless explicitly requested.
+4. **Verify nothing broke:** load the app, sign in, create an invoice, mark Sent, record a payment, export a PDF — confirm no regressions.
+5. **Re-verify recurring automation** if any backend/function change was made (function deployed; cron job active).
+6. Only then move on to the current app-hardening roadmap: Stripe lifecycle testing, backup/restore, append-only audit events, MFA recovery planning, password hardening, and documentation updates. Keep SaaS subscriptions/website work deferred unless explicitly requested.
 
 ---
 

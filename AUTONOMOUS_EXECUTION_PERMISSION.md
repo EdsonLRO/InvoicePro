@@ -87,7 +87,11 @@ When approval is required:
 Keep the following documents synchronised with the actual repository state:
 
 - `APP_STATUS.md`
+- `AUTOMATION_MODEL_ORCHESTRATION.md`
 - `PROJECT_HANDOFF.md`
+- `PRODUCT_COMPLETION_LEDGER.md`
+- `DECISION_LOG.md`
+- `RELEASE_READINESS.md`
 - `SECURITY_STORY.md`
 - `SUPABASE_HANDOFF.md`
 - `TALLYO_SECURITY_SAAS_MASTER_PLAN.md`

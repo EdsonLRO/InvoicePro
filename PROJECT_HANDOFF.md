@@ -156,6 +156,10 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `icon-192.png`, `icon-512.png` | Tallyo PWA icons. |
 | `APP_STATUS.md` | Short current-stage source of truth: what is implemented, what remains, and what is deferred to future SaaS work. |
 | `AUTONOMOUS_EXECUTION_PERMISSION.md` | Standing owner permission for autonomous safe development, testing, documentation, Supabase, Git, and deployment-preparation work, plus manual-approval boundaries. |
+| `AUTOMATION_MODEL_ORCHESTRATION.md` | Autonomous development loop, model/work-mode selection, computer-use policy, approval boundaries, and completion criteria. |
+| `PRODUCT_COMPLETION_LEDGER.md` | Capability-by-capability completion status and current next priorities. |
+| `DECISION_LOG.md` | Accepted, deferred, and pending product/security/operations decisions. |
+| `RELEASE_READINESS.md` | Release gates and evidence needed before real customer use. |
 | `SECURITY_FINDINGS_LEDGER.md` | Working record of security findings, fixes, verification evidence, and residual risk. |
 | `schema.sql` | Full Postgres schema: tables, RLS policies, new-user trigger. |
 | `supabase/audit_events.sql` | Append-only audit-events table used by provider events and selected sensitive app actions. |
@@ -377,12 +381,13 @@ Near-term (in rough order):
 
 ## 21. What Codex should do first
 
-1. **Read `index.html`, `schema.sql`, `recurring_setup.sql`, and the Edge Function** to understand real structure before changing anything. Trust the code over assumptions.
-2. **Confirm the unknowns**: exact Supabase project URL/keys location (`config.js`), Tailwind input filename, and third-party library versions.
-3. **Verify Tallyo rebrand hygiene** after UI changes. Keep visible app text, `manifest.json`, and icons branded as Tallyo, and keep the "Change Password" wording exactly as specified.
-4. **Re-verify the recurring automation** (function deploys; cron job registered/active) after any backend change.
-5. **Set up the local/Codex workflow**: rebuild Tailwind when classes change; after deploy, hard-refresh/Incognito to bypass the service worker.
-6. When touching invoices/templates, **respect the column-name mapping** in section 13 (`customer_snapshot`, `issue_date`, `grand_total`, `history`).
+1. **Read the current sources of truth first:** `APP_STATUS.md`, `PRODUCT_COMPLETION_LEDGER.md`, `DECISION_LOG.md`, `RELEASE_READINESS.md`, and `AUTOMATION_MODEL_ORCHESTRATION.md`.
+2. **Read `index.html`, `schema.sql`, `recurring_setup.sql`, and the relevant Edge Function** to understand real structure before changing implementation. Trust the code over assumptions.
+3. **Confirm the unknowns**: exact Supabase project URL/keys location (`config.js`), Tailwind input filename, and third-party library versions.
+4. **Verify Tallyo rebrand hygiene** after UI changes. Keep visible app text, `manifest.json`, and icons branded as Tallyo, and keep the "Change Password" wording exactly as specified.
+5. **Re-verify the recurring automation** (function deploys; cron job registered/active) after any backend change.
+6. **Set up the local/Codex workflow**: rebuild Tailwind when classes change; after deploy, hard-refresh/Incognito to bypass the service worker.
+7. When touching invoices/templates, **respect the column-name mapping** in section 13 (`customer_snapshot`, `issue_date`, `grand_total`, `history`).
 
 ---
 
