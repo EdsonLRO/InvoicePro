@@ -110,9 +110,9 @@ The most involved piece: making recurring invoices generate *on their own*, on a
 
 **Making sure the master key can't leak into the wrong rows.** This is the subtle part that got the most attention. Because the function runs with the master key, there is **no safety net** — RLS won't catch a mistake. So when the function creates an invoice, it must **explicitly stamp it with the correct owner's user ID**, taken from the schedule it came from. Get that right and every user's data stays properly separated even though the function can see everyone's. Get it wrong and you'd mix people's invoices together. *A service-role function has no RLS safety net, so correct per-user attribution has to be enforced deliberately in code — that single line is the difference between "a script that works" and "a script that's secure."*
 
-**Least privilege for the scheduler.** The daily scheduler has to call the function, and that call needs a key. It was deliberately given only the **public, low-power key** (enough to *trigger* the function), not the master key. The function then does its privileged work internally with its own key. Give each part only what it truly needs, and nothing more.
+**Authenticate the scheduler before privileged work.** The daily scheduler calls a public function URL, but knowing that URL must not be enough to trigger service-role work. Both scheduled jobs now send a dedicated automation secret in a custom header. The recurring function checks it before creating the privileged database client and returns `401 Unauthorized` when it is missing or wrong. The automation secret is not the service-role key and does not grant direct database access by itself.
 
-**Storing the scheduler's key in an encrypted vault.** The scheduler runs as a small job inside the database. Rather than paste its key in plain text into that job — where anyone with database access could read it — it's stored in **Supabase Vault**, encrypted. The job looks the key up by name and decrypts it only at the moment it runs. So even someone reading the list of scheduled jobs sees a reference, never the actual secret.
+**Storing the scheduler's secret in an encrypted vault.** The scheduler runs as a small job inside the database. Rather than paste its secret in plain text into that job, it is stored in **Supabase Vault**, encrypted. The job looks it up by name and decrypts it only when the request is built. Someone reading the schedule sees the Vault reference, not the value.
 
 **Tested before trusted.** The function was run by hand first and watched, reading the server logs to fix two small issues, before ever letting it run on a schedule. Bench-test first, wire it to the wall second. Only once it generated correct, correctly-owned invoices was it handed to the daily timer.
 
@@ -179,7 +179,7 @@ A credible security posture isn't about claiming perfection — it's about knowi
 
 - **Not certified as compliant.** The app is **built with data protection principles in mind**, but it is **not** formally "GDPR compliant." Real compliance groundwork — a privacy policy, lawful basis, data-subject rights (access/erasure/portability), retention, and a breach process — is future work and would be required before onboarding real paying customers.
 - **Activity history is convenient, not tamper-proof** — provider events and selected sensitive app actions now go into append-only `audit_events`. Company/settings saves are logged only as changed categories, not raw bank details, notes, addresses, or other sensitive values. This is still not a complete monitoring/compliance audit system.
-- **Recovery is not yet fully proven.** The Supabase organisation is now Pro with documented daily backups and seven-day retention, but Tallyo still needs current-backup evidence and a timed non-production restore test under `BACKUP_RESTORE_RUNBOOK.md`.
+- **Recovery is not yet fully proven.** The Supabase organisation is Pro and completed daily backups through 2026-07-13 were verified, but Tallyo still needs a timed non-production restore test under `BACKUP_RESTORE_RUNBOOK.md`.
 - **MFA has no provider recovery codes.** Tallyo now supports a second authenticator and refuses email-only MFA bypass, but an all-factors-lost support process and final browser tests remain. Supabase leaked-password protection is enabled and advisor-verified; its safe rejection-path acceptance test remains.
 - **All-devices logout exists but can be strengthened.** It currently uses current-password confirmation plus MFA when required before Supabase global sign-out. A future production hardening step would be an email-code confirmation flow before revocation.
 - **The content-security-policy allows one permissive setting** the in-browser framework needs — a documented trade-off rather than a hidden one.
@@ -211,8 +211,8 @@ Across every phase, the same instincts show up:
 - **Separation** — keep code, credentials, and data in different places rather than one blob.
 - **Verification** — make each part prove itself (real logins, MFA, integrity-checked scripts) instead of trusting by default.
 - **Defence in the data layer** — put the isolation rule inside the database (RLS), so it can't be skipped by the app above it.
-- **Least privilege** — give each component only the access it needs (the scheduler gets a low-power key, not the master key).
-- **Secrets in the environment, not the code** — the master key is injected at runtime and never committed; the scheduler's key lives encrypted in a vault.
+- **Least privilege** — keep the scheduler's caller secret separate from the service-role credential, and begin privileged work only after caller authentication.
+- **Secrets in the environment, not the code** — the master key is injected at runtime and never committed; the scheduler's dedicated secret lives encrypted in a vault.
 - **Explicit attribution where there's no safety net** — the service-role function stamps every row with the right owner, because RLS won't catch it there.
 - **Test the "no", not just the "yes"** — confirm controls reject the wrong input (e.g. a wrong MFA code, a cross-user query).
 - **Honesty about limits** — state what isn't done, and don't overclaim compliance or security.

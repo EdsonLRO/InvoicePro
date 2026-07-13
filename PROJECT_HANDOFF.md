@@ -181,6 +181,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `supabase/functions/stripe-webhook/index.ts` | Signed Stripe webhook receiver that records verified Checkout payments. |
 | `SECURITY_OPERATIONS.md` | Practical backup, restore, data-protection, email, payment, and release gates before real users. |
 | `BACKUP_RESTORE_RUNBOOK.md` | Supabase Pro backup posture, logical export safety, restore-test procedure, side-effect controls, evidence, and approval boundaries. |
+| `DEFERRED_MANUAL_CONFIGURATION.md` | Laptop/identity/provider/cost-dependent acceptance and configuration decisions that automation must not perform silently. |
 | `EMAIL_PHASE.md` | Staged Resend email plan: DNS setup, manual sending, webhooks, then automation. |
 | `ROADMAP_EMAIL_PAYMENTS.md` | Current implementation state, deploy checks, and remaining work for email/payments. |
 | Tailwind build inputs | `tailwind.config.js` + a Tailwind input CSS file used by the CLI to produce `tailwind.css`. **Unknown / needs confirmation:** exact input filename in the repo. |
@@ -199,7 +200,7 @@ npx tailwindcss -c tailwind.config.js -i <tailwind-input.css> -o tailwind.css --
 - **Postgres** with Row Level Security on every table.
 - **Supabase Auth** for accounts, email confirmation, and MFA.
 - **Edge Functions** (Deno) for server-side recurring generation and email delivery tracking.
-- **Vault** stores the scheduler's auth key (encrypted).
+- **Vault** stores the scheduler's dedicated automation secret (encrypted).
 - **`pg_cron` + `pg_net`** extensions enabled for scheduling and HTTP calls from the DB.
 - Public/publishable key is used by the browser app; the **service role key is never in source** — it is injected into the Edge Function at runtime by the platform.
 - **Unknown / needs confirmation:** exact project ref/URL should be read from `config.js` in the repo, not assumed.
@@ -273,7 +274,7 @@ The manual "Generate all due" path creates Sent invoices in the browser and does
   - For each, generates one invoice (status **Sent**), stamped with the schedule owner's `user_id`, with history entries marking it auto-generated.
   - If `email_enabled = true` and the customer snapshot has a valid email, sends the generated invoice through Resend using server-side secrets and records `document_email_sent`.
   - Advances `next_run` (end-of-month clamp + single catch-up for missed periods), updates `last_generated`/`generated_count`, appends to the schedule's history.
-- **Scheduler:** `pg_cron` job `generate-recurring-daily`, cron `0 6 * * *` (06:00 UTC daily), using `pg_net` to POST to the function.
+- **Scheduler:** `pg_cron` job `generate-recurring-daily`, cron `0 6 * * *` (06:00 UTC daily), using `pg_net` to POST with a Vault-backed `x-automation-secret`. The function validates it before creating the service-role client; unsigned requests return HTTP 401.
 - **Number generation:** reads the user's `invoice_prefix` and increments the max existing invoice number for that user/doc type.
 
 **Verify it's registered / ran:**
@@ -305,7 +306,7 @@ supabase functions deploy generate-recurring
 - **Front-end integrity:** third-party libraries pinned to exact versions with **Subresource Integrity (SRI)**; **Content-Security-Policy** in place; **self-hosted Tailwind** (removed a live CDN dependency).
 - **Transport & at-rest:** HTTPS/TLS in transit; platform encryption at rest.
 - **Customer snapshot model** keeps historical invoices correct and avoids live links to personal data that may later be erased.
-- **Secrets hygiene:** only public/publishable keys in front-end (`config.js`); **service role key never in source** (runtime-injected). The scheduler uses only the publishable key (least privilege), stored **encrypted in Supabase Vault**, read at runtime by the cron job.
+- **Secrets hygiene:** only public/publishable keys are in front-end `config.js`; the **service role key is never in source** and is runtime-injected. Both cron jobs use a dedicated `automation_secret`, stored **encrypted in Supabase Vault** and read only at runtime. This secret authenticates the caller but grants no direct database role by itself.
 - **Email secrets hygiene:** Resend API and webhook signing secrets live only as Supabase Edge Function secrets; browser code never sees them.
 - **Payment secrets hygiene:** Stripe secret and webhook signing secrets live only as Supabase Edge Function secrets; browser code never sees them.
 - **Stripe webhook hardening:** invoice payment updates come only from signed Checkout completion events, and the webhook checks that the Checkout session was created/logged by Tallyo before recording payment. Refund, refund-failure, failed-payment, and dispute lifecycle events are logged only when they map back to a known Tallyo Stripe payment.
@@ -318,7 +319,7 @@ supabase functions deploy generate-recurring
 
 - **No GDPR-compliance claim.** The app is **not** certified or "fully compliant". Real data-protection groundwork (privacy policy, lawful basis, data-subject rights, consent/unsubscribe, breach process, registration) is **future work** and required before onboarding real paying customers.
 - **Activity history is not a tamper-proof audit log** — it lives in editable records. Provider events and selected sensitive app actions now use append-only `audit_events`; company/settings saves are logged by category only, without storing the actual settings values. Full monitoring/compliance audit coverage is still future work.
-- **Backup posture is in progress:** Supabase Pro daily backups and seven-day retention are documented in `BACKUP_RESTORE_RUNBOOK.md`; current backup evidence and a timed restore test still remain.
+- **Backup posture is in progress:** Supabase Pro daily backups were verified through 2026-07-13 and seven-day retention is documented in `BACKUP_RESTORE_RUNBOOK.md`; an Owner-approved timed restore test remains.
 - **MFA has no provider recovery codes.** Tallyo supports a second authenticator and blocks email-only MFA recovery, but final browser acceptance tests and an all-factors-lost support procedure remain. Supabase leaked-password protection was enabled and advisor-verified on 2026-07-13; its safe rejection-path acceptance test remains.
 - **CSP allows one permissive setting** the in-browser Vue template compilation requires (`unsafe-eval`) — a documented trade-off.
 - **Stripe lifecycle needs more end-to-end testing:** failed-payment, refund, refund-failure, and dispute awareness are deployed and the sandbox Stripe webhook destination is subscribed to the needed events, but replay testing and operational policy are still needed before real customer use.
@@ -359,7 +360,7 @@ Near-term (in rough order):
    - Done: hardened Stripe webhook records verified Checkout payments and includes refund/dispute/failed-payment awareness.
    - Done: in-app Stripe refund requests through a server-side Edge Function.
    - Current payment caveat: Stripe should still be treated as test/development until explicitly moved to live mode.
-4. **Current hardening priorities:** finish Stripe sandbox replay testing for refund-failure/dispute/chargeback awareness; formal backup/restore test; expand audit coverage to privileged automation failures and backup/restore evidence; finish MFA recovery acceptance and the all-factors-lost support process; review Supabase Auth password/leaked-password/session settings; final mobile/PDF regression pass.
+4. **Current hardening priorities:** finish Stripe sandbox replay testing for refund-failure/dispute/chargeback awareness; run the formal restore test; expand audit coverage to privileged automation failures and backup/restore evidence; finish MFA recovery acceptance and the all-factors-lost support process; complete the provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; run the final mobile/PDF regression pass.
 5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, export/deletion process, consent/unsubscribe where relevant, and breach response notes.
 6. Optional app polish: link invoices to their recurring schedule (dedup guard); clearer payment-state wording; repo/URL rename to Tallyo only with Supabase Auth URL updates.
 7. Future phase, deliberately deferred: public website, paid Tallyo subscriptions, plan tiers, server-enforced entitlements, workspaces/teams/RBAC, and SaaS billing.

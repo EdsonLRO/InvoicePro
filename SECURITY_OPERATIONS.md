@@ -14,11 +14,17 @@ Future SaaS subscription billing, plan tiers, workspaces, RBAC, and the public m
 
 Supabase Pro is active and provides daily database backups with a seven-day retention window. The current operational procedure is in `BACKUP_RESTORE_RUNBOOK.md`.
 
-Remaining release gate:
+Current evidence and remaining release gate:
 
-- Verify the first/current scheduled backup in the Dashboard.
-- Run a timed restore test into a separate non-production project or controlled local environment.
+- Completed daily physical backups from 2026-07-06 through 2026-07-13 were verified through the Supabase CLI; WAL-G was enabled and PITR remained disabled.
+- Run an Owner-approved timed restore test into a separate non-production project or controlled local environment.
 - Keep production, test, and local data clearly separated.
+
+## Scheduled Automation Boundary
+
+The recurring and overdue cron jobs retrieve a dedicated automation secret from Supabase Vault at runtime and send it as `x-automation-secret`. `generate-recurring` checks that secret before creating its service-role client, and unsigned requests return HTTP 401. The service role remains server-side and every generated row must still be explicitly attributed to the schedule owner because service-role access bypasses RLS.
+
+Confirm the first post-hardening 06:00 and 09:00 UTC runs using `DEFERRED_MANUAL_CONFIGURATION.md`. Disable both jobs immediately in any restored clone.
 - Confirm invoices, customers, saved items, company settings, payments, recurring templates, Auth records, and audit events recover as expected.
 - Re-run cross-user RLS isolation tests after restoration.
 - Disable cloned cron and outbound automation before it can send email, create invoices, or call payment services.

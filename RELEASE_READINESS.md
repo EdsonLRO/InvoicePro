@@ -20,18 +20,18 @@ Tallyo is a real working app and strong portfolio project, but it is not yet liv
 | RLS / tenant isolation | Implemented | Previously break-tested; re-run before release. |
 | CSP/SRI/self-hosted Tailwind | Implemented | Recheck final deployed HTML before release. |
 | Email sending and webhooks | Implemented | Need final test delivery evidence. |
-| Overdue reminder automation | Implemented | Verify cron and opt-in behaviour before release. |
-| Recurring invoice automation | Implemented | Verify cron and service-role attribution before release. |
+| Overdue reminder automation | Implemented | Job is active and Vault-authenticated; confirm the first post-hardening scheduled run and opt-in behaviour before release. |
+| Recurring invoice automation | Implemented | Endpoint rejects unsigned calls and job is Vault-authenticated; confirm the first post-hardening run and service-role attribution before release. |
 | Stripe payments | In Progress | Sandbox implemented; signature rejection and payment/refund duplicate replay passed. Remaining positive lifecycle tests and live-mode setup are still gated. |
 | Refund/dispute/chargeback handling | In Progress | Unknown disputes are rejected and refund replay is idempotent; known-payment dispute, genuine failed-refund evidence, and operational policy remain. |
-| Backups and restore | In Progress | Pro plan and seven-day daily-backup procedure documented; verify a current backup and complete a timed non-production restore test. |
+| Backups and restore | In Progress | Pro daily backups were verified through 2026-07-13; an Owner-approved timed non-production restore test remains. |
 | Audit events | In Progress | Provider and selected app actions covered; not a full SIEM/compliance system. |
 | Privacy/legal groundwork | Planned | Privacy policy, terms, retention, export/delete, breach process. |
 | Mobile regression | Planned | Test key workflows on phone widths. |
 | PDF regression | Planned | Test mobile PDF download and long multi-page invoices. |
 | PWA/service-worker regression | Planned | Confirm cache behaviour and update instructions. |
 | Documentation accuracy | In Progress | Keep status/handoff/security docs synced with real implementation. |
-| Supabase Auth provider policy | In Progress | Email confirmation, MFA, and leaked-password protection are active; the leaked-password warning cleared on 2026-07-13. Session/JWT, password-policy, rate-limit, and abuse-control settings still need review. |
+| Supabase Auth provider policy | In Progress | Live settings were recorded without secrets. Email confirmation, MFA, refresh rotation, and leaked-password protection are active; remaining owner decisions are centralised in `DEFERRED_MANUAL_CONFIGURATION.md`. |
 | Agent governance documentation | Verified | Hierarchy, queue, locks, handoffs, computer-use controls, provider restrictions, and approval boundaries are authoritative and cross-linked. Recheck consistency at each release candidate. |
 
 ## Manual Approval Boundaries
@@ -55,6 +55,6 @@ Stop before:
 - Stripe webhook endpoint, subscribed events, and successful signed test deliveries.
 - Resend webhook endpoint and successful signed delivery events.
 - RLS verification notes.
-- Backup/restore evidence.
+- Current backup evidence plus timed restore evidence.
 - Mobile/PDF/PWA screenshots or notes.
 - Open risks accepted by owner.

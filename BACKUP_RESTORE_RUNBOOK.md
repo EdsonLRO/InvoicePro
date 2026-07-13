@@ -15,6 +15,7 @@ Follow `AUTOMATION_MODEL_ORCHESTRATION.md` and `AGENT_HIERARCHY_AND_COMPUTER_USE
 - **Current RPO:** up to 24 hours with daily backups. RPO means Recovery Point Objective: the maximum expected data loss measured in time.
 - **Current RTO:** unknown until a timed restore test is completed. RTO means Recovery Time Objective: how long recovery takes.
 - **Restore test:** pending. It must use a separate non-production project or a controlled local environment, never overwrite the active project for testing.
+- **Current evidence (checked 2026-07-13):** the Supabase CLI listed completed daily physical backups from 2026-07-06 through 2026-07-13 in `eu-west-2`; WAL-G was enabled and PITR was disabled. This proves scheduled backup availability, not restore correctness.
 
 Official references:
 
@@ -137,3 +138,5 @@ A completed backup check or restore test records:
 - deletion or retention decision for the test environment.
 
 Do not record database passwords, temporary CLI credentials, access tokens, Vault values, customer documents, or unnecessary PII.
+
+The remaining timed restore and its cost approval are tracked in `DEFERRED_MANUAL_CONFIGURATION.md`.

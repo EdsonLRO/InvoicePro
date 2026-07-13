@@ -63,6 +63,26 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Residual risk:** The trigger body and signup trigger were not changed, but one fresh test-account signup should still confirm automatic `company_settings` provisioning before this finding is marked Verified.
 - **Status:** Implemented; fresh-signup acceptance pending.
 
+### SEC-DB-002 - RLS identity checks and foreign-key lookups are not optimised
+
+- **Date:** 2026-07-13
+- **Classification:** defense-in-depth / database performance
+- **Finding:** Supabase performance advisors report that tenant policies call `auth.uid()` per row, and the `audit_events.actor_user_id` and `invoices.customer_id` foreign keys lack covering indexes.
+- **Impact:** Tenant isolation remains enforced, but larger tables would repeatedly evaluate the same identity function and could scan foreign-key columns during joins or parent-row changes.
+- **Change:** Applied migration `optimize_rls_and_foreign_key_indexes`. Every live ownership policy keeps the same condition but evaluates `(select auth.uid())` once per statement, and narrow indexes now cover `audit_events.actor_user_id` and `invoices.customer_id`. Canonical setup SQL was updated to match the live schema.
+- **Verification:** The missing-index and RLS init-plan advisor warnings cleared. RLS remains enabled on all six public data tables, policy counts and commands are unchanged, and the live security advisor remains clear. The remaining unused-index notices are informational on low-volume/new indexes and are not a reason to remove them prematurely.
+- **Status:** Verified.
+
+### SEC-AUTO-001 - Recurring generation endpoint lacks caller authentication
+
+- **Date:** 2026-07-13
+- **Classification:** vulnerable / privileged automation boundary
+- **Finding:** `generate-recurring` disables platform JWT verification for `pg_cron` but did not independently authenticate the request before creating a service-role client.
+- **Impact:** Anyone who discovered the public function URL could invoke privileged recurring processing. Due-date checks limit when rows are generated, but repeated or deliberately timed calls could create invoices or trigger configured customer email outside the trusted scheduler.
+- **Change:** `generate-recurring` now requires the existing `AUTOMATION_SECRET` in `x-automation-secret` before creating its service-role client. Migration `secure_scheduled_automation_calls` changed both automation jobs to read that secret from Vault at runtime; the former anon-key and inline-secret scheduler patterns are no longer used.
+- **Verification:** Deno check passed, deployed `generate-recurring` v12 is active, and an unsigned request returned HTTP 401. Both cron jobs remain active at their existing schedules and their stored commands use the Vault secret name without an anon key. The next scheduled runs on 2026-07-14 remain operational acceptance evidence.
+- **Status:** Implemented; next scheduled-run acceptance pending.
+
 ### SEC-LOG-001 - Stripe test/development state was too easy to miss
 
 - **Date:** 2026-07-12
@@ -154,7 +174,7 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 ## Open Follow-Ups
 
 - Confirm Supabase Auth password policy, JWT/session expiry, and rate-limit settings.
-- Decide whether breached-password screening will be enabled through provider settings or a trusted server-side check.
+- Complete the known-compromised-password rejection test for the enabled provider check.
 - Add the future verified "log out from all devices" flow when account-safety work begins.
 - Complete the remaining positive-path Stripe sandbox tests for a known Tallyo dispute and a genuine failed refund; current redacted evidence is in `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
 - Record backup and restore test evidence once a non-production restore is performed.

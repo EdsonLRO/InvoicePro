@@ -36,6 +36,9 @@ create table if not exists public.audit_events (
 create index if not exists audit_events_user_created_idx
     on public.audit_events(user_id, created_at desc);
 
+create index if not exists audit_events_actor_user_id_idx
+    on public.audit_events(actor_user_id);
+
 create index if not exists audit_events_object_idx
     on public.audit_events(object_type, object_id);
 
@@ -47,7 +50,7 @@ alter table public.audit_events enable row level security;
 
 drop policy if exists "own audit_events - select" on public.audit_events;
 create policy "own audit_events - select"
-    on public.audit_events for select using (auth.uid() = user_id);
+    on public.audit_events for select using ((select auth.uid()) = user_id);
 
 -- No insert/update/delete policies are created on purpose. Browser clients read
 -- their own audit events, while trusted Edge Functions insert with service role.

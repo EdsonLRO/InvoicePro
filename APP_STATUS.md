@@ -36,11 +36,11 @@ Still to finish before treating the app as customer-ready:
 
 - Complete the remaining Stripe positive-path sandbox tests for a known-payment dispute and genuine failed refund. Signature rejection, unrelated-event rejection, and payment/refund duplicate replay have passed.
 - Decide the operational chargeback/refund policy and customer support process.
-- Verify current Supabase Pro scheduled-backup evidence and complete at least one timed non-production restore test. The operating procedure is documented in `BACKUP_RESTORE_RUNBOOK.md`.
+- Complete at least one Owner-approved timed non-production restore test. Current Supabase Pro daily-backup evidence is verified in `BACKUP_RESTORE_RUNBOOK.md`.
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations. Company/settings saves are now covered at a privacy-safe category level.
 - Complete browser acceptance testing of the new fail-closed MFA, backup-authenticator, and password-recovery paths documented in `MFA_RECOVERY_RUNBOOK.md`.
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.
-- Review the remaining Supabase server-side password, session/JWT, and abuse-control settings. Leaked-password protection was enabled and the live advisor was clear on 2026-07-13.
+- Resolve the recorded Supabase server-side password, session, SMTP/rate-limit, and abuse-control decisions in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection is enabled and the live advisor was clear on 2026-07-13.
 - Privacy policy, terms, retention position, export/deletion process, and breach process.
 - Final mobile and PDF regression pass.
 - Documentation/screenshots/portfolio evidence kept in sync with the real app.
@@ -80,6 +80,7 @@ Strong controls already implemented:
 - Database-enforced Row Level Security.
 - Public keys only in the browser; secrets stay server-side.
 - Edge Functions for privileged email, recurring, and Stripe work.
+- Vault-backed scheduler authentication for recurring and overdue automation; the privileged recurring endpoint rejects unsigned calls.
 - Signed Resend and Stripe webhooks.
 - CSP, SRI, and self-hosted Tailwind.
 - Honest activity history wording.
@@ -91,7 +92,7 @@ Known limits:
 - Supabase does not provide recovery codes. Tallyo now supports a second authenticator and prevents email-only MFA bypass, but the new recovery paths still need browser acceptance testing and an all-factors-lost support procedure.
 - All-devices logout exists, but a future email-code confirmation flow would be stronger for production account recovery/security UX.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
-- Supabase Pro daily backups and the recovery runbook are in place, but a timed restore test, privacy operations, and incident response are not complete.
+- Supabase Pro daily backups are verified and the recovery runbook is in place, but a timed restore test, privacy operations, and incident response are not complete.
 - The app must not claim GDPR compliance or full security.
 
 ## Future SaaS / website phase

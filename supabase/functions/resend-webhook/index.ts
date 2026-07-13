@@ -18,11 +18,11 @@ function json(body: Record<string, unknown>, status = 200) {
   });
 }
 
-function base64ToBytes(value: string): Uint8Array {
+function base64ToBytes(value: string): ArrayBuffer {
   const bin = atob(value);
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
+  return out.buffer;
 }
 
 function timingSafeEqual(a: string, b: string): boolean {

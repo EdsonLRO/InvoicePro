@@ -35,6 +35,7 @@ For authoritative agent hierarchy, task coordination, locks, handoffs, and auton
 For graphical-dashboard and computer-use safety controls, see `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
 For completion and release tracking, see `PRODUCT_COMPLETION_LEDGER.md` and `RELEASE_READINESS.md`.
 For owner, product, security, and operations decisions, see `DECISION_LOG.md`.
+For laptop-, identity-, provider-, or cost-dependent work intentionally left for later, see `DEFERRED_MANUAL_CONFIGURATION.md`.
 
 ---
 
@@ -92,7 +93,7 @@ Honest limitations:
 - The app is **built with data-protection principles in mind**, but it is **not** formally GDPR compliant and must not be described as such.
 - Activity history is useful, but not a tamper-proof audit log.
 - Append-only audit logging now covers provider events and selected sensitive app actions, but it is not yet a complete security monitoring or compliance audit system.
-- Supabase Pro daily backups and a recovery runbook are in place; current-backup evidence and a timed restore test are still required.
+- Supabase Pro daily backups and a recovery runbook are in place; current-backup evidence is verified and a timed restore test remains required.
 - Supabase does not provide recovery codes. Tallyo supports a second authenticator and blocks email-only MFA recovery, but final browser acceptance tests and an all-factors-lost support process remain.
 - Stripe refund requests plus refund, dispute, chargeback, and failed-payment lifecycle handling are deployed and subscribed in the sandbox webhook destination, but still need broader replay testing and live-mode readiness before real customer use.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
@@ -150,7 +151,8 @@ Edge Function runtime / Supabase secrets:
 
 Supabase Vault secret names:
 
-- `project_anon_key`
+- `automation_secret` - active scheduler caller secret.
+- `project_anon_key` - legacy stored entry; no longer referenced by the automation cron commands.
 
 Never commit real `.env` files, service role keys, API keys, webhook secrets, database passwords, Vault values, or private credentials.
 
@@ -169,8 +171,8 @@ Never commit real `.env` files, service role keys, API keys, webhook secrets, da
 - Keep RLS enabled and scoped to the owning user.
 - Keep Supabase Auth allowed/redirect URLs in sync with the deployed site URL.
 - `pg_cron` and `pg_net` are used for scheduled Edge Function calls.
-- `generate-recurring-daily` runs recurring invoice generation.
-- `send-overdue-reminders-daily` runs opt-in overdue reminder automation.
+- `generate-recurring-daily` runs recurring invoice generation through a Vault-backed custom-secret gate.
+- `send-overdue-reminders-daily` runs opt-in overdue reminder automation through the same Vault-backed gate.
 - The Supabase organisation is now Pro; scheduled jobs still require monitoring and must be disabled in restored clones.
 
 For full details, see `SUPABASE_HANDOFF.md`.
@@ -182,10 +184,10 @@ For full details, see `SUPABASE_HANDOFF.md`.
 Current app/security work:
 
 1. Finish Stripe sandbox replay testing for refunds, disputes, chargebacks, failed/asynchronous states, and clearer UI wording where needed.
-2. Verify a current scheduled backup and run the documented non-production restore test in `BACKUP_RESTORE_RUNBOOK.md`.
+2. Run the documented Owner-approved non-production restore test in `BACKUP_RESTORE_RUNBOOK.md`; current backup evidence is verified.
 3. Expand append-only audit logging further, especially privileged automation failures and backup/restore evidence.
 4. Complete `MFA_RECOVERY_RUNBOOK.md` acceptance tests and define the all-factors-lost support process; consider upgrading all-devices logout with a server-side email-code confirmation flow.
-5. Complete the safe rejection test for enabled Supabase leaked-password protection, then review the remaining server-side Auth policy, session, rate-limit, and abuse-control settings.
+5. Complete the safe leaked-password rejection test and the provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`.
 6. Complete privacy/data-protection groundwork before real customer use.
 7. Keep security docs, screenshots, and portfolio evidence in sync with the real app.
 

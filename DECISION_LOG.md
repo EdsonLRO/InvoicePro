@@ -18,6 +18,8 @@ Statuses: Proposed, Accepted, Superseded, Deferred, Rejected.
 | 2026-07-13 | Use a second TOTP authenticator as the supported MFA backup and do not let email recovery bypass MFA. | Accepted | Supabase Auth does not provide recovery codes. A second verified factor preserves two-factor assurance; an all-factors-lost case remains blocked until a strong support recovery process is approved. |
 | 2026-07-13 | Enable Supabase leaked-password protection on the Pro project. | Accepted | Server-side breach-corpus checking strengthens the client password rules and cannot be bypassed through direct Auth API use. The setting was read back as enabled and the advisor warning cleared. |
 | 2026-07-13 | Remove direct API execution from internal trigger helpers and pin their search paths. | Accepted | Trigger-only functions do not need anonymous or authenticated RPC access. The least-privilege migration cleared all database advisor warnings without changing trigger business logic. |
+| 2026-07-13 | Authenticate both database-scheduled functions with one dedicated Vault-backed automation secret. | Accepted | A public anon key is not caller authentication for a function with service-role effects. Both cron jobs now retrieve `automation_secret` at runtime, and privileged processing begins only after the custom header is verified. |
+| 2026-07-13 | Preserve RLS ownership semantics while optimising identity evaluation and foreign-key lookups. | Accepted | Wrapping `auth.uid()` in a scalar subquery avoids per-row re-evaluation; narrow foreign-key indexes reduce scans without broadening access. |
 
 ## Pending Decisions
 

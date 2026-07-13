@@ -294,7 +294,15 @@ async function sendInvoiceEmail(resendKey: string, invoice: any, company: any, t
   return { ok: resendResponse.ok, status: resendResponse.status, body, subject: email.subject };
 }
 
-Deno.serve(async (_req) => {
+Deno.serve(async (req) => {
+  const automationSecret = Deno.env.get("AUTOMATION_SECRET") || "";
+  if (!automationSecret || req.headers.get("x-automation-secret") !== automationSecret) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const admin = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,

@@ -74,17 +74,21 @@ create index if not exists recurring_templates_due_idx
 alter table public.recurring_templates enable row level security;
 
 drop policy if exists "own recurring_templates - select" on public.recurring_templates;
-create policy "own recurring_templates - select"
-    on public.recurring_templates for select using (auth.uid() = user_id);
+drop policy if exists "own recurring - select" on public.recurring_templates;
+create policy "own recurring - select"
+    on public.recurring_templates for select using ((select auth.uid()) = user_id);
 
 drop policy if exists "own recurring_templates - insert" on public.recurring_templates;
-create policy "own recurring_templates - insert"
-    on public.recurring_templates for insert with check (auth.uid() = user_id);
+drop policy if exists "own recurring - insert" on public.recurring_templates;
+create policy "own recurring - insert"
+    on public.recurring_templates for insert with check ((select auth.uid()) = user_id);
 
 drop policy if exists "own recurring_templates - update" on public.recurring_templates;
-create policy "own recurring_templates - update"
-    on public.recurring_templates for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "own recurring - update" on public.recurring_templates;
+create policy "own recurring - update"
+    on public.recurring_templates for update using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 
 drop policy if exists "own recurring_templates - delete" on public.recurring_templates;
-create policy "own recurring_templates - delete"
-    on public.recurring_templates for delete using (auth.uid() = user_id);
+drop policy if exists "own recurring - delete" on public.recurring_templates;
+create policy "own recurring - delete"
+    on public.recurring_templates for delete using ((select auth.uid()) = user_id);

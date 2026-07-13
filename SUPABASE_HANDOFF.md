@@ -28,8 +28,8 @@
 - On sign-in, Supabase issues a short-lived signed **JWT** session token held client-side; the raw password is not retained by the app.
 - **Email confirmation is required** before an account is usable (see §3).
 - **Leaked-password protection is enabled** (`password_hibp_enabled=true`) and the live security advisor cleared its warning on 2026-07-13. A known-compromised-password rejection test remains acceptance evidence.
-- **Allowed / redirect URLs:** configured in Supabase Auth to match the deployed site URL. **Important:** if the site URL changes (e.g. a GitHub repo/URL rename during the Tallyo rebrand), these must be updated or auth breaks. **Unknown / needs confirmation** — exact configured URLs.
-- **Unknown / needs confirmation:** exact session/JWT expiry, password policy, and rate-limit settings (Supabase defaults assumed).
+- **Allowed / redirect URLs:** configured in Supabase Auth to match the deployed site URL. **Important:** if the site URL changes (e.g. a GitHub repo/URL rename during the Tallyo rebrand), these must be updated or auth breaks. Exact URL review remains an Owner acceptance item.
+- **Live provider snapshot (2026-07-13):** JWT lifetime 3600 seconds; refresh-token rotation enabled; session timebox/inactivity timeout disabled; single-session enforcement disabled; provider minimum password length 6 with no required character classes; email confirmation required; leaked-password protection enabled; email OTP expiry 3600 seconds with 8 digits; CAPTCHA not configured; email/token-refresh/verification rate limits 2/150/30. Tallyo's client requires 12 characters, so aligning the provider minimum to 12 is recorded in `DEFERRED_MANUAL_CONFIGURATION.md` rather than changed silently.
 
 ---
 
@@ -38,7 +38,7 @@
 1. User signs up with email + password.
 2. Supabase sends a **confirmation email with a verification link** (server-sent, not generated in the browser).
 3. The account must be confirmed via that link before it can be used.
-4. On the free tier, Supabase's built-in email sending has low rate limits; heavy testing can hit them. **Unknown / needs confirmation:** whether a custom SMTP provider is configured (assume default Supabase email unless the dashboard says otherwise).
+4. The live built-in email-send limit was 2 per hour on 2026-07-13. Custom SMTP configuration and final onboarding limits remain an Owner decision in `DEFERRED_MANUAL_CONFIGURATION.md`.
 
 ---
 
@@ -88,7 +88,7 @@ All in the `public` schema. All have RLS enabled and are scoped to the owning us
 - **Columns:** `user_id` (uuid, PK), `name`, `address`, `phone`, `mobile`, `email`, `tax_id`, `additional_info`, `logo_url` (all text), `invoice_prefix` (text, default `''`), `quote_prefix` (text, default `'QUO-'`), `credit_prefix` (text, default `'CN-'`), `default_currency` (text, default `'GBP'`), `payment_details`, `default_notes`, `default_terms`, `invoice_footer` (text), `updated_at` (timestamptz, default `now()`), `brand_color` (text, default `'#4f46e5'`), `logo_position` (text, default `'left'`).
 - **Relationships:** one-to-one with the auth user; `invoice_prefix` is used when generating invoice numbers.
 - **RLS:** select/insert/update/delete only where `auth.uid() = user_id`.
-- **Note:** a signup trigger auto-creates an empty row for each new user. **Unknown / needs confirmation:** trigger presence in the live DB (defined in `schema.sql`; not re-verified by the exports provided).
+- **Note:** a live signup trigger auto-creates an empty row for each new user. Its helper was hardened with an empty search path and trigger-only execution privileges on 2026-07-13; one fresh-signup acceptance check remains.
 
 ### `customers`
 - **Purpose:** the user's reusable customer address book.
@@ -111,7 +111,7 @@ All in the `public` schema. All have RLS enabled and are scoped to the owning us
 - **Relationships:** optional soft link to `customers` via `customer_id`; the authoritative customer data is `customer_snapshot`, so historical documents stay correct if the customer is later edited/deleted.
 - **RLS:** own rows only.
 - **Column-name cautions (app field ≠ DB column):** customer is **`customer_snapshot`** (not `customer`); issue date is **`issue_date`** (not `date`); total is **`grand_total`** (not a `totals` object).
-- **Notes:** a `tip` column exists (numeric, default 0) — legacy/optional; not prominently used in the current UI. Invoice numbering uses the user's `invoice_prefix`. **Unknown / needs confirmation:** the unique index on `(user_id, doc_type, number)` is defined in `schema.sql` but was not included in the exports provided — confirm with `pg_indexes` if needed.
+- **Notes:** a `tip` column exists (numeric, default 0) — legacy/optional; not prominently used in the current UI. Invoice numbering uses the user's `invoice_prefix`. The schema includes unique `(user_id, doc_type, number)` enforcement and an index on `customer_id` for the foreign key.
 
 **Newer invoice migrations:** if applied, `supabase/invoice_payment_options.sql` adds `online_payment_mode` and `deposit_amount`; `supabase/invoice_overdue_reminders.sql` adds `overdue_reminders_enabled`, `overdue_first_reminder_days`, `overdue_repeat_reminder_days`, and `overdue_max_reminders`.
 
@@ -175,6 +175,7 @@ Policy names follow the pattern `own <table> - <command>` where applicable, for 
 - **Purpose:** server-side recurring invoice generation with no browser open.
 - **Behaviour:** finds active `recurring_templates` where `next_run <= today`; for each, generates one invoice (status `Sent`) **stamped with the schedule owner's `user_id`**, appends history entries, then advances `next_run` (end-of-month clamp + single catch-up for missed periods) and updates `last_generated` / `generated_count` / the schedule's `history`. Invoice numbers use the user's `invoice_prefix`.
 - **Auth model:** uses the **service role key** (bypasses RLS). The key is injected by the platform at runtime (`SUPABASE_SERVICE_ROLE_KEY`) and is **never in source or committed**.
+- **Caller gate:** platform JWT verification is intentionally disabled for the scheduler, so the function requires `x-automation-secret` to match the server-side `AUTOMATION_SECRET` before creating the service-role client. Unsigned calls fail with HTTP 401.
 - **Deploy:** `supabase functions deploy generate-recurring`.
 - **Critical rule:** because RLS does not protect this path, correct per-user attribution (`user_id`) must be enforced in code for every write.
 
@@ -189,6 +190,8 @@ Other current Edge Functions:
 - `log-app-event` - authenticated user function; writes allowlisted sensitive app-action events into `audit_events` without exposing direct browser writes.
 - `stripe-webhook` - verifies Stripe signatures; records Checkout completion only when the Checkout session was created/logged by Tallyo; logs failed-payment/dispute/refund-failure lifecycle events; records successful refunds as locked negative Stripe payment entries.
 - Current sandbox Stripe webhook events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, `refund.failed`, `charge.dispute.created`, `charge.dispute.updated`, `charge.dispute.closed`, `charge.dispute.funds_withdrawn`, and `charge.dispute.funds_reinstated`.
+
+Live deployment snapshot on 2026-07-13: all nine functions were active; `generate-recurring` was v12 and `resend-webhook` was v11 after the hardening/type-check deployments. JWT verification is enabled for user-authenticated functions and intentionally disabled only for signature-verified provider webhooks or custom-secret scheduled functions.
 
 Deploy after edits:
 
@@ -206,8 +209,8 @@ supabase functions deploy <function-name>
 - **Job:** `generate-recurring-daily` (jobid 1), schedule **`0 6 * * *`** (06:00 UTC daily), `active = true`.
 - **What it runs:** a `net.http_post` to the Edge Function URL
   `https://cuagwifetheefftleeup.supabase.co/functions/v1/generate-recurring`,
-  with the `Authorization: Bearer` header value read from **Supabase Vault at runtime** via
-  `select decrypted_secret from vault.decrypted_secrets where name = 'project_anon_key'`,
+  with `x-automation-secret` read from **Supabase Vault at runtime** via
+  `select decrypted_secret from vault.decrypted_secrets where name = 'automation_secret'`,
   and an empty JSON body. **No key is written inline** in the job — only the Vault lookup.
 - **Verify job registered/active:**
   ```sql
@@ -225,17 +228,17 @@ supabase functions deploy <function-name>
 
 Additional scheduled job:
 
-- **Job:** `send-overdue-reminders-daily`, schedule commonly **`0 9 * * *`** (09:00 UTC daily), calls `send-overdue-reminders`.
-- It should send the `x-automation-secret` header using a secret value, never a committed value.
-- Verify it separately with `cron.job` and `cron.job_run_details` after registering or changing it.
+- **Job:** `send-overdue-reminders-daily` (jobid 3), schedule **`0 9 * * *`** (09:00 UTC daily), `active = true`, calls `send-overdue-reminders`.
+- It sends `x-automation-secret` by retrieving `automation_secret` from Vault at runtime, never from committed or inline plaintext.
+- Both jobs last succeeded on 2026-07-13 before the shared secret-gate migration. Confirm their first post-hardening runs on 2026-07-14 as recorded in `DEFERRED_MANUAL_CONFIGURATION.md`.
 
 ---
 
 ## 12. Supabase Vault usage
 
-- **Vault** stores the key the cron job uses to invoke the Edge Function, encrypted at rest.
-- **Secret name in use:** **`project_anon_key`** (holds the **publishable/anon** key — least privilege; only enough to trigger the function, not the service role key). This is the exact name referenced by the live cron job.
-- The cron SQL reads it at runtime via `select decrypted_secret from vault.decrypted_secrets where name = 'project_anon_key'`.
+- **Vault** stores the custom scheduler secret used to invoke scheduled Edge Functions, encrypted at rest.
+- **Secret name in use:** **`automation_secret`**. This is a dedicated caller-authentication secret, not the service role key and not a browser key.
+- Both cron commands read it at runtime via `select decrypted_secret from vault.decrypted_secrets where name = 'automation_secret'` and send it as `x-automation-secret`.
 - **Never** print, log, or commit the decrypted value. Vault secret **values** must never appear in code, docs, or commits (names are fine).
 
 ---
@@ -254,7 +257,7 @@ Names only — never commit real values.
 - Supabase project URL (`https://cuagwifetheefftleeup.supabase.co`) and the publishable/anon key — supplied via `config.js`. Public by design; RLS protects the data.
 
 **Vault (secret name, not a value):**
-- `project_anon_key`
+- `automation_secret`
 
 - e.g. `RESEND_API_KEY` — server-side only when added; never client-side or committed.
 
@@ -312,7 +315,7 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 - **All-devices logout exists** with current-password confirmation, MFA when required, an app audit event, and Supabase global sign-out. A stronger future version could add email-code confirmation and server-side revocation evidence.
 - **CSP** allows one permissive setting the in-browser Vue template compiler needs (documented trade-off).
 - **Data protection:** the app is **built with data protection principles in mind**, but is **not** certified or "GDPR compliant." Formal compliance work (privacy policy, lawful basis, data-subject rights, retention, breach process) is future work — do not claim compliance.
-- **Unknown / needs confirmation:** custom SMTP config, exact JWT/session expiry, and whether any response security headers (e.g. frame protection) are set (GitHub Pages limits headers).
+- **Deferred manual configuration:** custom SMTP, provider minimum-password alignment, session timebox/inactivity policy, CAPTCHA, rate limits, Auth connection strategy, and exact redirect URL acceptance are recorded in `DEFERRED_MANUAL_CONFIGURATION.md`. GitHub Pages still limits response-header control.
 
 ---
 
@@ -324,7 +327,7 @@ Additional current limitation: Stripe in-app refund requests and failed-payment/
 - **Service-role boundary** — never move the service role key into client code; never commit it.
 - **Edge Function attribution** — every generated row must carry the correct `user_id` (RLS won't catch mistakes here).
 - **Cron schedule** — don't break `generate-recurring-daily`; re-verify after function changes.
-- **Vault usage** — don't inline the invoke key into the cron job or expose the decrypted value; keep the `project_anon_key` lookup.
+- **Vault usage** — don't inline the invoke secret into a cron job or expose the decrypted value; keep the `automation_secret` lookup and `x-automation-secret` gate.
 - **DB column mapping** — keep `customer_snapshot`, `issue_date`, `grand_total`, and `history` correct.
 - **Unique invoice numbering** — respect `(user_id, doc_type, number)` uniqueness and the `invoice_prefix`.
 - **Auth URLs** — don't change the site URL without updating Supabase Auth settings.
