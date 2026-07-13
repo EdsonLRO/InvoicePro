@@ -2,6 +2,8 @@
 
 Operational security checklist for moving Tallyo from a working prototype into a safer product. This is not a compliance claim; it is the working list of controls to put in place before real customer email and payments.
 
+Agent task ownership, independent review, locks, and evidence follow `AUTOMATION_MODEL_ORCHESTRATION.md`. Any browser/dashboard operation follows `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, which defaults computer use to Read only and keeps secrets masked.
+
 ## Current Priority
 
 Email, opt-in reminder automation, recurring auto-email, and Stripe invoice-payment flows now exist for the current app. Current priority is to keep those working flows stable, keep secrets server-side, test the new Stripe lifecycle handling, and build a recovery path before real customer use.
@@ -150,3 +152,5 @@ Before deploying a security-sensitive change:
 4. Confirm privileged functions stamp the correct `user_id`.
 5. Confirm service-worker cache changes are intentional.
 6. Test success, failure, wrong-user access, duplicate events, and missing-data paths.
+7. Confirm task locks were released and the required QA/Security/Payments handoffs are evidenced.
+8. Confirm no dashboard action crossed an Owner-approval boundary.

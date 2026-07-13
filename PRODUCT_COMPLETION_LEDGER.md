@@ -25,7 +25,19 @@ Statuses: Planned, Investigating, Confirmed, In Progress, Implemented, Verified,
 | Backup and restore | Planned | Free-tier manual runbook needed now; Pro restore test needed before real customers. |
 | Privacy/legal groundwork | Planned | Privacy policy, terms, retention/export/delete process, breach process. |
 | Final mobile/PDF regression | Planned | Needed before treating app as customer-ready. |
+| Multi-agent governance and computer-use controls | Verified | One Owner, one Master Orchestrator, eight specialist roles, task queue, locks, handoffs, provider controls, and validation are documented in the authoritative governance files. |
 | Public SaaS website/subscriptions | Deferred | Future phase after current app/security readiness. |
+
+## Orchestrator Queue
+
+The Master Orchestrator owns this queue. Detailed task fields, statuses, assignment, and locking rules are authoritative in `AUTOMATION_MODEL_ORCHESTRATION.md`.
+
+| Task ID | Title | Priority | Status | Owner role | Work mode | Lock state | Evidence / next action |
+|---|---|---|---|---|---|---|---|
+| GOV-001 | Complete agent governance and computer-use controls | High | Verified | Master Orchestrator | Terra with Sol policy review | Released after commit | Hierarchy, queue, locks, handoffs, provider controls, cross-links, and validation completed. |
+| OPS-001 | Backup and restore runbook | High | Ready | Release Agent | Terra with Sol review | Unlocked | Define free-tier procedure and Pro restore-test boundary. |
+| PAY-TEST-001 | Finish Stripe sandbox lifecycle replay evidence | High | Ready | Payments Agent | Sol / Terra | Unlocked | Replay authorised sandbox failures/disputes and record idempotency/state evidence. |
+| AUTH-001 | Define MFA recovery process | Medium | Planned | Security Agent | Sol | Unlocked | Product/security decision and recovery runbook required. |
 
 ## Current Next Priorities
 

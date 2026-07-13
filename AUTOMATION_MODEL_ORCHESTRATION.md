@@ -1,429 +1,552 @@
-# Tallyo Automation and Model-Orchestration Playbook
+# Tallyo Automation and Agent-Orchestration Policy
 
-This file defines how Codex and supporting agents should continue Tallyo development without wasting effort, weakening controls, or stopping for approvals that have already been granted.
+This is the authoritative repository policy for autonomous task selection, agent roles, work-mode routing, task ownership, locks, handoffs, evidence, and closure.
 
-It is a governance document, not application runtime code. The model names below are orchestration labels. If the current Codex environment cannot explicitly switch models, use the labels as decision-making modes:
+Detailed graphical-dashboard controls are authoritative in `AGENT_HIERARCHY_AND_COMPUTER_USE.md`. Standing owner permission is recorded in `AUTONOMOUS_EXECUTION_PERMISSION.md`. If these documents appear to conflict, use the stricter approval boundary and record the conflict before continuing.
 
-- **Luna** = low-risk formatting and summary work.
-- **Terra** = normal development work.
-- **Sol** = security-critical, payment-critical, data-critical, or release-critical work.
+This policy is governance, not application runtime code. It does not activate background workers or prove that multiple agents are running.
 
-## 1. Core Principle
+## 1. Condensed Operating Rule
 
-Work autonomously by default.
+Tallyo uses one Owner, one Master Orchestrator, eight specialist functional agents, and three model/work modes.
 
-The normal loop is:
+The Orchestrator owns the task queue, role assignment, work-mode selection, task locks, evidence review, approval boundaries, and task closure.
 
-1. Inspect the current repository state.
-2. Identify the next highest-priority task.
-3. Choose the right work mode.
-4. Implement the smallest complete change.
-5. Test and verify it.
-6. Update the relevant documentation.
-7. Commit and push when authorised.
-8. Continue to the next safe task.
-9. Stop only when a real owner decision or manual action is required.
+A functional agent is a responsibility and decision boundary. Luna, Terra, and Sol are work modes, not automatically separate agents. When concurrent agents are unavailable, Codex performs the roles sequentially and records each material handoff or role transition.
 
-Keep the work evidence-driven, security-aware, and version-controlled.
+No two agents may edit the same file or overlapping scope at the same time. Computer use defaults to read-only inspection. Secrets must remain masked. Agents must stop before charges, live-mode changes, production security changes, deletion, real customer actions, legal acceptance, identity verification, or irreversible actions.
 
-## 2. Model / Work-Mode Roles
+A task is closed only after implementation, testing, independent review when required, documentation updates, evidence, lock release, and Orchestrator confirmation.
+
+## 2. Roles and Work Modes Are Different
+
+```text
+Functional agent = a responsibility and decision boundary.
+Model/work mode = the reasoning level used to perform that responsibility.
+```
+
+- Luna, Terra, and Sol are model or work-mode labels.
+- Functional agents are responsibility-based roles.
+- One functional agent may use different work modes as task risk changes.
+- Several roles may be performed by one Codex process when concurrent agents are unavailable.
+- Model labels do not mean three separately running agents.
+- The hierarchy is a coordination model, not proof of simultaneous background workers.
+- Never claim an agent exists or is running unless the environment actually supports it.
+- In a single-agent environment, execute the hierarchy sequentially and record material role transitions in task evidence.
+
+## 3. Hierarchy and Count
+
+```text
+1 Owner
+1 Master Orchestrator
+8 Specialist Agents
+3 Model / Work Modes
+```
+
+There are nine AI functional roles when the Master Orchestrator is included. The Owner is separate and is not an AI agent. Luna, Terra, and Sol are not additional functional agents. Actual concurrency depends on environment capability.
+
+```text
+Owner
+  |
+  v
+Master Orchestrator
+  |
+  +-- Product Agent
+  +-- Frontend Agent
+  +-- Backend / Supabase Agent
+  +-- Security Agent
+  +-- Payments Agent
+  +-- QA Agent
+  +-- Documentation Agent
+  +-- Release Agent
+```
+
+Cross-review path:
+
+```text
+Implementing Specialist
+        |
+        v
+QA Agent
+        |
+        v
+Security / Payments Review when required
+        |
+        v
+Documentation Agent
+        |
+        v
+Master Orchestrator closure
+```
+
+### Level 0 - Owner
+
+The Owner is above all agents and alone approves:
+
+- spending money or upgrading paid plans;
+- subscription prices and final commercial decisions not already documented;
+- Stripe live activation, live products, prices, payment methods, payouts, and banking changes;
+- production launch and legal publication;
+- identity, tax, banking, and business verification;
+- irreversible production changes;
+- deletion, overwrite, or restore-over of production data;
+- production security changes that require an owner decision.
+
+### Level 1 - Master Orchestrator
+
+The Master Orchestrator:
+
+- reads status, decisions, ledgers, diffs, and recent commits;
+- maintains and prioritises the task queue;
+- selects the next Ready task and classifies risk;
+- assigns one owner role and a specialist;
+- selects the work mode;
+- defines acceptance criteria, tests, documentation, and approval boundaries;
+- acquires and releases task/file locks;
+- prevents duplicate or conflicting work;
+- resolves dependencies, handoff conflicts, and documentation contradictions;
+- reviews evidence and decides whether safe autonomous work can continue;
+- identifies owner-blocked actions;
+- closes tasks only with evidence;
+- selects the next task after closure.
+
+Default work mode: Terra. Use Sol for critical planning, architecture, security, payment state, destructive-risk analysis, and release decisions.
+
+### Level 2 - Specialist Agents
+
+#### Product Agent
+
+Owns requirements, workflows, acceptance criteria, backlog priority, onboarding, approved product decisions, scope clarification, and user-facing behaviour.
+
+Default: Terra. Use Sol when behaviour affects permissions, money, identity, privacy, or destructive actions.
+
+#### Frontend Agent
+
+Owns the Vue interface, page structure, forms, state, responsive layout, accessibility, client validation, PWA behaviour, frontend tests, and safe user messaging.
+
+Default: Terra. Luna may handle wording, formatting, and repetitive UI text. Sol reviews changes interacting with authentication, authorization, payment state, security warnings, or sensitive data.
+
+#### Backend / Supabase Agent
+
+Owns schema, tracked migrations, Edge Functions, constraints, RLS, triggers, cron jobs, Vault usage, Auth configuration, server validation, APIs, database tests, and Supabase documentation.
+
+Default: Terra. Sol is required for Auth, RLS, authorization, tenant isolation, privileged functions, service-role use, destructive migrations, sessions, and recovery flows.
+
+#### Security Agent
+
+Owns threat modelling, finding discovery and validation, attack-path analysis, security invariants, fix review, bypass testing, Auth, MFA, sessions, secrets, RLS, release security, and residual-risk documentation.
+
+Default: Sol. When practical, final security verification must be independent from the implementing role.
+
+#### Payments Agent
+
+Owns Stripe Checkout and future Billing, deposits, refunds, disputes, chargebacks, asynchronous payments, webhook signatures, event subscriptions, idempotency, reconciliation, payment state, audit evidence, and test replay.
+
+Use Sol for architecture, state machines, abuse review, and final verification; Terra for scoped implementation and integration tests; Luna only for formatting payment documentation.
+
+#### QA Agent
+
+Owns test planning, regression, unit/integration/database/RLS tests, webhook replay, mobile, PDF, PWA/cache, accessibility, release regression, and failure-path verification.
+
+Default: Terra. Use Sol for malicious test design, bypass tests, security-sensitive assertions, and payment-consistency tests.
+
+#### Documentation Agent
+
+Owns status, handoffs, manuals, operations guides, decisions, completion/release ledgers, screenshot indexes, help content, release notes, and documentation consistency.
+
+Use Luna for formatting, Terra for substantive content, and Sol for security-, payment-, or compliance-sensitive claims. Never promote a planned control to Implemented or Verified without code and evidence.
+
+#### Release Agent
+
+Owns release-candidate preparation, deployment checklists, environment review, migration order, rollback, smoke tests, monitoring, backup/restore readiness, release evidence, and the final owner-action list.
+
+Default: Terra. Sol is required for final security, payment, Auth/session, destructive-risk, and production-readiness gates.
+
+## 4. Model / Work-Mode Routing
 
 ### Luna
 
-Use Luna for low-risk, repetitive, text-heavy work:
-
-- spelling and grammar fixes;
-- Markdown formatting;
-- simple documentation cleanup;
-- log summaries;
-- checklist extraction;
-- commit-message drafts;
-- small text comparisons.
-
-Do not use Luna alone for authentication, authorization, RLS, payments, billing, migrations, destructive operations, architecture, release approval, or legal/compliance decisions.
+Use for low-risk formatting, spelling, summaries, checklist extraction, commit-message drafts, and repetitive text work. Luna cannot independently approve security, payments, migrations, architecture, or releases.
 
 ### Terra
 
-Use Terra as the default development mode:
-
-- Vue/UI changes;
-- routine features;
-- normal debugging;
-- Supabase Edge Function implementation;
-- non-destructive database work;
-- tests;
-- documentation maintenance;
-- deployment preparation;
-- routine Git work.
-
-Terra should handle most day-to-day implementation.
+Use for routine product work, Vue changes, normal debugging, scoped Edge Functions, non-destructive database work, tests, documentation, deployment preparation, and Git work.
 
 ### Sol
 
-Use Sol for high-risk or critical-boundary work:
+Use when mistakes could expose data, move money incorrectly, weaken access control, or create subtle production failure. This includes Auth, MFA, sessions, RLS, tenant isolation, Stripe webhooks/refunds/disputes, secrets, privileged functions, destructive migrations, threat modelling, and final release gates.
 
-- Auth, MFA, account recovery, and sessions;
-- RLS, authorization, and tenant isolation;
-- Stripe webhooks, refunds, disputes, chargebacks, and subscription billing;
-- secrets, cryptography, or service-role decisions;
-- destructive or major migrations;
-- threat modelling and security scans;
-- final release-gate review.
+Selection rule:
 
-Use Sol when a mistake could expose data, move money incorrectly, weaken access control, or create a subtle production failure.
+1. Identity, money, authorization, private data, secrets, production, or destructive operations: Sol for analysis and final review.
+2. Ordinary product development: Terra.
+3. Repetitive low-risk text: Luna.
+4. Uncertainty: start with Terra, escalate to Sol when a critical boundary appears.
 
-## 3. Selection Rule
+Material disagreement is resolved as follows:
 
-Before each task, ask:
+- Sol controls critical security, payment, and data-integrity decisions.
+- Terra controls routine implementation when no critical concern exists.
+- The Owner decides unresolved product, commercial, legal, or financial ambiguity.
+- Material disagreement and its resolution go in `DECISION_LOG.md`.
 
-1. Does it affect identity, money, authorization, user data, secrets, production, or destructive operations? Use Sol for analysis and final verification.
-2. Is it ordinary product development? Use Terra.
-3. Is it repetitive, textual, or low-risk? Use Luna.
-4. Is there uncertainty? Default to Terra, then escalate to Sol if a critical boundary appears.
+## 5. Orchestrator Task Queue
 
-## 4. Main Autonomous Loop
-
-### Inspect
-
-Read the shortest current sources of truth first:
-
-- `APP_STATUS.md`
-- `PRODUCT_COMPLETION_LEDGER.md`
-- `SECURITY_FINDINGS_LEDGER.md`
-- `PROJECT_HANDOFF.md`
-- `SUPABASE_HANDOFF.md` when Supabase is involved
-- latest Git diff and recent commits
-
-Avoid rereading the whole repository unless needed.
-
-### Plan
-
-For non-trivial work, define:
-
-- objective;
-- affected component;
-- selected work mode;
-- security boundary;
-- expected files;
-- tests;
-- documentation updates;
-- rollback approach;
-- approval requirement.
-
-Do not over-plan trivial documentation or formatting work.
-
-### Implement
-
-Rules:
-
-- make the smallest complete change;
-- preserve intended behaviour;
-- avoid unrelated refactors;
-- keep secrets out of code and docs;
-- prefer tracked migrations over undocumented database edits;
-- enforce security server-side or in the database where required;
-- never rely only on hiding UI controls for permissions, subscriptions, or security.
-
-### Verify
-
-Use the strongest verification that fits the risk:
-
-1. syntax/build check;
-2. focused test;
-3. original bug reproduction where possible;
-4. bypass or abuse-case check for security work;
-5. legitimate workflow check;
-6. integration test;
-7. broader regression check;
-8. Sol review for critical work.
-
-Never mark a critical task verified without evidence.
-
-### Document
-
-Update relevant sources of truth:
-
-- `APP_STATUS.md`
-- `PROJECT_HANDOFF.md`
-- `SUPABASE_HANDOFF.md`
-- `SECURITY_STORY.md`
-- `SECURITY_OPERATIONS.md`
-- `SECURITY_FINDINGS_LEDGER.md`
-- `PRODUCT_COMPLETION_LEDGER.md`
-- `DECISION_LOG.md`
-- `RELEASE_READINESS.md`
-
-Use clear statuses:
-
-- Planned
-- Investigating
-- Confirmed
-- In Progress
-- Implemented
-- Verified
-- Blocked
-- Deferred
-- Not Applicable
-
-### Commit and Push
-
-Before committing:
-
-1. inspect the final diff;
-2. remove unrelated changes;
-3. run `git diff --check`;
-4. run relevant tests;
-5. confirm no secrets are included;
-6. update documentation;
-7. use a focused commit message.
-
-After pushing, report:
-
-- branch;
-- commit hash;
-- files changed;
-- tests run;
-- docs updated;
-- remaining risks;
-- next task.
-
-## 5. Security Finding Loop
-
-Use Sol for discovery and validation.
-
-For each finding:
-
-1. Identify vulnerable path, attacker-controlled input, broken control, affected asset, reachability, and evidence.
-2. Validate the issue and classify it as reportable, suppressed, deferred, or not applicable.
-3. Design the narrowest complete fix.
-4. Implement with fail-closed behaviour.
-5. Verify original issue no longer reproduces, alternate bypass fails, and legitimate behaviour still works.
-6. Update `SECURITY_FINDINGS_LEDGER.md`, threat model notes, docs, and release checklist.
-
-## 6. Supabase Loop
-
-Use Terra for routine work and Sol for Auth, RLS, privileged functions, and destructive migrations.
-
-Rules:
-
-- never expose service-role keys;
-- never use user-editable metadata for authorization;
-- do not use `SECURITY DEFINER` casually;
-- require ownership checks;
-- use both `USING` and `WITH CHECK` for update policies;
-- test direct API access when changing RLS;
-- do not rely on front-end filtering.
-
-Preferred flow:
-
-1. Inspect migration history.
-2. Compare repo schema with remote state when needed.
-3. Create tracked migration files for schema changes.
-4. Review RLS, grants, functions, triggers, views, indexes, and constraints.
-5. Apply and test in development/test.
-6. Run advisors where available.
-7. Verify cross-user isolation for access-control changes.
-8. Document and commit.
-9. Stop before destructive production actions.
-
-## 7. Stripe Loop
-
-Use Sol for webhook/security design and Terra for scoped implementation.
-
-Current expected sandbox event set:
+The Orchestrator maintains the queue in `PRODUCT_COMPLETION_LEDGER.md` or a task-specific working record. Every active task must include:
 
 ```text
-checkout.session.completed
-checkout.session.async_payment_succeeded
-checkout.session.async_payment_failed
-refund.created
-refund.updated
-refund.failed
-charge.dispute.created
-charge.dispute.updated
-charge.dispute.closed
-charge.dispute.funds_withdrawn
-charge.dispute.funds_reinstated
+Task ID:
+Title:
+Priority:
+Status:
+Phase:
+Owner role:
+Assigned specialist:
+Model/work mode:
+Risk level:
+Affected files:
+Dependencies:
+Security boundary:
+Acceptance criteria:
+Required tests:
+Required documentation:
+Approval boundary:
+Lock state:
+Branch:
+Commit:
+Evidence:
+Blocked reason:
+Next action:
 ```
 
-Verify:
+Allowed statuses:
 
-- test mode;
-- endpoint and subscribed events;
-- signature validation;
-- idempotency;
-- duplicate and out-of-order delivery;
-- failed events;
-- legitimate payment/refund/dispute flows;
-- audit events and invoice state.
+```text
+Planned
+Ready
+Assigned
+Investigating
+In Progress
+Implementation Complete
+Verification In Progress
+Blocked
+Owner Approval Required
+Verified
+Deferred
+Not Applicable
+Closed
+```
 
-Never switch to live mode without owner approval.
+Queue rules:
 
-## 8. SaaS Subscription Loop
+- Only the Orchestrator assigns tasks.
+- A task has exactly one owner role at a time.
+- Priority changes require a recorded reason.
+- Blocked tasks state the exact blocker.
+- Owner Approval Required states the exact decision, button, charge, or action.
+- Deferred tasks include rationale and a review trigger.
+- Closed tasks include evidence, documentation status, commit, and released locks.
 
-This is future-phase work and must not interrupt current app finishing.
+## 6. Task and File Locks
 
-Before implementation, Sol must define:
+Before editing, record:
 
-- workspace model;
-- membership and roles;
-- plans and entitlements;
-- usage limits;
-- subscription states;
-- grace periods;
-- downgrade/cancellation rules;
-- read-only mode;
-- retention behaviour.
+```text
+Task ID:
+Assigned role:
+Files or paths locked:
+Lock acquired:
+Expected release condition:
+```
 
-Implementation must enforce entitlements server-side or in the database, never only in the UI.
+Rules:
 
-## 9. Documentation Loop
+- One agent owns a file or overlapping range at a time.
+- Agents must not concurrently edit the same file or scope.
+- Directory locks are preferred for migrations, Auth, Stripe webhooks, and shared configuration.
+- Read-only review does not require an edit lock.
+- The Orchestrator resolves lock conflicts.
+- Release locks after commit, rollback, or reassignment.
+- Abandoned locks require a reason and recovery note.
+- Lock state is visible in the task record or completion ledger.
 
-Maintain one source of truth for each purpose:
+High-conflict paths:
 
-- current status: `APP_STATUS.md`;
+```text
+index.html
+schema.sql
+supabase/migrations/
+supabase/functions/stripe-webhook/
+supabase/functions/create-stripe-checkout/
+supabase/functions/create-stripe-refund/
+supabase/functions/log-app-event/
+APP_STATUS.md
+PROJECT_HANDOFF.md
+AUTOMATION_MODEL_ORCHESTRATION.md
+PRODUCT_COMPLETION_LEDGER.md
+RELEASE_READINESS.md
+```
+
+## 7. Standard Agent Flow
+
+```text
+Owner-approved roadmap
+        |
+        v
+Master Orchestrator
+        +-- reads status and ledgers
+        +-- chooses next task
+        +-- classifies risk
+        +-- acquires task/file locks
+        +-- assigns specialist and work mode
+        |
+        v
+Specialist Agent
+        +-- inspects
+        +-- plans
+        +-- implements
+        +-- runs focused tests
+        |
+        v
+QA Agent
+        +-- verifies expected behaviour
+        +-- verifies failure behaviour
+        +-- runs regression tests
+        |
+        v
+Security or Payments Review
+        +-- required for critical boundaries
+        |
+        v
+Documentation Agent
+        +-- updates sources of truth
+        |
+        v
+Master Orchestrator
+        +-- reviews evidence
+        +-- releases locks
+        +-- commits and pushes when authorised
+        +-- closes or blocks task
+        +-- selects next task
+```
+
+## 8. Model-Interchange Patterns
+
+### Low-risk documentation
+
+```text
+Luna -> format or clean
+Terra -> quick factual review
+Documentation Agent -> update source of truth
+Orchestrator -> commit and close
+```
+
+### Normal feature
+
+```text
+Terra -> plan and implement
+QA Agent using Terra -> test
+Luna -> documentation cleanup
+Orchestrator -> review, commit, continue
+```
+
+### Security-sensitive feature
+
+```text
+Sol -> define risk and invariant
+Terra -> implement scoped change
+QA Agent -> legitimate, malicious, and bypass tests
+Sol -> independently verify boundary
+Luna -> format evidence
+Documentation Agent -> update ledgers and handoff
+Orchestrator -> close only after evidence
+```
+
+### Payment feature
+
+```text
+Payments Agent using Sol -> define state machine, events, risks, approval boundary
+Backend Agent using Terra -> implement
+QA Agent using Terra/Sol -> replay duplicates, failures, and out-of-order events
+Payments Agent using Sol -> verify financial consistency
+Documentation Agent -> update payment operations
+Orchestrator -> commit and continue
+```
+
+### Major migration
+
+```text
+Backend Agent using Sol -> assess data and rollback risk
+Backend Agent using Terra -> implement tracked migration
+QA Agent -> apply in development/test and verify
+Security Agent using Sol -> review access and integrity
+Owner -> approve production action
+Release Agent -> execute approved production procedure
+```
+
+### Release
+
+```text
+Release Agent using Terra -> prepare release candidate
+QA Agent -> regression
+Documentation Agent using Luna/Terra -> consistency review
+Security Agent using Sol -> final gate
+Payments Agent using Sol -> final payment gate
+Master Orchestrator -> compile owner actions
+Owner -> approve launch
+```
+
+## 9. Task Execution Loops
+
+### Main loop
+
+1. Inspect current status, queue, decisions, diff, commits, and relevant code.
+2. Plan the smallest complete change with risk, tests, rollback, docs, and approval boundary.
+3. Acquire locks and implement within scope.
+4. Verify syntax, legitimate flow, failure flow, and bypass cases appropriate to risk.
+5. Update sources of truth.
+6. Inspect the final diff and scan for secrets.
+7. Commit and push when authorised.
+8. Release locks, close or block the task, and select the next Ready task.
+
+### Security finding loop
+
+Use Sol to identify the source, attacker-controlled input, broken control, affected asset, reachability, evidence, and severity. Record the finding before fixing. Implement fail-closed behaviour, verify the original path and alternate bypasses, preserve legitimate behaviour, and update `SECURITY_FINDINGS_LEDGER.md`.
+
+### Supabase loop
+
+Use Terra for routine work and Sol for Auth, RLS, privileged functions, and destructive migrations. Never expose service-role keys, use user-editable metadata for authorization, or rely on frontend filtering. Prefer tracked migrations, review grants/policies/functions/triggers, test direct API access and cross-user isolation, and stop before destructive production action.
+
+### Stripe loop
+
+Use Sol for design and final review. Verify test/live mode, signatures, idempotency, known app-created sessions, invoice/user binding, amounts, currencies, duplicate and out-of-order events, failed events, refunds, disputes, audit evidence, and invoice state. Never activate live mode without Owner approval.
+
+### Documentation loop
+
+Maintain these authorities:
+
+- current stage: `APP_STATUS.md`;
+- orchestration: this file;
+- computer use: `AGENT_HIERARCHY_AND_COMPUTER_USE.md`;
+- owner permission: `AUTONOMOUS_EXECUTION_PERMISSION.md`;
 - project handoff: `PROJECT_HANDOFF.md`;
-- Supabase details: `SUPABASE_HANDOFF.md`;
+- Supabase: `SUPABASE_HANDOFF.md`;
 - security story: `SECURITY_STORY.md`;
-- operational readiness: `SECURITY_OPERATIONS.md`;
-- product completion: `PRODUCT_COMPLETION_LEDGER.md`;
+- operations: `SECURITY_OPERATIONS.md`;
+- findings: `SECURITY_FINDINGS_LEDGER.md`;
+- capability/queue: `PRODUCT_COMPLETION_LEDGER.md`;
 - decisions: `DECISION_LOG.md`;
 - release gates: `RELEASE_READINESS.md`.
 
-Update documentation whenever behaviour, UI wording, routes, security posture, plan limits, Stripe events, Supabase configuration, or release state changes.
+Do not promote Planned to Implemented or Verified without evidence.
 
-## 10. Test Loop
+### Release loop
 
-Test layers:
+Prepare tests, migrations, deployment and rollback instructions, monitoring, backup/restore, support, privacy/legal groundwork, and release evidence. Sol reviews open findings, RLS, Auth/MFA/sessions, payments, email, cron, secrets, backups, incident response, privacy workflows, and claims. Stop before live Stripe, paid upgrades, public launch, final legal publication, production data migration, or irreversible changes.
 
-1. unit or syntax checks;
-2. integration checks;
-3. database checks;
-4. RLS checks;
-5. webhook replay;
-6. UI workflows;
-7. mobile;
-8. PDF;
-9. PWA/cache;
-10. release regression.
+## 10. Handoffs
 
-For critical changes, test the malicious case, the legitimate case, and at least one alternate bypass.
-
-## 11. Release Loop
-
-Preparation:
-
-- tests;
-- migrations;
-- deployment checklist;
-- rollback instructions;
-- monitoring/logging;
-- backup/restore procedure;
-- user manual;
-- support runbook;
-- privacy/legal groundwork.
-
-Final review uses Sol and must cover:
-
-- open findings;
-- RLS;
-- Auth/MFA/sessions;
-- Stripe;
-- email;
-- recurring jobs;
-- secrets;
-- backups;
-- incident response;
-- privacy workflows;
-- release claims.
-
-Stop before live Stripe, paid upgrades, public launch, production data migration, final legal publication, or irreversible changes.
-
-## 12. Manual Approval Boundaries
-
-Stop before:
-
-- spending money;
-- upgrading a paid service;
-- purchasing/changing a domain;
-- activating live payments;
-- sending real customer communications;
-- deleting or overwriting production data;
-- rotating owner-controlled secrets;
-- changing bank or payout settings;
-- publishing final legal terms;
-- choosing prices without owner decision;
-- launching publicly;
-- identity, tax, banking, or business verification;
-- irreversible production migrations.
-
-Do not stop for safe formatting, tests, routine docs, non-destructive inspection, authorised development migrations, authorised commits/pushes, or low-risk improvements.
-
-## 13. Computer-Use Policy
-
-Default mode:
+Every material handoff includes:
 
 ```text
-Inspect -> record evidence -> recommend -> stop before material change
+Task ID:
+From role:
+To role:
+Reason:
+Current status:
+Files changed:
+Files locked:
+Branch:
+Commit:
+Tests completed:
+Tests remaining:
+Security boundary:
+Known risks:
+Evidence:
+Required next action:
+Approval needed:
 ```
 
-Permission to inspect a dashboard is not permission to change it.
+Rules:
 
-Before any dashboard change, confirm:
+- No handoff without current status.
+- No hidden uncommitted changes.
+- Incomplete work is labelled clearly.
+- The receiving role confirms scope before editing.
+- The Orchestrator resolves conflicting handoffs.
+- Final critical verification cannot rely only on the implementer's claim when independent review is practical.
 
-- provider;
-- organisation/account;
-- project;
-- environment;
-- test/live mode;
-- target setting;
-- approval boundary.
+## 11. Conflicts and Failure Handling
 
-Never autonomously:
+### Task conflict
 
-- reveal, copy, screenshot, or document secret values;
-- accept charges or legal terms;
-- bypass MFA, CAPTCHA, or identity checks;
-- delete production data;
-- send real customer communications;
-- issue real refunds;
-- change live DNS, payout, Auth, or payment settings without approval.
+The Orchestrator orders tasks affecting the same boundary, usually placing the higher-risk dependency first. Both records name the dependency and locks prevent concurrent edits.
 
-Evidence should record provider, project, environment, dashboard path, previous/new values when safe, date/time, redactions, validation, rollback, and remaining uncertainty.
+### Documentation conflict
 
-## 14. Context-Efficiency Rules
+Resolve conflicts in this order:
 
-To reduce wasted tokens:
+1. verified code and test evidence;
+2. current status ledger;
+3. current decision log;
+4. specialised handoff;
+5. roadmap;
+6. historical documentation.
 
-- read status and ledgers first;
-- inspect changed files;
-- use Git diffs;
-- avoid broad rescans after small changes;
-- persist findings in files;
-- commit often;
-- use the lowest-risk work mode that can safely complete the task.
+Do not silently select the convenient version. Record material reconciliation.
 
-## 15. Completion Criteria
+### Implementation failure
+
+Stop repeated attempts, preserve the exact error and current state, identify partial application, avoid duplicate resources, roll back only when safe and authorised, and escalate sensitive failures to Sol. Production, destructive, billable, or irreversible recovery requires Owner approval.
+
+Computer-use failure rules are in `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
+
+## 12. Approval Boundaries
+
+Standing permission allows safe repository work, tests, documentation, authorised development changes, commits, and pushes. It never overrides the Owner-only boundaries in section 3 or `AUTONOMOUS_EXECUTION_PERMISSION.md`.
+
+When approval is required:
+
+1. Stop only the blocked action.
+2. Name the exact decision, button, charge, or action.
+3. State the recommended option and alternatives.
+4. Continue independent safe work.
+5. Resume automatically after approval until the next real boundary.
+
+## 13. Completion and Validation
 
 A task is complete only when:
 
-- requirement is satisfied;
-- code/docs exist;
-- tests/checks pass;
+- requirements and acceptance criteria are satisfied;
+- code or documentation exists;
+- focused and risk-appropriate tests pass;
 - legitimate and failure paths are considered;
-- critical boundaries are verified;
-- documentation is updated;
-- no secrets are exposed;
-- diff is focused;
-- commit is created and pushed when authorised;
-- ledger/status is updated.
+- critical boundaries receive required independent review;
+- sources of truth are updated;
+- no secrets or unnecessary personal data are exposed;
+- the diff is focused and `git diff --check` passes;
+- evidence, branch, and commit are recorded;
+- locks are released;
+- the Orchestrator confirms closure.
 
-## 16. Final Principle
+Governance changes additionally require:
 
-Use the least expensive mode that can safely complete the task:
+- valid internal links and closed Markdown code fences;
+- no duplicate headings or contradictory agent counts;
+- no conflicting Luna/Terra/Sol definitions;
+- no contradictory approval boundary;
+- correct operation in concurrent and single-agent sequential environments;
+- no claim that unavailable background agents are running.
 
-- Luna handles small work.
-- Terra builds the product.
-- Sol protects critical boundaries.
+## 14. Context Efficiency
 
-The goal is not to minimize every individual step. The goal is to minimize wasted effort while preserving correctness, security, and product quality.
+- Read status and ledgers before broad scans.
+- Inspect diffs and changed files first.
+- Persist evidence in repository documents.
+- Avoid rescanning unchanged scope.
+- Use the lowest-risk mode that can safely complete the task.
+- Keep task records concise but sufficient for another role to continue.
+
+## 15. Final Principle
+
+Luna handles low-risk cleanup. Terra builds the product. Sol protects critical boundaries. Functional agents own responsibilities; the Orchestrator owns coordination and evidence. The aim is to reduce wasted effort without sacrificing security, correctness, or honest reporting.

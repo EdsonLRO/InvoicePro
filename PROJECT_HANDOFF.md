@@ -1,5 +1,8 @@
 # PROJECT_HANDOFF.md — Tallyo
 
+> Mandatory governance reading before taking ownership: `AUTOMATION_MODEL_ORCHESTRATION.md`, `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, and `AUTONOMOUS_EXECUTION_PERMISSION.md`.
+> The first file is authoritative for agent hierarchy, queue, locks, handoffs, and closure. The second is authoritative for graphical-dashboard operations.
+
 > Handoff for an AI coding agent (e.g. ChatGPT / Codex) taking over development.
 > Read this fully before editing. Where facts are uncertain they are marked **Unknown / needs confirmation**.
 
@@ -381,13 +384,18 @@ Near-term (in rough order):
 
 ## 21. What Codex should do first
 
-1. **Read the current sources of truth first:** `APP_STATUS.md`, `PRODUCT_COMPLETION_LEDGER.md`, `DECISION_LOG.md`, `RELEASE_READINESS.md`, and `AUTOMATION_MODEL_ORCHESTRATION.md`.
-2. **Read `index.html`, `schema.sql`, `recurring_setup.sql`, and the relevant Edge Function** to understand real structure before changing implementation. Trust the code over assumptions.
-3. **Confirm the unknowns**: exact Supabase project URL/keys location (`config.js`), Tailwind input filename, and third-party library versions.
-4. **Verify Tallyo rebrand hygiene** after UI changes. Keep visible app text, `manifest.json`, and icons branded as Tallyo, and keep the "Change Password" wording exactly as specified.
-5. **Re-verify the recurring automation** (function deploys; cron job registered/active) after any backend change.
-6. **Set up the local/Codex workflow**: rebuild Tailwind when classes change; after deploy, hard-refresh/Incognito to bypass the service worker.
-7. When touching invoices/templates, **respect the column-name mapping** in section 13 (`customer_snapshot`, `issue_date`, `grand_total`, `history`).
+1. **Read governance and current sources of truth first:** `AUTOMATION_MODEL_ORCHESTRATION.md`, `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, `AUTONOMOUS_EXECUTION_PERMISSION.md`, `APP_STATUS.md`, `PRODUCT_COMPLETION_LEDGER.md`, `DECISION_LOG.md`, and `RELEASE_READINESS.md`.
+2. **Use the hierarchy and locks:** the Master Orchestrator assigns one owner role and work mode, records the task, and acquires a file/path lock before non-trivial edits. Do not edit a file or overlapping scope owned by another active task.
+3. **Read `index.html`, `schema.sql`, `recurring_setup.sql`, and the relevant Edge Function** to understand real structure before changing implementation. Trust the code over assumptions.
+4. **Confirm the unknowns**: exact Supabase project URL/keys location (`config.js`), Tailwind input filename, and third-party library versions.
+5. **Verify Tallyo rebrand hygiene** after UI changes. Keep visible app text, `manifest.json`, and icons branded as Tallyo, and keep the "Change Password" wording exactly as specified.
+6. **Re-verify the recurring automation** (function deploys; cron job registered/active) after any backend change.
+7. **Set up the local/Codex workflow**: rebuild Tailwind when classes change; after deploy, hard-refresh/Incognito to bypass the service worker.
+8. When touching invoices/templates, **respect the column-name mapping** in section 13 (`customer_snapshot`, `issue_date`, `grand_total`, `history`).
+
+### Required handoff
+
+Every material role or session handoff must identify the task ID, source and receiving roles, current status, changed and locked files, branch/commit, tests complete and remaining, security boundary, risks, evidence, next action, and approval need. Do not hand off hidden uncommitted work. Critical verification should be independent from implementation when practical.
 
 ---
 

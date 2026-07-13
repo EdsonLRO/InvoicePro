@@ -2,7 +2,8 @@
 
 This is the short source-of-truth for where Tallyo is right now.
 
-For autonomous execution rules, model/work-mode routing, approval boundaries, and context-efficiency guidance, see `AUTOMATION_MODEL_ORCHESTRATION.md`.
+For the authoritative agent hierarchy, task queue, locks, handoffs, model/work-mode routing, and approval boundaries, see `AUTOMATION_MODEL_ORCHESTRATION.md`.
+For detailed graphical-dashboard and computer-use controls, see `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
 For capability tracking and release gates, see `PRODUCT_COMPLETION_LEDGER.md` and `RELEASE_READINESS.md`.
 
 ## Current focus

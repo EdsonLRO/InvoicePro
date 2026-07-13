@@ -2,6 +2,8 @@
 
 This document records the owner's standing permission for Codex to continue Tallyo development, remediation, testing, documentation, Supabase, Git and deployment-preparation work autonomously.
 
+This authority is exercised through the Master Orchestrator defined in `AUTOMATION_MODEL_ORCHESTRATION.md`. All functional roles remain subject to the same approval boundaries. Detailed computer-use rules are authoritative in `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
+
 ## Permitted Work
 
 Codex may:
@@ -17,6 +19,8 @@ Codex may:
 - create commits;
 - push changes to the appropriate repository branch;
 - continue through multiple work stages without asking for repeated permission.
+
+The Orchestrator must assign one owner role, classify risk, record affected files, acquire edit locks for non-trivial work, define evidence, and close the task only after required verification. No specialist role may use this standing permission to bypass an Owner-only boundary.
 
 ## Security Finding Record
 
@@ -58,6 +62,8 @@ After implementing each finding, update the same record with:
 - Encountering a material product decision with multiple valid options and no existing repository decision.
 - Encountering an action that requires interactive identity verification, payment confirmation, MFA approval or access that only the owner can provide.
 
+For computer use, the default is Read only. A safe reversible dashboard change may proceed only when it is already authorised, limited to development/test/staging, free of cost and customer impact, keeps secrets masked, has a recorded previous value and rollback, and can be validated immediately. Material dashboard changes require Owner approval.
+
 When approval is required:
 
 1. Stop only the blocked action.
@@ -88,6 +94,7 @@ Keep the following documents synchronised with the actual repository state:
 
 - `APP_STATUS.md`
 - `AUTOMATION_MODEL_ORCHESTRATION.md`
+- `AGENT_HIERARCHY_AND_COMPUTER_USE.md`
 - `PROJECT_HANDOFF.md`
 - `PRODUCT_COMPLETION_LEDGER.md`
 - `DECISION_LOG.md`
@@ -135,6 +142,15 @@ After pushing, report:
 - security findings resolved;
 - unresolved issues;
 - any manual action required next.
+
+## Task Coordination
+
+- The Master Orchestrator owns the queue, role assignment, work-mode selection, edit locks, approval boundaries, evidence review, and closure.
+- Functional agents are responsibility roles; Luna, Terra, and Sol are work modes, not automatically separate agents.
+- When concurrent agents are unavailable, one Codex process performs roles sequentially and records material handoffs.
+- One agent owns a file or overlapping edit scope at a time.
+- Every material handoff includes current status, files/locks, tests, evidence, risks, and the required next action.
+- Computer use defaults to Read only and follows `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
 
 ## Final Operating Principle
 

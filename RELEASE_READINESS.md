@@ -31,6 +31,7 @@ Tallyo is a real working app and strong portfolio project, but it is not yet liv
 | PDF regression | Planned | Test mobile PDF download and long multi-page invoices. |
 | PWA/service-worker regression | Planned | Confirm cache behaviour and update instructions. |
 | Documentation accuracy | In Progress | Keep status/handoff/security docs synced with real implementation. |
+| Agent governance documentation | Verified | Hierarchy, queue, locks, handoffs, computer-use controls, provider restrictions, and approval boundaries are authoritative and cross-linked. Recheck consistency at each release candidate. |
 
 ## Manual Approval Boundaries
 

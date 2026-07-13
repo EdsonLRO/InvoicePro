@@ -198,10 +198,12 @@ Recommended components:
 
 Suggested initial plans: Free, Pro and Business. Exact pricing and limits must be evidence-based and legally reviewed before publication.
 
-## 6. Agent hierarchy
+## 6. Future SaaS responsibility domains
+
+The active Tallyo hierarchy is authoritative in `AUTOMATION_MODEL_ORCHESTRATION.md`: one Master Orchestrator and eight specialist functional agents operating under the Owner. The labels below are future SaaS business responsibility domains, not additional active agents and not a contradictory agent count. If that future phase is approved, the Orchestrator maps these domains onto the eight specialist roles.
 
 ```text
-Master Business Agent
+Future SaaS business responsibility map
 ├── Product and Strategy Agent
 ├── Engineering Architecture Agent
 ├── Security Lead Agent
@@ -215,7 +217,7 @@ Master Business Agent
 └── Growth and Analytics Agent
 ```
 
-The master agent coordinates but cannot silently overrule a security or legal release block. Any accepted risk must record owner, reasoning, compensating controls, expiry/review date and required follow-up.
+The Master Orchestrator coordinates work but cannot silently overrule a security finding, payment gate, or qualified legal review. The Owner remains the final human decision-maker where policy permits risk acceptance. Any accepted risk must record owner, reasoning, compensating controls, expiry/review date and required follow-up.
 
 ## 7. Controlled agent learning
 
