@@ -92,7 +92,7 @@ Honest limitations:
 - The app is **built with data-protection principles in mind**, but it is **not** formally GDPR compliant and must not be described as such.
 - Activity history is useful, but not a tamper-proof audit log.
 - Append-only audit logging now covers provider events and selected sensitive app actions, but it is not yet a complete security monitoring or compliance audit system.
-- Formal backups and restore testing are not complete.
+- Supabase Pro daily backups and a recovery runbook are in place; current-backup evidence and a timed restore test are still required.
 - MFA recovery/backup codes are not implemented.
 - Stripe refund requests plus refund, dispute, chargeback, and failed-payment lifecycle handling are deployed and subscribed in the sandbox webhook destination, but still need broader replay testing and live-mode readiness before real customer use.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
@@ -171,7 +171,7 @@ Never commit real `.env` files, service role keys, API keys, webhook secrets, da
 - `pg_cron` and `pg_net` are used for scheduled Edge Function calls.
 - `generate-recurring-daily` runs recurring invoice generation.
 - `send-overdue-reminders-daily` runs opt-in overdue reminder automation.
-- Free-tier Supabase projects can pause, which stops scheduled jobs.
+- The Supabase organisation is now Pro; scheduled jobs still require monitoring and must be disabled in restored clones.
 
 For full details, see `SUPABASE_HANDOFF.md`.
 
@@ -182,7 +182,7 @@ For full details, see `SUPABASE_HANDOFF.md`.
 Current app/security work:
 
 1. Finish Stripe sandbox replay testing for refunds, disputes, chargebacks, failed/asynchronous states, and clearer UI wording where needed.
-2. Add a formal backup and restore plan, then run a restore test.
+2. Verify a current scheduled backup and run the documented non-production restore test in `BACKUP_RESTORE_RUNBOOK.md`.
 3. Expand append-only audit logging further, especially privileged automation failures and backup/restore evidence.
 4. Add MFA recovery/backup-code planning, stronger account recovery controls, and consider upgrading all-devices logout with a server-side email-code confirmation flow.
 5. Add password-strength and breached-password checks where supported.

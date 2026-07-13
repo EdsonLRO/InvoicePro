@@ -180,6 +180,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `supabase/functions/log-app-event/index.ts` | Authenticated Edge Function (Deno/TS) that records allowlisted sensitive app-action audit events. |
 | `supabase/functions/stripe-webhook/index.ts` | Signed Stripe webhook receiver that records verified Checkout payments. |
 | `SECURITY_OPERATIONS.md` | Practical backup, restore, data-protection, email, payment, and release gates before real users. |
+| `BACKUP_RESTORE_RUNBOOK.md` | Supabase Pro backup posture, logical export safety, restore-test procedure, side-effect controls, evidence, and approval boundaries. |
 | `EMAIL_PHASE.md` | Staged Resend email plan: DNS setup, manual sending, webhooks, then automation. |
 | `ROADMAP_EMAIL_PAYMENTS.md` | Current implementation state, deploy checks, and remaining work for email/payments. |
 | Tailwind build inputs | `tailwind.config.js` + a Tailwind input CSS file used by the CLI to produce `tailwind.css`. **Unknown / needs confirmation:** exact input filename in the repo. |
@@ -289,7 +290,7 @@ order by start_time desc limit 5;
 supabase functions deploy generate-recurring
 ```
 
-**Caveat:** Supabase free tier can pause inactive projects; a paused project won't run cron.
+**Plan note:** the Supabase organisation is now Pro, so the former Free-tier inactivity-pause limitation no longer applies. Cron health still needs operational monitoring.
 
 ---
 
@@ -315,7 +316,7 @@ supabase functions deploy generate-recurring
 
 - **No GDPR-compliance claim.** The app is **not** certified or "fully compliant". Real data-protection groundwork (privacy policy, lawful basis, data-subject rights, consent/unsubscribe, breach process, registration) is **future work** and required before onboarding real paying customers.
 - **Activity history is not a tamper-proof audit log** — it lives in editable records. Provider events and selected sensitive app actions now use append-only `audit_events`; company/settings saves are logged by category only, without storing the actual settings values. Full monitoring/compliance audit coverage is still future work.
-- **No formal backups** on the current free tier; no documented retention/restore.
+- **Backup posture is in progress:** Supabase Pro daily backups and seven-day retention are documented in `BACKUP_RESTORE_RUNBOOK.md`; current backup evidence and a timed restore test still remain.
 - **MFA has no recovery/backup codes**; the app has local password-strength checks, but Supabase Auth password policy/rate-limit settings and breached-password screening still need confirmation before real onboarding.
 - **CSP allows one permissive setting** the in-browser Vue template compilation requires (`unsafe-eval`) — a documented trade-off.
 - **Stripe lifecycle needs more end-to-end testing:** failed-payment, refund, refund-failure, and dispute awareness are deployed and the sandbox Stripe webhook destination is subscribed to the needed events, but replay testing and operational policy are still needed before real customer use.

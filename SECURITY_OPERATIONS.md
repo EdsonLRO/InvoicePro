@@ -12,22 +12,19 @@ Future SaaS subscription billing, plan tiers, workspaces, RBAC, and the public m
 
 ## Backup And Restore
 
-Minimum before real users:
+Supabase Pro is active and provides daily database backups with a seven-day retention window. The current operational procedure is in `BACKUP_RESTORE_RUNBOOK.md`.
 
-- Confirm the Supabase plan includes scheduled database backups.
-- Document backup frequency and retention.
-- Run a restore test into a separate non-production Supabase project.
+Remaining release gate:
+
+- Verify the first/current scheduled backup in the Dashboard.
+- Run a timed restore test into a separate non-production project or controlled local environment.
 - Keep production, test, and local data clearly separated.
-- Export a small user-owned dataset and confirm invoices, customers, saved items, company settings, payments, and recurring templates can be recovered.
+- Confirm invoices, customers, saved items, company settings, payments, recurring templates, Auth records, and audit events recover as expected.
+- Re-run cross-user RLS isolation tests after restoration.
+- Disable cloned cron and outbound automation before it can send email, create invoices, or call payment services.
+- Confirm Edge Function secrets, provider dashboards, Auth settings, and Storage objects are handled separately.
 
-Manual restore test checklist:
-
-1. Create a test account with company settings, a customer, a saved item, an invoice, a payment, and a recurring schedule.
-2. Take or identify the backup snapshot.
-3. Restore into a separate project, never over production during a test.
-4. Confirm row counts and sample records match.
-5. Confirm RLS still blocks cross-user reads.
-6. Confirm Edge Function secrets are not copied into source or logs.
+PITR is not enabled by this runbook. It is a separately billed add-on and remains an Owner decision.
 
 ## Data Protection Groundwork
 

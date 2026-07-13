@@ -22,7 +22,7 @@ Statuses: Planned, Investigating, Confirmed, In Progress, Implemented, Verified,
 | Activity history | Implemented | User-facing document/schedule activity history; not tamper-proof. |
 | Append-only audit events | In Progress | Provider events and selected app actions covered, including settings saves by category. More automation/backups evidence remains. |
 | Account security | In Progress | Supabase Auth, email confirmation, TOTP MFA, password change AAL2 handling, local/all-devices logout. MFA recovery remains. |
-| Backup and restore | Planned | Free-tier manual runbook needed now; Pro restore test needed before real customers. |
+| Backup and restore | In Progress | Supabase Pro daily backups and seven-day retention are documented in `BACKUP_RESTORE_RUNBOOK.md`; scheduled-backup evidence and a timed non-production restore test remain. |
 | Privacy/legal groundwork | Planned | Privacy policy, terms, retention/export/delete process, breach process. |
 | Final mobile/PDF regression | Planned | Needed before treating app as customer-ready. |
 | Multi-agent governance and computer-use controls | Verified | One Owner, one Master Orchestrator, eight specialist roles, task queue, locks, handoffs, provider controls, and validation are documented in the authoritative governance files. |
@@ -35,16 +35,16 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 | Task ID | Title | Priority | Status | Owner role | Work mode | Lock state | Evidence / next action |
 |---|---|---|---|---|---|---|---|
 | GOV-001 | Complete agent governance and computer-use controls | High | Verified | Master Orchestrator | Terra with Sol policy review | Released after commit | Hierarchy, queue, locks, handoffs, provider controls, cross-links, and validation completed. |
-| OPS-001 | Backup and restore runbook | High | Ready | Release Agent | Terra with Sol review | Unlocked | Define free-tier procedure and Pro restore-test boundary. |
+| OPS-001 | Backup and restore runbook | High | Verified | Release Agent | Terra with Sol review | Released after commit | Pro plan confirmed, seven-day daily-backup procedure documented, restore side effects and Owner cost/destructive boundaries recorded in `BACKUP_RESTORE_RUNBOOK.md`. |
 | PAY-TEST-001 | Finish Stripe sandbox lifecycle replay evidence | High | Ready | Payments Agent | Sol / Terra | Unlocked | Replay authorised sandbox failures/disputes and record idempotency/state evidence. |
 | AUTH-001 | Define MFA recovery process | Medium | Planned | Security Agent | Sol | Unlocked | Product/security decision and recovery runbook required. |
 
 ## Current Next Priorities
 
-1. Backup/restore runbook for current Supabase free-tier limitations.
-2. Stripe sandbox replay testing evidence for refund-failure, failed/asynchronous payment, and dispute events.
+1. Stripe sandbox replay testing evidence for refund-failure, failed/asynchronous payment, and dispute events.
+2. Verify a current scheduled backup and run an Owner-approved timed restore test into a separate environment.
 3. MFA recovery/backup-code planning or documented recovery process.
-4. Supabase Auth password policy / breached-password checks when available on the selected plan.
+4. Supabase Auth password policy / breached-password checks on the Pro plan.
 5. Final mobile/PDF/PWA regression pass.
 6. Data-protection/legal groundwork before real customers.
 
