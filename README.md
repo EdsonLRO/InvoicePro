@@ -93,7 +93,7 @@ Honest limitations:
 - Activity history is useful, but not a tamper-proof audit log.
 - Append-only audit logging now covers provider events and selected sensitive app actions, but it is not yet a complete security monitoring or compliance audit system.
 - Supabase Pro daily backups and a recovery runbook are in place; current-backup evidence and a timed restore test are still required.
-- MFA recovery/backup codes are not implemented.
+- Supabase does not provide recovery codes. Tallyo supports a second authenticator and blocks email-only MFA recovery, but final browser acceptance tests and an all-factors-lost support process remain.
 - Stripe refund requests plus refund, dispute, chargeback, and failed-payment lifecycle handling are deployed and subscribed in the sandbox webhook destination, but still need broader replay testing and live-mode readiness before real customer use.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
 
@@ -184,8 +184,8 @@ Current app/security work:
 1. Finish Stripe sandbox replay testing for refunds, disputes, chargebacks, failed/asynchronous states, and clearer UI wording where needed.
 2. Verify a current scheduled backup and run the documented non-production restore test in `BACKUP_RESTORE_RUNBOOK.md`.
 3. Expand append-only audit logging further, especially privileged automation failures and backup/restore evidence.
-4. Add MFA recovery/backup-code planning, stronger account recovery controls, and consider upgrading all-devices logout with a server-side email-code confirmation flow.
-5. Add password-strength and breached-password checks where supported.
+4. Complete `MFA_RECOVERY_RUNBOOK.md` acceptance tests and define the all-factors-lost support process; consider upgrading all-devices logout with a server-side email-code confirmation flow.
+5. Enable and test Supabase leaked-password protection after Owner approval, and review the remaining server-side Auth policy settings.
 6. Complete privacy/data-protection groundwork before real customer use.
 7. Keep security docs, screenshots, and portfolio evidence in sync with the real app.
 

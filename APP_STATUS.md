@@ -38,9 +38,9 @@ Still to finish before treating the app as customer-ready:
 - Decide the operational chargeback/refund policy and customer support process.
 - Verify current Supabase Pro scheduled-backup evidence and complete at least one timed non-production restore test. The operating procedure is documented in `BACKUP_RESTORE_RUNBOOK.md`.
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations. Company/settings saves are now covered at a privacy-safe category level.
-- MFA recovery/backup codes or a documented recovery process.
+- Complete browser acceptance testing of the new fail-closed MFA, backup-authenticator, and password-recovery paths documented in `MFA_RECOVERY_RUNBOOK.md`.
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.
-- Password-strength and breached-password checks where supported.
+- Enable and verify Supabase leaked-password protection after Owner approval; the live advisor reported it disabled on 2026-07-13.
 - Privacy policy, terms, retention position, export/deletion process, and breach process.
 - Final mobile and PDF regression pass.
 - Documentation/screenshots/portfolio evidence kept in sync with the real app.
@@ -74,7 +74,7 @@ Strong controls already implemented:
 
 - Supabase Auth with server-side password hashing.
 - Real email confirmation.
-- Optional TOTP MFA.
+- Optional TOTP MFA with fail-closed assurance checks and support for one backup authenticator.
 - Explicit local logout and all-devices logout, with password confirmation and MFA when required for all-devices logout.
 - Database-enforced Row Level Security.
 - Public keys only in the browser; secrets stay server-side.
@@ -87,7 +87,7 @@ Known limits:
 
 - Activity history is useful, but not tamper-proof.
 - `audit_events` now covers provider events and selected sensitive app actions, but it is not a full compliance/SIEM audit system.
-- MFA is implemented, but recovery codes and stronger recovery procedures are not finished.
+- Supabase does not provide recovery codes. Tallyo now supports a second authenticator and prevents email-only MFA bypass, but the new recovery paths still need browser acceptance testing and an all-factors-lost support procedure.
 - All-devices logout exists, but a future email-code confirmation flow would be stronger for production account recovery/security UX.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
 - Supabase Pro daily backups and the recovery runbook are in place, but a timed restore test, privacy operations, and incident response are not complete.

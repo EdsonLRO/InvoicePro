@@ -56,6 +56,10 @@ The rest of this document is the journey from there to something you can actuall
 
 **Why it matters, and how it was checked.** A password can be guessed or stolen; the rotating code is something only the real person's phone has right now. I confirmed the whole flow, including the important negative case — that entering the *wrong* code is correctly refused. Testing that the lock says "no" to the wrong key matters as much as testing it says "yes" to the right one.
 
+**Recovery hardening added later.** The sign-in gate now fails closed: if Supabase cannot prove the required **Authenticator Assurance Level (AAL)** or cannot safely load the verified factors, Tallyo signs out the incomplete session instead of loading the app. A user can also add a second authenticator as a backup. Supabase does not provide recovery codes, so this keeps recovery inside the same two-factor model rather than treating email access as a magic bypass.
+
+The password-reset page now uses masked fields and requires a TOTP code when the account has MFA. If the app cannot establish the recovery requirements, the update stays disabled. Removing a backup factor or switching MFA off also requires a fresh authenticator code. These paths are implemented, with final browser acceptance testing still recorded as open work in `MFA_RECOVERY_RUNBOOK.md`.
+
 ---
 
 **Session safety added later.** The Account page now separates **Log Out This Device** from **Log Out All Devices**. That matters because the two actions are not the same risk. Logging out one browser should be easy and local. Logging out every device is a stronger security action, so the app asks for the current password and, where MFA is active, the authenticator code before using Supabase's global sign-out. In plain terms: ordinary exit is simple; account-wide session revocation gets a stronger check.
@@ -161,7 +165,7 @@ The next security work is not to rush into a public SaaS website. The next work 
 - finish sandbox replay testing for Stripe refund-failure, dispute, chargeback, and failed-payment awareness;
 - prove backup and restore;
 - expand append-only audit events beyond provider webhooks;
-- improve MFA recovery and password hardening;
+- finish acceptance evidence for MFA recovery and provider password hardening;
 - keep documentation and threat models aligned with the real app;
 - complete basic privacy and operational groundwork before real customer use.
 
@@ -176,7 +180,7 @@ A credible security posture isn't about claiming perfection — it's about knowi
 - **Not certified as compliant.** The app is **built with data protection principles in mind**, but it is **not** formally "GDPR compliant." Real compliance groundwork — a privacy policy, lawful basis, data-subject rights (access/erasure/portability), retention, and a breach process — is future work and would be required before onboarding real paying customers.
 - **Activity history is convenient, not tamper-proof** — provider events and selected sensitive app actions now go into append-only `audit_events`. Company/settings saves are logged only as changed categories, not raw bank details, notes, addresses, or other sensitive values. This is still not a complete monitoring/compliance audit system.
 - **Recovery is not yet fully proven.** The Supabase organisation is now Pro with documented daily backups and seven-day retention, but Tallyo still needs current-backup evidence and a timed non-production restore test under `BACKUP_RESTORE_RUNBOOK.md`.
-- **MFA has no recovery/backup codes.** The app now has local password-strength checks for new passwords, but Supabase Auth password policy settings and breached-password screening still need confirmation before real onboarding.
+- **MFA has no provider recovery codes.** Tallyo now supports a second authenticator and refuses email-only MFA bypass, but an all-factors-lost support process and final browser tests remain. Supabase leaked-password protection was reported disabled and needs an Owner-approved production Auth change.
 - **All-devices logout exists but can be strengthened.** It currently uses current-password confirmation plus MFA when required before Supabase global sign-out. A future production hardening step would be an email-code confirmation flow before revocation.
 - **The content-security-policy allows one permissive setting** the in-browser framework needs — a documented trade-off rather than a hidden one.
 - **Payment lifecycle still needs production testing.** The repo now includes deployed in-app Stripe refund requests plus failed-payment, refund, refund-failure, and dispute awareness, and the sandbox Stripe webhook destination is subscribed to the needed events. It still needs broader replay testing and live-mode readiness before real customer use.
@@ -194,7 +198,7 @@ Naming these plainly is the point. It's the difference between marketing and a g
 - **Production email hardening** such as tightening DMARC policy once all legitimate senders are confirmed.
 - **More append-only audit logging** for automation failures, backup/restore evidence, and other sensitive actions.
 - **Formal backups / retention** and a documented restore process.
-- **MFA recovery codes** and stronger Auth-level signup checks (server-side password policy / breach lookup).
+- **All-factors-lost MFA support procedure** plus stronger Auth-level signup checks (server-side password policy / breached-password screening).
 - **Data-protection groundwork** (privacy policy, consent/unsubscribe, data-subject request handling) before taking real customers.
 - **Future SaaS architecture** (public website, Tallyo subscriptions, plan tiers, workspaces, teams/RBAC, and server-enforced entitlements) after the current app is finished and hardened.
 

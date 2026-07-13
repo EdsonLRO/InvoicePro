@@ -215,6 +215,7 @@ npx tailwindcss -c tailwind.config.js -i <tailwind-input.css> -o tailwind.css --
 5. A "Change Password" flow exists in the app.
    - **Preserved wording (do not change):** the Change Password box asks for the user's **Current Password**, and its note reads: *"Please enter your current password to confirm it's you."* Keep the title "Change Password" and keep the note consistent with the field.
    - If MFA is enabled, changing password prompts for a fresh authenticator code after current-password reauth so Supabase can upgrade the session to AAL2 before `updateUser`.
+   - The logged-out password-reset flow uses masked password fields. It loads the account's verified factors first and requires TOTP when MFA is enrolled; factor-discovery failure stops recovery.
 6. Account session controls are explicit:
    - **Log Out This Device** calls Supabase sign-out with `scope: 'local'`.
    - **Log Out All Devices** asks for the current password, asks for MFA when the account/session requires AAL2, records an audit event, then calls global sign-out to revoke refresh tokens across devices.
@@ -224,9 +225,10 @@ npx tailwindcss -c tailwind.config.js -i <tailwind-input.css> -o tailwind.css --
 ## 12. MFA flow
 
 - **Optional TOTP MFA** (authenticator-app 6-digit rotating code) via Supabase Auth.
-- User enrolls an authenticator; once enabled, sign-in requires password **and** the current TOTP code.
-- Verified end-to-end, including that an incorrect code is rejected.
-- **Not implemented:** MFA recovery/backup codes. SMS and email MFA are not implemented (and email MFA is considered weaker; not planned as a priority).
+- User enrolls a primary authenticator; once enabled, sign-in requires password **and** the current TOTP code. Assurance-level and factor-list errors fail closed before application data loads.
+- The primary flow was verified end-to-end, including incorrect-code rejection. The new fail-closed and backup-factor paths still need final browser acceptance testing.
+- A user can enrol one backup authenticator and use either verified factor for sign-in or password recovery. Either factor can be retired only while the other remains, using a fresh code from the remaining factor; disabling MFA also requires a fresh code.
+- Supabase does not provide recovery codes. SMS and email MFA are not implemented, and a password-reset email does not bypass an enrolled authenticator. See `MFA_RECOVERY_RUNBOOK.md`.
 - **Implemented account safety:** "Log Out All Devices" exists in the Account page and uses current-password reauth plus MFA when required before Supabase global sign-out.
 - **Future account safety:** consider upgrading all-devices logout to a server-side email verification code/link flow before revocation. Keep this separate from normal local logout and record a dedicated `account_sessions_revoked`-style audit event if added.
 
@@ -317,7 +319,7 @@ supabase functions deploy generate-recurring
 - **No GDPR-compliance claim.** The app is **not** certified or "fully compliant". Real data-protection groundwork (privacy policy, lawful basis, data-subject rights, consent/unsubscribe, breach process, registration) is **future work** and required before onboarding real paying customers.
 - **Activity history is not a tamper-proof audit log** — it lives in editable records. Provider events and selected sensitive app actions now use append-only `audit_events`; company/settings saves are logged by category only, without storing the actual settings values. Full monitoring/compliance audit coverage is still future work.
 - **Backup posture is in progress:** Supabase Pro daily backups and seven-day retention are documented in `BACKUP_RESTORE_RUNBOOK.md`; current backup evidence and a timed restore test still remain.
-- **MFA has no recovery/backup codes**; the app has local password-strength checks, but Supabase Auth password policy/rate-limit settings and breached-password screening still need confirmation before real onboarding.
+- **MFA has no provider recovery codes.** Tallyo supports a second authenticator and blocks email-only MFA recovery, but final browser acceptance tests and an all-factors-lost support procedure remain. Supabase leaked-password protection was reported disabled on 2026-07-13; changing that production Auth policy requires Owner approval.
 - **CSP allows one permissive setting** the in-browser Vue template compilation requires (`unsafe-eval`) — a documented trade-off.
 - **Stripe lifecycle needs more end-to-end testing:** failed-payment, refund, refund-failure, and dispute awareness are deployed and the sandbox Stripe webhook destination is subscribed to the needed events, but replay testing and operational policy are still needed before real customer use.
 - **Email/payment automation depends on external configuration:** DNS, Resend/Stripe secrets, webhooks, and cron jobs must stay correctly configured.
@@ -357,7 +359,7 @@ Near-term (in rough order):
    - Done: hardened Stripe webhook records verified Checkout payments and includes refund/dispute/failed-payment awareness.
    - Done: in-app Stripe refund requests through a server-side Edge Function.
    - Current payment caveat: Stripe should still be treated as test/development until explicitly moved to live mode.
-4. **Current hardening priorities:** finish Stripe sandbox replay testing for refund-failure/dispute/chargeback awareness; formal backup/restore test; expand audit coverage to privileged automation failures and backup/restore evidence; MFA recovery/session-revocation planning; Supabase Auth password policy/breached-password checks; final mobile/PDF regression pass.
+4. **Current hardening priorities:** finish Stripe sandbox replay testing for refund-failure/dispute/chargeback awareness; formal backup/restore test; expand audit coverage to privileged automation failures and backup/restore evidence; finish MFA recovery acceptance and the all-factors-lost support process; review Supabase Auth password/leaked-password/session settings; final mobile/PDF regression pass.
 5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, export/deletion process, consent/unsubscribe where relevant, and breach response notes.
 6. Optional app polish: link invoices to their recurring schedule (dedup guard); clearer payment-state wording; repo/URL rename to Tallyo only with Supabase Auth URL updates.
 7. Future phase, deliberately deferred: public website, paid Tallyo subscriptions, plan tiers, server-enforced entitlements, workspaces/teams/RBAC, and SaaS billing.

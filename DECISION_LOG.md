@@ -15,6 +15,7 @@ Statuses: Proposed, Accepted, Superseded, Deferred, Rejected.
 | 2026-07-13 | Upgrade the Supabase organisation to Pro for current app hardening and recovery readiness. | Accepted | Owner completed the paid upgrade; Pro provides daily backups with seven days of retention and avoids Free-tier pausing. PITR remains a separate, unapproved paid add-on. |
 | 2026-07-13 | Use one Owner, one Master Orchestrator, eight specialist functional agents, and three model/work modes. | Accepted | Functional roles define responsibility; Luna, Terra, and Sol define work mode. Actual concurrency depends on environment capability, so one Codex process may perform roles sequentially without claiming background agents are running. |
 | 2026-07-13 | Make computer use read-only by default and require explicit Owner approval at material production, financial, legal, identity, secret, or irreversible boundaries. | Accepted | Dashboard access must not silently expand standing repository permission. Safe reversible test-environment changes remain allowed only under the recorded policy. |
+| 2026-07-13 | Use a second TOTP authenticator as the supported MFA backup and do not let email recovery bypass MFA. | Accepted | Supabase Auth does not provide recovery codes. A second verified factor preserves two-factor assurance; an all-factors-lost case remains blocked until a strong support recovery process is approved. |
 
 ## Pending Decisions
 
@@ -24,4 +25,4 @@ Statuses: Proposed, Accepted, Superseded, Deferred, Rejected.
 | Stripe live-mode activation | Enables real customer card payments. | Owner must approve live payment activation. |
 | Refund/chargeback support policy | Required before real customer payments. | Owner/legal/business decision. |
 | Privacy policy and terms wording | Required before onboarding real customers. | Owner/legal review. |
-| MFA recovery process | Needed before real users rely on TOTP. | Security/product decision. |
+| All-factors-lost MFA support process | Backup-authenticator recovery is implemented, but support still needs a strong identity-verification and escalation procedure for users who lose every factor. | Owner/security/product decision before real onboarding. |

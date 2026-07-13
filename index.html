@@ -135,6 +135,12 @@
                 <div class="bg-blue-50 text-blue-800 text-sm p-4 rounded-lg border border-blue-100">
                     Enter the current 6-digit code from your authenticator app to finish signing in.
                 </div>
+                <div v-if="mfa.loginFactors.length > 1">
+                    <label class="block text-sm font-medium mb-1">Authenticator</label>
+                    <select v-model="mfa.loginFactorId" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option v-for="(factor, index) in mfa.loginFactors" :key="factor.id" :value="factor.id">{{ mfaFactorLabel(factor, index) }}</option>
+                    </select>
+                </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">6-Digit Code</label>
                     <input type="text" inputmode="numeric" maxlength="6" v-model="mfa.code" @keyup.enter="verifyMfaLogin" class="w-full border rounded-lg px-3 py-3 text-center tracking-widest text-lg font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -158,6 +164,33 @@
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     Remembered it? <button @click="authMode = 'login'" class="text-indigo-600 hover:underline font-medium">Return to sign in</button>
                 </div>
+            </div>
+
+            <div v-if="authMode === 'recovery'" class="space-y-5">
+                <h2 class="text-xl font-semibold">Set a new password</h2>
+                <div class="bg-blue-50 text-blue-800 text-sm p-4 rounded-lg border border-blue-100">
+                    Choose a new password for your account. If two-factor authentication is enabled, you must also confirm with one of your enrolled authenticators.
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">New Password</label>
+                    <input type="password" autocomplete="new-password" v-model="pwdRecovery.new" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <p class="text-xs text-slate-400 mt-1">Use at least 12 characters. A longer passphrase is recommended.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Confirm New Password</label>
+                    <input type="password" autocomplete="new-password" v-model="pwdRecovery.confirm" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div v-if="pwdRecovery.requiresMfa">
+                    <label v-if="pwdRecovery.factors.length > 1" class="block text-sm font-medium mb-1">Authenticator</label>
+                    <select v-if="pwdRecovery.factors.length > 1" v-model="pwdRecovery.factorId" class="w-full border rounded-lg px-3 py-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option v-for="(factor, index) in pwdRecovery.factors" :key="factor.id" :value="factor.id">{{ mfaFactorLabel(factor, index) }}</option>
+                    </select>
+                    <label class="block text-sm font-medium mb-1">6-Digit Authenticator Code</label>
+                    <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" v-model="pwdRecovery.code" @keyup.enter="completePasswordRecovery" class="w-full border rounded-lg px-3 py-3 text-center tracking-widest text-lg font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <p class="text-xs text-slate-500 mt-2">Email access alone does not bypass two-factor authentication. Use your primary or backup authenticator.</p>
+                </div>
+                <p v-if="pwdRecovery.error" class="text-sm text-red-600">{{ pwdRecovery.error }}</p>
+                <button @click="completePasswordRecovery" :disabled="pwdRecovery.busy || !pwdRecovery.securityVerified" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ pwdRecovery.busy ? 'Updating...' : 'Update Password' }}</button>
             </div>
         </div>
     </div>
@@ -246,9 +279,10 @@
                     </div>
                     <p class="text-sm text-slate-600 mb-5">Add a second step at sign-in using an authenticator app (Google Authenticator, Authy, Microsoft Authenticator, etc.). Even if someone learns your password, they can't sign in without the code from your phone.</p>
                     <div v-if="!mfa.enabled && mfa.step === 'idle'">
-                        <button @click="startMfaEnroll" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Preparing...' : 'Enable Two-Factor' }}</button>
+                        <button @click="startMfaEnroll('primary')" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Preparing...' : 'Enable Two-Factor' }}</button>
                     </div>
                     <div v-if="mfa.step === 'enrolling'" class="space-y-4">
+                        <p class="text-sm font-medium text-slate-700">{{ mfa.enrollKind === 'backup' ? 'Add a backup authenticator' : 'Set up your authenticator' }}</p>
                         <ol class="text-sm text-slate-600 list-decimal list-inside space-y-1">
                             <li>Open your authenticator app and scan this QR code.</li>
                             <li>Enter the 6-digit code it shows to confirm.</li>
@@ -266,13 +300,23 @@
                             <input type="text" inputmode="numeric" maxlength="6" v-model="mfa.code" @keyup.enter="confirmMfaEnroll" class="w-full border rounded-lg px-3 py-2 text-center tracking-widest font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
                         </div>
                         <div class="flex gap-3">
-                            <button @click="confirmMfaEnroll" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Verifying...' : 'Confirm & Enable' }}</button>
+                            <button @click="confirmMfaEnroll" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Verifying...' : (mfa.enrollKind === 'backup' ? 'Confirm Backup' : 'Confirm & Enable') }}</button>
                             <button @click="cancelMfaEnroll" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
                         </div>
                     </div>
                     <div v-if="mfa.enabled && mfa.step === 'idle'">
                         <p class="text-sm text-green-700 mb-4">Two-factor authentication is active on your account.</p>
-                        <button @click="disableMfa" :disabled="mfa.busy" class="bg-white border border-red-300 text-red-600 px-6 py-2.5 rounded-lg hover:bg-red-50 font-medium transition disabled:opacity-50">{{ mfa.busy ? 'Working...' : 'Turn Off Two-Factor' }}</button>
+                        <div class="border border-slate-200 rounded-lg mb-4">
+                            <div v-for="(factor, index) in mfa.verifiedFactors" :key="factor.id" class="flex items-center justify-between gap-3 px-4 py-3 border-b border-slate-100">
+                                <span class="text-sm text-slate-700">{{ mfaFactorLabel(factor, index) }}</span>
+                                <button v-if="mfa.verifiedFactors.length > 1" @click="removeMfaFactor(factor.id)" :disabled="mfa.busy" class="text-sm text-red-600 hover:underline disabled:opacity-50">Remove</button>
+                            </div>
+                        </div>
+                        <p v-if="mfa.verifiedFactors.length < 2" class="text-sm text-amber-700 mb-4">Add a backup authenticator now. Supabase does not provide recovery codes, and Tallyo will not bypass MFA using email alone.</p>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button v-if="mfa.verifiedFactors.length < 2" @click="startMfaEnroll('backup')" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Preparing...' : 'Add Backup Authenticator' }}</button>
+                            <button @click="disableMfa" :disabled="mfa.busy" class="bg-white border border-red-300 text-red-600 px-6 py-2.5 rounded-lg hover:bg-red-50 font-medium transition disabled:opacity-50">{{ mfa.busy ? 'Working...' : 'Turn Off Two-Factor' }}</button>
+                        </div>
                     </div>
                 </div>
 
@@ -1638,7 +1682,7 @@
                 pendingEmail: '',
                 authBusy: false,
                 dataLoading: false,
-                mfa: { enabled: false, busy: false, step: 'idle', loginFactorId: null, verifiedFactorId: null, enrollFactorId: null, qr: '', secret: '', code: '' },
+                mfa: { enabled: false, busy: false, step: 'idle', loginFactorId: null, loginFactors: [], verifiedFactorId: null, verifiedFactors: [], enrollFactorId: null, enrollKind: 'primary', qr: '', secret: '', code: '' },
                 mfaPasswordConfirm: { visible: false, busy: false, code: '', error: '', title: 'Confirm with authenticator', message: 'Enter the 6-digit code from your authenticator app.' },
                 sessionConfirm: { visible: false, busy: false, password: '', error: '' },
                 pendingAuth: null,
@@ -1646,6 +1690,8 @@
                 encryptionKey: null,
                 userProfileEmail: '',
                 pwdChange: { old: '', new: '', confirm: '' },
+                pwdRecovery: { busy: false, securityVerified: false, new: '', confirm: '', code: '', error: '', requiresMfa: false, factorId: null, factors: [] },
+                passwordRecoveryStarted: false,
 
                 // App State
                 activeTab: 'create',
@@ -2068,51 +2114,78 @@
                 // Single gate for completing sign-in: require a second factor if the
                 // account has one, otherwise finish logging in.
                 try {
-                    const { data: aal } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+                    const { data: aal, error: aalError } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+                    if (aalError || !aal) throw aalError || new Error('Assurance level unavailable');
                     if (aal && aal.currentLevel === 'aal1' && aal.nextLevel === 'aal2') {
-                        const { data: factors } = await supabaseClient.auth.mfa.listFactors();
-                        const totp = factors && factors.totp && (factors.totp.find(f => f.status === 'verified') || factors.totp[0]);
-                        if (totp) {
-                            this.mfa.loginFactorId = totp.id;
-                            this.mfa.code = '';
-                            this.authMode = 'mfa';
-                            return;
-                        }
+                        const { data: factors, error: factorsError } = await supabaseClient.auth.mfa.listFactors();
+                        if (factorsError) throw factorsError;
+                        const verified = this.verifiedTotpFactors(factors);
+                        if (!verified.length) throw new Error('No verified authenticator factor was found');
+                        this.mfa.loginFactors = verified;
+                        this.mfa.loginFactorId = verified[0].id;
+                        this.mfa.code = '';
+                        this.authMode = 'mfa';
+                        return;
                     }
-                } catch (e) { console.warn('MFA check error:', e); }
-                this.onSignedIn(user);
+                    await this.onSignedIn(user);
+                } catch (e) {
+                    console.warn('Account security verification could not be completed.');
+                    try { await supabaseClient.auth.signOut({ scope: 'local' }); } catch (_) { /* best effort */ }
+                    this.clearSignedOutState();
+                    alert('Could not verify account security. Please sign in again.');
+                }
             },
             async verifyMfaLogin() {
                 if (!/^\d{6}$/.test((this.mfa.code || '').trim())) return alert("Enter the 6-digit code from your authenticator app.");
+                if (!this.mfa.loginFactors.some(factor => factor.id === this.mfa.loginFactorId)) return alert("Choose a valid authenticator.");
                 this.authBusy = true;
                 const { error } = await supabaseClient.auth.mfa.challengeAndVerify({ factorId: this.mfa.loginFactorId, code: this.mfa.code.trim() });
+                if (error) {
+                    this.authBusy = false;
+                    return alert("Incorrect or expired code. Try the latest code from your app.");
+                }
+                const { data: aal, error: aalError } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
                 this.authBusy = false;
-                if (error) return alert("Incorrect or expired code. Try the latest code from your app.");
+                if (aalError || !aal || aal.currentLevel !== 'aal2') return alert("Two-factor verification could not be confirmed. Please try again.");
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 this.mfa.code = '';
+                this.mfa.loginFactors = [];
+                this.mfa.loginFactorId = null;
                 this.authMode = 'login';
-                this.onSignedIn(user);
+                await this.onSignedIn(user);
+            },
+            verifiedTotpFactors(data) {
+                return ((data && data.totp) || []).filter(factor => factor.status === 'verified');
+            },
+            mfaFactorLabel(factor, index = 0) {
+                const friendlyName = String((factor && factor.friendly_name) || '').trim();
+                if (friendlyName) return friendlyName;
+                return index === 0 ? 'Primary authenticator' : `Backup authenticator ${index}`;
             },
             async loadMfaStatus() {
                 try {
                     const { data, error } = await supabaseClient.auth.mfa.listFactors();
                     if (error) return;
-                    const verified = (data.totp || []).find(f => f.status === 'verified') || (data.totp || [])[0];
-                    this.mfa.enabled = !!verified;
-                    this.mfa.verifiedFactorId = verified ? verified.id : null;
+                    const verified = this.verifiedTotpFactors(data);
+                    this.mfa.enabled = verified.length > 0;
+                    this.mfa.verifiedFactors = verified;
+                    this.mfa.verifiedFactorId = verified.length ? verified[0].id : null;
                 } catch (e) { /* ignore */ }
             },
-            async startMfaEnroll() {
+            async startMfaEnroll(kind = 'primary') {
+                if (kind === 'backup' && this.mfa.verifiedFactors.length >= 2) return alert("A backup authenticator is already enrolled.");
                 this.mfa.busy = true;
                 try {
                     const { data } = await supabaseClient.auth.mfa.listFactors();
                     const unverified = ((data && data.all) || []).filter(f => f.status === 'unverified');
                     for (const f of unverified) await supabaseClient.auth.mfa.unenroll({ factorId: f.id });
                 } catch (e) { /* ignore */ }
-                const { data, error } = await supabaseClient.auth.mfa.enroll({ factorType: 'totp' });
+                const friendlyName = kind === 'backup' ? 'Backup authenticator' : 'Primary authenticator';
+                const { data, error } = await supabaseClient.auth.mfa.enroll({ factorType: 'totp', friendlyName });
                 this.mfa.busy = false;
                 if (error) return alert("Could not start setup: " + error.message);
                 this.mfa.enrollFactorId = data.id;
+                this.mfa.enrollKind = kind;
                 this.mfa.qr = data.totp.qr_code;
                 this.mfa.secret = data.totp.secret;
                 this.mfa.code = '';
@@ -2124,33 +2197,64 @@
                 const { error } = await supabaseClient.auth.mfa.challengeAndVerify({ factorId: this.mfa.enrollFactorId, code: this.mfa.code.trim() });
                 this.mfa.busy = false;
                 if (error) return alert("Incorrect or expired code. Try the latest code from your app.");
+                const addedBackup = this.mfa.enrollKind === 'backup';
                 this.mfa.step = 'idle';
-                this.mfa.qr = ''; this.mfa.secret = ''; this.mfa.code = '';
+                this.mfa.qr = ''; this.mfa.secret = ''; this.mfa.code = ''; this.mfa.enrollFactorId = null; this.mfa.enrollKind = 'primary';
                 await this.loadMfaStatus();
-                await this.logAppAuditEvent('account_mfa_enabled', 'account', null, {});
-                alert("Two-factor authentication is now enabled.");
+                await this.logAppAuditEvent(addedBackup ? 'account_mfa_backup_added' : 'account_mfa_enabled', 'account', null, {});
+                alert(addedBackup ? "Backup authenticator added." : "Two-factor authentication is now enabled.");
             },
             cancelMfaEnroll() {
                 if (this.mfa.enrollFactorId) supabaseClient.auth.mfa.unenroll({ factorId: this.mfa.enrollFactorId }).catch(() => {});
-                this.mfa.step = 'idle'; this.mfa.qr = ''; this.mfa.secret = ''; this.mfa.code = ''; this.mfa.enrollFactorId = null;
+                this.mfa.step = 'idle'; this.mfa.qr = ''; this.mfa.secret = ''; this.mfa.code = ''; this.mfa.enrollFactorId = null; this.mfa.enrollKind = 'primary';
+            },
+            async removeMfaFactor(factorId) {
+                const factors = this.mfa.verifiedFactors.filter(factor => factor && factor.id);
+                if (factors.length < 2) return alert("Keep at least one authenticator enrolled, or use Turn Off Two-Factor.");
+                const target = factors.find(factor => factor.id === factorId);
+                const verifier = factors.find(factor => factor.id !== factorId);
+                if (!target || !verifier) return alert("Could not identify the authenticator.");
+                if (!confirm("Remove this authenticator?")) return;
+                try {
+                    const code = await this.requestPasswordMfaCode({
+                        title: 'Remove authenticator',
+                        message: `Enter a current code from ${this.mfaFactorLabel(verifier, factors.indexOf(verifier))} before removing the other authenticator.`
+                    });
+                    await this.completeMfaForCurrentSession(code, { force: true, factorId: verifier.id });
+                    this.mfa.busy = true;
+                    const { error } = await supabaseClient.auth.mfa.unenroll({ factorId: target.id });
+                    if (error) throw error;
+                    await this.loadMfaStatus();
+                    await this.logAppAuditEvent('account_mfa_factor_removed', 'account', null, {});
+                    alert("Authenticator removed.");
+                } catch (e) {
+                    alert("Could not remove authenticator: " + (e.message || e));
+                } finally {
+                    this.mfa.busy = false;
+                }
             },
             async disableMfa() {
                 if (!confirm("Turn off two-factor authentication? Your account will be protected by password only.")) return;
                 try {
-                    if (await this.currentSessionNeedsMfa()) {
-                        const code = await this.requestPasswordMfaCode({
-                            title: 'Confirm before turning off MFA',
-                            message: 'Enter the 6-digit code from your authenticator app before turning off two-factor authentication.'
-                        });
-                        await this.completeMfaForCurrentSession(code);
+                    const factors = this.mfa.verifiedFactors.filter(factor => factor && factor.id);
+                    if (!factors.length) return alert("No verified authenticator was found.");
+                    const verifierId = factors[0].id;
+                    const code = await this.requestPasswordMfaCode({
+                        title: 'Confirm before turning off MFA',
+                        message: `Enter a fresh code from ${this.mfaFactorLabel(factors[0], 0)} before turning off two-factor authentication.`
+                    });
+                    await this.completeMfaForCurrentSession(code, { force: true, factorId: verifierId });
+                    this.mfa.busy = true;
+                    const ordered = factors.filter(factor => factor.id !== verifierId).concat(factors[0]);
+                    for (const factor of ordered) {
+                        const { error } = await supabaseClient.auth.mfa.unenroll({ factorId: factor.id });
+                        if (error) throw error;
                     }
                 } catch (e) {
-                    return alert("Could not verify authenticator code: " + (e.message || e));
+                    this.mfa.busy = false;
+                    return alert("Could not turn off two-factor authentication: " + (e.message || e));
                 }
-                this.mfa.busy = true;
-                const { error } = await supabaseClient.auth.mfa.unenroll({ factorId: this.mfa.verifiedFactorId });
                 this.mfa.busy = false;
-                if (error) return alert("Could not disable: " + error.message);
                 await this.loadMfaStatus();
                 await this.logAppAuditEvent('account_mfa_disabled', 'account', null, {});
                 alert("Two-factor authentication has been turned off.");
@@ -2161,7 +2265,7 @@
                 this.isLoggedIn = true;
                 this.auth = { username: '', password: '', confirm: '', code: '' };
                 await this.loadAllData();
-                this.loadMfaStatus();
+                await this.loadMfaStatus();
                 this.navigateTo(this.tabFromHash(), { replace: !window.location.hash });
             },
             clearSignedOutState() {
@@ -2176,8 +2280,10 @@
                 this.companyAuditSnapshot = null;
                 this.customers = []; this.savedItems = []; this.invoices = [];
                 this.auditEvents = [];
-                this.mfa = { enabled: false, busy: false, step: 'idle', loginFactorId: null, verifiedFactorId: null, enrollFactorId: null, qr: '', secret: '', code: '' };
+                this.mfa = { enabled: false, busy: false, step: 'idle', loginFactorId: null, loginFactors: [], verifiedFactorId: null, verifiedFactors: [], enrollFactorId: null, enrollKind: 'primary', qr: '', secret: '', code: '' };
                 this.pwdChange = { old: '', new: '', confirm: '' };
+                this.pwdRecovery = { busy: false, securityVerified: false, new: '', confirm: '', code: '', error: '', requiresMfa: false, factorId: null, factors: [] };
+                this.passwordRecoveryStarted = false;
                 this.sessionConfirm = { visible: false, busy: false, password: '', error: '' };
             },
             async signOutWithScope(scope) {
@@ -2255,6 +2361,75 @@
                 alert("If an account exists for that email, a password reset link has been sent. Check your inbox.");
                 this.authMode = 'login';
             },
+            async beginPasswordRecovery(user = null) {
+                if (this.passwordRecoveryStarted) return;
+                this.passwordRecoveryStarted = true;
+                this.isLoggedIn = false;
+                this.currentUser = user;
+                this.userProfileEmail = (user && user.email) || this.userProfileEmail || '';
+                this.authMode = 'recovery';
+                this.pwdRecovery = { busy: true, securityVerified: false, new: '', confirm: '', code: '', error: '', requiresMfa: false, factorId: null, factors: [] };
+                try {
+                    const { data: factors, error: factorsError } = await supabaseClient.auth.mfa.listFactors();
+                    if (factorsError) throw factorsError;
+                    const verified = this.verifiedTotpFactors(factors);
+                    this.pwdRecovery.requiresMfa = verified.length > 0;
+                    this.pwdRecovery.factors = verified;
+                    this.pwdRecovery.factorId = verified.length ? verified[0].id : null;
+                    this.pwdRecovery.securityVerified = true;
+                } catch (e) {
+                    console.warn('Password recovery security verification could not be completed.');
+                    this.pwdRecovery.error = 'Could not verify the account recovery requirements. Open the reset link again and retry.';
+                } finally {
+                    this.pwdRecovery.busy = false;
+                }
+            },
+            async completePasswordRecovery() {
+                this.pwdRecovery.error = '';
+                if (!this.pwdRecovery.securityVerified) {
+                    this.pwdRecovery.error = 'Account recovery requirements have not been verified. Open the reset link again and retry.';
+                    return;
+                }
+                const passwordIssue = this.passwordPolicyMessage(this.pwdRecovery.new, this.userProfileEmail);
+                if (passwordIssue) {
+                    this.pwdRecovery.error = passwordIssue;
+                    return;
+                }
+                if (this.pwdRecovery.new !== this.pwdRecovery.confirm) {
+                    this.pwdRecovery.error = 'New passwords do not match.';
+                    return;
+                }
+                if (this.pwdRecovery.requiresMfa) {
+                    if (!this.pwdRecovery.factors.some(factor => factor.id === this.pwdRecovery.factorId)) {
+                        this.pwdRecovery.error = 'Choose a valid authenticator.';
+                        return;
+                    }
+                    if (!/^\d{6}$/.test(String(this.pwdRecovery.code || '').trim())) {
+                        this.pwdRecovery.error = 'Enter the 6-digit code from your authenticator app.';
+                        return;
+                    }
+                }
+                this.pwdRecovery.busy = true;
+                try {
+                    if (this.pwdRecovery.requiresMfa) {
+                        await this.verifyMfaFactor(this.pwdRecovery.factorId, this.pwdRecovery.code);
+                    }
+                    const { error } = await supabaseClient.auth.updateUser({ password: this.pwdRecovery.new });
+                    if (error) throw error;
+                    await this.logAppAuditEvent('account_password_recovered', 'account', null, {});
+                    const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+                    if (userError || !userData.user) throw userError || new Error('Updated account session unavailable');
+                    this.pwdRecovery = { busy: false, securityVerified: false, new: '', confirm: '', code: '', error: '', requiresMfa: false, factorId: null, factors: [] };
+                    this.passwordRecoveryStarted = false;
+                    this.authMode = 'login';
+                    await this.onSignedIn(userData.user);
+                    alert("Password updated successfully.");
+                } catch (e) {
+                    this.pwdRecovery.error = 'Could not update password: ' + (e.message || e);
+                } finally {
+                    this.pwdRecovery.busy = false;
+                }
+            },
             async currentSessionNeedsMfa() {
                 const { data: aal, error: aalError } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
                 if (aalError) throw aalError;
@@ -2295,21 +2470,27 @@
             },
             async completeMfaForCurrentSession(code, options = {}) {
                 const needsMfa = options.force || (await this.currentSessionNeedsMfa());
-                if (!needsMfa) return;
+                if (!needsMfa) return null;
 
                 const cleanCode = String(code || '').trim();
                 if (!/^\d{6}$/.test(cleanCode)) throw new Error('Enter the 6-digit code from your authenticator app.');
 
                 const { data: factors, error: factorsError } = await supabaseClient.auth.mfa.listFactors();
                 if (factorsError) throw factorsError;
-                const totp = factors && factors.totp && (factors.totp.find(f => f.status === 'verified') || factors.totp[0]);
+                const verified = this.verifiedTotpFactors(factors);
+                const totp = options.factorId ? verified.find(factor => factor.id === options.factorId) : verified[0];
                 if (!totp) throw new Error('No verified authenticator factor was found for this account.');
-
-                const { error: verifyError } = await supabaseClient.auth.mfa.challengeAndVerify({
-                    factorId: totp.id,
-                    code: cleanCode
-                });
+                await this.verifyMfaFactor(totp.id, cleanCode);
+                return totp.id;
+            },
+            async verifyMfaFactor(factorId, code) {
+                const cleanCode = String(code || '').trim();
+                if (!factorId) throw new Error('Choose a valid authenticator.');
+                if (!/^\d{6}$/.test(cleanCode)) throw new Error('Enter the 6-digit code from your authenticator app.');
+                const { error: verifyError } = await supabaseClient.auth.mfa.challengeAndVerify({ factorId, code: cleanCode });
                 if (verifyError) throw verifyError;
+                const { data: aal, error: aalError } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
+                if (aalError || !aal || aal.currentLevel !== 'aal2') throw aalError || new Error('Two-factor verification was not confirmed.');
             },
             async changePassword() {
                 const passwordIssue = this.passwordPolicyMessage(this.pwdChange.new, this.userProfileEmail);
@@ -3964,26 +4145,25 @@
             if ('serviceWorker' in navigator && location.protocol === 'https:') {
                 navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('Service worker registration failed:', err));
             }
-            // Restore an existing session on page load (keeps you logged in on refresh)
-            const { data } = await supabaseClient.auth.getSession();
-            if (data.session) {
-                await this.routeAfterAuth(data.session.user);
-            }
-            // React to auth events: password recovery only. (Normal sign-in is handled
-            // by login()/routeAfterAuth; handling SIGNED_IN here too would race with the
-            // MFA check and could bypass it.)
-            supabaseClient.auth.onAuthStateChange(async (event) => {
+            // React to password recovery without doing additional Supabase calls while
+            // the auth client is still notifying listeners. Normal sign-in remains
+            // gated through routeAfterAuth so an MFA check cannot be bypassed.
+            supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'PASSWORD_RECOVERY') {
-                    const newPass = prompt("Enter a new password (at least 12 characters):");
-                    const passwordIssue = this.passwordPolicyMessage(newPass, this.userProfileEmail);
-                    if (newPass && !passwordIssue) {
-                        const { error } = await supabaseClient.auth.updateUser({ password: newPass });
-                        alert(error ? ("Could not set password: " + error.message) : "Password updated. You are now signed in.");
-                    } else if (newPass) {
-                        alert(passwordIssue);
-                    }
+                    this.authMode = 'recovery';
+                    setTimeout(() => this.beginPasswordRecovery(session && session.user), 0);
                 }
             });
+            // Restore an existing session on page load (keeps you logged in on refresh).
+            // A recovery event sets authMode first, preventing a recovery session from
+            // being treated as a normal completed sign-in.
+            const { data } = await supabaseClient.auth.getSession();
+            const recoveryIntent = new URLSearchParams(window.location.hash.replace(/^#/, '')).get('type') === 'recovery';
+            if (data.session && recoveryIntent) {
+                await this.beginPasswordRecovery(data.session.user);
+            } else if (data.session && this.authMode !== 'recovery') {
+                await this.routeAfterAuth(data.session.user);
+            }
         }
     }).mount('#app');
 </script>

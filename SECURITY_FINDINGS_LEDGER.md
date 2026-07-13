@@ -20,6 +20,48 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 
 ## Entries
 
+### SEC-AUTH-001 - MFA assurance checks failed open
+
+- **Date:** 2026-07-13
+- **Classification:** vulnerable / authentication boundary
+- **Finding:** `routeAfterAuth` caught MFA assurance-level or factor-list errors and continued into `onSignedIn`. It also continued when an AAL2 session was required but no verified factor could be loaded.
+- **Impact:** A transient Auth/API failure or inconsistent factor response could let an AAL1 session reach the signed-in application UI instead of stopping at the MFA gate. Database RLS still limited rows to that authenticated user, but the app's promised second-factor boundary was not fail-closed.
+- **Change:** Assurance-level and factor-list failures now locally sign out the incomplete session. A required AAL2 session cannot initialise app data without a verified factor, and challenge completion is followed by an explicit AAL2 check.
+- **Verification:** Inline JavaScript syntax passed; focused static review confirmed every normal sign-in entry point uses `routeAfterAuth`; the local app loaded with no console errors. Browser checks for successful MFA, wrong code, restored sessions and simulated lookup failure remain required by `MFA_RECOVERY_RUNBOOK.md`.
+- **Residual risk:** The control is implemented client-side. High-risk future server operations should independently enforce recent AAL2 instead of trusting UI state.
+- **Status:** Implemented; browser acceptance pending.
+
+### SEC-AUTH-002 - Password recovery used an unmasked prompt and lacked an explicit MFA recovery gate
+
+- **Date:** 2026-07-13
+- **Classification:** vulnerable / account recovery
+- **Finding:** The `PASSWORD_RECOVERY` handler collected the new password through `window.prompt`, which displays ordinary text rather than a masked password field, and called `updateUser` without an explicit application-level MFA challenge when verified factors existed.
+- **Impact:** A new password could be exposed to someone viewing the screen. The recovery flow also relied on provider-side rejection rather than clearly preserving Tallyo's MFA requirement, creating ambiguity around whether access to email alone could bypass the enrolled second factor.
+- **Change:** Replaced the prompt with masked password/confirmation fields and the existing local password policy. Recovery must positively complete factor discovery before the update button is enabled, and verified TOTP accounts must challenge a selected primary or backup factor. Added backup-factor management and privacy-safe recovery/factor audit event types.
+- **Verification:** Static review confirms masked inputs, password match/strength checks, fail-closed factor discovery, TOTP validation, and no application initialisation before successful update. The recovery and two-factor management screens rendered at desktop and 390px widths with no horizontal overflow or console errors; both factors exposed a removal action only while two remained. Deno check passed for `log-app-event`; deployed version 4 remained JWT-protected and rejected an unauthenticated write with HTTP 401. Full reset-link, wrong-code, backup-factor and success-path account tests remain.
+- **Residual risk:** An all-factors-lost user has no self-service bypass. A strong support identity-verification process remains a release requirement.
+- **Status:** Implemented; browser acceptance pending.
+
+### SEC-AUTH-003 - Supabase leaked-password protection is disabled
+
+- **Date:** 2026-07-13
+- **Classification:** defense-in-depth / provider Auth configuration
+- **Finding:** The live Supabase security advisor reports that leaked-password protection is disabled even though the project is now on the Pro plan.
+- **Impact:** Tallyo's client-side password checks can reject simple patterns but cannot reliably detect passwords present in known breach corpora. Client validation can also be bypassed by direct Auth API use.
+- **Intended change:** Enable Supabase leaked-password protection after Owner approval and verify the server rejects a known compromised test password without recording or exposing the password.
+- **Required verification:** Re-run the Supabase security advisor and perform a safe test-account rejection check.
+- **Status:** Owner Approval Required because this changes production Auth policy.
+
+### SEC-DB-001 - Trigger helper functions retain unnecessary API execution grants
+
+- **Date:** 2026-07-13
+- **Classification:** defense-in-depth / database privilege hygiene
+- **Finding:** Supabase security advisors report that `public.handle_new_user()` is a `SECURITY DEFINER` trigger function executable by `anon` and `authenticated`, and `public.prevent_audit_event_mutation()` has no fixed `search_path`.
+- **Impact:** Trigger helpers should not be exposed as user-callable RPC functions. A mutable function search path also creates avoidable object-resolution risk if the function is later expanded.
+- **Intended change:** Prepare a tracked least-privilege migration that revokes direct API execution and fixes the trigger helper search path, then validate signup provisioning and append-only enforcement.
+- **Required verification:** Advisors clear, triggers remain enabled, new-user settings provisioning still succeeds, and audit update/delete attempts still fail.
+- **Status:** Confirmed; queued separately from AUTH-001 so the database and Auth changes remain reviewable.
+
 ### SEC-LOG-001 - Stripe test/development state was too easy to miss
 
 - **Date:** 2026-07-12
@@ -50,7 +92,7 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Impact:** MFA-protected users could not change their password from the app, and the failure was confusing.
 - **Change:** Added an authenticator-code popup when MFA is enabled and completed a Supabase MFA challenge/verify step after current-password reauth and before `updateUser`.
 - **Verification:** Ran `git diff --check`; reviewed against Supabase MFA/AAL docs. Manual browser test still required on the deployed app.
-- **Residual risk:** MFA recovery/backup flow is still not implemented; Auth-level password policy and breached-password protection still need dashboard confirmation.
+- **Residual risk:** Backup-authenticator recovery is implemented but still needs browser acceptance; Auth-level password policy and leaked-password protection still need Owner review.
 - **Evidence:** This fix commit; manual browser test pending.
 
 ### SEC-LOG-004 - Supabase dump dry-run printed a temporary CLI credential

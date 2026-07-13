@@ -46,19 +46,21 @@
 - Supabase Auth supports password reset via a reset email link.
 - The app also has an in-app **"Change Password"** feature for a signed-in user. Its box asks for the user's **Current Password**, with the note *"Please enter your current password to confirm it's you."* — keep this wording consistent with the field.
 - When MFA is enabled, Change Password prompts for and verifies a fresh TOTP code after the current-password reauth. Supabase requires an AAL2 session before password updates on MFA accounts.
-- **Unknown / needs confirmation:** whether the logged-out "forgot password" reset flow is wired in the UI, or only the signed-in change-password flow. Verify in `index.html`.
+- The logged-out reset flow is wired in `index.html` with masked new-password and confirmation fields. It must successfully list verified factors before enabling the update and requires a selected TOTP factor when MFA exists.
+- Email recovery is not an MFA bypass. If factor discovery fails, the app stops recovery. If every authenticator is lost, there is no self-service shortcut; see `MFA_RECOVERY_RUNBOOK.md`.
 
 ---
 
 ## 5. MFA / TOTP flow
 
 - **Optional TOTP MFA** (authenticator-app 6-digit rotating code) via Supabase Auth's MFA (factors / AAL) support.
-- Flow: user enrolls an authenticator app; once enabled, sign-in requires password **and** the current TOTP code.
-- Verified end-to-end including rejection of an incorrect code.
-- **Not implemented:** MFA recovery/backup codes. SMS and email MFA are not implemented.
+- Flow: user enrolls a primary authenticator app; once enabled, sign-in requires password **and** the current TOTP code. MFA assurance and factor-list failures now stop sign-in instead of continuing at AAL1.
+- The primary flow was verified end-to-end including incorrect-code rejection. Final browser acceptance testing remains for the new fail-closed, backup-factor, and password-recovery paths.
+- The Account page supports one backup authenticator. Either verified TOTP factor can complete sign-in or password recovery. Either factor can be retired only while the other remains, using a fresh code from the remaining factor; MFA disablement also requires a fresh code. These actions are audit-event allowlisted.
+- Supabase does not provide recovery codes. SMS and email MFA are not implemented, and email possession alone does not bypass TOTP.
 - **Implemented account safety:** the Account page now separates local sign-out from all-devices sign-out. Local sign-out uses Supabase `scope: 'local'`. All-devices sign-out requires the current password, asks for MFA when AAL2 is required, writes an app audit event, then uses Supabase global sign-out to revoke refresh tokens across devices.
 - **Future account safety:** optionally upgrade all-devices sign-out to an Edge Function backed email verification code/link flow before revocation, with a dedicated `account_sessions_revoked`-style audit event.
-- **Unknown / needs confirmation:** exact enrollment/verification UI location in `index.html`.
+- Enrollment and backup-factor management are in the Account Security section of `index.html`. Operational handling is documented in `MFA_RECOVERY_RUNBOOK.md`.
 
 ---
 
@@ -303,7 +305,8 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 - **Activity history** (`history` columns) is a convenience log, **not a tamper-proof audit log** — it lives in user-editable rows.
 - **Audit events** now cover provider events and selected sensitive app actions, but broader monitoring, alerting, and compliance evidence are still future work.
 - **Backup posture is in progress:** Pro daily backups with seven-day retention and the operating procedure are documented in `BACKUP_RESTORE_RUNBOOK.md`. A current backup check and timed non-production restore test remain.
-- **MFA has no recovery/backup codes**; the app has local password-strength checks, but Supabase Auth password policy/rate-limit settings and breached-password screening still need confirmation.
+- **MFA has no provider recovery codes.** Tallyo supports a second authenticator and blocks email-only MFA recovery. Full browser acceptance tests and an all-factors-lost support process remain.
+- **Supabase Auth posture reviewed read-only on 2026-07-13:** email confirmation was enabled, anonymous sign-in and phone/social providers were disabled, and leaked-password protection was reported disabled. Session/JWT and server password-policy settings still need Owner review; enabling leaked-password protection is an approval-gated production Auth change.
 - **All-devices logout exists** with current-password confirmation, MFA when required, an app audit event, and Supabase global sign-out. A stronger future version could add email-code confirmation and server-side revocation evidence.
 - **CSP** allows one permissive setting the in-browser Vue template compiler needs (documented trade-off).
 - **Data protection:** the app is **built with data protection principles in mind**, but is **not** certified or "GDPR compliant." Formal compliance work (privacy policy, lawful basis, data-subject rights, retention, breach process) is future work — do not claim compliance.

@@ -58,7 +58,7 @@ SQL lives in `supabase/audit_events.sql`.
 
 Current app-action coverage:
 
-- Account password changes, MFA enable/disable, document deletes, PDF exports, manual payment removal, customer deletes, saved-item deletes/price changes, and recurring schedule pause/resume/delete.
+- Account password changes/recovery, MFA enable/disable/backup-factor changes, document deletes, PDF exports, manual payment removal, customer deletes, saved-item deletes/price changes, and recurring schedule pause/resume/delete.
 - Keep audit metadata privacy-safe. Do not store passwords, tokens, full card data, full exported documents, or unnecessary customer PII in logs.
 
 Remaining audit hardening:

@@ -21,7 +21,7 @@ Statuses: Planned, Investigating, Confirmed, In Progress, Implemented, Verified,
 | Branding and PDF styling | Implemented | Brand colour, logo position/upload, app-style PDF attachments. |
 | Activity history | Implemented | User-facing document/schedule activity history; not tamper-proof. |
 | Append-only audit events | In Progress | Provider events and selected app actions covered, including settings saves by category. More automation/backups evidence remains. |
-| Account security | In Progress | Supabase Auth, email confirmation, TOTP MFA, password change AAL2 handling, local/all-devices logout. MFA recovery remains. |
+| Account security | In Progress | Supabase Auth, email confirmation, fail-closed TOTP MFA, backup-authenticator support, MFA-gated masked password recovery, password change AAL2 handling, and local/all-devices logout. New recovery paths still need browser acceptance evidence and an all-factors-lost support process. |
 | Backup and restore | In Progress | Supabase Pro daily backups and seven-day retention are documented in `BACKUP_RESTORE_RUNBOOK.md`; scheduled-backup evidence and a timed non-production restore test remain. |
 | Privacy/legal groundwork | Planned | Privacy policy, terms, retention/export/delete process, breach process. |
 | Final mobile/PDF regression | Planned | Needed before treating app as customer-ready. |
@@ -37,14 +37,14 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 | GOV-001 | Complete agent governance and computer-use controls | High | Verified | Master Orchestrator | Terra with Sol policy review | Released after commit | Hierarchy, queue, locks, handoffs, provider controls, cross-links, and validation completed. |
 | OPS-001 | Backup and restore runbook | High | Verified | Release Agent | Terra with Sol review | Released after commit | Pro plan confirmed, seven-day daily-backup procedure documented, restore side effects and Owner cost/destructive boundaries recorded in `BACKUP_RESTORE_RUNBOOK.md`. |
 | PAY-TEST-001 | Finish Stripe sandbox lifecycle replay evidence | High | In Progress | Payments Agent | Sol / Terra | Released with focused commit; remaining test subtask unlocked | Signature rejection, unknown-event binding, payment/refund duplicate replay, audit constraints, and Deno checks passed. Known-payment dispute and genuine `refund.failed` positive paths remain. |
-| AUTH-001 | Define MFA recovery process | Medium | Planned | Security Agent | Sol | Unlocked | Product/security decision and recovery runbook required. |
+| AUTH-001 | Harden MFA and define recovery process | High | In Progress | Security Agent | Sol / Terra | Implementation lock ready for release after branch push; authenticated acceptance subtask remains unlocked | Fail-closed sign-in, masked MFA-gated recovery, backup-factor management, runbook, responsive checks, and audit-function v4 deployment complete. Authenticated browser acceptance and production Auth settings remain separate follow-ups. |
 
 ## Current Next Priorities
 
 1. Complete the remaining Stripe sandbox positive-path evidence for a known-payment dispute and genuine `refund.failed` event; duplicate and unknown-event rejection evidence is recorded.
 2. Verify a current scheduled backup and run an Owner-approved timed restore test into a separate environment.
-3. MFA recovery/backup-code planning or documented recovery process.
-4. Supabase Auth password policy / breached-password checks on the Pro plan.
+3. Complete AUTH-001 browser acceptance tests for fail-closed MFA, backup-factor recovery, and masked password recovery.
+4. Owner review of Supabase Auth password policy, leaked-password protection, and session settings on the Pro plan; the read-only advisor reported leaked-password protection disabled.
 5. Final mobile/PDF/PWA regression pass.
 6. Data-protection/legal groundwork before real customers.
 
