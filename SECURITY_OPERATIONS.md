@@ -105,7 +105,7 @@ Payment security requirements:
 - Webhook signatures are verified.
 - Webhooks are idempotent.
 - Every payment event is tied to both `invoice_id` and `user_id`.
-- Webhook payment updates are accepted only for Checkout sessions previously created and logged by Tallyo.
+- Webhook payment updates and asynchronous-failure history are accepted only for Checkout sessions previously created and logged by Tallyo.
 - Amount and currency are checked before updating invoice payments.
 - Already-paid invoices cannot be accidentally paid twice without clear handling.
 - Stripe-confirmed payments are locked from manual removal in the app.
@@ -118,16 +118,16 @@ Current implementation notes:
 - `create-stripe-checkout` creates app-initiated full-balance Checkout sessions.
 - `create-stripe-refund` requests a full or partial Stripe refund for one of the user's own confirmed Stripe payment rows.
 - `send-document-email` can create email payment links for full balance and seller-approved deposit amounts.
-- `stripe-webhook` verifies Stripe signatures, accepts `checkout.session.completed` and `checkout.session.async_payment_succeeded` for payment recording, checks the Tallyo-created checkout audit event, updates invoice payments, and logs activity/audit events.
+- `stripe-webhook` verifies Stripe signatures, defaults to sandbox events unless `STRIPE_LIVE_MODE=true` is set server-side, accepts `checkout.session.completed` and `checkout.session.async_payment_succeeded` for payment recording, checks the Tallyo-created checkout audit event, updates invoice payments, and logs activity/audit events.
 - The webhook also handles `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, `refund.failed`, and key dispute events for lifecycle awareness. Failed payments and disputes are logged; successful refunds are recorded as locked negative Stripe payment entries and can reopen the invoice balance.
 - Current sandbox Stripe webhook destination is subscribed only to the 11 event types Tallyo handles: Checkout completed/succeeded/failed async events, refund created/updated/failed events, and charge dispute created/updated/closed/funds withdrawn/funds reinstated events.
 - Other Stripe lifecycle events such as `payment_intent.succeeded`, `charge.succeeded`, `charge.updated`, and `charge.refunded` are expected in Stripe history but should not independently mark invoices paid.
 
 Next payment hardening:
 
-- Finish sandbox replay testing for refund-failure, failed/asynchronous payment, and dispute events.
+- Keep `STRIPE_SANDBOX_TEST_EVIDENCE.md` current. Duplicate payment/refund replay and unrelated failure/dispute rejection passed; a known-payment dispute and genuine `refund.failed` event still need positive-path evidence.
 - Keep card data out of Tallyo; continue using Stripe-hosted Checkout.
-- Test duplicate/replayed webhook events.
+- Done for one completed payment and one successful refund: duplicate replays did not change invoice state or create additional audit rows.
 - Confirm failed or unexpected payment events never mark invoices paid.
 - Keep a clear distinction between customer invoice payments and future Tallyo SaaS subscription billing.
 
