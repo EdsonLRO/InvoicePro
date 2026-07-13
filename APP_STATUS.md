@@ -36,7 +36,7 @@ Still to finish before treating the app as customer-ready:
 
 - Finish Stripe replay testing for refund-failure, failed/asynchronous payment, and dispute events in sandbox.
 - Decide the operational chargeback/refund policy and customer support process.
-- Formal backup and restore plan, with at least one restore test.
+- Verify current Supabase Pro scheduled-backup evidence and complete at least one timed non-production restore test. The operating procedure is documented in `BACKUP_RESTORE_RUNBOOK.md`.
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations. Company/settings saves are now covered at a privacy-safe category level.
 - MFA recovery/backup codes or a documented recovery process.
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.
@@ -90,7 +90,7 @@ Known limits:
 - MFA is implemented, but recovery codes and stronger recovery procedures are not finished.
 - All-devices logout exists, but a future email-code confirmation flow would be stronger for production account recovery/security UX.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
-- Formal backups, restore testing, privacy operations, and incident response are not complete.
+- Supabase Pro daily backups and the recovery runbook are in place, but a timed restore test, privacy operations, and incident response are not complete.
 - The app must not claim GDPR compliance or full security.
 
 ## Future SaaS / website phase

@@ -12,6 +12,7 @@
 ## 1. Supabase project overview
 
 - **Backend platform:** Supabase — Postgres database, Supabase Auth, Row Level Security (RLS), Edge Functions, Vault, and Postgres scheduling (`pg_cron` + `pg_net`).
+- **Organisation plan:** Pro, confirmed through the Supabase organisation API on 2026-07-13. Pro scheduled database backups are documented in `BACKUP_RESTORE_RUNBOOK.md`; PITR is not approved or assumed enabled.
 - **Region:** eu-west-2 (West Europe / London).
 - **Front-end connection:** the Vue 3 single-page app (`index.html`) talks directly to Supabase via the Supabase JS client, using the **public/publishable (anon) key**. All data access is scoped per user by RLS.
 - **Server-side:** Edge Functions handle recurring invoice generation, email delivery, overdue reminders, and Stripe Checkout/webhooks using server-side secrets.
@@ -217,7 +218,7 @@ supabase functions deploy <function-name>
   where jobid = (select jobid from cron.job where jobname = 'generate-recurring-daily')
   order by start_time desc limit 5;
   ```
-- **Caveat:** on the Supabase free tier, a paused/inactive project will not run cron.
+- **Plan note:** the organisation is now Pro, so the former Free-tier inactivity-pause limitation no longer applies. Cron jobs must still be monitored and disabled immediately in any restored clone.
 
 Additional scheduled job:
 
@@ -301,7 +302,7 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 - **Service role key** grants full, RLS-bypassing access — it must stay server-side only; a leak would be critical. Never place it in client code or commits.
 - **Activity history** (`history` columns) is a convenience log, **not a tamper-proof audit log** — it lives in user-editable rows.
 - **Audit events** now cover provider events and selected sensitive app actions, but broader monitoring, alerting, and compliance evidence are still future work.
-- **No formal backups** on the current free tier; free-tier projects can pause and stop cron.
+- **Backup posture is in progress:** Pro daily backups with seven-day retention and the operating procedure are documented in `BACKUP_RESTORE_RUNBOOK.md`. A current backup check and timed non-production restore test remain.
 - **MFA has no recovery/backup codes**; the app has local password-strength checks, but Supabase Auth password policy/rate-limit settings and breached-password screening still need confirmation.
 - **All-devices logout exists** with current-password confirmation, MFA when required, an app audit event, and Supabase global sign-out. A stronger future version could add email-code confirmation and server-side revocation evidence.
 - **CSP** allows one permissive setting the in-browser Vue template compiler needs (documented trade-off).

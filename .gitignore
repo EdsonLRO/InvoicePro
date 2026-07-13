@@ -4,3 +4,6 @@
 config.js
 supabase/.temp/
 tmp/
+private-backups/
+*.backup
+*.dump

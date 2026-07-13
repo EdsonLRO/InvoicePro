@@ -53,6 +53,17 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Residual risk:** MFA recovery/backup flow is still not implemented; Auth-level password policy and breached-password protection still need dashboard confirmation.
 - **Evidence:** This fix commit; manual browser test pending.
 
+### SEC-LOG-004 - Supabase dump dry-run printed a temporary CLI credential
+
+- **Date:** 2026-07-13
+- **Classification:** defense-in-depth / secrets handling
+- **Finding:** `supabase db dump --linked --dry-run` printed the password for Supabase's short-lived `cli_login_postgres` role in generated command output.
+- **Impact:** Capturing or sharing the output could disclose temporary database access even though it is not the permanent project password.
+- **Change:** Stopped using the command in captured output and documented a prohibition in `BACKUP_RESTORE_RUNBOOK.md`. No credential value was stored in source or documentation.
+- **Verification:** Confirmed through live `pg_roles` metadata that the role used an explicit same-day expiry and was expired when rechecked; confirmed through current Supabase documentation that the passwordless CLI flow uses a temporary login role.
+- **Residual risk:** Future Supabase CLI versions may change this behaviour. Operators must review command output handling and avoid verbose/dry-run database commands in shared logs.
+- **Evidence:** `BACKUP_RESTORE_RUNBOOK.md`; Supabase CLI v2.109.0 observation on 2026-07-13.
+
 ## Open Follow-Ups
 
 - Confirm Supabase Auth password policy, JWT/session expiry, and rate-limit settings.

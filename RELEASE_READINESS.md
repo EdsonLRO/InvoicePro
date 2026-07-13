@@ -24,7 +24,7 @@ Tallyo is a real working app and strong portfolio project, but it is not yet liv
 | Recurring invoice automation | Implemented | Verify cron and service-role attribution before release. |
 | Stripe payments | In Progress | Sandbox implemented; replay testing and live-mode setup remain. |
 | Refund/dispute/chargeback handling | In Progress | Logic exists; needs replay evidence and operational policy. |
-| Backups and restore | Planned | Free-tier runbook needed now; Pro restore test needed before real customers. |
+| Backups and restore | In Progress | Pro plan and seven-day daily-backup procedure documented; verify a current backup and complete a timed non-production restore test. |
 | Audit events | In Progress | Provider and selected app actions covered; not a full SIEM/compliance system. |
 | Privacy/legal groundwork | Planned | Privacy policy, terms, retention, export/delete, breach process. |
 | Mobile regression | Planned | Test key workflows on phone widths. |
