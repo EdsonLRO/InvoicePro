@@ -42,15 +42,15 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Residual risk:** An all-factors-lost user has no self-service bypass. A strong support identity-verification process remains a release requirement.
 - **Status:** Implemented; browser acceptance pending.
 
-### SEC-AUTH-003 - Supabase leaked-password protection is disabled
+### SEC-AUTH-003 - Supabase leaked-password protection was disabled
 
 - **Date:** 2026-07-13
 - **Classification:** defense-in-depth / provider Auth configuration
 - **Finding:** The live Supabase security advisor reports that leaked-password protection is disabled even though the project is now on the Pro plan.
 - **Impact:** Tallyo's client-side password checks can reject simple patterns but cannot reliably detect passwords present in known breach corpora. Client validation can also be bypassed by direct Auth API use.
-- **Intended change:** Enable Supabase leaked-password protection after Owner approval and verify the server rejects a known compromised test password without recording or exposing the password.
-- **Required verification:** Re-run the Supabase security advisor and perform a safe test-account rejection check.
-- **Status:** Owner Approval Required because this changes production Auth policy.
+- **Change:** Enabled `password_hibp_enabled` through the Supabase Auth Management API after Owner approval. The previous value was recorded as `false`, the returned/read-back value was `true`, and no credential was printed or written to the repository.
+- **Verification:** The live Supabase security advisor was re-run on 2026-07-13 and the leaked-password warning cleared. A safe test-account rejection check with a known compromised password remains acceptance evidence; never record the password used.
+- **Status:** Implemented; rejection-path acceptance pending.
 
 ### SEC-DB-001 - Trigger helper functions retain unnecessary API execution grants
 
@@ -58,9 +58,10 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Classification:** defense-in-depth / database privilege hygiene
 - **Finding:** Supabase security advisors report that `public.handle_new_user()` is a `SECURITY DEFINER` trigger function executable by `anon` and `authenticated`, and `public.prevent_audit_event_mutation()` has no fixed `search_path`.
 - **Impact:** Trigger helpers should not be exposed as user-callable RPC functions. A mutable function search path also creates avoidable object-resolution risk if the function is later expanded.
-- **Intended change:** Prepare a tracked least-privilege migration that revokes direct API execution and fixes the trigger helper search path, then validate signup provisioning and append-only enforcement.
-- **Required verification:** Advisors clear, triggers remain enabled, new-user settings provisioning still succeeds, and audit update/delete attempts still fail.
-- **Status:** Confirmed; queued separately from AUTH-001 so the database and Auth changes remain reviewable.
+- **Change:** Applied `harden_internal_trigger_functions`: both helpers now use an empty fixed `search_path`, and direct execution is revoked from `PUBLIC`, `anon`, and `authenticated`. Source SQL was updated so fresh environments inherit the same posture.
+- **Verification:** The live advisors returned no findings; both API roles report no EXECUTE privilege; the signup, update-prevention, and delete-prevention triggers remain attached; and a no-op audit-event update failed with `audit_events are append-only`.
+- **Residual risk:** The trigger body and signup trigger were not changed, but one fresh test-account signup should still confirm automatic `company_settings` provisioning before this finding is marked Verified.
+- **Status:** Implemented; fresh-signup acceptance pending.
 
 ### SEC-LOG-001 - Stripe test/development state was too easy to miss
 
@@ -92,7 +93,7 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Impact:** MFA-protected users could not change their password from the app, and the failure was confusing.
 - **Change:** Added an authenticator-code popup when MFA is enabled and completed a Supabase MFA challenge/verify step after current-password reauth and before `updateUser`.
 - **Verification:** Ran `git diff --check`; reviewed against Supabase MFA/AAL docs. Manual browser test still required on the deployed app.
-- **Residual risk:** Backup-authenticator recovery is implemented but still needs browser acceptance; Auth-level password policy and leaked-password protection still need Owner review.
+- **Residual risk:** Backup-authenticator recovery is implemented but still needs browser acceptance; remaining server-side password, session, rate-limit, and abuse-control settings still need review.
 - **Evidence:** This fix commit; manual browser test pending.
 
 ### SEC-LOG-004 - Supabase dump dry-run printed a temporary CLI credential

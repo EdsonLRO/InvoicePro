@@ -37,14 +37,15 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 | GOV-001 | Complete agent governance and computer-use controls | High | Verified | Master Orchestrator | Terra with Sol policy review | Released after commit | Hierarchy, queue, locks, handoffs, provider controls, cross-links, and validation completed. |
 | OPS-001 | Backup and restore runbook | High | Verified | Release Agent | Terra with Sol review | Released after commit | Pro plan confirmed, seven-day daily-backup procedure documented, restore side effects and Owner cost/destructive boundaries recorded in `BACKUP_RESTORE_RUNBOOK.md`. |
 | PAY-TEST-001 | Finish Stripe sandbox lifecycle replay evidence | High | In Progress | Payments Agent | Sol / Terra | Released with focused commit; remaining test subtask unlocked | Signature rejection, unknown-event binding, payment/refund duplicate replay, audit constraints, and Deno checks passed. Known-payment dispute and genuine `refund.failed` positive paths remain. |
-| AUTH-001 | Harden MFA and define recovery process | High | In Progress | Security Agent | Sol / Terra | Implementation lock ready for release after branch push; authenticated acceptance subtask remains unlocked | Fail-closed sign-in, masked MFA-gated recovery, backup-factor management, runbook, responsive checks, and audit-function v4 deployment complete. Authenticated browser acceptance and production Auth settings remain separate follow-ups. |
+| AUTH-001 | Harden MFA and define recovery process | High | In Progress | Security Agent | Sol / Terra | Implementation released on a focused branch; authenticated acceptance subtask remains unlocked | Fail-closed sign-in, masked MFA-gated recovery, backup-factor management, runbook, responsive checks, and audit-function v4 deployment complete. Leaked-password protection is enabled; credential-dependent browser acceptance remains. |
+| DB-001 | Harden internal trigger helper functions | High | Implemented | Security Agent | Sol / Terra | Migration applied; signup acceptance remains unlocked | Empty search paths and least-privilege execution grants are applied. Security advisors are clear, all triggers remain attached, and append-only mutation rejection passed. Run one fresh-signup provisioning check before marking Verified. |
 
 ## Current Next Priorities
 
 1. Complete the remaining Stripe sandbox positive-path evidence for a known-payment dispute and genuine `refund.failed` event; duplicate and unknown-event rejection evidence is recorded.
 2. Verify a current scheduled backup and run an Owner-approved timed restore test into a separate environment.
 3. Complete AUTH-001 browser acceptance tests for fail-closed MFA, backup-factor recovery, and masked password recovery.
-4. Owner review of Supabase Auth password policy, leaked-password protection, and session settings on the Pro plan; the read-only advisor reported leaked-password protection disabled.
+4. Review the remaining Supabase Auth password policy, session/JWT, rate-limit, and abuse-control settings. Leaked-password protection is enabled and advisor-verified.
 5. Final mobile/PDF/PWA regression pass.
 6. Data-protection/legal groundwork before real customers.
 

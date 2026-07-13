@@ -185,7 +185,7 @@ Current app/security work:
 2. Verify a current scheduled backup and run the documented non-production restore test in `BACKUP_RESTORE_RUNBOOK.md`.
 3. Expand append-only audit logging further, especially privileged automation failures and backup/restore evidence.
 4. Complete `MFA_RECOVERY_RUNBOOK.md` acceptance tests and define the all-factors-lost support process; consider upgrading all-devices logout with a server-side email-code confirmation flow.
-5. Enable and test Supabase leaked-password protection after Owner approval, and review the remaining server-side Auth policy settings.
+5. Complete the safe rejection test for enabled Supabase leaked-password protection, then review the remaining server-side Auth policy, session, rate-limit, and abuse-control settings.
 6. Complete privacy/data-protection groundwork before real customer use.
 7. Keep security docs, screenshots, and portfolio evidence in sync with the real app.
 

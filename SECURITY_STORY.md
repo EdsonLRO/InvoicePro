@@ -165,7 +165,7 @@ The next security work is not to rush into a public SaaS website. The next work 
 - finish sandbox replay testing for Stripe refund-failure, dispute, chargeback, and failed-payment awareness;
 - prove backup and restore;
 - expand append-only audit events beyond provider webhooks;
-- finish acceptance evidence for MFA recovery and provider password hardening;
+- finish acceptance evidence for MFA recovery and the now-enabled provider leaked-password check;
 - keep documentation and threat models aligned with the real app;
 - complete basic privacy and operational groundwork before real customer use.
 
@@ -180,7 +180,7 @@ A credible security posture isn't about claiming perfection — it's about knowi
 - **Not certified as compliant.** The app is **built with data protection principles in mind**, but it is **not** formally "GDPR compliant." Real compliance groundwork — a privacy policy, lawful basis, data-subject rights (access/erasure/portability), retention, and a breach process — is future work and would be required before onboarding real paying customers.
 - **Activity history is convenient, not tamper-proof** — provider events and selected sensitive app actions now go into append-only `audit_events`. Company/settings saves are logged only as changed categories, not raw bank details, notes, addresses, or other sensitive values. This is still not a complete monitoring/compliance audit system.
 - **Recovery is not yet fully proven.** The Supabase organisation is now Pro with documented daily backups and seven-day retention, but Tallyo still needs current-backup evidence and a timed non-production restore test under `BACKUP_RESTORE_RUNBOOK.md`.
-- **MFA has no provider recovery codes.** Tallyo now supports a second authenticator and refuses email-only MFA bypass, but an all-factors-lost support process and final browser tests remain. Supabase leaked-password protection was reported disabled and needs an Owner-approved production Auth change.
+- **MFA has no provider recovery codes.** Tallyo now supports a second authenticator and refuses email-only MFA bypass, but an all-factors-lost support process and final browser tests remain. Supabase leaked-password protection is enabled and advisor-verified; its safe rejection-path acceptance test remains.
 - **All-devices logout exists but can be strengthened.** It currently uses current-password confirmation plus MFA when required before Supabase global sign-out. A future production hardening step would be an email-code confirmation flow before revocation.
 - **The content-security-policy allows one permissive setting** the in-browser framework needs — a documented trade-off rather than a hidden one.
 - **Payment lifecycle still needs production testing.** The repo now includes deployed in-app Stripe refund requests plus failed-payment, refund, refund-failure, and dispute awareness, and the sandbox Stripe webhook destination is subscribed to the needed events. It still needs broader replay testing and live-mode readiness before real customer use.

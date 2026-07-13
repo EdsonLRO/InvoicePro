@@ -40,7 +40,7 @@ Still to finish before treating the app as customer-ready:
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations. Company/settings saves are now covered at a privacy-safe category level.
 - Complete browser acceptance testing of the new fail-closed MFA, backup-authenticator, and password-recovery paths documented in `MFA_RECOVERY_RUNBOOK.md`.
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.
-- Enable and verify Supabase leaked-password protection after Owner approval; the live advisor reported it disabled on 2026-07-13.
+- Review the remaining Supabase server-side password, session/JWT, and abuse-control settings. Leaked-password protection was enabled and the live advisor was clear on 2026-07-13.
 - Privacy policy, terms, retention position, export/deletion process, and breach process.
 - Final mobile and PDF regression pass.
 - Documentation/screenshots/portfolio evidence kept in sync with the real app.
@@ -73,6 +73,7 @@ Current email automation is intentionally opt-in:
 Strong controls already implemented:
 
 - Supabase Auth with server-side password hashing.
+- Supabase leaked-password protection, checked server-side against known breach data.
 - Real email confirmation.
 - Optional TOTP MFA with fail-closed assurance checks and support for one backup authenticator.
 - Explicit local logout and all-devices logout, with password confirmation and MFA when required for all-devices logout.

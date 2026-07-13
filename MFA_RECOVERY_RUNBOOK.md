@@ -65,7 +65,7 @@ For each release that changes Auth or MFA:
 
 - The primary TOTP sign-in flow and wrong-code rejection were tested previously.
 - Fail-closed sign-in, masked recovery, backup-factor management, and new audit-event allowlisting are implemented under `AUTH-001`.
-- Desktop and 390px local rendering passed without horizontal overflow or console errors. The authenticated flows were not exercised because no test-account password or authenticator code was made available to Codex.
+- Desktop and 390px local rendering passed without horizontal overflow or console errors. A real reset email was requested for test account A on 2026-07-13, but password/TOTP-dependent steps remain paused until the Owner can enter those values directly in the browser; secrets must not be pasted into chat.
 - `log-app-event` version 4 was deployed with JWT verification enabled; a no-credential request returned HTTP 401.
 - Full browser acceptance testing of the new backup and recovery paths is still required before this task can be marked Verified.
-- Supabase leaked-password protection was reported as disabled by the live security advisor on 2026-07-13. Enabling it changes production Auth policy and remains an Owner approval step.
+- Supabase leaked-password protection was enabled on 2026-07-13 through the Auth Management API, its value was read back as enabled, and the live security advisor cleared the warning. A safe known-compromised-password rejection test still remains.

@@ -16,6 +16,8 @@ Statuses: Proposed, Accepted, Superseded, Deferred, Rejected.
 | 2026-07-13 | Use one Owner, one Master Orchestrator, eight specialist functional agents, and three model/work modes. | Accepted | Functional roles define responsibility; Luna, Terra, and Sol define work mode. Actual concurrency depends on environment capability, so one Codex process may perform roles sequentially without claiming background agents are running. |
 | 2026-07-13 | Make computer use read-only by default and require explicit Owner approval at material production, financial, legal, identity, secret, or irreversible boundaries. | Accepted | Dashboard access must not silently expand standing repository permission. Safe reversible test-environment changes remain allowed only under the recorded policy. |
 | 2026-07-13 | Use a second TOTP authenticator as the supported MFA backup and do not let email recovery bypass MFA. | Accepted | Supabase Auth does not provide recovery codes. A second verified factor preserves two-factor assurance; an all-factors-lost case remains blocked until a strong support recovery process is approved. |
+| 2026-07-13 | Enable Supabase leaked-password protection on the Pro project. | Accepted | Server-side breach-corpus checking strengthens the client password rules and cannot be bypassed through direct Auth API use. The setting was read back as enabled and the advisor warning cleared. |
+| 2026-07-13 | Remove direct API execution from internal trigger helpers and pin their search paths. | Accepted | Trigger-only functions do not need anonymous or authenticated RPC access. The least-privilege migration cleared all database advisor warnings without changing trigger business logic. |
 
 ## Pending Decisions
 

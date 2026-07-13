@@ -31,7 +31,7 @@ Tallyo is a real working app and strong portfolio project, but it is not yet liv
 | PDF regression | Planned | Test mobile PDF download and long multi-page invoices. |
 | PWA/service-worker regression | Planned | Confirm cache behaviour and update instructions. |
 | Documentation accuracy | In Progress | Keep status/handoff/security docs synced with real implementation. |
-| Supabase Auth provider policy | In Progress | Email confirmation and MFA are active. Leaked-password protection was reported disabled on 2026-07-13; session/JWT and password policy settings still need Owner review. |
+| Supabase Auth provider policy | In Progress | Email confirmation, MFA, and leaked-password protection are active; the leaked-password warning cleared on 2026-07-13. Session/JWT, password-policy, rate-limit, and abuse-control settings still need review. |
 | Agent governance documentation | Verified | Hierarchy, queue, locks, handoffs, computer-use controls, provider restrictions, and approval boundaries are authoritative and cross-linked. Recheck consistency at each release candidate. |
 
 ## Manual Approval Boundaries

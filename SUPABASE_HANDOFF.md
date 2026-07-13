@@ -27,6 +27,7 @@
 - Passwords are hashed server-side by Supabase (bcrypt). The app never stores or sees password hashes.
 - On sign-in, Supabase issues a short-lived signed **JWT** session token held client-side; the raw password is not retained by the app.
 - **Email confirmation is required** before an account is usable (see §3).
+- **Leaked-password protection is enabled** (`password_hibp_enabled=true`) and the live security advisor cleared its warning on 2026-07-13. A known-compromised-password rejection test remains acceptance evidence.
 - **Allowed / redirect URLs:** configured in Supabase Auth to match the deployed site URL. **Important:** if the site URL changes (e.g. a GitHub repo/URL rename during the Tallyo rebrand), these must be updated or auth breaks. **Unknown / needs confirmation** — exact configured URLs.
 - **Unknown / needs confirmation:** exact session/JWT expiry, password policy, and rate-limit settings (Supabase defaults assumed).
 
@@ -306,7 +307,8 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 - **Audit events** now cover provider events and selected sensitive app actions, but broader monitoring, alerting, and compliance evidence are still future work.
 - **Backup posture is in progress:** Pro daily backups with seven-day retention and the operating procedure are documented in `BACKUP_RESTORE_RUNBOOK.md`. A current backup check and timed non-production restore test remain.
 - **MFA has no provider recovery codes.** Tallyo supports a second authenticator and blocks email-only MFA recovery. Full browser acceptance tests and an all-factors-lost support process remain.
-- **Supabase Auth posture reviewed read-only on 2026-07-13:** email confirmation was enabled, anonymous sign-in and phone/social providers were disabled, and leaked-password protection was reported disabled. Session/JWT and server password-policy settings still need Owner review; enabling leaked-password protection is an approval-gated production Auth change.
+- **Supabase Auth posture reviewed on 2026-07-13:** email confirmation and leaked-password protection were enabled; anonymous sign-in and phone/social providers were disabled. Session/JWT, server password-policy, rate-limit, and abuse-control settings still need review.
+- **Internal trigger functions were hardened on 2026-07-13:** `handle_new_user()` and `prevent_audit_event_mutation()` use fixed empty search paths and are not directly executable by `anon` or `authenticated`. Advisors are clear and append-only enforcement passed; fresh-signup provisioning acceptance remains.
 - **All-devices logout exists** with current-password confirmation, MFA when required, an app audit event, and Supabase global sign-out. A stronger future version could add email-code confirmation and server-side revocation evidence.
 - **CSP** allows one permissive setting the in-browser Vue template compiler needs (documented trade-off).
 - **Data protection:** the app is **built with data protection principles in mind**, but is **not** certified or "GDPR compliant." Formal compliance work (privacy policy, lawful basis, data-subject rights, retention, breach process) is future work — do not claim compliance.

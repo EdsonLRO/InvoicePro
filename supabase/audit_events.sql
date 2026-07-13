@@ -55,11 +55,14 @@ create policy "own audit_events - select"
 create or replace function public.prevent_audit_event_mutation()
 returns trigger
 language plpgsql
+set search_path = ''
 as $$
 begin
     raise exception 'audit_events are append-only';
 end;
 $$;
+
+revoke execute on function public.prevent_audit_event_mutation() from public, anon, authenticated;
 
 drop trigger if exists prevent_audit_event_update on public.audit_events;
 create trigger prevent_audit_event_update
