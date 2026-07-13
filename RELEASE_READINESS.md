@@ -22,8 +22,8 @@ Tallyo is a real working app and strong portfolio project, but it is not yet liv
 | Email sending and webhooks | Implemented | Need final test delivery evidence. |
 | Overdue reminder automation | Implemented | Verify cron and opt-in behaviour before release. |
 | Recurring invoice automation | Implemented | Verify cron and service-role attribution before release. |
-| Stripe payments | In Progress | Sandbox implemented; replay testing and live-mode setup remain. |
-| Refund/dispute/chargeback handling | In Progress | Logic exists; needs replay evidence and operational policy. |
+| Stripe payments | In Progress | Sandbox implemented; signature rejection and payment/refund duplicate replay passed. Remaining positive lifecycle tests and live-mode setup are still gated. |
+| Refund/dispute/chargeback handling | In Progress | Unknown disputes are rejected and refund replay is idempotent; known-payment dispute, genuine failed-refund evidence, and operational policy remain. |
 | Backups and restore | In Progress | Pro plan and seven-day daily-backup procedure documented; verify a current backup and complete a timed non-production restore test. |
 | Audit events | In Progress | Provider and selected app actions covered; not a full SIEM/compliance system. |
 | Privacy/legal groundwork | Planned | Privacy policy, terms, retention, export/delete, breach process. |
@@ -37,7 +37,7 @@ Tallyo is a real working app and strong portfolio project, but it is not yet liv
 
 Stop before:
 
-- Supabase paid upgrade;
+- Additional billed Supabase projects/add-ons, including PITR;
 - Stripe live mode;
 - real customer emails or payment links;
 - public launch;

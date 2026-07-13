@@ -34,7 +34,7 @@ Implemented:
 
 Still to finish before treating the app as customer-ready:
 
-- Finish Stripe replay testing for refund-failure, failed/asynchronous payment, and dispute events in sandbox.
+- Complete the remaining Stripe positive-path sandbox tests for a known-payment dispute and genuine failed refund. Signature rejection, unrelated-event rejection, and payment/refund duplicate replay have passed.
 - Decide the operational chargeback/refund policy and customer support process.
 - Verify current Supabase Pro scheduled-backup evidence and complete at least one timed non-production restore test. The operating procedure is documented in `BACKUP_RESTORE_RUNBOOK.md`.
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations. Company/settings saves are now covered at a privacy-safe category level.

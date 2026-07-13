@@ -36,12 +36,12 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 |---|---|---|---|---|---|---|---|
 | GOV-001 | Complete agent governance and computer-use controls | High | Verified | Master Orchestrator | Terra with Sol policy review | Released after commit | Hierarchy, queue, locks, handoffs, provider controls, cross-links, and validation completed. |
 | OPS-001 | Backup and restore runbook | High | Verified | Release Agent | Terra with Sol review | Released after commit | Pro plan confirmed, seven-day daily-backup procedure documented, restore side effects and Owner cost/destructive boundaries recorded in `BACKUP_RESTORE_RUNBOOK.md`. |
-| PAY-TEST-001 | Finish Stripe sandbox lifecycle replay evidence | High | Ready | Payments Agent | Sol / Terra | Unlocked | Replay authorised sandbox failures/disputes and record idempotency/state evidence. |
+| PAY-TEST-001 | Finish Stripe sandbox lifecycle replay evidence | High | In Progress | Payments Agent | Sol / Terra | Released with focused commit; remaining test subtask unlocked | Signature rejection, unknown-event binding, payment/refund duplicate replay, audit constraints, and Deno checks passed. Known-payment dispute and genuine `refund.failed` positive paths remain. |
 | AUTH-001 | Define MFA recovery process | Medium | Planned | Security Agent | Sol | Unlocked | Product/security decision and recovery runbook required. |
 
 ## Current Next Priorities
 
-1. Stripe sandbox replay testing evidence for refund-failure, failed/asynchronous payment, and dispute events.
+1. Complete the remaining Stripe sandbox positive-path evidence for a known-payment dispute and genuine `refund.failed` event; duplicate and unknown-event rejection evidence is recorded.
 2. Verify a current scheduled backup and run an Owner-approved timed restore test into a separate environment.
 3. MFA recovery/backup-code planning or documented recovery process.
 4. Supabase Auth password policy / breached-password checks on the Pro plan.
