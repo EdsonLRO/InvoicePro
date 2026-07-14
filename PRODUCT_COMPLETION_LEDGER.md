@@ -21,7 +21,7 @@ Statuses: Planned, Investigating, Confirmed, In Progress, Implemented, Verified,
 | Branding and PDF styling | Implemented | Brand colour, logo position/upload, app-style PDF attachments. |
 | Activity history | Implemented | User-facing document/schedule activity history; not tamper-proof. |
 | Append-only audit events | In Progress | Provider events and selected app actions covered, including settings saves by category. More automation/backups evidence remains. |
-| Account security | In Progress | Supabase Auth, email confirmation, fail-closed TOTP MFA, backup-authenticator support, MFA-gated masked password recovery, password change AAL2 handling, and local/all-devices logout. New recovery paths still need browser acceptance evidence and an all-factors-lost support process. |
+| Account security | In Progress | Supabase Auth, email confirmation, fail-closed TOTP MFA, backup-authenticator support, MFA-gated masked password recovery, password change AAL2 handling, and local/all-devices logout. Primary/backup sign-in, protected factor removal, primary-specific and backup-specific recovery, wrong-code recovery rejection, email-only bypass rejection, and fail-closed lookup simulation passed on 2026-07-14. AUTH-001 is Verified. Broader provider policy decisions and robust all-factors-lost recovery remain paid/public-launch work. |
 | Backup and restore | In Progress | Supabase Pro daily backups were listed as completed through 2026-07-13 and seven-day retention is documented in `BACKUP_RESTORE_RUNBOOK.md`; an Owner-approved timed non-production restore test remains. |
 | Privacy/legal groundwork | Planned | Privacy policy, terms, retention/export/delete process, breach process. |
 | Final mobile/PDF regression | Planned | Needed before treating app as customer-ready. |
@@ -38,7 +38,7 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 | GOV-002 | Correct active Legal, Privacy and Regulatory Agent governance | High | Verified | Legal, Privacy and Regulatory Agent | Terra with Sol legal-risk review | Released after focused corrective commit | Ninth specialist, legal triggers/workflow/dispositions, task fields, cross-review rules, release gate, external-advice limits, and repository-wide consistency checks completed. Owner merge remains separate. |
 | OPS-001 | Backup and restore runbook | High | Verified | Release Agent | Terra with Sol review | Released after commit | Pro plan confirmed, seven-day daily-backup procedure documented, restore side effects and Owner cost/destructive boundaries recorded in `BACKUP_RESTORE_RUNBOOK.md`. |
 | PAY-TEST-001 | Finish Stripe sandbox lifecycle replay evidence | High | In Progress | Payments Agent | Sol / Terra | Released with focused commit; remaining test subtask unlocked | Signature rejection, unknown-event binding, payment/refund duplicate replay, audit constraints, and Deno checks passed. Known-payment dispute and genuine `refund.failed` positive paths remain. |
-| AUTH-001 | Harden MFA and define recovery process | High | In Progress | Security Agent | Sol / Terra | Implementation released on a focused branch; authenticated acceptance subtask remains unlocked | Fail-closed sign-in, masked MFA-gated recovery, backup-factor management, runbook, responsive checks, and audit-function v4 deployment complete. Leaked-password protection is enabled; credential-dependent browser acceptance remains. |
+| AUTH-001 | Harden MFA and define recovery process | High | Verified | Security Agent | Sol / Terra | Acceptance evidence complete on focused branch | Primary/backup sign-in, wrong-code sign-in and recovery rejection, email-only bypass rejection, protected backup removal, one-factor preservation, two-factor restoration, primary-specific and backup-specific masked password recovery, privacy-safe account-audit review, fail-closed lookup simulation, and provider leaked-password rejection passed on 2026-07-14. The interim all-factors-lost process is approved; robust recovery remains a separate paid/public-launch condition. |
 | DB-001 | Harden internal trigger helper functions | High | Implemented | Security Agent | Sol / Terra | Migration applied; signup acceptance remains unlocked | Empty search paths and least-privilege execution grants are applied. Security advisors are clear, all triggers remain attached, and append-only mutation rejection passed. Run one fresh-signup provisioning check before marking Verified. |
 | DB-002 | Optimise RLS identity evaluation and foreign-key lookups | High | Verified | Security Agent | Sol / Terra | Migration applied and released | RLS init-plan and missing-index warnings cleared without changing policy commands, ownership conditions, table RLS state, or security-advisor status. |
 | AUTO-001 | Authenticate privileged scheduled automation calls | High | Implemented | Security Agent | Sol / Terra | Migration/function deployed; scheduled acceptance remains unlocked | Current `generate-recurring` v13 retains unsigned-call rejection and both cron jobs use the Vault-backed automation secret. Confirm the next 06:00/09:00 UTC runs before marking Verified. |
@@ -48,10 +48,9 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 
 1. Complete the remaining Stripe sandbox positive-path evidence for a known-payment dispute and genuine `refund.failed` event; duplicate and unknown-event rejection evidence is recorded.
 2. Run an Owner-approved timed restore test into a separate environment; current scheduled-backup evidence is verified.
-3. Complete AUTH-001 browser acceptance tests for fail-closed MFA, backup-factor recovery, and masked password recovery.
-4. Complete the Supabase Auth policy decisions recorded in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection is enabled and advisor-verified.
-5. Final mobile/PDF/PWA regression pass.
-6. Data-protection/legal groundwork before real customers.
+3. Complete the remaining Supabase Auth policy decisions recorded in `DEFERRED_MANUAL_CONFIGURATION.md`. AUTH-001 is Verified; leaked-password protection is enabled, advisor-verified, and rejection-tested. Robust all-factors-lost recovery remains a paid/public-launch condition.
+4. Final mobile/PDF/PWA regression pass.
+5. Data-protection/legal groundwork before real customers.
 
 ## Completion Rule
 

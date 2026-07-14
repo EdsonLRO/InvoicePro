@@ -6,14 +6,21 @@ This is the single checklist for work that needs the Owner at the laptop, an ide
 
 Use only the dedicated Tallyo test accounts. Enter passwords and authenticator codes directly in the browser; never paste them into chat or terminal logs.
 
-- Complete the pending password-reset link on the local/test branch.
-- For an MFA-enabled account, confirm a wrong TOTP code is rejected and the password is unchanged.
-- Confirm a correct TOTP code permits the password update and the new password signs in.
-- Confirm both primary and backup authenticators can complete sign-in and password recovery.
-- Remove one factor using a fresh code from the remaining factor; confirm the app never permits removal of the last verified factor through that flow.
-- Confirm email access alone cannot reset the password of an MFA-enabled account.
-- Run one fresh signup and confirm the `company_settings` row is created automatically.
-- Run one safe known-compromised-password rejection test. Record only pass/fail, never the password used.
+- [x] Confirm a non-MFA control account can sign in normally.
+- [x] Confirm a wrong primary TOTP code is rejected and a current primary code completes sign-in.
+- [x] Confirm a backup authenticator enrolled in a separate authenticator app can independently complete a fresh sign-in.
+- [x] Remove the backup using a fresh code from the remaining primary factor, confirm one verified factor remains, then restore a fresh backup and confirm two verified factors are present.
+- [x] Complete the pending password-reset link on the local/test branch.
+- [x] Confirm a wrong recovery TOTP leaves the password unchanged.
+- [x] Confirm the primary authenticator can complete password recovery and the new password signs in.
+- [x] Confirm the backup authenticator can independently complete password recovery and the new password signs in.
+- [x] Confirm email access alone cannot reset the password of an MFA-enabled account.
+- [x] Simulate an assurance-level or factor-list lookup failure and confirm the app does not initialise signed-in data.
+- [ ] Run one fresh signup and confirm the `company_settings` row is created automatically.
+- [x] Run one safe known-compromised-password rejection test. Record only pass/fail, never the password used.
+- [x] Approve the interim deny-by-default all-factors-lost support process for the current portfolio build.
+
+The completed MFA sign-in, replacement-factor, factor-management, AAL2 Change Password, and enrolled-factor-gated password-recovery checks above were accepted on 2026-07-14. Primary-specific and backup-specific reset flows each completed independently, and the resulting password completed sign-in. A wrong recovery TOTP was rejected, an email-only recovery submission was blocked, and the existing password remained valid after those rejected attempts. A controlled extraction test of the shipped `routeAfterAuth` method passed five scenarios, including fail-closed assurance lookup, factor lookup, and missing-factor paths that did not initialise signed-in data. Supabase also rejected a known-compromised password after current-password and MFA verification; only pass/fail was recorded. The Owner approved an interim all-factors-lost response that forbids email-only or administrator bypass and identity-document collection; robust recovery remains required before paid/public onboarding. A fresh sign-in after replacement restored the expected primary/backup labels and both factors independently completed AAL2. No password, TOTP code, QR secret, recovery token, account contact data, or identity evidence was recorded.
 
 Detailed procedure: `MFA_RECOVERY_RUNBOOK.md`.
 

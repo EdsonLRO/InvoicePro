@@ -27,9 +27,9 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Finding:** `routeAfterAuth` caught MFA assurance-level or factor-list errors and continued into `onSignedIn`. It also continued when an AAL2 session was required but no verified factor could be loaded.
 - **Impact:** A transient Auth/API failure or inconsistent factor response could let an AAL1 session reach the signed-in application UI instead of stopping at the MFA gate. Database RLS still limited rows to that authenticated user, but the app's promised second-factor boundary was not fail-closed.
 - **Change:** Assurance-level and factor-list failures now locally sign out the incomplete session. A required AAL2 session cannot initialise app data without a verified factor, and challenge completion is followed by an explicit AAL2 check.
-- **Verification:** Inline JavaScript syntax passed; focused static review confirmed every normal sign-in entry point uses `routeAfterAuth`; the local app loaded with no console errors. Browser checks for successful MFA, wrong code, restored sessions and simulated lookup failure remain required by `MFA_RECOVERY_RUNBOOK.md`.
+- **Verification:** Inline JavaScript syntax passed; focused static review confirmed every normal sign-in entry point uses `routeAfterAuth`; the local app loaded with no console errors. On 2026-07-14, an incorrect primary TOTP was rejected, current primary and backup factors each completed a fresh AAL2 sign-in, and an enrolled-factor-gated password recovery produced a password that completed a fresh AAL2 sign-in using the backup factor. A controlled extraction test ran the actual shipped `routeAfterAuth` method through five scenarios. Assurance lookup failure, factor lookup failure, and missing verified factors each forced local sign-out, cleared signed-out state, and never called `onSignedIn`; valid MFA routing and an existing AAL2 session still followed their intended paths.
 - **Residual risk:** The control is implemented client-side. High-risk future server operations should independently enforce recent AAL2 instead of trusting UI state.
-- **Status:** Implemented; browser acceptance pending.
+- **Status:** Verified.
 
 ### SEC-AUTH-002 - Password recovery used an unmasked prompt and lacked an explicit MFA recovery gate
 
@@ -38,9 +38,9 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Finding:** The `PASSWORD_RECOVERY` handler collected the new password through `window.prompt`, which displays ordinary text rather than a masked password field, and called `updateUser` without an explicit application-level MFA challenge when verified factors existed.
 - **Impact:** A new password could be exposed to someone viewing the screen. The recovery flow also relied on provider-side rejection rather than clearly preserving Tallyo's MFA requirement, creating ambiguity around whether access to email alone could bypass the enrolled second factor.
 - **Change:** Replaced the prompt with masked password/confirmation fields and the existing local password policy. Recovery must positively complete factor discovery before the update button is enabled, and verified TOTP accounts must challenge a selected primary or backup factor. Added backup-factor management and privacy-safe recovery/factor audit event types.
-- **Verification:** Static review confirms masked inputs, password match/strength checks, fail-closed factor discovery, TOTP validation, and no application initialisation before successful update. The recovery and two-factor management screens rendered at desktop and 390px widths with no horizontal overflow or console errors; both factors exposed a removal action only while two remained. Deno check passed for `log-app-event`; deployed version 4 remained JWT-protected and rejected an unauthenticated write with HTTP 401. Full reset-link, wrong-code, backup-factor and success-path account tests remain.
-- **Residual risk:** An all-factors-lost user has no self-service bypass. A strong support identity-verification process remains a release requirement.
-- **Status:** Implemented; browser acceptance pending.
+- **Verification:** Static review confirms masked inputs, password match/strength checks, fail-closed factor discovery, TOTP validation, and no application initialisation before successful update. The recovery and two-factor management screens rendered at desktop and 390px widths with no horizontal overflow or console errors; a later clipped desktop recovery viewport was corrected with a scrollable signed-out shell. On 2026-07-14, backup-factor sign-in and protected removal/re-enrolment passed. Primary-specific and backup-specific reset flows each completed independently, and the resulting password completed sign-in. A wrong recovery TOTP was rejected, an email-only recovery submission was blocked, and the existing password remained valid after those rejected attempts. Deno check passed for `log-app-event`; deployed version 4 remained JWT-protected and rejected an unauthenticated write with HTTP 401. A live review of recent account-security rows found only `user_agent` metadata, no sensitive metadata keys, no password/TOTP/token terms, and no email-like values.
+- **Residual risk:** An all-factors-lost user has no recovery path. The approved interim support response is deny-by-default and prevents an informal administrator bypass, but robust recovery remains required before paid/public onboarding.
+- **Status:** Verified for the current AUTH-001 scope. Robust all-factors-lost recovery remains a separate paid/public-launch condition.
 
 ### SEC-AUTH-003 - Supabase leaked-password protection was disabled
 
@@ -49,8 +49,8 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Finding:** The live Supabase security advisor reports that leaked-password protection is disabled even though the project is now on the Pro plan.
 - **Impact:** Tallyo's client-side password checks can reject simple patterns but cannot reliably detect passwords present in known breach corpora. Client validation can also be bypassed by direct Auth API use.
 - **Change:** Enabled `password_hibp_enabled` through the Supabase Auth Management API after Owner approval. The previous value was recorded as `false`, the returned/read-back value was `true`, and no credential was printed or written to the repository.
-- **Verification:** The live Supabase security advisor was re-run on 2026-07-13 and the leaked-password warning cleared. A safe test-account rejection check with a known compromised password remains acceptance evidence; never record the password used.
-- **Status:** Implemented; rejection-path acceptance pending.
+- **Verification:** The live Supabase security advisor was re-run on 2026-07-13 and the leaked-password warning cleared. On 2026-07-14, a known-compromised candidate passed Tallyo's local format checks, reached Supabase after current-password and MFA verification, and was rejected as weak/easy to guess. Only the pass/fail outcome was recorded, not the candidate value.
+- **Status:** Verified.
 
 ### SEC-DB-001 - Trigger helper functions retain unnecessary API execution grants
 
@@ -124,9 +124,9 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Finding:** Change Password rechecked the current password with `signInWithPassword`, but on MFA-enabled accounts that creates an AAL1 session. The app then called `updateUser` before completing a fresh MFA challenge, so Supabase rejected the password update with an AAL2-required error.
 - **Impact:** MFA-protected users could not change their password from the app, and the failure was confusing.
 - **Change:** Added an authenticator-code popup when MFA is enabled and completed a Supabase MFA challenge/verify step after current-password reauth and before `updateUser`.
-- **Verification:** Ran `git diff --check`; reviewed against Supabase MFA/AAL docs. Manual browser test still required on the deployed app.
-- **Residual risk:** Backup-authenticator recovery is implemented but still needs browser acceptance; remaining server-side password, session, rate-limit, and abuse-control settings still need review.
-- **Evidence:** This fix commit; manual browser test pending.
+- **Verification:** Ran `git diff --check`; reviewed against Supabase MFA/AAL docs. Primary and backup factors each completed fresh AAL2 sign-in on 2026-07-14. The deployed Change Password flow then requested a fresh authenticator code and completed the password update successfully.
+- **Residual risk:** The backup-authenticator sign-in, protected-removal, replacement-factor, and AAL2 password-change paths passed acceptance. Remaining server-side password, session, rate-limit, abuse-control, and password-recovery settings still need review.
+- **Evidence:** This fix commit; MFA factor and Change Password acceptance dated 2026-07-14.
 
 ### SEC-LOG-004 - Supabase dump dry-run printed a temporary CLI credential
 
@@ -186,7 +186,7 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 ## Open Follow-Ups
 
 - Confirm Supabase Auth password policy, JWT/session expiry, and rate-limit settings.
-- Complete the known-compromised-password rejection test for the enabled provider check.
-- Add the future verified "log out from all devices" flow when account-safety work begins.
+- Keep the verified leaked-password control enabled and recheck it after material Auth-provider changes.
+- Add the future email-confirmed enhancement to the existing "log out from all devices" flow; do not treat email access alone as sufficient identity proof.
 - Complete the remaining positive-path Stripe sandbox tests for a known Tallyo dispute and a genuine failed refund; current redacted evidence is in `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
 - Record backup and restore test evidence once a non-production restore is performed.

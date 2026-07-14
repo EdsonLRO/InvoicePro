@@ -39,7 +39,7 @@ Still to finish before treating the app as customer-ready:
 - Decide the operational chargeback/refund policy and customer support process.
 - Complete at least one Owner-approved timed non-production restore test. Current Supabase Pro daily-backup evidence is verified in `BACKUP_RESTORE_RUNBOOK.md`.
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations. Company/settings saves are now covered at a privacy-safe category level.
-- Complete browser acceptance testing of the new fail-closed MFA, backup-authenticator, and password-recovery paths documented in `MFA_RECOVERY_RUNBOOK.md`.
+- MFA browser acceptance is complete for fail-closed routing, primary/backup factor lifecycle, primary-specific and backup-specific recovery, wrong-code rejection, and email-only bypass rejection. Robust all-factors-lost recovery remains a paid/public-launch condition.
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.
 - Resolve the recorded Supabase server-side password, session, SMTP/rate-limit, and abuse-control decisions in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection is enabled and the live advisor was clear on 2026-07-13.
 - Privacy policy, terms, retention position, export/deletion process, and breach process.
@@ -90,7 +90,7 @@ Known limits:
 
 - Activity history is useful, but not tamper-proof.
 - `audit_events` now covers provider events and selected sensitive app actions, but it is not a full compliance/SIEM audit system.
-- Supabase does not provide recovery codes. Tallyo now supports a second authenticator and prevents email-only MFA bypass, but the new recovery paths still need browser acceptance testing and an all-factors-lost support procedure.
+- Supabase does not provide recovery codes. Tallyo supports a second authenticator and prevents email-only MFA bypass. AUTH-001 acceptance is Verified. The interim all-factors-lost support response is approved and deny-by-default; robust recovery is still required before paid/public onboarding.
 - All-devices logout exists, but a future email-code confirmation flow would be stronger for production account recovery/security UX.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
 - Supabase Pro daily backups are verified and the recovery runbook is in place, but a timed restore test, privacy operations, and incident response are not complete.
