@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
       object_id: documentId,
       source: "edge_function",
       provider: "resend",
-      metadata: { to, status: resendResponse.status, response: resendBody, category: "payment_reminder" },
+      metadata: { status: resendResponse.status, reason: "provider_rejected_request", category: "payment_reminder" },
     });
     return json({ error: resendBody?.message || "Reminder email could not be sent" }, 502);
   }

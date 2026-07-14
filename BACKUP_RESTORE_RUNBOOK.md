@@ -15,7 +15,7 @@ Follow `AUTOMATION_MODEL_ORCHESTRATION.md` and `AGENT_HIERARCHY_AND_COMPUTER_USE
 - **Current RPO:** up to 24 hours with daily backups. RPO means Recovery Point Objective: the maximum expected data loss measured in time.
 - **Current RTO:** unknown until a timed restore test is completed. RTO means Recovery Time Objective: how long recovery takes.
 - **Restore test:** pending. It must use a separate non-production project or a controlled local environment, never overwrite the active project for testing.
-- **Current evidence (checked 2026-07-13):** the Supabase CLI listed completed daily physical backups from 2026-07-06 through 2026-07-13 in `eu-west-2`; WAL-G was enabled and PITR was disabled. This proves scheduled backup availability, not restore correctness.
+- **Current evidence (checked 2026-07-14):** the Supabase CLI listed completed daily physical backups in the current visible window through 2026-07-14 in `eu-west-2`; WAL-G was enabled and PITR was disabled. This proves scheduled backup availability, not restore correctness.
 
 Official references:
 
@@ -81,7 +81,7 @@ supabase db dump --linked --file private-backups/<date-purpose>/data.sql --use-c
 
 Security warning: do not run `supabase db dump --linked --dry-run` in captured terminals, CI logs, shared transcripts, or agent output. Current CLI passwordless flows print a short-lived `cli_login_postgres` credential in the generated script. This is not the permanent project password, but it is still a credential and must not be logged.
 
-The machine currently has Supabase CLI and Docker available. `psql` was not available on `PATH` on 2026-07-13, so a CLI restore cannot be claimed ready until PostgreSQL client tools are installed and verified.
+The machine currently has Supabase CLI and Docker available. `psql` was still not available on `PATH` on 2026-07-14, so a CLI restore cannot be claimed ready until PostgreSQL client tools are installed and verified.
 
 ## Restore-Test Procedure
 

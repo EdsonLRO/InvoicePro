@@ -53,8 +53,9 @@ These are configuration decisions, not invitations to weaken Auth, MFA, RLS, or 
 
 The recurring and overdue jobs now retrieve `automation_secret` from Vault and send it as `x-automation-secret`. Their endpoints reject unsigned requests.
 
-- After 2026-07-14 06:00 UTC, confirm `generate-recurring-daily` completed successfully on deployed v13.
-- After 2026-07-14 09:00 UTC, confirm `send-overdue-reminders-daily` completed successfully.
+- The 2026-07-14 protected functions both returned HTTP 200 and no duplicate invoice, owner mismatch, opt-in violation, or unintended email was found. The recurring pg_net caller exhausted its former short response timeout even though the Edge Function completed.
+- Both cron commands now use an explicit 30-second pg_net timeout and the privacy-safe email functions are deployed (`generate-recurring` v14 and `send-overdue-reminders` v7).
+- After the next natural 06:00 and 09:00 UTC runs, confirm both pg_net response rows are HTTP 200. Do not force a live run merely to create evidence.
 - Confirm no duplicate invoice or unintended customer email was produced.
 - For any due recurring schedule, confirm the generated invoice has source/occurrence attribution and one `recurring_invoice_generated` audit event.
 - If either job fails, inspect redacted Edge Function/cron logs before retrying. Never print the secret.
@@ -73,8 +74,8 @@ Current scheduled-backup evidence is verified. A timed restore is still required
 
 - [x] Complete the known-payment dispute and genuine failed-refund Stripe sandbox tests, including duplicate replay checks. Privacy-safe evidence was recorded on 2026-07-14 in `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
 - Keep Stripe in sandbox until live-mode configuration, policy/legal work, and explicit Owner approval are complete.
-- Run final desktop/mobile/PDF/PWA regression checks.
-- Complete privacy policy, terms, retention, export/deletion, refund/support, and breach-response groundwork before real customers.
+- Complete authenticated mobile, long/mobile PDF, and real-browser PWA checks. Public desktop/mobile shell, deployed CSP/SRI, manifest and service-worker checks passed on 2026-07-14.
+- Complete the blocked actions in `LEGAL_PRIVACY_READINESS.md` and legally review `PAYMENT_OPERATIONS_RUNBOOK.md` before real customers.
 
 ## Completed non-manual evidence
 
@@ -82,4 +83,6 @@ Current scheduled-backup evidence is verified. A timed restore is still required
 - RLS performance hardening and foreign-key indexes were applied without changing tenant ownership rules.
 - `generate-recurring` v13 rejects unsigned requests, enforces one invoice per schedule occurrence, and only emails after a conditional schedule claim; both cron commands are Vault-backed.
 - `resend-webhook` v11 passes Deno type checking and rejects unsigned requests.
-- Daily physical backups from 2026-07-06 through 2026-07-13 were listed as completed; WAL-G is enabled and PITR remains disabled/unapproved.
+- Daily physical backups from 2026-07-07 through 2026-07-14 were listed as completed in the current seven-day window; WAL-G is enabled and PITR remains disabled/unapproved.
+- Two-account RLS read isolation passed across all six tenant tables on 2026-07-14. Five rolled-back customer write checks also passed: own update/insert allowed; foreign update/delete/insert blocked.
+- Seven-day Resend audit evidence showed 31 sent and 31 delivered events with no failed, bounced, or complained signal.

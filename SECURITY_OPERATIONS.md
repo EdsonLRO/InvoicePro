@@ -16,7 +16,7 @@ Supabase Pro is active and provides daily database backups with a seven-day rete
 
 Current evidence and remaining release gate:
 
-- Completed daily physical backups from 2026-07-06 through 2026-07-13 were verified through the Supabase CLI; WAL-G was enabled and PITR remained disabled.
+- Completed daily physical backups through 2026-07-14 were verified through the Supabase CLI; WAL-G was enabled and PITR remained disabled.
 - Run an Owner-approved timed restore test into a separate non-production project or controlled local environment.
 - Keep production, test, and local data clearly separated.
 
@@ -24,7 +24,7 @@ Current evidence and remaining release gate:
 
 The recurring and overdue cron jobs retrieve a dedicated automation secret from Supabase Vault at runtime and send it as `x-automation-secret`. `generate-recurring` checks that secret before creating its service-role client, and unsigned requests return HTTP 401. The service role remains server-side and every generated row must still be explicitly attributed to the schedule owner because service-role access bypasses RLS.
 
-Confirm the first post-hardening 06:00 and 09:00 UTC runs using `DEFERRED_MANUAL_CONFIGURATION.md`. Disable both jobs immediately in any restored clone.
+The protected functions returned HTTP 200 on 2026-07-14. The recurring pg_net request exhausted its former short response timeout even though its function completed, so both jobs now use a 30-second response timeout. Confirm the next natural 06:00 and 09:00 UTC pg_net responses using `DEFERRED_MANUAL_CONFIGURATION.md`. Disable both jobs immediately in any restored clone.
 - Confirm invoices, customers, saved items, company settings, payments, recurring templates, Auth records, and audit events recover as expected.
 - Re-run cross-user RLS isolation tests after restoration.
 - Disable cloned cron and outbound automation before it can send email, create invoices, or call payment services.
@@ -34,7 +34,7 @@ PITR is not enabled by this runbook. It is a separately billed add-on and remain
 
 ## Data Protection Groundwork
 
-Needed before inviting real users:
+Internal groundwork is now recorded in `LEGAL_PRIVACY_READINESS.md`. Before inviting real users it must become approved, tested operations and accurate customer-facing documents:
 
 - Privacy policy.
 - Terms of service.
@@ -107,7 +107,7 @@ Still-to-decide before production/commercial use:
 - Whether this remains a single-business invoice-payment app flow or later becomes a multi-business SaaS/Stripe Connect platform.
 - Whether Tallyo ever takes platform fees. This is future SaaS work, not current app finishing.
 - Supported currencies beyond the current invoice currency flow.
-- Refund, dispute, chargeback, failed-payment, and customer support handling.
+- Operationally test and legally review `PAYMENT_OPERATIONS_RUNBOOK.md`, including refund, dispute, chargeback, failed-payment, and support handling.
 - Terms, privacy, cancellation, and payment dispute wording for real customers.
 
 The Legal, Privacy and Regulatory Agent must issue a dated disposition for legally material payment/customer-use changes and verify mandatory conditions before release. A required external professional review, unresolved legal block, missing notice, or unsupported product claim keeps public launch blocked.

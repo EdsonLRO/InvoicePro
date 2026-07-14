@@ -182,6 +182,9 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `supabase/functions/stripe-webhook/index.ts` | Signed Stripe webhook receiver that records verified Checkout payments. |
 | `SECURITY_OPERATIONS.md` | Practical backup, restore, data-protection, email, payment, and release gates before real users. |
 | `BACKUP_RESTORE_RUNBOOK.md` | Supabase Pro backup posture, logical export safety, restore-test procedure, side-effect controls, evidence, and approval boundaries. |
+| `PAYMENT_OPERATIONS_RUNBOOK.md` | Internal Stripe sandbox refund, dispute, chargeback, failure, support, and escalation procedure; not a customer-facing policy. |
+| `LEGAL_PRIVACY_READINESS.md` | Internal data-flow, role, vendor, retention, rights, breach, claims, legal disposition, and launch-block register. |
+| `RELEASE_EVIDENCE_2026-07-15.md` | Privacy-safe evidence, deployed versions, limitations, and remaining gates from the current readiness pass. |
 | `DEFERRED_MANUAL_CONFIGURATION.md` | Laptop/identity/provider/cost-dependent acceptance and configuration decisions that automation must not perform silently. |
 | `EMAIL_PHASE.md` | Staged Resend email plan: DNS setup, manual sending, webhooks, then automation. |
 | `ROADMAP_EMAIL_PAYMENTS.md` | Current implementation state, deploy checks, and remaining work for email/payments. |
@@ -322,7 +325,7 @@ supabase functions deploy generate-recurring
 
 - **No GDPR-compliance claim.** The app is **not** certified or "fully compliant". Real data-protection groundwork (privacy policy, lawful basis, data-subject rights, consent/unsubscribe, breach process, registration) is **future work** and required before onboarding real paying customers.
 - **Activity history is not a tamper-proof audit log** — it lives in editable records. Provider events and selected sensitive app actions now use append-only `audit_events`; company/settings saves are logged by category only, without storing the actual settings values. Full monitoring/compliance audit coverage is still future work.
-- **Backup posture is in progress:** Supabase Pro daily backups were verified through 2026-07-13 and seven-day retention is documented in `BACKUP_RESTORE_RUNBOOK.md`; an Owner-approved timed restore test remains.
+- **Backup posture is in progress:** Supabase Pro daily backups were verified through 2026-07-14 and seven-day operational retention is documented in `BACKUP_RESTORE_RUNBOOK.md`; an Owner-approved timed restore test remains.
 - **MFA has no provider recovery codes.** Tallyo supports a second authenticator and blocks email-only MFA recovery. Primary-specific and backup-specific recovery acceptance passed on 2026-07-14, completing AUTH-001. The Owner approved an interim deny-by-default all-factors-lost response; robust recovery is still required before paid/public onboarding. Supabase leaked-password protection was enabled and advisor-verified on 2026-07-13, and its safe rejection path passed on 2026-07-14.
 - **CSP allows one permissive setting** the in-browser Vue template compilation requires (`unsafe-eval`) — a documented trade-off.
 - **Stripe sandbox lifecycle is technically verified, not live-approved:** trusted Checkout binding, successful payment/refund processing, genuine failed-refund reversal, known-payment dispute awareness, unknown-event rejection, and duplicate replay passed. Operational policy, legal/privacy readiness, and explicit live-mode approval are still required before real customer use.
@@ -363,7 +366,7 @@ Near-term (in rough order):
    - Done: hardened Stripe webhook records verified Checkout payments and includes refund/dispute/failed-payment awareness.
    - Done: in-app Stripe refund requests through a server-side Edge Function.
    - Current payment caveat: Stripe should still be treated as test/development until explicitly moved to live mode.
-4. **Current hardening priorities:** run the formal restore test; define the operational refund/dispute/chargeback/support process; expand audit coverage to privileged automation failures and backup/restore evidence; complete the remaining provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; design robust all-factors-lost recovery before paid/public onboarding; run the final mobile/PDF regression pass.
+4. **Current hardening priorities:** run the formal restore test; operationally test and legally review `PAYMENT_OPERATIONS_RUNBOOK.md`; complete the blocked legal/privacy work in `LEGAL_PRIVACY_READINESS.md`; finish provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; design robust all-factors-lost recovery before paid/public onboarding; finish authenticated mobile/PDF/PWA acceptance.
 5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, export/deletion process, consent/unsubscribe where relevant, and breach response notes.
 6. Optional app polish: link invoices to their recurring schedule (dedup guard); clearer payment-state wording; repo/URL rename to Tallyo only with Supabase Auth URL updates.
 7. Future phase, deliberately deferred: public website, paid Tallyo subscriptions, plan tiers, server-enforced entitlements, workspaces/teams/RBAC, and SaaS billing.

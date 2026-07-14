@@ -34,7 +34,7 @@ For the short current-stage source of truth, see `APP_STATUS.md`.
 For authoritative agent hierarchy, task coordination, locks, handoffs, and autonomous development rules, see `AUTOMATION_MODEL_ORCHESTRATION.md`.
 For the active Legal, Privacy and Regulatory Agent's triggers, evidence standard, dispositions, and professional-advice limits, see `TALLYO_LEGAL_COMPLIANCE_AGENT.md`.
 For graphical-dashboard and computer-use safety controls, see `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
-For completion and release tracking, see `PRODUCT_COMPLETION_LEDGER.md` and `RELEASE_READINESS.md`.
+For completion and release tracking, see `PRODUCT_COMPLETION_LEDGER.md` and `RELEASE_READINESS.md`. Internal live-readiness procedures are in `PAYMENT_OPERATIONS_RUNBOOK.md` and `LEGAL_PRIVACY_READINESS.md`; neither file is a published customer policy or legal-compliance claim.
 For owner, product, security, and operations decisions, see `DECISION_LOG.md`.
 For laptop-, identity-, provider-, or cost-dependent work intentionally left for later, see `DEFERRED_MANUAL_CONFIGURATION.md`.
 
@@ -185,7 +185,7 @@ For full details, see `SUPABASE_HANDOFF.md`.
 Current app/security work:
 
 1. Define the operational refund, dispute, chargeback, and support process; the implemented Stripe sandbox lifecycle and duplicate replay behavior are Verified.
-2. Run the documented Owner-approved non-production restore test in `BACKUP_RESTORE_RUNBOOK.md`; current backup evidence is verified.
+2. Run the documented Owner-approved non-production restore test in `BACKUP_RESTORE_RUNBOOK.md`; current daily-backup evidence is verified through 2026-07-14.
 3. Expand append-only audit logging further, especially privileged automation failures and backup/restore evidence.
 4. Preserve the Verified `MFA_RECOVERY_RUNBOOK.md` controls and approved deny-by-default all-factors-lost response; design robust recovery before paid/public onboarding. Consider upgrading all-devices logout with a server-side email-code confirmation flow.
 5. Complete the remaining provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; leaked-password rejection is already Verified.
