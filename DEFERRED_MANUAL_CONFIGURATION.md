@@ -11,7 +11,7 @@ Use only the dedicated Tallyo test accounts. Enter passwords and authenticator c
 - [x] Confirm a backup authenticator enrolled in a separate authenticator app can independently complete a fresh sign-in.
 - [x] Remove the backup using a fresh code from the remaining primary factor, confirm one verified factor remains, then restore a fresh backup and confirm two verified factors are present.
 - [x] Complete the pending password-reset link on the local/test branch.
-- [ ] Confirm a wrong recovery TOTP leaves the password unchanged.
+- [x] Confirm a wrong recovery TOTP leaves the password unchanged.
 - [x] Confirm a correct enrolled TOTP permits the password update and the new password signs in.
 - [ ] Confirm the backup authenticator can also complete password recovery.
 - [ ] Confirm email access alone cannot reset the password of an MFA-enabled account.
@@ -19,7 +19,7 @@ Use only the dedicated Tallyo test accounts. Enter passwords and authenticator c
 - [ ] Run one fresh signup and confirm the `company_settings` row is created automatically.
 - [ ] Run one safe known-compromised-password rejection test. Record only pass/fail, never the password used.
 
-The completed MFA sign-in, replacement-factor, factor-management, AAL2 Change Password, and enrolled-factor-gated password-recovery checks above were accepted on 2026-07-14. The updated password completed a fresh AAL2 sign-in using the backup authenticator. The exact authenticator used during recovery was not recorded, so the primary-specific and backup-specific recovery variants remain open. A fresh sign-in after replacement restored the expected primary/backup labels and both factors independently completed AAL2. No password, TOTP code, QR secret, recovery token, or account contact data was recorded.
+The completed MFA sign-in, replacement-factor, factor-management, AAL2 Change Password, and enrolled-factor-gated password-recovery checks above were accepted on 2026-07-14. A wrong recovery TOTP was rejected, the existing password remained valid, and the primary authenticator completed the subsequent AAL2 sign-in through the neutral second option. The successfully updated password also completed a fresh AAL2 sign-in using the backup authenticator. The exact authenticator used during the successful recovery was not recorded, so the primary-specific and backup-specific recovery variants remain open. A fresh sign-in after replacement restored the expected primary/backup labels and both factors independently completed AAL2. No password, TOTP code, QR secret, recovery token, or account contact data was recorded.
 
 Detailed procedure: `MFA_RECOVERY_RUNBOOK.md`.
 
