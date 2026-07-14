@@ -35,7 +35,7 @@ Implemented:
 
 Still to finish before treating the app as customer-ready:
 
-- Complete the remaining Stripe positive-path sandbox tests for a known-payment dispute and genuine failed refund. Signature rejection, unrelated-event rejection, and payment/refund duplicate replay have passed.
+- Stripe sandbox lifecycle verification is complete for signature rejection, unrelated-event rejection, successful payment/refund replay, a known-payment dispute, and a genuine failed-refund reversal. Live mode remains disabled and approval-gated.
 - Decide the operational chargeback/refund policy and customer support process.
 - Complete at least one Owner-approved timed non-production restore test. Current Supabase Pro daily-backup evidence is verified in `BACKUP_RESTORE_RUNBOOK.md`.
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations. Company/settings saves are now covered at a privacy-safe category level.
@@ -49,13 +49,13 @@ Still to finish before treating the app as customer-ready:
 
 ## Current payment status
 
-Stripe invoice payments are implemented for the app flow, but should be treated as test/development until explicitly switched to live mode.
+Stripe invoice payments are implemented and the handled lifecycle is verified in sandbox, but the feature must still be treated as test/development until explicitly switched to live mode.
 
 Do not send payment links to real customers until:
 
 - Stripe live keys and live webhook secret are configured intentionally.
 - The live webhook destination is verified.
-- Refund, dispute, failed-payment, and chargeback behavior is tested and documented in live mode.
+- Refund, dispute, failed-payment, and chargeback behavior is tested and documented for the approved live configuration.
 - Terms, privacy, refund, and support processes are ready.
 - Backup/restore and incident response basics are in place.
 

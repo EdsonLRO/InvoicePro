@@ -139,10 +139,10 @@ Current implementation notes:
 
 Next payment hardening:
 
-- Keep `STRIPE_SANDBOX_TEST_EVIDENCE.md` current. Duplicate payment/refund replay and unrelated failure/dispute rejection passed; a known-payment dispute and genuine `refund.failed` event still need positive-path evidence.
+- Keep `STRIPE_SANDBOX_TEST_EVIDENCE.md` current. Duplicate payment/refund replay, unrelated-event rejection, a known-payment dispute, and a genuine asynchronous `refund.failed` lifecycle passed in sandbox.
 - Keep card data out of Tallyo; continue using Stripe-hosted Checkout.
 - Done for one completed payment and one successful refund: duplicate replays did not change invoice state or create additional audit rows.
-- Confirm failed or unexpected payment events never mark invoices paid.
+- Re-run the recorded lifecycle checks after material payment-handler changes and confirm failed or unexpected payment events never mark invoices paid.
 - Keep a clear distinction between customer invoice payments and future Tallyo SaaS subscription billing.
 
 ## Secret Handling

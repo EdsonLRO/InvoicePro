@@ -12,7 +12,7 @@ Statuses: Planned, Investigating, Confirmed, In Progress, Implemented, Verified,
 | Customers | Implemented | Address book with bulk delete. |
 | Saved items | Implemented | Catalogue with bulk delete and bulk price update. |
 | Manual payments | Implemented | Record/remove manual payments; removal is confirmed and audited. |
-| Stripe invoice payments | Implemented | Server-side Checkout, signed webhook confirmation, deposits, refunds, disputes/failures awareness. Still test/development until live mode is approved. |
+| Stripe invoice payments | Verified | Server-side Checkout, signed webhook confirmation, deposits, refunds, failed-refund reversal, and dispute awareness passed the recorded sandbox lifecycle and replay checks. Live mode remains disabled and approval-gated. |
 | Recurring invoices | Implemented | Server-side scheduled generation and schedule management. |
 | Recurring invoice email | Implemented | Opt-in per recurring schedule. |
 | Manual document email | Implemented | Resend Edge Function with PDF attachment and payment links. |
@@ -37,7 +37,7 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 | GOV-001 | Complete agent governance and computer-use controls | High | Verified | Master Orchestrator | Terra with Sol policy review | Released after commit | Hierarchy, queue, locks, handoffs, provider controls, cross-links, and validation completed. |
 | GOV-002 | Correct active Legal, Privacy and Regulatory Agent governance | High | Verified | Legal, Privacy and Regulatory Agent | Terra with Sol legal-risk review | Released after focused corrective commit | Ninth specialist, legal triggers/workflow/dispositions, task fields, cross-review rules, release gate, external-advice limits, and repository-wide consistency checks completed. Owner merge remains separate. |
 | OPS-001 | Backup and restore runbook | High | Verified | Release Agent | Terra with Sol review | Released after commit | Pro plan confirmed, seven-day daily-backup procedure documented, restore side effects and Owner cost/destructive boundaries recorded in `BACKUP_RESTORE_RUNBOOK.md`. |
-| PAY-TEST-001 | Finish Stripe sandbox lifecycle replay evidence | High | In Progress | Payments Agent | Sol / Terra | Released with focused commit; remaining test subtask unlocked | Signature rejection, unknown-event binding, payment/refund duplicate replay, audit constraints, and Deno checks passed. Known-payment dispute and genuine `refund.failed` positive paths remain. |
+| PAY-TEST-001 | Finish Stripe sandbox lifecycle replay evidence | High | Verified | Payments Agent | Sol / Terra | Released after focused evidence commit | Signature rejection, unknown-event binding, payment/refund replay, a known-payment dispute, a genuine asynchronous failed refund with balance restoration, and duplicate replay idempotency passed in Stripe sandbox. Privacy-safe evidence is recorded in `STRIPE_SANDBOX_TEST_EVIDENCE.md`. |
 | AUTH-001 | Harden MFA and define recovery process | High | Verified | Security Agent | Sol / Terra | Acceptance evidence complete on focused branch | Primary/backup sign-in, wrong-code sign-in and recovery rejection, email-only bypass rejection, protected backup removal, one-factor preservation, two-factor restoration, primary-specific and backup-specific masked password recovery, privacy-safe account-audit review, fail-closed lookup simulation, and provider leaked-password rejection passed on 2026-07-14. The interim all-factors-lost process is approved; robust recovery remains a separate paid/public-launch condition. |
 | DB-001 | Harden internal trigger helper functions | High | Verified | Security Agent | Sol / Terra | Migration and acceptance evidence complete | Empty search paths and least-privilege execution grants are applied. Security advisors are clear, all triggers remain attached, append-only mutation rejection passed, and a confirmed fresh signup created exactly one matching `company_settings` row on 2026-07-14 with no missing or orphan settings rows. |
 | DB-002 | Optimise RLS identity evaluation and foreign-key lookups | High | Verified | Security Agent | Sol / Terra | Migration applied and released | RLS init-plan and missing-index warnings cleared without changing policy commands, ownership conditions, table RLS state, or security-advisor status. |
@@ -47,9 +47,9 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 
 ## Current Next Priorities
 
-1. Complete the remaining Stripe sandbox positive-path evidence for a known-payment dispute and genuine `refund.failed` event; duplicate and unknown-event rejection evidence is recorded.
-2. Run an Owner-approved timed restore test into a separate environment; current scheduled-backup evidence is verified.
-3. Complete the remaining Supabase Auth policy decisions recorded in `DEFERRED_MANUAL_CONFIGURATION.md`. AUTH-001 is Verified; leaked-password protection is enabled, advisor-verified, and rejection-tested. Robust all-factors-lost recovery remains a paid/public-launch condition.
+1. Run an Owner-approved timed restore test into a separate environment; current scheduled-backup evidence is verified.
+2. Complete the remaining Supabase Auth policy decisions recorded in `DEFERRED_MANUAL_CONFIGURATION.md`. AUTH-001 is Verified; leaked-password protection is enabled, advisor-verified, and rejection-tested. Robust all-factors-lost recovery remains a paid/public-launch condition.
+3. Define the operational refund, dispute, chargeback, and customer-support process while Stripe remains sandbox-only.
 4. Final mobile/PDF/PWA regression pass.
 5. Data-protection/legal groundwork before real customers.
 

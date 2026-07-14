@@ -33,6 +33,7 @@ Current boundary: this document covers invoice/customer payment features inside 
 - Done: Stripe async payment failure, refund, refund-failure, and dispute lifecycle awareness.
 - Done: successful Stripe refunds are recorded as locked negative payment entries and can reopen the invoice balance.
 - Done: Stripe sandbox webhook destination is subscribed to the 11 events Tallyo currently handles.
+- Done: Stripe sandbox positive lifecycle verification covers trusted payment binding, successful refund, genuine asynchronous failed-refund reversal, known-payment dispute awareness, and duplicate replay idempotency.
 - Current caveat: Stripe should still be treated as test/development unless live mode is explicitly approved and configured.
 
 ## Required deploy/setup checks
@@ -121,7 +122,7 @@ Near term:
 - Update screenshots and portfolio notes to include email, per-invoice reminders, deposits, and hardened Stripe webhooks.
 - Done: added a concise payment threat model section to the security story.
 - Done: payment list shows clearer remaining-balance wording after a seller-approved deposit.
-- Partial: payment/refund duplicate replay and unrelated asynchronous-failure/dispute rejection passed on 2026-07-13. A known-payment dispute and genuine `refund.failed` event still need positive-path evidence before real customer use; see `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
+- Done: payment/refund duplicate replay and unrelated-event rejection passed on 2026-07-13; a known-payment dispute and genuine `refund.failed` lifecycle, including duplicate replay, passed on 2026-07-14. See `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
 - Done: app payment panel shows a private/admin-facing reminder that Stripe is in test/development until live mode is intentionally configured.
 - Keep README, handoff, security story, Supabase handoff, and operations docs in sync with the real app state.
 
