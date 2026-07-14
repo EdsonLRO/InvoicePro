@@ -27,7 +27,7 @@
 - Passwords are hashed server-side by Supabase (bcrypt). The app never stores or sees password hashes.
 - On sign-in, Supabase issues a short-lived signed **JWT** session token held client-side; the raw password is not retained by the app.
 - **Email confirmation is required** before an account is usable (see §3).
-- **Leaked-password protection is enabled** (`password_hibp_enabled=true`) and the live security advisor cleared its warning on 2026-07-13. A known-compromised-password rejection test remains acceptance evidence.
+- **Leaked-password protection is enabled** (`password_hibp_enabled=true`), the live security advisor cleared its warning on 2026-07-13, and a safe known-compromised-password rejection test passed on 2026-07-14.
 - **Allowed / redirect URLs:** configured in Supabase Auth to match the deployed site URL. **Important:** if the site URL changes (e.g. a GitHub repo/URL rename during the Tallyo rebrand), these must be updated or auth breaks. Exact URL review remains an Owner acceptance item.
 - **Live provider snapshot (2026-07-13):** JWT lifetime 3600 seconds; refresh-token rotation enabled; session timebox/inactivity timeout disabled; single-session enforcement disabled; provider minimum password length 6 with no required character classes; email confirmation required; leaked-password protection enabled; email OTP expiry 3600 seconds with 8 digits; CAPTCHA not configured; email/token-refresh/verification rate limits 2/150/30. Tallyo's client requires 12 characters, so aligning the provider minimum to 12 is recorded in `DEFERRED_MANUAL_CONFIGURATION.md` rather than changed silently.
 

@@ -114,7 +114,7 @@ Use ordered Supabase migrations with repeatable environment setup, drift checks,
 
 ### SEC-009 — Password and abuse controls are incomplete
 
-**Status:** In progress. Supabase leaked-password protection is enabled and advisor-verified; its rejection-path acceptance test remains.
+**Status:** In progress. Supabase leaked-password protection is enabled, advisor-verified, and passed a safe provider rejection test on 2026-07-14. Broader signup/login/reset throttling, bot controls, suspicious-login monitoring, and email-abuse protections remain.
 Document and test signup/login/reset throttling, password strength, bot controls, suspicious-login monitoring and email-delivery abuse protections. Do not imply that server-side password hashing or breached-password checking alone solves account abuse.
 
 ### SEC-010 — MFA recovery and disablement require stronger controls

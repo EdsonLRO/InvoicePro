@@ -49,7 +49,7 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 1. Complete the remaining Stripe sandbox positive-path evidence for a known-payment dispute and genuine `refund.failed` event; duplicate and unknown-event rejection evidence is recorded.
 2. Run an Owner-approved timed restore test into a separate environment; current scheduled-backup evidence is verified.
 3. Complete AUTH-001 acceptance for factor-specific password recovery and define the all-factors-lost support process; MFA sign-in, backup-factor lifecycle, wrong-code and email-only recovery rejection, one successful MFA-gated recovery path, privacy-safe account-audit review, and fail-closed lookup simulation passed on 2026-07-14.
-4. Complete the Supabase Auth policy decisions recorded in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection is enabled and advisor-verified.
+4. Complete the remaining Supabase Auth policy decisions recorded in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection is enabled, advisor-verified, and rejection-tested.
 5. Final mobile/PDF/PWA regression pass.
 6. Data-protection/legal groundwork before real customers.
 

@@ -49,8 +49,8 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Finding:** The live Supabase security advisor reports that leaked-password protection is disabled even though the project is now on the Pro plan.
 - **Impact:** Tallyo's client-side password checks can reject simple patterns but cannot reliably detect passwords present in known breach corpora. Client validation can also be bypassed by direct Auth API use.
 - **Change:** Enabled `password_hibp_enabled` through the Supabase Auth Management API after Owner approval. The previous value was recorded as `false`, the returned/read-back value was `true`, and no credential was printed or written to the repository.
-- **Verification:** The live Supabase security advisor was re-run on 2026-07-13 and the leaked-password warning cleared. A safe test-account rejection check with a known compromised password remains acceptance evidence; never record the password used.
-- **Status:** Implemented; rejection-path acceptance pending.
+- **Verification:** The live Supabase security advisor was re-run on 2026-07-13 and the leaked-password warning cleared. On 2026-07-14, a known-compromised candidate passed Tallyo's local format checks, reached Supabase after current-password and MFA verification, and was rejected as weak/easy to guess. Only the pass/fail outcome was recorded, not the candidate value.
+- **Status:** Verified.
 
 ### SEC-DB-001 - Trigger helper functions retain unnecessary API execution grants
 
@@ -186,7 +186,7 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 ## Open Follow-Ups
 
 - Confirm Supabase Auth password policy, JWT/session expiry, and rate-limit settings.
-- Complete the known-compromised-password rejection test for the enabled provider check.
+- Keep the verified leaked-password control enabled and recheck it after material Auth-provider changes.
 - Add the future email-confirmed enhancement to the existing "log out from all devices" flow; do not treat email access alone as sufficient identity proof.
 - Complete the remaining positive-path Stripe sandbox tests for a known Tallyo dispute and a genuine failed refund; current redacted evidence is in `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
 - Record backup and restore test evidence once a non-production restore is performed.
