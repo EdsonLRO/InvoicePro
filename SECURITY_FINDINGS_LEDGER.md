@@ -199,5 +199,5 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - Confirm Supabase Auth password policy, JWT/session expiry, and rate-limit settings.
 - Keep the verified leaked-password control enabled and recheck it after material Auth-provider changes.
 - Add the future email-confirmed enhancement to the existing "log out from all devices" flow; do not treat email access alone as sufficient identity proof.
-- Complete the remaining positive-path Stripe sandbox tests for a known Tallyo dispute and a genuine failed refund; current redacted evidence is in `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
+- Keep the verified Stripe sandbox lifecycle evidence current after material payment-handler changes; live activation remains separately approval-gated.
 - Record backup and restore test evidence once a non-production restore is performed.

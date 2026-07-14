@@ -184,11 +184,11 @@ For full details, see `SUPABASE_HANDOFF.md`.
 
 Current app/security work:
 
-1. Finish Stripe sandbox replay testing for refunds, disputes, chargebacks, failed/asynchronous states, and clearer UI wording where needed.
+1. Define the operational refund, dispute, chargeback, and support process; the implemented Stripe sandbox lifecycle and duplicate replay behavior are Verified.
 2. Run the documented Owner-approved non-production restore test in `BACKUP_RESTORE_RUNBOOK.md`; current backup evidence is verified.
 3. Expand append-only audit logging further, especially privileged automation failures and backup/restore evidence.
 4. Preserve the Verified `MFA_RECOVERY_RUNBOOK.md` controls and approved deny-by-default all-factors-lost response; design robust recovery before paid/public onboarding. Consider upgrading all-devices logout with a server-side email-code confirmation flow.
-5. Complete the safe leaked-password rejection test and the provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`.
+5. Complete the remaining provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; leaked-password rejection is already Verified.
 6. Complete privacy/data-protection groundwork before real customer use.
 7. Keep security docs, screenshots, and portfolio evidence in sync with the real app.
 

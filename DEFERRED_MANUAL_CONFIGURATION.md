@@ -71,7 +71,7 @@ Current scheduled-backup evidence is verified. A timed restore is still required
 
 ## 5. Remaining release acceptance
 
-- Finish the known-payment dispute and genuine failed-refund Stripe sandbox tests.
+- [x] Complete the known-payment dispute and genuine failed-refund Stripe sandbox tests, including duplicate replay checks. Privacy-safe evidence was recorded on 2026-07-14 in `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
 - Keep Stripe in sandbox until live-mode configuration, policy/legal work, and explicit Owner approval are complete.
 - Run final desktop/mobile/PDF/PWA regression checks.
 - Complete privacy policy, terms, retention, export/deletion, refund/support, and breach-response groundwork before real customers.

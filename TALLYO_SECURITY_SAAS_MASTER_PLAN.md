@@ -279,7 +279,7 @@ Additionally requires workspace/RBAC isolation, server-enforced entitlements, St
 
 ## 10. Current execution order
 
-1. Finish Stripe sandbox replay tests and operational refund/chargeback decisions.
+1. Define the operational refund/chargeback/support process; the implemented Stripe sandbox lifecycle and replay checks are Verified.
 2. Create and prove backup/restore.
 3. Expand audit coverage and alerts.
 4. Preserve the Verified MFA recovery controls, design robust all-factors-lost recovery before paid/public onboarding, and finish session-revocation design.
