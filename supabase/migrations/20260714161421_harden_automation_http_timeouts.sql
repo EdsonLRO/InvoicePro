@@ -1,5 +1,5 @@
--- SEC-AUTO-001: authenticate privileged scheduled functions with the existing
--- automation secret, retrieved from Vault at runtime rather than stored inline.
+-- SEC-AUTO-003: allow scheduled Edge Functions enough time to return their
+-- operational result instead of leaving pg_net with an ambiguous timeout.
 
 select cron.alter_job(
     job_id := (select jobid from cron.job where jobname = 'generate-recurring-daily'),

@@ -80,8 +80,8 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Finding:** `generate-recurring` disables platform JWT verification for `pg_cron` but did not independently authenticate the request before creating a service-role client.
 - **Impact:** Anyone who discovered the public function URL could invoke privileged recurring processing. Due-date checks limit when rows are generated, but repeated or deliberately timed calls could create invoices or trigger configured customer email outside the trusted scheduler.
 - **Change:** `generate-recurring` now requires the existing `AUTOMATION_SECRET` in `x-automation-secret` before creating its service-role client. Migration `secure_scheduled_automation_calls` changed both automation jobs to read that secret from Vault at runtime; the former anon-key and inline-secret scheduler patterns are no longer used.
-- **Verification:** Deno check passed, deployed `generate-recurring` v12 is active, and an unsigned request returned HTTP 401. Both cron jobs remain active at their existing schedules and their stored commands use the Vault secret name without an anon key. The next scheduled runs on 2026-07-14 remain operational acceptance evidence.
-- **Status:** Implemented; next scheduled-run acceptance pending.
+- **Verification:** Deno check passed, the current deployed function retains the authentication control, and an unsigned request returned HTTP 401. On 2026-07-14, the natural 06:00 recurring and 09:00 reminder schedules both reached their protected Edge Functions and received HTTP 200 there, proving the Vault-backed scheduler credential was accepted. Both cron jobs remain active at their existing schedules and their stored commands use the Vault secret name without an anon key. The recurring database-side response timed out under the former pg_net default even though the function completed; that separate observability issue is tracked as `SEC-AUTO-003`.
+- **Status:** Verified.
 
 ### SEC-AUTO-002 - Recurring generation is not idempotent across partial failures
 
@@ -94,6 +94,17 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Verification:** Deno check passed. Live rolled-back transactions proved a second invoice for one occurrence is rejected, the first conditional claim affects one row, the second affects zero, ordinary invoices with null recurrence fields remain unaffected, and no test rows persist. The columns/index exist, invoice RLS remains enabled with four policies, security advisors are clear, and an unsigned function request returns HTTP 401. No template was due during deployment. The first real scheduled run remains operational acceptance evidence.
 - **Residual risk:** A crash after the schedule claim but before Resend accepts the message can miss an automatic email; preventing both duplicates and missed sends under every crash point requires a transactional outbox/queue, which is a larger future design. The current choice prioritises avoiding duplicate invoices and customer emails.
 - **Status:** Implemented; scheduled-run acceptance pending.
+
+### SEC-AUTO-003 - Scheduled HTTP calls can time out before successful functions return
+
+- **Date:** 2026-07-14
+- **Classification:** vulnerable / automation reliability and observability
+- **Finding:** Both pg_cron commands relied on pg_net's default HTTP timeout. The 06:00 recurring run completed successfully in the Edge Function, but its database-side request timed out before the response was recorded.
+- **Impact:** Operators could see an ambiguous or failed scheduler result even when privileged work completed. Retrying an uncertain result increases duplicate-processing risk; recurring idempotency limits that risk but does not make the missing response acceptable.
+- **Change:** Set `timeout_milliseconds := 30000` explicitly on both Vault-authenticated scheduled calls. Schedules, endpoints, request bodies, authentication, and Edge Function behavior remain unchanged.
+- **Verification:** The canonical SQL and generated migration both set the explicit timeout, and migration `20260714161421` is recorded as applied in the linked project. Live read-back confirmed both jobs remain active at their original `0 6 * * *` and `0 9 * * *` schedules, retain the custom authentication header and Vault secret lookup, and store the 30-second timeout. The Supabase security advisor returned no findings. Neither function was invoked during this change. A later scheduled run must return a database-side response within the configured timeout before this finding can be marked Verified.
+- **Residual risk:** A 30-second timeout cannot distinguish every network interruption from a completed remote action. Idempotent processing and audit events remain necessary controls.
+- **Status:** Implemented; next scheduled-response acceptance pending.
 
 ### SEC-LOG-001 - Stripe test/development state was too easy to miss
 
