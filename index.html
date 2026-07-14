@@ -52,6 +52,8 @@
         .pdf-mode .pdf-bold-row, .pdf-mode .pdf-bold-row * { font-weight: 700 !important; }
         .no-spin::-webkit-outer-spin-button, .no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .no-spin { -moz-appearance: textfield; }
+        .auth-scroll-shell { min-height: 0; overflow-y: auto; }
+        .auth-scroll-card { margin-top: auto; margin-bottom: auto; }
         .pdf-mode tbody td { vertical-align: middle !important; padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; }
         #invoice-canvas .font-bold.text-slate-400 { color: var(--brand) !important; }
         @media (max-width: 1024px) {
@@ -72,8 +74,8 @@
 
 <div id="app" v-cloak class="flex flex-col h-screen overflow-hidden">
     
-    <div v-if="!isLoggedIn" class="flex-1 flex items-center justify-center bg-slate-900 p-6">
-        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
+    <div v-if="!isLoggedIn" class="auth-scroll-shell flex-1 flex justify-center bg-slate-900 p-4 sm:p-6">
+        <div class="auth-scroll-card w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
             <div class="text-center mb-8">
                 <h1 class="text-3xl font-bold tracking-tight text-indigo-600 mb-1">Tallyo</h1>
                 <p class="text-sm text-slate-500">Create and manage your invoices</p>
@@ -138,8 +140,9 @@
                 <div v-if="mfa.loginFactors.length > 1">
                     <label class="block text-sm font-medium mb-1">Authenticator</label>
                     <select v-model="mfa.loginFactorId" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <option v-for="(factor, index) in mfa.loginFactors" :key="factor.id" :value="factor.id">{{ mfaFactorLabel(factor, index) }}</option>
+                        <option v-for="(factor, index) in mfa.loginFactors" :key="factor.id" :value="factor.id">{{ mfaChallengeFactorLabel(factor, index, mfa.loginFactors) }}</option>
                     </select>
+                    <p v-if="mfaFactorRolesNeedRepair(mfa.loginFactors)" class="text-xs text-amber-700 mt-2">Authenticator names could not be confirmed before verification, so neutral option numbers are shown. If a current code does not match, choose the other option. Confirm the saved names in Account Security after signing in.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">6-Digit Code</label>
@@ -183,8 +186,9 @@
                 <div v-if="pwdRecovery.requiresMfa">
                     <label v-if="pwdRecovery.factors.length > 1" class="block text-sm font-medium mb-1">Authenticator</label>
                     <select v-if="pwdRecovery.factors.length > 1" v-model="pwdRecovery.factorId" class="w-full border rounded-lg px-3 py-2 mb-3 focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <option v-for="(factor, index) in pwdRecovery.factors" :key="factor.id" :value="factor.id">{{ mfaFactorLabel(factor, index) }}</option>
+                        <option v-for="(factor, index) in pwdRecovery.factors" :key="factor.id" :value="factor.id">{{ mfaChallengeFactorLabel(factor, index, pwdRecovery.factors) }}</option>
                     </select>
+                    <p v-if="mfaFactorRolesNeedRepair(pwdRecovery.factors)" class="text-xs text-amber-700 mb-3">Authenticator names could not be confirmed before verification, so neutral option numbers are shown. If a current code does not match, choose the other option.</p>
                     <label class="block text-sm font-medium mb-1">6-Digit Authenticator Code</label>
                     <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" v-model="pwdRecovery.code" @keyup.enter="completePasswordRecovery" class="w-full border rounded-lg px-3 py-3 text-center tracking-widest text-lg font-bold focus:ring-2 focus:ring-indigo-500 outline-none">
                     <p class="text-xs text-slate-500 mt-2">Email access alone does not bypass two-factor authentication. Use your primary or backup authenticator.</p>
@@ -285,6 +289,7 @@
                         <p class="text-sm font-medium text-slate-700">{{ mfa.enrollKind === 'backup' ? 'Add a backup authenticator' : 'Set up your authenticator' }}</p>
                         <ol class="text-sm text-slate-600 list-decimal list-inside space-y-1">
                             <li>Open your authenticator app and scan this QR code.</li>
+                            <li>If your app supports custom names, label this entry {{ mfa.enrollKind === 'backup' ? 'Backup authenticator' : 'Primary authenticator' }}.</li>
                             <li>Enter the 6-digit code it shows to confirm.</li>
                         </ol>
                         <div class="flex flex-col sm:flex-row items-start gap-5">
@@ -312,9 +317,10 @@
                                 <button v-if="mfa.verifiedFactors.length > 1" @click="removeMfaFactor(factor.id)" :disabled="mfa.busy" class="text-sm text-red-600 hover:underline disabled:opacity-50">Remove</button>
                             </div>
                         </div>
-                        <p v-if="mfa.verifiedFactors.length < 2" class="text-sm text-amber-700 mb-4">Add a backup authenticator now. Supabase does not provide recovery codes, and Tallyo will not bypass MFA using email alone.</p>
+                        <p v-if="mfaFactorRolesNeedRepair(mfa.verifiedFactors)" class="text-sm text-amber-700 mb-4">This account has duplicated authenticator roles. Remove one factor using a current code from the other, then add the missing role shown by Tallyo.</p>
+                        <p v-if="mfa.verifiedFactors.length < 2" class="text-sm text-amber-700 mb-4">Add another authenticator now. Supabase does not provide recovery codes, and Tallyo will not bypass MFA using email alone.</p>
                         <div class="flex flex-col sm:flex-row gap-3">
-                            <button v-if="mfa.verifiedFactors.length < 2" @click="startMfaEnroll('backup')" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Preparing...' : 'Add Backup Authenticator' }}</button>
+                            <button v-if="mfa.verifiedFactors.length < 2" @click="startMfaEnroll()" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Preparing...' : (mfaNextEnrollKind() === 'primary' ? 'Add Primary Authenticator' : 'Add Backup Authenticator') }}</button>
                             <button @click="disableMfa" :disabled="mfa.busy" class="bg-white border border-red-300 text-red-600 px-6 py-2.5 rounded-lg hover:bg-red-50 font-medium transition disabled:opacity-50">{{ mfa.busy ? 'Working...' : 'Turn Off Two-Factor' }}</button>
                         </div>
                     </div>
@@ -2162,6 +2168,28 @@
                 if (friendlyName) return friendlyName;
                 return index === 0 ? 'Primary authenticator' : `Backup authenticator ${index}`;
             },
+            mfaChallengeFactorLabel(factor, index = 0, factors = []) {
+                if (this.mfaFactorRolesNeedRepair(factors)) return `Authenticator option ${index + 1}`;
+                return this.mfaFactorLabel(factor, index);
+            },
+            mfaFactorRole(factor, index = 0) {
+                const friendlyName = String((factor && factor.friendly_name) || '').trim().toLowerCase();
+                if (friendlyName.startsWith('primary authenticator')) return 'primary';
+                if (friendlyName.startsWith('backup authenticator')) return 'backup';
+                return index === 0 ? 'primary' : 'backup';
+            },
+            mfaFactorRolesNeedRepair(factors = []) {
+                const verified = (factors || []).filter(factor => factor && factor.id);
+                if (verified.length < 2) return false;
+                const roles = verified.map((factor, index) => this.mfaFactorRole(factor, index));
+                return !roles.includes('primary') || !roles.includes('backup');
+            },
+            mfaNextEnrollKind(factors = this.mfa.verifiedFactors) {
+                const verified = (factors || []).filter(factor => factor && factor.id);
+                if (!verified.length) return 'primary';
+                const roles = verified.map((factor, index) => this.mfaFactorRole(factor, index));
+                return roles.includes('primary') ? 'backup' : 'primary';
+            },
             async loadMfaStatus() {
                 try {
                     const { data, error } = await supabaseClient.auth.mfa.listFactors();
@@ -2172,8 +2200,9 @@
                     this.mfa.verifiedFactorId = verified.length ? verified[0].id : null;
                 } catch (e) { /* ignore */ }
             },
-            async startMfaEnroll(kind = 'primary') {
-                if (kind === 'backup' && this.mfa.verifiedFactors.length >= 2) return alert("A backup authenticator is already enrolled.");
+            async startMfaEnroll(kind = null) {
+                if (this.mfa.verifiedFactors.length >= 2) return alert("Two authenticators are already enrolled.");
+                kind = kind || this.mfaNextEnrollKind();
                 this.mfa.busy = true;
                 try {
                     const { data } = await supabaseClient.auth.mfa.listFactors();
