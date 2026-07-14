@@ -16,13 +16,15 @@ Use only the dedicated Tallyo test accounts. Enter passwords and authenticator c
 - [x] Confirm the backup authenticator can independently complete password recovery and the new password signs in.
 - [x] Confirm email access alone cannot reset the password of an MFA-enabled account.
 - [x] Simulate an assurance-level or factor-list lookup failure and confirm the app does not initialise signed-in data.
-- [ ] Run one fresh signup and confirm the `company_settings` row is created automatically.
+- [x] Run one fresh signup and confirm the `company_settings` row is created automatically.
 - [x] Run one safe known-compromised-password rejection test. Record only pass/fail, never the password used.
 - [x] Approve the interim deny-by-default all-factors-lost support process for the current portfolio build.
 
 The completed MFA sign-in, replacement-factor, factor-management, AAL2 Change Password, and enrolled-factor-gated password-recovery checks above were accepted on 2026-07-14. Primary-specific and backup-specific reset flows each completed independently, and the resulting password completed sign-in. A wrong recovery TOTP was rejected, an email-only recovery submission was blocked, and the existing password remained valid after those rejected attempts. A controlled extraction test of the shipped `routeAfterAuth` method passed five scenarios, including fail-closed assurance lookup, factor lookup, and missing-factor paths that did not initialise signed-in data. Supabase also rejected a known-compromised password after current-password and MFA verification; only pass/fail was recorded. The Owner approved an interim all-factors-lost response that forbids email-only or administrator bypass and identity-document collection; robust recovery remains required before paid/public onboarding. A fresh sign-in after replacement restored the expected primary/backup labels and both factors independently completed AAL2. No password, TOTP code, QR secret, recovery token, account contact data, or identity evidence was recorded.
 
 Detailed procedure: `MFA_RECOVERY_RUNBOOK.md`.
+
+Fresh-signup provisioning passed on 2026-07-14. The confirmed test account had one matching `company_settings` row, total Auth/settings counts matched, and no missing or orphan settings rows were found. The test address and account identifier were not recorded.
 
 ## 2. Supabase Auth policy decisions
 

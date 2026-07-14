@@ -257,7 +257,7 @@ Tables (all have `user_id` and RLS; a user can only access their own rows):
 - `recurring_templates` key fields: `frequency` (weekly/monthly/quarterly/yearly/custom), `custom_interval`, `custom_unit` (days/weeks/months), `start_date`, `next_run`, `active`, `email_enabled`, `last_generated`, `generated_count`, plus snapshot of customer/items/currency/tax_mode/etc.
 - Generated invoices use nullable `recurring_template_id` plus `recurring_occurrence_date`; a partial unique index prevents a retry/concurrent run from creating a second attributed invoice for the same occurrence.
 
-A trigger auto-creates an empty `company_settings` row on new user signup.
+A hardened trigger auto-creates an empty `company_settings` row on new user signup. A confirmed fresh-signup acceptance test passed on 2026-07-14 with matched aggregate counts and no missing/orphan settings rows.
 
 **Design note:** invoices store a **snapshot** of customer details so historical documents stay correct even if the customer is later edited or deleted.
 
