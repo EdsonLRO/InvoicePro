@@ -2,13 +2,13 @@
 
 This is the authoritative repository policy for autonomous task selection, agent roles, work-mode routing, task ownership, locks, handoffs, evidence, and closure.
 
-Detailed graphical-dashboard controls are authoritative in `AGENT_HIERARCHY_AND_COMPUTER_USE.md`. Standing owner permission is recorded in `AUTONOMOUS_EXECUTION_PERMISSION.md`. If these documents appear to conflict, use the stricter approval boundary and record the conflict before continuing.
+The active legal/privacy/regulatory specialist specification is authoritative in `TALLYO_LEGAL_COMPLIANCE_AGENT.md`. Detailed graphical-dashboard controls are authoritative in `AGENT_HIERARCHY_AND_COMPUTER_USE.md`. Standing owner permission is recorded in `AUTONOMOUS_EXECUTION_PERMISSION.md`. If these documents appear to conflict, use the stricter approval boundary and record the conflict before continuing.
 
 This policy is governance, not application runtime code. It does not activate background workers or prove that multiple agents are running.
 
 ## 1. Condensed Operating Rule
 
-Tallyo uses one Owner, one Master Orchestrator, eight specialist functional agents, and three model/work modes.
+Tallyo uses one Owner, one Master Orchestrator, nine specialist functional agents, and three model/work modes.
 
 The Orchestrator owns the task queue, role assignment, work-mode selection, task locks, evidence review, approval boundaries, and task closure.
 
@@ -39,11 +39,11 @@ Model/work mode = the reasoning level used to perform that responsibility.
 ```text
 1 Owner
 1 Master Orchestrator
-8 Specialist Agents
+9 Specialist Agents
 3 Model / Work Modes
 ```
 
-There are nine AI functional roles when the Master Orchestrator is included. The Owner is separate and is not an AI agent. Luna, Terra, and Sol are not additional functional agents. Actual concurrency depends on environment capability.
+There are ten AI functional roles when the Master Orchestrator is included. The Owner is separate and is not an AI agent. Luna, Terra, and Sol are model/work modes, not additional functional agents. Actual concurrency depends on environment capability. In a single-agent environment, Codex performs the roles sequentially and records material role transitions.
 
 ```text
 Owner
@@ -58,6 +58,7 @@ Master Orchestrator
   +-- Payments Agent
   +-- QA Agent
   +-- Documentation Agent
+  +-- Legal, Privacy and Regulatory Agent
   +-- Release Agent
 ```
 
@@ -71,6 +72,9 @@ QA Agent
         |
         v
 Security / Payments Review when required
+        |
+        v
+Legal, Privacy and Regulatory Review when required
         |
         v
 Documentation Agent
@@ -100,6 +104,7 @@ The Master Orchestrator:
 - maintains and prioritises the task queue;
 - selects the next Ready task and classifies risk;
 - assigns one owner role and a specialist;
+- identifies possible legal materiality and assigns the Legal, Privacy and Regulatory Agent whenever a mandatory trigger applies or materiality is uncertain;
 - selects the work mode;
 - defines acceptance criteria, tests, documentation, and approval boundaries;
 - acquires and releases task/file locks;
@@ -156,29 +161,51 @@ Owns status, handoffs, manuals, operations guides, decisions, completion/release
 
 Use Luna for formatting, Terra for substantive content, and Sol for security-, payment-, or compliance-sensitive claims. Never promote a planned control to Implemented or Verified without code and evidence.
 
+#### Legal, Privacy and Regulatory Agent
+
+Owns legal, privacy, regulatory, and contractual issue spotting for Tallyo, including UK GDPR and Data Protection Act analysis, ICO guidance, controller/processor roles, Privacy Notice, Terms, Cookie Notice and consent, Data Processing Agreements, vendors/subprocessors and international transfers, retention/deletion and data-subject rights, breach obligations, consumer protection, subscriptions/renewals/trials/cancellation/refunds, pricing and marketing claims, invoicing/payment considerations, applicable Companies House and HMRC obligations, accessibility-related legal considerations, provider contracts, regulatory-change tracking, jurisdiction expansion, and legally material release conditions.
+
+Reports to the Master Orchestrator and cross-reviews with Product, Security, Payments, Documentation, and Release. It may issue `Approved`, `Approved with conditions`, `Blocked`, `External professional review required`, or `Not legally material`. A legal block cannot be silently overridden.
+
+This role supports evidence-based legal risk management but does not replace a solicitor, barrister, accountant, tax adviser, data-protection professional, regulated financial adviser, or other qualified professional. It must not claim that Tallyo is legally compliant, fully compliant, certified, GDPR compliant, or fully secure without appropriate evidence and qualified external approval where required.
+
+Use Terra for routine legal-document maintenance, authoritative-source collection, registers, checklists, implementation tracking, and evidence-backed notice updates. Use Sol for legally material feature analysis, privacy architecture, consumer protection, payments/subscriptions/cancellation/refunds, transfers, retention/deletion, legal-risk assessment, release blocks, and final verification. Luna is limited to formatting, plain-language cleanup, document structure, spelling, and consistency; it cannot interpret law, approve legal documents, determine applicability, or issue a legal disposition.
+
 #### Release Agent
 
 Owns release-candidate preparation, deployment checklists, environment review, migration order, rollback, smoke tests, monitoring, backup/restore readiness, release evidence, and the final owner-action list.
 
 Default: Terra. Sol is required for final security, payment, Auth/session, destructive-risk, and production-readiness gates.
 
+### Legally material cross-review responsibilities
+
+- Product Agent defines intended behaviour and affected users.
+- Legal, Privacy and Regulatory Agent evaluates law, regulation, regulator guidance, platform/contractual rules, and user-facing commitments.
+- Security Agent evaluates technical risk and privacy/security controls.
+- Payments Agent evaluates financial state and Stripe behaviour.
+- Documentation Agent maintains wording approved by the responsible reviewers.
+- Release Agent confirms legal conditions and external-review requirements are resolved or explicitly recorded.
+- Master Orchestrator closes the task.
+
+The Legal Agent does not replace Security, Payments, tax/accounting review, or qualified external professional advice.
+
 ## 4. Model / Work-Mode Routing
 
 ### Luna
 
-Use for low-risk formatting, spelling, summaries, checklist extraction, commit-message drafts, and repetitive text work. Luna cannot independently approve security, payments, migrations, architecture, or releases.
+Use for low-risk formatting, spelling, summaries, checklist extraction, commit-message drafts, and repetitive text work. Luna cannot independently approve security, payments, migrations, architecture, legal documents, regulatory applicability, or releases.
 
 ### Terra
 
-Use for routine product work, Vue changes, normal debugging, scoped Edge Functions, non-destructive database work, tests, documentation, deployment preparation, and Git work.
+Use for routine product work, Vue changes, normal debugging, scoped Edge Functions, non-destructive database work, tests, documentation, deployment preparation, Git work, routine legal-document maintenance, authoritative-source collection, compliance checklists, registers, and implementation tracking.
 
 ### Sol
 
-Use when mistakes could expose data, move money incorrectly, weaken access control, or create subtle production failure. This includes Auth, MFA, sessions, RLS, tenant isolation, Stripe webhooks/refunds/disputes, secrets, privileged functions, destructive migrations, threat modelling, and final release gates.
+Use when mistakes could expose data, move money incorrectly, weaken access control, create legal or regulatory exposure, or create subtle production failure. This includes Auth, MFA, sessions, RLS, tenant isolation, Stripe webhooks/refunds/disputes, secrets, privileged functions, destructive migrations, threat modelling, legally material feature analysis, privacy architecture, consumer protection, subscriptions/cancellation/refunds, international transfers, retention/deletion decisions, and final security/legal/release gates.
 
 Selection rule:
 
-1. Identity, money, authorization, private data, secrets, production, or destructive operations: Sol for analysis and final review.
+1. Identity, money, authorization, private data, secrets, legally material changes, production, or destructive operations: Sol for analysis and final review.
 2. Ordinary product development: Terra.
 3. Repetitive low-risk text: Luna.
 4. Uncertainty: start with Terra, escalate to Sol when a critical boundary appears.
@@ -207,6 +234,16 @@ Risk level:
 Affected files:
 Dependencies:
 Security boundary:
+Legal materiality:
+Jurisdictions:
+Affected user/data-subject types:
+Applicable requirements:
+Required legal documents:
+Mandatory controls:
+Required evidence:
+Legal disposition:
+External review required:
+Legal review date:
 Acceptance criteria:
 Required tests:
 Required documentation:
@@ -218,6 +255,8 @@ Evidence:
 Blocked reason:
 Next action:
 ```
+
+The legal fields are mandatory whenever a trigger in `TALLYO_LEGAL_COMPLIANCE_AGENT.md` applies or legal materiality is uncertain. Valid task owner, assigned specialist, reviewer, and release-gate reviewer roles include all nine specialists, including the Legal, Privacy and Regulatory Agent.
 
 Allowed statuses:
 
@@ -283,8 +322,11 @@ supabase/functions/log-app-event/
 APP_STATUS.md
 PROJECT_HANDOFF.md
 AUTOMATION_MODEL_ORCHESTRATION.md
+TALLYO_LEGAL_COMPLIANCE_AGENT.md
 PRODUCT_COMPLETION_LEDGER.md
 RELEASE_READINESS.md
+legal/
+privacy/
 ```
 
 ## 7. Standard Agent Flow
@@ -306,6 +348,11 @@ Specialist Agent
         +-- plans
         +-- implements
         +-- runs focused tests
+        |
+        v
+Legal, Privacy and Regulatory Agent when triggered
+        +-- identifies jurisdictions, affected users, requirements, platform rules, controls, evidence, and external-advice triggers
+        +-- issues a legal disposition
         |
         v
 QA Agent
@@ -373,6 +420,21 @@ Documentation Agent -> update payment operations
 Orchestrator -> commit and continue
 ```
 
+### Legally material feature
+
+```text
+Product Agent -> define intended behaviour and affected users
+Legal Agent using Sol -> identify jurisdictions, requirements, platform rules, wording, controls, evidence, and external-advice triggers
+Implementation Specialist using Terra -> implement the conditioned scope
+QA Agent -> verify intended and failure behaviour
+Security Agent using Sol -> verify privacy/security controls
+Payments Agent using Sol -> verify financial state when money is affected
+Legal Agent using Sol -> verify mandatory conditions and issue the final disposition
+Documentation Agent using Terra -> maintain only approved wording
+Release Agent -> confirm legal conditions and external-review requirements are resolved or recorded
+Master Orchestrator -> close only with legal evidence
+```
+
 ### Major migration
 
 ```text
@@ -392,6 +454,7 @@ QA Agent -> regression
 Documentation Agent using Luna/Terra -> consistency review
 Security Agent using Sol -> final gate
 Payments Agent using Sol -> final payment gate
+Legal, Privacy and Regulatory Agent using Sol -> final legally material release gate
 Master Orchestrator -> compile owner actions
 Owner -> approve launch
 ```
@@ -421,12 +484,19 @@ Use Terra for routine work and Sol for Auth, RLS, privileged functions, and dest
 
 Use Sol for design and final review. Verify test/live mode, signatures, idempotency, known app-created sessions, invoice/user binding, amounts, currencies, duplicate and out-of-order events, failed events, refunds, disputes, audit evidence, and invoice state. Never activate live mode without Owner approval.
 
+### Legal, privacy, and regulatory loop
+
+Assign the Legal, Privacy and Regulatory Agent whenever work affects personal data, customer/user communications, account deletion, export, retention, payments/prices/refunds/disputes, subscriptions/trials/renewals/cancellation, marketing claims, cookies/analytics/advertising, automated decisions or AI, transfers, vendors/subprocessors, children/vulnerable users, incidents/breaches/complaints, public or cross-jurisdiction launch, legal documents, or tax/invoicing claims. The Orchestrator may also assign it whenever legal materiality is uncertain.
+
+The Legal Agent identifies jurisdictions and affected users/data subjects; checks current primary or authoritative sources and records the date checked; identifies laws, regulator guidance, platform/contractual rules, required controls/wording/evidence, and external-advice triggers; then issues a disposition. Implementation, QA, Security, Payments, and Documentation complete their separate responsibilities before the Legal Agent verifies its mandatory conditions. A legally material task cannot close until those conditions are verified or `External professional review required` is explicitly recorded.
+
 ### Documentation loop
 
 Maintain these authorities:
 
 - current stage: `APP_STATUS.md`;
 - orchestration: this file;
+- legal/privacy/regulatory authority: `TALLYO_LEGAL_COMPLIANCE_AGENT.md`;
 - computer use: `AGENT_HIERARCHY_AND_COMPUTER_USE.md`;
 - owner permission: `AUTONOMOUS_EXECUTION_PERMISSION.md`;
 - project handoff: `PROJECT_HANDOFF.md`;
@@ -442,7 +512,7 @@ Do not promote Planned to Implemented or Verified without evidence.
 
 ### Release loop
 
-Prepare tests, migrations, deployment and rollback instructions, monitoring, backup/restore, support, privacy/legal groundwork, and release evidence. Sol reviews open findings, RLS, Auth/MFA/sessions, payments, email, cron, secrets, backups, incident response, privacy workflows, and claims. Stop before live Stripe, paid upgrades, public launch, final legal publication, production data migration, or irreversible changes.
+Prepare tests, migrations, deployment and rollback instructions, monitoring, backup/restore, support, privacy/legal groundwork, and release evidence. Sol reviews open findings, RLS, Auth/MFA/sessions, payments, email, cron, secrets, backups, incident response, privacy workflows, and claims. The Legal Agent must complete or condition every legally material release review, and the Release Agent must confirm those conditions and any mandatory external review are resolved or recorded. Stop before live Stripe, paid upgrades, public launch, final legal publication, production data migration, or irreversible changes.
 
 ## 10. Handoffs
 
@@ -461,6 +531,7 @@ Commit:
 Tests completed:
 Tests remaining:
 Security boundary:
+Legal materiality and disposition when applicable:
 Known risks:
 Evidence:
 Required next action:
@@ -501,6 +572,10 @@ Stop repeated attempts, preserve the exact error and current state, identify par
 
 Computer-use failure rules are in `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
 
+### Legal block or accepted legal risk
+
+A legal block cannot be silently overridden. An Owner decision to accept legal risk must record the reasoning, affected feature, affected users, evidence, compensating controls, review date, expiry date where applicable, and whether external professional advice is still required. The Legal Agent does not replace Security, Payments, tax/accounting review, or qualified external professional advice.
+
 ## 12. Approval Boundaries
 
 Standing permission allows safe repository work, tests, documentation, authorised development changes, commits, and pushes. It never overrides the Owner-only boundaries in section 3 or `AUTONOMOUS_EXECUTION_PERMISSION.md`.
@@ -535,6 +610,8 @@ Governance changes additionally require:
 - no duplicate headings or contradictory agent counts;
 - no conflicting Luna/Terra/Sol definitions;
 - no contradictory approval boundary;
+- nine specialist roles and ten AI functional roles including the Master Orchestrator;
+- legal triggers, disposition authority, required workflow, cross-review relationships, and release gate are present;
 - correct operation in concurrent and single-agent sequential environments;
 - no claim that unavailable background agents are running.
 
@@ -549,4 +626,4 @@ Governance changes additionally require:
 
 ## 15. Final Principle
 
-Luna handles low-risk cleanup. Terra builds the product. Sol protects critical boundaries. Functional agents own responsibilities; the Orchestrator owns coordination and evidence. The aim is to reduce wasted effort without sacrificing security, correctness, or honest reporting.
+Luna handles low-risk cleanup. Terra builds and maintains routine product and evidence work. Sol protects critical security, payment, legal, privacy, regulatory, and release boundaries. Functional agents own responsibilities; the Orchestrator owns coordination and evidence. The aim is to reduce wasted effort without sacrificing security, correctness, lawful operation, or honest reporting.

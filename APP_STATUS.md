@@ -3,6 +3,7 @@
 This is the short source-of-truth for where Tallyo is right now.
 
 For the authoritative agent hierarchy, task queue, locks, handoffs, model/work-mode routing, and approval boundaries, see `AUTOMATION_MODEL_ORCHESTRATION.md`.
+For legally material task triggers, review conditions, and external-professional-advice boundaries, see `TALLYO_LEGAL_COMPLIANCE_AGENT.md`.
 For detailed graphical-dashboard and computer-use controls, see `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
 For capability tracking and release gates, see `PRODUCT_COMPLETION_LEDGER.md` and `RELEASE_READINESS.md`.
 

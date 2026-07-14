@@ -2,7 +2,7 @@
 
 This document records the owner's standing permission for Codex to continue Tallyo development, remediation, testing, documentation, Supabase, Git and deployment-preparation work autonomously.
 
-This authority is exercised through the Master Orchestrator defined in `AUTOMATION_MODEL_ORCHESTRATION.md`. All functional roles remain subject to the same approval boundaries. Detailed computer-use rules are authoritative in `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
+This authority is exercised through the Master Orchestrator defined in `AUTOMATION_MODEL_ORCHESTRATION.md`. All nine specialist functional roles, including the active Legal, Privacy and Regulatory Agent defined in `TALLYO_LEGAL_COMPLIANCE_AGENT.md`, remain subject to the same approval boundaries. Detailed computer-use rules are authoritative in `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
 
 ## Permitted Work
 
@@ -56,7 +56,7 @@ After implementing each finding, update the same record with:
 - Disabling security protections.
 - Exposing, rotating or replacing production secrets when the owner must provide or approve the new value.
 - Making irreversible production changes.
-- Changing legal terms, privacy policy commitments or regulated business claims that require owner or legal review.
+- Publishing or materially changing legal terms, privacy commitments, regulated business claims, or another legally material release item before the Legal Agent's mandatory conditions and any required external professional review are resolved or recorded.
 - Merging into a protected production branch when repository rules require human approval.
 - Deploying publicly when the application has not passed the agreed release gates.
 - Encountering a material product decision with multiple valid options and no existing repository decision.
@@ -146,6 +146,8 @@ After pushing, report:
 ## Task Coordination
 
 - The Master Orchestrator owns the queue, role assignment, work-mode selection, edit locks, approval boundaries, evidence review, and closure.
+- Tallyo has nine active specialist functional agents and ten AI functional roles when the Master Orchestrator is included; the Owner is separate and is not an AI agent.
+- The Legal, Privacy and Regulatory Agent is a valid task owner, assigned specialist, reviewer, and release-gate reviewer. Its legal block cannot be silently overridden.
 - Functional agents are responsibility roles; Luna, Terra, and Sol are work modes, not automatically separate agents.
 - When concurrent agents are unavailable, one Codex process performs roles sequentially and records material handoffs.
 - One agent owns a file or overlapping edit scope at a time.

@@ -2,7 +2,7 @@
 
 > Instructions for an AI coding agent (Codex) working on this repository.
 > Read this before making changes. When unsure, ask or mark **Unknown / needs confirmation** rather than guessing.
-> Also read `AUTOMATION_MODEL_ORCHESTRATION.md` for the authoritative hierarchy, queue, locks, handoffs, approval boundaries, and model/work-mode routing. Read `AGENT_HIERARCHY_AND_COMPUTER_USE.md` before operating a graphical dashboard.
+> Also read `AUTOMATION_MODEL_ORCHESTRATION.md` for the authoritative hierarchy, queue, locks, handoffs, approval boundaries, and model/work-mode routing. Read `TALLYO_LEGAL_COMPLIANCE_AGENT.md` when work may be legally material. Read `AGENT_HIERARCHY_AND_COMPUTER_USE.md` before operating a graphical dashboard.
 
 ---
 
@@ -129,7 +129,7 @@ Do not introduce Tallyo subscription billing, workspaces, RBAC, or SaaS entitlem
 
 ## 11. First tasks Codex should perform
 
-1. **Read governance and current sources of truth first:** `AUTOMATION_MODEL_ORCHESTRATION.md`, `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, `AUTONOMOUS_EXECUTION_PERMISSION.md`, `APP_STATUS.md`, `PRODUCT_COMPLETION_LEDGER.md`, `DECISION_LOG.md`, and `RELEASE_READINESS.md`.
+1. **Read governance and current sources of truth first:** `AUTOMATION_MODEL_ORCHESTRATION.md`, `TALLYO_LEGAL_COMPLIANCE_AGENT.md`, `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, `AUTONOMOUS_EXECUTION_PERMISSION.md`, `APP_STATUS.md`, `PRODUCT_COMPLETION_LEDGER.md`, `DECISION_LOG.md`, and `RELEASE_READINESS.md`.
 2. **Read the code before implementation:** `index.html`, `config.js`, `schema.sql`, `recurring_setup.sql`, and the relevant Edge Function. Confirm anything marked "Unknown / needs confirmation" from the source, not assumptions.
 3. **Maintain the visible Tallyo rebrand:**
    - Keep user-facing app text, `manifest.json`, and PWA icons branded as Tallyo.
@@ -159,8 +159,9 @@ A change is "done" when all of the following hold:
 
 ## 13. Condensed agent governance
 
-- Tallyo uses one Owner, one Master Orchestrator, eight specialist functional roles, and three work modes: Luna, Terra, and Sol.
+- Tallyo uses one Owner, one Master Orchestrator, nine specialist functional roles, and three work modes: Luna, Terra, and Sol. There are ten AI functional roles when the Orchestrator is included; the Owner is separate.
 - The Orchestrator owns the queue, role assignment, mode selection, locks, evidence, approvals, and closure.
+- The Legal, Privacy and Regulatory Agent is an active specialist. Assign it whenever a task meets a mandatory legal trigger or legal materiality is uncertain; a legal block cannot be silently overridden.
 - Functional roles are responsibilities; work modes are reasoning levels. Do not claim concurrent/background agents unless the environment supports them.
 - When concurrency is unavailable, perform roles sequentially and record material handoffs.
 - One agent owns a file or overlapping edit scope at a time.

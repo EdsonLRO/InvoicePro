@@ -2,7 +2,7 @@
 
 Operational security checklist for moving Tallyo from a working prototype into a safer product. This is not a compliance claim; it is the working list of controls to put in place before real customer email and payments.
 
-Agent task ownership, independent review, locks, and evidence follow `AUTOMATION_MODEL_ORCHESTRATION.md`. Any browser/dashboard operation follows `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, which defaults computer use to Read only and keeps secrets masked.
+Agent task ownership, independent review, locks, and evidence follow `AUTOMATION_MODEL_ORCHESTRATION.md`. Legally material data, payment, communication, vendor, incident, and release work also follows the active review process in `TALLYO_LEGAL_COMPLIANCE_AGENT.md`. Any browser/dashboard operation follows `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, which defaults computer use to Read only and keeps secrets masked.
 
 ## Current Priority
 
@@ -109,6 +109,8 @@ Still-to-decide before production/commercial use:
 - Supported currencies beyond the current invoice currency flow.
 - Refund, dispute, chargeback, failed-payment, and customer support handling.
 - Terms, privacy, cancellation, and payment dispute wording for real customers.
+
+The Legal, Privacy and Regulatory Agent must issue a dated disposition for legally material payment/customer-use changes and verify mandatory conditions before release. A required external professional review, unresolved legal block, missing notice, or unsupported product claim keeps public launch blocked.
 
 Payment security requirements:
 

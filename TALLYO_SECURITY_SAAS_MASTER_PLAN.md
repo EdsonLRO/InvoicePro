@@ -200,14 +200,14 @@ Suggested initial plans: Free, Pro and Business. Exact pricing and limits must b
 
 ## 6. Future SaaS responsibility domains
 
-The active Tallyo hierarchy is authoritative in `AUTOMATION_MODEL_ORCHESTRATION.md`: one Master Orchestrator and eight specialist functional agents operating under the Owner. The labels below are future SaaS business responsibility domains, not additional active agents and not a contradictory agent count. If that future phase is approved, the Orchestrator maps these domains onto the eight specialist roles.
+The active Tallyo hierarchy is authoritative in `AUTOMATION_MODEL_ORCHESTRATION.md`: one Master Orchestrator and nine specialist functional agents operating under the Owner, for ten AI functional roles including the Orchestrator. The Legal, Privacy and Regulatory Agent is one of those active specialists. The labels below are future SaaS business responsibility domains, not additional active agents and not a contradictory agent count. If that future phase is approved, the Orchestrator maps these domains onto the nine specialist roles.
 
 ```text
 Future SaaS business responsibility map
 ├── Product and Strategy Agent
 ├── Engineering Architecture Agent
 ├── Security Lead Agent
-├── Legal, Privacy and Compliance Lead Agent
+├── Legal, Privacy and Regulatory Agent
 ├── Data and Database Agent
 ├── Payments and Subscription Agent
 ├── Reliability and Operations Agent
@@ -217,7 +217,7 @@ Future SaaS business responsibility map
 └── Growth and Analytics Agent
 ```
 
-The Master Orchestrator coordinates work but cannot silently overrule a security finding, payment gate, or qualified legal review. The Owner remains the final human decision-maker where policy permits risk acceptance. Any accepted risk must record owner, reasoning, compensating controls, expiry/review date and required follow-up.
+The Master Orchestrator coordinates work but cannot silently overrule a security finding, payment gate, Legal Agent block, or mandatory external professional review. The Owner remains the final human decision-maker where policy permits risk acceptance. Any accepted legal risk must record the affected feature and users, reasoning, evidence, compensating controls, expiry/review date, required follow-up, and whether external advice remains required.
 
 ## 7. Controlled agent learning
 
