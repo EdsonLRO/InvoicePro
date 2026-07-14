@@ -59,9 +59,9 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Finding:** Supabase security advisors report that `public.handle_new_user()` is a `SECURITY DEFINER` trigger function executable by `anon` and `authenticated`, and `public.prevent_audit_event_mutation()` has no fixed `search_path`.
 - **Impact:** Trigger helpers should not be exposed as user-callable RPC functions. A mutable function search path also creates avoidable object-resolution risk if the function is later expanded.
 - **Change:** Applied `harden_internal_trigger_functions`: both helpers now use an empty fixed `search_path`, and direct execution is revoked from `PUBLIC`, `anon`, and `authenticated`. Source SQL was updated so fresh environments inherit the same posture.
-- **Verification:** The live advisors returned no findings; both API roles report no EXECUTE privilege; the signup, update-prevention, and delete-prevention triggers remain attached; and a no-op audit-event update failed with `audit_events are append-only`.
-- **Residual risk:** The trigger body and signup trigger were not changed, but one fresh test-account signup should still confirm automatic `company_settings` provisioning before this finding is marked Verified.
-- **Status:** Implemented; fresh-signup acceptance pending.
+- **Verification:** The live advisors returned no findings; both API roles report no EXECUTE privilege; the signup, update-prevention, and delete-prevention triggers remain attached; and a no-op audit-event update failed with `audit_events are append-only`. On 2026-07-14, the live signup trigger was enabled, `handle_new_user()` remained security-definer with an empty search path, and neither `anon` nor `authenticated` could execute it directly. A confirmed fresh signup created one matching `company_settings` row; aggregate Auth/settings counts matched with no missing or orphan settings rows. No test address or account identifier was recorded.
+- **Residual risk:** A future change to the trigger or `company_settings` schema could break signup transactionally; repeat this acceptance check after either changes.
+- **Status:** Verified.
 
 ### SEC-DB-002 - RLS identity checks and foreign-key lookups are not optimised
 
