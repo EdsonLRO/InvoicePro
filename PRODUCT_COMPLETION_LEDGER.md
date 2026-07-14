@@ -21,8 +21,8 @@ Statuses: Planned, Investigating, Confirmed, In Progress, Implemented, Verified,
 | Branding and PDF styling | Implemented | Brand colour, logo position/upload, app-style PDF attachments. |
 | Activity history | Implemented | User-facing document/schedule activity history; not tamper-proof. |
 | Append-only audit events | In Progress | Provider events and selected app actions covered, including settings saves by category. More automation/backups evidence remains. |
-| Account security | In Progress | Supabase Auth, email confirmation, TOTP MFA, password change AAL2 handling, local/all-devices logout. MFA recovery remains. |
-| Backup and restore | In Progress | Supabase Pro daily backups and seven-day retention are documented in `BACKUP_RESTORE_RUNBOOK.md`; scheduled-backup evidence and a timed non-production restore test remain. |
+| Account security | In Progress | Supabase Auth, email confirmation, fail-closed TOTP MFA, backup-authenticator support, MFA-gated masked password recovery, password change AAL2 handling, and local/all-devices logout. New recovery paths still need browser acceptance evidence and an all-factors-lost support process. |
+| Backup and restore | In Progress | Supabase Pro daily backups were listed as completed through 2026-07-13 and seven-day retention is documented in `BACKUP_RESTORE_RUNBOOK.md`; an Owner-approved timed non-production restore test remains. |
 | Privacy/legal groundwork | Planned | Privacy policy, terms, retention/export/delete process, breach process. |
 | Final mobile/PDF regression | Planned | Needed before treating app as customer-ready. |
 | Multi-agent governance and computer-use controls | Verified | One Owner, one Master Orchestrator, eight specialist roles, task queue, locks, handoffs, provider controls, and validation are documented in the authoritative governance files. |
@@ -37,14 +37,18 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 | GOV-001 | Complete agent governance and computer-use controls | High | Verified | Master Orchestrator | Terra with Sol policy review | Released after commit | Hierarchy, queue, locks, handoffs, provider controls, cross-links, and validation completed. |
 | OPS-001 | Backup and restore runbook | High | Verified | Release Agent | Terra with Sol review | Released after commit | Pro plan confirmed, seven-day daily-backup procedure documented, restore side effects and Owner cost/destructive boundaries recorded in `BACKUP_RESTORE_RUNBOOK.md`. |
 | PAY-TEST-001 | Finish Stripe sandbox lifecycle replay evidence | High | In Progress | Payments Agent | Sol / Terra | Released with focused commit; remaining test subtask unlocked | Signature rejection, unknown-event binding, payment/refund duplicate replay, audit constraints, and Deno checks passed. Known-payment dispute and genuine `refund.failed` positive paths remain. |
-| AUTH-001 | Define MFA recovery process | Medium | Planned | Security Agent | Sol | Unlocked | Product/security decision and recovery runbook required. |
+| AUTH-001 | Harden MFA and define recovery process | High | In Progress | Security Agent | Sol / Terra | Implementation released on a focused branch; authenticated acceptance subtask remains unlocked | Fail-closed sign-in, masked MFA-gated recovery, backup-factor management, runbook, responsive checks, and audit-function v4 deployment complete. Leaked-password protection is enabled; credential-dependent browser acceptance remains. |
+| DB-001 | Harden internal trigger helper functions | High | Implemented | Security Agent | Sol / Terra | Migration applied; signup acceptance remains unlocked | Empty search paths and least-privilege execution grants are applied. Security advisors are clear, all triggers remain attached, and append-only mutation rejection passed. Run one fresh-signup provisioning check before marking Verified. |
+| DB-002 | Optimise RLS identity evaluation and foreign-key lookups | High | Verified | Security Agent | Sol / Terra | Migration applied and released | RLS init-plan and missing-index warnings cleared without changing policy commands, ownership conditions, table RLS state, or security-advisor status. |
+| AUTO-001 | Authenticate privileged scheduled automation calls | High | Implemented | Security Agent | Sol / Terra | Migration/function deployed; scheduled acceptance remains unlocked | Current `generate-recurring` v13 retains unsigned-call rejection and both cron jobs use the Vault-backed automation secret. Confirm the next 06:00/09:00 UTC runs before marking Verified. |
+| AUTO-002 | Make recurring generation idempotent across partial failures | High | Implemented | Security Agent | Sol / Terra | Migration/function deployed; scheduled acceptance remains unlocked | Per-occurrence uniqueness and conditional claims passed rolled-back live verification; `generate-recurring` v13 is active and unsigned calls fail closed. Confirm the first real run before marking Verified. |
 
 ## Current Next Priorities
 
 1. Complete the remaining Stripe sandbox positive-path evidence for a known-payment dispute and genuine `refund.failed` event; duplicate and unknown-event rejection evidence is recorded.
-2. Verify a current scheduled backup and run an Owner-approved timed restore test into a separate environment.
-3. MFA recovery/backup-code planning or documented recovery process.
-4. Supabase Auth password policy / breached-password checks on the Pro plan.
+2. Run an Owner-approved timed restore test into a separate environment; current scheduled-backup evidence is verified.
+3. Complete AUTH-001 browser acceptance tests for fail-closed MFA, backup-factor recovery, and masked password recovery.
+4. Complete the Supabase Auth policy decisions recorded in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection is enabled and advisor-verified.
 5. Final mobile/PDF/PWA regression pass.
 6. Data-protection/legal groundwork before real customers.
 

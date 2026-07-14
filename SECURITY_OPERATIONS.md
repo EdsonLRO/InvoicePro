@@ -14,11 +14,17 @@ Future SaaS subscription billing, plan tiers, workspaces, RBAC, and the public m
 
 Supabase Pro is active and provides daily database backups with a seven-day retention window. The current operational procedure is in `BACKUP_RESTORE_RUNBOOK.md`.
 
-Remaining release gate:
+Current evidence and remaining release gate:
 
-- Verify the first/current scheduled backup in the Dashboard.
-- Run a timed restore test into a separate non-production project or controlled local environment.
+- Completed daily physical backups from 2026-07-06 through 2026-07-13 were verified through the Supabase CLI; WAL-G was enabled and PITR remained disabled.
+- Run an Owner-approved timed restore test into a separate non-production project or controlled local environment.
 - Keep production, test, and local data clearly separated.
+
+## Scheduled Automation Boundary
+
+The recurring and overdue cron jobs retrieve a dedicated automation secret from Supabase Vault at runtime and send it as `x-automation-secret`. `generate-recurring` checks that secret before creating its service-role client, and unsigned requests return HTTP 401. The service role remains server-side and every generated row must still be explicitly attributed to the schedule owner because service-role access bypasses RLS.
+
+Confirm the first post-hardening 06:00 and 09:00 UTC runs using `DEFERRED_MANUAL_CONFIGURATION.md`. Disable both jobs immediately in any restored clone.
 - Confirm invoices, customers, saved items, company settings, payments, recurring templates, Auth records, and audit events recover as expected.
 - Re-run cross-user RLS isolation tests after restoration.
 - Disable cloned cron and outbound automation before it can send email, create invoices, or call payment services.
@@ -58,12 +64,18 @@ SQL lives in `supabase/audit_events.sql`.
 
 Current app-action coverage:
 
-- Account password changes, MFA enable/disable, document deletes, PDF exports, manual payment removal, customer deletes, saved-item deletes/price changes, and recurring schedule pause/resume/delete.
+- Account password changes/recovery, MFA enable/disable/backup-factor changes, document deletes, PDF exports, manual payment removal, customer deletes, saved-item deletes/price changes, and recurring schedule pause/resume/delete.
 - Keep audit metadata privacy-safe. Do not store passwords, tokens, full card data, full exported documents, or unnecessary customer PII in logs.
 
 Remaining audit hardening:
 
-- Company/settings saves are now logged at a privacy-safe category level. Expand remaining coverage to privileged automation failures and backup/restore operations.
+- Company/settings saves are logged at a privacy-safe category level. Recurring generation now records success, failure, retry reuse, skipped claims, and schedule-history failures without raw exception text. Backup/restore operations still need evidence when the Owner-approved exercise runs.
+
+Recurring integrity rule:
+
+- One invoice is permitted per `(recurring_template_id, recurring_occurrence_date)` when both values exist.
+- A conditional update of the expected active `next_run` is the processing claim; only its winner may send email.
+- A rare crash after that claim but before Resend acceptance may miss an email. Eliminating both duplicate and missed delivery under every crash point requires a future transactional outbox/queue.
 
 ## Email Phase Gates
 

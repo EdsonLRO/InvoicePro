@@ -40,6 +40,18 @@ verify_jwt = true
 import_map = "./functions/create-stripe-checkout/deno.json"
 entrypoint = "./functions/create-stripe-checkout/index.ts"
 
+[functions.create-stripe-refund]
+enabled = true
+verify_jwt = true
+import_map = "./functions/create-stripe-refund/deno.json"
+entrypoint = "./functions/create-stripe-refund/index.ts"
+
+[functions.log-app-event]
+enabled = true
+verify_jwt = true
+import_map = "./functions/log-app-event/deno.json"
+entrypoint = "./functions/log-app-event/index.ts"
+
 [functions.stripe-webhook]
 enabled = true
 verify_jwt = false

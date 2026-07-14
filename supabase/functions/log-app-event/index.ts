@@ -12,7 +12,10 @@ const corsHeaders = {
 
 const allowedEvents = new Set([
   "account_password_changed",
+  "account_password_recovered",
   "account_mfa_enabled",
+  "account_mfa_backup_added",
+  "account_mfa_factor_removed",
   "account_mfa_disabled",
   "account_logout_local",
   "account_logout_all_devices",

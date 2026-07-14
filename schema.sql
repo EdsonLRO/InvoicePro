@@ -121,10 +121,15 @@ create table public.invoices (
     -- computed totals snapshot (kept for fast listing / reporting)
     grand_total       numeric(12,2) default 0,
 
+    -- populated only for invoices generated from recurring schedules
+    recurring_template_id uuid,
+    recurring_occurrence_date date,
+
     created_at        timestamptz default now(),
     updated_at        timestamptz default now()
 );
 create index invoices_user_id_idx on public.invoices(user_id);
+create index invoices_customer_id_idx on public.invoices(customer_id);
 -- invoice numbers must be unique PER USER and per document type
 create unique index invoices_user_number_idx
     on public.invoices(user_id, doc_type, number);
@@ -145,43 +150,43 @@ alter table public.invoices         enable row level security;
 
 -- company_settings ----------------------------------------------------------
 create policy "own company_settings - select"
-    on public.company_settings for select using (auth.uid() = user_id);
+    on public.company_settings for select using ((select auth.uid()) = user_id);
 create policy "own company_settings - insert"
-    on public.company_settings for insert with check (auth.uid() = user_id);
+    on public.company_settings for insert with check ((select auth.uid()) = user_id);
 create policy "own company_settings - update"
-    on public.company_settings for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+    on public.company_settings for update using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "own company_settings - delete"
-    on public.company_settings for delete using (auth.uid() = user_id);
+    on public.company_settings for delete using ((select auth.uid()) = user_id);
 
 -- customers ------------------------------------------------------------------
 create policy "own customers - select"
-    on public.customers for select using (auth.uid() = user_id);
+    on public.customers for select using ((select auth.uid()) = user_id);
 create policy "own customers - insert"
-    on public.customers for insert with check (auth.uid() = user_id);
+    on public.customers for insert with check ((select auth.uid()) = user_id);
 create policy "own customers - update"
-    on public.customers for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+    on public.customers for update using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "own customers - delete"
-    on public.customers for delete using (auth.uid() = user_id);
+    on public.customers for delete using ((select auth.uid()) = user_id);
 
 -- saved_items ----------------------------------------------------------------
 create policy "own saved_items - select"
-    on public.saved_items for select using (auth.uid() = user_id);
+    on public.saved_items for select using ((select auth.uid()) = user_id);
 create policy "own saved_items - insert"
-    on public.saved_items for insert with check (auth.uid() = user_id);
+    on public.saved_items for insert with check ((select auth.uid()) = user_id);
 create policy "own saved_items - update"
-    on public.saved_items for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+    on public.saved_items for update using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "own saved_items - delete"
-    on public.saved_items for delete using (auth.uid() = user_id);
+    on public.saved_items for delete using ((select auth.uid()) = user_id);
 
 -- invoices -------------------------------------------------------------------
 create policy "own invoices - select"
-    on public.invoices for select using (auth.uid() = user_id);
+    on public.invoices for select using ((select auth.uid()) = user_id);
 create policy "own invoices - insert"
-    on public.invoices for insert with check (auth.uid() = user_id);
+    on public.invoices for insert with check ((select auth.uid()) = user_id);
 create policy "own invoices - update"
-    on public.invoices for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+    on public.invoices for update using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "own invoices - delete"
-    on public.invoices for delete using (auth.uid() = user_id);
+    on public.invoices for delete using ((select auth.uid()) = user_id);
 
 
 -- ============================================================================
@@ -191,7 +196,7 @@ create policy "own invoices - delete"
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
-security definer set search_path = public
+security definer set search_path = ''
 as $$
 begin
     insert into public.company_settings (user_id)
@@ -200,6 +205,8 @@ begin
     return new;
 end;
 $$;
+
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
 
 create trigger on_auth_user_created
     after insert on auth.users

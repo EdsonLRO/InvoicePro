@@ -20,6 +20,81 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 
 ## Entries
 
+### SEC-AUTH-001 - MFA assurance checks failed open
+
+- **Date:** 2026-07-13
+- **Classification:** vulnerable / authentication boundary
+- **Finding:** `routeAfterAuth` caught MFA assurance-level or factor-list errors and continued into `onSignedIn`. It also continued when an AAL2 session was required but no verified factor could be loaded.
+- **Impact:** A transient Auth/API failure or inconsistent factor response could let an AAL1 session reach the signed-in application UI instead of stopping at the MFA gate. Database RLS still limited rows to that authenticated user, but the app's promised second-factor boundary was not fail-closed.
+- **Change:** Assurance-level and factor-list failures now locally sign out the incomplete session. A required AAL2 session cannot initialise app data without a verified factor, and challenge completion is followed by an explicit AAL2 check.
+- **Verification:** Inline JavaScript syntax passed; focused static review confirmed every normal sign-in entry point uses `routeAfterAuth`; the local app loaded with no console errors. Browser checks for successful MFA, wrong code, restored sessions and simulated lookup failure remain required by `MFA_RECOVERY_RUNBOOK.md`.
+- **Residual risk:** The control is implemented client-side. High-risk future server operations should independently enforce recent AAL2 instead of trusting UI state.
+- **Status:** Implemented; browser acceptance pending.
+
+### SEC-AUTH-002 - Password recovery used an unmasked prompt and lacked an explicit MFA recovery gate
+
+- **Date:** 2026-07-13
+- **Classification:** vulnerable / account recovery
+- **Finding:** The `PASSWORD_RECOVERY` handler collected the new password through `window.prompt`, which displays ordinary text rather than a masked password field, and called `updateUser` without an explicit application-level MFA challenge when verified factors existed.
+- **Impact:** A new password could be exposed to someone viewing the screen. The recovery flow also relied on provider-side rejection rather than clearly preserving Tallyo's MFA requirement, creating ambiguity around whether access to email alone could bypass the enrolled second factor.
+- **Change:** Replaced the prompt with masked password/confirmation fields and the existing local password policy. Recovery must positively complete factor discovery before the update button is enabled, and verified TOTP accounts must challenge a selected primary or backup factor. Added backup-factor management and privacy-safe recovery/factor audit event types.
+- **Verification:** Static review confirms masked inputs, password match/strength checks, fail-closed factor discovery, TOTP validation, and no application initialisation before successful update. The recovery and two-factor management screens rendered at desktop and 390px widths with no horizontal overflow or console errors; both factors exposed a removal action only while two remained. Deno check passed for `log-app-event`; deployed version 4 remained JWT-protected and rejected an unauthenticated write with HTTP 401. Full reset-link, wrong-code, backup-factor and success-path account tests remain.
+- **Residual risk:** An all-factors-lost user has no self-service bypass. A strong support identity-verification process remains a release requirement.
+- **Status:** Implemented; browser acceptance pending.
+
+### SEC-AUTH-003 - Supabase leaked-password protection was disabled
+
+- **Date:** 2026-07-13
+- **Classification:** defense-in-depth / provider Auth configuration
+- **Finding:** The live Supabase security advisor reports that leaked-password protection is disabled even though the project is now on the Pro plan.
+- **Impact:** Tallyo's client-side password checks can reject simple patterns but cannot reliably detect passwords present in known breach corpora. Client validation can also be bypassed by direct Auth API use.
+- **Change:** Enabled `password_hibp_enabled` through the Supabase Auth Management API after Owner approval. The previous value was recorded as `false`, the returned/read-back value was `true`, and no credential was printed or written to the repository.
+- **Verification:** The live Supabase security advisor was re-run on 2026-07-13 and the leaked-password warning cleared. A safe test-account rejection check with a known compromised password remains acceptance evidence; never record the password used.
+- **Status:** Implemented; rejection-path acceptance pending.
+
+### SEC-DB-001 - Trigger helper functions retain unnecessary API execution grants
+
+- **Date:** 2026-07-13
+- **Classification:** defense-in-depth / database privilege hygiene
+- **Finding:** Supabase security advisors report that `public.handle_new_user()` is a `SECURITY DEFINER` trigger function executable by `anon` and `authenticated`, and `public.prevent_audit_event_mutation()` has no fixed `search_path`.
+- **Impact:** Trigger helpers should not be exposed as user-callable RPC functions. A mutable function search path also creates avoidable object-resolution risk if the function is later expanded.
+- **Change:** Applied `harden_internal_trigger_functions`: both helpers now use an empty fixed `search_path`, and direct execution is revoked from `PUBLIC`, `anon`, and `authenticated`. Source SQL was updated so fresh environments inherit the same posture.
+- **Verification:** The live advisors returned no findings; both API roles report no EXECUTE privilege; the signup, update-prevention, and delete-prevention triggers remain attached; and a no-op audit-event update failed with `audit_events are append-only`.
+- **Residual risk:** The trigger body and signup trigger were not changed, but one fresh test-account signup should still confirm automatic `company_settings` provisioning before this finding is marked Verified.
+- **Status:** Implemented; fresh-signup acceptance pending.
+
+### SEC-DB-002 - RLS identity checks and foreign-key lookups are not optimised
+
+- **Date:** 2026-07-13
+- **Classification:** defense-in-depth / database performance
+- **Finding:** Supabase performance advisors report that tenant policies call `auth.uid()` per row, and the `audit_events.actor_user_id` and `invoices.customer_id` foreign keys lack covering indexes.
+- **Impact:** Tenant isolation remains enforced, but larger tables would repeatedly evaluate the same identity function and could scan foreign-key columns during joins or parent-row changes.
+- **Change:** Applied migration `optimize_rls_and_foreign_key_indexes`. Every live ownership policy keeps the same condition but evaluates `(select auth.uid())` once per statement, and narrow indexes now cover `audit_events.actor_user_id` and `invoices.customer_id`. Canonical setup SQL was updated to match the live schema.
+- **Verification:** The missing-index and RLS init-plan advisor warnings cleared. RLS remains enabled on all six public data tables, policy counts and commands are unchanged, and the live security advisor remains clear. The remaining unused-index notices are informational on low-volume/new indexes and are not a reason to remove them prematurely.
+- **Status:** Verified.
+
+### SEC-AUTO-001 - Recurring generation endpoint lacks caller authentication
+
+- **Date:** 2026-07-13
+- **Classification:** vulnerable / privileged automation boundary
+- **Finding:** `generate-recurring` disables platform JWT verification for `pg_cron` but did not independently authenticate the request before creating a service-role client.
+- **Impact:** Anyone who discovered the public function URL could invoke privileged recurring processing. Due-date checks limit when rows are generated, but repeated or deliberately timed calls could create invoices or trigger configured customer email outside the trusted scheduler.
+- **Change:** `generate-recurring` now requires the existing `AUTOMATION_SECRET` in `x-automation-secret` before creating its service-role client. Migration `secure_scheduled_automation_calls` changed both automation jobs to read that secret from Vault at runtime; the former anon-key and inline-secret scheduler patterns are no longer used.
+- **Verification:** Deno check passed, deployed `generate-recurring` v12 is active, and an unsigned request returned HTTP 401. Both cron jobs remain active at their existing schedules and their stored commands use the Vault secret name without an anon key. The next scheduled runs on 2026-07-14 remain operational acceptance evidence.
+- **Status:** Implemented; next scheduled-run acceptance pending.
+
+### SEC-AUTO-002 - Recurring generation is not idempotent across partial failures
+
+- **Date:** 2026-07-13
+- **Classification:** vulnerable / automation integrity and customer-contact risk
+- **Finding:** `generate-recurring` inserts and may email an invoice before advancing its recurring template, but it did not check whether the template update succeeded and invoices carried no unique schedule-occurrence marker.
+- **Impact:** A database/update interruption or concurrent invocation could leave the same template occurrence due after an invoice was created, allowing a later run to create or email another invoice for the same period. The function could also report success even when schedule advancement failed.
+- **Evidence:** Static control-flow review found the unchecked template update after invoice/email processing. Live schema inspection confirmed `invoices` had no `recurring_template_id` or `recurring_occurrence_date` columns and no recurrence idempotency index; zero templates were due when the remediation window was checked.
+- **Change:** Applied migration `add_recurring_generation_idempotency`. Generated invoices now carry nullable `recurring_template_id` and `recurring_occurrence_date` attribution with a partial unique index. `generate-recurring` v13 handles uniqueness conflicts by reusing the existing occurrence, conditionally advances only the expected active schedule, sends email only after winning that claim, reports partial failures honestly, and writes privacy-safe success/failure/retry events to `audit_events`.
+- **Verification:** Deno check passed. Live rolled-back transactions proved a second invoice for one occurrence is rejected, the first conditional claim affects one row, the second affects zero, ordinary invoices with null recurrence fields remain unaffected, and no test rows persist. The columns/index exist, invoice RLS remains enabled with four policies, security advisors are clear, and an unsigned function request returns HTTP 401. No template was due during deployment. The first real scheduled run remains operational acceptance evidence.
+- **Residual risk:** A crash after the schedule claim but before Resend accepts the message can miss an automatic email; preventing both duplicates and missed sends under every crash point requires a transactional outbox/queue, which is a larger future design. The current choice prioritises avoiding duplicate invoices and customer emails.
+- **Status:** Implemented; scheduled-run acceptance pending.
+
 ### SEC-LOG-001 - Stripe test/development state was too easy to miss
 
 - **Date:** 2026-07-12
@@ -50,7 +125,7 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Impact:** MFA-protected users could not change their password from the app, and the failure was confusing.
 - **Change:** Added an authenticator-code popup when MFA is enabled and completed a Supabase MFA challenge/verify step after current-password reauth and before `updateUser`.
 - **Verification:** Ran `git diff --check`; reviewed against Supabase MFA/AAL docs. Manual browser test still required on the deployed app.
-- **Residual risk:** MFA recovery/backup flow is still not implemented; Auth-level password policy and breached-password protection still need dashboard confirmation.
+- **Residual risk:** Backup-authenticator recovery is implemented but still needs browser acceptance; remaining server-side password, session, rate-limit, and abuse-control settings still need review.
 - **Evidence:** This fix commit; manual browser test pending.
 
 ### SEC-LOG-004 - Supabase dump dry-run printed a temporary CLI credential
@@ -111,7 +186,7 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 ## Open Follow-Ups
 
 - Confirm Supabase Auth password policy, JWT/session expiry, and rate-limit settings.
-- Decide whether breached-password screening will be enabled through provider settings or a trusted server-side check.
+- Complete the known-compromised-password rejection test for the enabled provider check.
 - Add the future verified "log out from all devices" flow when account-safety work begins.
 - Complete the remaining positive-path Stripe sandbox tests for a known Tallyo dispute and a genuine failed refund; current redacted evidence is in `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
 - Record backup and restore test evidence once a non-production restore is performed.

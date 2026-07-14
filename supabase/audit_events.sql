@@ -1,5 +1,5 @@
 -- ============================================================================
--- Tallyo - Append-only audit events draft
+-- Tallyo - Append-only audit events
 --
 -- Purpose:
 --   Trusted server-side event log for security-sensitive actions such as email
@@ -7,8 +7,9 @@
 --   automation.
 --
 -- Important:
---   This complements the existing invoice/template history JSONB fields. It is
---   not wired into the app yet. Apply in Supabase SQL Editor when ready.
+--   This complements the existing invoice/template history JSONB fields.
+--   Provider webhooks, privileged automation, and allowlisted app actions write
+--   here through trusted Edge Functions; browser clients remain read-only.
 --
 -- Security model:
 --   * Users can read their own audit events.
@@ -36,6 +37,9 @@ create table if not exists public.audit_events (
 create index if not exists audit_events_user_created_idx
     on public.audit_events(user_id, created_at desc);
 
+create index if not exists audit_events_actor_user_id_idx
+    on public.audit_events(actor_user_id);
+
 create index if not exists audit_events_object_idx
     on public.audit_events(object_type, object_id);
 
@@ -47,7 +51,7 @@ alter table public.audit_events enable row level security;
 
 drop policy if exists "own audit_events - select" on public.audit_events;
 create policy "own audit_events - select"
-    on public.audit_events for select using (auth.uid() = user_id);
+    on public.audit_events for select using ((select auth.uid()) = user_id);
 
 -- No insert/update/delete policies are created on purpose. Browser clients read
 -- their own audit events, while trusted Edge Functions insert with service role.
@@ -55,11 +59,14 @@ create policy "own audit_events - select"
 create or replace function public.prevent_audit_event_mutation()
 returns trigger
 language plpgsql
+set search_path = ''
 as $$
 begin
     raise exception 'audit_events are append-only';
 end;
 $$;
+
+revoke execute on function public.prevent_audit_event_mutation() from public, anon, authenticated;
 
 drop trigger if exists prevent_audit_event_update on public.audit_events;
 create trigger prevent_audit_event_update

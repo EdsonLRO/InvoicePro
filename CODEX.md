@@ -136,7 +136,7 @@ Do not introduce Tallyo subscription billing, workspaces, RBAC, or SaaS entitlem
    - Do **not** rename the repo/URL unless Supabase Auth allowed/redirect URLs are updated at the same time.
 4. **Verify nothing broke:** load the app, sign in, create an invoice, mark Sent, record a payment, export a PDF — confirm no regressions.
 5. **Re-verify recurring automation** if any backend/function change was made (function deployed; cron job active).
-6. Only then move on to the current app-hardening roadmap: Stripe lifecycle testing, backup/restore, append-only audit events, MFA recovery planning, password hardening, and documentation updates. Keep SaaS subscriptions/website work deferred unless explicitly requested.
+6. Only then move on to the current app-hardening roadmap: Stripe lifecycle testing, backup/restore, append-only audit events, MFA recovery acceptance and operations, provider password hardening, and documentation updates. Keep SaaS subscriptions/website work deferred unless explicitly requested.
 
 ---
 

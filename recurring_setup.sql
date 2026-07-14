@@ -65,6 +65,35 @@ alter table public.recurring_templates
     add column if not exists created_at timestamptz default now(),
     add column if not exists updated_at timestamptz default now();
 
+-- Generated invoices retain their schedule source and occurrence. The partial
+-- unique index prevents retries/concurrent jobs from generating the same
+-- occurrence twice while leaving manual invoices unaffected.
+alter table public.invoices
+    add column if not exists recurring_template_id uuid,
+    add column if not exists recurring_occurrence_date date;
+
+do $$
+begin
+    if not exists (
+        select 1
+        from pg_constraint
+        where conname = 'invoices_recurring_template_id_fkey'
+          and conrelid = 'public.invoices'::regclass
+    ) then
+        alter table public.invoices
+            add constraint invoices_recurring_template_id_fkey
+            foreign key (recurring_template_id)
+            references public.recurring_templates(id)
+            on delete set null;
+    end if;
+end;
+$$;
+
+create unique index if not exists invoices_recurring_occurrence_uidx
+    on public.invoices(recurring_template_id, recurring_occurrence_date)
+    where recurring_template_id is not null
+      and recurring_occurrence_date is not null;
+
 create index if not exists recurring_templates_user_id_idx
     on public.recurring_templates(user_id);
 
@@ -74,17 +103,21 @@ create index if not exists recurring_templates_due_idx
 alter table public.recurring_templates enable row level security;
 
 drop policy if exists "own recurring_templates - select" on public.recurring_templates;
-create policy "own recurring_templates - select"
-    on public.recurring_templates for select using (auth.uid() = user_id);
+drop policy if exists "own recurring - select" on public.recurring_templates;
+create policy "own recurring - select"
+    on public.recurring_templates for select using ((select auth.uid()) = user_id);
 
 drop policy if exists "own recurring_templates - insert" on public.recurring_templates;
-create policy "own recurring_templates - insert"
-    on public.recurring_templates for insert with check (auth.uid() = user_id);
+drop policy if exists "own recurring - insert" on public.recurring_templates;
+create policy "own recurring - insert"
+    on public.recurring_templates for insert with check ((select auth.uid()) = user_id);
 
 drop policy if exists "own recurring_templates - update" on public.recurring_templates;
-create policy "own recurring_templates - update"
-    on public.recurring_templates for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "own recurring - update" on public.recurring_templates;
+create policy "own recurring - update"
+    on public.recurring_templates for update using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 
 drop policy if exists "own recurring_templates - delete" on public.recurring_templates;
-create policy "own recurring_templates - delete"
-    on public.recurring_templates for delete using (auth.uid() = user_id);
+drop policy if exists "own recurring - delete" on public.recurring_templates;
+create policy "own recurring - delete"
+    on public.recurring_templates for delete using ((select auth.uid()) = user_id);
