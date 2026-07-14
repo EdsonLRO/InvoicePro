@@ -21,7 +21,7 @@ Tallyo is a real working app and strong portfolio project, but it is not yet liv
 | CSP/SRI/self-hosted Tailwind | Implemented | Recheck final deployed HTML before release. |
 | Email sending and webhooks | Implemented | Need final test delivery evidence. |
 | Overdue reminder automation | Implemented | Job is active and Vault-authenticated; confirm the first post-hardening scheduled run and opt-in behaviour before release. |
-| Recurring invoice automation | Implemented | Endpoint rejects unsigned calls and job is Vault-authenticated; confirm the first post-hardening run and service-role attribution before release. |
+| Recurring invoice automation | Implemented | Endpoint rejects unsigned calls, job is Vault-authenticated, and per-occurrence uniqueness/conditional claiming passed rolled-back live verification. Confirm the first v13 scheduled run and service-role attribution before release. |
 | Stripe payments | In Progress | Sandbox implemented; signature rejection and payment/refund duplicate replay passed. Remaining positive lifecycle tests and live-mode setup are still gated. |
 | Refund/dispute/chargeback handling | In Progress | Unknown disputes are rejected and refund replay is idempotent; known-payment dispute, genuine failed-refund evidence, and operational policy remain. |
 | Backups and restore | In Progress | Pro daily backups were verified through 2026-07-13; an Owner-approved timed non-production restore test remains. |

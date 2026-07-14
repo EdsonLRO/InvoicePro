@@ -69,7 +69,13 @@ Current app-action coverage:
 
 Remaining audit hardening:
 
-- Company/settings saves are now logged at a privacy-safe category level. Expand remaining coverage to privileged automation failures and backup/restore operations.
+- Company/settings saves are logged at a privacy-safe category level. Recurring generation now records success, failure, retry reuse, skipped claims, and schedule-history failures without raw exception text. Backup/restore operations still need evidence when the Owner-approved exercise runs.
+
+Recurring integrity rule:
+
+- One invoice is permitted per `(recurring_template_id, recurring_occurrence_date)` when both values exist.
+- A conditional update of the expected active `next_run` is the processing claim; only its winner may send email.
+- A rare crash after that claim but before Resend acceptance may miss an email. Eliminating both duplicate and missed delivery under every crash point requires a future transactional outbox/queue.
 
 ## Email Phase Gates
 

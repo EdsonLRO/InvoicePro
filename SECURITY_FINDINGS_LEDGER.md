@@ -83,6 +83,18 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Verification:** Deno check passed, deployed `generate-recurring` v12 is active, and an unsigned request returned HTTP 401. Both cron jobs remain active at their existing schedules and their stored commands use the Vault secret name without an anon key. The next scheduled runs on 2026-07-14 remain operational acceptance evidence.
 - **Status:** Implemented; next scheduled-run acceptance pending.
 
+### SEC-AUTO-002 - Recurring generation is not idempotent across partial failures
+
+- **Date:** 2026-07-13
+- **Classification:** vulnerable / automation integrity and customer-contact risk
+- **Finding:** `generate-recurring` inserts and may email an invoice before advancing its recurring template, but it did not check whether the template update succeeded and invoices carried no unique schedule-occurrence marker.
+- **Impact:** A database/update interruption or concurrent invocation could leave the same template occurrence due after an invoice was created, allowing a later run to create or email another invoice for the same period. The function could also report success even when schedule advancement failed.
+- **Evidence:** Static control-flow review found the unchecked template update after invoice/email processing. Live schema inspection confirmed `invoices` had no `recurring_template_id` or `recurring_occurrence_date` columns and no recurrence idempotency index; zero templates were due when the remediation window was checked.
+- **Change:** Applied migration `add_recurring_generation_idempotency`. Generated invoices now carry nullable `recurring_template_id` and `recurring_occurrence_date` attribution with a partial unique index. `generate-recurring` v13 handles uniqueness conflicts by reusing the existing occurrence, conditionally advances only the expected active schedule, sends email only after winning that claim, reports partial failures honestly, and writes privacy-safe success/failure/retry events to `audit_events`.
+- **Verification:** Deno check passed. Live rolled-back transactions proved a second invoice for one occurrence is rejected, the first conditional claim affects one row, the second affects zero, ordinary invoices with null recurrence fields remain unaffected, and no test rows persist. The columns/index exist, invoice RLS remains enabled with four policies, security advisors are clear, and an unsigned function request returns HTTP 401. No template was due during deployment. The first real scheduled run remains operational acceptance evidence.
+- **Residual risk:** A crash after the schedule claim but before Resend accepts the message can miss an automatic email; preventing both duplicates and missed sends under every crash point requires a transactional outbox/queue, which is a larger future design. The current choice prioritises avoiding duplicate invoices and customer emails.
+- **Status:** Implemented; scheduled-run acceptance pending.
+
 ### SEC-LOG-001 - Stripe test/development state was too easy to miss
 
 - **Date:** 2026-07-12

@@ -108,7 +108,7 @@ All in the `public` schema. All have RLS enabled and are scoped to the owning us
 - **Purpose:** one row per document — invoice, quote, or credit note.
 - **Owner field:** `user_id` (uuid, NOT NULL, default `auth.uid()`).
 - **Columns:** `id` (uuid, PK, default `gen_random_uuid()`), `user_id`, `doc_type` (text, NOT NULL, default `'invoice'`), `number` (text, NOT NULL), `status` (text, NOT NULL, default `'Draft'`), `issue_date` (date), `due_date` (date), `po_number` (text), `currency` (text, default `'GBP'`), `customer_id` (uuid, nullable), **`customer_snapshot`** (jsonb, nullable), `items` (jsonb, NOT NULL, default `'[]'`), `payments` (jsonb, NOT NULL, default `'[]'`), `global_discount` (numeric, default `0`), `tax_rate` (numeric, default `0`), `shipping_cost` (numeric, default `0`), `tip` (numeric, default `0`), `notes` (text), `terms` (text), **`grand_total`** (numeric, default `0`), `created_at` (timestamptz, default `now()`), `updated_at` (timestamptz, default `now()`), `tax_mode` (text, default `'exclusive'`), **`history`** (jsonb, default `'[]'`).
-- **Relationships:** optional soft link to `customers` via `customer_id`; the authoritative customer data is `customer_snapshot`, so historical documents stay correct if the customer is later edited/deleted.
+- **Relationships:** optional soft link to `customers` via `customer_id`; the authoritative customer data is `customer_snapshot`, so historical documents stay correct if the customer is later edited/deleted. Generated recurring invoices additionally carry nullable `recurring_template_id` and `recurring_occurrence_date`; their partial unique index permits only one attributed invoice per schedule occurrence.
 - **RLS:** own rows only.
 - **Column-name cautions (app field ≠ DB column):** customer is **`customer_snapshot`** (not `customer`); issue date is **`issue_date`** (not `date`); total is **`grand_total`** (not a `totals` object).
 - **Notes:** a `tip` column exists (numeric, default 0) — legacy/optional; not prominently used in the current UI. Invoice numbering uses the user's `invoice_prefix`. The schema includes unique `(user_id, doc_type, number)` enforcement and an index on `customer_id` for the foreign key.
@@ -173,7 +173,7 @@ Policy names follow the pattern `own <table> - <command>` where applicable, for 
 
 - **Function:** `generate-recurring` (Deno / TypeScript), at `supabase/functions/generate-recurring/index.ts`.
 - **Purpose:** server-side recurring invoice generation with no browser open.
-- **Behaviour:** finds active `recurring_templates` where `next_run <= today`; for each, generates one invoice (status `Sent`) **stamped with the schedule owner's `user_id`**, appends history entries, then advances `next_run` (end-of-month clamp + single catch-up for missed periods) and updates `last_generated` / `generated_count` / the schedule's `history`. Invoice numbers use the user's `invoice_prefix`.
+- **Behaviour:** finds active `recurring_templates` where `next_run <= today`; for each, creates or reuses the uniquely attributed schedule occurrence, then conditionally advances the expected `next_run`. Only the invocation that wins that claim may email. The invoice is status `Sent`, stamped with the schedule owner's `user_id`, and the schedule updates `last_generated`, `generated_count`, and history. Invoice numbers use the user's `invoice_prefix`.
 - **Auth model:** uses the **service role key** (bypasses RLS). The key is injected by the platform at runtime (`SUPABASE_SERVICE_ROLE_KEY`) and is **never in source or committed**.
 - **Caller gate:** platform JWT verification is intentionally disabled for the scheduler, so the function requires `x-automation-secret` to match the server-side `AUTOMATION_SECRET` before creating the service-role client. Unsigned calls fail with HTTP 401.
 - **Deploy:** `supabase functions deploy generate-recurring`.
@@ -191,7 +191,7 @@ Other current Edge Functions:
 - `stripe-webhook` - verifies Stripe signatures; records Checkout completion only when the Checkout session was created/logged by Tallyo; logs failed-payment/dispute/refund-failure lifecycle events; records successful refunds as locked negative Stripe payment entries.
 - Current sandbox Stripe webhook events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, `refund.failed`, `charge.dispute.created`, `charge.dispute.updated`, `charge.dispute.closed`, `charge.dispute.funds_withdrawn`, and `charge.dispute.funds_reinstated`.
 
-Live deployment snapshot on 2026-07-13: all nine functions were active; `generate-recurring` was v12 and `resend-webhook` was v11 after the hardening/type-check deployments. JWT verification is enabled for user-authenticated functions and intentionally disabled only for signature-verified provider webhooks or custom-secret scheduled functions.
+Live deployment snapshot on 2026-07-13: all nine functions were active; `generate-recurring` was v13 and `resend-webhook` was v11 after the hardening/type-check deployments. JWT verification is enabled for user-authenticated functions and intentionally disabled only for signature-verified provider webhooks or custom-secret scheduled functions.
 
 Deploy after edits:
 

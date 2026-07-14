@@ -19,7 +19,7 @@ It is designed to be simple, mobile-friendly, and security-conscious. It suits f
 **Working app / active hardening stage.**
 
 - Core invoicing, customers, saved items, payments, recurring billing, email, PDF export, and activity history are working.
-- Recurring invoice generation runs through a scheduled Supabase Edge Function.
+- Recurring invoice generation runs through a scheduled Supabase Edge Function with per-occurrence idempotency and a Vault-backed caller gate.
 - Document email is implemented through Resend.
 - Email delivery tracking is implemented through signed Resend webhooks and `audit_events`.
 - Overdue reminder email is implemented, with automation enabled per invoice.

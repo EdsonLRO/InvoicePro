@@ -121,6 +121,10 @@ create table public.invoices (
     -- computed totals snapshot (kept for fast listing / reporting)
     grand_total       numeric(12,2) default 0,
 
+    -- populated only for invoices generated from recurring schedules
+    recurring_template_id uuid,
+    recurring_occurrence_date date,
+
     created_at        timestamptz default now(),
     updated_at        timestamptz default now()
 );

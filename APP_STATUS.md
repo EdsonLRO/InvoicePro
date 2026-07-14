@@ -21,7 +21,7 @@ Implemented:
 - Manual payments and Stripe-confirmed invoice payments.
 - Stripe Checkout payment links for full balance and seller-approved deposits.
 - In-app Stripe refund requests through a server-side Edge Function.
-- Recurring invoices with server-side scheduled generation.
+- Recurring invoices with authenticated, per-occurrence-idempotent server-side scheduled generation.
 - Resend email sending for documents and overdue reminders.
 - Signed Resend webhook delivery tracking.
 - Per-invoice opt-in overdue reminder automation.

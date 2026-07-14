@@ -20,6 +20,7 @@ Statuses: Proposed, Accepted, Superseded, Deferred, Rejected.
 | 2026-07-13 | Remove direct API execution from internal trigger helpers and pin their search paths. | Accepted | Trigger-only functions do not need anonymous or authenticated RPC access. The least-privilege migration cleared all database advisor warnings without changing trigger business logic. |
 | 2026-07-13 | Authenticate both database-scheduled functions with one dedicated Vault-backed automation secret. | Accepted | A public anon key is not caller authentication for a function with service-role effects. Both cron jobs now retrieve `automation_secret` at runtime, and privileged processing begins only after the custom header is verified. |
 | 2026-07-13 | Preserve RLS ownership semantics while optimising identity evaluation and foreign-key lookups. | Accepted | Wrapping `auth.uid()` in a scalar subquery avoids per-row re-evaluation; narrow foreign-key indexes reduce scans without broadening access. |
+| 2026-07-13 | Prefer at-most-once recurring invoice/email processing over duplicate customer contact after partial failure. | Accepted | Each schedule occurrence is unique and email starts only after a conditional schedule claim. A rare crash after the claim may miss email; eliminating both outcomes requires a future transactional outbox/queue. |
 
 ## Pending Decisions
 

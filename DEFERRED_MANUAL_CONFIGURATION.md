@@ -44,9 +44,10 @@ These are configuration decisions, not invitations to weaken Auth, MFA, RLS, or 
 
 The recurring and overdue jobs now retrieve `automation_secret` from Vault and send it as `x-automation-secret`. Their endpoints reject unsigned requests.
 
-- After 2026-07-14 06:00 UTC, confirm `generate-recurring-daily` completed successfully.
+- After 2026-07-14 06:00 UTC, confirm `generate-recurring-daily` completed successfully on deployed v13.
 - After 2026-07-14 09:00 UTC, confirm `send-overdue-reminders-daily` completed successfully.
 - Confirm no duplicate invoice or unintended customer email was produced.
+- For any due recurring schedule, confirm the generated invoice has source/occurrence attribution and one `recurring_invoice_generated` audit event.
 - If either job fails, inspect redacted Edge Function/cron logs before retrying. Never print the secret.
 
 ## 4. Backup restore exercise
@@ -70,6 +71,6 @@ Current scheduled-backup evidence is verified. A timed restore is still required
 
 - Supabase leaked-password protection is enabled and security advisors are clear.
 - RLS performance hardening and foreign-key indexes were applied without changing tenant ownership rules.
-- `generate-recurring` v12 rejects unsigned requests; both cron commands are Vault-backed.
+- `generate-recurring` v13 rejects unsigned requests, enforces one invoice per schedule occurrence, and only emails after a conditional schedule claim; both cron commands are Vault-backed.
 - `resend-webhook` v11 passes Deno type checking and rejects unsigned requests.
 - Daily physical backups from 2026-07-06 through 2026-07-13 were listed as completed; WAL-G is enabled and PITR remains disabled/unapproved.

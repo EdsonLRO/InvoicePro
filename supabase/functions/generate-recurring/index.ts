@@ -321,12 +321,31 @@ Deno.serve(async (req) => {
   let emailed = 0;
   let emailSkipped = 0;
   let emailFailed = 0;
+  let generationFailed = 0;
+  let duplicatePrevented = 0;
+  let historyUpdateFailed = 0;
 
   for (const tpl of (due || [])) {
     try {
       const userId = String(tpl.user_id || "");
       if (!userId) {
         console.error("template missing user_id", tpl.id);
+        generationFailed++;
+        continue;
+      }
+
+      const occurrenceDate = String(tpl.next_run || "");
+      if (!occurrenceDate) {
+        generationFailed++;
+        await insertAuditEvent(admin, {
+          user_id: userId,
+          actor_user_id: null,
+          event_type: "recurring_invoice_generation_failed",
+          object_type: "recurring_template",
+          object_id: tpl.id,
+          source: "edge_function",
+          metadata: { stage: "validate_occurrence", reason: "missing_next_run" },
+        });
         continue;
       }
 
@@ -348,6 +367,8 @@ Deno.serve(async (req) => {
         notes: tpl.notes || null,
         terms: tpl.terms || null,
         grand_total: calcGrandTotal(tpl),
+        recurring_template_id: tpl.id,
+        recurring_occurrence_date: occurrenceDate,
         history: [
           { ts: nowISO, type: "created", text: "Document created" },
           { ts: nowISO, type: "recurring", text: "Generated automatically from recurring schedule" + (tpl.name ? ` "${tpl.name}"` : "") },
@@ -355,24 +376,126 @@ Deno.serve(async (req) => {
         ],
       };
 
-      const { data: inserted, error: insErr } = await admin.from("invoices").insert(invoice).select("*").single();
+      let inserted: any = null;
+      let reusedExisting = false;
+      const { data: created, error: insErr } = await admin.from("invoices")
+        .insert(invoice).select("*").single();
       if (insErr) {
-        console.error("insert failed", tpl.id, insErr.message);
+        if (insErr.code === "23505") {
+          const { data: existing, error: existingError } = await admin.from("invoices")
+            .select("*")
+            .eq("recurring_template_id", tpl.id)
+            .eq("recurring_occurrence_date", occurrenceDate)
+            .maybeSingle();
+          if (existingError || !existing) {
+            generationFailed++;
+            console.error("idempotent invoice lookup failed", tpl.id, existingError?.message || "not found");
+            await insertAuditEvent(admin, {
+              user_id: userId,
+              actor_user_id: null,
+              event_type: "recurring_invoice_generation_failed",
+              object_type: "recurring_template",
+              object_id: tpl.id,
+              source: "edge_function",
+              metadata: { stage: "idempotency_lookup", reason: "existing_invoice_unavailable", occurrence_date: occurrenceDate },
+            });
+            continue;
+          }
+          inserted = existing;
+          reusedExisting = true;
+          duplicatePrevented++;
+          await insertAuditEvent(admin, {
+            user_id: userId,
+            actor_user_id: null,
+            event_type: "recurring_generation_retry_reused_invoice",
+            object_type: "invoice",
+            object_id: existing.id,
+            source: "edge_function",
+            metadata: { recurring_template_id: tpl.id, occurrence_date: occurrenceDate },
+          });
+        } else {
+          generationFailed++;
+          console.error("insert failed", tpl.id, insErr.message);
+          await insertAuditEvent(admin, {
+            user_id: userId,
+            actor_user_id: null,
+            event_type: "recurring_invoice_generation_failed",
+            object_type: "recurring_template",
+            object_id: tpl.id,
+            source: "edge_function",
+            metadata: { stage: "invoice_insert", reason: "database_rejected", occurrence_date: occurrenceDate },
+          });
+          continue;
+        }
+      } else {
+        inserted = created;
+      }
+
+      const invoiceNumber = String(inserted.number || number);
+      const res = catchUp(tpl, today);
+      const hist = Array.isArray(tpl.history) ? tpl.history : [];
+      hist.push({ ts: nowISO, type: "generated", text: `Generated invoice #${invoiceNumber} (scheduled)` });
+
+      const { data: claimed, error: claimError } = await admin.from("recurring_templates").update({
+        next_run: res.newNextRun,
+        last_generated: today,
+        generated_count: (tpl.generated_count || 0) + 1,
+        history: hist,
+        updated_at: new Date().toISOString(),
+      })
+        .eq("id", tpl.id)
+        .eq("user_id", userId)
+        .eq("active", true)
+        .eq("next_run", occurrenceDate)
+        .select("id")
+        .maybeSingle();
+
+      if (claimError || !claimed) {
+        if (claimError) generationFailed++;
+        console.warn("recurring occurrence was not claimed", tpl.id, claimError?.message || "already claimed or changed");
+        await insertAuditEvent(admin, {
+          user_id: userId,
+          actor_user_id: null,
+          event_type: claimError
+            ? "recurring_invoice_generation_failed"
+            : "recurring_generation_claim_skipped",
+          object_type: "recurring_template",
+          object_id: tpl.id,
+          source: "edge_function",
+          metadata: {
+            stage: "schedule_claim",
+            reason: claimError ? "database_rejected" : "already_claimed_or_changed",
+            invoice_id: inserted.id,
+            occurrence_date: occurrenceDate,
+            reused_existing: reusedExisting,
+          },
+        });
         continue;
       }
 
-      const res = catchUp(tpl, today);
-      const hist = Array.isArray(tpl.history) ? tpl.history : [];
-      hist.push({ ts: nowISO, type: "generated", text: `Generated invoice #${number} (scheduled)` });
+      generated++;
+      await insertAuditEvent(admin, {
+        user_id: userId,
+        actor_user_id: null,
+        event_type: "recurring_invoice_generated",
+        object_type: "invoice",
+        object_id: inserted.id,
+        source: "edge_function",
+        metadata: {
+          recurring_template_id: tpl.id,
+          occurrence_date: occurrenceDate,
+          reused_existing: reusedExisting,
+        },
+      });
 
       if (tpl.email_enabled === true) {
         const to = String(tpl.customer_snapshot?.email || "").trim();
         if (!validEmail(to)) {
           emailSkipped++;
-          hist.push({ ts: nowISO, type: "email", text: `Automatic email skipped for invoice #${number}: customer has no valid email address` });
+          hist.push({ ts: nowISO, type: "email", text: `Automatic email skipped for invoice #${invoiceNumber}: customer has no valid email address` });
         } else if (!resendKey) {
           emailSkipped++;
-          hist.push({ ts: nowISO, type: "email", text: `Automatic email skipped for invoice #${number}: email service is not configured` });
+          hist.push({ ts: nowISO, type: "email", text: `Automatic email skipped for invoice #${invoiceNumber}: email service is not configured` });
         } else {
           const { data: company } = await admin.from("company_settings").select("*").eq("user_id", userId).maybeSingle();
           const sentAt = new Date().toISOString();
@@ -385,7 +508,7 @@ Deno.serve(async (req) => {
               .update({ history: invoiceHistory, updated_at: sentAt })
               .eq("id", inserted.id)
               .eq("user_id", userId);
-            hist.push({ ts: sentAt, type: "email", text: `Emailed invoice #${number} to ${to}` });
+            hist.push({ ts: sentAt, type: "email", text: `Emailed invoice #${invoiceNumber} to ${to}` });
             await insertAuditEvent(admin, {
               user_id: userId,
               actor_user_id: userId,
@@ -405,7 +528,7 @@ Deno.serve(async (req) => {
               .update({ history: invoiceHistory, updated_at: sentAt })
               .eq("id", inserted.id)
               .eq("user_id", userId);
-            hist.push({ ts: sentAt, type: "email", text: `Automatic email failed for invoice #${number}` });
+            hist.push({ ts: sentAt, type: "email", text: `Automatic email failed for invoice #${invoiceNumber}` });
             await insertAuditEvent(admin, {
               user_id: userId,
               actor_user_id: userId,
@@ -420,21 +543,56 @@ Deno.serve(async (req) => {
         }
       }
 
-      await admin.from("recurring_templates").update({
-        next_run: res.newNextRun,
-        last_generated: today,
-        generated_count: (tpl.generated_count || 0) + 1,
-        history: hist,
-        updated_at: new Date().toISOString(),
-      }).eq("id", tpl.id).eq("user_id", userId);
-
-      generated++;
+      if (tpl.email_enabled === true) {
+        const { error: historyError } = await admin.from("recurring_templates")
+          .update({ history: hist, updated_at: new Date().toISOString() })
+          .eq("id", tpl.id)
+          .eq("user_id", userId);
+        if (historyError) {
+          historyUpdateFailed++;
+          console.error("schedule history update failed", tpl.id, historyError.message);
+          await insertAuditEvent(admin, {
+            user_id: userId,
+            actor_user_id: null,
+            event_type: "recurring_schedule_history_update_failed",
+            object_type: "recurring_template",
+            object_id: tpl.id,
+            source: "edge_function",
+            metadata: { invoice_id: inserted.id, occurrence_date: occurrenceDate },
+          });
+        }
+      }
     } catch (e) {
+      generationFailed++;
       console.error("template failed", tpl.id, String(e));
+      const userId = String(tpl.user_id || "");
+      if (userId) {
+        await insertAuditEvent(admin, {
+          user_id: userId,
+          actor_user_id: null,
+          event_type: "recurring_invoice_generation_failed",
+          object_type: "recurring_template",
+          object_id: tpl.id,
+          source: "edge_function",
+          metadata: { stage: "template_processing", reason: "unexpected_error" },
+        });
+      }
     }
   }
 
-  return new Response(JSON.stringify({ ok: true, generated, emailed, emailSkipped, emailFailed, checked: (due || []).length }), {
+  const ok = generationFailed === 0 && historyUpdateFailed === 0;
+  return new Response(JSON.stringify({
+    ok,
+    generated,
+    emailed,
+    emailSkipped,
+    emailFailed,
+    generationFailed,
+    duplicatePrevented,
+    historyUpdateFailed,
+    checked: (due || []).length,
+  }), {
+    status: ok ? 200 : 500,
     headers: { "Content-Type": "application/json" },
   });
 });

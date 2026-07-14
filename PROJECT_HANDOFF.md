@@ -254,6 +254,7 @@ Tables (all have `user_id` and RLS; a user can only access their own rows):
 - `doc_type` is one of `invoice` / `quote` / `credit`; `status` is one of `Draft` / `Sent` / `Paid` / `Cancelled`.
 - Invoice numbers are unique per `(user_id, doc_type, number)`; the app/function prepend the user's `invoice_prefix` from `company_settings`.
 - `recurring_templates` key fields: `frequency` (weekly/monthly/quarterly/yearly/custom), `custom_interval`, `custom_unit` (days/weeks/months), `start_date`, `next_run`, `active`, `email_enabled`, `last_generated`, `generated_count`, plus snapshot of customer/items/currency/tax_mode/etc.
+- Generated invoices use nullable `recurring_template_id` plus `recurring_occurrence_date`; a partial unique index prevents a retry/concurrent run from creating a second attributed invoice for the same occurrence.
 
 A trigger auto-creates an empty `company_settings` row on new user signup.
 
@@ -271,9 +272,10 @@ The manual "Generate all due" path creates Sent invoices in the browser and does
 **Server-side automation (live):**
 - **Edge Function** `generate-recurring` (`supabase/functions/generate-recurring/index.ts`, Deno/TS):
   - Finds active schedules where `next_run <= today`.
-  - For each, generates one invoice (status **Sent**), stamped with the schedule owner's `user_id`, with history entries marking it auto-generated.
-  - If `email_enabled = true` and the customer snapshot has a valid email, sends the generated invoice through Resend using server-side secrets and records `document_email_sent`.
-  - Advances `next_run` (end-of-month clamp + single catch-up for missed periods), updates `last_generated`/`generated_count`, appends to the schedule's history.
+  - For each occurrence, inserts or reuses one uniquely attributed invoice (status **Sent**) stamped with the schedule owner's `user_id`.
+  - Conditionally advances the expected `next_run`; only the invocation that wins this claim may email, preventing concurrent/retry duplicate contact.
+  - If `email_enabled = true` and the customer snapshot has a valid email, sends through Resend after the claim and records `document_email_sent`.
+  - Updates `last_generated`/`generated_count`, schedule history, and privacy-safe append-only generation/failure events.
 - **Scheduler:** `pg_cron` job `generate-recurring-daily`, cron `0 6 * * *` (06:00 UTC daily), using `pg_net` to POST with a Vault-backed `x-automation-secret`. The function validates it before creating the service-role client; unsigned requests return HTTP 401.
 - **Number generation:** reads the user's `invoice_prefix` and increments the max existing invoice number for that user/doc type.
 

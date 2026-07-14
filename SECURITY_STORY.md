@@ -116,6 +116,8 @@ The most involved piece: making recurring invoices generate *on their own*, on a
 
 **Tested before trusted.** The function was run by hand first and watched, reading the server logs to fix two small issues, before ever letting it run on a schedule. Bench-test first, wire it to the wall second. Only once it generated correct, correctly-owned invoices was it handed to the daily timer.
 
+**Making retries safe.** Scheduled systems can fail halfway through. Tallyo now stamps every generated invoice with both its recurring-template ID and the scheduled occurrence date, and the database allows only one invoice for that pair. The function also has to win a conditional update of the schedule's expected `next_run` before it may email the customer. A retry can therefore reuse the existing occurrence instead of creating or emailing another invoice. The trade-off is stated honestly: a crash after claiming the schedule but before Resend accepts the email could miss that email. Avoiding both duplicates and missed sends under every crash point would require a future transactional outbox or queue.
+
 ---
 
 ## Phase 8 - Email that reaches customers without exposing secrets

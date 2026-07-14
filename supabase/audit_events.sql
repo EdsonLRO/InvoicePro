@@ -1,5 +1,5 @@
 -- ============================================================================
--- Tallyo - Append-only audit events draft
+-- Tallyo - Append-only audit events
 --
 -- Purpose:
 --   Trusted server-side event log for security-sensitive actions such as email
@@ -7,8 +7,9 @@
 --   automation.
 --
 -- Important:
---   This complements the existing invoice/template history JSONB fields. It is
---   not wired into the app yet. Apply in Supabase SQL Editor when ready.
+--   This complements the existing invoice/template history JSONB fields.
+--   Provider webhooks, privileged automation, and allowlisted app actions write
+--   here through trusted Edge Functions; browser clients remain read-only.
 --
 -- Security model:
 --   * Users can read their own audit events.
