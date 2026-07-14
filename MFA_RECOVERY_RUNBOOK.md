@@ -65,7 +65,8 @@ For each release that changes Auth or MFA:
 
 - On 2026-07-14, the non-MFA control sign-in completed normally, an incorrect primary TOTP code was rejected, and a current primary TOTP code completed AAL2 sign-in.
 - A backup authenticator was enrolled in a separate authenticator app and independently completed a fresh AAL2 sign-in.
-- Removing the backup authenticator required a current code from the remaining primary factor. The live Auth factor list then showed one verified primary factor; a fresh backup was enrolled and the final read-back showed two verified factors again.
+- Removing the backup authenticator required a current code from the remaining primary factor. The live Auth factor list then showed one verified primary factor; a fresh backup was enrolled and the final read-back showed two verified factors again. After a complete sign-out, both the primary and replacement backup independently completed fresh AAL2 sign-ins.
+- During replacement-factor verification, one in-progress sign-in briefly displayed two backup-style labels. A complete sign-out and fresh sign-in reloaded the factor metadata and restored the expected Primary authenticator and Backup authenticator labels. Both factors then matched their respective authenticator credentials. Treat recurrence as a UI refresh defect; do not infer factor identity from list position alone.
 - Fail-closed sign-in, masked recovery, backup-factor management, and new audit-event allowlisting are implemented under `AUTH-001`.
 - Desktop and 390px local rendering passed without horizontal overflow or console errors. A real reset email was requested for test account A on 2026-07-13, but the complete password-update recovery path still needs acceptance testing. Passwords and TOTP codes must be entered directly in the browser and never pasted into chat.
 - `log-app-event` version 4 was deployed with JWT verification enabled; a no-credential request returned HTTP 401.

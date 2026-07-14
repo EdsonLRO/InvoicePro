@@ -19,7 +19,7 @@ Use only the dedicated Tallyo test accounts. Enter passwords and authenticator c
 - [ ] Run one fresh signup and confirm the `company_settings` row is created automatically.
 - [ ] Run one safe known-compromised-password rejection test. Record only pass/fail, never the password used.
 
-The completed MFA sign-in and factor-management checks above were accepted on 2026-07-14. No password, TOTP code, QR secret, recovery token, or account contact data was recorded.
+The completed MFA sign-in, replacement-factor, factor-management, and AAL2 Change Password checks above were accepted on 2026-07-14. A fresh sign-in after replacement restored the expected primary/backup labels and both factors independently completed AAL2. No password, TOTP code, QR secret, recovery token, or account contact data was recorded.
 
 Detailed procedure: `MFA_RECOVERY_RUNBOOK.md`.
 
