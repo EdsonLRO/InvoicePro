@@ -52,6 +52,8 @@
         .pdf-mode .pdf-bold-row, .pdf-mode .pdf-bold-row * { font-weight: 700 !important; }
         .no-spin::-webkit-outer-spin-button, .no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .no-spin { -moz-appearance: textfield; }
+        .auth-scroll-shell { min-height: 0; overflow-y: auto; }
+        .auth-scroll-card { margin-top: auto; margin-bottom: auto; }
         .pdf-mode tbody td { vertical-align: middle !important; padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; }
         #invoice-canvas .font-bold.text-slate-400 { color: var(--brand) !important; }
         @media (max-width: 1024px) {
@@ -72,8 +74,8 @@
 
 <div id="app" v-cloak class="flex flex-col h-screen overflow-hidden">
     
-    <div v-if="!isLoggedIn" class="flex-1 flex items-center justify-center bg-slate-900 p-6">
-        <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
+    <div v-if="!isLoggedIn" class="auth-scroll-shell flex-1 flex justify-center bg-slate-900 p-4 sm:p-6">
+        <div class="auth-scroll-card w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
             <div class="text-center mb-8">
                 <h1 class="text-3xl font-bold tracking-tight text-indigo-600 mb-1">Tallyo</h1>
                 <p class="text-sm text-slate-500">Create and manage your invoices</p>
