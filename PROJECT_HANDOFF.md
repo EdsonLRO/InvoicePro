@@ -1,7 +1,7 @@
 # PROJECT_HANDOFF.md — Tallyo
 
-> Mandatory governance reading before taking ownership: `AUTOMATION_MODEL_ORCHESTRATION.md`, `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, and `AUTONOMOUS_EXECUTION_PERMISSION.md`.
-> The first file is authoritative for agent hierarchy, queue, locks, handoffs, and closure. The second is authoritative for graphical-dashboard operations.
+> Mandatory governance reading before taking ownership: `AUTOMATION_MODEL_ORCHESTRATION.md`, `TALLYO_LEGAL_COMPLIANCE_AGENT.md`, `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, and `AUTONOMOUS_EXECUTION_PERMISSION.md`.
+> `AUTOMATION_MODEL_ORCHESTRATION.md` is authoritative for hierarchy, queue, locks, handoffs, and closure. `TALLYO_LEGAL_COMPLIANCE_AGENT.md` is authoritative for the active legal/privacy/regulatory role. `AGENT_HIERARCHY_AND_COMPUTER_USE.md` is authoritative for graphical-dashboard operations.
 
 > Handoff for an AI coding agent (e.g. ChatGPT / Codex) taking over development.
 > Read this fully before editing. Where facts are uncertain they are marked **Unknown / needs confirmation**.
@@ -160,6 +160,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `APP_STATUS.md` | Short current-stage source of truth: what is implemented, what remains, and what is deferred to future SaaS work. |
 | `AUTONOMOUS_EXECUTION_PERMISSION.md` | Standing owner permission for autonomous safe development, testing, documentation, Supabase, Git, and deployment-preparation work, plus manual-approval boundaries. |
 | `AUTOMATION_MODEL_ORCHESTRATION.md` | Autonomous development loop, model/work-mode selection, computer-use policy, approval boundaries, and completion criteria. |
+| `TALLYO_LEGAL_COMPLIANCE_AGENT.md` | Active Legal, Privacy and Regulatory Agent scope, mandatory triggers, evidence, dispositions, release conditions, and external-advice limits. |
 | `PRODUCT_COMPLETION_LEDGER.md` | Capability-by-capability completion status and current next priorities. |
 | `DECISION_LOG.md` | Accepted, deferred, and pending product/security/operations decisions. |
 | `RELEASE_READINESS.md` | Release gates and evidence needed before real customer use. |
@@ -390,7 +391,7 @@ Near-term (in rough order):
 
 ## 21. What Codex should do first
 
-1. **Read governance and current sources of truth first:** `AUTOMATION_MODEL_ORCHESTRATION.md`, `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, `AUTONOMOUS_EXECUTION_PERMISSION.md`, `APP_STATUS.md`, `PRODUCT_COMPLETION_LEDGER.md`, `DECISION_LOG.md`, and `RELEASE_READINESS.md`.
+1. **Read governance and current sources of truth first:** `AUTOMATION_MODEL_ORCHESTRATION.md`, `TALLYO_LEGAL_COMPLIANCE_AGENT.md`, `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, `AUTONOMOUS_EXECUTION_PERMISSION.md`, `APP_STATUS.md`, `PRODUCT_COMPLETION_LEDGER.md`, `DECISION_LOG.md`, and `RELEASE_READINESS.md`.
 2. **Use the hierarchy and locks:** the Master Orchestrator assigns one owner role and work mode, records the task, and acquires a file/path lock before non-trivial edits. Do not edit a file or overlapping scope owned by another active task.
 3. **Read `index.html`, `schema.sql`, `recurring_setup.sql`, and the relevant Edge Function** to understand real structure before changing implementation. Trust the code over assumptions.
 4. **Confirm the unknowns**: exact Supabase project URL/keys location (`config.js`), Tailwind input filename, and third-party library versions.

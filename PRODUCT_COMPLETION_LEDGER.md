@@ -25,7 +25,7 @@ Statuses: Planned, Investigating, Confirmed, In Progress, Implemented, Verified,
 | Backup and restore | In Progress | Supabase Pro daily backups were listed as completed through 2026-07-13 and seven-day retention is documented in `BACKUP_RESTORE_RUNBOOK.md`; an Owner-approved timed non-production restore test remains. |
 | Privacy/legal groundwork | Planned | Privacy policy, terms, retention/export/delete process, breach process. |
 | Final mobile/PDF regression | Planned | Needed before treating app as customer-ready. |
-| Multi-agent governance and computer-use controls | Verified | One Owner, one Master Orchestrator, eight specialist roles, task queue, locks, handoffs, provider controls, and validation are documented in the authoritative governance files. |
+| Multi-agent governance and computer-use controls | Verified | One Owner, one Master Orchestrator, nine specialist roles, ten AI functional roles including the Orchestrator, task queue, locks, handoffs, provider controls, and validation are documented. The active Legal, Privacy and Regulatory Agent correction passed repository consistency checks; Owner merge remains separate. |
 | Public SaaS website/subscriptions | Deferred | Future phase after current app/security readiness. |
 
 ## Orchestrator Queue
@@ -35,6 +35,7 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 | Task ID | Title | Priority | Status | Owner role | Work mode | Lock state | Evidence / next action |
 |---|---|---|---|---|---|---|---|
 | GOV-001 | Complete agent governance and computer-use controls | High | Verified | Master Orchestrator | Terra with Sol policy review | Released after commit | Hierarchy, queue, locks, handoffs, provider controls, cross-links, and validation completed. |
+| GOV-002 | Correct active Legal, Privacy and Regulatory Agent governance | High | Verified | Legal, Privacy and Regulatory Agent | Terra with Sol legal-risk review | Released after focused corrective commit | Ninth specialist, legal triggers/workflow/dispositions, task fields, cross-review rules, release gate, external-advice limits, and repository-wide consistency checks completed. Owner merge remains separate. |
 | OPS-001 | Backup and restore runbook | High | Verified | Release Agent | Terra with Sol review | Released after commit | Pro plan confirmed, seven-day daily-backup procedure documented, restore side effects and Owner cost/destructive boundaries recorded in `BACKUP_RESTORE_RUNBOOK.md`. |
 | PAY-TEST-001 | Finish Stripe sandbox lifecycle replay evidence | High | In Progress | Payments Agent | Sol / Terra | Released with focused commit; remaining test subtask unlocked | Signature rejection, unknown-event binding, payment/refund duplicate replay, audit constraints, and Deno checks passed. Known-payment dispute and genuine `refund.failed` positive paths remain. |
 | AUTH-001 | Harden MFA and define recovery process | High | In Progress | Security Agent | Sol / Terra | Implementation released on a focused branch; remaining recovery acceptance subtask is unlocked | Primary/backup sign-in, wrong-code rejection, protected backup removal, one-factor preservation, and two-factor restoration passed on 2026-07-14. Masked password recovery, lookup-error simulation, and the all-factors-lost support process remain. |
