@@ -63,9 +63,11 @@ For each release that changes Auth or MFA:
 
 ## Current Evidence And Limits
 
-- The primary TOTP sign-in flow and wrong-code rejection were tested previously.
+- On 2026-07-14, the non-MFA control sign-in completed normally, an incorrect primary TOTP code was rejected, and a current primary TOTP code completed AAL2 sign-in.
+- A backup authenticator was enrolled in a separate authenticator app and independently completed a fresh AAL2 sign-in.
+- Removing the backup authenticator required a current code from the remaining primary factor. The live Auth factor list then showed one verified primary factor; a fresh backup was enrolled and the final read-back showed two verified factors again.
 - Fail-closed sign-in, masked recovery, backup-factor management, and new audit-event allowlisting are implemented under `AUTH-001`.
-- Desktop and 390px local rendering passed without horizontal overflow or console errors. A real reset email was requested for test account A on 2026-07-13, but password/TOTP-dependent steps remain paused until the Owner can enter those values directly in the browser; secrets must not be pasted into chat.
+- Desktop and 390px local rendering passed without horizontal overflow or console errors. A real reset email was requested for test account A on 2026-07-13, but the complete password-update recovery path still needs acceptance testing. Passwords and TOTP codes must be entered directly in the browser and never pasted into chat.
 - `log-app-event` version 4 was deployed with JWT verification enabled; a no-credential request returned HTTP 401.
-- Full browser acceptance testing of the new backup and recovery paths is still required before this task can be marked Verified.
+- MFA sign-in and backup-factor lifecycle acceptance passed. Masked password recovery, email-only bypass rejection, simulated assurance/factor lookup failure, privacy-safe audit-content review, and the all-factors-lost support process remain required before this task can be marked Verified.
 - Supabase leaked-password protection was enabled on 2026-07-13 through the Auth Management API, its value was read back as enabled, and the live security advisor cleared the warning. A safe known-compromised-password rejection test still remains.

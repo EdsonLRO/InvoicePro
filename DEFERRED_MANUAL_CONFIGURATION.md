@@ -6,14 +6,20 @@ This is the single checklist for work that needs the Owner at the laptop, an ide
 
 Use only the dedicated Tallyo test accounts. Enter passwords and authenticator codes directly in the browser; never paste them into chat or terminal logs.
 
-- Complete the pending password-reset link on the local/test branch.
-- For an MFA-enabled account, confirm a wrong TOTP code is rejected and the password is unchanged.
-- Confirm a correct TOTP code permits the password update and the new password signs in.
-- Confirm both primary and backup authenticators can complete sign-in and password recovery.
-- Remove one factor using a fresh code from the remaining factor; confirm the app never permits removal of the last verified factor through that flow.
-- Confirm email access alone cannot reset the password of an MFA-enabled account.
-- Run one fresh signup and confirm the `company_settings` row is created automatically.
-- Run one safe known-compromised-password rejection test. Record only pass/fail, never the password used.
+- [x] Confirm a non-MFA control account can sign in normally.
+- [x] Confirm a wrong primary TOTP code is rejected and a current primary code completes sign-in.
+- [x] Confirm a backup authenticator enrolled in a separate authenticator app can independently complete a fresh sign-in.
+- [x] Remove the backup using a fresh code from the remaining primary factor, confirm one verified factor remains, then restore a fresh backup and confirm two verified factors are present.
+- [ ] Complete the pending password-reset link on the local/test branch.
+- [ ] Confirm a wrong recovery TOTP leaves the password unchanged.
+- [ ] Confirm a correct primary TOTP permits the password update and the new password signs in.
+- [ ] Confirm the backup authenticator can also complete password recovery.
+- [ ] Confirm email access alone cannot reset the password of an MFA-enabled account.
+- [ ] Simulate an assurance-level or factor-list lookup failure and confirm the app does not initialise signed-in data.
+- [ ] Run one fresh signup and confirm the `company_settings` row is created automatically.
+- [ ] Run one safe known-compromised-password rejection test. Record only pass/fail, never the password used.
+
+The completed MFA sign-in and factor-management checks above were accepted on 2026-07-14. No password, TOTP code, QR secret, recovery token, or account contact data was recorded.
 
 Detailed procedure: `MFA_RECOVERY_RUNBOOK.md`.
 
