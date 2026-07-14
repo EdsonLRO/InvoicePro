@@ -32,6 +32,7 @@ It is designed to be simple, mobile-friendly, and security-conscious. It suits f
 
 For the short current-stage source of truth, see `APP_STATUS.md`.
 For authoritative agent hierarchy, task coordination, locks, handoffs, and autonomous development rules, see `AUTOMATION_MODEL_ORCHESTRATION.md`.
+For the active Legal, Privacy and Regulatory Agent's triggers, evidence standard, dispositions, and professional-advice limits, see `TALLYO_LEGAL_COMPLIANCE_AGENT.md`.
 For graphical-dashboard and computer-use safety controls, see `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
 For completion and release tracking, see `PRODUCT_COMPLETION_LEDGER.md` and `RELEASE_READINESS.md`.
 For owner, product, security, and operations decisions, see `DECISION_LOG.md`.

@@ -2,6 +2,8 @@
 
 This is the authoritative detailed policy for operating graphical browsers and desktop dashboards on behalf of Tallyo. The role hierarchy and task lifecycle are authoritative in `AUTOMATION_MODEL_ORCHESTRATION.md`.
 
+That hierarchy contains one Owner, one Master Orchestrator, nine specialist functional agents, and three model/work modes. The Legal, Privacy and Regulatory Agent is an active specialist and may be the assigned role or reviewer for legally material computer-use tasks.
+
 Computer use means operating an interactive browser or desktop interface like a human, including Stripe, Supabase, GitHub, DNS, Resend or another email provider, hosting dashboards, OAuth screens, and screenshot collection.
 
 Prefer CLI, API, migrations, connectors, and version-controlled configuration when they provide the required control and evidence.
@@ -52,6 +54,21 @@ Evidence required:
 Validation:
 Rollback:
 Completion report:
+```
+
+For legally material work also record:
+
+```text
+Legal materiality:
+Jurisdictions:
+Affected user/data-subject types:
+Applicable requirements:
+Required legal documents:
+Mandatory controls:
+Required evidence:
+Legal disposition:
+External review required:
+Legal review date:
 ```
 
 ## 3. Read-Only Loop
@@ -224,6 +241,7 @@ Owner -> approve material change
 Terra -> perform only the approved change
 QA / Terra -> validate outside the dashboard
 Sol -> review sensitive evidence
+Legal Agent using Sol -> review legal/privacy/regulatory materiality and conditions when triggered
 Luna -> format the redacted report
 Orchestrator -> update the task and release locks
 ```
@@ -240,7 +258,7 @@ One Codex process may perform these transitions sequentially, but must not claim
 6. Avoid duplicate resources or duplicate financial events.
 7. Roll back only when safe and authorised.
 8. Preserve redacted evidence.
-9. Escalate security/payment-sensitive failure to Sol.
+9. Escalate security-, payment-, or legally material failure to Sol and the responsible specialist.
 10. Request Owner approval for destructive, billable, production, or irreversible recovery.
 
 Never blindly retry charges, refunds, deployments, webhook creation, project creation, restore, or destructive operations. First establish whether the previous attempt succeeded partially or asynchronously.
@@ -286,4 +304,4 @@ Remaining manual action:
 
 ## 12. Completion Criteria
 
-A computer-use task is complete only when the correct account/project/environment/mode was confirmed, permitted actions stayed within scope, secret and PII handling was safe, the saved state was independently validated where possible, evidence was redacted, failures/partial application were resolved or documented, the task record was updated, and the Orchestrator released any lock.
+A computer-use task is complete only when the correct account/project/environment/mode was confirmed, permitted actions stayed within scope, secret and PII handling was safe, the saved state was independently validated where possible, evidence was redacted, failures/partial application were resolved or documented, legally material conditions and external-review requirements were resolved or recorded, the task record was updated, and the Orchestrator released any lock.

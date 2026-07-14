@@ -27,12 +27,15 @@ Tallyo is a real working app and strong portfolio project, but it is not yet liv
 | Backups and restore | In Progress | Pro daily backups were verified through 2026-07-13; an Owner-approved timed non-production restore test remains. |
 | Audit events | In Progress | Provider and selected app actions covered; not a full SIEM/compliance system. |
 | Privacy/legal groundwork | Planned | Privacy policy, terms, retention, export/delete, breach process. |
+| Legal, privacy and regulatory review | Blocked | The active Legal, Privacy and Regulatory Agent must review every legally material release change, verify mandatory conditions, and record any required external professional review. Required launch documents and privacy operations are unfinished. |
 | Mobile regression | Planned | Test key workflows on phone widths. |
 | PDF regression | Planned | Test mobile PDF download and long multi-page invoices. |
 | PWA/service-worker regression | Planned | Confirm cache behaviour and update instructions. |
 | Documentation accuracy | In Progress | Keep status/handoff/security docs synced with real implementation. |
 | Supabase Auth provider policy | In Progress | Live settings were recorded without secrets. Email confirmation, MFA, refresh rotation, and leaked-password protection are active; remaining owner decisions are centralised in `DEFERRED_MANUAL_CONFIGURATION.md`. |
-| Agent governance documentation | Verified | Hierarchy, queue, locks, handoffs, computer-use controls, provider restrictions, and approval boundaries are authoritative and cross-linked. Recheck consistency at each release candidate. |
+| Agent governance documentation | Verified | The corrected hierarchy contains nine specialists and ten AI functional roles including the Orchestrator. Counts, legal triggers/workflow, task fields, work modes, release gate, code fences, headings, secret/PII scope, and documentation-only file scope passed validation. Owner merge remains separate. |
+
+Public launch remains blocked when required legal documents are unfinished, material privacy flows are undocumented, legally required notices are missing, unresolved legal blocks exist, mandatory external professional review is incomplete, or product claims exceed verified evidence.
 
 ## Manual Approval Boundaries
 
@@ -58,3 +61,4 @@ Stop before:
 - Current backup evidence plus timed restore evidence.
 - Mobile/PDF/PWA screenshots or notes.
 - Open risks accepted by owner.
+- Dated Legal Agent dispositions for all legally material release changes, including evidence that mandatory conditions and external professional review requirements were resolved or explicitly recorded.
