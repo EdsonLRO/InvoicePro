@@ -74,7 +74,7 @@ A finding is not `fixed` while any material security or compatibility check is u
 
 ### SEC-001 — MFA assurance checks must fail closed
 
-**Status:** Implemented under AUTH-001; final browser acceptance test pending.
+**Status:** Verified under AUTH-001 on 2026-07-14; robust all-factors-lost recovery remains a paid/public-launch condition.
 If the Supabase Authenticator Assurance Level check errors or returns an unknown state, the app must remain restricted or sign out. Full application initialisation must occur only after the required assurance level is proven. Test fresh login, restored sessions, API/network failure, expired sessions, wrong TOTP, valid TOTP and non-enrolled accounts.
 
 ### SEC-002 — Sensitive operations need trusted AAL2 enforcement
@@ -282,7 +282,7 @@ Additionally requires workspace/RBAC isolation, server-enforced entitlements, St
 1. Finish Stripe sandbox replay tests and operational refund/chargeback decisions.
 2. Create and prove backup/restore.
 3. Expand audit coverage and alerts.
-4. Complete factor-specific MFA recovery acceptance, design robust all-factors-lost recovery before paid/public onboarding, and finish session-revocation design.
+4. Preserve the Verified MFA recovery controls, design robust all-factors-lost recovery before paid/public onboarding, and finish session-revocation design.
 5. Add password and abuse hardening.
 6. Complete privacy, terms, retention, rights and breach operations.
 7. Run final mobile/PDF regression and synchronise evidence.
