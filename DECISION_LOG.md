@@ -22,6 +22,7 @@ Statuses: Proposed, Accepted, Superseded, Deferred, Rejected.
 | 2026-07-13 | Preserve RLS ownership semantics while optimising identity evaluation and foreign-key lookups. | Accepted | Wrapping `auth.uid()` in a scalar subquery avoids per-row re-evaluation; narrow foreign-key indexes reduce scans without broadening access. |
 | 2026-07-13 | Prefer at-most-once recurring invoice/email processing over duplicate customer contact after partial failure. | Accepted | Each schedule occurrence is unique and email starts only after a conditional schedule claim. A rare crash after the claim may miss email; eliminating both outcomes requires a future transactional outbox/queue. |
 | 2026-07-14 | Use one Owner, one Master Orchestrator, nine specialist functional agents, and three model/work modes. The Legal, Privacy and Regulatory Agent is active. | Accepted | There are ten AI functional roles including the Orchestrator; the Owner is separate. The Legal Agent owns legal/privacy/regulatory analysis and release conditions but does not replace qualified external professional advice. This corrects the previous omission without claiming concurrent agents where the environment supports only sequential role transitions. |
+| 2026-07-14 | Use a deny-by-default all-factors-lost MFA support policy for the current portfolio build. | Accepted | Support cannot disable MFA, rely on email access alone, collect identity documents, or transfer account data. This avoids an informal authentication bypass and unnecessary identity-data collection. Robust recovery remains required before paid/public onboarding. |
 
 ## Pending Decisions
 
@@ -31,4 +32,4 @@ Statuses: Proposed, Accepted, Superseded, Deferred, Rejected.
 | Stripe live-mode activation | Enables real customer card payments. | Owner must approve live payment activation. |
 | Refund/chargeback support policy | Required before real customer payments. | Owner/legal/business decision. |
 | Privacy policy and terms wording | Required before onboarding real customers. | Owner/legal review. |
-| All-factors-lost MFA support process | Backup-authenticator recovery is implemented, but support still needs a strong identity-verification and escalation procedure for users who lose every factor. | Owner/security/product decision before real onboarding. |
+| Future all-factors-lost recovery method | The interim support process is deny-by-default and cannot restore access. A paid/public service needs a robust method such as reviewed one-time recovery codes or an equivalent risk-assessed design. | Owner/security/legal decision before implementation and real onboarding. |

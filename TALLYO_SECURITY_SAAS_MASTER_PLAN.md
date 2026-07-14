@@ -120,7 +120,7 @@ Document and test signup/login/reset throttling, password strength, bot controls
 ### SEC-010 — MFA recovery and disablement require stronger controls
 
 **Status:** Partially implemented; operational support decision remains.
-Tallyo supports a second verified TOTP authenticator, MFA-gated password recovery, fresh-code checks for factor removal/disablement, and allowlisted recovery/factor audit events. Supabase does not provide recovery codes. The all-factors-lost support process still needs strong identity-verification, approval, notification, session-revocation and escalation rules; avoid insecure administrator shortcuts. See `MFA_RECOVERY_RUNBOOK.md`.
+Tallyo supports a second verified TOTP authenticator, MFA-gated password recovery, fresh-code checks for factor removal/disablement, and allowlisted recovery/factor audit events. Supabase does not provide recovery codes. The Owner approved an interim deny-by-default all-factors-lost response for the current portfolio build: no email-only or administrator bypass, no identity-document collection, and no account-data transfer. A robust, risk-assessed recovery method remains required before paid/public onboarding. See `MFA_RECOVERY_RUNBOOK.md`.
 
 ### SEC-011 — Backup and restoration are not proven
 
@@ -282,7 +282,7 @@ Additionally requires workspace/RBAC isolation, server-enforced entitlements, St
 1. Finish Stripe sandbox replay tests and operational refund/chargeback decisions.
 2. Create and prove backup/restore.
 3. Expand audit coverage and alerts.
-4. Complete MFA recovery acceptance, the all-factors-lost support process and session-revocation design.
+4. Complete factor-specific MFA recovery acceptance, design robust all-factors-lost recovery before paid/public onboarding, and finish session-revocation design.
 5. Add password and abuse hardening.
 6. Complete privacy, terms, retention, rights and breach operations.
 7. Run final mobile/PDF regression and synchronise evidence.

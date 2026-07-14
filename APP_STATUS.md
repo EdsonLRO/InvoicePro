@@ -90,7 +90,7 @@ Known limits:
 
 - Activity history is useful, but not tamper-proof.
 - `audit_events` now covers provider events and selected sensitive app actions, but it is not a full compliance/SIEM audit system.
-- Supabase does not provide recovery codes. Tallyo now supports a second authenticator and prevents email-only MFA bypass, but the new recovery paths still need browser acceptance testing and an all-factors-lost support procedure.
+- Supabase does not provide recovery codes. Tallyo supports a second authenticator and prevents email-only MFA bypass. The interim all-factors-lost support response is approved and deny-by-default; factor-specific recovery acceptance remains, and robust recovery is still required before paid/public onboarding.
 - All-devices logout exists, but a future email-code confirmation flow would be stronger for production account recovery/security UX.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
 - Supabase Pro daily backups are verified and the recovery runbook is in place, but a timed restore test, privacy operations, and incident response are not complete.

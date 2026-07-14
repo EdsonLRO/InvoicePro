@@ -16,7 +16,7 @@ Tallyo is a real working app and strong portfolio project, but it is not yet liv
 |---|---|---|
 | Core invoicing workflows | Implemented | Needs final regression evidence. |
 | Supabase Auth + email verification | Implemented | Needs current Auth settings review before release. |
-| TOTP MFA | In Progress | Primary/backup enrolment and sign-in, wrong-code sign-in and recovery rejection, email-only bypass rejection, protected backup removal, one-factor preservation, restoration to two verified factors, one enrolled-factor-gated masked password-recovery path, privacy-safe account-audit review, and fail-closed lookup simulation passed on 2026-07-14. Complete factor-specific recovery and the all-factors-lost support process. |
+| TOTP MFA | In Progress | Primary/backup enrolment and sign-in, wrong-code sign-in and recovery rejection, email-only bypass rejection, protected backup removal, one-factor preservation, restoration to two verified factors, one enrolled-factor-gated masked password-recovery path, privacy-safe account-audit review, and fail-closed lookup simulation passed on 2026-07-14. The interim all-factors-lost response is approved and deny-by-default; complete factor-specific recovery. Robust lost-factor recovery remains required before paid/public onboarding. |
 | RLS / tenant isolation | Implemented | Previously break-tested; re-run before release. |
 | CSP/SRI/self-hosted Tailwind | Implemented | Recheck final deployed HTML before release. |
 | Email sending and webhooks | Implemented | Need final test delivery evidence. |
