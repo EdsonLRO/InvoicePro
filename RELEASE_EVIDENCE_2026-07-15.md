@@ -33,6 +33,7 @@ Privacy-safe evidence from the `codex/release-readiness-pass` review. This does 
 - After that deployment acceptance, the Owner approved production session-policy activation. Supabase Auth was saved and independently reloaded/read back with a 168-hour maximum session duration, 24-hour inactivity timeout, refresh-token rotation enabled with the existing 10-second reuse interval, and single-session enforcement disabled. The established 3600-second JWT lifetime was not changed.
 - After Owner approval, `send-overdue-reminders` version 8 was deployed to production without forcing an invocation. Deployed-source readback confirmed privacy-safe `payment_reminder_processing_failed` evidence for provider-request and invoice-history-update failures, continued processing of other eligible invoices, and a non-success HTTP response when any invoice fails. The custom `x-automation-secret` boundary remained in place, and the immediate post-deployment Edge Function log review found no error signal.
 - After separate Owner approval, authenticated `log-app-event` version 5 was deployed. Deployed-source readback confirmed allowlisted `manual_payment_recorded` and `document_status_changed` events; the public GitHub Pages source contained both post-save calls, and an unauthenticated production request was rejected with HTTP 401 without writing an event. Metadata excludes payment notes and customer/contact/document-content fields.
+- PR #29 required `Security checks` run `29433260397` passed against head `6f3b1e17a4559e55037eb58bef9688ebf8baa85e` and was squash-merged as `622ed859929eb1331e965276bc6e3bda4edd5b1b`. GitHub Pages then served both the Account-page export control and `account_data_exported` call. `log-app-event` version 6 was deployed with JWT verification still enabled; deployed-source readback contained the new allowlist event, and immediate Edge Function logs showed no 5xx/runtime signal. No customer workflow was invoked.
 - All nine Edge Function sources were changed from floating `@supabase/supabase-js@2` imports to exact `2.110.1`, the version already resolved by the current Deno checks. Three unused floating import-map aliases were removed. The dependency-pin harness and all nine `deno check` runs passed. This was a source reproducibility hardening change only; production functions were not redeployed.
 - Per-function Deno lockfiles were generated with verified Deno `2.2.15` LTS in Supabase-compatible v4 format. Local frozen checks passed for all nine functions. A read-only GitHub Actions workflow was prepared with immutable `actions/checkout` and `denoland/setup-deno` commit SHAs, no secrets, disabled credential persistence, and the four focused Node security harnesses. The workflow's own static security harness passed locally before remote execution.
 - PR #25 exercised the new gate against commit `d11cbe049ab59c30da4ed268173e4c8247d51a2d`. GitHub `Security checks` run `29417705148` completed successfully, providing the first remote evidence for the frozen checks and focused harnesses. The CI control is therefore Verified; this did not deploy or invoke any production Edge Function.
@@ -44,7 +45,7 @@ Detailed PDF/PWA notes: `PDF_PWA_REGRESSION_EVIDENCE_2026-07-15.md`.
 
 - `LEGAL_OPERATIONS_RECORDS.md` now contains a working ROPA, rights/incident/vendor/retention templates, and preliminary DPIA screening.
 - `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` records fictional rights-request and cross-tenant breach exercises without real personal data. Both exercises passed as process-design walkthroughs but exposed blocking operational gaps.
-- `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md` records an approved-with-conditions design for an authenticated RLS-scoped account-holder JSON export. Success and simulated dataset-failure harnesses cover pagination, metadata minimisation, local download, no partial file, and minimal audit emission. Dedicated test-account browser acceptance and production audit-event readback are still pending.
+- `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md` records an approved-with-conditions design for an authenticated RLS-scoped account-holder JSON export. Success and simulated dataset-failure harnesses cover pagination, metadata minimisation, local download, no partial file, and minimal audit emission. The frontend and v6 server allowlist are deployed; dedicated test-account browser acceptance and one successful production event row are still pending.
 - This evidence does not approve lawful bases, retention periods, controller/processor roles, public notices, live case handling, or legal compliance.
 
 ## Deployed Hardening
@@ -61,7 +62,7 @@ Active versions after deployment:
 | `send-reminder-email` | 8 | Supabase JWT |
 | `send-overdue-reminders` | 8 | `x-automation-secret` |
 | `generate-recurring` | 14 | `x-automation-secret` |
-| `log-app-event` | 5 | Supabase JWT |
+| `log-app-event` | 6 | Supabase JWT |
 
 ## Informational Advisories
 
@@ -77,7 +78,7 @@ No change was made because current usage evidence does not justify index removal
 
 - Observe PWA update behaviour across a later deployment. Phone PDF, installation, offline shell fallback, and reconnection are verified; offline authentication and customer-data access are intentionally unsupported.
 - Complete the CAPTCHA/abuse-control and connection-allocation decisions. Custom SMTP delivery and its initial 30-emails-per-hour limit are verified; the seven-day session timebox and 24-hour inactivity timeout are active and evidence-backed.
-- Complete dedicated test-account desktop/mobile acceptance and production audit-event readback for the account-holder data export. Do not inspect or record exported customer content in evidence.
+- Complete dedicated test-account desktop/mobile acceptance and confirm one successful production event row for the account-holder data export. Do not inspect or record exported customer content in evidence.
 - Implement robust all-factors-lost recovery before paid/public onboarding.
 - Resolve the tabletop gaps, complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and `PAYMENT_OPERATIONS_RUNBOOK.md`.
 - Keep Stripe sandbox-only until a separately approved live release.

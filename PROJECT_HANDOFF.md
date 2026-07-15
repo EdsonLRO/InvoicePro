@@ -181,7 +181,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `supabase/functions/resend-webhook/index.ts` | Signed Resend webhook receiver for delivery/failure/open/click events. |
 | `supabase/functions/create-stripe-checkout/index.ts` | Authenticated Edge Function (Deno/TS) that creates Stripe Checkout sessions from the app. |
 | `supabase/functions/create-stripe-refund/index.ts` | Authenticated Edge Function (Deno/TS) that requests Stripe refunds for the user's own confirmed Stripe payment rows. |
-| `supabase/functions/log-app-event/index.ts` | Authenticated Edge Function (Deno/TS) that records allowlisted sensitive app-action audit events. |
+| `supabase/functions/log-app-event/index.ts` | Authenticated Edge Function (Deno/TS), deployed as version 6, that records allowlisted sensitive app-action audit events including minimal account-export success evidence. |
 | `supabase/functions/stripe-webhook/index.ts` | Signed Stripe webhook receiver that records verified Checkout payments. |
 | `SECURITY_OPERATIONS.md` | Practical backup, restore, data-protection, email, payment, and release gates before real users. |
 | `BACKUP_RESTORE_RUNBOOK.md` | Supabase Pro backup posture, logical export safety, restore-test procedure, side-effect controls, evidence, and approval boundaries. |
@@ -375,7 +375,7 @@ Near-term (in rough order):
    - Done: hardened Stripe webhook records verified Checkout payments and includes refund/dispute/failed-payment awareness.
    - Done: in-app Stripe refund requests through a server-side Edge Function.
    - Current payment caveat: Stripe should still be treated as test/development until explicitly moved to live mode.
-4. **Current hardening priorities:** complete controlled desktop/mobile acceptance and deployed audit readback for the implemented account-holder export; operationally test and legally review `PAYMENT_OPERATIONS_RUNBOOK.md`; complete the separate blocked legal/privacy work in `LEGAL_PRIVACY_READINESS.md`; finish provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; design robust all-factors-lost recovery before paid/public onboarding; and observe PWA update-across-deployment behaviour.
+4. **Current hardening priorities:** complete controlled desktop/mobile acceptance and one successful production event readback for the deployed account-holder export; operationally test and legally review `PAYMENT_OPERATIONS_RUNBOOK.md`; complete the separate blocked legal/privacy work in `LEGAL_PRIVACY_READINESS.md`; finish provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; design robust all-factors-lost recovery before paid/public onboarding; and observe PWA update-across-deployment behaviour.
 5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, correction/deletion/provider-assistance and restricted-case processes, consent/unsubscribe where relevant, and breach response notes. The account-holder JSON export is one control, not the whole rights-request process.
 6. Optional app polish: link invoices to their recurring schedule (dedup guard); clearer payment-state wording; repo/URL rename to Tallyo only with Supabase Auth URL updates.
 7. Future phase, deliberately deferred: public website, paid Tallyo subscriptions, plan tiers, server-enforced entitlements, workspaces/teams/RBAC, and SaaS billing.

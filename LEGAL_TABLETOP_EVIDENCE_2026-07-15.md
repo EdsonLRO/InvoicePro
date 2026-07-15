@@ -23,7 +23,7 @@ This tabletop tests whether the written process identifies the right decisions a
 
 - No restricted rights-case system is selected or tested.
 - No approved controller/processor decision tree or contact route exists.
-- Account-holder workspace export is implemented and harness-tested, but dedicated test-account desktop/mobile acceptance and deployed audit-event readback remain. Deletion is not implemented or operationally verified.
+- Account-holder workspace export is implemented, harness-tested, and deployed with a read-back `log-app-event` v6 allowlist. Dedicated test-account desktop/mobile acceptance and one successful production event row remain. Deletion is not implemented or operationally verified.
 - Provider assistance/deletion request steps and contacts are not evidenced.
 - Final retention periods and backup-deletion wording are not approved.
 - No approved secure delivery channel is selected.

@@ -188,7 +188,7 @@ Other current Edge Functions:
 - `resend-webhook` - verifies Resend webhook signatures and records email lifecycle events.
 - `create-stripe-checkout` - authenticated user function; creates Stripe Checkout sessions for the caller's own invoice.
 - `create-stripe-refund` - authenticated user function; requests Stripe refunds for the caller's own confirmed Stripe payment rows.
-- `log-app-event` - authenticated user function; deployed version 5 writes allowlisted sensitive app-action events into `audit_events` without exposing direct browser writes.
+- `log-app-event` - authenticated user function; deployed version 6 writes allowlisted sensitive app-action events, including privacy-minimised account-export success evidence, into `audit_events` without exposing direct browser writes.
 - `stripe-webhook` - verifies Stripe signatures; records Checkout completion only when the Checkout session was created/logged by Tallyo; logs failed-payment/dispute/refund-failure lifecycle events; records successful refunds as locked negative Stripe payment entries.
 - Current sandbox Stripe webhook events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, `refund.failed`, `charge.dispute.created`, `charge.dispute.updated`, `charge.dispute.closed`, `charge.dispute.funds_withdrawn`, and `charge.dispute.funds_reinstated`.
 
