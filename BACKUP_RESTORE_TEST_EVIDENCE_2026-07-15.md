@@ -79,4 +79,4 @@ No changes were made to those temporary-project settings because the exercise te
 
 No passwords, temporary database credentials, access tokens, Vault values, customer documents, account addresses, or unnecessary personal data were copied into this evidence.
 
-The temporary restore project is retained only until the Owner explicitly approves permanent deletion.
+After evidence collection, the Owner explicitly approved permanent deletion. The temporary restore project was deleted successfully on 2026-07-15, and a follow-up project listing showed only the production project, still `ACTIVE_HEALTHY`.

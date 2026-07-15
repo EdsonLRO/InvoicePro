@@ -37,7 +37,7 @@ Still to finish before treating the app as customer-ready:
 
 - Stripe sandbox lifecycle verification is complete for signature rejection, unrelated-event rejection, successful payment/refund replay, a known-payment dispute, and a genuine failed-refund reversal. Live mode remains disabled and approval-gated.
 - Review and operationally test the internal chargeback/refund/support procedure in `PAYMENT_OPERATIONS_RUNBOOK.md`; customer-facing policy remains legally blocked.
-- The Owner-approved non-production restore test passed on 2026-07-15. Delete the isolated temporary project after explicit approval; evidence is in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
+- The Owner-approved non-production restore test passed on 2026-07-15. The isolated temporary project was deleted after approval and production remained healthy; evidence is in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations. Company/settings saves are now covered at a privacy-safe category level.
 - MFA browser acceptance is complete for fail-closed routing, primary/backup factor lifecycle, primary-specific and backup-specific recovery, wrong-code rejection, and email-only bypass rejection. Robust all-factors-lost recovery remains a paid/public-launch condition.
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.

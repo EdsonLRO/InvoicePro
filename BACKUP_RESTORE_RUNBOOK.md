@@ -144,4 +144,4 @@ A completed backup check or restore test records:
 
 Do not record database passwords, temporary CLI credentials, access tokens, Vault values, customer documents, or unnecessary PII.
 
-The 2026-07-15 exercise is recorded in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`. Permanent deletion of its temporary project remains approval-gated and is tracked in `DEFERRED_MANUAL_CONFIGURATION.md`.
+The 2026-07-15 exercise is recorded in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`. Its temporary project was permanently deleted after explicit Owner approval, and production remained healthy.

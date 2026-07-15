@@ -55,7 +55,6 @@ No change was made because current usage evidence does not justify index removal
 
 - Confirm the next natural 06:00/09:00 UTC cron/pg_net responses under the corrected 30-second timeout. A one-time Codex follow-up is scheduled; the functions will not be forced merely to create evidence.
 - Run authenticated mobile workflows, long/mobile PDF downloads, and real-browser PWA install/offline/update checks.
-- Obtain explicit Owner approval, then permanently delete the isolated temporary restore project now that evidence collection is complete.
 - Resolve Auth session policy, custom SMTP/rate limits, CAPTCHA/abuse controls, and connection allocation decisions.
 - Implement robust all-factors-lost recovery before paid/public onboarding.
 - Resolve the tabletop gaps, complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and `PAYMENT_OPERATIONS_RUNBOOK.md`.

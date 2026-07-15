@@ -70,7 +70,7 @@ The Owner-approved timed restore completed on 2026-07-15. Privacy-safe results a
 - [x] Measure platform restore-to-healthy time at approximately four minutes.
 - [x] Match exact row counts and structural controls without copying customer content.
 - [x] Re-run two-context tenant read isolation and rolled-back write probes.
-- [ ] Permanently delete the temporary restore project after explicit Owner approval.
+- [x] Permanently delete the temporary restore project after explicit Owner approval and verify production remains healthy.
 
 ## 5. Remaining release acceptance
 

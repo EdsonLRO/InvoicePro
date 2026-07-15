@@ -18,7 +18,7 @@ Current evidence and remaining release gate:
 
 - Completed daily physical backups through 2026-07-14 were verified through the Supabase CLI; WAL-G was enabled and PITR remained disabled.
 - An Owner-approved isolated restore completed on 2026-07-15. Exact data/structure counts matched, both copied cron jobs were disabled, and two-context RLS read/write checks passed. See `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
-- Permanently delete the temporary restore project only after explicit Owner approval.
+- The temporary restore project was permanently deleted after explicit Owner approval; the production project remained healthy.
 - Keep production, test, and local data clearly separated.
 
 ## Scheduled Automation Boundary
