@@ -216,6 +216,19 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Residual risk:** Invoice and delivery records still contain customer contact data needed for the invoicing service. Retention and deletion rules remain a legal/privacy release gate.
 - **Evidence:** `supabase/functions/send-document-email/index.ts`; `send-reminder-email/index.ts`; `send-overdue-reminders/index.ts`; `generate-recurring/index.ts`.
 
+### SEC-SUPPLY-001 - Edge Function checks and dependency integrity were not enforced in CI
+
+- **Date:** 2026-07-15
+- **Classification:** defense-in-depth / software supply chain and release assurance
+- **Finding:** The nine Edge Functions could be changed without an automated Deno type check, and no committed Deno lockfiles protected the integrity of transitive remote modules. Existing focused Node security harnesses also ran only when invoked manually.
+- **Impact:** A pull request could introduce a type error, floating dependency, broken security invariant, or unexpected transitive dependency change without an automatic repository signal before merge.
+- **Intended change:** Add a read-only GitHub Actions workflow with immutable third-party action SHAs and exact Deno `2.2.15` LTS; commit a Supabase-compatible frozen lockfile for each function; run all nine Deno checks and all focused Node security harnesses on pull requests and pushes to `main`.
+- **Change:** Added one frozen v4 lockfile per function, a read-only workflow with immutable action commit SHAs and disabled checkout credential persistence, and a workflow self-audit harness. The dependency harness now also rejects missing, incompatible, or unhashed locks.
+- **Verification:** Verified Deno `2.2.15` against its official SHA-256 release checksum. All nine frozen checks and all four focused Node harnesses pass locally. Static checks confirm exact action SHAs, `contents: read`, no secret context, no write permission, and frozen lock enforcement. PR #25 GitHub `Security checks` run `29417705148` completed successfully.
+- **Residual risk:** CI detects known repository invariants but is not a substitute for code review, provider testing, vulnerability monitoring, or production acceptance.
+- **Evidence:** `.github/workflows/security-checks.yml`, `supabase/functions/*/deno.lock`, `tests/edge-dependency-pin-harness.cjs`, and `tests/security-workflow-harness.cjs`.
+- **Status:** Verified.
+
 ## Open Follow-Ups
 
 - Confirm Supabase Auth password policy, JWT/session expiry, and rate-limit settings.
