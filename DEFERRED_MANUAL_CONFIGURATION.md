@@ -37,8 +37,8 @@ Live settings were read without exposing credentials on 2026-07-13:
 | Leaked-password protection | Enabled | Keep enabled; complete the rejection test above. |
 | JWT lifetime | 3600 seconds | Keep unless a measured security/UX reason supports a change. |
 | Refresh-token rotation | Enabled | Keep enabled. |
-| Session timebox | Disabled | Decide before public onboarding whether a maximum session age is required. |
-| Inactivity timeout | Disabled | Decide before public onboarding whether idle sessions should expire. |
+| Session timebox | Disabled | Recommended: 7 days, pending Owner approval and deployed client acceptance. |
+| Inactivity timeout | Disabled | Recommended: 24 hours, pending Owner approval and deployed client acceptance. |
 | Single-session enforcement | Disabled | Keep unless product policy requires one session per account; Tallyo already provides global logout. |
 | Email confirmation | Required | Keep enabled. |
 | Email OTP expiry / length | 3600 seconds / 8 digits | Review with the final email/recovery UX; do not loosen without a reason. |
@@ -48,6 +48,8 @@ Live settings were read without exposing credentials on 2026-07-13:
 | Auth database connections | Absolute 10 | Low urgency for the current load. Revisit the provider connection strategy before scaling or changing compute. |
 
 These are configuration decisions, not invitations to weaken Auth, MFA, RLS, or rate limits.
+
+The 7-day/24-hour recommendation balances customer-data protection with the repeated mobile use expected from a small-business invoicing app. Keep the one-hour JWT lifetime and refresh-token rotation unchanged. Supabase enforces timebox and inactivity limits when the session next refreshes, so effective sign-out may occur up to the JWT lifetime later. Before enabling these values, Tallyo's client must deploy and accept graceful `SIGNED_OUT` handling so an expired session clears all in-memory business data and returns to login. Single-session enforcement should remain disabled because users may legitimately use a phone and computer, and Tallyo already offers local and all-devices logout.
 
 ## 3. Scheduled automation acceptance
 
