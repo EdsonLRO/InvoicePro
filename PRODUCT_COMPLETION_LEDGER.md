@@ -24,7 +24,7 @@ Statuses: Planned, Investigating, Confirmed, In Progress, Implemented, Verified,
 | Account security | In Progress | Supabase Auth, email confirmation, leaked-password protection, a verified 12-character provider minimum, fail-closed TOTP MFA, backup-authenticator support, MFA-gated masked password recovery, password change AAL2 handling, and local/all-devices logout. Primary/backup sign-in, protected factor removal, primary-specific and backup-specific recovery, wrong-code recovery rejection, email-only bypass rejection, and fail-closed lookup simulation passed on 2026-07-14. AUTH-001 is Verified. Broader provider policy decisions and robust all-factors-lost recovery remain paid/public-launch work. |
 | Backup and restore | Verified | A selected daily backup restored to an isolated project on 2026-07-15. Exact row/schema counts matched, copied automation was disabled, restored RLS read/write probes passed, and the temporary project was deleted after approval. |
 | Privacy/legal groundwork | In Progress | Internal data-flow, role, vendor, retention, rights, incident, claims, working ROPA, DPIA screening, case templates, and fictional tabletop evidence now exist. Public notices, a restricted case system, live operational testing, final decisions and external review remain. |
-| Final mobile/PDF regression | In Progress | Public shell passed desktop and 390x844 layout checks. The deployed optimized exporter produced a 689,481-byte, three-page A4 PDF from the authenticated 24-row fixture, about 98.1% smaller than the previous export, with clean row boundaries and continuation. Authenticated phone PDF and PWA device acceptance remain. |
+| Final mobile/PDF regression | Verified | Public shell layout, authenticated real-phone PDF download, PWA installation, offline shell fallback, and reconnection passed. The 689,481-byte, three-page A4 fixture had no cuts or split rows and was about 98.1% smaller than the previous export. PWA update-across-deployment is tracked separately. |
 | Multi-agent governance and computer-use controls | Verified | One Owner, one Master Orchestrator, nine specialist roles, ten AI functional roles including the Orchestrator, task queue, locks, handoffs, provider controls, validation, and the active Legal Agent correction are merged and documented. |
 | Public SaaS website/subscriptions | Deferred | Future phase after current app/security readiness. |
 
@@ -50,7 +50,7 @@ The Master Orchestrator owns this queue. Detailed task fields, statuses, assignm
 
 1. Complete the remaining Supabase Auth policy decisions recorded in `DEFERRED_MANUAL_CONFIGURATION.md`. AUTH-001 is Verified; leaked-password protection is enabled, advisor-verified, and rejection-tested, and the provider minimum is 12 characters. Robust all-factors-lost recovery remains a paid/public-launch condition.
 2. Resolve and legally review the internal payment operations procedure in `PAYMENT_OPERATIONS_RUNBOOK.md` before real customers.
-3. Complete authenticated phone PDF and PWA install/offline/update acceptance. The optimized long desktop PDF and public shell checks are verified and recorded.
+3. Observe the installed PWA updating across a later deployment. Phone PDF, installation, offline shell fallback, and reconnection are verified; offline authentication and customer data are intentionally unsupported.
 4. Resolve the blocking gaps from `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md`, verify operations in a restricted system, and obtain approval for customer-facing documents.
 
 ## Completion Rule

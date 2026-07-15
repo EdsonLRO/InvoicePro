@@ -26,6 +26,7 @@ Privacy-safe evidence from the `codex/release-readiness-pass` review. This does 
 - A dedicated authenticated test account produced a synthetic 24-row, three-page PDF. All rows remained complete, page gaps were clean, alternating row colours continued correctly, and notes, terms, payment details, and totals followed the last item without overlap.
 - The previous PNG/RGBA export was 35,767,558 bytes. After merge commit `c48c60267bbb44e5257d2f258a0ffc92fb8f9ac9` deployed, the same authenticated synthetic invoice exported as a 689,481-byte, three-page A4 PDF: approximately 98.1% smaller.
 - All deployed optimized PDF pages were rendered and visually rechecked. Complete-row pagination, continuation gaps, alternating colours, notes, terms, and totals remained correct. Pixel inspection found white page edges, and all pages referenced one shared 1600x5588 JPEG image object.
+- The Owner completed real-phone acceptance: the authenticated long PDF downloaded without cuts, Tallyo installed successfully, the cached login shell opened in airplane mode, offline login remained unavailable as expected, and normal operation returned after reconnection.
 
 Detailed PDF/PWA notes: `PDF_PWA_REGRESSION_EVIDENCE_2026-07-15.md`.
 
@@ -60,7 +61,7 @@ No change was made because current usage evidence does not justify index removal
 
 ## Pending Acceptance
 
-- Run an authenticated phone PDF download plus real-browser PWA install/offline/update checks. Desktop deployment, size, and multi-page PDF layout are verified.
+- Observe PWA update behaviour across a later deployment. Phone PDF, installation, offline shell fallback, and reconnection are verified; offline authentication and customer-data access are intentionally unsupported.
 - Resolve Auth session policy, custom SMTP/rate limits, CAPTCHA/abuse controls, and connection allocation decisions.
 - Implement robust all-factors-lost recovery before paid/public onboarding.
 - Resolve the tabletop gaps, complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and `PAYMENT_OPERATIONS_RUNBOOK.md`.
@@ -68,6 +69,6 @@ No change was made because current usage evidence does not justify index removal
 
 ## Test Limitations
 
-- Authenticated desktop browser access and a synthetic long-invoice fixture are available. The control surface still does not expose mobile viewport emulation or Service Worker APIs, so authenticated phone and PWA install/offline/update acceptance is not claimed.
+- The installed PWA has not yet observed a later published version, so update-across-deployment behaviour is not operationally claimed.
 - The Edge Function tree is not uniformly `deno fmt` clean; bulk reformatting was deliberately avoided to keep this hardening diff focused. Type checking passed.
 - `psql` is not on `PATH`; the verified platform restore used Supabase's restore-to-new-project flow rather than a local CLI restore.
