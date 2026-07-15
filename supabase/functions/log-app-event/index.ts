@@ -24,6 +24,8 @@ const allowedEvents = new Set([
   "document_bulk_deleted",
   "document_pdf_exported",
   "document_bulk_pdf_exported",
+  "document_status_changed",
+  "manual_payment_recorded",
   "manual_payment_removed",
   "customer_deleted",
   "customer_bulk_deleted",
