@@ -224,10 +224,10 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Impact:** A pull request could introduce a type error, floating dependency, broken security invariant, or unexpected transitive dependency change without an automatic repository signal before merge.
 - **Intended change:** Add a read-only GitHub Actions workflow with immutable third-party action SHAs and exact Deno `2.2.15` LTS; commit a Supabase-compatible frozen lockfile for each function; run all nine Deno checks and all focused Node security harnesses on pull requests and pushes to `main`.
 - **Change:** Added one frozen v4 lockfile per function, a read-only workflow with immutable action commit SHAs and disabled checkout credential persistence, and a workflow self-audit harness. The dependency harness now also rejects missing, incompatible, or unhashed locks.
-- **Verification:** Verified Deno `2.2.15` against its official SHA-256 release checksum. All nine frozen checks and all four focused Node harnesses pass locally. Static checks confirm exact action SHAs, `contents: read`, no secret context, no write permission, and frozen lock enforcement. Remote GitHub Actions evidence remains pending.
+- **Verification:** Verified Deno `2.2.15` against its official SHA-256 release checksum. All nine frozen checks and all four focused Node harnesses pass locally. Static checks confirm exact action SHAs, `contents: read`, no secret context, no write permission, and frozen lock enforcement. PR #25 GitHub `Security checks` run `29417705148` completed successfully.
 - **Residual risk:** CI detects known repository invariants but is not a substitute for code review, provider testing, vulnerability monitoring, or production acceptance.
 - **Evidence:** `.github/workflows/security-checks.yml`, `supabase/functions/*/deno.lock`, `tests/edge-dependency-pin-harness.cjs`, and `tests/security-workflow-harness.cjs`.
-- **Status:** Implemented; pending remote CI verification.
+- **Status:** Verified.
 
 ## Open Follow-Ups
 
