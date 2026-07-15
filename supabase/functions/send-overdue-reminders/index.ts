@@ -275,7 +275,12 @@ Deno.serve(async (req) => {
           object_id: inv.id,
           source: "edge_function",
           provider: "resend",
-          metadata: { to, status: resendResponse.status, response: resendBody, category: "payment_reminder", automated: true },
+          metadata: {
+            status: resendResponse.status,
+            reason: "provider_rejected_request",
+            category: "payment_reminder",
+            automated: true,
+          },
         });
         continue;
       }

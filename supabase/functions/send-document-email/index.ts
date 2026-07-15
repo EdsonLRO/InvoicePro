@@ -658,7 +658,7 @@ Deno.serve(async (req) => {
       object_id: documentId,
       source: "edge_function",
       provider: "resend",
-      metadata: { to, status: resendResponse.status, response: resendBody },
+      metadata: { status: resendResponse.status, reason: "provider_rejected_request" },
     });
     return json({ error: resendBody?.message || "Email could not be sent" }, 502);
   }

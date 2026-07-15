@@ -224,13 +224,13 @@ supabase functions deploy <function-name>
   where jobid = (select jobid from cron.job where jobname = 'generate-recurring-daily')
   order by start_time desc limit 5;
   ```
-- **Plan note:** the organisation is now Pro, so the former Free-tier inactivity-pause limitation no longer applies. Cron jobs must still be monitored and disabled immediately in any restored clone.
+- **Plan note:** the organisation is now Pro, so the former Free-tier inactivity-pause limitation no longer applies. Daily physical backups were verified through 2026-07-14. Cron jobs must still be monitored and disabled immediately in any restored clone.
 
 Additional scheduled job:
 
 - **Job:** `send-overdue-reminders-daily` (jobid 3), schedule **`0 9 * * *`** (09:00 UTC daily), `active = true`, calls `send-overdue-reminders`.
 - It sends `x-automation-secret` by retrieving `automation_secret` from Vault at runtime, never from committed or inline plaintext.
-- Both jobs last succeeded on 2026-07-13 before the shared secret-gate migration. Confirm their first post-hardening runs on 2026-07-14 as recorded in `DEFERRED_MANUAL_CONFIGURATION.md`.
+- Both protected functions returned HTTP 200 on 2026-07-14. The recurring pg_net request exhausted its former short response timeout even though the function completed; both cron commands now use a 30-second response timeout. Confirm the next natural response rows as recorded in `DEFERRED_MANUAL_CONFIGURATION.md`.
 
 ---
 
@@ -308,7 +308,7 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 - **Service role key** grants full, RLS-bypassing access — it must stay server-side only; a leak would be critical. Never place it in client code or commits.
 - **Activity history** (`history` columns) is a convenience log, **not a tamper-proof audit log** — it lives in user-editable rows.
 - **Audit events** now cover provider events and selected sensitive app actions, but broader monitoring, alerting, and compliance evidence are still future work.
-- **Backup posture is in progress:** Pro daily backups with seven-day retention and the operating procedure are documented in `BACKUP_RESTORE_RUNBOOK.md`. A current backup check and timed non-production restore test remain.
+- **Backup posture is in progress:** Pro daily backups through 2026-07-14 and the operating procedure are documented in `BACKUP_RESTORE_RUNBOOK.md`. A timed non-production restore test remains.
 - **MFA has no provider recovery codes.** Tallyo supports a second authenticator and blocks email-only MFA recovery. Primary-specific and backup-specific recovery acceptance passed on 2026-07-14, completing AUTH-001. The interim all-factors-lost response is approved and deny-by-default; robust recovery is still required before paid/public onboarding.
 - **Supabase Auth posture reviewed on 2026-07-13:** email confirmation and leaked-password protection were enabled; anonymous sign-in and phone/social providers were disabled. Session/JWT, server password-policy, rate-limit, and abuse-control settings still need review.
 - **Internal trigger functions were hardened on 2026-07-13 and accepted on 2026-07-14:** `handle_new_user()` and `prevent_audit_event_mutation()` use fixed empty search paths and are not directly executable by `anon` or `authenticated`. Advisors are clear, append-only enforcement passed, and fresh-signup provisioning produced one matching settings row with no missing/orphan rows.

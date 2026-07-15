@@ -32,7 +32,7 @@ Live settings were read without exposing credentials on 2026-07-13:
 
 | Setting | Current value | Recommended owner action |
 |---|---:|---|
-| Provider minimum password length | 6 | Raise to 12 after the test accounts pass recovery/signup checks, matching Tallyo's client rule. |
+| Provider minimum password length | 12 | Raised from 6 to 12 and read back from the production Auth provider on 2026-07-15, matching Tallyo's client rule. |
 | Required password character classes | None | Keep passphrase-friendly unless a documented policy requires character classes; length and breached-password rejection matter more than forced symbols. |
 | Leaked-password protection | Enabled | Keep enabled; complete the rejection test above. |
 | JWT lifetime | 3600 seconds | Keep unless a measured security/UX reason supports a change. |
@@ -53,33 +53,39 @@ These are configuration decisions, not invitations to weaken Auth, MFA, RLS, or 
 
 The recurring and overdue jobs now retrieve `automation_secret` from Vault and send it as `x-automation-secret`. Their endpoints reject unsigned requests.
 
-- After 2026-07-14 06:00 UTC, confirm `generate-recurring-daily` completed successfully on deployed v13.
-- After 2026-07-14 09:00 UTC, confirm `send-overdue-reminders-daily` completed successfully.
-- Confirm no duplicate invoice or unintended customer email was produced.
+- The 2026-07-14 protected functions both returned HTTP 200 and no duplicate invoice, owner mismatch, opt-in violation, or unintended email was found. The recurring pg_net caller exhausted its former short response timeout even though the Edge Function completed.
+- Both cron commands now use an explicit 30-second pg_net timeout and the privacy-safe email functions are deployed (`generate-recurring` v14 and `send-overdue-reminders` v7).
+- [x] Confirm the next natural 06:00 and 09:00 UTC runs and retained pg_net responses. Both cron runs succeeded on 2026-07-15; both responses were HTTP 200 with no timeout or transport error.
+- [x] Confirm no duplicate invoice or unintended customer email was produced. Database checks found zero duplicate recurring occurrence groups, zero generated-owner mismatches, no newly generated recurring invoice, and no audit/email event in the acceptance window. No schedule or reminder was due.
 - For any due recurring schedule, confirm the generated invoice has source/occurrence attribution and one `recurring_invoice_generated` audit event.
 - If either job fails, inspect redacted Edge Function/cron logs before retrying. Never print the secret.
 
 ## 4. Backup restore exercise
 
-Current scheduled-backup evidence is verified. A timed restore is still required because a backup is not proven until recovery has been exercised.
+The Owner-approved timed restore completed on 2026-07-15. Privacy-safe results are recorded in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
 
-- Choose a known backup and review the displayed cost of a separate restore project.
-- Obtain explicit Owner approval for that exact billed project/action.
-- Follow `BACKUP_RESTORE_RUNBOOK.md`, disabling cron and all email/Stripe side effects in the restored environment before testing.
-- Measure RTO, validate row counts without copying customer content, and re-run Account A/Account B isolation tests.
-- Record only operational evidence; do not record credentials or customer documents.
+- [x] Restore a known backup to a separate project after reviewing and approving the displayed `$0` incremental total.
+- [x] Disable both copied cron jobs and clear the outbound `pg_net` queue before validation.
+- [x] Confirm no Edge Functions or provider configuration could send email, generate invoices, or process payments.
+- [x] Measure platform restore-to-healthy time at approximately four minutes.
+- [x] Match exact row counts and structural controls without copying customer content.
+- [x] Re-run two-context tenant read isolation and rolled-back write probes.
+- [x] Permanently delete the temporary restore project after explicit Owner approval and verify production remains healthy.
 
 ## 5. Remaining release acceptance
 
 - [x] Complete the known-payment dispute and genuine failed-refund Stripe sandbox tests, including duplicate replay checks. Privacy-safe evidence was recorded on 2026-07-14 in `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
 - Keep Stripe in sandbox until live-mode configuration, policy/legal work, and explicit Owner approval are complete.
-- Run final desktop/mobile/PDF/PWA regression checks.
-- Complete privacy policy, terms, retention, export/deletion, refund/support, and breach-response groundwork before real customers.
+- Complete authenticated mobile PDF and real-browser PWA install/offline/update checks. Public desktop/mobile shell, deployed CSP/SRI, manifest and service-worker checks passed on 2026-07-14. An authenticated 24-row, three-page desktop PDF passed visual continuation and row-boundary checks on 2026-07-15; the optimized exporter still needs a post-deployment phone download.
+- Complete the blocking actions in `LEGAL_PRIVACY_READINESS.md` and `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md`, then legally review `PAYMENT_OPERATIONS_RUNBOOK.md` before real customers.
 
 ## Completed non-manual evidence
 
-- Supabase leaked-password protection is enabled and security advisors are clear.
+- Supabase leaked-password protection is enabled, the provider minimum password length is 12, and security advisors are clear.
 - RLS performance hardening and foreign-key indexes were applied without changing tenant ownership rules.
-- `generate-recurring` v13 rejects unsigned requests, enforces one invoice per schedule occurrence, and only emails after a conditional schedule claim; both cron commands are Vault-backed.
+- `generate-recurring` v14 rejects unsigned requests, enforces one invoice per schedule occurrence, and only emails after a conditional schedule claim; both cron commands are Vault-backed and passed natural 2026-07-15 cron/pg_net acceptance.
 - `resend-webhook` v11 passes Deno type checking and rejects unsigned requests.
-- Daily physical backups from 2026-07-06 through 2026-07-13 were listed as completed; WAL-G is enabled and PITR remains disabled/unapproved.
+- Daily physical backups from 2026-07-07 through 2026-07-14 were listed as completed in the current seven-day window; WAL-G is enabled and PITR remains disabled/unapproved.
+- The `2026-07-15 00:44:45 UTC` backup restored successfully into an isolated project; exact data/structure counts matched and restored RLS checks passed.
+- Two-account RLS read isolation passed across all six tenant tables on 2026-07-14. Five rolled-back customer write checks also passed: own update/insert allowed; foreign update/delete/insert blocked.
+- Seven-day Resend audit evidence showed 31 sent and 31 delivered events with no failed, bounced, or complained signal.

@@ -10,12 +10,13 @@ Follow `AUTOMATION_MODEL_ORCHESTRATION.md` and `AGENT_HIERARCHY_AND_COMPUTER_USE
 - **Project:** `cuagwifetheefftleeup` (`EdsonLRO Project`).
 - **Region:** West Europe (London / `eu-west-2`).
 - **Plan:** Pro, confirmed through the Supabase organisation API on 2026-07-13.
+- **Database version:** PostgreSQL `17.6.1.127`, read from the project API on 2026-07-15.
 - **Scheduled backups:** Supabase documents daily backups with seven days of retention for Pro projects.
 - **PITR:** Point-in-Time Recovery is not part of this runbook and must not be enabled without Owner approval because it is a separately billed add-on.
 - **Current RPO:** up to 24 hours with daily backups. RPO means Recovery Point Objective: the maximum expected data loss measured in time.
-- **Current RTO:** unknown until a timed restore test is completed. RTO means Recovery Time Objective: how long recovery takes.
-- **Restore test:** pending. It must use a separate non-production project or a controlled local environment, never overwrite the active project for testing.
-- **Current evidence (checked 2026-07-13):** the Supabase CLI listed completed daily physical backups from 2026-07-06 through 2026-07-13 in `eu-west-2`; WAL-G was enabled and PITR was disabled. This proves scheduled backup availability, not restore correctness.
+- **Measured restore time:** approximately four minutes from temporary-project creation to first observed healthy state on 2026-07-15. This measures platform restore-to-healthy, not complete application recovery. RTO means Recovery Time Objective: how long recovery takes.
+- **Restore test:** verified in a separate non-production project on 2026-07-15. The active project was not overwritten. Evidence is in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
+- **Current evidence:** completed daily physical backups were listed through 2026-07-14; a `2026-07-15 00:44:45 UTC` backup restored with matching row/schema counts and passing tenant-isolation probes. WAL-G was enabled and PITR was disabled.
 
 Official references:
 
@@ -81,15 +82,19 @@ supabase db dump --linked --file private-backups/<date-purpose>/data.sql --use-c
 
 Security warning: do not run `supabase db dump --linked --dry-run` in captured terminals, CI logs, shared transcripts, or agent output. Current CLI passwordless flows print a short-lived `cli_login_postgres` credential in the generated script. This is not the permanent project password, but it is still a credential and must not be logged.
 
-The machine currently has Supabase CLI and Docker available. `psql` was not available on `PATH` on 2026-07-13, so a CLI restore cannot be claimed ready until PostgreSQL client tools are installed and verified.
+The machine currently has Supabase CLI and Docker available. `psql` was still not available on `PATH` on 2026-07-14, so a CLI restore cannot be claimed ready until PostgreSQL client tools are installed and verified.
 
 ## Restore-Test Procedure
 
-This procedure is deliberately approval-gated because Supabase's restore-to-new-project flow creates a separately billed project. A platform restore test must stop before the final cost confirmation until the Owner approves it.
+This procedure is deliberately approval-gated because Supabase's restore-to-new-project flow creates a separate project with operational and potentially changing billing consequences. A platform restore test must stop before the final restore action until the Owner approves it.
+
+For the 2026-07-15 exercise, the restore-specific dashboard showed `$0` additional monthly compute, `$0` additional monthly disk, and `$0` total. The Owner approved that exact restore action and a temporary project was created in `eu-west-2`. Pricing, credits, compute, disk, taxes, and platform terms can change, so every future restore-to-new-project action remains separately approval-gated.
+
+The restore-specific dashboard also confirmed that database schema, data, indexes, roles, permissions, and users transfer. Storage objects/settings, Edge Functions, Auth settings/API keys, database extensions/settings, and read replicas require manual reconfiguration. The restored project starts with the current compute size and 1.5 times the disk size to allow the restore to complete.
 
 1. Select a known scheduled backup from before the test marker was created.
 2. Review the displayed cost for restoring to a new project.
-3. Obtain explicit Owner approval for that exact new project and recurring cost.
+3. Obtain explicit Owner approval for that exact new project, displayed cost, and operational side effects, even when the displayed incremental cost is `$0`.
 4. Restore to a new non-production project in the same region.
 5. Immediately prevent external side effects in the restored project:
    - disable all restored `pg_cron` jobs;
@@ -139,4 +144,4 @@ A completed backup check or restore test records:
 
 Do not record database passwords, temporary CLI credentials, access tokens, Vault values, customer documents, or unnecessary PII.
 
-The remaining timed restore and its cost approval are tracked in `DEFERRED_MANUAL_CONFIGURATION.md`.
+The 2026-07-15 exercise is recorded in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`. Its temporary project was permanently deleted after explicit Owner approval, and production remained healthy.

@@ -3855,6 +3855,7 @@
                         // not at the device's screen width (which made mobile exports a tall, cut-off sliver).
                         window.html2canvas(el, {
                             scale: 2,
+                            backgroundColor: '#ffffff',
                             windowWidth: 1024,
                             windowHeight: Math.max(1600, el.scrollHeight + 500),
                             width: 800,
@@ -3893,16 +3894,19 @@
                             const pageH = pdf.internal.pageSize.getHeight();
                             const imgW = pageW;
                             const imgH = (canvas.height * imgW) / canvas.width;
-                            const imgData = canvas.toDataURL('image/png');
+                            // JPEG keeps text and branding sharp at this capture scale while
+                            // avoiding the very large RGBA payload produced by PNG exports.
+                            const imgData = canvas.toDataURL('image/jpeg', 0.92);
+                            const imageAlias = 'invoice-render';
                             // Place the image, adding extra A4 pages if the invoice is taller than one page.
                             let heightLeft = imgH;
                             let position = 0;
-                            pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
+                            pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH, imageAlias, 'FAST');
                             heightLeft -= pageH;
                             while (heightLeft > 0) {
                                 position -= pageH;
                                 pdf.addPage();
-                                pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
+                                pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH, imageAlias, 'FAST');
                                 heightLeft -= pageH;
                             }
                             pdf.save(`Invoice_${inv.number}.pdf`);

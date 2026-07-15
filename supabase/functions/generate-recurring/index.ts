@@ -537,7 +537,12 @@ Deno.serve(async (req) => {
               object_id: inserted.id,
               source: "edge_function",
               provider: "resend",
-              metadata: { to, status: sendResult.status, response: sendResult.body, automated: true, recurring_template_id: tpl.id },
+              metadata: {
+                status: sendResult.status,
+                reason: "provider_rejected_request",
+                automated: true,
+                recurring_template_id: tpl.id,
+              },
             });
           }
         }

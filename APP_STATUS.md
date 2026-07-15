@@ -36,14 +36,14 @@ Implemented:
 Still to finish before treating the app as customer-ready:
 
 - Stripe sandbox lifecycle verification is complete for signature rejection, unrelated-event rejection, successful payment/refund replay, a known-payment dispute, and a genuine failed-refund reversal. Live mode remains disabled and approval-gated.
-- Decide the operational chargeback/refund policy and customer support process.
-- Complete at least one Owner-approved timed non-production restore test. Current Supabase Pro daily-backup evidence is verified in `BACKUP_RESTORE_RUNBOOK.md`.
+- Review and operationally test the internal chargeback/refund/support procedure in `PAYMENT_OPERATIONS_RUNBOOK.md`; customer-facing policy remains legally blocked.
+- The Owner-approved non-production restore test passed on 2026-07-15. The isolated temporary project was deleted after approval and production remained healthy; evidence is in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations. Company/settings saves are now covered at a privacy-safe category level.
 - MFA browser acceptance is complete for fail-closed routing, primary/backup factor lifecycle, primary-specific and backup-specific recovery, wrong-code rejection, and email-only bypass rejection. Robust all-factors-lost recovery remains a paid/public-launch condition.
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.
-- Resolve the recorded Supabase server-side password, session, SMTP/rate-limit, and abuse-control decisions in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection is enabled and the live advisor was clear on 2026-07-13.
-- Privacy policy, terms, retention position, export/deletion process, and breach process.
-- Final mobile and PDF regression pass.
+- Resolve the recorded Supabase session, SMTP/rate-limit, and abuse-control decisions in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection and a verified 12-character provider minimum are enabled; the live advisor was clear on 2026-07-13.
+- Complete the blocked legal/privacy actions in `LEGAL_PRIVACY_READINESS.md`. Working records, a preliminary DPIA screening, and a fictional tabletop now exist, but restricted case tooling, public notices, retention/role decisions, verified rights operations, vendor evidence, and external review remain.
+- Complete authenticated mobile PDF and real-browser PWA regression. The deployed public shell passed desktop and 390x844 overflow checks, and an authenticated 24-row desktop invoice passed three-page PDF layout checks. The lighter PDF exporter still needs post-deployment phone acceptance.
 - Documentation/screenshots/portfolio evidence kept in sync with the real app.
 - Keep `DECISION_LOG.md`, `PRODUCT_COMPLETION_LEDGER.md`, and `RELEASE_READINESS.md` updated as the app moves toward live readiness.
 
@@ -75,6 +75,7 @@ Strong controls already implemented:
 
 - Supabase Auth with server-side password hashing.
 - Supabase leaked-password protection, checked server-side against known breach data.
+- A 12-character Supabase Auth provider minimum aligned with the client-side rule.
 - Real email confirmation.
 - Optional TOTP MFA with fail-closed assurance checks and support for one backup authenticator.
 - Explicit local logout and all-devices logout, with password confirmation and MFA when required for all-devices logout.
@@ -93,7 +94,7 @@ Known limits:
 - Supabase does not provide recovery codes. Tallyo supports a second authenticator and prevents email-only MFA bypass. AUTH-001 acceptance is Verified. The interim all-factors-lost support response is approved and deny-by-default; robust recovery is still required before paid/public onboarding.
 - All-devices logout exists, but a future email-code confirmation flow would be stronger for production account recovery/security UX.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
-- Supabase Pro daily backups are verified and the recovery runbook is in place, but a timed restore test, privacy operations, and incident response are not complete.
+- Supabase Pro daily backups and one isolated timed restore are verified. Complete service recovery still needs manual Auth/provider reconfiguration, and tested privacy/incident operations remain unfinished.
 - The app must not claim GDPR compliance or full security.
 
 ## Future SaaS / website phase

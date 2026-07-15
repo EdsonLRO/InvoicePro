@@ -194,6 +194,17 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Residual risk:** The trusted Checkout audit row remains part of the payment authorization chain and must stay service-role-only and append-only.
 - **Evidence:** `supabase/functions/stripe-webhook/index.ts`; PAY-TEST-001.
 
+### SEC-LOG-005 - Failed email audit events retained unnecessary provider data
+
+- **Date:** 2026-07-14
+- **Classification:** defense-in-depth / privacy-safe logging
+- **Finding:** Failed Resend sends stored the recipient address and complete provider response body in append-only audit metadata even though the invoice reference and HTTP status were sufficient for diagnosis.
+- **Impact:** Error-path audit records could retain unnecessary customer contact data or provider-supplied diagnostic fields for the lifetime of the audit event.
+- **Change:** Preserve only the HTTP status, a stable generic failure reason, and non-personal workflow context. Successful-send events continue to retain the intended recipient because the app uses that evidence for user-visible delivery history.
+- **Verification:** All nine Edge Functions passed Deno type checking; focused source search found no failed-email audit retaining a raw provider response; `send-document-email` v19, `send-reminder-email` v8, `send-overdue-reminders` v7, and `generate-recurring` v14 were deployed active on 2026-07-14.
+- **Residual risk:** Invoice and delivery records still contain customer contact data needed for the invoicing service. Retention and deletion rules remain a legal/privacy release gate.
+- **Evidence:** `supabase/functions/send-document-email/index.ts`; `send-reminder-email/index.ts`; `send-overdue-reminders/index.ts`; `generate-recurring/index.ts`.
+
 ## Open Follow-Ups
 
 - Confirm Supabase Auth password policy, JWT/session expiry, and rate-limit settings.
