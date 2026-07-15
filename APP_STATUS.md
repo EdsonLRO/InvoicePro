@@ -43,7 +43,7 @@ Still to finish before treating the app as customer-ready:
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.
 - Resolve the recorded Supabase session, SMTP/rate-limit, and abuse-control decisions in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection and a verified 12-character provider minimum are enabled; the live advisor was clear on 2026-07-13.
 - Complete the blocked legal/privacy actions in `LEGAL_PRIVACY_READINESS.md`. Working records, a preliminary DPIA screening, and a fictional tabletop now exist, but restricted case tooling, public notices, retention/role decisions, verified rights operations, vendor evidence, and external review remain.
-- Complete authenticated mobile PDF and real-browser PWA regression. The deployed public shell passed desktop and 390x844 overflow checks; the optimized authenticated 24-row desktop PDF is verified at three clean A4 pages and 689,481 bytes. Phone PDF and PWA device acceptance remain.
+- Observe PWA update behaviour across a later deployment. Mobile PDF, installation, offline login-shell fallback, and reconnection are verified. Offline authentication and customer-data access are intentionally unsupported.
 - Documentation/screenshots/portfolio evidence kept in sync with the real app.
 - Keep `DECISION_LOG.md`, `PRODUCT_COMPLETION_LEDGER.md`, and `RELEASE_READINESS.md` updated as the app moves toward live readiness.
 

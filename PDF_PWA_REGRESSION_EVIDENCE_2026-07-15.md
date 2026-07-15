@@ -37,13 +37,24 @@ The inline application script parses successfully after the change.
 - Pixel inspection confirmed white page edges on every page. A dark strip seen around page 2 in one preview was the viewer background, not embedded PDF content.
 - All three pages reference the same 1600x5588 `/DCTDecode` JPEG object, confirming that the image alias is reused rather than embedding three copies.
 
-Desktop PDF size, format, and multi-page layout acceptance are Verified. A real-phone download is still required before authenticated mobile PDF acceptance can be marked Verified.
+Desktop PDF size, format, and multi-page layout acceptance are Verified.
+
+## Real-Phone Acceptance
+
+- The Owner signed in on a real phone and downloaded the synthetic long invoice.
+- The downloaded PDF opened successfully with no horizontal or vertical cuts and no split or incomplete rows.
+- Tallyo installed successfully from the mobile browser and launched from the installed application.
+- With airplane mode enabled, the installed application opened its cached login shell.
+- Offline login was unavailable, as expected: Supabase authentication and customer-data access require a network connection and Tallyo does not cache credentials for offline authentication.
+- After airplane mode was disabled, the installed application opened normally again.
+
+Authenticated mobile PDF, PWA installation, offline shell fallback, and reconnection acceptance are Verified.
 
 ## PWA Boundary
 
 - The deployed manifest and service-worker source match the repository.
 - Both required PWA icon files exist.
 - The public 390x844 shell has no horizontal overflow or off-screen controls.
-- The available authenticated browser-control surface does not expose mobile viewport emulation or Service Worker install/offline controls.
+- A real-phone test verified installation, offline shell fallback, and normal recovery after connectivity returned.
 
-PWA install, offline fallback, update behaviour, and authenticated mobile workflows therefore remain In Progress. They must be accepted on a real phone or a browser surface that exposes those capabilities; source inspection alone is not treated as operational proof.
+PWA update-across-deployment behaviour remains In Progress because the installed application has not yet observed a later published version. Offline authentication and offline customer-data access are intentionally unsupported.
