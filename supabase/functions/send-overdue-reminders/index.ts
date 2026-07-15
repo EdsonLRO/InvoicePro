@@ -242,27 +242,50 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      const email = buildEmail(inv, company, outstanding, overdueDays);
-      const resendResponse = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: FROM_EMAIL,
-          to: [to],
-          subject: email.subject,
-          html: email.html,
-          text: email.text,
-          tags: [
-            { name: "category", value: "payment_reminder" },
-            { name: "document_id", value: inv.id },
-            { name: "user_id", value: userId },
-            { name: "automated", value: "true" },
-          ],
-        }),
-      });
+      let email: ReturnType<typeof buildEmail>;
+      let resendResponse: Response;
+      try {
+        email = buildEmail(inv, company, outstanding, overdueDays);
+        resendResponse = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${resendKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: FROM_EMAIL,
+            to: [to],
+            subject: email.subject,
+            html: email.html,
+            text: email.text,
+            tags: [
+              { name: "category", value: "payment_reminder" },
+              { name: "document_id", value: inv.id },
+              { name: "user_id", value: userId },
+              { name: "automated", value: "true" },
+            ],
+          }),
+        });
+      } catch (error) {
+        failed++;
+        console.error("payment reminder request failed", inv.id, String(error));
+        await insertAuditEvent(admin, {
+          user_id: userId,
+          actor_user_id: null,
+          event_type: "payment_reminder_processing_failed",
+          object_type: "invoice",
+          object_id: inv.id,
+          source: "edge_function",
+          provider: "resend",
+          metadata: {
+            stage: "provider_request",
+            reason: "unexpected_error",
+            category: "payment_reminder",
+            automated: true,
+          },
+        });
+        continue;
+      }
       const resendBody = await resendResponse.json().catch(() => ({}));
 
       if (!resendResponse.ok) {
@@ -300,6 +323,20 @@ Deno.serve(async (req) => {
       if (updateError) {
         failed++;
         console.error("invoice history update failed", inv.id, updateError.message);
+        await insertAuditEvent(admin, {
+          user_id: userId,
+          actor_user_id: null,
+          event_type: "payment_reminder_processing_failed",
+          object_type: "invoice",
+          object_id: inv.id,
+          source: "edge_function",
+          metadata: {
+            stage: "invoice_history_update",
+            reason: "database_rejected",
+            category: "payment_reminder",
+            automated: true,
+          },
+        });
         continue;
       }
 
@@ -318,5 +355,6 @@ Deno.serve(async (req) => {
       sent++;
   }
 
-  return json({ ok: true, users: activeUsers.size, checked, sent, skipped, failed });
+  const ok = failed === 0;
+  return json({ ok, users: activeUsers.size, checked, sent, skipped, failed }, ok ? 200 : 500);
 });
