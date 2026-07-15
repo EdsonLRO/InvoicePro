@@ -192,6 +192,8 @@ Other current Edge Functions:
 - `stripe-webhook` - verifies Stripe signatures; records Checkout completion only when the Checkout session was created/logged by Tallyo; logs failed-payment/dispute/refund-failure lifecycle events; records successful refunds as locked negative Stripe payment entries.
 - Current sandbox Stripe webhook events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, `refund.failed`, `charge.dispute.created`, `charge.dispute.updated`, `charge.dispute.closed`, `charge.dispute.funds_withdrawn`, and `charge.dispute.funds_reinstated`.
 
+Dependency rule: every function source pins `@supabase/supabase-js` to `2.110.1`. Do not replace the exact version with `@2`, `latest`, a caret, or another floating specification. Review and test an intentional version update across all nine functions before deployment. `tests/edge-dependency-pin-harness.cjs` enforces this repository rule.
+
 Live deployment snapshot on 2026-07-13: all nine functions were active; `generate-recurring` was v13 and `resend-webhook` was v11 after the hardening/type-check deployments. JWT verification is enabled for user-authenticated functions and intentionally disabled only for signature-verified provider webhooks or custom-secret scheduled functions.
 
 Deploy after edits:

@@ -2,7 +2,7 @@
 // Browser clients never write audit_events directly; this function validates the
 // session, limits event types, scrubs metadata, and inserts with the service role.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

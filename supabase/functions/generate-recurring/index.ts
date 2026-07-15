@@ -2,7 +2,7 @@
 // Finds active recurring schedules that are due, generates one invoice each,
 // optionally emails generated invoices, advances next_run, and logs history.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 

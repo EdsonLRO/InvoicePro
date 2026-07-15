@@ -2,7 +2,7 @@
 // The browser asks to send a saved document; this function authenticates the
 // caller, verifies document ownership, sends the email, and records history.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 

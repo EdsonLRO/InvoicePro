@@ -3,7 +3,7 @@
 // document history. If RESEND_WEBHOOK_SECRET is not configured yet, events are
 // acknowledged but ignored so the endpoint can be created during setup.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
