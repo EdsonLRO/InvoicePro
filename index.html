@@ -8,7 +8,7 @@
          connections may load from, limiting the impact of any injected content.
          MUST stay on one line (newlines in a meta CSP can drop directives).
          'unsafe-eval' is required because Vue compiles templates in the browser. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net; frame-src https://challenges.cloudflare.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
 
     <title>Tallyo</title>
 
@@ -94,7 +94,12 @@
                     </div>
                     <input type="password" v-model="auth.password" @keyup.enter="login" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
-                <button @click="login" :disabled="authBusy" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Signing in...' : 'Sign In' }}</button>
+                <div v-if="turnstile.enabled">
+                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;"></div>
+                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" aria-live="polite">Loading security check...</p>
+                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" aria-live="polite">{{ turnstile.error }} <button @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry</button></p>
+                </div>
+                <button @click="login" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Signing in...' : 'Sign In' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     Don't have an account? <button @click="authMode = 'register'" class="text-indigo-600 hover:underline font-medium">Create one</button>
                 </div>
@@ -118,7 +123,12 @@
                     <label class="block text-sm font-medium mb-1">Confirm Password</label>
                     <input type="password" v-model="auth.confirm" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
-                <button @click="register" :disabled="authBusy" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Creating account...' : 'Create Account' }}</button>
+                <div v-if="turnstile.enabled">
+                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;"></div>
+                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" aria-live="polite">Loading security check...</p>
+                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" aria-live="polite">{{ turnstile.error }} <button @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry</button></p>
+                </div>
+                <button @click="register" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Creating account...' : 'Create Account' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     Already registered? <button @click="authMode = 'login'" class="text-indigo-600 hover:underline font-medium">Sign in</button>
                 </div>
@@ -163,7 +173,12 @@
                     <label class="block text-sm font-medium mb-1">Email Address</label>
                     <input type="email" v-model="auth.username" @keyup.enter="sendPasswordReset" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
-                <button @click="sendPasswordReset" :disabled="authBusy" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Sending...' : 'Send Reset Link' }}</button>
+                <div v-if="turnstile.enabled">
+                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;"></div>
+                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" aria-live="polite">Loading security check...</p>
+                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" aria-live="polite">{{ turnstile.error }} <button @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry</button></p>
+                </div>
+                <button @click="sendPasswordReset" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Sending...' : 'Send Reset Link' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     Remembered it? <button @click="authMode = 'login'" class="text-indigo-600 hover:underline font-medium">Return to sign in</button>
                 </div>
@@ -1687,6 +1702,56 @@
     // Supabase connection — values come from config.js (uploaded once).
     const supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
 
+    const TURNSTILE_API_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    let turnstileApiPromise = null;
+
+    function loadTurnstileApi() {
+        if (window.turnstile) return Promise.resolve(window.turnstile);
+        if (turnstileApiPromise) return turnstileApiPromise;
+
+        turnstileApiPromise = new Promise((resolve, reject) => {
+            const existing = document.querySelector(`script[src="${TURNSTILE_API_URL}"]`);
+            const script = existing || document.createElement('script');
+            let settled = false;
+            const cleanup = () => {
+                clearTimeout(timeout);
+                script.removeEventListener('load', finish);
+                script.removeEventListener('error', fail);
+            };
+            const rejectLoad = message => {
+                if (settled) return;
+                settled = true;
+                cleanup();
+                if (!window.turnstile) script.remove();
+                reject(new Error(message));
+            };
+            const finish = () => {
+                if (settled) return;
+                if (!window.turnstile) return rejectLoad('Turnstile API unavailable');
+                settled = true;
+                cleanup();
+                resolve(window.turnstile);
+            };
+            const fail = () => rejectLoad('Turnstile failed to load');
+            const timeout = setTimeout(() => rejectLoad('Turnstile load timed out'), 12000);
+            script.addEventListener('load', finish, { once: true });
+            script.addEventListener('error', fail, { once: true });
+            if (!existing) {
+                // Cloudflare requires this changing live script, so it has a narrow,
+                // documented SRI exception and an exact-origin CSP allowance.
+                script.src = TURNSTILE_API_URL;
+                script.async = true;
+                script.defer = true;
+                document.head.appendChild(script);
+            }
+        }).catch(error => {
+            turnstileApiPromise = null;
+            throw error;
+        });
+
+        return turnstileApiPromise;
+    }
+
     const { createApp } = Vue;
 
     createApp({
@@ -1702,6 +1767,14 @@
                 authSignOutRequested: false,
                 authSessionVersion: 0,
                 dataLoading: false,
+                turnstile: {
+                    enabled: Boolean(String(window.TURNSTILE_SITE_KEY || '').trim()),
+                    siteKey: String(window.TURNSTILE_SITE_KEY || '').trim(),
+                    loading: false,
+                    widgetId: null,
+                    token: '',
+                    error: ''
+                },
                 mfa: { enabled: false, busy: false, step: 'idle', loginFactorId: null, loginFactors: [], verifiedFactorId: null, verifiedFactors: [], enrollFactorId: null, enrollKind: 'primary', qr: '', secret: '', code: '' },
                 mfaPasswordConfirm: { visible: false, busy: false, code: '', error: '', title: 'Confirm with authenticator', message: 'Enter the 6-digit code from your authenticator app.' },
                 sessionConfirm: { visible: false, busy: false, password: '', error: '' },
@@ -1982,6 +2055,13 @@
                 return this.selectedRecurring.map(id => this.recurringTemplates.find(t => t.id === id)).filter(Boolean);
             }
         },
+        watch: {
+            authMode(nextMode, previousMode) {
+                if (!this.turnstile.enabled || nextMode === previousMode) return;
+                this.removeTurnstileWidget();
+                if (this.isTurnstileAuthMode(nextMode)) this.$nextTick(() => this.renderTurnstile());
+            }
+        },
         methods: {
             pageInfo(total, page) {
                 const safeTotal = Math.max(1, total || 1);
@@ -2085,6 +2165,86 @@
                 this.applyRoute(this.tabFromRouteKey(routeKey), routeKey);
             },
             // ================= AUTHENTICATION (Supabase Auth) =================
+            isTurnstileAuthMode(mode = this.authMode) {
+                return mode === 'login' || mode === 'register' || mode === 'forgot';
+            },
+            turnstileAction(mode = this.authMode) {
+                if (mode === 'register') return 'signup';
+                if (mode === 'forgot') return 'password_reset';
+                return 'login';
+            },
+            async renderTurnstile() {
+                if (!this.turnstile.enabled || !this.isTurnstileAuthMode() || this.turnstile.widgetId !== null) return;
+                const container = this.$refs.turnstileContainer;
+                if (!container) return;
+                const mode = this.authMode;
+                this.turnstile.loading = true;
+                this.turnstile.error = '';
+                try {
+                    const api = await loadTurnstileApi();
+                    if (mode !== this.authMode || !this.isTurnstileAuthMode()) return;
+                    this.turnstile.widgetId = api.render(container, {
+                        sitekey: this.turnstile.siteKey,
+                        action: this.turnstileAction(mode),
+                        theme: 'light',
+                        size: 'flexible',
+                        appearance: 'interaction-only',
+                        language: 'auto',
+                        tabindex: 0,
+                        'response-field': false,
+                        'feedback-enabled': false,
+                        'refresh-expired': 'manual',
+                        callback: token => {
+                            if (mode !== this.authMode) return;
+                            this.turnstile.token = String(token || '');
+                            this.turnstile.error = '';
+                        },
+                        'expired-callback': () => {
+                            this.turnstile.token = '';
+                            this.turnstile.error = 'Security check expired.';
+                        },
+                        'error-callback': () => {
+                            this.turnstile.token = '';
+                            this.turnstile.error = 'Security check could not be completed.';
+                        },
+                        'unsupported-callback': () => {
+                            this.turnstile.token = '';
+                            this.turnstile.error = 'This browser cannot complete the security check.';
+                        }
+                    });
+                } catch (_) {
+                    this.turnstile.error = 'Security check could not load. Check your connection or content blocker.';
+                } finally {
+                    this.turnstile.loading = false;
+                }
+            },
+            removeTurnstileWidget() {
+                if (this.turnstile.widgetId !== null && window.turnstile) {
+                    try { window.turnstile.remove(this.turnstile.widgetId); } catch (_) { /* already removed */ }
+                }
+                this.turnstile.widgetId = null;
+                this.turnstile.token = '';
+                this.turnstile.loading = false;
+                this.turnstile.error = '';
+            },
+            resetTurnstileChallenge() {
+                this.turnstile.token = '';
+                this.turnstile.error = '';
+                if (this.turnstile.widgetId !== null && window.turnstile) {
+                    try { window.turnstile.reset(this.turnstile.widgetId); } catch (_) { /* retry remains available */ }
+                }
+            },
+            retryTurnstile() {
+                this.removeTurnstileWidget();
+                this.$nextTick(() => this.renderTurnstile());
+            },
+            requireTurnstileToken() {
+                if (!this.turnstile.enabled) return '';
+                if (this.turnstile.loading) throw new Error('Wait for the security check to finish.');
+                if (this.turnstile.error) throw new Error(this.turnstile.error);
+                if (!this.turnstile.token) throw new Error('Complete the security check before continuing.');
+                return this.turnstile.token;
+            },
             passwordPolicyMessage(password, email = '') {
                 const value = String(password || '');
                 if (value.length < 12) return 'Password must be at least 12 characters.';
@@ -2103,13 +2263,25 @@
                 if(this.auth.password !== this.auth.confirm) return alert("Passwords do not match.");
                 const passwordIssue = this.passwordPolicyMessage(this.auth.password, email);
                 if(passwordIssue) return alert(passwordIssue);
+                let captchaToken = '';
+                try { captchaToken = this.requireTurnstileToken(); }
+                catch (error) { return alert(error.message); }
                 this.authBusy = true;
-                const { error } = await supabaseClient.auth.signUp({
-                    email: email,
-                    password: this.auth.password,
-                    options: { emailRedirectTo: window.location.origin + window.location.pathname }
-                });
-                this.authBusy = false;
+                const options = { emailRedirectTo: window.location.origin + window.location.pathname };
+                if (captchaToken) options.captchaToken = captchaToken;
+                let error = null;
+                try {
+                    ({ error } = await supabaseClient.auth.signUp({
+                        email: email,
+                        password: this.auth.password,
+                        options
+                    }));
+                } catch (requestError) {
+                    error = requestError;
+                } finally {
+                    this.authBusy = false;
+                    this.resetTurnstileChallenge();
+                }
                 if(error) return alert("Registration failed: " + error.message);
                 this.pendingEmail = email;
                 this.authMode = 'verify';
@@ -2117,18 +2289,30 @@
             async login() {
                 const email = (this.auth.username || '').trim().toLowerCase();
                 if(!email || !this.auth.password) return alert("Enter your email and password.");
+                let captchaToken = '';
+                try { captchaToken = this.requireTurnstileToken(); }
+                catch (error) { return alert(error.message); }
                 this.authBusy = true;
-                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                const credentials = {
                     email: email,
                     password: this.auth.password
-                });
-                if(error) {
+                };
+                if (captchaToken) credentials.options = { captchaToken };
+                let data = null;
+                let error = null;
+                try {
+                    ({ data, error } = await supabaseClient.auth.signInWithPassword(credentials));
+                } catch (requestError) {
+                    error = requestError;
+                } finally {
                     this.authBusy = false;
+                    this.resetTurnstileChallenge();
+                }
+                if(error) {
                     if(error.message && error.message.toLowerCase().includes('not confirmed'))
                         return alert("Please confirm your email first. Check your inbox for the confirmation link.");
                     return alert("Sign in failed: " + error.message);
                 }
-                this.authBusy = false;
                 await this.routeAfterAuth(data.user);
             },
             async routeAfterAuth(user) {
@@ -2464,11 +2648,21 @@
             async sendPasswordReset() {
                 const email = (this.auth.username || '').trim().toLowerCase();
                 if(!email) return alert("Enter your email address above first, then click reset.");
+                let captchaToken = '';
+                try { captchaToken = this.requireTurnstileToken(); }
+                catch (error) { return alert(error.message); }
                 this.authBusy = true;
-                const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
-                    redirectTo: window.location.origin + window.location.pathname
-                });
-                this.authBusy = false;
+                const options = { redirectTo: window.location.origin + window.location.pathname };
+                if (captchaToken) options.captchaToken = captchaToken;
+                let error = null;
+                try {
+                    ({ error } = await supabaseClient.auth.resetPasswordForEmail(email, options));
+                } catch (requestError) {
+                    error = requestError;
+                } finally {
+                    this.authBusy = false;
+                    this.resetTurnstileChallenge();
+                }
                 if(error) return alert("Could not send reset email: " + error.message);
                 alert("If an account exists for that email, a password reset link has been sent. Check your inbox.");
                 this.authMode = 'login';
@@ -4371,6 +4565,7 @@
         },
         async mounted() {
             window.addEventListener('hashchange', this.handleHashChange);
+            if (this.turnstile.enabled) this.$nextTick(() => this.renderTurnstile());
             // Register the service worker only on the live HTTPS site (not on
             // localhost), so local development never serves stale cached files.
             if ('serviceWorker' in navigator && location.protocol === 'https:') {

@@ -23,6 +23,7 @@ assert.match(workflow, /deno check --frozen --lock=deno\.lock index\.ts/);
 assert.match(workflow, /persist-credentials: false/);
 
 for (const harness of [
+  'auth-captcha-harness.cjs',
   'edge-dependency-pin-harness.cjs',
   'financial-action-audit-harness.cjs',
   'security-workflow-harness.cjs',
