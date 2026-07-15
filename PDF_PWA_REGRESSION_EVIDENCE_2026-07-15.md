@@ -1,6 +1,6 @@
 # Tallyo PDF and PWA Regression Evidence - 2026-07-15
 
-Privacy-safe acceptance notes for the release-readiness branch. The invoice, customer, descriptions, address, and email domain used in this exercise were synthetic and belong to a dedicated test account. No email or payment action was triggered.
+Privacy-safe acceptance notes for the release-readiness branch and its deployment through merge commit `c48c60267bbb44e5257d2f258a0ffc92fb8f9ac9`. The invoice, customer, descriptions, address, and email domain used in this exercise were synthetic and belong to a dedicated test account. No email or payment action was triggered.
 
 ## Long PDF Layout
 
@@ -18,14 +18,26 @@ The deployed PNG/RGBA export was 35,767,558 bytes. Inspection showed the same 16
 
 ## PDF Size Hardening
 
-The release branch now:
+The deployed application now:
 
 - supplies an explicit white background to `html2canvas`;
 - converts the captured invoice to JPEG at quality 0.92 instead of RGBA PNG;
 - reuses one jsPDF image alias across continuation pages; and
 - retains the existing fixed 800px desktop capture and row-boundary pagination logic.
 
-The inline application script parses successfully after the change. The existing long PDF proves the unchanged pagination logic; the JPEG comparison supports the size/quality choice. A post-deployment phone download is still required before mobile PDF acceptance can be marked Verified.
+The inline application script parses successfully after the change.
+
+## Post-Deployment PDF Acceptance
+
+- Confirmed the public deployment contains the JPEG exporter and jsPDF image-alias reuse.
+- Exported the same authenticated 24-row synthetic invoice from the deployed application.
+- The deployed optimized PDF was 689,481 bytes, compared with 35,767,558 bytes for the previous PNG/RGBA export: a reduction of approximately 98.1%.
+- `pdfinfo` and `pypdf` confirmed A4, three pages, PDF 1.3, and no encryption.
+- All three pages were rendered again and visually inspected. Rows 1-8, 9-21, and 22-24 remained complete on pages 1, 2, and 3 respectively; continuation spacing, alternating colours, notes, terms, and totals remained correct.
+- Pixel inspection confirmed white page edges on every page. A dark strip seen around page 2 in one preview was the viewer background, not embedded PDF content.
+- All three pages reference the same 1600x5588 `/DCTDecode` JPEG object, confirming that the image alias is reused rather than embedding three copies.
+
+Desktop PDF size, format, and multi-page layout acceptance are Verified. A real-phone download is still required before authenticated mobile PDF acceptance can be marked Verified.
 
 ## PWA Boundary
 
