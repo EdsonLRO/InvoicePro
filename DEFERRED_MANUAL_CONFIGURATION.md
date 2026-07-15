@@ -58,7 +58,7 @@ Deployment acceptance passed on 2026-07-15 after PR #17 was squash-merged as `37
 The recurring and overdue jobs now retrieve `automation_secret` from Vault and send it as `x-automation-secret`. Their endpoints reject unsigned requests.
 
 - The 2026-07-14 protected functions both returned HTTP 200 and no duplicate invoice, owner mismatch, opt-in violation, or unintended email was found. The recurring pg_net caller exhausted its former short response timeout even though the Edge Function completed.
-- Both cron commands now use an explicit 30-second pg_net timeout and the privacy-safe email functions are deployed (`generate-recurring` v14 and `send-overdue-reminders` v7).
+- Both cron commands now use an explicit 30-second pg_net timeout. `generate-recurring` v14 and `send-overdue-reminders` v8 are deployed; the latter adds minimised provider/history failure evidence and truthful non-success status without changing eligibility or opt-in rules.
 - [x] Confirm the next natural 06:00 and 09:00 UTC runs and retained pg_net responses. Both cron runs succeeded on 2026-07-15; both responses were HTTP 200 with no timeout or transport error.
 - [x] Confirm no duplicate invoice or unintended customer email was produced. Database checks found zero duplicate recurring occurrence groups, zero generated-owner mismatches, no newly generated recurring invoice, and no audit/email event in the acceptance window. No schedule or reminder was due.
 - For any due recurring schedule, confirm the generated invoice has source/occurrence attribution and one `recurring_invoice_generated` audit event.

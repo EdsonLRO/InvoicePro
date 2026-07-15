@@ -184,7 +184,7 @@ Other current Edge Functions:
 
 - `send-document-email` - authenticated user function; sends documents through Resend, can attach a PDF, and can create Stripe payment links.
 - `send-reminder-email` - authenticated user function; sends one manual overdue reminder and logs history.
-- `send-overdue-reminders` - scheduled function protected by `AUTOMATION_SECRET`; sends only for invoices explicitly opted in to automatic reminders.
+- `send-overdue-reminders` - scheduled function protected by `AUTOMATION_SECRET`; sends only for invoices explicitly opted in to automatic reminders. Deployed version 8 records minimised provider/history failure evidence and returns a non-success response if any eligible invoice fails.
 - `resend-webhook` - verifies Resend webhook signatures and records email lifecycle events.
 - `create-stripe-checkout` - authenticated user function; creates Stripe Checkout sessions for the caller's own invoice.
 - `create-stripe-refund` - authenticated user function; requests Stripe refunds for the caller's own confirmed Stripe payment rows.
@@ -308,7 +308,7 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 
 - **Service role key** grants full, RLS-bypassing access — it must stay server-side only; a leak would be critical. Never place it in client code or commits.
 - **Activity history** (`history` columns) is a convenience log, **not a tamper-proof audit log** — it lives in user-editable rows.
-- **Audit events** now cover provider events and selected sensitive app actions, but broader monitoring, alerting, and compliance evidence are still future work.
+- **Audit events** now cover provider events, selected sensitive app actions, recurring-generation failures, and minimised overdue-reminder provider/history failures. Broader monitoring, alerting, backup/restore evidence integration, and compliance evidence are still future work.
 - **Backup posture is verified for the current scope:** Pro daily backups through 2026-07-14 and the operating procedure are documented in `BACKUP_RESTORE_RUNBOOK.md`. A selected backup restored to an isolated project on 2026-07-15; schema/data counts and RLS probes passed, copied automation was disabled, and the temporary project was deleted after approval.
 - **MFA has no provider recovery codes.** Tallyo supports a second authenticator and blocks email-only MFA recovery. Primary-specific and backup-specific recovery acceptance passed on 2026-07-14, completing AUTH-001. The interim all-factors-lost response is approved and deny-by-default; robust recovery is still required before paid/public onboarding.
 - **Supabase Auth posture reviewed through 2026-07-15:** email confirmation and leaked-password protection are enabled; the provider minimum is 12 characters; anonymous sign-in and phone/social providers are disabled; JWT lifetime remains one hour with refresh rotation. The 168-hour session timebox and 24-hour inactivity timeout are active; single-session enforcement remains disabled. Rate-limit, SMTP, and abuse-control decisions remain open.
