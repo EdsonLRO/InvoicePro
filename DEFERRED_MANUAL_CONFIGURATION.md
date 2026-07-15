@@ -84,6 +84,7 @@ The Owner-approved timed restore completed on 2026-07-15. Privacy-safe results a
 - [x] Complete the known-payment dispute and genuine failed-refund Stripe sandbox tests, including duplicate replay checks. Privacy-safe evidence was recorded on 2026-07-14 in `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
 - Keep Stripe in sandbox until live-mode configuration, policy/legal work, and explicit Owner approval are complete.
 - Observe PWA update behaviour across a later deployment. Public shell, deployed CSP/SRI, manifest/icons, optimized desktop and phone PDF, installation, offline login-shell fallback, and reconnection are verified. Offline authentication and customer-data access are intentionally unsupported.
+- Using only a dedicated test account, accept the Account-page JSON export on desktop and mobile: confirm the warning, successful readable download, expected dataset counts, no cross-account rows, and one `account_data_exported` audit event after deployment. Record only counts and pass/fail, never exported content.
 - Complete the blocking actions in `LEGAL_PRIVACY_READINESS.md` and `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md`, then legally review `PAYMENT_OPERATIONS_RUNBOOK.md` before real customers.
 
 ## Completed non-manual evidence

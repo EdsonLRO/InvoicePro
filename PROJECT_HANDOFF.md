@@ -106,6 +106,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 **Records / other**
 - Customers address book; Saved Items catalogue.
 - Per-document **Activity History** (timestamped events: created, sent, converted, payment, payment removed, paid, cancelled, status change, recurring-generated, reminder, note; plus free-text notes). Explicitly labelled "activity history, not a tamper-proof audit log".
+- Account holders can download a structured JSON copy of their RLS-visible workspace from the Account page. The browser revalidates the Auth user, paginates all six tenant datasets, limits Auth metadata, aborts on session/query failure, creates no new server-side export copy, and records only minimal success metadata.
 - Branding page: brand colour (presets + custom), logo position, **logo upload from computer** (resized, size-capped, embedded) or URL, live preview.
 - Dashboard, mobile-tuned layouts, PWA (installable; service worker active over HTTPS).
 
@@ -188,6 +189,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `LEGAL_PRIVACY_READINESS.md` | Internal data-flow, role, vendor, retention, rights, breach, claims, legal disposition, and launch-block register. |
 | `LEGAL_OPERATIONS_RECORDS.md` | Internal working ROPA, privacy case templates, vendor/retention review templates, preliminary DPIA screening, and exercise schedule. |
 | `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` | Fictional, privacy-safe rights-request and breach tabletop evidence with blocking operational gaps. |
+| `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md` | Legal/privacy scope, mandatory controls, evidence limits, and release conditions for the RLS-scoped account-holder JSON export. |
 | `RELEASE_EVIDENCE_2026-07-15.md` | Privacy-safe evidence, deployed versions, limitations, and remaining gates from the current readiness pass. |
 | `DEFERRED_MANUAL_CONFIGURATION.md` | Laptop/identity/provider/cost-dependent acceptance and configuration decisions that automation must not perform silently. |
 | `EMAIL_PHASE.md` | Staged Resend email plan: DNS setup, manual sending, webhooks, then automation. |
@@ -229,6 +231,7 @@ npx tailwindcss -c tailwind.config.js -i <tailwind-input.css> -o tailwind.css --
    - **Log Out This Device** calls Supabase sign-out with `scope: 'local'`.
    - **Log Out All Devices** asks for the current password, asks for MFA when the account/session requires AAL2, records an audit event, then calls global sign-out to revoke refresh tokens across devices.
    - Unexpected provider sign-out clears loaded invoices, customers, drafts, schedules, form/security state, and navigation before returning to login. Session-generation checks discard initial business-data, audit, and MFA responses that complete after sign-out.
+7. Account data export uses the same authenticated public client and database RLS as the app. It revalidates the current Auth user, exports only RLS-visible rows, excludes Auth secrets/tokens/TOTP material/unrestricted metadata, and fails without downloading when any dataset or session check fails.
 
 ---
 
@@ -314,6 +317,7 @@ supabase functions deploy generate-recurring
 - **Real email verification** (server-sent link) — replaced an earlier fake client-side code.
 - **Optional TOTP MFA**, verified including wrong-code rejection.
 - **Row Level Security** on every table — DB-enforced per-user isolation; verified with a deliberate break-test (querying "all" returns only the caller's rows).
+- **RLS-scoped account export** — workspace JSON is assembled only in the authenticated browser, with stable pagination, whole-export failure, minimized Auth metadata, no service-role access, and no new server-side export store.
 - **Front-end integrity:** third-party libraries pinned to exact versions with **Subresource Integrity (SRI)**; **Content-Security-Policy** in place; **self-hosted Tailwind** (removed a live CDN dependency).
 - **Transport & at-rest:** HTTPS/TLS in transit; platform encryption at rest.
 - **Customer snapshot model** keeps historical invoices correct and avoids live links to personal data that may later be erased.
@@ -371,8 +375,8 @@ Near-term (in rough order):
    - Done: hardened Stripe webhook records verified Checkout payments and includes refund/dispute/failed-payment awareness.
    - Done: in-app Stripe refund requests through a server-side Edge Function.
    - Current payment caveat: Stripe should still be treated as test/development until explicitly moved to live mode.
-4. **Current hardening priorities:** run the formal restore test; operationally test and legally review `PAYMENT_OPERATIONS_RUNBOOK.md`; complete the blocked legal/privacy work in `LEGAL_PRIVACY_READINESS.md`; finish provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; design robust all-factors-lost recovery before paid/public onboarding; finish authenticated mobile/PDF/PWA acceptance.
-5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, export/deletion process, consent/unsubscribe where relevant, and breach response notes.
+4. **Current hardening priorities:** complete controlled desktop/mobile acceptance and deployed audit readback for the implemented account-holder export; operationally test and legally review `PAYMENT_OPERATIONS_RUNBOOK.md`; complete the separate blocked legal/privacy work in `LEGAL_PRIVACY_READINESS.md`; finish provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; design robust all-factors-lost recovery before paid/public onboarding; and observe PWA update-across-deployment behaviour.
+5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, correction/deletion/provider-assistance and restricted-case processes, consent/unsubscribe where relevant, and breach response notes. The account-holder JSON export is one control, not the whole rights-request process.
 6. Optional app polish: link invoices to their recurring schedule (dedup guard); clearer payment-state wording; repo/URL rename to Tallyo only with Supabase Auth URL updates.
 7. Future phase, deliberately deferred: public website, paid Tallyo subscriptions, plan tiers, server-enforced entitlements, workspaces/teams/RBAC, and SaaS billing.
 

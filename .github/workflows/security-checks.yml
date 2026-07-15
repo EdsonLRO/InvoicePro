@@ -36,6 +36,7 @@ jobs:
 
       - name: Run focused security harnesses
         run: |
+          node tests/account-data-export-harness.cjs
           node tests/edge-dependency-pin-harness.cjs
           node tests/financial-action-audit-harness.cjs
           node tests/security-workflow-harness.cjs

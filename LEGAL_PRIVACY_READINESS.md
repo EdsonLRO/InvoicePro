@@ -14,6 +14,7 @@ The technical app may continue in controlled portfolio/sandbox testing. Publicat
 |---|---|---|---|
 | Account signup/sign-in | Email, Auth identifiers, password verifier, MFA factor metadata, session/security events | Supabase Auth | Email confirmation, leaked-password screening, optional TOTP MFA, AAL2 checks. Robust all-factors-lost recovery remains blocked. |
 | Invoicing workspace | Business profile, customer contacts, invoice/quote/credit-note content, saved items, payment records | Supabase Postgres | Per-user RLS, two-account isolation tests, service-role attribution, append-only provider audit events. |
+| Account-holder data export | Limited Auth profile fields plus company settings, customers, saved items, documents, recurring schedules, and audit events | Authenticated browser reads from Supabase Postgres, then local JSON download | Existing RLS, Auth-user revalidation, stable pagination, whole-export failure, session-generation check, metadata minimisation, trusted-device warning, no server staging. Controlled test-account browser acceptance and deployed audit readback remain. |
 | Document/reminder email | Recipient email, document content/PDF, delivery metadata | Resend via Supabase Edge Functions | Server-side key, ownership checks, signed webhook, opt-in automation. Retention and processor terms need review. |
 | Invoice card payment | Invoice reference, amount, currency, customer email, provider identifiers; card data remains with Stripe Checkout | Stripe via Supabase Edge Functions | Server-side key, signed/idempotent webhook, trusted Checkout binding, sandbox-only. |
 | Public app hosting | Static app assets and ordinary hosting/request metadata | GitHub Pages | No intentional customer database storage in hosting. Response-header and future custom-domain position need review. |
@@ -82,7 +83,7 @@ ICO guidance requires records of personal-data breaches and, where the reporting
 
 `LEGAL_OPERATIONS_RECORDS.md` contains a working ROPA, rights/incident/vendor/retention templates, and a preliminary DPIA screening. `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` records fictional rights-request and breach exercises with no real personal data.
 
-The tabletop passed as a process-design exercise but identified blocking operational gaps: no restricted case system, no approved role/lawful-basis decisions, no verified export/deletion procedure, incomplete vendor/transfer evidence, and no approved incident escalation contacts. It is not evidence that live privacy operations work end to end.
+The tabletop passed as a process-design exercise but identified blocking operational gaps. The account-holder workspace export is now implemented and harness-tested under `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md`, but controlled browser acceptance remains. There is still no restricted case system, approved role/lawful-basis decision, verified correction/deletion/provider-assistance procedure, complete vendor/transfer evidence, or approved incident escalation route. This is not evidence that live privacy operations work end to end.
 
 ## Claims Register
 
@@ -95,7 +96,7 @@ Blocked without explicit legal approval and suitable evidence: "GDPR compliant",
 1. Confirm business/controller identity and legal contact details.
 2. Obtain and review vendor/DPA/transfer/subprocessor evidence.
 3. Approve lawful bases and final retention periods with deletion mechanics.
-4. Select a restricted case system, then build and test account export, correction, deletion, secure delivery, and case-register operations.
+4. Complete controlled acceptance for the implemented account-holder export; select a restricted case system; then build and test correction, deletion, provider assistance, secure delivery, and case-register operations.
 5. Draft product-specific Privacy Notice and Terms that match the implemented systems and user type.
 6. Review refund, cancellation, failed-payment, dispute, support, and complaint wording.
 7. Complete DPIA screening and external professional review for unresolved controller/processor, consumer, transfer, tax, or recovery questions.

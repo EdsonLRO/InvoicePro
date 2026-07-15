@@ -19,6 +19,7 @@ const allowedEvents = new Set([
   "account_mfa_disabled",
   "account_logout_local",
   "account_logout_all_devices",
+  "account_data_exported",
   "company_settings_updated",
   "document_deleted",
   "document_bulk_deleted",
