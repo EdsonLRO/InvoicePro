@@ -9,7 +9,7 @@ Internal security, privacy, product, and release decision pack. This is not a pu
 | Task ID | AUTH-002 |
 | Title | Select and prepare CAPTCHA protection for public Auth flows |
 | Priority | High before public signup |
-| Status | Owner Approval Required |
+| Status | In Progress |
 | Phase | App security hardening |
 | Owner role | Security Agent |
 | Assigned specialists | Backend / Supabase, Frontend, QA, Legal, Privacy and Regulatory, Release |
@@ -20,10 +20,10 @@ Internal security, privacy, product, and release decision pack. This is not a pu
 | Legal materiality | Yes: new browser-facing vendor and personal-data flow |
 | Jurisdictions | United Kingdom initially; provider transfer terms still require final review |
 | Affected people | Account applicants and account holders using protected Auth forms |
-| Legal disposition | `Approved with conditions` for this internal recommendation only; provider activation remains `Blocked` pending Owner approval |
+| Legal disposition | `Approved with conditions` for the bounded frontend implementation; provider provisioning, notice/transfer closure, and production activation remain `Blocked` |
 | External review required | Final vendor/transfer and public-notice wording should be included in pre-launch professional review |
-| Branch | `codex/captcha-abuse-control-decision` |
-| Lock | Documentation decision scope only; no production or Auth configuration lock acquired |
+| Branch | `codex/turnstile-auth-integration` |
+| Lock | `index.html`, `config.js`, focused Auth/security tests, and CAPTCHA-related status records; no production Auth configuration lock acquired |
 
 ## Decision Summary
 
@@ -41,7 +41,22 @@ Configure it with:
 - the public sitekey in the client and the secret only in Supabase Auth configuration;
 - no CAPTCHA token, provider response, IP address, user agent, or fingerprint signal in Tallyo logs.
 
-This recommendation does **not** authorize creating a Cloudflare account/widget, accepting provider terms, copying a secret, changing Supabase Auth, changing CSP, or publishing the integration. Those are Owner approval boundaries.
+On 2026-07-15, the Owner approved the bounded implementation after the vendor data flow, exact-origin CSP change, and narrow SRI exception were explained. That approval covers frontend support, CSP, automated tests, and internal records. It does **not** authorize creating or accepting a Cloudflare account/widget on the Owner's behalf, copying a secret, enabling Supabase CAPTCHA enforcement, publishing legal wording, or treating the control as production-active.
+
+## Implementation Record
+
+The frontend now contains dormant Turnstile support for sign-up, password sign-in, and password-reset initiation:
+
+- `config.js` contains a blank public `TURNSTILE_SITE_KEY`; no secret is present;
+- the script loads conditionally only when a site key is configured;
+- explicit SPA rendering uses flexible sizing, Managed interaction-only appearance, no pre-clearance, no hidden response field, and provider feedback disabled;
+- the CSP adds only `https://challenges.cloudflare.com` to `script-src` and `frame-src`; `connect-src` is unchanged;
+- each protected Supabase Auth call receives `captchaToken` only when configured;
+- tokens are cleared and the widget is reset after successful, rejected, and network-failed requests;
+- MFA, recovered-password update, and signed-in password-change calls remain outside the CAPTCHA flow;
+- `tests/auth-captcha-harness.cjs` verifies token routing, reset/fail-closed behavior, dormant compatibility, CSP scope, and privacy-safe handling.
+
+Supabase CAPTCHA enforcement remains **off**. A production site key is not configured, the Cloudflare secret is not stored, and the live Auth behavior is unchanged until the controlled rollout resumes.
 
 ## Why CAPTCHA Is Worth Adding
 
@@ -178,9 +193,9 @@ Supabase protection must not be enabled until the deployed frontend supplies a t
 
 The dashboard-only state is prohibited because it would break sign-up, sign-in, and password-reset initiation.
 
-## Owner Decision Required
+## Owner Decision Record
 
-Before implementation, the Owner must approve all of the following as one bounded decision:
+The Owner approved items 1-3 and 5-6 for the bounded frontend implementation on 2026-07-15. Item 4 remains open for provider/legal evidence and final pre-launch review. Item 7 remains an Owner-operated provisioning step because it involves provider account/terms interaction and a secret. Item 8 remains a separate approval immediately before production enforcement.
 
 1. Cloudflare Turnstile as a new browser-facing vendor.
 2. Managed mode with no pre-clearance or invisible mode.
@@ -212,6 +227,6 @@ Before implementation, the Owner must approve all of the following as one bounde
 
 ## Final Disposition
 
-`Approved with conditions` for internal planning and an Owner decision.
+`Approved with conditions` for the bounded, dormant frontend implementation, exact-origin CSP change, focused tests, and internal records.
 
-`Blocked` for implementation, provider activation, Supabase configuration, CSP publication, and public reliance until the Owner approves the eight-item decision above. Paid/public launch remains blocked by the wider legal and operational gates even if CAPTCHA is later enabled.
+`Blocked` for provider/account provisioning by the agent, legal-notice publication, secret handling, Supabase enforcement, and public reliance. Production activation still requires the outstanding vendor/legal evidence, Owner-operated widget and secret steps, browser acceptance, and a separate Owner approval. Paid/public launch remains blocked by the wider legal and operational gates even if CAPTCHA is later enabled.

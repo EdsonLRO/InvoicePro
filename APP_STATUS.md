@@ -32,6 +32,7 @@ Implemented:
 - Authenticated app-action `audit_events` for selected sensitive actions, including manual payment recording/removal and manual document-status changes.
 - RLS-scoped account data export to structured JSON, created locally in the signed-in user's browser with minimised Auth metadata and no new server-side export copy.
 - Supabase Auth, email confirmation, optional TOTP MFA, RLS, CSP, SRI, and server-side secrets.
+- Dormant Cloudflare Turnstile support for public sign-up, password sign-in, and reset requests, with exact-origin CSP and focused tests. No site key/secret is configured and Supabase enforcement remains off.
 - Stripe failed-payment, refund, refund-failure, and dispute lifecycle awareness in the webhook.
 
 Still to finish before treating the app as customer-ready:
@@ -43,6 +44,7 @@ Still to finish before treating the app as customer-ready:
 - MFA browser acceptance is complete for fail-closed routing, primary/backup factor lifecycle, primary-specific and backup-specific recovery, wrong-code rejection, and email-only bypass rejection. Robust all-factors-lost recovery remains a paid/public-launch condition.
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.
 - Resolve the remaining Supabase SMTP/rate-limit and abuse-control decisions in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection and a verified 12-character provider minimum are enabled. Graceful unexpected-session expiry handling is implemented, harness-tested, merged, and present in the public deployment. The Owner-approved 7-day session timebox and 24-hour inactivity timeout were enabled and read back from production on 2026-07-15; the one-hour JWT lifetime, refresh rotation, and multi-device sessions remain unchanged.
+- Complete Turnstile widget provisioning, legal/vendor evidence, desktop/mobile browser acceptance, and a separately approved production activation. The frontend is prepared, but CAPTCHA is not currently active.
 - The account-holder export and `log-app-event` v6 allowlist are deployed. Complete controlled desktop/mobile acceptance and confirm one successful production event row. Then complete the separate blocked legal/privacy actions in `LEGAL_PRIVACY_READINESS.md`: restricted case tooling, public notices, retention/role decisions, correction/deletion/provider-assistance operations, vendor evidence, and external review.
 - Observe PWA update behaviour across a later deployment. Mobile PDF, installation, offline login-shell fallback, and reconnection are verified. Offline authentication and customer-data access are intentionally unsupported.
 - Documentation/screenshots/portfolio evidence kept in sync with the real app.
