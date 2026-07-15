@@ -174,7 +174,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `supabase/functions/generate-recurring/index.ts` | Edge Function (Deno/TS) that generates due recurring invoices. Deployed to Supabase. |
 | `supabase/functions/send-document-email/index.ts` | Edge Function (Deno/TS) that sends invoices/quotes/credit notes by Resend and can attach PDFs/payment links. |
 | `supabase/functions/send-reminder-email/index.ts` | Edge Function (Deno/TS) that sends one authenticated overdue payment reminder via Resend. |
-| `supabase/functions/send-overdue-reminders/index.ts` | Scheduled Edge Function (Deno/TS) that sends per-invoice opt-in overdue reminders. |
+| `supabase/functions/send-overdue-reminders/index.ts` | Scheduled Edge Function (Deno/TS) that sends per-invoice opt-in overdue reminders and records minimised processing-failure evidence. |
 | `supabase/functions/resend-webhook/index.ts` | Signed Resend webhook receiver for delivery/failure/open/click events. |
 | `supabase/functions/create-stripe-checkout/index.ts` | Authenticated Edge Function (Deno/TS) that creates Stripe Checkout sessions from the app. |
 | `supabase/functions/create-stripe-refund/index.ts` | Authenticated Edge Function (Deno/TS) that requests Stripe refunds for the user's own confirmed Stripe payment rows. |

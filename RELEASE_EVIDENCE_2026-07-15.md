@@ -30,6 +30,7 @@ Privacy-safe evidence from the `codex/release-readiness-pass` review. This does 
 - A controlled session-expiry harness passed full in-memory state clearing, quiet intentional logout, failed-logout recovery, unexpected `SIGNED_OUT` notification, and rejection of delayed initial business-data, audit-event, and MFA responses.
 - PR #17 was squash-merged as `3758775b3b1928523ef77216bc45cfa7af584db5`. The harness and inline-script syntax check passed again from merged `main`. The public GitHub Pages source contained the expected `SIGNED_OUT` handler, session-generation guard, and reauthentication message; the Tallyo sign-in shell rendered with its email/password fields and no captured browser-console errors. Session-policy activation was still Owner-gated and unchanged during that specific deployment-acceptance check.
 - After that deployment acceptance, the Owner approved production session-policy activation. Supabase Auth was saved and independently reloaded/read back with a 168-hour maximum session duration, 24-hour inactivity timeout, refresh-token rotation enabled with the existing 10-second reuse interval, and single-session enforcement disabled. The established 3600-second JWT lifetime was not changed.
+- After Owner approval, `send-overdue-reminders` version 8 was deployed to production without forcing an invocation. Deployed-source readback confirmed privacy-safe `payment_reminder_processing_failed` evidence for provider-request and invoice-history-update failures, continued processing of other eligible invoices, and a non-success HTTP response when any invoice fails. The custom `x-automation-secret` boundary remained in place, and the immediate post-deployment Edge Function log review found no error signal.
 
 Detailed PDF/PWA notes: `PDF_PWA_REGRESSION_EVIDENCE_2026-07-15.md`.
 
@@ -43,13 +44,15 @@ Detailed PDF/PWA notes: `PDF_PWA_REGRESSION_EVIDENCE_2026-07-15.md`.
 
 Failed Resend audit events no longer retain the recipient address or raw provider response. They keep only HTTP status, a stable generic reason, and non-personal workflow context.
 
+Scheduled overdue-reminder processing failures now record only the affected invoice identifier plus a generic stage, reason, workflow category, and automation flag. Recipient addresses, customer fields, reminder text, and raw provider responses are deliberately excluded.
+
 Active versions after deployment:
 
 | Function | Version | Auth boundary |
 |---|---:|---|
 | `send-document-email` | 19 | Supabase JWT |
 | `send-reminder-email` | 8 | Supabase JWT |
-| `send-overdue-reminders` | 7 | `x-automation-secret` |
+| `send-overdue-reminders` | 8 | `x-automation-secret` |
 | `generate-recurring` | 14 | `x-automation-secret` |
 
 ## Informational Advisories

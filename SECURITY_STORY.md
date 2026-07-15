@@ -198,7 +198,7 @@ Naming these plainly is the point. It's the difference between marketing and a g
 
 - **Refund/dispute/chargeback replay testing** for Stripe payment lifecycle events.
 - **Production email hardening** such as tightening DMARC policy once all legitimate senders are confirmed.
-- **More append-only audit logging** for automation failures, backup/restore evidence, and other sensitive actions.
+- **More append-only audit logging** for remaining sensitive actions and stronger monitoring. Recurring and overdue-reminder failure paths now have privacy-safe evidence, while backup/restore evidence remains a separate controlled record.
 - **Formal backups / retention** and a documented restore process.
 - **Robust all-factors-lost MFA recovery method** before paid/public onboarding, plus stronger Auth-level signup checks (server-side password policy / breached-password screening).
 - **Data-protection groundwork** (privacy policy, consent/unsubscribe, data-subject request handling) before taking real customers.
