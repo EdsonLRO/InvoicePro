@@ -27,7 +27,8 @@ Privacy-safe evidence from the `codex/release-readiness-pass` review. This does 
 - The previous PNG/RGBA export was 35,767,558 bytes. After merge commit `c48c60267bbb44e5257d2f258a0ffc92fb8f9ac9` deployed, the same authenticated synthetic invoice exported as a 689,481-byte, three-page A4 PDF: approximately 98.1% smaller.
 - All deployed optimized PDF pages were rendered and visually rechecked. Complete-row pagination, continuation gaps, alternating colours, notes, terms, and totals remained correct. Pixel inspection found white page edges, and all pages referenced one shared 1600x5588 JPEG image object.
 - The Owner completed real-phone acceptance: the authenticated long PDF downloaded without cuts, Tallyo installed successfully, the cached login shell opened in airplane mode, offline login remained unavailable as expected, and normal operation returned after reconnection.
-- A controlled session-expiry harness passed full in-memory state clearing, quiet intentional logout, failed-logout recovery, unexpected `SIGNED_OUT` notification, and rejection of delayed initial business-data, audit-event, and MFA responses. Deployed browser acceptance and provider-policy activation remain pending.
+- A controlled session-expiry harness passed full in-memory state clearing, quiet intentional logout, failed-logout recovery, unexpected `SIGNED_OUT` notification, and rejection of delayed initial business-data, audit-event, and MFA responses.
+- PR #17 was squash-merged as `3758775b3b1928523ef77216bc45cfa7af584db5`. The harness and inline-script syntax check passed again from merged `main`. The public GitHub Pages source contained the expected `SIGNED_OUT` handler, session-generation guard, and reauthentication message; the Tallyo sign-in shell rendered with its email/password fields and no captured browser-console errors. Session-policy activation remains Owner-gated and was not changed during deployment acceptance.
 
 Detailed PDF/PWA notes: `PDF_PWA_REGRESSION_EVIDENCE_2026-07-15.md`.
 
@@ -63,7 +64,7 @@ No change was made because current usage evidence does not justify index removal
 ## Pending Acceptance
 
 - Observe PWA update behaviour across a later deployment. Phone PDF, installation, offline shell fallback, and reconnection are verified; offline authentication and customer-data access are intentionally unsupported.
-- Deploy and accept the session-expiry client handling, then decide whether to enable the recommended seven-day session timebox and 24-hour inactivity timeout. Custom SMTP/rate limits, CAPTCHA/abuse controls, and connection allocation decisions remain separate gates.
+- Decide whether to enable the recommended seven-day session timebox and 24-hour inactivity timeout now that the session-expiry client handling has passed merged deployment acceptance. Custom SMTP/rate limits, CAPTCHA/abuse controls, and connection allocation decisions remain separate gates.
 - Implement robust all-factors-lost recovery before paid/public onboarding.
 - Resolve the tabletop gaps, complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and `PAYMENT_OPERATIONS_RUNBOOK.md`.
 - Keep Stripe sandbox-only until a separately approved live release.
