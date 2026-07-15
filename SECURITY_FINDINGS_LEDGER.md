@@ -229,6 +229,19 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Evidence:** `.github/workflows/security-checks.yml`, `supabase/functions/*/deno.lock`, `tests/edge-dependency-pin-harness.cjs`, and `tests/security-workflow-harness.cjs`.
 - **Status:** Verified.
 
+### SEC-SUPPLY-002 - Main does not require the verified security gate
+
+- **Date:** 2026-07-15
+- **Classification:** defense-in-depth / repository change control
+- **Finding:** GitHub repository settings showed no classic branch protection or branch ruleset for `main`. The verified `Security checks / verify` job reports failures, but a direct push or merge is not currently blocked when that check is absent or unsuccessful.
+- **Impact:** The automated dependency, type, and focused security checks remain advisory rather than an enforced merge boundary.
+- **Change:** After Owner approval, GitHub branch ruleset `18994100` was created as `Protect main with verified security checks`. It is active, targets the default `main` branch, has an empty bypass list, blocks deletion and force pushes, requires pull requests with zero approving reviews, and requires the GitHub Actions `verify` check against the latest branch state.
+- **Verification:** Saved-settings readback confirmed every intended target and rule. A focused pull request will provide the final enforcement proof before this finding is marked Verified.
+- **Rollback:** Disable or remove only the new ruleset after Owner approval if it blocks recovery unexpectedly; do not force-push or remove unrelated protections.
+- **Residual risk:** Repository administrators retain platform-level recovery powers. Zero required reviews is intentional for the current solo-owner workflow, so the rule enforces automated checks and pull-request change control but does not provide independent human review.
+- **Evidence:** GitHub ruleset `18994100` settings readback on 2026-07-15.
+- **Status:** Implemented; focused pull-request enforcement proof pending.
+
 ## Open Follow-Ups
 
 - Confirm Supabase Auth password policy, JWT/session expiry, and rate-limit settings.
