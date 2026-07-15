@@ -52,6 +52,17 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Verification:** The live Supabase security advisor was re-run on 2026-07-13 and the leaked-password warning cleared. On 2026-07-14, a known-compromised candidate passed Tallyo's local format checks, reached Supabase after current-password and MFA verification, and was rejected as weak/easy to guess. Only the pass/fail outcome was recorded, not the candidate value.
 - **Status:** Verified.
 
+### SEC-AUTH-004 - Expired sessions could leave customer data in browser memory
+
+- **Date:** 2026-07-15
+- **Classification:** defense-in-depth / session and customer-data protection
+- **Finding:** The Supabase Auth listener handled password recovery but did not explicitly handle `SIGNED_OUT`. An expired or remotely revoked session could therefore leave the current Vue state visible until a refresh, and an initial business-data, audit, or MFA response already in flight could repopulate state after logout.
+- **Impact:** On a shared or unattended device, invoices, customer details, drafts, payment context, recurring schedules, and account-security form data could remain visible after the server-side session had ended. RLS would still block new unauthorised database access, but it cannot erase data already loaded into browser memory.
+- **Change:** Unexpected `SIGNED_OUT` events now immediately clear all user and business state, reset navigation to login, and show a concise reauthentication message. Intentional local/global logout remains quiet. Session-generation guards discard initial business-data, audit, and MFA responses that return after sign-out.
+- **Verification:** The inline application script parsed successfully. A controlled Node/VM harness exercised idempotent full-state clearing, unexpected expiry, intentional logout, failed logout, and expiry during delayed business-data, audit-event, and MFA requests. All cases passed, and no delayed response repopulated signed-out state.
+- **Residual risk:** The client change still needs deployed browser acceptance. The recommended seven-day maximum session age and 24-hour inactivity timeout remain disabled until separate Owner approval; Supabase applies them on token refresh, so expiry can occur up to the one-hour JWT lifetime later.
+- **Evidence:** `index.html`; this focused session-expiry hardening change; `DEFERRED_MANUAL_CONFIGURATION.md`.
+
 ### SEC-DB-001 - Trigger helper functions retain unnecessary API execution grants
 
 - **Date:** 2026-07-13

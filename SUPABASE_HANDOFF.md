@@ -29,7 +29,7 @@
 - **Email confirmation is required** before an account is usable (see §3).
 - **Leaked-password protection is enabled** (`password_hibp_enabled=true`), the live security advisor cleared its warning on 2026-07-13, and a safe known-compromised-password rejection test passed on 2026-07-14.
 - **Allowed / redirect URLs:** configured in Supabase Auth to match the deployed site URL. **Important:** if the site URL changes (e.g. a GitHub repo/URL rename during the Tallyo rebrand), these must be updated or auth breaks. Exact URL review remains an Owner acceptance item.
-- **Live provider snapshot (2026-07-13):** JWT lifetime 3600 seconds; refresh-token rotation enabled; session timebox/inactivity timeout disabled; single-session enforcement disabled; provider minimum password length 6 with no required character classes; email confirmation required; leaked-password protection enabled; email OTP expiry 3600 seconds with 8 digits; CAPTCHA not configured; email/token-refresh/verification rate limits 2/150/30. Tallyo's client requires 12 characters, so aligning the provider minimum to 12 is recorded in `DEFERRED_MANUAL_CONFIGURATION.md` rather than changed silently.
+- **Live provider snapshot (updated 2026-07-15):** JWT lifetime 3600 seconds; refresh-token rotation enabled; session timebox/inactivity timeout disabled; single-session enforcement disabled; provider minimum password length 12 with no required character classes; email confirmation required; leaked-password protection enabled; email OTP expiry 3600 seconds with 8 digits; CAPTCHA not configured; email/token-refresh/verification rate limits 2/150/30. A seven-day timebox and 24-hour inactivity timeout are recommended but remain Owner-gated.
 
 ---
 
@@ -56,10 +56,11 @@
 
 - **Optional TOTP MFA** (authenticator-app 6-digit rotating code) via Supabase Auth's MFA (factors / AAL) support.
 - Flow: user enrolls a primary authenticator app; once enabled, sign-in requires password **and** the current TOTP code. MFA assurance and factor-list failures now stop sign-in instead of continuing at AAL1.
-- The primary flow was verified end-to-end including incorrect-code rejection. Final browser acceptance testing remains for the new fail-closed, backup-factor, and password-recovery paths.
+- Primary and backup sign-in, incorrect-code rejection, protected factor replacement/removal, AAL2 password change, and MFA-gated password recovery were verified end to end on 2026-07-14.
 - The Account page supports one backup authenticator. Either verified TOTP factor can complete sign-in or password recovery. Either factor can be retired only while the other remains, using a fresh code from the remaining factor; MFA disablement also requires a fresh code. These actions are audit-event allowlisted.
 - Supabase does not provide recovery codes. SMS and email MFA are not implemented, and email possession alone does not bypass TOTP.
 - **Implemented account safety:** the Account page now separates local sign-out from all-devices sign-out. Local sign-out uses Supabase `scope: 'local'`. All-devices sign-out requires the current password, asks for MFA when AAL2 is required, writes an app audit event, then uses Supabase global sign-out to revoke refresh tokens across devices.
+- **Session-expiry handling:** the browser handles unexpected Supabase `SIGNED_OUT` events by clearing all loaded customer/business state and returning to login. Session-generation checks prevent delayed initial business-data, audit, or MFA responses from repopulating state after sign-out. Intentional logout remains quiet.
 - **Future account safety:** optionally upgrade all-devices sign-out to an Edge Function backed email verification code/link flow before revocation, with a dedicated `account_sessions_revoked`-style audit event.
 - Enrollment and backup-factor management are in the Account Security section of `index.html`. Operational handling is documented in `MFA_RECOVERY_RUNBOOK.md`.
 
@@ -308,14 +309,14 @@ Provide a `.env.example` with placeholders if env files are introduced; never co
 - **Service role key** grants full, RLS-bypassing access — it must stay server-side only; a leak would be critical. Never place it in client code or commits.
 - **Activity history** (`history` columns) is a convenience log, **not a tamper-proof audit log** — it lives in user-editable rows.
 - **Audit events** now cover provider events and selected sensitive app actions, but broader monitoring, alerting, and compliance evidence are still future work.
-- **Backup posture is in progress:** Pro daily backups through 2026-07-14 and the operating procedure are documented in `BACKUP_RESTORE_RUNBOOK.md`. A timed non-production restore test remains.
+- **Backup posture is verified for the current scope:** Pro daily backups through 2026-07-14 and the operating procedure are documented in `BACKUP_RESTORE_RUNBOOK.md`. A selected backup restored to an isolated project on 2026-07-15; schema/data counts and RLS probes passed, copied automation was disabled, and the temporary project was deleted after approval.
 - **MFA has no provider recovery codes.** Tallyo supports a second authenticator and blocks email-only MFA recovery. Primary-specific and backup-specific recovery acceptance passed on 2026-07-14, completing AUTH-001. The interim all-factors-lost response is approved and deny-by-default; robust recovery is still required before paid/public onboarding.
-- **Supabase Auth posture reviewed on 2026-07-13:** email confirmation and leaked-password protection were enabled; anonymous sign-in and phone/social providers were disabled. Session/JWT, server password-policy, rate-limit, and abuse-control settings still need review.
+- **Supabase Auth posture reviewed through 2026-07-15:** email confirmation and leaked-password protection are enabled; the provider minimum is 12 characters; anonymous sign-in and phone/social providers are disabled; JWT lifetime remains one hour with refresh rotation. Session timebox/inactivity, rate-limit, SMTP, and abuse-control decisions remain open.
 - **Internal trigger functions were hardened on 2026-07-13 and accepted on 2026-07-14:** `handle_new_user()` and `prevent_audit_event_mutation()` use fixed empty search paths and are not directly executable by `anon` or `authenticated`. Advisors are clear, append-only enforcement passed, and fresh-signup provisioning produced one matching settings row with no missing/orphan rows.
 - **All-devices logout exists** with current-password confirmation, MFA when required, an app audit event, and Supabase global sign-out. A stronger future version could add email-code confirmation and server-side revocation evidence.
 - **CSP** allows one permissive setting the in-browser Vue template compiler needs (documented trade-off).
 - **Data protection:** the app is **built with data protection principles in mind**, but is **not** certified or "GDPR compliant." Formal compliance work (privacy policy, lawful basis, data-subject rights, retention, breach process) is future work — do not claim compliance.
-- **Deferred manual configuration:** custom SMTP, provider minimum-password alignment, session timebox/inactivity policy, CAPTCHA, rate limits, Auth connection strategy, and exact redirect URL acceptance are recorded in `DEFERRED_MANUAL_CONFIGURATION.md`. GitHub Pages still limits response-header control.
+- **Deferred manual configuration:** custom SMTP, session timebox/inactivity policy, CAPTCHA, rate limits, Auth connection strategy, and exact redirect URL acceptance are recorded in `DEFERRED_MANUAL_CONFIGURATION.md`. GitHub Pages still limits response-header control.
 
 ---
 

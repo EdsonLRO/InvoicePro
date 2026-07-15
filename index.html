@@ -1687,6 +1687,8 @@
                 currentUser: null,
                 pendingEmail: '',
                 authBusy: false,
+                authSignOutRequested: false,
+                authSessionVersion: 0,
                 dataLoading: false,
                 mfa: { enabled: false, busy: false, step: 'idle', loginFactorId: null, loginFactors: [], verifiedFactorId: null, verifiedFactors: [], enrollFactorId: null, enrollKind: 'primary', qr: '', secret: '', code: '' },
                 mfaPasswordConfirm: { visible: false, busy: false, code: '', error: '', title: 'Confirm with authenticator', message: 'Enter the 6-digit code from your authenticator app.' },
@@ -2119,6 +2121,7 @@
             async routeAfterAuth(user) {
                 // Single gate for completing sign-in: require a second factor if the
                 // account has one, otherwise finish logging in.
+                this.authSignOutRequested = false;
                 try {
                     const { data: aal, error: aalError } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
                     if (aalError || !aal) throw aalError || new Error('Assurance level unavailable');
@@ -2136,6 +2139,7 @@
                     await this.onSignedIn(user);
                 } catch (e) {
                     console.warn('Account security verification could not be completed.');
+                    this.authSignOutRequested = true;
                     try { await supabaseClient.auth.signOut({ scope: 'local' }); } catch (_) { /* best effort */ }
                     this.clearSignedOutState();
                     alert('Could not verify account security. Please sign in again.');
@@ -2191,9 +2195,12 @@
                 return roles.includes('primary') ? 'backup' : 'primary';
             },
             async loadMfaStatus() {
+                if (!this.currentUser) return;
+                const loadUserId = this.currentUser.id;
+                const loadSessionVersion = this.authSessionVersion;
                 try {
                     const { data, error } = await supabaseClient.auth.mfa.listFactors();
-                    if (error) return;
+                    if (error || !this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
                     const verified = this.verifiedTotpFactors(data);
                     this.mfa.enabled = verified.length > 0;
                     this.mfa.verifiedFactors = verified;
@@ -2289,35 +2296,98 @@
                 alert("Two-factor authentication has been turned off.");
             },
             async onSignedIn(user) {
+                this.authSignOutRequested = false;
+                this.authSessionVersion += 1;
+                const signInSessionVersion = this.authSessionVersion;
                 this.currentUser = user;
                 this.userProfileEmail = user.email;
                 this.isLoggedIn = true;
                 this.auth = { username: '', password: '', confirm: '', code: '' };
                 await this.loadAllData();
+                if (!this.sessionLoadIsCurrent(user.id, signInSessionVersion)) return;
                 await this.loadMfaStatus();
+                if (!this.sessionLoadIsCurrent(user.id, signInSessionVersion)) return;
                 this.navigateTo(this.tabFromHash(), { replace: !window.location.hash });
             },
             clearSignedOutState() {
+                this.authSessionVersion += 1;
                 this.isLoggedIn = false;
                 this.currentUser = null;
+                this.pendingEmail = '';
+                this.pendingAuth = null;
+                this.generatedCode = null;
+                this.encryptionKey = null;
+                this.userProfileEmail = '';
+                this.authBusy = false;
                 this.auth = { username: '', password: '', confirm: '', code: '' };
                 this.authMode = 'login';
                 this.activeTab = 'create';
+                this.mobileMenuOpen = false;
                 window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
                 this.editingExisting = false;
+                this.isExportingPDF = false;
                 this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 };
                 this.companyAuditSnapshot = null;
                 this.customers = []; this.savedItems = []; this.invoices = [];
                 this.auditEvents = [];
+                this.invoiceSearch = '';
+                this.invoiceStatusFilter = 'All';
+                this.invoiceTypeFilter = 'All';
+                this.invoiceSort = 'date_desc';
+                this.invoicePage = 1;
+                this.selectedInvoices = [];
+                this.invoiceBulkBusy = false;
+                this.emailSendingId = null;
+                this.stripeCheckoutBusyId = null;
+                this.stripeRefundBusyKey = null;
+                this.newPayment = { amount: null, date: new Date().toISOString().split('T')[0], note: '' };
+                this.activityNote = '';
+                this.reminderModal = { open: false, inv: null, text: '', copied: false, sending: false };
+                this.refundModal = { open: false, paymentIndex: null, amount: 0, max: 0, error: '', submitting: false };
+                this.recurringTemplates = [];
+                this.recurringView = 'list';
+                this.editingTemplate = null;
+                this.recurringForm = null;
+                this.recurringPage = 1;
+                this.selectedRecurring = [];
+                this.recurringBulkBusy = false;
+                this.customerForm = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' };
+                this.customerView = 'list';
+                this.customerPage = 1;
+                this.selectedCustomers = [];
+                this.customerBulkBusy = false;
+                this.customerSearch = '';
+                this.editingCustomer = null;
+                this.showQuickCustomer = false;
+                this.quickCustomer = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' };
+                this.itemView = 'list';
+                this.itemForm = { name: '', description: '', price: 0 };
+                this.itemSearch = '';
+                this.itemPage = 1;
+                this.selectedItems = [];
+                this.itemBulkBusy = false;
+                this.editingItem = null;
+                this.lastTaxMode = 'exclusive';
                 this.mfa = { enabled: false, busy: false, step: 'idle', loginFactorId: null, loginFactors: [], verifiedFactorId: null, verifiedFactors: [], enrollFactorId: null, enrollKind: 'primary', qr: '', secret: '', code: '' };
                 this.pwdChange = { old: '', new: '', confirm: '' };
                 this.pwdRecovery = { busy: false, securityVerified: false, new: '', confirm: '', code: '', error: '', requiresMfa: false, factorId: null, factors: [] };
                 this.passwordRecoveryStarted = false;
+                this.mfaPasswordConfirm = { visible: false, busy: false, code: '', error: '', title: 'Confirm with authenticator', message: 'Enter the 6-digit code from your authenticator app.' };
                 this.sessionConfirm = { visible: false, busy: false, password: '', error: '' };
+                this.resolvePasswordMfaCode = null;
+                this.rejectPasswordMfaCode = null;
+                this.resolveSessionPasswordConfirm = null;
+                this.rejectSessionPasswordConfirm = null;
+                this.dataLoading = false;
+                this.draft = this.getEmptyDraft();
             },
             async signOutWithScope(scope) {
+                this.authSignOutRequested = true;
                 const { error } = await supabaseClient.auth.signOut({ scope });
-                if (error) throw error;
+                if (error) {
+                    this.authSignOutRequested = false;
+                    throw error;
+                }
                 this.clearSignedOutState();
             },
             async confirmLogoutLocal() {
@@ -2672,6 +2742,8 @@
 
             async loadAllData() {
                 if (!this.currentUser) return;
+                const loadUserId = this.currentUser.id;
+                const loadSessionVersion = this.authSessionVersion;
                 this.dataLoading = true;
                 try {
                     const [companyRes, custRes, itemRes, invRes] = await Promise.all([
@@ -2684,6 +2756,7 @@
                     if (custRes.error) throw custRes.error;
                     if (itemRes.error) throw itemRes.error;
                     if (invRes.error) throw invRes.error;
+                    if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
 
                     if (companyRes.data) this.company = this.rowToCompany(companyRes.data);
                     this.companyAuditSnapshot = this.cloneCompanyForAudit();
@@ -2691,20 +2764,35 @@
                     this.savedItems = (itemRes.data || []).map(r => this.rowToItem(r));
                     this.invoices = (invRes.data || []).map(r => this.rowToInvoice(r));
                     await this.loadAuditEvents();
+                    if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
                     this.draft = this.getEmptyDraft();
                     // Recurring templates — best effort; the table may not exist until the setup SQL is run.
                     try {
                         const recRes = await supabaseClient.from('recurring_templates').select('*').order('created_at', { ascending: false });
-                        if (!recRes.error) this.recurringTemplates = (recRes.data || []).map(r => this.rowToTemplate(r));
+                        if (!recRes.error && this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) {
+                            this.recurringTemplates = (recRes.data || []).map(r => this.rowToTemplate(r));
+                        }
                     } catch (recErr) { console.warn('Recurring templates unavailable (run recurring_setup.sql):', recErr); }
                 } catch (e) {
+                    if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
                     console.error("Failed to load data:", e);
                     alert("Could not load your data: " + (e.message || e));
                 } finally {
-                    this.dataLoading = false;
+                    if (this.authSessionVersion === loadSessionVersion) this.dataLoading = false;
                 }
             },
+            sessionLoadIsCurrent(userId, sessionVersion) {
+                return !!(
+                    this.isLoggedIn &&
+                    this.currentUser &&
+                    this.currentUser.id === userId &&
+                    this.authSessionVersion === sessionVersion
+                );
+            },
             async loadAuditEvents() {
+                if (!this.currentUser) return;
+                const loadUserId = this.currentUser.id;
+                const loadSessionVersion = this.authSessionVersion;
                 try {
                     const { data, error } = await supabaseClient
                         .from('audit_events')
@@ -2713,7 +2801,9 @@
                         .in('event_type', ['document_email_sent', 'email_sent', 'email_delivered', 'email_delivery_delayed', 'email_bounced', 'email_complained', 'email_failed', 'email_opened', 'email_clicked', 'email_received'])
                         .order('created_at', { ascending: false })
                         .limit(500);
-                    if (!error) this.auditEvents = data || [];
+                    if (!error && this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) {
+                        this.auditEvents = data || [];
+                    }
                 } catch (e) {
                     console.warn('Audit events unavailable:', e);
                 }
@@ -4185,6 +4275,15 @@
                 if (event === 'PASSWORD_RECOVERY') {
                     this.authMode = 'recovery';
                     setTimeout(() => this.beginPasswordRecovery(session && session.user), 0);
+                } else if (event === 'SIGNED_OUT') {
+                    const expectedSignOut = this.authSignOutRequested;
+                    const hadActiveSession = this.isLoggedIn;
+                    setTimeout(() => {
+                        this.clearSignedOutState();
+                        if (hadActiveSession && !expectedSignOut) {
+                            alert('Your session has ended. Please sign in again.');
+                        }
+                    }, 0);
                 }
             });
             // Restore an existing session on page load (keeps you logged in on refresh).
