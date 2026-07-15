@@ -17,6 +17,12 @@ Privacy-safe evidence from the `codex/release-readiness-pass` review. This does 
 - Supabase Pro listed completed daily physical backups through 2026-07-14; WAL-G was enabled and PITR disabled.
 - No known Stripe, Resend, JWT, or webhook-secret pattern was found in tracked text/source files.
 
+## Prepared But Not Operationally Verified
+
+- `LEGAL_OPERATIONS_RECORDS.md` now contains a working ROPA, rights/incident/vendor/retention templates, and preliminary DPIA screening.
+- `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` records fictional rights-request and cross-tenant breach exercises without real personal data. Both exercises passed as process-design walkthroughs but exposed blocking operational gaps.
+- This evidence does not approve lawful bases, retention periods, controller/processor roles, public notices, live case handling, or legal compliance.
+
 ## Deployed Hardening
 
 Failed Resend audit events no longer retain the recipient address or raw provider response. They keep only HTTP status, a stable generic reason, and non-personal workflow context.
@@ -34,6 +40,8 @@ Active versions after deployment:
 
 - `audit_events_actor_user_id_idx` and `invoices_customer_id_idx` are currently reported unused.
 - Auth database allocation remains an absolute 10 connections rather than percentage-based.
+- The project API reported PostgreSQL `17.6.1.127` and an active healthy project on 2026-07-15.
+- A read-only cost check showed a `$10/month` new-project baseline. The exact restore confirmation remains authoritative and no billed action was approved.
 
 No change was made because current usage evidence does not justify index removal or an Auth allocation change.
 
@@ -44,7 +52,7 @@ No change was made because current usage evidence does not justify index removal
 - Complete an Owner-approved timed restore into a separate non-production environment. This is billed/side-effect-sensitive and remains approval-gated.
 - Resolve Auth provider minimum password length, session policy, custom SMTP/rate limits, CAPTCHA/abuse controls, and connection allocation decisions.
 - Implement robust all-factors-lost recovery before paid/public onboarding.
-- Complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md` and `PAYMENT_OPERATIONS_RUNBOOK.md`.
+- Resolve the tabletop gaps, complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and `PAYMENT_OPERATIONS_RUNBOOK.md`.
 - Keep Stripe sandbox-only until a separately approved live release.
 
 ## Test Limitations

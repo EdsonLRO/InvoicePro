@@ -4,7 +4,7 @@ Internal evidence and action register for the current app. It is not a public Pr
 
 ## Current Disposition
 
-**Legal, Privacy and Regulatory Agent disposition, 2026-07-14:** `Blocked` for paid/public or real-customer onboarding.
+**Legal, Privacy and Regulatory Agent disposition, 2026-07-15:** `Approved with conditions` for internal preparation, portfolio demonstrations, sandbox payments, and controlled test-account use only. Paid/public or real-customer onboarding remains `Blocked`.
 
 The technical app may continue in controlled portfolio/sandbox testing. Publication remains blocked because controller identity/contact details, final lawful-basis decisions, retention periods, customer-facing notices/terms, rights operations, vendor/transfer evidence, and external review where required are unfinished.
 
@@ -51,7 +51,7 @@ No final retention period is approved yet. Before launch, the Owner and Legal Ag
 | Email/delivery records | Tallyo audit/history plus Resend provider data | Delivery evidence, suppression, provider deletion and support needs |
 | Append-only audit events | No final retention automation | Security evidence versus minimisation; access and deletion exceptions |
 | Backups | Current Supabase Pro daily backup window | Restoration, deleted-data reappearance, expiry evidence and legal hold |
-| Support/rights/incident records | Process not yet operational | Case closure, accountability, claims and secure deletion |
+| Support/rights/incident records | Internal templates and a fictional tabletop exist; no restricted live case system is approved | Case access, closure, accountability, claims, secure delivery and deletion |
 
 ICO storage-limitation guidance says retention should be necessary, documented, reviewed, and supported by deletion/anonymisation in practice: <https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-protection-principles/a-guide-to-the-data-protection-principles/storage-limitation/>.
 
@@ -78,6 +78,12 @@ ICO guidance says subject access requests can be verbal or written and normally 
 
 ICO guidance requires records of personal-data breaches and, where the reporting threshold is met, notification without undue delay and where feasible within 72 hours: <https://ico.org.uk/for-organisations/report-a-breach/personal-data-breach/personal-data-breaches-a-guide/>.
 
+## Internal Operations Evidence
+
+`LEGAL_OPERATIONS_RECORDS.md` contains a working ROPA, rights/incident/vendor/retention templates, and a preliminary DPIA screening. `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` records fictional rights-request and breach exercises with no real personal data.
+
+The tabletop passed as a process-design exercise but identified blocking operational gaps: no restricted case system, no approved role/lawful-basis decisions, no verified export/deletion procedure, incomplete vendor/transfer evidence, and no approved incident escalation contacts. It is not evidence that live privacy operations work end to end.
+
 ## Claims Register
 
 Allowed factual wording must remain evidence-backed, for example: "uses Supabase Auth", "RLS is enabled and isolation-tested", "Stripe webhook signatures are verified", and "built with data-protection principles in mind".
@@ -89,7 +95,7 @@ Blocked without explicit legal approval and suitable evidence: "GDPR compliant",
 1. Confirm business/controller identity and legal contact details.
 2. Obtain and review vendor/DPA/transfer/subprocessor evidence.
 3. Approve lawful bases and final retention periods with deletion mechanics.
-4. Build and test account export, correction, deletion, and case-register operations.
+4. Select a restricted case system, then build and test account export, correction, deletion, secure delivery, and case-register operations.
 5. Draft product-specific Privacy Notice and Terms that match the implemented systems and user type.
 6. Review refund, cancellation, failed-payment, dispute, support, and complaint wording.
 7. Complete DPIA screening and external professional review for unresolved controller/processor, consumer, transfer, tax, or recovery questions.

@@ -10,6 +10,7 @@ Follow `AUTOMATION_MODEL_ORCHESTRATION.md` and `AGENT_HIERARCHY_AND_COMPUTER_USE
 - **Project:** `cuagwifetheefftleeup` (`EdsonLRO Project`).
 - **Region:** West Europe (London / `eu-west-2`).
 - **Plan:** Pro, confirmed through the Supabase organisation API on 2026-07-13.
+- **Database version:** PostgreSQL `17.6.1.127`, read from the project API on 2026-07-15.
 - **Scheduled backups:** Supabase documents daily backups with seven days of retention for Pro projects.
 - **PITR:** Point-in-Time Recovery is not part of this runbook and must not be enabled without Owner approval because it is a separately billed add-on.
 - **Current RPO:** up to 24 hours with daily backups. RPO means Recovery Point Objective: the maximum expected data loss measured in time.
@@ -86,6 +87,8 @@ The machine currently has Supabase CLI and Docker available. `psql` was still no
 ## Restore-Test Procedure
 
 This procedure is deliberately approval-gated because Supabase's restore-to-new-project flow creates a separately billed project. A platform restore test must stop before the final cost confirmation until the Owner approves it.
+
+Current cost evidence, checked without creating a project on 2026-07-15: the organisation API showed a `$10/month` new-project baseline. The restore confirmation shown by Supabase remains authoritative because compute, disk, backup state, taxes, credits, and current platform pricing can change the actual charge. No cost or project creation was approved or accepted during this check.
 
 1. Select a known scheduled backup from before the test marker was created.
 2. Review the displayed cost for restoring to a new project.

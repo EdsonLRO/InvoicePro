@@ -64,6 +64,8 @@ The recurring and overdue jobs now retrieve `automation_secret` from Vault and s
 
 Current scheduled-backup evidence is verified. A timed restore is still required because a backup is not proven until recovery has been exercised.
 
+Read-only cost evidence on 2026-07-15 showed a `$10/month` new-project baseline. This is not approval to create the restore project; the exact Supabase restore confirmation is authoritative and requires separate Owner approval.
+
 - Choose a known backup and review the displayed cost of a separate restore project.
 - Obtain explicit Owner approval for that exact billed project/action.
 - Follow `BACKUP_RESTORE_RUNBOOK.md`, disabling cron and all email/Stripe side effects in the restored environment before testing.
@@ -75,7 +77,7 @@ Current scheduled-backup evidence is verified. A timed restore is still required
 - [x] Complete the known-payment dispute and genuine failed-refund Stripe sandbox tests, including duplicate replay checks. Privacy-safe evidence was recorded on 2026-07-14 in `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
 - Keep Stripe in sandbox until live-mode configuration, policy/legal work, and explicit Owner approval are complete.
 - Complete authenticated mobile, long/mobile PDF, and real-browser PWA checks. Public desktop/mobile shell, deployed CSP/SRI, manifest and service-worker checks passed on 2026-07-14.
-- Complete the blocked actions in `LEGAL_PRIVACY_READINESS.md` and legally review `PAYMENT_OPERATIONS_RUNBOOK.md` before real customers.
+- Complete the blocking actions in `LEGAL_PRIVACY_READINESS.md` and `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md`, then legally review `PAYMENT_OPERATIONS_RUNBOOK.md` before real customers.
 
 ## Completed non-manual evidence
 

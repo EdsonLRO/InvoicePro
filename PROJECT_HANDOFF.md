@@ -184,6 +184,8 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `BACKUP_RESTORE_RUNBOOK.md` | Supabase Pro backup posture, logical export safety, restore-test procedure, side-effect controls, evidence, and approval boundaries. |
 | `PAYMENT_OPERATIONS_RUNBOOK.md` | Internal Stripe sandbox refund, dispute, chargeback, failure, support, and escalation procedure; not a customer-facing policy. |
 | `LEGAL_PRIVACY_READINESS.md` | Internal data-flow, role, vendor, retention, rights, breach, claims, legal disposition, and launch-block register. |
+| `LEGAL_OPERATIONS_RECORDS.md` | Internal working ROPA, privacy case templates, vendor/retention review templates, preliminary DPIA screening, and exercise schedule. |
+| `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` | Fictional, privacy-safe rights-request and breach tabletop evidence with blocking operational gaps. |
 | `RELEASE_EVIDENCE_2026-07-15.md` | Privacy-safe evidence, deployed versions, limitations, and remaining gates from the current readiness pass. |
 | `DEFERRED_MANUAL_CONFIGURATION.md` | Laptop/identity/provider/cost-dependent acceptance and configuration decisions that automation must not perform silently. |
 | `EMAIL_PHASE.md` | Staged Resend email plan: DNS setup, manual sending, webhooks, then automation. |
