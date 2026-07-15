@@ -42,7 +42,7 @@ Live settings were read without exposing credentials on 2026-07-13:
 | Single-session enforcement | Disabled | Keep unless product policy requires one session per account; Tallyo already provides global logout. |
 | Email confirmation | Required | Keep enabled. |
 | Email OTP expiry / length | 3600 seconds / 8 digits | Review with the final email/recovery UX; do not loosen without a reason. |
-| CAPTCHA | Not configured | Add a supported CAPTCHA provider plus frontend integration before public signup if abuse risk warrants it. Do not enable only the dashboard half. |
+| CAPTCHA | Decision prepared; not configured | `CAPTCHA_ABUSE_CONTROL_DECISION_2026-07-15.md` recommends Cloudflare Turnstile Managed mode with no pre-clearance/invisible mode, exact-hostname restriction, narrow CSP origins, privacy minimisation, and a documented provider-required SRI exception. Owner approval is required before vendor selection, terms acceptance, widget/key creation, code/CSP changes, or Supabase enforcement. Never enable only the dashboard half. |
 | Auth email delivery | Verified | Resend SMTP is configured with sender `Tallyo <auth@mail.tallyo.co.uk>`, port 465, and a send-only API key restricted to `mail.tallyo.co.uk`. Supabase completed a dedicated-test-account recovery request with HTTP 200 on 2026-07-15, and receipt was confirmed in that test inbox. |
 | Auth email send rate | 30 per hour | Supabase raised the limit from 2 to 30 when custom SMTP was enabled. Keep this initial limit and review provider evidence before any increase. |
 | Token refresh / verification limits | 150 / 30 | Revisit from observed traffic before launch; do not raise pre-emptively. |
