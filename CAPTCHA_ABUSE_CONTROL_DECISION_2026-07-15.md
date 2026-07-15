@@ -58,6 +58,8 @@ The frontend now contains dormant Turnstile support for sign-up, password sign-i
 
 Supabase CAPTCHA enforcement remains **off**. A production site key is not configured, the Cloudflare secret is not stored, and the live Auth behavior is unchanged until the controlled rollout resumes.
 
+`CLOUDFLARE_TURNSTILE_VENDOR_REVIEW_2026-07-15.md` records the refreshed provider, DPA, UK-transfer, subprocessor, PECR, hostname, and rollout evidence. Its disposition is approved-with-conditions for controlled test preparation only; production remains blocked.
+
 ## Why CAPTCHA Is Worth Adding
 
 Tallyo exposes public Auth endpoints that can be targeted for:
@@ -182,7 +184,7 @@ Supabase protection must not be enabled until the deployed frontend supplies a t
 ## Rollout Order
 
 1. Owner chooses the provider and accepts the documented SRI/data-flow trade-off.
-2. Review Cloudflare terms, DPA, UK transfer mechanism, subprocessors, and intended Privacy Notice wording.
+2. Use the internal provider/DPA/transfer review as evidence, then obtain the outstanding Owner contract acceptance, product-specific retention detail, final notice/lawful-basis decisions, and professional review.
 3. Create separate test and production widgets; keep secret values masked.
 4. Implement frontend code, CSP, focused tests, and documentation on a review branch.
 5. Deploy the frontend first with CAPTCHA support present but Supabase enforcement still off.
@@ -195,7 +197,7 @@ The dashboard-only state is prohibited because it would break sign-up, sign-in, 
 
 ## Owner Decision Record
 
-The Owner approved items 1-3 and 5-6 for the bounded frontend implementation on 2026-07-15. Item 4 remains open for provider/legal evidence and final pre-launch review. Item 7 remains an Owner-operated provisioning step because it involves provider account/terms interaction and a secret. Item 8 remains a separate approval immediately before production enforcement.
+The Owner approved items 1-3 and 5-6 for the bounded frontend implementation on 2026-07-15. Internal evidence for item 4 is now recorded, but Owner contract acceptance, unresolved retention/transfer decisions, public-notice wording, and final professional review remain open. Item 7 remains an Owner-operated provisioning step because it involves provider account/terms interaction and a secret. Item 8 remains a separate approval immediately before production enforcement.
 
 1. Cloudflare Turnstile as a new browser-facing vendor.
 2. Managed mode with no pre-clearance or invisible mode.
