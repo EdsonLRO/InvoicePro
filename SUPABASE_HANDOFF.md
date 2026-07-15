@@ -159,7 +159,7 @@ Policy names follow the pattern `own <table> - <command>` where applicable, for 
 - Browser clients should not insert, update, or delete audit events.
 - Trusted Edge Functions and verified provider webhooks insert audit events with the service role key.
 - Updates/deletes are blocked by trigger in `supabase/audit_events.sql`.
-- `log-app-event` records selected authenticated user actions such as deletes, exports, payment removal, MFA/password changes, session logout scope, recurring schedule changes, and company/settings saves with privacy-safe metadata.
+- `log-app-event` records selected authenticated user actions such as deletes, exports, manual payment recording/removal, manual document-status changes, MFA/password changes, session logout scope, recurring schedule changes, and company/settings saves with privacy-safe metadata.
 - Reconfirm the live policy/trigger state after applying or changing this migration.
 
 ---
@@ -188,7 +188,7 @@ Other current Edge Functions:
 - `resend-webhook` - verifies Resend webhook signatures and records email lifecycle events.
 - `create-stripe-checkout` - authenticated user function; creates Stripe Checkout sessions for the caller's own invoice.
 - `create-stripe-refund` - authenticated user function; requests Stripe refunds for the caller's own confirmed Stripe payment rows.
-- `log-app-event` - authenticated user function; writes allowlisted sensitive app-action events into `audit_events` without exposing direct browser writes.
+- `log-app-event` - authenticated user function; deployed version 5 writes allowlisted sensitive app-action events into `audit_events` without exposing direct browser writes.
 - `stripe-webhook` - verifies Stripe signatures; records Checkout completion only when the Checkout session was created/logged by Tallyo; logs failed-payment/dispute/refund-failure lifecycle events; records successful refunds as locked negative Stripe payment entries.
 - Current sandbox Stripe webhook events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, `refund.failed`, `charge.dispute.created`, `charge.dispute.updated`, `charge.dispute.closed`, `charge.dispute.funds_withdrawn`, and `charge.dispute.funds_reinstated`.
 

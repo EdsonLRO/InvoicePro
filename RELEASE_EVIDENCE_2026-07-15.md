@@ -31,6 +31,7 @@ Privacy-safe evidence from the `codex/release-readiness-pass` review. This does 
 - PR #17 was squash-merged as `3758775b3b1928523ef77216bc45cfa7af584db5`. The harness and inline-script syntax check passed again from merged `main`. The public GitHub Pages source contained the expected `SIGNED_OUT` handler, session-generation guard, and reauthentication message; the Tallyo sign-in shell rendered with its email/password fields and no captured browser-console errors. Session-policy activation was still Owner-gated and unchanged during that specific deployment-acceptance check.
 - After that deployment acceptance, the Owner approved production session-policy activation. Supabase Auth was saved and independently reloaded/read back with a 168-hour maximum session duration, 24-hour inactivity timeout, refresh-token rotation enabled with the existing 10-second reuse interval, and single-session enforcement disabled. The established 3600-second JWT lifetime was not changed.
 - After Owner approval, `send-overdue-reminders` version 8 was deployed to production without forcing an invocation. Deployed-source readback confirmed privacy-safe `payment_reminder_processing_failed` evidence for provider-request and invoice-history-update failures, continued processing of other eligible invoices, and a non-success HTTP response when any invoice fails. The custom `x-automation-secret` boundary remained in place, and the immediate post-deployment Edge Function log review found no error signal.
+- After separate Owner approval, authenticated `log-app-event` version 5 was deployed. Deployed-source readback confirmed allowlisted `manual_payment_recorded` and `document_status_changed` events; the public GitHub Pages source contained both post-save calls, and an unauthenticated production request was rejected with HTTP 401 without writing an event. Metadata excludes payment notes and customer/contact/document-content fields.
 
 Detailed PDF/PWA notes: `PDF_PWA_REGRESSION_EVIDENCE_2026-07-15.md`.
 
@@ -54,6 +55,7 @@ Active versions after deployment:
 | `send-reminder-email` | 8 | Supabase JWT |
 | `send-overdue-reminders` | 8 | `x-automation-secret` |
 | `generate-recurring` | 14 | `x-automation-secret` |
+| `log-app-event` | 5 | Supabase JWT |
 
 ## Informational Advisories
 
