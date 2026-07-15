@@ -32,7 +32,7 @@ Live settings were read without exposing credentials on 2026-07-13:
 
 | Setting | Current value | Recommended owner action |
 |---|---:|---|
-| Provider minimum password length | 6 | Raise to 12 after the test accounts pass recovery/signup checks, matching Tallyo's client rule. |
+| Provider minimum password length | 12 | Raised from 6 to 12 and read back from the production Auth provider on 2026-07-15, matching Tallyo's client rule. |
 | Required password character classes | None | Keep passphrase-friendly unless a documented policy requires character classes; length and breached-password rejection matter more than forced symbols. |
 | Leaked-password protection | Enabled | Keep enabled; complete the rejection test above. |
 | JWT lifetime | 3600 seconds | Keep unless a measured security/UX reason supports a change. |
@@ -64,10 +64,10 @@ The recurring and overdue jobs now retrieve `automation_secret` from Vault and s
 
 Current scheduled-backup evidence is verified. A timed restore is still required because a backup is not proven until recovery has been exercised.
 
-Read-only cost evidence on 2026-07-15 showed a `$10/month` new-project baseline. This is not approval to create the restore project; the exact Supabase restore confirmation is authoritative and requires separate Owner approval.
+Read-only evidence on 2026-07-15 showed a generic `$10/month` new-project baseline, but the restore-specific dashboard showed `$0` additional compute, `$0` additional disk, and `$0` total for the selected backup. This is not approval to create the restore project; the final Supabase restore action remains separately Owner-approved because it creates another environment and can clone active database automation.
 
 - Choose a known backup and review the displayed cost of a separate restore project.
-- Obtain explicit Owner approval for that exact billed project/action.
+- Obtain explicit Owner approval for that exact project/action and displayed cost, even when the displayed incremental cost is `$0`.
 - Follow `BACKUP_RESTORE_RUNBOOK.md`, disabling cron and all email/Stripe side effects in the restored environment before testing.
 - Measure RTO, validate row counts without copying customer content, and re-run Account A/Account B isolation tests.
 - Record only operational evidence; do not record credentials or customer documents.
@@ -81,7 +81,7 @@ Read-only cost evidence on 2026-07-15 showed a `$10/month` new-project baseline.
 
 ## Completed non-manual evidence
 
-- Supabase leaked-password protection is enabled and security advisors are clear.
+- Supabase leaked-password protection is enabled, the provider minimum password length is 12, and security advisors are clear.
 - RLS performance hardening and foreign-key indexes were applied without changing tenant ownership rules.
 - `generate-recurring` v13 rejects unsigned requests, enforces one invoice per schedule occurrence, and only emails after a conditional schedule claim; both cron commands are Vault-backed.
 - `resend-webhook` v11 passes Deno type checking and rejects unsigned requests.

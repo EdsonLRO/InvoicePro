@@ -15,7 +15,7 @@ Tallyo is a real working app and strong portfolio project, but it is not yet liv
 | Gate | Status | Evidence / next action |
 |---|---|---|
 | Core invoicing workflows | Implemented | Needs final regression evidence. |
-| Supabase Auth + email verification | Implemented | Needs current Auth settings review before release. |
+| Supabase Auth + email verification | Implemented | Email verification, leaked-password protection, and the 12-character provider minimum are active; remaining provider decisions are tracked below. |
 | TOTP MFA | Verified | Primary/backup enrolment and sign-in, protected factor lifecycle, primary-specific and backup-specific password recovery, wrong-code sign-in/recovery rejection, email-only bypass rejection, privacy-safe account-audit review, fail-closed lookup simulation, and provider leaked-password rejection passed on 2026-07-14. |
 | All-factors-lost account recovery | Blocked | The approved interim response is deny-by-default and does not restore access. Implement and review a robust recovery method before paid/public onboarding. |
 | RLS / tenant isolation | Verified | On 2026-07-14, two authenticated account contexts passed 12 table-visibility checks across all six tenant tables plus five rolled-back customer write-path checks; no cross-tenant row was visible or mutable. |
@@ -33,7 +33,7 @@ Tallyo is a real working app and strong portfolio project, but it is not yet liv
 | PDF regression | Planned | Test mobile PDF download and long multi-page invoices. |
 | PWA/service-worker regression | In Progress | Deployed manifest/service-worker contents match the repository and required icon assets exist. Install/offline/update behaviour still needs a real-browser/device check. |
 | Documentation accuracy | In Progress | Keep status/handoff/security docs synced with real implementation. |
-| Supabase Auth provider policy | In Progress | Live settings were recorded without secrets. Email confirmation, MFA, refresh rotation, and leaked-password protection are active; remaining owner decisions are centralised in `DEFERRED_MANUAL_CONFIGURATION.md`. |
+| Supabase Auth provider policy | In Progress | Live settings were recorded without secrets. Email confirmation, MFA, refresh rotation, leaked-password protection, and a verified 12-character minimum are active; remaining owner decisions are centralised in `DEFERRED_MANUAL_CONFIGURATION.md`. |
 | Agent governance documentation | Verified | The corrected hierarchy and active Legal Agent governance are merged. Counts, legal triggers/workflow, task fields, work modes, release gate, code fences, headings, and secret/PII scope passed validation. |
 
 Public launch remains blocked when required legal documents are unfinished, material privacy flows are undocumented, legally required notices are missing, unresolved legal blocks exist, mandatory external professional review is incomplete, or product claims exceed verified evidence.

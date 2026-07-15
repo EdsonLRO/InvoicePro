@@ -86,13 +86,15 @@ The machine currently has Supabase CLI and Docker available. `psql` was still no
 
 ## Restore-Test Procedure
 
-This procedure is deliberately approval-gated because Supabase's restore-to-new-project flow creates a separately billed project. A platform restore test must stop before the final cost confirmation until the Owner approves it.
+This procedure is deliberately approval-gated because Supabase's restore-to-new-project flow creates a separate project with operational and potentially changing billing consequences. A platform restore test must stop before the final restore action until the Owner approves it.
 
-Current cost evidence, checked without creating a project on 2026-07-15: the organisation API showed a `$10/month` new-project baseline. The restore confirmation shown by Supabase remains authoritative because compute, disk, backup state, taxes, credits, and current platform pricing can change the actual charge. No cost or project creation was approved or accepted during this check.
+Current cost evidence, checked without creating a project on 2026-07-15: the organisation API showed a generic `$10/month` new-project baseline, while the restore-specific dashboard showed `$0` additional monthly compute, `$0` additional monthly disk, and `$0` total for restoring the selected backup to a new project in `eu-west-2`. The restore screen is authoritative for that attempt, but pricing, credits, compute, disk, taxes, and platform terms can change. The final **Restore to new project** action was not selected and no project was created.
+
+The restore-specific dashboard also confirmed that database schema, data, indexes, roles, permissions, and users transfer. Storage objects/settings, Edge Functions, Auth settings/API keys, database extensions/settings, and read replicas require manual reconfiguration. The restored project starts with the current compute size and 1.5 times the disk size to allow the restore to complete.
 
 1. Select a known scheduled backup from before the test marker was created.
 2. Review the displayed cost for restoring to a new project.
-3. Obtain explicit Owner approval for that exact new project and recurring cost.
+3. Obtain explicit Owner approval for that exact new project, displayed cost, and operational side effects, even when the displayed incremental cost is `$0`.
 4. Restore to a new non-production project in the same region.
 5. Immediately prevent external side effects in the restored project:
    - disable all restored `pg_cron` jobs;

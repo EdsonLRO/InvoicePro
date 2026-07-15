@@ -41,7 +41,7 @@ Still to finish before treating the app as customer-ready:
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations. Company/settings saves are now covered at a privacy-safe category level.
 - MFA browser acceptance is complete for fail-closed routing, primary/backup factor lifecycle, primary-specific and backup-specific recovery, wrong-code rejection, and email-only bypass rejection. Robust all-factors-lost recovery remains a paid/public-launch condition.
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.
-- Resolve the recorded Supabase server-side password, session, SMTP/rate-limit, and abuse-control decisions in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection is enabled and the live advisor was clear on 2026-07-13.
+- Resolve the recorded Supabase session, SMTP/rate-limit, and abuse-control decisions in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection and a verified 12-character provider minimum are enabled; the live advisor was clear on 2026-07-13.
 - Complete the blocked legal/privacy actions in `LEGAL_PRIVACY_READINESS.md`. Working records, a preliminary DPIA screening, and a fictional tabletop now exist, but restricted case tooling, public notices, retention/role decisions, verified rights operations, vendor evidence, and external review remain.
 - Complete authenticated mobile, long/mobile PDF, and real-browser PWA regression. The deployed public shell already passed desktop and 390x844 overflow checks.
 - Documentation/screenshots/portfolio evidence kept in sync with the real app.
@@ -75,6 +75,7 @@ Strong controls already implemented:
 
 - Supabase Auth with server-side password hashing.
 - Supabase leaked-password protection, checked server-side against known breach data.
+- A 12-character Supabase Auth provider minimum aligned with the client-side rule.
 - Real email confirmation.
 - Optional TOTP MFA with fail-closed assurance checks and support for one backup authenticator.
 - Explicit local logout and all-devices logout, with password confirmation and MFA when required for all-devices logout.
