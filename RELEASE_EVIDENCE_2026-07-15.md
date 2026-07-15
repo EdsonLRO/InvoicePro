@@ -17,6 +17,7 @@ Privacy-safe evidence from the `codex/release-readiness-pass` review. This does 
 - Deployed `manifest.json` and `service-worker.js` matched the repository; both PWA icons exist.
 - Supabase Pro listed completed daily physical backups through 2026-07-14; WAL-G was enabled and PITR disabled.
 - Supabase Auth minimum password length was raised from 6 to 12 with leaked-password protection kept enabled; the saved value was reopened and read back on 2026-07-15.
+- Supabase Auth custom SMTP was enabled and read back with sender `Tallyo <auth@mail.tallyo.co.uk>`, host `smtp.resend.com`, port 465, a 60-second per-user interval, and a 30-emails-per-hour limit. The Resend credential is send-only and restricted to `mail.tallyo.co.uk`; its secret value was transferred directly into Supabase and was not displayed, logged, or committed. After the final credential was installed, a separately approved dedicated-test-account recovery request completed with HTTP 200 in Supabase Auth at 15:41:22 UTC and receipt was confirmed in the dedicated inbox. An immediate duplicate request was correctly rejected by the configured per-user cooldown. End-to-end Auth SMTP delivery is Verified.
 - No known Stripe, Resend, JWT, or webhook-secret pattern was found in tracked text/source files.
 - An Owner-approved backup restored to a separate project at `$0` displayed incremental cost and was first observed healthy after approximately four minutes.
 - Restored exact row counts, structural controls, and five migration records matched production; 12 tenant read checks and four rolled-back write probes passed.
@@ -74,7 +75,7 @@ No change was made because current usage evidence does not justify index removal
 ## Pending Acceptance
 
 - Observe PWA update behaviour across a later deployment. Phone PDF, installation, offline shell fallback, and reconnection are verified; offline authentication and customer-data access are intentionally unsupported.
-- Complete the remaining custom SMTP/rate-limit, CAPTCHA/abuse-control, and connection-allocation decisions. The seven-day session timebox and 24-hour inactivity timeout are active and evidence-backed.
+- Complete the CAPTCHA/abuse-control and connection-allocation decisions. Custom SMTP delivery and its initial 30-emails-per-hour limit are verified; the seven-day session timebox and 24-hour inactivity timeout are active and evidence-backed.
 - Implement robust all-factors-lost recovery before paid/public onboarding.
 - Resolve the tabletop gaps, complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and `PAYMENT_OPERATIONS_RUNBOOK.md`.
 - Keep Stripe sandbox-only until a separately approved live release.
