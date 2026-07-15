@@ -13,6 +13,7 @@ The technical app may continue in controlled portfolio/sandbox testing. Publicat
 | Flow | Data categories | System | Current control / open point |
 |---|---|---|---|
 | Account signup/sign-in | Email, Auth identifiers, password verifier, MFA factor metadata, session/security events | Supabase Auth | Email confirmation, leaked-password screening, optional TOTP MFA, AAL2 checks. Robust all-factors-lost recovery remains blocked. |
+| Proposed Auth CAPTCHA | IP address, TLS/browser fingerprint signals, user agent, sitekey/origin, challenge result/token | Cloudflare Turnstile in the browser, then Supabase Auth validation | Not active. `CAPTCHA_ABUSE_CONTROL_DECISION_2026-07-15.md` recommends Managed mode with no pre-clearance/invisible mode, minimal logging, exact-hostname restriction, and a narrow CSP/SRI exception. Owner vendor/data-flow approval and notice/transfer review remain required. |
 | Invoicing workspace | Business profile, customer contacts, invoice/quote/credit-note content, saved items, payment records | Supabase Postgres | Per-user RLS, two-account isolation tests, service-role attribution, append-only provider audit events. |
 | Account-holder data export | Limited Auth profile fields plus company settings, customers, saved items, documents, recurring schedules, and audit events | Authenticated browser reads from Supabase Postgres, then local JSON download | Existing RLS, Auth-user revalidation, stable pagination, whole-export failure, session-generation check, metadata minimisation, trusted-device warning, no server staging. Frontend and `log-app-event` v6 allowlist are deployed; controlled test-account browser acceptance and one successful production event row remain. |
 | Document/reminder email | Recipient email, document content/PDF, delivery metadata | Resend via Supabase Edge Functions | Server-side key, ownership checks, signed webhook, opt-in automation. Retention and processor terms need review. |
@@ -37,8 +38,9 @@ This role split is a working hypothesis and requires external review before comm
 | Resend | Transactional invoice/reminder email and delivery events | Recipient, message/PDF, delivery metadata | Collect DPA, processing locations, subprocessors, retention and suppression behaviour | Evidence required |
 | Stripe | Checkout, payment, refund, dispute lifecycle | Payment/customer identifiers; card data handled by Stripe | Collect applicable terms/DPA, role split, transfers, retention, dispute evidence rules | Evidence required |
 | GitHub Pages | Static app hosting | Request/hosting metadata; no intended workspace database | Confirm applicable terms, logs/retention, region/transfer position | Evidence required |
+| Cloudflare Turnstile (proposed) | Bot and automated Auth-abuse detection for sign-up, password sign-in, and reset requests | IP address, TLS/browser fingerprint signals, user agent, sitekey/origin and challenge data; no workspace/customer data intended | Cloudflare describes processor activity for site protection and controller activity for improving Turnstile. Review DPA, UK transfer terms, subprocessors, retention, provider terms, and final notice wording before selection. | Proposed only; Owner approval required |
 
-No analytics, advertising, or non-essential cookie provider is approved in the current app. Any future provider triggers a new privacy/PECR review.
+No analytics, advertising, or non-essential cookie provider is approved in the current app. Turnstile is not currently enabled. Its provider statement that security signals are strictly necessary is evidence for review, not Tallyo's final PECR conclusion. Any future provider triggers a new privacy/PECR review.
 
 ## Retention Working Register
 
