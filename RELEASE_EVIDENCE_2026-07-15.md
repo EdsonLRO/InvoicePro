@@ -44,6 +44,7 @@ Detailed PDF/PWA notes: `PDF_PWA_REGRESSION_EVIDENCE_2026-07-15.md`.
 
 - `LEGAL_OPERATIONS_RECORDS.md` now contains a working ROPA, rights/incident/vendor/retention templates, and preliminary DPIA screening.
 - `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` records fictional rights-request and cross-tenant breach exercises without real personal data. Both exercises passed as process-design walkthroughs but exposed blocking operational gaps.
+- `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md` records an approved-with-conditions design for an authenticated RLS-scoped account-holder JSON export. Success and simulated dataset-failure harnesses cover pagination, metadata minimisation, local download, no partial file, and minimal audit emission. Dedicated test-account browser acceptance and production audit-event readback are still pending.
 - This evidence does not approve lawful bases, retention periods, controller/processor roles, public notices, live case handling, or legal compliance.
 
 ## Deployed Hardening
@@ -76,6 +77,7 @@ No change was made because current usage evidence does not justify index removal
 
 - Observe PWA update behaviour across a later deployment. Phone PDF, installation, offline shell fallback, and reconnection are verified; offline authentication and customer-data access are intentionally unsupported.
 - Complete the CAPTCHA/abuse-control and connection-allocation decisions. Custom SMTP delivery and its initial 30-emails-per-hour limit are verified; the seven-day session timebox and 24-hour inactivity timeout are active and evidence-backed.
+- Complete dedicated test-account desktop/mobile acceptance and production audit-event readback for the account-holder data export. Do not inspect or record exported customer content in evidence.
 - Implement robust all-factors-lost recovery before paid/public onboarding.
 - Resolve the tabletop gaps, complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and `PAYMENT_OPERATIONS_RUNBOOK.md`.
 - Keep Stripe sandbox-only until a separately approved live release.

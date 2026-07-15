@@ -48,6 +48,8 @@ The rest of this document is the journey from there to something you can actuall
 
 **Why it matters.** This is the heart of keeping many users' data safely separated. Putting the rule in the database means the safety net is always there, underneath everything, no matter what the app above it does.
 
+**Using that boundary for account export.** The Account page can now prepare a structured JSON copy of the signed-in user's workspace. It uses the ordinary authenticated Supabase client, so the same RLS policies remain the boundary; there is no service-role shortcut. The browser rechecks the Auth user, paginates every tenant table, excludes passwords, tokens, TOTP material and unrestricted Auth metadata, stops if the session or any query fails, and creates the file locally instead of staging another server-side copy. A minimal `account_data_exported` event records only the format/version. This helps account holders retrieve their workspace, but it does not automatically resolve a request from one of their invoice recipients or make Tallyo compliant.
+
 ---
 
 ## Phase 3 — A second lock on the door (MFA)
@@ -182,6 +184,7 @@ The future public website, Tallyo subscriptions, plan tiers, workspaces, teams, 
 A credible security posture isn't about claiming perfection — it's about knowing exactly where you stand. A few things are deliberately still on the list:
 
 - **Not certified as compliant.** The app is **built with data protection principles in mind**, but it is **not** formally "GDPR compliant." Real compliance groundwork — a privacy policy, lawful basis, data-subject rights (access/erasure/portability), retention, and a breach process — is future work and would be required before onboarding real paying customers.
+- **Account export is not the whole rights process.** The RLS-scoped JSON export is implemented for the account holder and avoids a new server-side export copy. Third-party request routing, identity decisions, redaction, correction, deletion, provider assistance, retention exceptions, secure delivery, and restricted case records remain separate work.
 - **Activity history is convenient, not tamper-proof** — provider events and selected sensitive app actions now go into append-only `audit_events`. Manual payment recording/removal and manual status changes are covered without payment notes or customer data. Company/settings saves are logged only as changed categories, not raw bank details, notes, addresses, or other sensitive values. This is still not a complete monitoring/compliance audit system.
 - **Recovery is not yet fully proven.** The Supabase organisation is Pro and completed daily backups through 2026-07-14 were verified, but Tallyo still needs a timed non-production restore test under `BACKUP_RESTORE_RUNBOOK.md`.
 - **MFA has no provider recovery codes.** Tallyo supports a second authenticator and refuses email-only MFA bypass. Primary-specific and backup-specific recovery tests passed on 2026-07-14, completing AUTH-001. The interim all-factors-lost support response is approved and deny-by-default; robust recovery is still required before paid/public onboarding. Supabase leaked-password protection is enabled, advisor-verified, and passed a safe provider rejection test on 2026-07-14.
@@ -203,7 +206,7 @@ Naming these plainly is the point. It's the difference between marketing and a g
 - **More append-only audit logging** for remaining sensitive actions and stronger monitoring. Recurring and overdue-reminder failure paths now have privacy-safe evidence, while backup/restore evidence remains a separate controlled record.
 - **Formal backups / retention** and a documented restore process.
 - **Robust all-factors-lost MFA recovery method** before paid/public onboarding, plus stronger Auth-level signup checks (server-side password policy / breached-password screening).
-- **Data-protection groundwork** (privacy policy, consent/unsubscribe, data-subject request handling) before taking real customers.
+- **Data-protection groundwork** (privacy policy, consent/unsubscribe, restricted case handling, correction/deletion/provider assistance, and operational acceptance of the account export) before taking real customers.
 - **Future SaaS architecture** (public website, Tallyo subscriptions, plan tiers, workspaces, teams/RBAC, and server-enforced entitlements) after the current app is finished and hardened.
 
 ---

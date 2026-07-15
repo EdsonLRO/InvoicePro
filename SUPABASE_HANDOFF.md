@@ -159,7 +159,7 @@ Policy names follow the pattern `own <table> - <command>` where applicable, for 
 - Browser clients should not insert, update, or delete audit events.
 - Trusted Edge Functions and verified provider webhooks insert audit events with the service role key.
 - Updates/deletes are blocked by trigger in `supabase/audit_events.sql`.
-- `log-app-event` records selected authenticated user actions such as deletes, exports, manual payment recording/removal, manual document-status changes, MFA/password changes, session logout scope, recurring schedule changes, and company/settings saves with privacy-safe metadata.
+- `log-app-event` records selected authenticated user actions such as deletes, document/account exports, manual payment recording/removal, manual document-status changes, MFA/password changes, session logout scope, recurring schedule changes, and company/settings saves with privacy-safe metadata. The account-export event contains format/version only; exported content, counts, filenames, customer data, and Auth metadata are not sent to the function.
 - Reconfirm the live policy/trigger state after applying or changing this migration.
 
 ---
