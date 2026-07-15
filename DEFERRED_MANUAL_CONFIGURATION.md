@@ -51,6 +51,8 @@ These are configuration decisions, not invitations to weaken Auth, MFA, RLS, or 
 
 The 7-day/24-hour recommendation balances customer-data protection with the repeated mobile use expected from a small-business invoicing app. Keep the one-hour JWT lifetime and refresh-token rotation unchanged. Supabase enforces timebox and inactivity limits when the session next refreshes, so effective sign-out may occur up to the JWT lifetime later. Before enabling these values, Tallyo's client must deploy and accept graceful `SIGNED_OUT` handling so an expired session clears all in-memory business data and returns to login. Single-session enforcement should remain disabled because users may legitimately use a phone and computer, and Tallyo already offers local and all-devices logout.
 
+Deployment acceptance passed on 2026-07-15 after PR #17 was squash-merged as `3758775b3b1928523ef77216bc45cfa7af584db5`. The focused session-expiry harness passed again from merged `main`; the public GitHub Pages source contained the `SIGNED_OUT` handler, session-generation guard, and reauthentication message; the unauthenticated Tallyo sign-in shell rendered normally with no captured browser-console errors. No Supabase Auth session-policy value was changed during this acceptance check.
+
 ## 3. Scheduled automation acceptance
 
 The recurring and overdue jobs now retrieve `automation_secret` from Vault and send it as `x-automation-secret`. Their endpoints reject unsigned requests.
