@@ -43,11 +43,14 @@ Live settings were read without exposing credentials on 2026-07-13:
 | Email confirmation | Required | Keep enabled. |
 | Email OTP expiry / length | 3600 seconds / 8 digits | Review with the final email/recovery UX; do not loosen without a reason. |
 | CAPTCHA | Not configured | Add a supported CAPTCHA provider plus frontend integration before public signup if abuse risk warrants it. Do not enable only the dashboard half. |
-| Built-in email send rate | 2 per hour | Configure and test custom SMTP before public onboarding or heavier acceptance testing. |
+| Auth email delivery | Verified | Resend SMTP is configured with sender `Tallyo <auth@mail.tallyo.co.uk>`, port 465, and a send-only API key restricted to `mail.tallyo.co.uk`. Supabase completed a dedicated-test-account recovery request with HTTP 200 on 2026-07-15, and receipt was confirmed in that test inbox. |
+| Auth email send rate | 30 per hour | Supabase raised the limit from 2 to 30 when custom SMTP was enabled. Keep this initial limit and review provider evidence before any increase. |
 | Token refresh / verification limits | 150 / 30 | Revisit from observed traffic before launch; do not raise pre-emptively. |
 | Auth database connections | Absolute 10 | Low urgency for the current load. Revisit the provider connection strategy before scaling or changing compute. |
 
 These are configuration decisions, not invitations to weaken Auth, MFA, RLS, or rate limits.
+
+Custom SMTP was enabled and read back from the production dashboard on 2026-07-15. The Resend credential is purpose-specific, send-only, and restricted to the verified `mail.tallyo.co.uk` domain; its value was transferred directly into Supabase and was not displayed, logged, or committed. Non-secret readback confirmed the sender identity, `smtp.resend.com`, port 465, a 60-second per-user minimum interval, and the 30-emails-per-hour Auth limit. A separately approved recovery request to a dedicated Tallyo test account completed with HTTP 200 in Supabase Auth after the final credential was installed, and receipt was confirmed in the dedicated inbox. An immediate duplicate was correctly rate-limited. End-to-end Auth SMTP delivery is Verified.
 
 The active 7-day/24-hour policy balances customer-data protection with the repeated mobile use expected from a small-business invoicing app. The one-hour JWT lifetime and refresh-token rotation remain unchanged. Supabase enforces timebox and inactivity limits when the session next refreshes, so effective sign-out may occur up to the JWT lifetime later. Tallyo's deployed client handles unexpected `SIGNED_OUT` events by clearing all in-memory business data and returning to login. Single-session enforcement remains disabled because users may legitimately use a phone and computer, and Tallyo already offers local and all-devices logout.
 
