@@ -86,6 +86,7 @@ Strong controls already implemented:
 - Signed Resend and Stripe webhooks.
 - CSP, SRI, and self-hosted Tailwind.
 - All nine Edge Functions pin `@supabase/supabase-js` to exact version `2.110.1`; unused floating import-map aliases were removed.
+- A read-only GitHub Actions security gate uses immutable action commit SHAs, exact Deno `2.2.15` LTS, and per-function frozen dependency locks. It type-checks all nine functions and runs the focused security harnesses without repository write permission or secrets.
 - Honest activity history wording.
 
 Known limits:

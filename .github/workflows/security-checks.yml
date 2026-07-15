@@ -1,0 +1,56 @@
+name: Security checks
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2.0.4
+        with:
+          deno-version: v2.2.15
+          cache: true
+          cache-hash: ${{ hashFiles('supabase/functions/**/deno.lock') }}
+
+      - name: Run focused security harnesses
+        run: |
+          node tests/edge-dependency-pin-harness.cjs
+          node tests/financial-action-audit-harness.cjs
+          node tests/security-workflow-harness.cjs
+          node tests/session-expiry-harness.cjs
+
+      - name: Type-check Edge Functions with frozen locks
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r entry; do
+            function_dir="$(dirname "$entry")"
+            echo "::group::$(basename "$function_dir")"
+            (
+              cd "$function_dir"
+              deno check --frozen --lock=deno.lock index.ts
+            )
+            echo "::endgroup::"
+          done < <(find supabase/functions -mindepth 2 -maxdepth 2 -name index.ts -print | sort)
