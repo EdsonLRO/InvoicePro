@@ -3341,14 +3341,21 @@
                 }
             },
             async changeStatus(newStatus) {
-                if ((this.draft.status || 'Draft') === newStatus) return;
+                const previousStatus = this.draft.status || 'Draft';
+                if (previousStatus === newStatus) return;
                 this.draft.status = newStatus;
                 // For a brand-new, unsaved document just set the status locally; it saves with the doc.
                 if (!this.isUuid(this.draft.id)) return;
                 const labels = { Draft: 'Reverted to draft', Sent: 'Marked as sent', Paid: 'Marked as paid', Cancelled: 'Marked as cancelled' };
                 const types = { Draft: 'status', Sent: 'sent', Paid: 'paid', Cancelled: 'cancelled' };
                 this.addHistory(types[newStatus] || 'status', labels[newStatus] || ('Status changed to ' + newStatus));
-                await this.persistDraft();
+                const saved = await this.persistDraft();
+                if (saved) {
+                    await this.logAppAuditEvent('document_status_changed', 'document', this.draft.id, {
+                        from_status: previousStatus,
+                        to_status: newStatus
+                    });
+                }
             },
             async addActivityNote() {
                 const text = (this.activityNote || '').trim();
@@ -3374,7 +3381,14 @@
                 this.addHistory('payment', 'Payment of ' + this.getCurrencySymbol(this.draft.currency) + amt.toFixed(2) + ' recorded');
                 if (this.draft.status === 'Paid' && !wasPaid) this.addHistory('paid', 'Marked as fully paid');
                 this.newPayment = { amount: null, date: new Date().toISOString().split('T')[0], note: '' };
-                await this.persistDraft();
+                const saved = await this.persistDraft();
+                if (saved && this.isUuid(this.draft.id)) {
+                    await this.logAppAuditEvent('manual_payment_recorded', 'invoice', this.draft.id, {
+                        amount: Math.round((amt + Number.EPSILON) * 100) / 100,
+                        currency: this.draft.currency || 'GBP',
+                        resulting_status: this.draft.status || 'Draft'
+                    });
+                }
             },
             stripePaymentBadge(payment) {
                 const amount = Number(payment && payment.amount);
