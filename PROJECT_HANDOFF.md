@@ -75,7 +75,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 - Global discount, shipping cost.
 
 **Payments & status**
-- Record/remove manual payments (remove requires confirmation and is logged).
+- Record/remove manual payments (remove requires confirmation; both actions are append-only audited with minimised metadata).
 - Stripe Checkout payment links are implemented through server-side Edge Functions.
 - App Pay by Card creates a full-balance Checkout session.
 - Invoice emails can include full-balance links and seller-approved deposit links.

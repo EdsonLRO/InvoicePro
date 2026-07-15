@@ -29,7 +29,7 @@ Implemented:
 - Branded PDF invoices and email PDF attachments.
 - Activity history for documents and recurring schedules.
 - Provider-backed `audit_events` for email and Stripe events.
-- Authenticated app-action `audit_events` for selected sensitive actions.
+- Authenticated app-action `audit_events` for selected sensitive actions, including manual payment recording/removal and manual document-status changes.
 - Supabase Auth, email confirmation, optional TOTP MFA, RLS, CSP, SRI, and server-side secrets.
 - Stripe failed-payment, refund, refund-failure, and dispute lifecycle awareness in the webhook.
 
@@ -90,7 +90,7 @@ Strong controls already implemented:
 Known limits:
 
 - Activity history is useful, but not tamper-proof.
-- `audit_events` now covers provider events and selected sensitive app actions, but it is not a full compliance/SIEM audit system.
+- `audit_events` now covers provider events and selected sensitive app actions, including manual financial-state changes, but it is not a full compliance or SIEM audit system.
 - Supabase does not provide recovery codes. Tallyo supports a second authenticator and prevents email-only MFA bypass. AUTH-001 acceptance is Verified. The interim all-factors-lost support response is approved and deny-by-default; robust recovery is still required before paid/public onboarding.
 - All-devices logout exists, but a future email-code confirmation flow would be stronger for production account recovery/security UX.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
