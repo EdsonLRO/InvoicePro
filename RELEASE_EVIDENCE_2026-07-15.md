@@ -21,6 +21,12 @@ Privacy-safe evidence from the `codex/release-readiness-pass` review. This does 
 - An Owner-approved backup restored to a separate project at `$0` displayed incremental cost and was first observed healthy after approximately four minutes.
 - Restored exact row counts, structural controls, and five migration records matched production; 12 tenant read checks and four rolled-back write probes passed.
 - Both copied cron jobs were disabled, the `pg_net` queue was empty/cleared, and no Edge Functions or provider integrations were configured in the clone.
+- The production recurring and overdue jobs then completed their next natural runs at 06:00 and 09:00 UTC. Both cron records succeeded; retained pg_net responses were HTTP 200 with no timeout or transport error.
+- Post-run database checks found zero duplicate recurring occurrence groups, zero generated-owner mismatches, and no invoice or audit/email event in the acceptance window. No schedule or reminder was due, so no customer communication was expected.
+- A dedicated authenticated test account produced a synthetic 24-row, three-page PDF. All rows remained complete, page gaps were clean, alternating row colours continued correctly, and notes, terms, payment details, and totals followed the last item without overlap.
+- The current PNG/RGBA export was 35,767,558 bytes. A quality-92 JPEG rendering of the same continuous invoice image was 684,960 bytes and retained acceptable visual quality. The branch exporter now captures onto white and uses JPEG plus jsPDF image alias reuse; post-deployment mobile size/download acceptance remains.
+
+Detailed PDF/PWA notes: `PDF_PWA_REGRESSION_EVIDENCE_2026-07-15.md`.
 
 ## Prepared But Not Operationally Verified
 
@@ -53,8 +59,7 @@ No change was made because current usage evidence does not justify index removal
 
 ## Pending Acceptance
 
-- Confirm the next natural 06:00/09:00 UTC cron/pg_net responses under the corrected 30-second timeout. A one-time Codex follow-up is scheduled; the functions will not be forced merely to create evidence.
-- Run authenticated mobile workflows, long/mobile PDF downloads, and real-browser PWA install/offline/update checks.
+- Deploy the lighter PDF exporter and run an authenticated phone download plus real-browser PWA install/offline/update checks.
 - Resolve Auth session policy, custom SMTP/rate limits, CAPTCHA/abuse controls, and connection allocation decisions.
 - Implement robust all-factors-lost recovery before paid/public onboarding.
 - Resolve the tabletop gaps, complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and `PAYMENT_OPERATIONS_RUNBOOK.md`.
@@ -62,6 +67,6 @@ No change was made because current usage evidence does not justify index removal
 
 ## Test Limitations
 
-- Authenticated desktop browser access is now available, but the control surface did not expose mobile viewport emulation or Service Worker APIs and the available test account had no invoice for a PDF download. Authenticated mobile/PWA/PDF acceptance is therefore not claimed.
+- Authenticated desktop browser access and a synthetic long-invoice fixture are now available. The control surface still does not expose mobile viewport emulation or Service Worker APIs, so authenticated phone and PWA install/offline/update acceptance is not claimed. The optimized PDF code has not yet been deployed from this branch.
 - The Edge Function tree is not uniformly `deno fmt` clean; bulk reformatting was deliberately avoided to keep this hardening diff focused. Type checking passed.
 - `psql` is not on `PATH`; the verified platform restore used Supabase's restore-to-new-project flow rather than a local CLI restore.

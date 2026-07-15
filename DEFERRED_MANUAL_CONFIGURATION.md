@@ -55,8 +55,8 @@ The recurring and overdue jobs now retrieve `automation_secret` from Vault and s
 
 - The 2026-07-14 protected functions both returned HTTP 200 and no duplicate invoice, owner mismatch, opt-in violation, or unintended email was found. The recurring pg_net caller exhausted its former short response timeout even though the Edge Function completed.
 - Both cron commands now use an explicit 30-second pg_net timeout and the privacy-safe email functions are deployed (`generate-recurring` v14 and `send-overdue-reminders` v7).
-- After the next natural 06:00 and 09:00 UTC runs, confirm both pg_net response rows are HTTP 200. Do not force a live run merely to create evidence.
-- Confirm no duplicate invoice or unintended customer email was produced.
+- [x] Confirm the next natural 06:00 and 09:00 UTC runs and retained pg_net responses. Both cron runs succeeded on 2026-07-15; both responses were HTTP 200 with no timeout or transport error.
+- [x] Confirm no duplicate invoice or unintended customer email was produced. Database checks found zero duplicate recurring occurrence groups, zero generated-owner mismatches, no newly generated recurring invoice, and no audit/email event in the acceptance window. No schedule or reminder was due.
 - For any due recurring schedule, confirm the generated invoice has source/occurrence attribution and one `recurring_invoice_generated` audit event.
 - If either job fails, inspect redacted Edge Function/cron logs before retrying. Never print the secret.
 
@@ -76,14 +76,14 @@ The Owner-approved timed restore completed on 2026-07-15. Privacy-safe results a
 
 - [x] Complete the known-payment dispute and genuine failed-refund Stripe sandbox tests, including duplicate replay checks. Privacy-safe evidence was recorded on 2026-07-14 in `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
 - Keep Stripe in sandbox until live-mode configuration, policy/legal work, and explicit Owner approval are complete.
-- Complete authenticated mobile, long/mobile PDF, and real-browser PWA checks. Public desktop/mobile shell, deployed CSP/SRI, manifest and service-worker checks passed on 2026-07-14.
+- Complete authenticated mobile PDF and real-browser PWA install/offline/update checks. Public desktop/mobile shell, deployed CSP/SRI, manifest and service-worker checks passed on 2026-07-14. An authenticated 24-row, three-page desktop PDF passed visual continuation and row-boundary checks on 2026-07-15; the optimized exporter still needs a post-deployment phone download.
 - Complete the blocking actions in `LEGAL_PRIVACY_READINESS.md` and `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md`, then legally review `PAYMENT_OPERATIONS_RUNBOOK.md` before real customers.
 
 ## Completed non-manual evidence
 
 - Supabase leaked-password protection is enabled, the provider minimum password length is 12, and security advisors are clear.
 - RLS performance hardening and foreign-key indexes were applied without changing tenant ownership rules.
-- `generate-recurring` v13 rejects unsigned requests, enforces one invoice per schedule occurrence, and only emails after a conditional schedule claim; both cron commands are Vault-backed.
+- `generate-recurring` v14 rejects unsigned requests, enforces one invoice per schedule occurrence, and only emails after a conditional schedule claim; both cron commands are Vault-backed and passed natural 2026-07-15 cron/pg_net acceptance.
 - `resend-webhook` v11 passes Deno type checking and rejects unsigned requests.
 - Daily physical backups from 2026-07-07 through 2026-07-14 were listed as completed in the current seven-day window; WAL-G is enabled and PITR remains disabled/unapproved.
 - The `2026-07-15 00:44:45 UTC` backup restored successfully into an isolated project; exact data/structure counts matched and restored RLS checks passed.
