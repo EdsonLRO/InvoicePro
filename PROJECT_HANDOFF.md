@@ -133,6 +133,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 - **PDF/export:** client-side (jsPDF + html2canvas; SheetJS/xlsx for spreadsheets). **Unknown / needs confirmation:** exact library versions (pinned with SRI in the HTML).
 - **Hosting:** GitHub Pages (static). PWA via `manifest.json` + `service-worker.js`.
 - **Automation:** Supabase Edge Function (Deno/TypeScript) + `pg_cron` schedule.
+- **Edge dependency control:** all nine function sources pin `@supabase/supabase-js` to exact version `2.110.1`; `tests/edge-dependency-pin-harness.cjs` rejects floating Supabase versions.
 - **Local dev (current author):** Windows + VS Code + Supabase CLI. Node.js installed.
 
 ---

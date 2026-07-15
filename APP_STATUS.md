@@ -85,6 +85,7 @@ Strong controls already implemented:
 - Vault-backed scheduler authentication for recurring and overdue automation; the privileged recurring endpoint rejects unsigned calls.
 - Signed Resend and Stripe webhooks.
 - CSP, SRI, and self-hosted Tailwind.
+- All nine Edge Functions pin `@supabase/supabase-js` to exact version `2.110.1`; unused floating import-map aliases were removed.
 - Honest activity history wording.
 
 Known limits:

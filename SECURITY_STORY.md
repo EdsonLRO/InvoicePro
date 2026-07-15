@@ -75,6 +75,8 @@ The password-reset page now uses masked fields and requires a TOTP code when the
 - Added a **Content-Security-Policy (CSP)** — a strict list of which sources are even allowed to run scripts or open connections, shrinking the space an attacker has to work in.
 - Brought the styling library **in-house (self-hosted)** instead of fetching it live, removing one outside dependency entirely.
 
+**The same discipline now covers server code.** Every Supabase Edge Function pins `@supabase/supabase-js` to exact version `2.110.1`, and unused floating import aliases were removed. An import such as `@2` could silently select a newer package during a future deployment; the exact pin makes that dependency change visible and reviewable. Exact pinning reduces supply-chain drift but does not prove a package can never contain a vulnerability, so updates still need security review and testing.
+
 **Why it matters.** This closes off "supply-chain" attacks — where you're compromised not through your own code but through something you borrowed. SRI means "only run this exact code I already trust," and CSP means "and only talk to these specific places."
 
 ---

@@ -2,7 +2,7 @@
 // Authenticates the caller, verifies invoice ownership and overdue state,
 // sends the reminder, then records history and audit events.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 

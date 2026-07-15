@@ -1,7 +1,7 @@
 // create-stripe-refund - requests a Stripe refund for a Tallyo invoice payment.
 // Money state is still updated only by the signed Stripe webhook.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
