@@ -62,15 +62,15 @@ The recurring and overdue jobs now retrieve `automation_secret` from Vault and s
 
 ## 4. Backup restore exercise
 
-Current scheduled-backup evidence is verified. A timed restore is still required because a backup is not proven until recovery has been exercised.
+The Owner-approved timed restore completed on 2026-07-15. Privacy-safe results are recorded in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
 
-Read-only evidence on 2026-07-15 showed a generic `$10/month` new-project baseline, but the restore-specific dashboard showed `$0` additional compute, `$0` additional disk, and `$0` total for the selected backup. This is not approval to create the restore project; the final Supabase restore action remains separately Owner-approved because it creates another environment and can clone active database automation.
-
-- Choose a known backup and review the displayed cost of a separate restore project.
-- Obtain explicit Owner approval for that exact project/action and displayed cost, even when the displayed incremental cost is `$0`.
-- Follow `BACKUP_RESTORE_RUNBOOK.md`, disabling cron and all email/Stripe side effects in the restored environment before testing.
-- Measure RTO, validate row counts without copying customer content, and re-run Account A/Account B isolation tests.
-- Record only operational evidence; do not record credentials or customer documents.
+- [x] Restore a known backup to a separate project after reviewing and approving the displayed `$0` incremental total.
+- [x] Disable both copied cron jobs and clear the outbound `pg_net` queue before validation.
+- [x] Confirm no Edge Functions or provider configuration could send email, generate invoices, or process payments.
+- [x] Measure platform restore-to-healthy time at approximately four minutes.
+- [x] Match exact row counts and structural controls without copying customer content.
+- [x] Re-run two-context tenant read isolation and rolled-back write probes.
+- [ ] Permanently delete the temporary restore project after explicit Owner approval.
 
 ## 5. Remaining release acceptance
 
@@ -86,5 +86,6 @@ Read-only evidence on 2026-07-15 showed a generic `$10/month` new-project baseli
 - `generate-recurring` v13 rejects unsigned requests, enforces one invoice per schedule occurrence, and only emails after a conditional schedule claim; both cron commands are Vault-backed.
 - `resend-webhook` v11 passes Deno type checking and rejects unsigned requests.
 - Daily physical backups from 2026-07-07 through 2026-07-14 were listed as completed in the current seven-day window; WAL-G is enabled and PITR remains disabled/unapproved.
+- The `2026-07-15 00:44:45 UTC` backup restored successfully into an isolated project; exact data/structure counts matched and restored RLS checks passed.
 - Two-account RLS read isolation passed across all six tenant tables on 2026-07-14. Five rolled-back customer write checks also passed: own update/insert allowed; foreign update/delete/insert blocked.
 - Seven-day Resend audit evidence showed 31 sent and 31 delivered events with no failed, bounced, or complained signal.

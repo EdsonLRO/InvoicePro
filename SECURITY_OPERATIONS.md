@@ -17,7 +17,8 @@ Supabase Pro is active and provides daily database backups with a seven-day rete
 Current evidence and remaining release gate:
 
 - Completed daily physical backups through 2026-07-14 were verified through the Supabase CLI; WAL-G was enabled and PITR remained disabled.
-- Run an Owner-approved timed restore test into a separate non-production project or controlled local environment.
+- An Owner-approved isolated restore completed on 2026-07-15. Exact data/structure counts matched, both copied cron jobs were disabled, and two-context RLS read/write checks passed. See `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
+- Permanently delete the temporary restore project only after explicit Owner approval.
 - Keep production, test, and local data clearly separated.
 
 ## Scheduled Automation Boundary
@@ -69,7 +70,7 @@ Current app-action coverage:
 
 Remaining audit hardening:
 
-- Company/settings saves are logged at a privacy-safe category level. Recurring generation now records success, failure, retry reuse, skipped claims, and schedule-history failures without raw exception text. Backup/restore operations still need evidence when the Owner-approved exercise runs.
+- Company/settings saves are logged at a privacy-safe category level. Recurring generation records success, failure, retry reuse, skipped claims, and schedule-history failures without raw exception text. The 2026-07-15 restore exercise has separate privacy-safe operational evidence; it did not add customer content or credentials to the audit record.
 
 Recurring integrity rule:
 

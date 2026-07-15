@@ -37,7 +37,7 @@ Still to finish before treating the app as customer-ready:
 
 - Stripe sandbox lifecycle verification is complete for signature rejection, unrelated-event rejection, successful payment/refund replay, a known-payment dispute, and a genuine failed-refund reversal. Live mode remains disabled and approval-gated.
 - Review and operationally test the internal chargeback/refund/support procedure in `PAYMENT_OPERATIONS_RUNBOOK.md`; customer-facing policy remains legally blocked.
-- Complete at least one Owner-approved timed non-production restore test. Supabase Pro daily-backup evidence is verified through 2026-07-14 in `BACKUP_RESTORE_RUNBOOK.md`.
+- The Owner-approved non-production restore test passed on 2026-07-15. Delete the isolated temporary project after explicit approval; evidence is in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
 - Expand append-only audit logging to remaining sensitive actions, privileged automation failures, and backup/restore operations. Company/settings saves are now covered at a privacy-safe category level.
 - MFA browser acceptance is complete for fail-closed routing, primary/backup factor lifecycle, primary-specific and backup-specific recovery, wrong-code rejection, and email-only bypass rejection. Robust all-factors-lost recovery remains a paid/public-launch condition.
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.
@@ -94,7 +94,7 @@ Known limits:
 - Supabase does not provide recovery codes. Tallyo supports a second authenticator and prevents email-only MFA bypass. AUTH-001 acceptance is Verified. The interim all-factors-lost support response is approved and deny-by-default; robust recovery is still required before paid/public onboarding.
 - All-devices logout exists, but a future email-code confirmation flow would be stronger for production account recovery/security UX.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
-- Supabase Pro daily backups are verified through 2026-07-14 and the recovery runbook is in place, but a timed restore test and tested privacy/incident operations are not complete.
+- Supabase Pro daily backups and one isolated timed restore are verified. Complete service recovery still needs manual Auth/provider reconfiguration, and tested privacy/incident operations remain unfinished.
 - The app must not claim GDPR compliance or full security.
 
 ## Future SaaS / website phase

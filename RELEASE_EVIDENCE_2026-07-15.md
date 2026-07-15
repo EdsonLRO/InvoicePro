@@ -18,6 +18,9 @@ Privacy-safe evidence from the `codex/release-readiness-pass` review. This does 
 - Supabase Pro listed completed daily physical backups through 2026-07-14; WAL-G was enabled and PITR disabled.
 - Supabase Auth minimum password length was raised from 6 to 12 with leaked-password protection kept enabled; the saved value was reopened and read back on 2026-07-15.
 - No known Stripe, Resend, JWT, or webhook-secret pattern was found in tracked text/source files.
+- An Owner-approved backup restored to a separate project at `$0` displayed incremental cost and was first observed healthy after approximately four minutes.
+- Restored exact row counts, structural controls, and five migration records matched production; 12 tenant read checks and four rolled-back write probes passed.
+- Both copied cron jobs were disabled, the `pg_net` queue was empty/cleared, and no Edge Functions or provider integrations were configured in the clone.
 
 ## Prepared But Not Operationally Verified
 
@@ -43,7 +46,7 @@ Active versions after deployment:
 - `audit_events_actor_user_id_idx` and `invoices_customer_id_idx` are currently reported unused.
 - Auth database allocation remains an absolute 10 connections rather than percentage-based.
 - The project API reported PostgreSQL `17.6.1.127` and an active healthy project on 2026-07-15.
-- A read-only cost check showed a generic `$10/month` new-project baseline. The restore-specific dashboard then showed `$0` additional monthly compute, `$0` additional monthly disk, and `$0` total for the selected backup. The final restore action was not selected and no project was created.
+- The restore-specific dashboard showed `$0` additional monthly compute, `$0` additional monthly disk, and `$0` total for the selected backup; the approved non-production restore then completed.
 - The restore dashboard confirmed that schema, data, indexes, roles, permissions, and users transfer; Storage objects/settings, Edge Functions, Auth settings/API keys, database extensions/settings, and read replicas require manual reconfiguration.
 
 No change was made because current usage evidence does not justify index removal or an Auth allocation change.
@@ -52,7 +55,7 @@ No change was made because current usage evidence does not justify index removal
 
 - Confirm the next natural 06:00/09:00 UTC cron/pg_net responses under the corrected 30-second timeout. A one-time Codex follow-up is scheduled; the functions will not be forced merely to create evidence.
 - Run authenticated mobile workflows, long/mobile PDF downloads, and real-browser PWA install/offline/update checks.
-- Complete an Owner-approved timed restore into a separate non-production environment. The dashboard currently shows `$0` incremental monthly cost, but separate-project creation and cloned database automation remain side-effect-sensitive and approval-gated.
+- Obtain explicit Owner approval, then permanently delete the isolated temporary restore project now that evidence collection is complete.
 - Resolve Auth session policy, custom SMTP/rate limits, CAPTCHA/abuse controls, and connection allocation decisions.
 - Implement robust all-factors-lost recovery before paid/public onboarding.
 - Resolve the tabletop gaps, complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and `PAYMENT_OPERATIONS_RUNBOOK.md`.
@@ -62,4 +65,4 @@ No change was made because current usage evidence does not justify index removal
 
 - Authenticated desktop browser access is now available, but the control surface did not expose mobile viewport emulation or Service Worker APIs and the available test account had no invoice for a PDF download. Authenticated mobile/PWA/PDF acceptance is therefore not claimed.
 - The Edge Function tree is not uniformly `deno fmt` clean; bulk reformatting was deliberately avoided to keep this hardening diff focused. Type checking passed.
-- `psql` is not on `PATH`; the restore runbook correctly remains unproven.
+- `psql` is not on `PATH`; the verified platform restore used Supabase's restore-to-new-project flow rather than a local CLI restore.
