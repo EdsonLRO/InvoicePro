@@ -78,7 +78,7 @@ No change was made because current usage evidence does not justify index removal
 
 - Observe PWA update behaviour across a later deployment. Phone PDF, installation, offline shell fallback, and reconnection are verified; offline authentication and customer-data access are intentionally unsupported.
 - Complete the CAPTCHA/abuse-control and connection-allocation decisions. Custom SMTP delivery and its initial 30-emails-per-hour limit are verified; the seven-day session timebox and 24-hour inactivity timeout are active and evidence-backed.
-- Complete dedicated test-account desktop/mobile acceptance and confirm one successful production event row for the account-holder data export. Do not inspect or record exported customer content in evidence.
+- Dedicated test-account desktop/mobile account-holder export acceptance completed on 2026-07-16. Warning, download, and local readability passed; privacy-safe desktop structure/count/ownership checks passed; and corrected production events contained only `export_version` and `format`. Exported customer content was not recorded in evidence.
 - Implement robust all-factors-lost recovery before paid/public onboarding.
 - Resolve the tabletop gaps, complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and `PAYMENT_OPERATIONS_RUNBOOK.md`.
 - Keep Stripe sandbox-only until a separately approved live release.
