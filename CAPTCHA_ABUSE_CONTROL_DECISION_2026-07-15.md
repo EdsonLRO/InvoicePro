@@ -41,7 +41,7 @@ Configure it with:
 - the public sitekey in the client and the secret only in Supabase Auth configuration;
 - no CAPTCHA token, provider response, IP address, user agent, or fingerprint signal in Tallyo logs.
 
-On 2026-07-15, the Owner approved the bounded implementation after the vendor data flow, exact-origin CSP change, and narrow SRI exception were explained. That approval covers frontend support, CSP, automated tests, and internal records. It does **not** authorize creating or accepting a Cloudflare account/widget on the Owner's behalf, copying a secret, enabling Supabase CAPTCHA enforcement, publishing legal wording, or treating the control as production-active.
+On 2026-07-15, the Owner approved the bounded implementation after the vendor data flow, exact-origin CSP change, and narrow SRI exception were explained. That approval covers frontend support, CSP, automated tests, and internal records. The Owner separately accepted the applicable Cloudflare account terms and reported creating the controlled test widget on 2026-07-16. This does **not** authorize the agent to copy a secret, enable Supabase CAPTCHA enforcement, publish legal wording, or treat the control as production-active.
 
 ## Implementation Record
 
@@ -57,6 +57,10 @@ The frontend now contains dormant Turnstile support for sign-up, password sign-i
 - `tests/auth-captcha-harness.cjs` verifies token routing, reset/fail-closed behavior, dormant compatibility, CSP scope, and privacy-safe handling.
 
 Supabase CAPTCHA enforcement remains **off**. A production site key is not configured, the Cloudflare secret is not stored, and the live Auth behavior is unchanged until the controlled rollout resumes.
+
+### Test Widget Provisioning Record
+
+On 2026-07-16, the Owner reported creating `Tallyo portfolio Auth test` as a Managed test widget restricted to `edsonlro.github.io`, with pre-clearance off. No site key or secret is recorded in this repository or in these internal records. The widget is for controlled portfolio acceptance only and must not be reused for the eventual Tallyo production hostname.
 
 `CLOUDFLARE_TURNSTILE_VENDOR_REVIEW_2026-07-15.md` records the refreshed provider, DPA, UK-transfer, subprocessor, PECR, hostname, and rollout evidence. Its disposition is approved-with-conditions for controlled test preparation only; production remains blocked.
 
@@ -231,4 +235,4 @@ The Owner approved items 1-3 and 5-6 for the bounded frontend implementation on 
 
 `Approved with conditions` for the bounded, dormant frontend implementation, exact-origin CSP change, focused tests, and internal records.
 
-`Blocked` for provider/account provisioning by the agent, legal-notice publication, secret handling, Supabase enforcement, and public reliance. Production activation still requires the outstanding vendor/legal evidence, Owner-operated widget and secret steps, browser acceptance, and a separate Owner approval. Paid/public launch remains blocked by the wider legal and operational gates even if CAPTCHA is later enabled.
+`Blocked` for legal-notice publication, secret handling by the agent, Supabase enforcement, and public reliance. Owner-operated account acceptance and controlled test-widget provisioning are complete. Production activation still requires browser acceptance, the outstanding vendor/legal decisions, an eventual separate production widget and Owner-operated secret entry for the final Tallyo hostname, and a separate Owner approval. Paid/public launch remains blocked by the wider legal and operational gates even if CAPTCHA is later enabled.
