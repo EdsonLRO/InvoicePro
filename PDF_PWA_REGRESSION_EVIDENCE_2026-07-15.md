@@ -50,6 +50,15 @@ Desktop PDF size, format, and multi-page layout acceptance are Verified.
 
 Authenticated mobile PDF, PWA installation, offline shell fallback, and reconnection acceptance are Verified.
 
+## Existing-Install Update Acceptance
+
+- PR #40 was merged as release commit `2cfb88685be9921c4e799ed461dc4cf833daf7ba` after the protected security workflow passed.
+- GitHub Pages returned HTTP 200 for the updated app shell and service worker and exposed frontend build `2026.07.16.1` with cache `tallyo-shell-2026-07-16-1`.
+- Desktop and 390x844 browser checks found no horizontal overflow, no warning/error console signal, and a visible build marker on the Account page.
+- The Owner opened the existing installed Tallyo application after publication without uninstalling or reinstalling it and confirmed `Tallyo build 2026.07.16.1`.
+
+Update-across-deployment acceptance is Verified.
+
 ## PWA Boundary
 
 - The deployed manifest and service-worker source match the repository.
@@ -57,4 +66,4 @@ Authenticated mobile PDF, PWA installation, offline shell fallback, and reconnec
 - The public 390x844 shell has no horizontal overflow or off-screen controls.
 - A real-phone test verified installation, offline shell fallback, and normal recovery after connectivity returned.
 
-PWA update-across-deployment behaviour remains In Progress because the installed application has not yet observed a later published version. Offline authentication and offline customer-data access are intentionally unsupported.
+PWA installation, offline shell fallback, reconnection, and update-across-deployment behaviour are Verified. Offline authentication and offline customer-data access are intentionally unsupported.
