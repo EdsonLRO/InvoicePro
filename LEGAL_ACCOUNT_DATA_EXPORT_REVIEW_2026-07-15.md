@@ -89,6 +89,17 @@ The feature creates no additional Tallyo server-side retention location. Existin
 
 Do not use real customer data for acceptance evidence.
 
+### Controlled Desktop Acceptance - 2026-07-16
+
+- A dedicated test account displayed the sensitive-data warning and completed the browser download.
+- The version-1 JSON was readable and contained only the expected top-level account/data structure and six approved datasets.
+- Dataset counts matched the same tenant's database counts after accounting for the audit event written after file creation.
+- Twenty-five exported rows carrying `user_id` were checked with zero ownership mismatches.
+- No password, password verifier, access/refresh token, TOTP secret, unrestricted metadata, or Auth identity field was present.
+- One append-only `account_data_exported` event was recorded with no provider identifiers.
+
+The event also contained generic `user_agent` enrichment, which exceeded this review's format/version-only metadata boundary. `SEC-LOG-006` records the focused omission fix. Desktop acceptance therefore remains conditional until the corrected function is deployed and one corrected event is read back; mobile acceptance also remains pending.
+
 ## 12. Uncertainty And External-Advice Triggers
 
 Qualified review remains required before public onboarding for controller/processor roles, lawful bases, third-party data disclosure, exemptions, retention, secure support delivery, accounting/tax records, and deletion. A request from an invoice recipient, authorised representative, child, vulnerable person, regulator, court, or person in another jurisdiction must not be routed through this account-holder export without case-specific review.

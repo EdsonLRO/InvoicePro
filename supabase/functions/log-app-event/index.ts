@@ -121,7 +121,9 @@ Deno.serve(async (req) => {
   if (objectId && !isUuid(objectId)) return json({ error: "Invalid object ID" }, 400);
 
   const metadata = sanitizeMetadata(body.metadata);
-  metadata.user_agent = (req.headers.get("user-agent") || "").slice(0, 120);
+  if (eventType !== "account_data_exported") {
+    metadata.user_agent = (req.headers.get("user-agent") || "").slice(0, 120);
+  }
 
   const { error } = await admin.from("audit_events").insert({
     user_id: userData.user.id,

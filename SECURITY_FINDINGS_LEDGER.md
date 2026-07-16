@@ -217,6 +217,18 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Residual risk:** Invoice and delivery records still contain customer contact data needed for the invoicing service. Retention and deletion rules remain a legal/privacy release gate.
 - **Evidence:** `supabase/functions/send-document-email/index.ts`; `send-reminder-email/index.ts`; `send-overdue-reminders/index.ts`; `generate-recurring/index.ts`.
 
+### SEC-LOG-006 - Account-export audit event retained unnecessary browser metadata
+
+- **Date:** 2026-07-16
+- **Classification:** defense-in-depth / privacy-safe logging
+- **Finding:** The first controlled production account export correctly emitted `account_data_exported`, but the generic audit writer appended a truncated `user_agent` field even though the approved export design requires format and export-version metadata only.
+- **Impact:** The append-only event retained browser fingerprint detail that was not needed to prove export completion and contradicted the documented data-minimisation boundary.
+- **Change:** Exclude `user_agent` enrichment only for `account_data_exported`; other existing security and operational events retain their current diagnostic behavior. Add a focused regression assertion to the account-export harness.
+- **Verification:** The controlled desktop export produced readable version-1 JSON with the six expected datasets, database-matching counts, zero ownership mismatches across 25 tenant-owned rows, and no forbidden Auth/token fields. The original production event proved the finding by containing `format`, `export_version`, and `user_agent`. Frozen Deno type checking, the account-export harness, the security-workflow harness, and dependency-lock verification pass. Deployment and one corrected event remain acceptance gates.
+- **Residual risk:** Other audit-event types continue to retain truncated user-agent data. Their purpose and retention still require the wider legal/privacy review; this focused fix does not make a general compliance claim.
+- **Evidence:** `supabase/functions/log-app-event/index.ts`; `tests/account-data-export-harness.cjs`; `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md`.
+- **Status:** Implemented; production deployment and corrected-event acceptance pending.
+
 ### SEC-SUPPLY-001 - Edge Function checks and dependency integrity were not enforced in CI
 
 - **Date:** 2026-07-15
