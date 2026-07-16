@@ -98,7 +98,7 @@ Do not use real customer data for acceptance evidence.
 - No password, password verifier, access/refresh token, TOTP secret, unrestricted metadata, or Auth identity field was present.
 - One append-only `account_data_exported` event was recorded with no provider identifiers.
 
-The event also contained generic `user_agent` enrichment, which exceeded this review's format/version-only metadata boundary. `SEC-LOG-006` records the focused omission fix. Desktop acceptance therefore remains conditional until the corrected function is deployed and one corrected event is read back; mobile acceptance also remains pending.
+The first event also contained generic `user_agent` enrichment, which exceeded this review's format/version-only metadata boundary. `SEC-LOG-006` records the focused omission fix. After PR #37 merged, `log-app-event` version 7 was deployed with JWT verification preserved. A fresh export completed on 2026-07-16 and its production event contained only `export_version` and `format`; `user_agent`, `provider`, and `provider_event_id` were absent. Desktop acceptance is therefore Verified for this controlled test-account scope. Mobile acceptance remains pending.
 
 ## 12. Uncertainty And External-Advice Triggers
 

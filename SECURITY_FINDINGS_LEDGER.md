@@ -224,10 +224,10 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Finding:** The first controlled production account export correctly emitted `account_data_exported`, but the generic audit writer appended a truncated `user_agent` field even though the approved export design requires format and export-version metadata only.
 - **Impact:** The append-only event retained browser fingerprint detail that was not needed to prove export completion and contradicted the documented data-minimisation boundary.
 - **Change:** Exclude `user_agent` enrichment only for `account_data_exported`; other existing security and operational events retain their current diagnostic behavior. Add a focused regression assertion to the account-export harness.
-- **Verification:** The controlled desktop export produced readable version-1 JSON with the six expected datasets, database-matching counts, zero ownership mismatches across 25 tenant-owned rows, and no forbidden Auth/token fields. The original production event proved the finding by containing `format`, `export_version`, and `user_agent`. Frozen Deno type checking, the account-export harness, the security-workflow harness, and dependency-lock verification pass. Deployment and one corrected event remain acceptance gates.
+- **Verification:** The controlled desktop export produced readable version-1 JSON with the six expected datasets, database-matching counts, zero ownership mismatches across 25 tenant-owned rows, and no forbidden Auth/token fields. The original production event proved the finding by containing `format`, `export_version`, and `user_agent`. Frozen Deno type checking, the account-export harness, the security-workflow harness, and dependency-lock verification passed. After PR #37 merged, `log-app-event` version 7 was deployed with JWT verification preserved. A fresh production export event at 2026-07-16 11:13:24 UTC contained only `export_version` and `format`; `user_agent`, `provider`, and `provider_event_id` were absent.
 - **Residual risk:** Other audit-event types continue to retain truncated user-agent data. Their purpose and retention still require the wider legal/privacy review; this focused fix does not make a general compliance claim.
 - **Evidence:** `supabase/functions/log-app-event/index.ts`; `tests/account-data-export-harness.cjs`; `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md`.
-- **Status:** Implemented; production deployment and corrected-event acceptance pending.
+- **Status:** Verified for the focused account-export metadata scope. Mobile export acceptance and the wider audit-retention legal review remain separate gates.
 
 ### SEC-SUPPLY-001 - Edge Function checks and dependency integrity were not enforced in CI
 
@@ -261,5 +261,5 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - Add the future email-confirmed enhancement to the existing "log out from all devices" flow; do not treat email access alone as sufficient identity proof.
 - Keep the verified Stripe sandbox lifecycle evidence current after material payment-handler changes; live activation remains separately approval-gated.
 - Keep the verified isolated backup/restore evidence current after material schema, RLS, automation, or backup-policy changes.
-- Complete dedicated test-account desktop/mobile acceptance and one successful production audit event for the account-data export without recording exported content.
+- Complete dedicated test-account mobile acceptance for the account-data export without recording exported content. Desktop acceptance and the corrected production audit event are Verified.
 - Observe the installed PWA updating across a later deployment.
