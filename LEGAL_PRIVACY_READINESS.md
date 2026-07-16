@@ -85,7 +85,7 @@ ICO guidance requires records of personal-data breaches and, where the reporting
 
 `LEGAL_OPERATIONS_RECORDS.md` contains a working ROPA, rights/incident/vendor/retention templates, and a preliminary DPIA screening. `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` records fictional rights-request and breach exercises with no real personal data.
 
-The tabletop passed as a process-design exercise but identified blocking operational gaps. The account-holder workspace export is now implemented and harness-tested under `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md`, but controlled browser acceptance remains. There is still no restricted case system, approved role/lawful-basis decision, verified correction/deletion/provider-assistance procedure, complete vendor/transfer evidence, or approved incident escalation route. This is not evidence that live privacy operations work end to end.
+The tabletop passed as a process-design exercise but identified blocking operational gaps. The account-holder workspace export is implemented and reviewed under `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md`. Controlled desktop and real-phone acceptance confirmed the trusted-device warning, local JSON download and readability; corrected production audit events contain only the approved format/version metadata. There is still no restricted case system, approved role/lawful-basis decision, verified correction/deletion/provider-assistance procedure, complete vendor/transfer evidence, or approved incident escalation route. This is not evidence that live privacy operations work end to end.
 
 ## Claims Register
 
