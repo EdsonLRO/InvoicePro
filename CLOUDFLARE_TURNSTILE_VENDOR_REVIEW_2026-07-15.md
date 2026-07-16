@@ -9,9 +9,9 @@ Internal legal, privacy, security, and release evidence. This is not legal advic
 | Provider and service | Cloudflare Turnstile |
 | Review date | 2026-07-15 |
 | Intended purpose | Reduce automated abuse of public sign-up, password sign-in, and password-reset requests |
-| Current state | Dormant frontend support is merged; no site key or secret is configured and Supabase enforcement is off |
+| Current state | Dormant frontend support is merged; the Owner reported creating the controlled test widget on 2026-07-16, but no site key or secret is configured in Tallyo and Supabase enforcement is off |
 | Legal Agent disposition | `Approved with conditions` for test preparation and controlled acceptance only |
-| Production disposition | `Blocked` pending Owner contract acceptance, final hostname, notice/lawful-basis decisions, browser acceptance, secret entry, and separate activation approval |
+| Production disposition | `Blocked` pending the final hostname, notice/lawful-basis decisions, browser acceptance, separate production-widget provisioning, Owner-operated secret entry, and separate activation approval |
 | External review | Required before paid/public onboarding because role allocation, international transfers, PECR treatment, and notice wording remain legally material |
 
 ## Evidence Snapshot
@@ -74,7 +74,7 @@ Cloudflare describes these signals as strictly necessary. That statement is prov
 
 ## Approved Test Configuration
 
-When the Owner provisions the controlled test widget, use:
+The Owner reported provisioning the controlled test widget on 2026-07-16 using this required profile:
 
 | Setting | Required value |
 |---|---|
@@ -97,8 +97,8 @@ The eventual production widget must be separate and restricted to Tallyo's final
 
 ## Controlled Acceptance Checklist
 
-1. Owner reviews and personally accepts the Cloudflare account and applicable terms.
-2. Owner creates the test widget with the exact profile above and keeps the secret masked.
+1. Completed 2026-07-16: Owner reviewed and personally accepted the Cloudflare account and applicable terms.
+2. Completed 2026-07-16: Owner reported creating the test widget with the exact profile above and kept the secret masked.
 3. Use Cloudflare's published dummy keys for automated error/replay cases; do not put a production secret into automated tests.
 4. Configure only the public test site key in a temporary acceptance branch or local session.
 5. Keep Supabase CAPTCHA enforcement off while checking rendering, keyboard use, 200% zoom, 320/390-pixel widths, retry, blocked-script, offline, and unsupported-browser states.
