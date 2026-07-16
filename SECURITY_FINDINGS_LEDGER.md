@@ -59,9 +59,10 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Finding:** The Supabase Auth listener handled password recovery but did not explicitly handle `SIGNED_OUT`. An expired or remotely revoked session could therefore leave the current Vue state visible until a refresh, and an initial business-data, audit, or MFA response already in flight could repopulate state after logout.
 - **Impact:** On a shared or unattended device, invoices, customer details, drafts, payment context, recurring schedules, and account-security form data could remain visible after the server-side session had ended. RLS would still block new unauthorised database access, but it cannot erase data already loaded into browser memory.
 - **Change:** Unexpected `SIGNED_OUT` events now immediately clear all user and business state, reset navigation to login, and show a concise reauthentication message. Intentional local/global logout remains quiet. Session-generation guards discard initial business-data, audit, and MFA responses that return after sign-out.
-- **Verification:** The inline application script parsed successfully. A controlled Node/VM harness exercised idempotent full-state clearing, unexpected expiry, intentional logout, failed logout, and expiry during delayed business-data, audit-event, and MFA requests. All cases passed, and no delayed response repopulated signed-out state.
-- **Residual risk:** The client change still needs deployed browser acceptance. The recommended seven-day maximum session age and 24-hour inactivity timeout remain disabled until separate Owner approval; Supabase applies them on token refresh, so expiry can occur up to the one-hour JWT lifetime later.
-- **Evidence:** `index.html`; this focused session-expiry hardening change; `DEFERRED_MANUAL_CONFIGURATION.md`.
+- **Verification:** The inline application script parsed successfully. A controlled Node/VM harness exercised idempotent full-state clearing, unexpected expiry, intentional logout, failed logout, and expiry during delayed business-data, audit-event, and MFA requests. All cases passed, and no delayed response repopulated signed-out state. After deployment, the public source contained the `SIGNED_OUT` handler and session-generation guard, and the unauthenticated sign-in shell rendered normally. The Owner-approved seven-day maximum session age and 24-hour inactivity timeout were then enabled and read back from Supabase on 2026-07-15.
+- **Residual risk:** Supabase applies the session limits on token refresh, so effective sign-out may occur up to the one-hour JWT lifetime later. Recheck browser-state clearing after material Auth-session or bootstrap changes.
+- **Evidence:** `index.html`; `tests/session-expiry-harness.cjs`; `DEFERRED_MANUAL_CONFIGURATION.md`; `RELEASE_EVIDENCE_2026-07-15.md`.
+- **Status:** Verified.
 
 ### SEC-DB-001 - Trigger helper functions retain unnecessary API execution grants
 
@@ -102,9 +103,9 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Impact:** A database/update interruption or concurrent invocation could leave the same template occurrence due after an invoice was created, allowing a later run to create or email another invoice for the same period. The function could also report success even when schedule advancement failed.
 - **Evidence:** Static control-flow review found the unchecked template update after invoice/email processing. Live schema inspection confirmed `invoices` had no `recurring_template_id` or `recurring_occurrence_date` columns and no recurrence idempotency index; zero templates were due when the remediation window was checked.
 - **Change:** Applied migration `add_recurring_generation_idempotency`. Generated invoices now carry nullable `recurring_template_id` and `recurring_occurrence_date` attribution with a partial unique index. `generate-recurring` v13 handles uniqueness conflicts by reusing the existing occurrence, conditionally advances only the expected active schedule, sends email only after winning that claim, reports partial failures honestly, and writes privacy-safe success/failure/retry events to `audit_events`.
-- **Verification:** Deno check passed. Live rolled-back transactions proved a second invoice for one occurrence is rejected, the first conditional claim affects one row, the second affects zero, ordinary invoices with null recurrence fields remain unaffected, and no test rows persist. The columns/index exist, invoice RLS remains enabled with four policies, security advisors are clear, and an unsigned function request returns HTTP 401. No template was due during deployment. The first real scheduled run remains operational acceptance evidence.
+- **Verification:** Deno check passed. Live rolled-back transactions proved a second invoice for one occurrence is rejected, the first conditional claim affects one row, the second affects zero, ordinary invoices with null recurrence fields remain unaffected, and no test rows persist. The columns/index exist, invoice RLS remains enabled with four policies, security advisors are clear, and an unsigned function request returns HTTP 401. The protected function completed its natural 2026-07-15 06:00 UTC run; cron succeeded, retained pg_net evidence was HTTP 200, and post-run checks found zero duplicate occurrence groups and zero generated-owner mismatches. No schedule was due, so no invoice or email was expected.
 - **Residual risk:** A crash after the schedule claim but before Resend accepts the message can miss an automatic email; preventing both duplicates and missed sends under every crash point requires a transactional outbox/queue, which is a larger future design. The current choice prioritises avoiding duplicate invoices and customer emails.
-- **Status:** Implemented; scheduled-run acceptance pending.
+- **Status:** Verified.
 
 ### SEC-AUTO-003 - Scheduled HTTP calls can time out before successful functions return
 
@@ -113,9 +114,9 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Finding:** Both pg_cron commands relied on pg_net's default HTTP timeout. The 06:00 recurring run completed successfully in the Edge Function, but its database-side request timed out before the response was recorded.
 - **Impact:** Operators could see an ambiguous or failed scheduler result even when privileged work completed. Retrying an uncertain result increases duplicate-processing risk; recurring idempotency limits that risk but does not make the missing response acceptable.
 - **Change:** Set `timeout_milliseconds := 30000` explicitly on both Vault-authenticated scheduled calls. Schedules, endpoints, request bodies, authentication, and Edge Function behavior remain unchanged.
-- **Verification:** The canonical SQL and generated migration both set the explicit timeout, and migration `20260714161421` is recorded as applied in the linked project. Live read-back confirmed both jobs remain active at their original `0 6 * * *` and `0 9 * * *` schedules, retain the custom authentication header and Vault secret lookup, and store the 30-second timeout. The Supabase security advisor returned no findings. Neither function was invoked during this change. A later scheduled run must return a database-side response within the configured timeout before this finding can be marked Verified.
+- **Verification:** The canonical SQL and generated migration both set the explicit timeout, and migration `20260714161421` is recorded as applied in the linked project. Live read-back confirmed both jobs remain active at their original `0 6 * * *` and `0 9 * * *` schedules, retain the custom authentication header and Vault secret lookup, and store the 30-second timeout. The next natural runs on 2026-07-15 both succeeded; retained pg_net responses were HTTP 200 with no timeout or transport error. Post-run duplicate, ownership, opt-in, and unintended-communication checks passed.
 - **Residual risk:** A 30-second timeout cannot distinguish every network interruption from a completed remote action. Idempotent processing and audit events remain necessary controls.
-- **Status:** Implemented; next scheduled-response acceptance pending.
+- **Status:** Verified.
 
 ### SEC-LOG-001 - Stripe test/development state was too easy to miss
 
@@ -244,8 +245,9 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 
 ## Open Follow-Ups
 
-- Confirm Supabase Auth password policy, JWT/session expiry, and rate-limit settings.
-- Keep the verified leaked-password control enabled and recheck it after material Auth-provider changes.
+- Keep the verified Supabase Auth policy evidence current after material provider changes: 12-character minimum, leaked-password rejection, one-hour JWT lifetime, refresh rotation, seven-day maximum session age, 24-hour inactivity timeout, custom SMTP, and the initial Auth rate limits.
 - Add the future email-confirmed enhancement to the existing "log out from all devices" flow; do not treat email access alone as sufficient identity proof.
 - Keep the verified Stripe sandbox lifecycle evidence current after material payment-handler changes; live activation remains separately approval-gated.
-- Record backup and restore test evidence once a non-production restore is performed.
+- Keep the verified isolated backup/restore evidence current after material schema, RLS, automation, or backup-policy changes.
+- Complete dedicated test-account desktop/mobile acceptance and one successful production audit event for the account-data export without recording exported content.
+- Observe the installed PWA updating across a later deployment.
