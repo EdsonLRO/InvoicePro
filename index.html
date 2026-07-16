@@ -211,6 +211,8 @@
                 <p v-if="pwdRecovery.error" class="text-sm text-red-600">{{ pwdRecovery.error }}</p>
                 <button @click="completePasswordRecovery" :disabled="pwdRecovery.busy || !pwdRecovery.securityVerified" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ pwdRecovery.busy ? 'Updating...' : 'Update Password' }}</button>
             </div>
+
+            <p class="text-center text-xs text-slate-400 mt-6">Tallyo build {{ appBuild }}</p>
         </div>
     </div>
 
@@ -362,6 +364,8 @@
                     </div>
                     <p class="text-xs text-red-500 mt-3">All-devices logout asks for your password, and MFA too when enabled.</p>
                 </div>
+
+                <p class="text-center text-xs text-slate-400">Tallyo build {{ appBuild }}</p>
 
             </div>
 
@@ -1752,11 +1756,13 @@
         return turnstileApiPromise;
     }
 
+    const APP_BUILD = '2026.07.16.1';
     const { createApp } = Vue;
 
     createApp({
         data() {
             return {
+                appBuild: APP_BUILD,
                 // Auth State
                 isLoggedIn: false,
                 authMode: 'login', 
@@ -4569,7 +4575,7 @@
             // Register the service worker only on the live HTTPS site (not on
             // localhost), so local development never serves stale cached files.
             if ('serviceWorker' in navigator && location.protocol === 'https:') {
-                navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('Service worker registration failed:', err));
+                navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'none' }).catch(err => console.warn('Service worker registration failed:', err));
             }
             // React to password recovery without doing additional Supabase calls while
             // the auth client is still notifying listeners. Normal sign-in remains

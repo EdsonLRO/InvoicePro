@@ -40,6 +40,7 @@ jobs:
           node tests/auth-captcha-harness.cjs
           node tests/edge-dependency-pin-harness.cjs
           node tests/financial-action-audit-harness.cjs
+          node tests/pwa-update-harness.cjs
           node tests/security-workflow-harness.cjs
           node tests/session-expiry-harness.cjs
 

@@ -4,10 +4,23 @@
 // when the device is offline). Requests to other origins (Supabase, CDNs) are left
 // alone and always go straight to the network.
 
-const CACHE = 'tallyo-v1';
+const CACHE = 'tallyo-shell-2026-07-16-1';
+const APP_SHELL = [
+  './',
+  './index.html',
+  './tailwind.css',
+  './config.js',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
+];
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting(); // activate the new service worker right away
+  event.waitUntil(
+    caches.open(CACHE)
+      .then((cache) => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (event) => {
@@ -29,13 +42,29 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    fetch(req)
-      .then(res => {
-        // keep a fresh copy for offline fallback
-        const copy = res.clone();
-        caches.open(CACHE).then(cache => cache.put(req, copy)).catch(() => {});
-        return res;
-      })
-      .catch(() => caches.match(req)) // offline: serve the last cached copy if we have it
+    (async () => {
+      try {
+        const response = await fetch(req);
+        if (response && response.ok) {
+          const copy = response.clone();
+          event.waitUntil(
+            caches.open(CACHE)
+              .then((cache) => cache.put(req, copy))
+              .catch(() => {})
+          );
+        }
+        return response;
+      } catch (error) {
+        const cached = await caches.match(req);
+        if (cached) return cached;
+
+        if (req.mode === 'navigate') {
+          const shell = await caches.match('./index.html');
+          if (shell) return shell;
+        }
+
+        throw error;
+      }
+    })()
   );
 });
