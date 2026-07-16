@@ -167,6 +167,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `PRODUCT_COMPLETION_LEDGER.md` | Capability-by-capability completion status and current next priorities. |
 | `DECISION_LOG.md` | Accepted, deferred, and pending product/security/operations decisions. |
 | `RELEASE_READINESS.md` | Release gates and evidence needed before real customer use. |
+| `FINAL_APP_REGRESSION_EVIDENCE_2026-07-16.md` | Final current-scope automated and deployed route-regression evidence, with explicit live-release exclusions. |
 | `SECURITY_FINDINGS_LEDGER.md` | Working record of security findings, fixes, verification evidence, and residual risk. |
 | `schema.sql` | Full Postgres schema: tables, RLS policies, new-user trigger. |
 | `supabase/audit_events.sql` | Append-only audit-events table used by provider events and selected sensitive app actions. |
