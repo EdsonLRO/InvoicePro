@@ -23,7 +23,7 @@ This tabletop tests whether the written process identifies the right decisions a
 
 - No restricted rights-case system is selected or tested.
 - No approved controller/processor decision tree or contact route exists.
-- Account-holder workspace export is implemented, harness-tested, and deployed with a read-back `log-app-event` v6 allowlist. Dedicated test-account desktop/mobile acceptance and one successful production event row remain. Deletion is not implemented or operationally verified.
+- Account-holder workspace export is implemented, harness-tested, and deployed with a read-back JWT-protected `log-app-event` v7 allowlist. Dedicated test-account desktop/mobile warning, download, and readability acceptance passed, and corrected production events contain only format/version metadata. Deletion is not implemented or operationally verified.
 - Provider assistance/deletion request steps and contacts are not evidenced.
 - Final retention periods and backup-deletion wording are not approved.
 - No approved secure delivery channel is selected.
@@ -62,7 +62,7 @@ This tabletop tests whether the written process identifies the right decisions a
 |---|---|---|---|
 | Select a restricted rights/incident case system and define access/retention | High | Blocked pending Owner/provider decision | Blocks public onboarding |
 | Approve controller/processor routing and lawful-basis decisions | High | Blocked pending qualified review | Blocks public onboarding |
-| Accept and evidence the RLS-scoped account-holder export | High | Implemented; controlled test-account acceptance pending | Does not by itself unblock public onboarding |
+| Accept and evidence the RLS-scoped account-holder export | High | Verified for controlled account-holder desktop/mobile scope | Does not by itself unblock public onboarding |
 | Build and verify correction and deletion operations | High | Planned | Blocks public onboarding |
 | Collect vendor DPA, transfer, deletion and incident-contact evidence | High | Planned | Blocks public onboarding |
 | Assign incident decision authority and escalation contacts | High | Planned | Blocks public onboarding |
