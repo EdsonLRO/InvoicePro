@@ -130,7 +130,7 @@ Later:
 
 - Formal backup and restore testing.
 - Further append-only audit log hardening for settings changes, automation failures, and backup/restore evidence.
-- AUTH-001 factor-specific recovery acceptance passed on 2026-07-14. Preserve the approved deny-by-default all-factors-lost response and design robust recovery before paid/public onboarding; Supabase recovery codes are not available.
+- AUTH-001 factor-specific recovery acceptance passed on 2026-07-14. AUTH-002 server-managed one-time recovery codes are implemented and locally verified because Supabase has no native recovery codes. Preserve the approved deny-by-default production response until backend-first deployment and live acceptance pass.
 - Supabase Auth password policy confirmation and breached-password checks.
 - Privacy policy, terms, data export/erasure process, retention policy, and breach process before real customer onboarding.
 - Future SaaS subscription billing, plan tiers, workspaces, teams, RBAC, and public website.

@@ -26,6 +26,7 @@ for (const harness of [
   'auth-captcha-harness.cjs',
   'edge-dependency-pin-harness.cjs',
   'financial-action-audit-harness.cjs',
+  'mfa-recovery-harness.cjs',
   'security-workflow-harness.cjs',
   'session-expiry-harness.cjs',
 ]) {

@@ -95,7 +95,7 @@ Honest limitations:
 - Activity history is useful, but not a tamper-proof audit log.
 - Append-only audit logging now covers provider events and selected sensitive app actions, but it is not yet a complete security monitoring or compliance audit system.
 - Supabase Pro daily backups and a recovery runbook are in place; current-backup evidence is verified and a timed restore test remains required.
-- Supabase does not provide recovery codes. Tallyo supports a second authenticator and blocks email-only MFA recovery. Primary-specific and backup-specific recovery acceptance passed on 2026-07-14. The interim all-factors-lost response is deny-by-default, and robust recovery is still required before paid/public onboarding.
+- Supabase does not provide native recovery codes. Tallyo supports a second authenticator and blocks email-only MFA recovery. A server-managed all-factors-lost candidate is implemented and locally tested with HMAC-only code storage, attempt locking, global factor/session cleanup, restrictive RLS, and forced TOTP re-enrolment. Production remains deny-by-default until backend-first deployment and live acceptance pass.
 - Stripe refund requests plus refund, dispute, chargeback, and failed-payment lifecycle handling are deployed and subscribed in the sandbox webhook destination, but still need broader replay testing and live-mode readiness before real customer use.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
 
@@ -187,7 +187,7 @@ Current app/security work:
 1. Define the operational refund, dispute, chargeback, and support process; the implemented Stripe sandbox lifecycle and duplicate replay behavior are Verified.
 2. Run the documented Owner-approved non-production restore test in `BACKUP_RESTORE_RUNBOOK.md`; current daily-backup evidence is verified through 2026-07-14.
 3. Expand append-only audit logging further, especially privileged automation failures and backup/restore evidence.
-4. Preserve the Verified `MFA_RECOVERY_RUNBOOK.md` controls and approved deny-by-default all-factors-lost response; design robust recovery before paid/public onboarding. Consider upgrading all-devices logout with a server-side email-code confirmation flow.
+4. Preserve the Verified `MFA_RECOVERY_RUNBOOK.md` controls and approved deny-by-default production response; deploy and accept the implemented all-factors-lost candidate before paid/public onboarding. Consider upgrading all-devices logout with a server-side email-code confirmation flow later.
 5. Complete the remaining provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; leaked-password rejection is already Verified.
 6. Complete privacy/data-protection groundwork before real customer use.
 7. Keep security docs, screenshots, and portfolio evidence in sync with the real app.

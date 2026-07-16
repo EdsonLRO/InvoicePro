@@ -57,3 +57,9 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/stripe-webhook/deno.json"
 entrypoint = "./functions/stripe-webhook/index.ts"
+
+[functions.mfa-recovery]
+enabled = true
+verify_jwt = true
+import_map = "./functions/mfa-recovery/deno.json"
+entrypoint = "./functions/mfa-recovery/index.ts"
