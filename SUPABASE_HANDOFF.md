@@ -273,7 +273,7 @@ Names only — never commit real values.
 - `STRIPE_WEBHOOK_SECRET`
 - `AUTOMATION_SECRET`
 - `APP_BASE_URL`
-- `MFA_RECOVERY_PEPPER` - required by the undeployed recovery candidate; do not create, display, or commit its value before the approved deployment step.
+- `MFA_RECOVERY_PEPPER` - required by the deployed `mfa-recovery` Edge Function; server-side only, never display, log, or commit its value.
 
 Provide a `.env.example` with placeholders if env files are introduced; never commit a real `.env`.
 
