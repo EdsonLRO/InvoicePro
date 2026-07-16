@@ -6,9 +6,9 @@ This record covers the candidate all-factors-lost recovery implementation on `co
 
 ## Current Disposition
 
-**Implemented and locally verified; not deployed or production-accepted.**
+**Backend deployed and structurally verified; authenticated lifecycle and frontend acceptance remain open.**
 
-Production continues to use the approved deny-by-default process in `MFA_RECOVERY_RUNBOOK.md`. The candidate must not be described as live until every production item below passes.
+The migration, server-only pepper, and JWT-protected Edge Function are deployed. Production continues to use the approved deny-by-default user process because the recovery UI is not published and the authenticated code lifecycle has not completed the matrix below. The feature must not be described as fully live or accepted yet.
 
 ## Local Evidence
 
@@ -23,21 +23,35 @@ Production continues to use the approved deny-by-default process in `MFA_RECOVER
 | One-time semantics | Passed by harness | Claiming one valid code deletes the complete generation before factor cleanup. |
 | Recovery lock | Passed by harness | Restrictive policies cover all six tenant-data tables and deny access while recovery is pending. |
 | Browser state clearing | Passed by harness | Raw code and recovery-entry state clear on sign-out; recovery routing checks state before business-data initialisation. |
-| Pre-deployment shell regression | Passed | Local build `2026.07.16.2` rendered at desktop, 390 px, and 320 px with no page-level horizontal overflow or captured browser warning/error. Recovery-specific screens remain pending because the backend is intentionally not deployed. |
+| Pre-deployment shell regression | Passed | Local build `2026.07.16.2` rendered at desktop, 390 px, and 320 px with no page-level horizontal overflow or captured browser warning/error. Recovery-specific authenticated screens remain pending live acceptance. |
 | Regression suite | Passed | All repository security harnesses passed after implementation. |
 | Legal/privacy/security review | Conditional | `LEGAL_MFA_RECOVERY_REVIEW_2026-07-16.md` permits implementation/testing but blocks production until its conditions and this live matrix are closed. |
 
 Static checks do not prove hosted database behaviour, global session invalidation, provider factor deletion, or email delivery. Those require the live tests below.
 
+## Live Backend Evidence
+
+| Control | Result | Privacy-safe evidence |
+|---|---|---|
+| Migration history | Passed | Production and repository history match through `20260716161054`; the initial recovery migration and two corrective helper migrations applied successfully. |
+| Secret handling | Passed | `MFA_RECOVERY_PEPPER` was generated from 48 cryptographically random bytes and installed directly as an Edge secret without displaying or writing the value. |
+| Function deployment | Passed | `mfa-recovery` version 1 is active with JWT verification enabled. |
+| Network boundary | Passed | Missing credentials returned 401, an unapproved origin returned 403, and a publishable key without a user session returned 401. |
+| Database privileges | Passed | Recovery tables have RLS; browser writes are denied; all four privileged RPCs are service-role-only security-definer functions with fixed empty search paths. |
+| Tenant policy coverage | Passed | Both restrictive policies exist on all six tenant-data tables. A rolled-back probe confirmed AAL1 saw zero rows, AAL2 matched the account's own baseline, and pending recovery saw zero rows across all six tables. |
+| Helper exposure | Passed after correction | Live probing found that direct policy access to `auth.mfa_factors` was denied. The final design uses a current-user-only security-definer helper in non-exposed schema `private`; the exposed helper was removed. Security and per-row JWT advisor warnings then cleared. |
+| Probe cleanup | Passed | Rolled-back tests left zero recovery-state and zero recovery-code rows. |
+| Advisor disposition | Accepted with documented INFO | `mfa_recovery_codes` intentionally has RLS with no browser policy. Unused-index and Auth connection-strategy notices are informational at current scale. |
+
 ## Approval-Gated Deployment Evidence
 
 Record only dates, versions, counts, HTTP status classes, and pass/fail outcomes.
 
-- [ ] Migration applied successfully; tables, policies, grants, and RPC signatures read back as expected.
-- [ ] `MFA_RECOVERY_PEPPER` installed without display, logging, or repository storage.
-- [ ] `mfa-recovery` deployed with JWT verification enabled; deployed source/version read back.
-- [ ] No-credential request rejected with HTTP 401.
-- [ ] Unapproved browser origin rejected with HTTP 403.
+- [x] Migration applied successfully; tables, policies, grants, and RPC signatures read back as expected.
+- [x] `MFA_RECOVERY_PEPPER` installed without display, logging, or repository storage.
+- [x] `mfa-recovery` deployed with JWT verification enabled; deployed source/version read back.
+- [x] No-credential request rejected with HTTP 401.
+- [x] Unapproved browser origin rejected with HTTP 403.
 - [ ] AAL1 code generation rejected; AAL2 generation accepted.
 - [ ] Exactly ten HMAC rows exist and no raw-code-shaped value exists in either recovery table or recent audit metadata.
 - [ ] Replacing a set invalidates the previous generation.

@@ -11,6 +11,13 @@ const migrationName = fs.readdirSync(path.join(root, 'supabase', 'migrations'))
 
 assert(migrationName, 'MFA recovery migration is missing.');
 const migration = fs.readFileSync(path.join(root, 'supabase', 'migrations', migrationName), 'utf8');
+const privateHelperMigrationName = fs.readdirSync(path.join(root, 'supabase', 'migrations'))
+  .find((name) => name.endsWith('_move_mfa_helper_to_private_schema.sql'));
+assert(privateHelperMigrationName, 'Private MFA RLS helper migration is missing.');
+const privateHelperMigration = fs.readFileSync(
+  path.join(root, 'supabase', 'migrations', privateHelperMigrationName),
+  'utf8',
+);
 
 const inlineScript = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)]
   .find((match) => !/\ssrc\s*=/.test(match[0]));
@@ -43,6 +50,24 @@ assert.match(migration, /failed_attempts between 0 and 5/i);
 assert.match(migration, /interval '15 minutes'/i);
 assert.match(migration, /delete from public\.mfa_recovery_codes[\s\S]*where user_id = p_user_id/i);
 assert.doesNotMatch(migration, /raw_code|plain(?:text)?_code/i);
+
+for (const table of [
+  'company_settings',
+  'customers',
+  'saved_items',
+  'invoices',
+  'recurring_templates',
+  'audit_events',
+]) {
+  assert.match(privateHelperMigration, new RegExp(`'${table}'`), `${table} must use the private MFA helper.`);
+}
+assert.match(privateHelperMigration, /create schema if not exists private/i);
+assert.match(privateHelperMigration, /security definer\s+set search_path = ''/i);
+assert.match(privateHelperMigration, /revoke all on function private\.current_user_has_verified_mfa\(\)[\s\S]*from public, anon, authenticated/i);
+assert.match(privateHelperMigration, /grant execute on function private\.current_user_has_verified_mfa\(\)[\s\S]*to authenticated, service_role/i);
+assert.match(privateHelperMigration, /not \(select private\.current_user_has_verified_mfa\(\)\)/i);
+assert.match(privateHelperMigration, /\(\(select auth\.jwt\(\)\)->>'aal'\) = 'aal2'/i);
+assert.match(privateHelperMigration, /drop function public\.current_user_has_verified_mfa\(\)/i);
 
 assert.match(edge, /crypto\.getRandomValues\(new Uint8Array\(CODE_LENGTH\)\)/);
 assert.match(edge, /CODE_LENGTH = 20/);
