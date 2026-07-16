@@ -62,6 +62,8 @@ Supabase CAPTCHA enforcement remains **off**. A production site key is not confi
 
 On 2026-07-16, the Owner reported creating `Tallyo portfolio Auth test` as a Managed test widget restricted to `edsonlro.github.io`, with pre-clearance off. No site key or secret is recorded in this repository or in these internal records. The widget is for controlled portfolio acceptance only and must not be reused for the eventual Tallyo production hostname.
 
+`TURNSTILE_BROWSER_ACCEPTANCE_2026-07-16.md` records the successful controlled pre-enforcement pass: all three protected frontend modes completed with Cloudflare's published test key across desktop, 390-pixel, and 320-pixel layouts, and the real test widget returned Cloudflare's Success state on its authorised GitHub Pages hostname. No Auth form was submitted, no key was persisted, and Supabase enforcement remained off.
+
 `CLOUDFLARE_TURNSTILE_VENDOR_REVIEW_2026-07-15.md` records the refreshed provider, DPA, UK-transfer, subprocessor, PECR, hostname, and rollout evidence. Its disposition is approved-with-conditions for controlled test preparation only; production remains blocked.
 
 ## Why CAPTCHA Is Worth Adding
@@ -235,4 +237,4 @@ The Owner approved items 1-3 and 5-6 for the bounded frontend implementation on 
 
 `Approved with conditions` for the bounded, dormant frontend implementation, exact-origin CSP change, focused tests, and internal records.
 
-`Blocked` for legal-notice publication, secret handling by the agent, Supabase enforcement, and public reliance. Owner-operated account acceptance and controlled test-widget provisioning are complete. Production activation still requires browser acceptance, the outstanding vendor/legal decisions, an eventual separate production widget and Owner-operated secret entry for the final Tallyo hostname, and a separate Owner approval. Paid/public launch remains blocked by the wider legal and operational gates even if CAPTCHA is later enabled.
+`Blocked` for legal-notice publication, secret handling by the agent, Supabase enforcement, and public reliance. Owner-operated account acceptance, controlled test-widget provisioning, and pre-enforcement browser acceptance are complete. Production activation still requires the outstanding vendor/legal decisions, an eventual separate production widget and Owner-operated secret entry for the final Tallyo hostname, a separate Owner approval, and immediate post-activation Auth regression. Paid/public launch remains blocked by the wider legal and operational gates even if CAPTCHA is later enabled.

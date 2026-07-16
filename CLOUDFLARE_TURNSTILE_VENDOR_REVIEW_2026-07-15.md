@@ -9,7 +9,7 @@ Internal legal, privacy, security, and release evidence. This is not legal advic
 | Provider and service | Cloudflare Turnstile |
 | Review date | 2026-07-15 |
 | Intended purpose | Reduce automated abuse of public sign-up, password sign-in, and password-reset requests |
-| Current state | Dormant frontend support is merged; the Owner reported creating the controlled test widget on 2026-07-16, but no site key or secret is configured in Tallyo and Supabase enforcement is off |
+| Current state | Dormant frontend support is merged; the Owner reported creating the controlled test widget and pre-enforcement browser acceptance passed on 2026-07-16, but no site key or secret is configured in Tallyo and Supabase enforcement is off |
 | Legal Agent disposition | `Approved with conditions` for test preparation and controlled acceptance only |
 | Production disposition | `Blocked` pending the final hostname, notice/lawful-basis decisions, browser acceptance, separate production-widget provisioning, Owner-operated secret entry, and separate activation approval |
 | External review | Required before paid/public onboarding because role allocation, international transfers, PECR treatment, and notice wording remain legally material |
@@ -99,11 +99,11 @@ The eventual production widget must be separate and restricted to Tallyo's final
 
 1. Completed 2026-07-16: Owner reviewed and personally accepted the Cloudflare account and applicable terms.
 2. Completed 2026-07-16: Owner reported creating the test widget with the exact profile above and kept the secret masked.
-3. Use Cloudflare's published dummy keys for automated error/replay cases; do not put a production secret into automated tests.
-4. Configure only the public test site key in a temporary acceptance branch or local session.
-5. Keep Supabase CAPTCHA enforcement off while checking rendering, keyboard use, 200% zoom, 320/390-pixel widths, retry, blocked-script, offline, and unsupported-browser states.
-6. Confirm the browser sends no Tallyo workspace/customer data to Cloudflare.
-7. Remove the test site key and verify the repository returns to the blank-key state.
+3. Completed 2026-07-16 for the implemented scope: focused tests used Cloudflare's published test key; no production secret entered automated tests.
+4. Completed 2026-07-16: the public test site key was used transiently on the authorised GitHub Pages hostname and was not committed or stored in project records.
+5. Completed 2026-07-16 for pre-enforcement acceptance: desktop, 390-pixel, and 320-pixel rendering and mobile form scrolling passed; retry/fail-closed paths remain covered by the focused harness. Production post-activation testing remains separate.
+6. Partially completed: no Auth form or Tallyo workspace/customer data was submitted during acceptance, and the implemented code sends only the challenge token with protected Auth requests. Provider-side signal processing remains governed by the vendor/privacy review.
+7. Completed 2026-07-16: the repository remained on the blank-key state and the working tree was clean after testing.
 8. Complete notice, role, transfer, retention, and professional-review actions.
 9. Later, create a separate production widget for the final application hostname and enter its secret directly in Supabase Auth.
 10. Obtain a separate Owner approval immediately before enabling Supabase CAPTCHA, then test all protected flows and missing/expired/replayed tokens.
