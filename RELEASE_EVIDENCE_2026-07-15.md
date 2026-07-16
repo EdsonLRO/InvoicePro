@@ -28,6 +28,8 @@ Privacy-safe evidence from the `codex/release-readiness-pass` review. This does 
 - The previous PNG/RGBA export was 35,767,558 bytes. After merge commit `c48c60267bbb44e5257d2f258a0ffc92fb8f9ac9` deployed, the same authenticated synthetic invoice exported as a 689,481-byte, three-page A4 PDF: approximately 98.1% smaller.
 - All deployed optimized PDF pages were rendered and visually rechecked. Complete-row pagination, continuation gaps, alternating colours, notes, terms, and totals remained correct. Pixel inspection found white page edges, and all pages referenced one shared 1600x5588 JPEG image object.
 - The Owner completed real-phone acceptance: the authenticated long PDF downloaded without cuts, Tallyo installed successfully, the cached login shell opened in airplane mode, offline login remained unavailable as expected, and normal operation returned after reconnection.
+- PR #40 passed protected `Security checks` run `29495647969` and was merged as `2cfb88685be9921c4e799ed461dc4cf833daf7ba`. GitHub Pages served frontend build `2026.07.16.1` and service-worker cache `tallyo-shell-2026-07-16-1`; desktop and 390x844 checks found no horizontal overflow or console warning/error signal. The Owner then reopened the existing installed application without reinstalling it and confirmed the new build marker. PWA update-across-deployment acceptance is Verified.
+- Dedicated test-account desktop/mobile account-holder export acceptance completed on 2026-07-16. Warning, download, and local readability passed; privacy-safe desktop structure/count/ownership checks passed; and corrected production events contained only `export_version` and `format`. Exported customer content was not recorded in evidence.
 - A controlled session-expiry harness passed full in-memory state clearing, quiet intentional logout, failed-logout recovery, unexpected `SIGNED_OUT` notification, and rejection of delayed initial business-data, audit-event, and MFA responses.
 - PR #17 was squash-merged as `3758775b3b1928523ef77216bc45cfa7af584db5`. The harness and inline-script syntax check passed again from merged `main`. The public GitHub Pages source contained the expected `SIGNED_OUT` handler, session-generation guard, and reauthentication message; the Tallyo sign-in shell rendered with its email/password fields and no captured browser-console errors. Session-policy activation was still Owner-gated and unchanged during that specific deployment-acceptance check.
 - After that deployment acceptance, the Owner approved production session-policy activation. Supabase Auth was saved and independently reloaded/read back with a 168-hour maximum session duration, 24-hour inactivity timeout, refresh-token rotation enabled with the existing 10-second reuse interval, and single-session enforcement disabled. The established 3600-second JWT lifetime was not changed.
@@ -45,7 +47,7 @@ Detailed PDF/PWA notes: `PDF_PWA_REGRESSION_EVIDENCE_2026-07-15.md`.
 
 - `LEGAL_OPERATIONS_RECORDS.md` now contains a working ROPA, rights/incident/vendor/retention templates, and preliminary DPIA screening.
 - `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` records fictional rights-request and cross-tenant breach exercises without real personal data. Both exercises passed as process-design walkthroughs but exposed blocking operational gaps.
-- `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md` records an approved-with-conditions design for an authenticated RLS-scoped account-holder JSON export. Success and simulated dataset-failure harnesses cover pagination, metadata minimisation, local download, no partial file, and minimal audit emission. The frontend and v6 server allowlist are deployed; dedicated test-account browser acceptance and one successful production event row are still pending.
+- `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md` records the approved-with-conditions design and completed account-holder acceptance. Separate correction, deletion, provider-assistance, restricted-case, secure-delivery, and public-notice operations remain unfinished.
 - This evidence does not approve lawful bases, retention periods, controller/processor roles, public notices, live case handling, or legal compliance.
 
 ## Deployed Hardening
@@ -62,7 +64,7 @@ Active versions after deployment:
 | `send-reminder-email` | 8 | Supabase JWT |
 | `send-overdue-reminders` | 8 | `x-automation-secret` |
 | `generate-recurring` | 14 | `x-automation-secret` |
-| `log-app-event` | 6 | Supabase JWT |
+| `log-app-event` | 7 | Supabase JWT |
 
 ## Informational Advisories
 
@@ -76,15 +78,12 @@ No change was made because current usage evidence does not justify index removal
 
 ## Pending Acceptance
 
-- Observe PWA update behaviour across a later deployment. Phone PDF, installation, offline shell fallback, and reconnection are verified; offline authentication and customer-data access are intentionally unsupported.
 - Complete the CAPTCHA/abuse-control and connection-allocation decisions. Custom SMTP delivery and its initial 30-emails-per-hour limit are verified; the seven-day session timebox and 24-hour inactivity timeout are active and evidence-backed.
-- Dedicated test-account desktop/mobile account-holder export acceptance completed on 2026-07-16. Warning, download, and local readability passed; privacy-safe desktop structure/count/ownership checks passed; and corrected production events contained only `export_version` and `format`. Exported customer content was not recorded in evidence.
 - Implement robust all-factors-lost recovery before paid/public onboarding.
 - Resolve the tabletop gaps, complete and externally review the blocked legal/privacy/customer-policy work in `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and `PAYMENT_OPERATIONS_RUNBOOK.md`.
 - Keep Stripe sandbox-only until a separately approved live release.
 
 ## Test Limitations
 
-- The installed PWA has not yet observed a later published version, so update-across-deployment behaviour is not operationally claimed.
 - The Edge Function tree is not uniformly `deno fmt` clean; bulk reformatting was deliberately avoided to keep this hardening diff focused. Type checking passed.
 - `psql` is not on `PATH`; the verified platform restore used Supabase's restore-to-new-project flow rather than a local CLI restore.

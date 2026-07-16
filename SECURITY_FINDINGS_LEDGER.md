@@ -262,4 +262,4 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - Keep the verified Stripe sandbox lifecycle evidence current after material payment-handler changes; live activation remains separately approval-gated.
 - Keep the verified isolated backup/restore evidence current after material schema, RLS, automation, or backup-policy changes.
 - Keep account-export desktop/mobile acceptance current after material scope, RLS, Auth, or audit-writer changes. Do not record exported content in evidence.
-- Observe the installed PWA updating across a later deployment.
+- Keep PWA update acceptance current after material service-worker, cache-version, manifest, or hosting changes.

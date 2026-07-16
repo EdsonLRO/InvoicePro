@@ -158,7 +158,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 | `tailwind.css` | Compiled, self-hosted Tailwind stylesheet. Must be rebuilt when new classes are added. |
 | `config.js` | Holds public Supabase URL + publishable/anon key. **No secret keys.** |
 | `manifest.json` | PWA metadata (name, icons). Rebranded to Tallyo. |
-| `service-worker.js` | PWA caching / offline. Caches aggressively (hard-refresh after deploy). |
+| `service-worker.js` | Versioned same-origin PWA shell cache with network-first refresh and safe offline navigation fallback. Supabase/CDN traffic is not intercepted. |
 | `icon-192.png`, `icon-512.png` | Tallyo PWA icons. |
 | `APP_STATUS.md` | Short current-stage source of truth: what is implemented, what remains, and what is deferred to future SaaS work. |
 | `AUTONOMOUS_EXECUTION_PERMISSION.md` | Standing owner permission for autonomous safe development, testing, documentation, Supabase, Git, and deployment-preparation work, plus manual-approval boundaries. |
@@ -349,7 +349,7 @@ Always describe security as "controls implemented + honest limitations", never a
 
 - **Historical naming remains:** repo/folder name and historical threat-model docs still reference InvoicePro; the visible UI, manifest, and icons use Tallyo.
 - **Generated invoice numbering** was historically inconsistent (plain number vs prefixed); the Edge Function now prepends the user's prefix — verify consistency across app-generated and server-generated invoices.
-- **Service-worker caching** can serve stale files after deploy; requires hard-refresh / Incognito to confirm changes. Easy to mistake for "deploy didn't work".
+- **PWA updates are evidence-backed, not magic.** Build `2026.07.16.1` passed existing-install update acceptance. Keep the visible build marker and increment both build/cache versions for material frontend releases; do not claim future releases updated until observed.
 - **Mobile item row** was iteratively tuned (qty/unit stacking, price/disc/tax widths, suggestion-dropdown clipping). Re-test on small screens after any table/layout change.
 - **Recurring-from-invoice** does not link the invoice to its spawned schedule; toggling "Repeat" again on the same invoice and re-saving can create a second schedule. No dedup guard.
 - **Free-tier pause** can silently stop the daily cron.
@@ -375,7 +375,7 @@ Near-term (in rough order):
    - Done: hardened Stripe webhook records verified Checkout payments and includes refund/dispute/failed-payment awareness.
    - Done: in-app Stripe refund requests through a server-side Edge Function.
    - Current payment caveat: Stripe should still be treated as test/development until explicitly moved to live mode.
-4. **Current hardening priorities:** operationally test and legally review `PAYMENT_OPERATIONS_RUNBOOK.md`; complete the separate blocked legal/privacy work in `LEGAL_PRIVACY_READINESS.md`; finish provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; design robust all-factors-lost recovery before paid/public onboarding; and observe PWA update-across-deployment behaviour. Controlled desktop/mobile account-export acceptance and corrected production audit metadata are Verified.
+4. **Current hardening priorities:** operationally test and legally review `PAYMENT_OPERATIONS_RUNBOOK.md`; complete the separate blocked legal/privacy work in `LEGAL_PRIVACY_READINESS.md`; finish provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; and design robust all-factors-lost recovery before paid/public onboarding. Controlled desktop/mobile account-export acceptance, corrected production audit metadata, and PWA update-across-deployment behaviour are Verified.
 5. **Data-protection groundwork** before real customer use: privacy policy, terms, retention position, correction/deletion/provider-assistance and restricted-case processes, consent/unsubscribe where relevant, and breach response notes. The account-holder JSON export is one control, not the whole rights-request process.
 6. Optional app polish: link invoices to their recurring schedule (dedup guard); clearer payment-state wording; repo/URL rename to Tallyo only with Supabase Auth URL updates.
 7. Future phase, deliberately deferred: public website, paid Tallyo subscriptions, plan tiers, server-enforced entitlements, workspaces/teams/RBAC, and SaaS billing.
