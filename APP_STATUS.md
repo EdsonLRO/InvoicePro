@@ -15,6 +15,8 @@ The current product is a single-user-per-account invoicing workspace backed by S
 
 ## Current app stage
 
+**Current invoicing-app scope:** feature-complete and regression-verified for the intended test/portfolio stage. Real-customer release remains blocked by the security, legal, privacy, provider, and live-payment conditions below.
+
 Implemented:
 
 - Invoices, quotes, and credit notes.
