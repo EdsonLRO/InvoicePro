@@ -130,7 +130,7 @@ Later:
 
 - Formal backup and restore testing.
 - Further append-only audit log hardening for settings changes, automation failures, and backup/restore evidence.
-- AUTH-001 factor-specific recovery acceptance passed on 2026-07-14. AUTH-002's server-managed recovery backend was deployed on 2026-07-16 because Supabase has no native recovery codes; boundary, privilege, AAL, rolled-back RLS, authenticated lifecycle, audit-minimisation, and two-account probes pass. Preserve the approved deny-by-default user response until live throttling, notification delivery, final legal disposition, and real-device acceptance pass and the frontend is published.
+- AUTH-001 factor-specific recovery acceptance passed on 2026-07-14. AUTH-002's server-managed recovery backend was deployed on 2026-07-16 because Supabase has no native recovery codes; boundary, privilege, AAL, rolled-back RLS, authenticated lifecycle, audit-minimisation, two-account, and rollback-only live-throttling probes pass. Preserve the approved deny-by-default user response until notification delivery, final legal disposition, and real-device acceptance pass and the frontend is published.
 - Supabase Auth password policy confirmation and breached-password checks.
 - Privacy policy, terms, data export/erasure process, retention policy, and breach process before real customer onboarding.
 - Future SaaS subscription billing, plan tiers, workspaces, teams, RBAC, and public website.

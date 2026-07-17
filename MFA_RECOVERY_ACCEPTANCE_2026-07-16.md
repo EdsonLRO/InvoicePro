@@ -8,7 +8,7 @@ This record covers the candidate all-factors-lost recovery implementation on `co
 
 **Backend deployed and structurally verified; authenticated lifecycle passed, with selected release gates still open.**
 
-The migration, server-only pepper, and JWT-protected Edge Function are deployed. Authenticated generation, replacement, one-time recovery, forced re-enrolment, audit-minimisation, and recovery-lock behaviour have passed with privacy-safe evidence. Production continues to use the approved deny-by-default user process because live throttling, notification delivery, final legal disposition, and real-device acceptance remain. The feature must not be described as fully live or accepted yet.
+The migration, server-only pepper, and JWT-protected Edge Function are deployed. Authenticated generation, replacement, one-time recovery, forced re-enrolment, audit-minimisation, recovery-lock behaviour, and live throttling logic have passed with privacy-safe evidence. Production continues to use the approved deny-by-default user process because notification delivery, final legal disposition, and real-device acceptance remain. The feature must not be described as fully live or accepted yet.
 
 ## Local Evidence
 
@@ -66,7 +66,7 @@ Record only dates, versions, counts, HTTP status classes, and pass/fail outcomes
 - [ ] AAL1 code generation rejected; AAL2 generation accepted.
 - [x] Exactly ten HMAC rows exist and no raw-code-shaped value exists in either recovery table or recent audit metadata.
 - [x] Replacing a set invalidates the previous generation.
-- [ ] Wrong codes are rejected without account-data access; the fifth failed attempt locks recovery for 15 minutes.
+- [x] Wrong codes are rejected without account-data access; a rollback-only production probe returned `invalid` for attempts one through four and `locked` on attempt five with a 15-minute window. A follow-up read confirmed the rollback left zero failed attempts, active locks, or recovery-required rows. Existing AAL1/RLS probes confirm account data remains unavailable before MFA verification.
 - [x] A valid code works once, invalidates its complete set, removes old factors, and signs out existing sessions.
 - [x] While recovery is pending, SELECT and rolled-back write probes fail across `company_settings`, `customers`, `saved_items`, `invoices`, `recurring_templates`, and `audit_events`.
 - [x] A second account cannot read or alter the recovering account's state or tenant data.
