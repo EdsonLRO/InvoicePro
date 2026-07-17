@@ -37,6 +37,8 @@ Do not put private email addresses, identity documents, customer data, secrets, 
 | D04 - working role model | Approved for qualified review: Tallyo is the likely controller for account, security, support, service-operation, and its own payment/fraud processing; the business user is the likely controller for customer/contact and invoice content, with Tallyo potentially acting as processor. | This is a working model, not a final legal determination. Qualified review must confirm it per activity and determine required customer data-processing terms and rights routing. |
 | D05/D06 - lawful basis and retention | The Owner approved `LEGAL_BASIS_RETENTION_OPTIONS_2026-07-17.md` as the working position for qualified UK legal/privacy and accounting review. | This is not final legal acceptance and does not authorize production deletion, migration, customer wording, legal publication, real-customer processing, or spending. Specific bases/periods remain subject to qualified correction. |
 
+The D07 provider shortlist is recorded in `RESTRICTED_CASE_SYSTEM_OPTIONS_2026-07-17.md`. No provider, account, trial, contract, purchase, configuration, or live-data use has been approved. The next non-sensitive fact is whether the existing business email is paid Google Workspace, ordinary free Gmail, Microsoft 365, or unknown.
+
 ## Facts The Owner Can Decide Without Sharing Sensitive Data Here
 
 The next Owner response can be limited to:
