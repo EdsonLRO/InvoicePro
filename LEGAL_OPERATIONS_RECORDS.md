@@ -85,7 +85,7 @@ For each data category, record the purpose, start event, proposed period, legal/
 
 `PRIVACY_OPERATIONS_RUNBOOK.md` is the implementable operating authority for rights, correction, deletion, provider assistance, secure delivery, and personal-data incidents. Before real-customer processing, the Owner must approve a restricted case system and assigned roles, then pass all four synthetic exercises. Repository templates and the 2026-07-15 tabletop do not by themselves satisfy this gate.
 
-`LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md`, `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`, and `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md` define the remaining decisions, current evidence, and qualified-review deliverables.
+`LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md`, `LEGAL_BASIS_RETENTION_OPTIONS_2026-07-17.md`, `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`, and `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md` define the remaining decisions, current lawful-basis/retention proposal, provider evidence, and qualified-review deliverables.
 
 ## DPIA Screening
 

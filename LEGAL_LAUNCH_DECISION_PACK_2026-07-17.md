@@ -36,6 +36,8 @@ Do not put private email addresses, identity documents, customer data, secrets, 
 | D03 - initial customer scope | Approved: UK business account holders aged 18 or over, using Tallyo for ordinary business invoicing; no personal/household account use, sensitive case-record use, or non-UK onboarding for the initial release. | Qualified review must confirm the wording and treatment of sole traders, mixed-purpose users, invoice recipients, and regulated professionals performing ordinary invoicing. |
 | D04 - working role model | Approved for qualified review: Tallyo is the likely controller for account, security, support, service-operation, and its own payment/fraud processing; the business user is the likely controller for customer/contact and invoice content, with Tallyo potentially acting as processor. | This is a working model, not a final legal determination. Qualified review must confirm it per activity and determine required customer data-processing terms and rights routing. |
 
+`LEGAL_BASIS_RETENTION_OPTIONS_2026-07-17.md` now contains the current-source D05 lawful-basis map and D06 privacy-lean retention proposal. Both remain proposals until the Owner approves them as the working position for qualified legal/privacy and accounting review.
+
 ## Facts The Owner Can Decide Without Sharing Sensitive Data Here
 
 The next Owner response can be limited to:
