@@ -6,9 +6,9 @@ This record covers the candidate all-factors-lost recovery implementation on `co
 
 ## Current Disposition
 
-**Acceptance complete; Owner approval required before frontend publication.**
+**Accepted and published for the controlled test/portfolio stage.**
 
-The migration, server-only pepper, and JWT-protected Edge Function are deployed. Authenticated generation, replacement, one-time recovery, forced re-enrolment, audit-minimisation, recovery-lock behaviour, live throttling, notification delivery/minimisation, and real-Android acceptance have passed with privacy-safe evidence. The final internal legal disposition permits an Owner-approved merge and controlled test/portfolio publication; external UK legal/privacy review remains required before paid/public onboarding. The frontend is not yet published and must not be described as live.
+The migration, server-only pepper, and JWT-protected Edge Function are deployed. Authenticated generation, replacement, one-time recovery, forced re-enrolment, audit-minimisation, recovery-lock behaviour, live throttling, notification delivery/minimisation, and real-Android acceptance passed with privacy-safe evidence. The Owner explicitly approved the retained boundary on 2026-07-17; PR #44 merged as `8a22b5b`, the post-merge security and Pages workflows passed, and a focused public-shell smoke check found the mobile-scroll CSS present with no horizontal overflow or browser warning/error. External UK legal/privacy review remains required before paid/public onboarding.
 
 ## Local Evidence
 

@@ -6,7 +6,7 @@ This runbook records how Tallyo handles multi-factor authentication (MFA) recove
 
 Tallyo uses time-based one-time password (TOTP) authenticators through Supabase Auth. Supabase Auth did not provide native recovery codes when rechecked on 2026-07-16.
 
-The supported recovery method is therefore a second verified authenticator:
+The preferred recovery method is a second verified authenticator:
 
 1. The user enables MFA with a primary authenticator.
 2. While still signed in, the user adds one backup authenticator from Account Security.
@@ -16,11 +16,11 @@ The supported recovery method is therefore a second verified authenticator:
 
 Tallyo does not use email, SMS, security questions, or a browser-stored code as an MFA bypass.
 
-The production user experience still uses this model. The recovery database controls, server-only pepper, and JWT-protected Edge Function were deployed on 2026-07-16. Authenticated generation, replacement, one-time recovery, forced re-enrolment, audit-minimisation, recovery-lock behaviour, rollback-only production throttling, Owner-confirmed notification delivery/minimisation, and real-Android acceptance passed by 2026-07-17. The final internal legal disposition permits Owner-approved controlled test/portfolio publication, but the browser UI remains unpublished until PR #44 receives that approval. The feature is therefore not yet described as fully live.
+The production user experience also supports saved one-time recovery codes when every authenticator is unavailable. The recovery database controls, server-only pepper, and JWT-protected Edge Function were deployed on 2026-07-16. Authenticated generation, replacement, one-time recovery, forced re-enrolment, audit-minimisation, recovery-lock behaviour, rollback-only production throttling, Owner-confirmed notification delivery/minimisation, and real-Android acceptance passed by 2026-07-17. After explicit Owner approval, PR #44 merged as `8a22b5b`; post-merge security checks, Pages deployment, and the focused published-shell smoke check passed. This release is limited to the controlled test/portfolio stage.
 
-## Recovery-Code Candidate
+## Recovery-Code Release
 
-The candidate design adds ten one-time codes that are shown once to an already AAL2-verified user. Each code contains 100 bits of randomness. Raw codes are not stored, emailed, logged, or sent to audit history. Postgres stores only HMAC-SHA256 values made with a server-only `MFA_RECOVERY_PEPPER`.
+The released design adds ten one-time codes that are shown once to an already AAL2-verified user. Each code contains 100 bits of randomness. Raw codes are not stored, emailed, logged, or sent to audit history. Postgres stores only HMAC-SHA256 values made with a server-only `MFA_RECOVERY_PEPPER`.
 
 Recovery requires both the account password session at AAL1 and one saved recovery code. A successful claim atomically invalidates the complete code set, removes the old TOTP factors through the server-side Supabase Admin API, globally signs out existing sessions, and places the account in a database-enforced recovery state. Restrictive RLS policies deny the six tenant-data tables until a new TOTP factor is verified at AAL2 and the recovery state is completed.
 
@@ -43,20 +43,21 @@ The password-reset email proves access to the registered mailbox, but it does no
 | Primary authenticator unavailable, backup available | Use the backup authenticator, then replace the lost factor while signed in. |
 | Backup authenticator unavailable, primary available | Use the primary authenticator and remove/re-enrol the backup. |
 | Password forgotten, at least one authenticator available | Use the password-reset email and complete the TOTP challenge. |
-| All authenticators lost | Production currently has no self-service bypass. After the candidate is deployed and accepted, use the password plus one saved one-time recovery code, then enrol a new authenticator before business data is unlocked. |
+| All authenticators lost, saved code available | Use the password plus one saved one-time recovery code, then enrol a new authenticator before business data is unlocked. |
+| All authenticators and saved codes lost | Use the deny-by-default support process below; no email-only, support, or administrator bypass exists. |
 
 ## All Factors Lost
 
-The Owner accepted the following interim deny-by-default process on 2026-07-14 for the current portfolio build:
+The Owner accepted the following deny-by-default fallback on 2026-07-14 for a user who has neither an available authenticator nor a valid saved recovery code:
 
 1. Support must not disable MFA, remove factors, transfer account data, or treat control of the registered email address as sufficient identity proof.
 2. Support must not collect passports, driving licences, selfies, banking records, or other identity evidence because Tallyo has no approved identity-proofing, evidence-retention, or secure-review process.
-3. Support explains that access cannot currently be restored without a verified authenticator and directs the user to use a separately enrolled backup authenticator if one remains available.
+3. Support explains that access cannot be restored without a verified authenticator or valid saved recovery code and directs the user to use either one if available.
 4. A support case may record only the date, a non-sensitive case reference, the category `all_factors_lost`, and the outcome `recovery_unavailable`. It must not contain passwords, TOTP codes, QR secrets, recovery tokens, invoice/customer content, or identity documents.
 5. The account and its data remain subject to the normal retention and deletion rules. Support must not migrate data to a replacement account or disclose account contents through another channel.
 6. A suspicious, coercive, or disputed request is escalated as a security incident; it does not create an exception to the policy.
 
-This defines what support does today without creating an administrator bypass. Keep it in force until the recovery-code candidate passes live acceptance. No support or administrator exception is introduced by the candidate.
+This defines what support does without creating an administrator bypass. No support or administrator exception is introduced by the recovery-code release.
 
 Security and privacy basis checked on 2026-07-14:
 
@@ -115,7 +116,7 @@ Do not merge or publish the frontend before its backend dependencies exist. The 
 2. **Completed 2026-07-16:** generate and install a new server-only `MFA_RECOVERY_PEPPER` without displaying or committing it.
 3. **Completed 2026-07-16:** deploy `mfa-recovery` version 1 with JWT verification enabled.
 4. **Completed 2026-07-17:** unauthorized, wrong-origin, rolled-back AAL/RLS, authenticated generation, replacement, one-time-use, forced re-enrolment, audit-minimisation, two-account, rollback-only live-throttling, notification-delivery/minimisation, and desktop/phone acceptance passed.
-5. **Owner approval required:** mark PR #44 ready, merge it, and publish the frontend only after the Owner explicitly approves this retained boundary.
-6. After publication, record the release commit and complete a focused smoke check without repeating unrelated regression work.
+5. **Completed 2026-07-17:** the Owner explicitly approved marking PR #44 ready, merging it, and publishing the frontend; merge commit `8a22b5b` was deployed by GitHub Pages.
+6. **Completed 2026-07-17:** post-merge security and Pages workflows passed. The focused public-shell smoke check confirmed HTTPS load, the new recovery-modal mobile-scroll CSS, no horizontal overflow, and no browser warning/error.
 
 If any backend step fails, leave the current deny-by-default production UI in place and do not publish the recovery-code frontend.
