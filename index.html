@@ -3929,6 +3929,9 @@
             formatHistoryTime(ts) {
                 try { return new Date(ts).toLocaleString(); } catch (e) { return ts; }
             },
+            formatDateTime(ts) {
+                try { return new Date(ts).toLocaleString(); } catch (e) { return ts; }
+            },
             async recordPayment() {
                 const amt = parseFloat(this.newPayment.amount);
                 if (!amt || amt <= 0) return alert("Enter a valid payment amount.");
