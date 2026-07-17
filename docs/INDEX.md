@@ -77,7 +77,7 @@ Roles: Product + Backend + Security + Legal + QA + Release. Always high risk; re
 
 ### Legal and regulatory work
 
-Read the full `TALLYO_LEGAL_COMPLIANCE_AGENT.md`, relevant source documents, current authoritative evidence and applicable release conditions.
+Read the full `TALLYO_LEGAL_COMPLIANCE_AGENT.md`, relevant source documents, `LEGAL_PRIVACY_READINESS.md`, `LEGAL_OPERATIONS_RECORDS.md`, and applicable release conditions. For `LEGAL-OPS-001` or real-customer preparation, also read `LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md`, `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`, `PRIVACY_OPERATIONS_RUNBOOK.md`, and `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md`.
 
 Roles: Legal/Privacy plus only triggered Product, Security, Payments, Documentation or Release roles. Use Sol-level review for legally material conclusions. A legal block cannot be silently overridden.
 
@@ -145,6 +145,8 @@ Do not generate separate role reports for roles marked `Not triggered`.
 | Meaningful handoff state | `PROJECT_HANDOFF.md` |
 | Supabase implementation handoff | `SUPABASE_HANDOFF.md` |
 | Security findings | `SECURITY_FINDINGS_LEDGER.md` |
+| Legal/privacy readiness disposition | `LEGAL_PRIVACY_READINESS.md` |
+| Privacy operations records and gate | `LEGAL_OPERATIONS_RECORDS.md`, `PRIVACY_OPERATIONS_RUNBOOK.md` |
 
 Other documents should link to these sources rather than repeat their complete rules when practical. Verified code and test evidence override stale narrative documentation; reconcile material contradictions explicitly.
 

@@ -1,0 +1,45 @@
+# LEGAL-OPS-001 Operational And Legal Readiness - 2026-07-17
+
+Task ID: LEGAL-OPS-001
+Title: Prepare operational and legal readiness for real-customer review
+Objective: Convert the existing legal/privacy groundwork into a current-source decision pack, implementable operating requirements, unpublished draft documents, and a qualified-review handoff without onboarding real customers or claiming compliance.
+Priority: High
+Status: In Progress
+Phase: Owner decisions, synthetic operations and qualified-review handoff
+Owner role: Legal, Privacy and Regulatory Agent
+Assigned specialists: Product Agent, Security Agent, Payments Agent, Documentation Agent, Release Agent
+Required reviewers: QA Agent; Security Agent for personal-data controls; Payments Agent for refund/dispute wording; Legal Agent final review; Release Agent gate review
+Model/work mode: Sol for legal/privacy/release decisions; Terra for evidence collection and document implementation
+Risk level: High
+Affected files: this task record; `LEGAL_PRIVACY_READINESS.md`; `LEGAL_OPERATIONS_RECORDS.md`; `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md`; `PAYMENT_OPERATIONS_RUNBOOK.md`; new internal decision, vendor-evidence, operational and external-review records; authoritative status documents only when their state changes
+Files or paths locked: LEGAL-OPS-001 legal/privacy readiness and operating-evidence scope on `codex/legal-ops-readiness`
+Lock acquired: 2026-07-17
+Expected release condition: focused evidence and draft package committed, verified, handed off with explicit remaining Owner/external-review gates, or task reassigned
+Documents to read: `AGENTS.md`; `APP_STATUS.md`; `docs/INDEX.md`; full `AUTOMATION_MODEL_ORCHESTRATION.md`; full `AUTONOMOUS_EXECUTION_PERMISSION.md`; full `TALLYO_LEGAL_COMPLIANCE_AGENT.md`; `LEGAL_PRIVACY_READINESS.md`; `LEGAL_OPERATIONS_RECORDS.md`; `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md`; `PAYMENT_OPERATIONS_RUNBOOK.md`; `RELEASE_READINESS.md`; `PRODUCT_COMPLETION_LEDGER.md`; relevant current official legal and provider sources
+Documents explicitly not required: SaaS website planning; marketing implementation; unrelated historical evidence; Auth/MFA source; Stripe source; production migrations unless a later separately scoped task requires them
+Dependencies: verified current app behaviour; existing data-flow/ROPA/tabletop evidence; Owner business decisions; current provider contract/transfer evidence; qualified UK legal/privacy review before paid/public onboarding
+Jurisdictions: United Kingdom only for this task; expansion requires a separate review
+Affected user/data-subject types: account holders; freelancers, sole traders and small-business users; their customer contacts and invoice recipients; payment participants; support, rights-request and incident reporters
+Applicable requirements: UK GDPR and Data Protection Act 2018 issue spotting; ICO transparency, lawful-basis, accountability, rights, retention, security, breach and transfer guidance; PECR where applicable; UK consumer/B2B fairness and payment/refund considerations; provider contractual rules; Companies House/HMRC matters only where applicable and externally reviewed
+Required legal documents: internal decision register; current vendor/subprocessor/transfer evidence register; retention proposal; rights/incident operating requirements; fuller DPIA-style assessment; unpublished product-specific Privacy Notice and Terms drafts after required facts are decided; refund/support wording; external-review evidence pack
+Mandatory controls: no live case data in Git; restricted case-system requirement; data minimisation; proportionate identity verification; controller/processor routing; secure delivery; deadline/escalation tracking; provider assistance; retention/deletion and backup treatment; incident/breach decision record; claims control; no public legal publication before approval
+Required evidence: dated official sources; repository behaviour mapping; unresolved fact/decision list; synthetic-only operational exercise; focused link/format/claims/secret/PII checks; independent specialist review; explicit external-review scope
+Legal disposition: `Approved with conditions` for internal preparation only; paid/public or real-customer onboarding remains `Blocked`
+External review required: Yes, before legal publication, paid/public onboarding or real-customer processing
+Legal review date: Started 2026-07-17; final internal disposition pending completion of this package
+Acceptance criteria: current primary/authoritative sources are recorded with dates; product facts and data flows are reconciled; every unresolved Owner or professional decision is explicit; safe operational procedures and synthetic test plans are implementable; draft documents remain unpublished and visibly non-final; no secret or personal data is collected; release blockers remain fail-closed
+Required tests: focused Markdown/link/claims checks; `git diff --check`; secret and prohibited-PII scan; synthetic rights/incident/correction/deletion/provider-assistance walkthrough; repository `verify` only if source or CI-covered files change
+Required documentation: this active record plus only legal/privacy/release authorities whose state materially changes
+Security boundary: never request, inspect, store or commit passwords, MFA values, JWTs, provider secrets, private emails, identity documents, live case data, customer data, payment details or provider payloads
+Privacy/legal materiality: High; the work defines how Tallyo would process personal data and communicate commitments to real users and affected individuals
+Payment impact: Payment/refund/dispute wording is in scope for review; Stripe live mode and real-money actions are not authorised
+Production impact: None authorised. No public legal publication, real-customer onboarding, provider activation, live Stripe, production migration, or real-case processing
+Owner permission required: Yes for business/controller identity, legal contact route, target user type, final lawful bases, retention periods, restricted case-system/provider selection, incident authority, final customer wording, accepted legal risk, external-review engagement, legal publication and public/paid launch
+Approval boundary: stop before any paid service, external account creation, provider configuration, live data use, legal publication, real-customer communication, public launch, live payment action, destructive operation or irreversible decision
+Implementation result: Current-source decision pack, vendor/transfer evidence register, privacy-operations runbook, and qualified-review handoff drafted. Authoritative readiness and operations records reconciled. No application/provider configuration or live data changed.
+Review result: Focused documentation, link, local-reference, secret/JWT/private-key/email-pattern and prohibited-claims context review passed; `git diff --check` passed. Existing application regression was not repeated because no application, test, workflow, dependency, migration, or runtime source changed. Independent specialist/qualified review remains pending.
+Evidence: `LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md`; `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`; `PRIVACY_OPERATIONS_RUNBOOK.md`; `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md`; reconciled `LEGAL_PRIVACY_READINESS.md` and `LEGAL_OPERATIONS_RECORDS.md`; existing fictional tabletop, verified account-holder export, completed MFA recovery acceptance, Stripe sandbox evidence, and isolated timed-restore evidence
+Branch: `codex/legal-ops-readiness`
+Commit: Pending
+Blocked reason: Safe internal preparation can continue, but customer-facing legal drafting and operational acceptance require D01-D10 Owner facts/choices. Legal publication, real-customer processing, live payments, and public/paid launch remain blocked by D01-D14, synthetic operating evidence, qualified external review, and separate Owner release approvals.
+Next action: Owner decides D01-D03 and authorizes D04 as the working model for qualified review; then shortlist (without purchase/account creation) a restricted case system and qualified UK adviser. Do not draft final customer wording until the facts gate in `LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md` is met.
