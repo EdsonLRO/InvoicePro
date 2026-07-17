@@ -4,14 +4,14 @@ Task ID: AUTH-002
 Title: Close one-time MFA recovery acceptance and PR #44
 Objective: Finish the remaining evidence gates for Tallyo's all-factors-lost recovery flow, record the final Legal Agent disposition, and prepare PR #44 for an Owner-approved merge without weakening Auth, MFA, RLS, session revocation, notification minimisation, or secret handling.
 Risk level: High
-Phase: Acceptance complete; awaiting Owner merge/publication approval
+Phase: Complete
 Source role: Master Orchestrator in the previous Codex task
 Receiving role: Master Orchestrator in a fresh Codex task
 Owner role: Security Agent
 Assigned specialists: Backend/Supabase Agent, QA Agent, Legal/Privacy Agent
 Required reviewers: Independent Security/QA verification and final Legal Agent disposition
 Affected files: `index.html`, `supabase/functions/mfa-recovery/`, recovery migrations, `tests/mfa-recovery-harness.cjs`, and only the authoritative AUTH-002 status/evidence documents whose state changes
-Files or paths locked: AUTH-002 implementation and evidence scope on `codex/mfa-recovery-codes` until PR #44 closes
+Files or paths locked: Released; PR #44 is merged
 Documents to read: `AGENTS.md`, `APP_STATUS.md`, `docs/INDEX.md`, this file, full `AUTOMATION_MODEL_ORCHESTRATION.md`, full `AUTONOMOUS_EXECUTION_PERMISSION.md`, full `TALLYO_SECURITY_SAAS_MASTER_PLAN.md`, full `TALLYO_LEGAL_COMPLIANCE_AGENT.md`, `MFA_RECOVERY_RUNBOOK.md`, `MFA_RECOVERY_ACCEPTANCE_2026-07-16.md`, `LEGAL_MFA_RECOVERY_REVIEW_2026-07-16.md`, `RELEASE_READINESS.md`, and directly affected source/test files
 Documents explicitly not required: payment operations, future SaaS website planning, marketing content, and unrelated historical evidence unless a contradiction or regression requires them
 Dependencies: Supabase project `cuagwifetheefftleeup`; deployed `mfa-recovery` version 1 with JWT verification; migrations through `20260716161054`; server-only `MFA_RECOVERY_PEPPER`; GitHub PR #44
@@ -20,15 +20,15 @@ Required tests: Only the focused tests required by each remaining gate; rerun th
 Security boundary: Never request, inspect, copy, log, store, or commit passwords, TOTP values, QR secrets, recovery codes, JWTs, provider secrets, email bodies, private identifiers, or customer data. Do not create an email-only/support/admin bypass. Do not weaken AAL, RLS, origin checks, global sign-out, one-time consumption, throttling, or forced re-enrolment.
 Privacy/legal materiality: High; security notices and account recovery affect access to private business and customer data. Do not claim GDPR compliance, NIST conformance, guaranteed recovery, or complete security.
 Payment impact: Not triggered
-Production impact: Backend recovery controls are deployed. The accepted recovery frontend exists only on the feature branch and must not reach `main` until the Owner approves PR #44.
-Owner permission required: Yes, before marking PR #44 ready/merging and therefore publishing the frontend through GitHub Pages
-Approval boundary: Stop before merge, public frontend publication, any secret reveal/rotation, destructive production action, or change to provider enforcement.
+Production impact: Backend recovery controls and the Owner-approved recovery frontend are deployed for the controlled test/portfolio stage. Paid/public onboarding remains blocked by the retained legal/privacy and launch conditions.
+Owner permission required: Satisfied on 2026-07-17 for marking PR #44 ready, merging it, and publishing the frontend through GitHub Pages
+Approval boundary: Satisfied for PR #44 only. Secret reveal/rotation, destructive production action, provider-enforcement changes, paid/public onboarding, and other high-risk work remain separately approval-gated.
 
 ## Current Result
 
 Implementation result: The migration, server-only pepper, and JWT-protected Edge Function are deployed. Authenticated generation and replacement, one-time recovery, factor/session cleanup, forced re-enrolment, restrictive recovery-state RLS, two-account isolation, audit minimisation, and five-attempt/15-minute throttling have passed. The Owner completed a private recovery lifecycle and generated a fresh code set without sharing any secret value.
 
-Review result: Local security harnesses and frozen Deno checks for all ten Edge Functions pass after the mobile source correction. GitHub PR #44 remains open and draft; confirm its required `verify` check on the newly pushed commit before requesting Owner approval.
+Review result: Local security harnesses and frozen Deno checks for all ten Edge Functions passed after the mobile source correction. PR #44 `verify` passed, the Owner approved the retained boundary, and PR #44 merged as `8a22b5b`. Post-merge security checks and Pages deployment passed. A focused public-shell smoke check confirmed HTTPS load, the new mobile-scroll CSS, no horizontal overflow, and no browser warning/error.
 
 Evidence:
 
@@ -41,9 +41,9 @@ Evidence:
 - Resend API acceptance is recorded for generation, recovery-started, and recovery-completed notices. On 2026-07-17, the Owner confirmed all three arrived and contained none of the prohibited secret, token, customer, invoice, or payment content; no private inbox content is retained as evidence.
 - A physical Android device reached the local branch through ADB reverse port mapping, preserving the existing `127.0.0.1` allowed origin without public deployment. Recovery acceptance, global sign-out, the database recovery lock, forced re-enrolment, AAL2 restoration, and fresh private code generation passed. A clipped modal confirmation control was corrected with overlay-level mobile scrolling and passed a placeholder-only real-phone retest.
 
-Branch: `codex/mfa-recovery-codes`
+Implementation branch: `codex/mfa-recovery-codes`
 Implementation/evidence baseline commit: `420c143`; use current Git `HEAD` for the later handoff-only documentation commits
-Pull request: [PR #44](https://github.com/EdsonLRO/InvoicePro/pull/44), draft and mergeable as checked on 2026-07-17
+Pull request: [PR #44](https://github.com/EdsonLRO/InvoicePro/pull/44), merged on 2026-07-17 as `8a22b5b`
 
 ## Remaining Gates
 
@@ -52,9 +52,9 @@ Pull request: [PR #44](https://github.com/EdsonLRO/InvoicePro/pull/44), draft an
 3. **Completed — real-phone recovery acceptance:** on 2026-07-17, a physical Android device used ADB reverse port mapping to preserve the existing allowed local origin. Recovery, global sign-out, recovery-state data denial, forced re-enrolment, AAL2 restoration, and fresh private code generation passed. The initially clipped modal confirmation control was corrected and passed a placeholder-only phone retest without exposing secret values.
 4. **Completed — final Legal Agent disposition:** the final internal review permits Owner-approved merge and controlled test/portfolio frontend publication. External qualified UK legal/privacy review remains required before paid/public onboarding or real-customer use; no compliance claim is made.
 
-Blocked reason: All four acceptance gates are complete. The only retained task boundary is explicit Owner approval before marking PR #44 ready, merging it, or publishing the recovery frontend.
+Blocked reason: None for AUTH-002. Broader paid/public onboarding remains blocked by separate legal, privacy, provider, and launch gates.
 
-Next action: Commit and push the focused acceptance closure, confirm GitHub `verify`, then stop for explicit Owner approval before marking PR #44 ready or merging. Do not invent additional app work or broaden into the future SaaS website.
+Next action: None. AUTH-002 is closed. Do not invent additional app work or broaden into the future SaaS website.
 
 ## Fresh-Thread Operating Rule
 

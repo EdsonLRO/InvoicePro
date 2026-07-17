@@ -4,6 +4,8 @@
 **Jurisdiction:** United Kingdom
 **Final internal disposition:** Approved with conditions for Owner-approved merge and controlled test/portfolio frontend publication. All mandatory AUTH-002 technical, notification, and real-device acceptance conditions are verified. External qualified UK legal/privacy review remains required before paid/public onboarding or real-customer use, including final lawful-basis, retention, support wording, public Privacy Notice, and vendor-record decisions.
 
+**Publication record:** The Owner approved the retained boundary on 17 July 2026. PR #44 merged as `8a22b5b`; post-merge security checks, Pages deployment, and the focused published-shell smoke check passed. This does not alter the external-review requirement or create a compliance claim.
+
 This review supports risk management and does not claim legal compliance, NIST certification, or that account recovery is risk-free.
 
 ## 1. Territory And Affected People
@@ -30,7 +32,7 @@ Tallyo acts as controller for account-security and recovery records. Supabase pr
 
 ## 5. Current Behaviour And Evidence
 
-Tallyo supports primary and backup TOTP factors and deliberately refuses email-only MFA bypass. The recovery backend is deployed with server-only HMAC storage, atomic one-time consumption, attempt locking, global factor/session cleanup, restrictive recovery-state RLS, minimal audit metadata, and forced re-enrolment. Boundary, privilege, AAL, tenant-isolation, throttling, notification-delivery/minimisation, and physical-Android recovery/re-enrolment acceptance passed with privacy-safe evidence. The browser cannot use the Supabase service role. The recovery frontend remains unpublished pending Owner approval for PR #44.
+Tallyo supports primary and backup TOTP factors and deliberately refuses email-only MFA bypass. The recovery backend is deployed with server-only HMAC storage, atomic one-time consumption, attempt locking, global factor/session cleanup, restrictive recovery-state RLS, minimal audit metadata, and forced re-enrolment. Boundary, privilege, AAL, tenant-isolation, throttling, notification-delivery/minimisation, and physical-Android recovery/re-enrolment acceptance passed with privacy-safe evidence. The browser cannot use the Supabase service role. The Owner-approved recovery frontend is published for the controlled test/portfolio stage.
 
 ## 6. Foreseeable Failure Scenarios
 
@@ -89,4 +91,4 @@ NIST is used as a security benchmark, not as a binding UK legal standard for Tal
 
 ## 13. Release Conditions
 
-The migration, server-only secret, Edge Function, and required acceptance evidence are complete. PR #44 may be marked ready, merged, and published only after explicit Owner approval. Any regression in atomic consumption, restrictive RLS, session revocation, throttling, notification minimisation, or forced re-enrolment blocks release. Paid/public onboarding and real-customer use remain blocked pending the external UK legal/privacy review and broader launch conditions recorded in `RELEASE_READINESS.md`.
+The migration, server-only secret, Edge Function, required acceptance evidence, Owner approval, PR #44 merge, and controlled test/portfolio publication are complete. Any regression in atomic consumption, restrictive RLS, session revocation, throttling, notification minimisation, or forced re-enrolment blocks continued release. Paid/public onboarding and real-customer use remain blocked pending the external UK legal/privacy review and broader launch conditions recorded in `RELEASE_READINESS.md`.
