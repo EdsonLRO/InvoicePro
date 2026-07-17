@@ -35,6 +35,7 @@ Statuses: Proposed, Accepted, Superseded, Deferred, Rejected.
 | 2026-07-17 | Operate Tallyo's initial release as a sole trader. | Accepted | The exact contracting/controller identity and required disclosures remain private, secure-route facts for qualified review and final legal documents. Re-open before incorporation or another operator change. |
 | 2026-07-17 | Limit the initial release to UK business account holders aged 18 or over using Tallyo for ordinary business invoicing. | Accepted | Personal/household account use, sensitive case-record use, and non-UK onboarding remain out of scope pending separate review. This does not by itself prohibit invoicing an individual customer. |
 | 2026-07-17 | Submit the provisional activity-specific controller/processor model for qualified review. | Accepted | Tallyo is the likely controller for account/security/service operations and may process customer/invoice content for the business-user controller. This is a working model, not final legal acceptance. |
+| 2026-07-17 | Use the existing business/support email as Tallyo's legal and privacy contact route instead of creating a dedicated privacy mailbox. | Accepted | The address stays out of Git. Before real customers, it requires approved public wording, MFA, controlled and backup access, request routing, deadline/retention controls, and synthetic intake testing. |
 
 ## Pending Decisions
 
@@ -44,7 +45,7 @@ Statuses: Proposed, Accepted, Superseded, Deferred, Rejected.
 | Stripe live-mode activation | Enables real customer card payments. | Owner must approve live payment activation. |
 | Refund/chargeback support policy | Required before real customer payments. | Owner/legal/business decision. |
 | Privacy policy and terms wording | Required before onboarding real customers. | Owner/legal review. |
-| Sole-trader identity and controlled legal/privacy contact route | Required for accurate contracting, transparency, rights and complaint handling without placing private details in Git. | Owner facts through a secure route, then qualified review and separate publication approval. |
+| Sole-trader identity and legal/privacy contact implementation | The existing business/support email route is selected, but the exact contracting identity, required address disclosures, public wording, access coverage, and synthetic intake evidence remain open. | Owner facts through a secure route, qualified review, operational acceptance, and separate publication approval. |
 | Lawful-basis, retention and controller/processor conclusions | Required before accurate legal drafting, deletion promises or live privacy operations. | Owner decisions informed by qualified UK legal/privacy review. |
 | Restricted rights/incident case system and assigned authority | Required before real requests, incidents or customer data can be handled safely. | Owner/provider choice, Security/Privacy review and synthetic acceptance; spending/account creation remains separately approval-gated. |
 | All-factors-lost recovery production activation | The accepted one-time-code design is implemented locally, but its migration, server pepper, Edge Function, RLS probes, security notices, browser flow, and two-account isolation are not yet live-accepted. | Owner approval for production changes, then Security/Backend/Legal acceptance before real onboarding. |
