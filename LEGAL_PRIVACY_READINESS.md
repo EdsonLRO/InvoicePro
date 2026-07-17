@@ -4,15 +4,15 @@ Internal evidence and action register for the current app. It is not a public Pr
 
 ## Current Disposition
 
-**Legal, Privacy and Regulatory Agent disposition, 2026-07-15:** `Approved with conditions` for internal preparation, portfolio demonstrations, sandbox payments, and controlled test-account use only. Paid/public or real-customer onboarding remains `Blocked`.
+**Legal, Privacy and Regulatory Agent disposition, refreshed 2026-07-17:** `Approved with conditions` for internal preparation, portfolio demonstrations, sandbox payments, and controlled test-account use only. Paid/public or real-customer onboarding remains `Blocked`.
 
-The technical app may continue in controlled portfolio/sandbox testing. Publication remains blocked because controller identity/contact details, final lawful-basis decisions, retention periods, customer-facing notices/terms, rights operations, vendor/transfer evidence, and external review where required are unfinished.
+The technical app may continue in controlled portfolio/sandbox testing. Current official vendor and legal sources have been collected in `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`, but legal acceptance remains pending. Publication remains blocked because controller identity/contact details, final role and lawful-basis decisions, retention periods, customer-facing notices/terms, verified rights/incident operations, vendor/transfer dispositions, and the focused qualified review required by Tallyo's current material-uncertainty policy are unfinished. A retained DPO, paid Workspace continuity service, Vault licence and cyber-response retainer are not launch prerequisites for the approved initial scope.
 
 ## Data Flow Map
 
 | Flow | Data categories | System | Current control / open point |
 |---|---|---|---|
-| Account signup/sign-in | Email, Auth identifiers, password verifier, MFA factor metadata, recovery-code HMAC values, minimal recovery state, session/security events | Supabase Auth, Tallyo Postgres, Resend security notices | Email confirmation, leaked-password screening, optional TOTP MFA, AAL2 checks. The all-factors-lost candidate minimises stored recovery data and never stores/emails raw codes; production deployment and mandatory review conditions remain blocked. |
+| Account signup/sign-in | Email, Auth identifiers, password verifier, MFA factor metadata, recovery-code HMAC values, minimal recovery state, session/security events | Supabase Auth, Tallyo Postgres, Resend security notices | Email confirmation, leaked-password screening, optional TOTP MFA, AAL2 checks. The all-factors-lost flow is verified for the controlled test/portfolio stage; it minimises stored recovery data, never stores/emails raw codes, globally signs out recovery use, preserves the AAL lock, and forces authenticator re-enrolment. This does not approve real-customer onboarding. |
 | Prepared Auth CAPTCHA | IP address, TLS/browser fingerprint signals, user agent, sitekey/origin, challenge result/token | Cloudflare Turnstile in the browser, then Supabase Auth validation | Frontend support and narrow CSP/SRI exception are approved and implemented, but dormant: no site key/secret is configured and Supabase enforcement is off. Managed mode, no pre-clearance/invisible mode, feedback disabled, minimal logging, and exact-hostname restriction remain required. Notice/transfer/vendor evidence still blocks production activation. |
 | Invoicing workspace | Business profile, customer contacts, invoice/quote/credit-note content, saved items, payment records | Supabase Postgres | Per-user RLS, two-account isolation tests, service-role attribution, append-only provider audit events. |
 | Account-holder data export | Limited Auth profile fields plus company settings, customers, saved items, documents, recurring schedules, and audit events | Authenticated browser reads from Supabase Postgres, then local JSON download | Existing RLS, Auth-user revalidation, stable pagination, whole-export failure, session-generation check, metadata minimisation, trusted-device warning, no server staging. Frontend and JWT-protected `log-app-event` v7 are deployed; controlled desktop/mobile acceptance passed and corrected production events contain only format/version metadata. |
@@ -30,14 +30,21 @@ This role split is a working hypothesis and requires external review before comm
 - Supabase, Resend, Stripe, and hosting providers may act as processors or independent controllers for specific provider purposes.
 - Fraud, security, legal-obligation, tax/accounting, and dispute processing may change the role analysis.
 
+## DPO Screening
+
+Checked against current [ICO small-organisation guidance](https://ico.org.uk/for-organisations/advice-for-small-organisations/getting-started-with-gdpr/data-protection-advice-on-common-topics/) on 2026-07-17. Tallyo is not a public authority, and its approved initial scope excludes large-scale regular/systematic monitoring and large-scale special-category or criminal-offence data processing. A formal DPO is therefore not currently indicated. The Owner is the initial accountable privacy operator without using the protected DPO title.
+
+Re-screen before introducing large-scale monitoring, sensitive/regulated workflows, children, employees at scale, new jurisdictions, or another material processing change. This screening does not remove the need for sufficient procedures, resources, records or ad-hoc qualified advice when a complex issue occurs.
+
 ## Vendor And Transfer Register
 
 | Vendor | Purpose | Data | Contract/DPA, region, transfers, subprocessors | Status |
 |---|---|---|---|---|
-| Supabase | Auth, database, Edge Functions, backups, scheduler/Vault | Account and workspace data | Collect current DPA, region, transfer mechanism, retention/deletion, breach terms | Evidence required |
-| Resend | Transactional invoice/reminder email and delivery events | Recipient, message/PDF, delivery metadata | Collect DPA, processing locations, subprocessors, retention and suppression behaviour | Evidence required |
-| Stripe | Checkout, payment, refund, dispute lifecycle | Payment/customer identifiers; card data handled by Stripe | Collect applicable terms/DPA, role split, transfers, retention, dispute evidence rules | Evidence required |
-| GitHub Pages | Static app hosting | Request/hosting metadata; no intended workspace database | Confirm applicable terms, logs/retention, region/transfer position | Evidence required |
+| Supabase | Auth, database, Edge Functions, backups, scheduler/Vault | Account and workspace data | June 2026 DPA, London region, UK Addendum/SCC route, subprocessors, deletion and incident terms recorded in `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`; current Pro plan exposes seven days of API/database and Auth audit logs; account incorporation and transfer-risk decision remain open | Evidence collected; legal acceptance pending |
+| Resend | Transactional invoice/reminder/security email and delivery events | Recipient, message/PDF, delivery metadata | DPA, UK transfer route, 15 July 2026 subprocessor list, 30-day email-data statement, termination deletion statement, dashboard/export/share behaviour recorded; processing scope and transfer decision remain open | Evidence collected; legal acceptance pending |
+| Stripe | Checkout, payment, refund, dispute lifecycle | Payment/customer identifiers; card data handled by Stripe | DPA role split, transfer addendum, subprocessors/affiliates and qualified deletion terms recorded; exact contracting entity, live-service scope, retention and transfer decision remain open | Evidence collected; sandbox only; legal acceptance pending |
+| GitHub Pages | Static app hosting | Request/hosting metadata; no intended workspace database | Public terms/privacy evidence recorded. Current free/public Pages use has not been shown to be covered by the Enterprise DPA; contract, logs/retention and transfer suitability remain open | Evidence collected with material contract gap |
+| Google Workspace Business Standard (pending) | Proposed legal/privacy intake and restricted case area | Request/case identity, correspondence, evidence, decisions and delivery records if later approved | Current pricing, flexible/annual commitments, DPA roles, global processing/subprocessors, UK transfer mechanics, incident/deletion terms, fundamental data-region scope and cancellation risks are recorded. No active Standard subscription or contract acceptance is verified. | Candidate only; purchase, transfer acceptance, configuration and synthetic evidence pending |
 | Cloudflare Turnstile (selected; inactive) | Bot and automated Auth-abuse detection for sign-up, password sign-in, and reset requests | IP address, TLS/browser fingerprint signals, user agent, sitekey/origin and challenge data; no workspace/customer data intended | `CLOUDFLARE_TURNSTILE_VENDOR_REVIEW_2026-07-15.md` records the provider role split, DPA v6.4, UK Addendum/SCC route, public subprocessors, PECR issue, and hostname boundary. The Owner accepted the applicable account terms, reported creating the controlled test widget, and completed pre-enforcement browser acceptance on 2026-07-16. Product-specific retention, transfer-risk conclusions, final notice wording, and professional review remain open. | Internal evidence refreshed; pre-enforcement acceptance verified; production activation blocked |
 
 No analytics, advertising, or non-essential cookie provider is approved in the current app. Turnstile frontend support is dormant and the provider is not contacted while the public site key is blank. Its statement that security signals are strictly necessary is evidence for review, not Tallyo's final PECR conclusion. Any future provider triggers a new privacy/PECR review.
@@ -46,12 +53,14 @@ No analytics, advertising, or non-essential cookie provider is approved in the c
 
 No final retention period is approved yet. Before launch, the Owner and Legal Agent must set and justify each period, including exceptions and deletion evidence.
 
+`LEGAL_BASIS_RETENTION_OPTIONS_2026-07-17.md` contains the Owner-approved working D05/D06 position for qualified review. It separates Tallyo's own sole-trader tax records from business-user workspace records, proposes a 30-day account-closure/export window, category-specific operational periods, and seven-day backup expiry, and leaves all production deletion/migration work separately blocked. No period is final until qualified review and implementation acceptance.
+
 | Category | Current position | Required decision |
 |---|---|---|
-| Account/Auth/security events | Retained by Supabase/provider defaults and app records | Operational need, fraud/security defence, deletion method, legal hold |
-| Customers and invoices | User-controlled active records | Contract/accounting needs, account closure, customer-contact requests |
+| Account/Auth/security events | Supabase Pro provider logs currently expose seven days; Tallyo audit/recovery records have no approved category purge | Proposed 12-month routine and 24-month narrowly material-security periods require LIA, implementation and review |
+| Customers and invoices | User-controlled active records; no approved closure deletion | Proposed 30-day export/closure window, then active deletion and seven-day backup expiry; user retains responsibility for their own accounting export |
 | Payment/refund/dispute records | Tallyo summary plus Stripe provider record | Accounting, chargeback, fraud, tax and legal-claim periods |
-| Email/delivery records | Tallyo audit/history plus Resend provider data | Delivery evidence, suppression, provider deletion and support needs |
+| Email/delivery records | Tallyo audit/history plus Resend provider data; Resend states 30-day email-data retention | Keep message content at provider default; proposed Tallyo delivery history follows the underlying document unless a defined dispute hold applies |
 | Append-only audit events | No final retention automation | Security evidence versus minimisation; access and deletion exceptions |
 | Backups | Current Supabase Pro daily backup window | Restoration, deleted-data reappearance, expiry evidence and legal hold |
 | Support/rights/incident records | Internal templates and a fictional tabletop exist; no restricted live case system is approved | Case access, closure, accountability, claims, secure delivery and deletion |
@@ -83,9 +92,9 @@ ICO guidance requires records of personal-data breaches and, where the reporting
 
 ## Internal Operations Evidence
 
-`LEGAL_OPERATIONS_RECORDS.md` contains a working ROPA, rights/incident/vendor/retention templates, and a preliminary DPIA screening. `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` records fictional rights-request and breach exercises with no real personal data.
+`LEGAL_OPERATIONS_RECORDS.md` contains a working ROPA and case/vendor/retention templates. `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` records fictional rights-request and breach exercises with no real personal data. `ICO_ACCOUNTABILITY_PREPARATION_2026-07-17.md` now contains the fuller provisional DPIA-style assessment, fee worksheet, LIA worksheets and review calendar. `LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md` identifies the exact decisions; `LEGAL_OWNER_ACTIONS_BEFORE_LAUNCH_2026-07-17.md` consolidates actions that require the Owner or an external party; `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md` records current official provider evidence and limitations; `PRIVACY_OPERATIONS_RUNBOOK.md` defines the restricted-case and synthetic acceptance gate; the four unpublished customer-document drafts hold working wording; and `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md` defines the qualified-review handoff.
 
-The tabletop passed as a process-design exercise but identified blocking operational gaps. The account-holder workspace export is implemented and reviewed under `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md`. Controlled desktop and real-phone acceptance confirmed the trusted-device warning, local JSON download and readability; corrected production audit events contain only the approved format/version metadata. There is still no restricted case system, approved role/lawful-basis decision, verified correction/deletion/provider-assistance procedure, complete vendor/transfer evidence, or approved incident escalation route. This is not evidence that live privacy operations work end to end.
+The tabletop passed as a process-design exercise but identified blocking operational gaps. The account-holder workspace export is implemented and reviewed under `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md`. Controlled desktop and real-phone acceptance confirmed the trusted-device warning, local JSON download and readability; corrected production audit events contain only the approved format/version metadata. Business Standard is the selected candidate but is not verified active; subscription/contract approval, restricted case configuration, verified correction/deletion/provider-assistance procedure, accepted vendor/transfer disposition, approved retention decisions and incident escalation exercise remain open. This is not evidence that live privacy operations work end to end.
 
 ## Claims Register
 
@@ -95,11 +104,11 @@ Blocked without explicit legal approval and suitable evidence: "GDPR compliant",
 
 ## Mandatory Work Before Launch
 
-1. Confirm business/controller identity and legal contact details.
-2. Obtain and review vendor/DPA/transfer/subprocessor evidence.
-3. Approve lawful bases and final retention periods with deletion mechanics.
-4. Keep the verified account-holder export current; select a restricted case system; then build and test correction, deletion, provider assistance, secure delivery, and case-register operations.
-5. Draft product-specific Privacy Notice and Terms that match the implemented systems and user type.
-6. Review refund, cancellation, failed-payment, dispute, support, and complaint wording.
-7. Complete DPIA screening and external professional review for unresolved controller/processor, consumer, transfer, tax, or recovery questions.
-8. Re-run the Legal Agent release gate immediately before paid/public onboarding.
+1. Resolve D01-D14 in `LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md`, beginning with business/controller identity, legal contact, and eligible-customer model.
+2. Obtain qualified acceptance or conditions for the provider, contract, and transfer evidence in `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`.
+3. Approve role/lawful-basis and final retention decisions with active-system, provider, legal-hold, and backup deletion mechanics.
+4. Keep the verified account-holder export current; complete the Business Standard contract/purchase decision, separately approve fictional-data configuration if purchased, then pass every synthetic correction, deletion, provider-assistance, secure-delivery, recovery and incident exercise in `PRIVACY_OPERATIONS_RUNBOOK.md`.
+5. Replace placeholders in the prepared unpublished Privacy Notice, Terms, business-user data terms, and payment/refund/support/complaint drafts; reconcile them to final facts and implementation; obtain qualified review; then obtain separate Owner publication approval.
+6. Use the prepared DPIA/LIA and ICO-fee worksheets to complete the final assessment and official fee checker with real facts, and obtain the focused one-off external legal review defined in `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md`. The review remains a Tallyo governance response to current material uncertainty, not a standing-adviser or DPO requirement.
+7. Obtain separate Owner approval for legal publication, provider production changes, real-customer onboarding, live payments, and public/paid launch.
+8. Re-run the Legal Agent and Release Agent gates immediately before each authorized launch action.
