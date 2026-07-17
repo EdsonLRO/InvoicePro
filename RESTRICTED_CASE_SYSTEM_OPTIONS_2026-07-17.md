@@ -1,6 +1,6 @@
 # Tallyo Restricted Case-System Options - 2026-07-17
 
-Internal D07 shortlist for `LEGAL-OPS-001`. Provider information and published prices were checked against official sources on 2026-07-17. This is not a provider selection, purchasing approval, account-creation approval, legal advice, or authorization to place real personal data in any candidate system.
+Internal D07 shortlist for `LEGAL-OPS-001`. Provider information and published prices were checked against official sources on 2026-07-17. On 2026-07-17, the Owner reported that the existing Gmail service uses Tallyo's business domain; the Google Workspace route is now the preferred candidate, subject to edition/Vault confirmation and the controls in `GOOGLE_WORKSPACE_PRIVACY_CASE_PLAN_2026-07-17.md`. This is not a final provider selection, purchasing approval, account-creation approval, legal advice, or authorization to place real personal data in any candidate system.
 
 ## Recommendation In Plain English
 
@@ -64,8 +64,8 @@ Prices are comparison signals only and may change. Starting a free trial can cre
 
 ## D07 Decision Still Required
 
-The next Owner fact can be supplied without giving an address, password, code, or mailbox content:
+The business-domain Google Workspace route is recorded. The exact edition and Vault entitlement remain unconfirmed. The next Owner fact can be supplied without giving an address, password, code, or mailbox content:
 
-> Is Tallyo's existing business email (a) a paid Google Workspace account using a business domain, (b) ordinary free Gmail, (c) Microsoft 365, or (d) not sure?
+> In Google Admin under Billing > Subscriptions, is the plan `Business Plus`, another plan name, or `not sure`?
 
-After that answer, Codex may prepare a provider-specific configuration and synthetic acceptance plan. Account creation, trial activation, contract acceptance, paid subscription, private-email inspection, provider configuration, live data, and destructive retention remain separately blocked.
+After that answer, Codex may reconcile the provider-specific configuration and synthetic acceptance plan. Account creation, trial activation, contract acceptance, paid subscription, private-email inspection, provider configuration, live data, and destructive retention remain separately blocked.
