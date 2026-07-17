@@ -13,7 +13,7 @@ Internal operating requirements for `LEGAL-OPS-001`. This runbook must be valida
 
 ## Required Roles
 
-The Owner must assign role names and backups before launch:
+The Owner must assign each role before launch. In the initial sole-trader model, the Owner may hold the routine roles; an alternate operator is optional unless a later risk or availability review requires one:
 
 | Role | Minimum authority |
 |---|---|
@@ -26,7 +26,7 @@ The Owner must assign role names and backups before launch:
 | Notification authority | Decide ICO/affected-person notification with qualified advice where needed |
 | Owner escalation | Approve material legal risk, public/customer communications, spend, and production-impacting action |
 
-One person may hold several roles in a small operation, but the decision and second-person review requirements must remain explicit.
+One person may hold several roles in a small operation. Straightforward cases require a recorded Owner checklist and read-back; obtain qualified review or advice when a high-risk, disputed, legally complex, or uncertain trigger applies.
 
 ## Rights Request Procedure
 
@@ -41,7 +41,7 @@ One person may hold several roles in a small operation, but the decision and sec
 9. **Deliver securely:** use the approved delivery route, confirm the recipient, apply least disclosure, and record delivery evidence. Do not use public provider share links.
 10. **Close and review:** record outcome, approvers, provider references, completion time, remaining limitations, appeal/complaint information where required, case retention trigger, and deletion due date.
 
-The normal response deadline and any permitted extension must be configured from current ICO guidance and confirmed by the legal reviewer; the case system must alert well before the deadline, not on the deadline.
+The normal response deadline must be configured from current ICO guidance and recorded by the Owner; the case system must alert well before the deadline, not on the deadline. Obtain qualified advice before relying on an extension or where the applicable deadline is disputed or uncertain.
 
 ## Correction And Deletion Control
 
@@ -63,7 +63,7 @@ Account deletion, project deletion, bulk deletion, provider-account closure, sec
 2. **Contain safely:** stop ongoing exposure using the least disruptive reversible control. Production changes, credential rotation, customer communications, and destructive actions retain their existing approval boundaries unless an authorized emergency procedure says otherwise.
 3. **Determine facts:** systems, data categories, number/types of people, period, access/download evidence, encryption, tenant scope, jurisdictions, providers, and continuing risk.
 4. **Classify:** distinguish service/security incident from a personal-data breach and assess likelihood and severity of harm. Record uncertainty and assumptions.
-5. **Escalate:** notify the assigned privacy authority, Owner, Security lead, affected providers, and qualified advisers. Provider notice does not replace Tallyo's own assessment.
+5. **Escalate:** the Owner notifies affected providers and obtains qualified legal or security help when the incident is material, high-risk, disputed, or uncertain. Provider notice does not replace Tallyo's own assessment.
 6. **Decide notifications:** record whether ICO and affected-person notification thresholds are met, who decided, when, evidence considered, and why. Where notification is required, act without undue delay and manage the 72-hour timeline; later information can follow where permitted.
 7. **Recover and verify:** remediate, repeat relevant isolation/security checks, monitor, and ensure restored backups do not silently reintroduce deleted or exposed state.
 8. **Close:** approve lessons, control changes, notice/register updates, follow-up owners, evidence retention, and review date.
@@ -72,7 +72,7 @@ Account deletion, project deletion, bulk deletion, provider-account closure, sec
 
 Before approval, demonstrate with fictional data only:
 
-- role-based access, MFA, backup owner access, and immediate access revocation;
+- role-based access, MFA, tested Owner recovery, an absence/monitoring rule, and immediate access revocation; test alternate-operator access if one is appointed;
 - immutable or reviewable audit history for view/export/change/delete events;
 - deadline calculation, reminders, escalation, and out-of-hours routing;
 - secure evidence upload/download and malware-safe handling where applicable;
@@ -94,7 +94,7 @@ Run all four before real-customer processing:
 3. provider-assistance request to Supabase, Resend, and Stripe using synthetic provider records only;
 4. fictional cross-tenant exposure with a timed breach assessment and notification-decision record.
 
-Pass requires: complete deadline and authority records; no secret or personal data outside the restricted test system; correct tenant/provider scoping; secure delivery; explicit limitations; second-person review; and retained synthetic evidence. A tabletop alone does not satisfy this gate.
+Pass requires: complete deadline and authority records; no secret or personal data outside the restricted test system; correct tenant/provider scoping; secure delivery; explicit limitations; recorded Owner review and read-back; qualified review where a simulated escalation trigger applies; and retained synthetic evidence. A tabletop alone does not satisfy this gate.
 
 ## Review Triggers
 

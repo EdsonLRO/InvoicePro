@@ -1,18 +1,18 @@
 # Tallyo Professional Backup Service Options - 2026-07-17
 
-Internal D08-D09 provider-category shortlist for `LEGAL-OPS-001`. On 2026-07-17, the Owner confirmed that no trusted person or existing professional adviser is available as Tallyo's backup privacy operator. The Owner subsequently authorised public candidate research and unsent quote drafts only; the results are recorded in `PROFESSIONAL_BACKUP_CANDIDATES_AND_DRAFTS_2026-07-17.md`.
+Internal optional-contingency record for `LEGAL-OPS-001`. On 2026-07-17, the Owner confirmed that no trusted person or existing professional adviser is available as Tallyo's backup privacy operator, authorised public candidate research and unsent drafts, then selected a proportionate Owner-operated initial model. The results remain available in `PROFESSIONAL_BACKUP_CANDIDATES_AND_DRAFTS_2026-07-17.md` if later risk or scale justifies external support.
 
 This is not a provider selection, endorsement, quote request, external communication, engagement, spending approval, access grant, legal advice, or authorization to handle real cases.
 
-## Recommended Minimum Model
+## Optional Escalation Model
 
-Tallyo should not try to make one supplier cover every risk unless that supplier demonstrates all required competence, independence, availability, access controls, and insurance. The recommended small-business model is:
+Tallyo does not need to retain all three categories before launch. If a later case, absence, growth or risk assessment requires external support, it should not try to make one supplier cover every risk unless that supplier demonstrates all required competence, independence, availability, access controls, and insurance. The optional categories are:
 
 1. **Privacy/legal decision backup:** an SRA-regulated solicitor or firm with current UK data-protection and small-SaaS experience;
 2. **Google Workspace continuity backup:** a Google-validated Workspace partner or managed service provider with a tightly scoped emergency-administration service; and
 3. **Cyber incident response:** an NCSC-assured Cyber Incident Response provider suitable for common attacks affecting a small UK business.
 
-These are on-call routes, not necessarily full-time staff. Contracting structure and cost require quotes. A qualified reviewer must decide whether any formal DPO appointment is legally required; this shortlist does not label an adviser as Tallyo's DPO.
+These may be ad-hoc routes rather than retained staff. Contracting structure and cost require quotes. Current ICO small-organisation guidance indicates that a DPO is unlikely to be required for Tallyo's approved initial scope; this must be re-screened if the service begins large-scale monitoring or large-scale special-category/criminal-data processing.
 
 ## Category A - Privacy And Legal Decision Backup
 
@@ -68,7 +68,7 @@ NCSC assurance is evidence of incident-response capability, not automatic accept
 | Fully outsourced privacy operations | Strongest routine continuity and deadline coverage | Likely disproportionate initially; more data access, vendor dependency, and cost |
 | Combined privacy/technical service | Fewer handoffs if genuinely qualified across both | Independence, legal privilege, security depth, conflicts, and single-provider failure require close review |
 
-For Tallyo's current pre-customer stage, the preferred quote structure is **light/on-call privacy review plus pre-identified technical and CIR routes**, with no standing access to customer data. This remains a proposal until quotes and contract terms are reviewed.
+For Tallyo's current pre-customer stage, no retained service is required. A focused one-off legal launch review remains the only planned professional engagement under Tallyo's current governance. Workspace and CIR support can be obtained ad hoc if a trigger occurs, with no standing access to customer data.
 
 ## Safe Information For A Future Quote Request
 
@@ -84,6 +84,6 @@ Do not send repository access, screenshots, private identity/contact details, ar
 
 ## Current Gate
 
-The professional-backup route is required before real customers. Public research and unsent drafts are complete in `PROFESSIONAL_BACKUP_CANDIDATES_AND_DRAFTS_2026-07-17.md`; no provider was contacted.
+The professional-backup work is `Deferred / optional`. Public research and unsent drafts are complete in `PROFESSIONAL_BACKUP_CANDIDATES_AND_DRAFTS_2026-07-17.md`; no provider was contacted.
 
-The next safe Owner decision is whether to approve one specific candidate and final message for initial contact. That approval would authorise only the identified quote request through the approved sender route. Entering unapproved private details, granting access, accepting terms, starting a trial, spending, configuring a provider, or engaging a provider would remain separately blocked.
+Re-open provider contact only if case complexity, service volume, planned absence, account-recovery risk, an actual material incident, insurer/customer terms or an external reviewer makes support necessary. Sending any message, entering unapproved private details, granting access, accepting terms, starting a trial, spending, configuring a provider, or engaging a provider remains separately blocked.

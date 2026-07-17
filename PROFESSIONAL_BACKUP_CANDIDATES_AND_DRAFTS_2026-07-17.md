@@ -101,4 +101,4 @@ Any future contract should state that assured response work is performed under t
 
 ## Current Disposition
 
-Research and drafting are complete within the Owner-approved scope. All three messages remain **UNSENT**. The next gate is Owner review and explicit approval of the specific candidate, final message, sender route, and any approved non-sensitive contact details before one message is sent. Provider selection, contract acceptance, spending, account changes, access grants, and live-data use remain separate later gates.
+Research and drafting are complete within the Owner-approved scope. All three messages remain **UNSENT** and the shortlist is now an optional contingency reference, not a launch requirement. Re-open contact only if a documented complexity, availability, scale, insurer/customer or incident trigger justifies it. Provider selection, contact, contract acceptance, spending, account changes, access grants, and live-data use remain separate later gates.

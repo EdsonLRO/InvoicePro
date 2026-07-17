@@ -1,6 +1,6 @@
 # Tallyo Google Workspace Privacy Case Plan - 2026-07-17
 
-Internal D07 configuration and synthetic-acceptance plan for `LEGAL-OPS-001`. On 2026-07-17, the Owner reported that Tallyo's Gmail service uses its business domain and that the current edition is Business Standard. The Google Workspace route remains the preferred candidate, but Business Standard does not include Google Vault. The Owner chose to remain on Standard for now; no upgrade or add-on is authorized.
+Internal D07 configuration and synthetic-acceptance plan for `LEGAL-OPS-001`. On 2026-07-17, the Owner reported that Tallyo's Gmail service uses its business domain and that the current edition is Business Standard, then selected that existing edition as the proportionate initial case-system candidate. Business Standard does not include Google Vault, but Vault is an optional e-discovery/hold control rather than an automatic prerequisite for the approved sole-trader, low-volume scope. No upgrade or add-on is authorized.
 
 This plan does not authorize account inspection, mailbox inspection, provider configuration, a trial, an upgrade, spending, contract acceptance, real personal data, live cases, external sharing, or retention/deletion rules.
 
@@ -8,11 +8,11 @@ This plan does not authorize account inspection, mailbox inspection, provider co
 
 Do not configure or use the case system until all of these are satisfied:
 
-1. the Owner later approves either Business Plus or a confirmed compatible Vault add-on; Business Standard alone does not meet the proposed retention/hold design;
+1. the Owner approves a Business Standard restricted case area for fictional-data configuration and testing; no Vault purchase is required for this initial test;
 2. the applicable subscription terms, [Google Cloud Data Processing Addendum](https://workspace.google.com/terms/dpa_terms.html), subprocessors, locations/transfers, deletion behaviour, support path, and breach terms have been reviewed and accepted through the existing legal/vendor gate;
 3. the Owner separately approves any upgrade, new licensed operator, spending, trial, provider configuration, or contract acceptance;
-4. D08-D09 role names and backup coverage are assigned, including an independent reviewer for disclosure, deletion, refusal, extension, incident-notification, and retention-rule decisions;
-5. a backup administrator/operator path exists with separately controlled MFA and tested recovery; no credentials or recovery material may enter Git or ordinary chat;
+4. D08-D09 record the Owner as initial operator, the optional-alternate position, the absence/monitoring plan, and the legal/security escalation triggers;
+5. the Owner account uses MFA and tested recovery; no credentials or recovery material may enter Git or ordinary chat;
 6. the final retention periods and exact rights-deadline rules have qualified review; and
 7. Security and Privacy approve the synthetic configuration and evidence plan before any provider change.
 
@@ -27,11 +27,11 @@ Do not configure or use the case system until all of these are satisfied:
 
 ### Internal Case Area
 
-- Create a dedicated organisational Shared Drive for privacy operations; do not use an individual's My Drive.
+- Create a dedicated organisational Shared Drive for privacy operations if the actual Standard account supports the required controls; otherwise use a dedicated restricted organisational folder and record the limitation. Do not use an unmanaged consumer account.
 - Disable external sharing for the internal drive. Restrict membership to the named case roles and keep Manager access to the minimum possible.
 - Use a limited-access folder per case. Suggested subfolders are `00-intake`, `10-scope`, `20-approved-evidence`, `30-response-review`, and `40-closure`.
 - Keep the identity-to-reference mapping only in the restricted case area. Operational discussion elsewhere uses the case reference only.
-- Block offline synchronisation/download to unmanaged devices where the licensed controls support it; otherwise record that limitation and do not accept the configuration for live use.
+- Avoid offline synchronisation/download to unmanaged devices. Where the edition cannot technically block it, the Owner must use a managed-device operating rule and verify that no case content is synchronised locally during the synthetic test.
 
 ### Case Register And Deadlines
 
@@ -40,16 +40,16 @@ Use one restricted register with these minimum fields:
 | Area | Required fields |
 |---|---|
 | Identity and timing | Case reference; received date/time/channel; request/incident type; Tallyo role; verified legal deadline; internal checkpoints |
-| Ownership | Intake owner; case owner; backup owner; identity approver; response/notification approver; legal/security escalation |
+| Ownership | Intake owner; case owner; optional alternate if appointed; identity approver; response/notification approver; legal/security escalation |
 | Scope | Data-subject category; tenant/account reference where approved; systems/providers to search; third-party/protected-material flags |
 | Decisions | Identity method/status; extension/refusal/legal-hold reason; actions approved; disclosure/redaction/deletion decision; decision maker and review time |
 | Evidence | Restricted folder references; provider reference numbers; result counts; audit-search reference; secure-delivery evidence; no raw provider payloads in the register |
 | Closure | Outcome; unresolved limitation; complaint/appeal route where applicable; closed date; retention trigger; deletion due date; deletion/hold status |
 
-- Automation may remind people but must not decide the legal deadline. The case owner records and validates the deadline using current approved guidance.
+- Automation may remind the Owner but must not decide the legal deadline. The Owner records and validates the deadline using current approved guidance.
 - Configure multiple internal reminders and an escalation before the deadline. Exact timing remains part of the synthetic test and qualified review.
 - Calendar/reminder titles contain the case reference only and use a restricted calendar or approved automation path.
-- A missed reminder, missing backup owner, or unclear deadline fails acceptance.
+- A missed reminder, untested absence rule, or unclear deadline fails acceptance.
 
 ### Evidence And Audit
 
@@ -64,14 +64,14 @@ Use one restricted register with these minimum fields:
 - Never share the internal case drive or evidence folders with a requester.
 - Build a separate, minimal response package containing only approved disclosure material. Use an authenticated named-recipient route with public/anonymous links disabled and access expiry/revocation tested where supported.
 - Verify the recipient separately, record who approved delivery, and test that another account cannot open the package.
-- If Business Plus cannot provide the approved delivery guarantees, select a separately reviewed delivery service; ordinary email attachments are not the fallback.
+- If Standard cannot provide the approved delivery guarantees, select a separately reviewed delivery method; ordinary email attachments are not the fallback for a high-risk disclosure.
 
-### Retention, Hold, Export, And Deletion
+### Retention, Export, Deletion, And Triggered Holds
 
-- Google Vault is proposed for retention and legal hold. [Google warns](https://support.google.com/vault/answer/2990828?hl=en) that an incorrect retention rule can cause irreversible purging.
-- No Vault rule may be enabled until the final schedule is approved, a rule manifest and rollback/impact analysis are reviewed, a tiny synthetic scope passes, and the Owner separately authorizes the destructive configuration.
-- Scope case retention to the dedicated shared drive or approved labels where the licensed edition supports it. Do not apply a default rule across Gmail or Drive merely for convenience.
-- Test export, hold, release of hold, normal deletion, provider purge delay, administrator recovery window, and evidence of expiry using fictional cases only.
+- Business Standard uses the approved case register, dedicated case area, closure date, deletion due date, scheduled review and manual deletion/read-back evidence. Record Drive trash/recovery windows and do not promise immediate or irrecoverable deletion.
+- Test case export, ordinary deletion, sharing revocation, provider recovery window and evidence of expiry using fictional cases only.
+- If a real case raises litigation, regulatory preservation, disputed deletion or another legal-hold need, pause ordinary deletion and obtain qualified advice before acting. Vault, an add-on or another reviewed preservation method can then be considered under separate approval.
+- If Vault is later approved, [Google warns](https://support.google.com/vault/answer/2990828?hl=en) that an incorrect retention rule can cause irreversible purging. No rule may be enabled until a manifest, impact analysis, tiny synthetic scope and separate destructive-configuration approval pass.
 - A case cannot be described as deleted until active data, shared material, provider residuals, holds, audit exceptions, and recovery windows are recorded honestly.
 
 ## Synthetic Acceptance Sequence
@@ -82,21 +82,21 @@ Provider configuration is not authorized yet. Once separately approved, use only
 2. **Correction/deletion request:** approved target manifest, active correction/deletion, Auth/email/payment/provider limitations, legal-hold decision, backup/recovery window, read-back verification, and closure.
 3. **Processor-assistance request:** route a fictional business-user request across Supabase, Resend, and Stripe using synthetic references and record each provider limitation without copying payloads.
 4. **Fictional personal-data incident:** start the clock, restrict access, record facts and uncertainty, perform the notification-threshold decision, exercise the 72-hour escalation path, recover, and close.
-5. **Isolation and continuity:** prove an unauthorized account cannot open a case or response package; revoke an operator; exercise backup-admin access; export a synthetic case; and verify the documented recovery path.
-6. **Retention:** apply the candidate rule only to the synthetic scope, verify expected survival and expiry, and stop before any irreversible broad rule.
+5. **Isolation and continuity:** prove an unauthorized account cannot open a case or response package; verify Owner account recovery without exposing recovery material; export a synthetic case; and test the absence/monitoring rule.
+6. **Retention:** apply the manual schedule to the synthetic scope, verify sharing revocation, ordinary deletion and the documented recovery/expiry limitations, and stop before any irreversible broad rule.
 
-Pass requires the criteria in `PRIVACY_OPERATIONS_RUNBOOK.md`, complete provider/audit evidence, second-person review, no data outside the restricted test system, and no unresolved high-risk control gap. A tabletop or screenshot alone is insufficient.
+Pass requires the criteria in `PRIVACY_OPERATIONS_RUNBOOK.md`, complete provider/audit evidence, recorded Owner review, qualified advice for any simulated escalation trigger, no data outside the restricted test system, and no unresolved high-risk control gap. A tabletop or screenshot alone is insufficient.
 
 ## Current Gate
 
-The business-domain Google Workspace Business Standard route is recorded, but D07 remains open. [Google's current edition comparison](https://workspace.google.com/intl/en_gb/business/) includes Vault with Business Plus, while [Google's Vault licensing guidance](https://support.google.com/vault/answer/2557687?hl=en) says an edition without Vault may be able to buy add-on licences. An online add-on starts a 30-day trial and can later bill, so Codex has not opened or activated it.
+The business-domain Google Workspace Business Standard route is selected, but D07 remains open until the restricted configuration and synthetic acceptance pass. [Google's current edition comparison](https://workspace.google.com/intl/en_gb/business/) places Vault in Business Plus, while [Google's current reporting guidance](https://support.google.com/a/answer/7061566?hl=en) states that Drive log events are normally retained for six months. Those facts define limitations; they do not by themselves require an upgrade.
 
-Current published annual-commitment prices are GBP 11.80 per user/month for Standard and GBP 18.40 for Plus, a GBP 6.60 per-user monthly difference before any tax or contract-specific adjustment. Flexible prices are GBP 14 and GBP 22 respectively. These are comparison signals only, not a purchase recommendation or authorization.
+Current published pricing remains a comparison signal only. Tallyo already uses Standard, and this plan does not authorise an upgrade, add-on, trial or other spending.
 
-The safe options remain:
+The proportionate path is:
 
-1. stay on Standard and keep real-customer privacy-case operations blocked;
-2. later approve a Business Plus upgrade review; or
-3. later approve checking Vault add-on eligibility and price, without starting the trial.
+1. approve fictional-data configuration of a restricted Standard case area;
+2. pass access, audit, deadline, secure-delivery, retention/deletion, recovery and 72-hour synthetic exercises; and
+3. reconsider Vault, a second operator or paid support only if a later legal hold, scale, absence, customer/insurer condition or risk assessment requires it.
 
-The Owner selected option 1 for now. Safe internal role, procedure, and synthetic-test preparation may continue, but no provider configuration or live case is allowed.
+No provider configuration or live case is authorised by this document. The next gate is explicit Owner approval for the fictional-data Standard configuration and synthetic test; external legal publication and real-customer launch remain separately blocked.

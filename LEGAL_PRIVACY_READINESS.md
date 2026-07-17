@@ -6,7 +6,7 @@ Internal evidence and action register for the current app. It is not a public Pr
 
 **Legal, Privacy and Regulatory Agent disposition, refreshed 2026-07-17:** `Approved with conditions` for internal preparation, portfolio demonstrations, sandbox payments, and controlled test-account use only. Paid/public or real-customer onboarding remains `Blocked`.
 
-The technical app may continue in controlled portfolio/sandbox testing. Current official vendor and legal sources have been collected in `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`, but legal acceptance remains pending. Publication remains blocked because controller identity/contact details, user/contract model, final role and lawful-basis decisions, retention periods, customer-facing notices/terms, verified rights/incident operations, vendor/transfer dispositions, and qualified external review are unfinished.
+The technical app may continue in controlled portfolio/sandbox testing. Current official vendor and legal sources have been collected in `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`, but legal acceptance remains pending. Publication remains blocked because controller identity/contact details, final role and lawful-basis decisions, retention periods, customer-facing notices/terms, verified rights/incident operations, vendor/transfer dispositions, and the focused qualified review required by Tallyo's current material-uncertainty policy are unfinished. A retained DPO, paid Workspace continuity service, Vault licence and cyber-response retainer are not launch prerequisites for the approved initial scope.
 
 ## Data Flow Map
 
@@ -29,6 +29,12 @@ This role split is a working hypothesis and requires external review before comm
 - A business user is likely the controller for customer/contact and invoice data they enter; Tallyo may act as processor for that data.
 - Supabase, Resend, Stripe, and hosting providers may act as processors or independent controllers for specific provider purposes.
 - Fraud, security, legal-obligation, tax/accounting, and dispute processing may change the role analysis.
+
+## DPO Screening
+
+Checked against current [ICO small-organisation guidance](https://ico.org.uk/for-organisations/advice-for-small-organisations/getting-started-with-gdpr/data-protection-advice-on-common-topics/) on 2026-07-17. Tallyo is not a public authority, and its approved initial scope excludes large-scale regular/systematic monitoring and large-scale special-category or criminal-offence data processing. A formal DPO is therefore not currently indicated. The Owner is the initial accountable privacy operator without using the protected DPO title.
+
+Re-screen before introducing large-scale monitoring, sensitive/regulated workflows, children, employees at scale, new jurisdictions, or another material processing change. This screening does not remove the need for sufficient procedures, resources, records or ad-hoc qualified advice when a complex issue occurs.
 
 ## Vendor And Transfer Register
 
@@ -87,7 +93,7 @@ ICO guidance requires records of personal-data breaches and, where the reporting
 
 `LEGAL_OPERATIONS_RECORDS.md` contains a working ROPA, rights/incident/vendor/retention templates, and a preliminary DPIA screening. `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` records fictional rights-request and breach exercises with no real personal data. `LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md` identifies the exact Owner decisions, `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md` records current official provider evidence and limitations, `PRIVACY_OPERATIONS_RUNBOOK.md` defines the restricted-case and synthetic acceptance gate, and `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md` defines the qualified-review handoff.
 
-The tabletop passed as a process-design exercise but identified blocking operational gaps. The account-holder workspace export is implemented and reviewed under `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md`. Controlled desktop and real-phone acceptance confirmed the trusted-device warning, local JSON download and readability; corrected production audit events contain only the approved format/version metadata. There is still no restricted case system, approved role/lawful-basis decision, verified correction/deletion/provider-assistance procedure, accepted vendor/transfer disposition, or approved incident escalation route. This is not evidence that live privacy operations work end to end.
+The tabletop passed as a process-design exercise but identified blocking operational gaps. The account-holder workspace export is implemented and reviewed under `LEGAL_ACCOUNT_DATA_EXPORT_REVIEW_2026-07-15.md`. Controlled desktop and real-phone acceptance confirmed the trusted-device warning, local JSON download and readability; corrected production audit events contain only the approved format/version metadata. Business Standard and the Owner-operated role model are selected, but the restricted case configuration, verified correction/deletion/provider-assistance procedure, accepted vendor/transfer disposition, approved retention decisions and incident escalation exercise remain open. This is not evidence that live privacy operations work end to end.
 
 ## Claims Register
 
@@ -100,8 +106,8 @@ Blocked without explicit legal approval and suitable evidence: "GDPR compliant",
 1. Resolve D01-D14 in `LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md`, beginning with business/controller identity, legal contact, and eligible-customer model.
 2. Obtain qualified acceptance or conditions for the provider, contract, and transfer evidence in `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`.
 3. Approve role/lawful-basis and final retention decisions with active-system, provider, legal-hold, and backup deletion mechanics.
-4. Keep the verified account-holder export current; approve a restricted case system; then pass every synthetic correction, deletion, provider-assistance, secure-delivery, and incident exercise in `PRIVACY_OPERATIONS_RUNBOOK.md`.
+4. Keep the verified account-holder export current; approve fictional-data configuration of the selected Business Standard restricted case area; then pass every synthetic correction, deletion, provider-assistance, secure-delivery, recovery and incident exercise in `PRIVACY_OPERATIONS_RUNBOOK.md`.
 5. After the facts above are decided, draft and externally review product-specific Privacy Notice, Terms, business-user data terms where required, and payment/refund/support/complaint wording.
-6. Complete the fuller DPIA-style assessment, ICO fee self-assessment, current-law review, and external professional review defined in `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md`.
+6. Complete the fuller DPIA-style assessment, ICO fee self-assessment, current-law review, and focused one-off external legal review defined in `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md`. The review remains a Tallyo governance response to current material uncertainty, not a standing-adviser or DPO requirement.
 7. Obtain separate Owner approval for legal publication, provider production changes, real-customer onboarding, live payments, and public/paid launch.
 8. Re-run the Legal Agent and Release Agent gates immediately before each authorized launch action.
