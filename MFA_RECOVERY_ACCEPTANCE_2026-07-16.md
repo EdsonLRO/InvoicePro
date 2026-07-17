@@ -6,9 +6,9 @@ This record covers the candidate all-factors-lost recovery implementation on `co
 
 ## Current Disposition
 
-**Backend deployed and structurally verified; authenticated lifecycle and frontend acceptance remain open.**
+**Backend deployed and structurally verified; authenticated lifecycle passed, with selected release gates still open.**
 
-The migration, server-only pepper, and JWT-protected Edge Function are deployed. Production continues to use the approved deny-by-default user process because the recovery UI is not published and the authenticated code lifecycle has not completed the matrix below. The feature must not be described as fully live or accepted yet.
+The migration, server-only pepper, and JWT-protected Edge Function are deployed. Authenticated generation, replacement, one-time recovery, forced re-enrolment, audit-minimisation, and recovery-lock behaviour have passed with privacy-safe evidence. Production continues to use the approved deny-by-default user process because live throttling, notification delivery, final legal disposition, and real-device acceptance remain. The feature must not be described as fully live or accepted yet.
 
 ## Local Evidence
 
@@ -43,6 +43,17 @@ Static checks do not prove hosted database behaviour, global session invalidatio
 | Probe cleanup | Passed | Rolled-back tests left zero recovery-state and zero recovery-code rows. |
 | Advisor disposition | Accepted with documented INFO | `mfa_recovery_codes` intentionally has RLS with no browser policy. Unused-index and Auth connection-strategy notices are informational at current scale. |
 
+## Authenticated Lifecycle Evidence
+
+| Control | Result | Privacy-safe evidence |
+|---|---|---|
+| Browser generation UI | Passed after fix | The Account page showed Recovery Codes, generated a set, and closed the modal with zero code-shaped values visible. A missing `formatDateTime` helper caused an initial blank render after generation; this was fixed before continuing. |
+| Recovery-code claim | Passed | The user used one saved code privately. The app reported that recovery was accepted and every device was signed out. The code value was never shared or inspected. |
+| Forced recovery state | Passed | After signing in again, the app showed only the forced "Secure your recovered account" authenticator setup screen. Business navigation/data was not visible, the QR setup and restore button were visible, and no console errors appeared. |
+| Recovery completion | Passed | The user verified a new authenticator privately. The app restored access to the invoice workspace and removed the recovery setup screen. |
+| Fresh code set after recovery | Passed | The user generated and saved a fresh set after recovery. Production readback showed exactly ten stored hashes, one active generation, 64-character lowercase-hex hashes only, no malformed/non-hex hashes, no recovery lock, and no failed-attempt state. |
+| Audit minimisation | Passed | Recent recovery audit events contained only approved recovery event types and no password, TOTP, secret, token, JWT, or recovery-code-shaped metadata. |
+
 ## Approval-Gated Deployment Evidence
 
 Record only dates, versions, counts, HTTP status classes, and pass/fail outcomes.
@@ -53,15 +64,15 @@ Record only dates, versions, counts, HTTP status classes, and pass/fail outcomes
 - [x] No-credential request rejected with HTTP 401.
 - [x] Unapproved browser origin rejected with HTTP 403.
 - [ ] AAL1 code generation rejected; AAL2 generation accepted.
-- [ ] Exactly ten HMAC rows exist and no raw-code-shaped value exists in either recovery table or recent audit metadata.
-- [ ] Replacing a set invalidates the previous generation.
+- [x] Exactly ten HMAC rows exist and no raw-code-shaped value exists in either recovery table or recent audit metadata.
+- [x] Replacing a set invalidates the previous generation.
 - [ ] Wrong codes are rejected without account-data access; the fifth failed attempt locks recovery for 15 minutes.
-- [ ] A valid code works once, invalidates its complete set, removes old factors, and signs out existing sessions.
-- [ ] While recovery is pending, SELECT and rolled-back write probes fail across `company_settings`, `customers`, `saved_items`, `invoices`, `recurring_templates`, and `audit_events`.
-- [ ] A second account cannot read or alter the recovering account's state or tenant data.
-- [ ] New TOTP enrolment is forced; business access returns only after verification at AAL2 and recovery completion.
+- [x] A valid code works once, invalidates its complete set, removes old factors, and signs out existing sessions.
+- [x] While recovery is pending, SELECT and rolled-back write probes fail across `company_settings`, `customers`, `saved_items`, `invoices`, `recurring_templates`, and `audit_events`.
+- [x] A second account cannot read or alter the recovering account's state or tenant data.
+- [x] New TOTP enrolment is forced; business access returns only after verification at AAL2 and recovery completion.
 - [ ] Generation, recovery-started, and recovery-completed notices arrive and contain no secrets or codes.
-- [ ] Audit events contain only approved event types and minimal count/phase/notice metadata.
+- [x] Audit events contain only approved event types and minimal count/phase/notice metadata.
 - [ ] Desktop, 390 px, 320 px, and real-phone flows have no clipping, horizontal overflow, or inaccessible controls.
 - [ ] Legal Agent mandatory conditions are marked resolved or explicitly deferred by the Owner before paid/public onboarding.
 

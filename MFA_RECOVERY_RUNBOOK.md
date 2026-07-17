@@ -16,7 +16,7 @@ The supported recovery method is therefore a second verified authenticator:
 
 Tallyo does not use email, SMS, security questions, or a browser-stored code as an MFA bypass.
 
-The production user experience still uses this model. The recovery database controls, server-only pepper, and JWT-protected Edge Function were deployed on 2026-07-16, but the browser UI remains unpublished until authenticated lifecycle and real-device acceptance pass. The feature is therefore not yet described as fully live.
+The production user experience still uses this model. The recovery database controls, server-only pepper, and JWT-protected Edge Function were deployed on 2026-07-16. Authenticated generation, replacement, one-time recovery, forced re-enrolment, audit-minimisation, and recovery-lock behaviour passed on 2026-07-17, but the browser UI remains unpublished until live throttling, notification delivery, final legal disposition, and real-device acceptance pass. The feature is therefore not yet described as fully live.
 
 ## Recovery-Code Candidate
 
@@ -102,7 +102,7 @@ For each release that changes Auth or MFA:
 - Supabase leaked-password protection was enabled on 2026-07-13 through the Auth Management API, its value was read back as enabled, and the live security advisor cleared the warning. On 2026-07-14, a known-compromised candidate passed Tallyo's local format checks, reached Supabase after current-password and MFA verification, and was rejected by the provider. Only the pass/fail result was recorded.
 - On 2026-07-16, the recovery migration, server-only pepper, and `mfa-recovery` version 1 were deployed backend-first with JWT verification. Missing credentials returned 401, an unapproved origin returned 403, and a publishable key without a user session returned 401. Structural readback passed. A rolled-back live probe confirmed AAL1 denial, AAL2 own-data access, and recovery-lock denial across all six tenant tables without retaining test state.
 - The first live policy probe exposed a permission failure when the documented optional-MFA template read `auth.mfa_factors` directly. Tallyo corrected this with a current-user-only security-definer helper in non-exposed schema `private`; no Auth-table grant was added. The repeated probe passed and the related security/performance advisor warnings cleared.
-- Authenticated generation, replacement, throttling, one-time recovery, factor/session cleanup, notices, audit metadata, two-account isolation, and real-device browser acceptance remain required before the frontend is published.
+- Authenticated generation, replacement, one-time recovery, factor/session cleanup, recovery-state lock, audit metadata, and two-account isolation have passed with privacy-safe evidence. Live wrong-code throttling, notification-email delivery, final legal disposition, and real-device browser acceptance remain required before the frontend is published.
 
 ## Approval-Gated Deployment Order
 
@@ -111,7 +111,7 @@ Do not merge or publish the frontend before its backend dependencies exist. The 
 1. **Completed 2026-07-16:** apply the recovery migrations through `20260716161054`.
 2. **Completed 2026-07-16:** generate and install a new server-only `MFA_RECOVERY_PEPPER` without displaying or committing it.
 3. **Completed 2026-07-16:** deploy `mfa-recovery` version 1 with JWT verification enabled.
-4. **In progress:** unauthorized, wrong-origin, and rolled-back AAL/RLS probes passed; authenticated generation, throttling, one-time-use, notification, audit, and two-account lifecycle probes remain.
+4. **In progress:** unauthorized, wrong-origin, rolled-back AAL/RLS, authenticated generation, replacement, one-time-use, forced re-enrolment, audit-minimisation, and two-account probes passed. Live throttling, notification delivery, and real-device acceptance remain.
 5. Merge and publish the frontend only after the backend probes pass.
 6. Complete desktop and phone acceptance, then record the release commit and function version.
 
