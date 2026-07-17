@@ -217,6 +217,29 @@ Material disagreement is resolved as follows:
 - The Owner decides unresolved product, commercial, legal, or financial ambiguity.
 - Material disagreement and its resolution go in `DECISION_LOG.md`.
 
+### Risk-based specialist selection and review
+
+Do not simulate every specialist role for every task. Assign only roles materially relevant to the task and record unneeded roles as `Not triggered`. Do not generate separate reports for untriggered roles.
+
+Examples:
+
+```text
+Visual-only UI change -> Frontend + QA
+Documentation formatting -> Documentation
+Pricing wording -> Product + Payments + Legal
+Auth or RLS -> Backend + Security + QA
+Public chatbot -> Backend + Security + Documentation + Legal + QA
+Production release -> Release + Security + Legal + Owner
+```
+
+Review levels:
+
+- **Low risk:** spacing, low-impact styling, spelling, static internal formatting and test naming. Focused implementation -> focused tests -> concise evidence -> close.
+- **Medium risk:** forms, routing, pricing presentation, accessibility behaviour, ordinary public components and non-sensitive analytics names. Implementation -> QA -> triggered specialist review -> close.
+- **High risk:** identity, Auth, MFA, sessions, authorization, RLS, tenant isolation, private data, PII, secrets, money, Stripe, subscriptions, refunds, legal commitments, AI access to private data, production and destructive actions. Sol-level analysis -> implementation -> independent verification -> required specialist gates -> Owner approval where required -> release evidence.
+
+High-risk work must load the complete relevant specialist policies. The context-routing rules in `AGENTS.md` and `docs/INDEX.md` reduce unrelated reading; they do not reduce review depth at a triggered critical boundary.
+
 ## 5. Orchestrator Task Queue
 
 The Orchestrator maintains the queue in `PRODUCT_COMPLETION_LEDGER.md` or a task-specific working record. Every active task must include:
@@ -510,6 +533,18 @@ Maintain these authorities:
 
 Do not promote Planned to Implemented or Verified without evidence.
 
+Update a document when its authoritative state changes. Do not rewrite every authority after every minor task:
+
+- update the active task record during the task;
+- update `APP_STATUS.md` only for a material current-product status change;
+- update `DECISION_LOG.md` only for a genuine decision, exception, override or conflict;
+- update `PRODUCT_COMPLETION_LEDGER.md` only when capability or tracked-task status changes;
+- update `RELEASE_READINESS.md` only when a release condition changes;
+- update `PROJECT_HANDOFF.md` only for a meaningful milestone, ownership transfer or material session handoff;
+- update help, security and payment evidence only when their user-visible behaviour, claim, result or finding changes.
+
+Related documentation may be batched at task or milestone closure. Historical records are preserved but excluded from default context unless needed for regression, contradiction or explicit historical review.
+
 ### Release loop
 
 Prepare tests, migrations, deployment and rollback instructions, monitoring, backup/restore, support, privacy/legal groundwork, and release evidence. Sol reviews open findings, RLS, Auth/MFA/sessions, payments, email, cron, secrets, backups, incident response, privacy workflows, and claims. The Legal Agent must complete or condition every legally material release review, and the Release Agent must confirm those conditions and any mandatory external review are resolved or recorded. Stop before live Stripe, paid upgrades, public launch, final legal publication, production data migration, or irreversible changes.
@@ -617,12 +652,29 @@ Governance changes additionally require:
 
 ## 14. Context Efficiency
 
-- Read status and ledgers before broad scans.
-- Inspect diffs and changed files first.
+- Read `AGENTS.md`, `APP_STATUS.md`, `docs/INDEX.md`, any real active-task record and directly affected source files as the compact default context.
+- Classify task risk, then load only specialist documents triggered by scope and risk. Do not read every linked document by default.
+- Read complete relevant specialist policies for high-risk work.
+- Inspect diffs and changed files before broad scans.
 - Persist evidence in repository documents.
 - Avoid rescanning unchanged scope.
 - Use the lowest-risk mode that can safely complete the task.
 - Keep task records concise but sufficient for another role to continue.
+- Prefer existing deterministic checks and reason about failures instead of manually rereading every passing file.
+
+Routine final responses use:
+
+```text
+Completed:
+Files changed:
+Validation:
+Material risks:
+Owner approval required:
+Commit:
+Next action:
+```
+
+Routine reports do not reproduce complete files, repeat the entire governance model, report on untriggered roles or paste successful test output in full. Critical work may add detail required for safety.
 
 ## 15. Final Principle
 

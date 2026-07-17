@@ -1,10 +1,10 @@
 # PROJECT_HANDOFF.md — Tallyo
 
-> Mandatory governance reading before taking ownership: `AUTOMATION_MODEL_ORCHESTRATION.md`, `TALLYO_LEGAL_COMPLIANCE_AGENT.md`, `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, and `AUTONOMOUS_EXECUTION_PERMISSION.md`.
-> `AUTOMATION_MODEL_ORCHESTRATION.md` is authoritative for hierarchy, queue, locks, handoffs, and closure. `TALLYO_LEGAL_COMPLIANCE_AGENT.md` is authoritative for the active legal/privacy/regulatory role. `AGENT_HIERARCHY_AND_COMPUTER_USE.md` is authoritative for graphical-dashboard operations.
+> Start with `AGENTS.md`, `APP_STATUS.md`, and `docs/INDEX.md`. Use the routing index to load this handoff and specialist policies only when the active task needs them.
+> `AUTOMATION_MODEL_ORCHESTRATION.md` remains authoritative for hierarchy, queue, locks, handoffs, and closure. `TALLYO_LEGAL_COMPLIANCE_AGENT.md` remains authoritative for the active legal/privacy/regulatory role. `AGENT_HIERARCHY_AND_COMPUTER_USE.md` remains authoritative for graphical-dashboard operations.
 
 > Handoff for an AI coding agent (e.g. ChatGPT / Codex) taking over development.
-> Read this fully before editing. Where facts are uncertain they are marked **Unknown / needs confirmation**.
+> Read this fully for a meaningful project/session handoff or when routed here. Where facts are uncertain they are marked **Unknown / needs confirmation**.
 
 ---
 
@@ -404,14 +404,13 @@ Near-term (in rough order):
 
 ## 21. What Codex should do first
 
-1. **Read governance and current sources of truth first:** `AUTOMATION_MODEL_ORCHESTRATION.md`, `TALLYO_LEGAL_COMPLIANCE_AGENT.md`, `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, `AUTONOMOUS_EXECUTION_PERMISSION.md`, `APP_STATUS.md`, `PRODUCT_COMPLETION_LEDGER.md`, `DECISION_LOG.md`, and `RELEASE_READINESS.md`.
-2. **Use the hierarchy and locks:** the Master Orchestrator assigns one owner role and work mode, records the task, and acquires a file/path lock before non-trivial edits. Do not edit a file or overlapping scope owned by another active task.
-3. **Read `index.html`, `schema.sql`, `recurring_setup.sql`, and the relevant Edge Function** to understand real structure before changing implementation. Trust the code over assumptions.
-4. **Confirm the unknowns**: exact Supabase project URL/keys location (`config.js`), Tailwind input filename, and third-party library versions.
-5. **Verify Tallyo rebrand hygiene** after UI changes. Keep visible app text, `manifest.json`, and icons branded as Tallyo, and keep the "Change Password" wording exactly as specified.
-6. **Re-verify the recurring automation** (function deploys; cron job registered/active) after any backend change.
-7. **Set up the local/Codex workflow**: rebuild Tailwind when classes change; after deploy, hard-refresh/Incognito to bypass the service worker.
-8. When touching invoices/templates, **respect the column-name mapping** in section 13 (`customer_snapshot`, `issue_date`, `grand_total`, `history`).
+1. **Load compact context:** read `AGENTS.md`, `APP_STATUS.md`, `docs/INDEX.md`, any real active-task record, and source files directly affected by the task.
+2. **Classify and route:** select only materially relevant roles and load only the specialist policies triggered by task scope and risk. Read complete relevant policies for high-risk work.
+3. **Use the hierarchy and locks:** the Master Orchestrator assigns one owner role and work mode, records the task, and acquires a file/path lock before non-trivial edits. Do not edit a file or overlapping scope owned by another active task.
+4. **Read affected source files** before changing implementation. Trust code and current evidence over assumptions; do not inspect unrelated runtime files by default.
+5. **Confirm relevant unknowns** from source, provider readback or evidence rather than guessing.
+6. **Validate proportionately:** rebuild Tailwind when classes change, account for service-worker cache after deploys, and run full workflows only when the changed boundary requires them.
+7. When touching invoices/templates, **respect the column-name mapping** in section 13 (`customer_snapshot`, `issue_date`, `grand_total`, `history`).
 
 ### Required handoff
 
