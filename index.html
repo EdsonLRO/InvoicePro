@@ -878,7 +878,7 @@
                     <h3 class="text-lg font-semibold mb-1">Payments</h3>
                     <p class="text-sm text-slate-500 mb-4">Record full or partial payments, or open a Stripe card checkout. The balance and status update automatically.</p>
 
-                    <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    <div v-if="!stripeLiveMode" class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                         <div class="font-semibold">Stripe test mode</div>
                         <div>Card payments are still in test/development until live Stripe mode, policies, backups, and final checks are intentionally approved.</div>
                     </div>
@@ -1884,6 +1884,7 @@
                 invoiceBulkBusy: false,
                 emailSendingId: null,
                 stripeCheckoutBusyId: null,
+                stripeLiveMode: window.STRIPE_LIVE_MODE === true,
                 stripeRefundBusyKey: null,
                 newPayment: { amount: null, date: new Date().toISOString().split('T')[0], note: '' },
                 activityNote: '',
@@ -3960,7 +3961,7 @@
             },
             stripePaymentBadge(payment) {
                 const amount = Number(payment && payment.amount);
-                if (payment && payment.lifecycleEvent === 'refund_failed_reversal') return 'Stripe refund failed';
+                if (payment && payment.lifecycleEvent === 'refund_failed_reversal') return 'Stripe refund reversed';
                 if (payment && (payment.lifecycleEvent === 'refund' || amount < 0)) return 'Stripe refund';
                 return 'Stripe confirmed';
             },

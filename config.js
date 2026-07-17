@@ -14,3 +14,4 @@ window.SUPABASE_ANON_KEY = 'sb_publishable_sN8qt13wD8IZcDP222T6tA_ze5fxp-t';
 // Public Cloudflare Turnstile site key. Leave blank until the production widget
 // is provisioned and tested. The matching secret belongs only in Supabase Auth.
 window.TURNSTILE_SITE_KEY = '';
+window.STRIPE_LIVE_MODE = false;

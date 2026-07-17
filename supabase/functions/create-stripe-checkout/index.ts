@@ -43,17 +43,37 @@ function validEmail(value: unknown): value is string {
 function checkoutBaseUrl(req: Request): string | null {
   const configured = Deno.env.get("APP_BASE_URL");
   if (configured) return configured.replace(/\/+$/, "");
+  if (Deno.env.get("STRIPE_LIVE_MODE") === "true") return null;
   const origin = req.headers.get("Origin");
   return origin ? origin.replace(/\/+$/, "") : null;
 }
 
+function stripeKeyMatchesConfiguredMode(key: string): boolean {
+  const expectsLive = Deno.env.get("STRIPE_LIVE_MODE") === "true";
+  return expectsLive ? /^(?:sk|rk)_live_/.test(key) : /^(?:sk|rk)_test_/.test(key);
+}
+
+function stripePaymentsEnabled(): boolean {
+  return Deno.env.get("STRIPE_LIVE_MODE") === "true"
+    ? Deno.env.get("STRIPE_PAYMENTS_ENABLED") === "true"
+    : Deno.env.get("STRIPE_PAYMENTS_ENABLED") !== "false";
+}
+
 async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
-  try {
-    const { error } = await admin.from("audit_events").insert(payload);
-    if (error) console.warn("audit event insert skipped", error.message);
-  } catch (e) {
-    console.warn("audit event insert skipped", String(e));
-  }
+  const { error } = await admin.from("audit_events").insert(payload);
+  if (!error || error.code === "23505") return;
+  throw new Error(`required audit event insert failed: ${error.message}`);
+}
+
+async function checkoutIdempotencyKey(parts: string[]): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(parts.join("\u001f")),
+  );
+  const hex = Array.from(new Uint8Array(digest)).map((byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+  return `tallyo-checkout-${hex}`;
 }
 
 Deno.serve(async (req) => {
@@ -62,6 +82,16 @@ Deno.serve(async (req) => {
 
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
   if (!stripeKey) return json({ error: "Stripe is not configured" }, 500);
+  if (!stripeKeyMatchesConfiguredMode(stripeKey)) {
+    return json({ error: "Stripe key mode does not match STRIPE_LIVE_MODE" }, 500);
+  }
+  if (!stripePaymentsEnabled()) {
+    return json({ error: "Card payments are temporarily unavailable" }, 503);
+  }
+  const stripeApiVersion = Deno.env.get("STRIPE_API_VERSION")?.trim();
+  if (Deno.env.get("STRIPE_LIVE_MODE") === "true" && !stripeApiVersion) {
+    return json({ error: "STRIPE_API_VERSION is required in live mode" }, 500);
+  }
 
   const authHeader = req.headers.get("Authorization") || "";
   if (!authHeader.startsWith("Bearer ")) return json({ error: "Missing authorization" }, 401);
@@ -121,17 +151,32 @@ Deno.serve(async (req) => {
   params.set("payment_intent_data[metadata][payment_kind]", "full_balance");
   if (validEmail(customer.email)) params.set("customer_email", customer.email.trim());
 
+  const idempotencyKey = await checkoutIdempotencyKey([
+    documentId,
+    userData.user.id,
+    currency,
+    String(amountMinor),
+    "full_balance",
+    "app",
+    validEmail(customer.email) ? customer.email.trim().toLowerCase() : "",
+  ]);
+
   const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${stripeKey}`,
       "Content-Type": "application/x-www-form-urlencoded",
+      "Idempotency-Key": idempotencyKey,
+      ...(stripeApiVersion ? { "Stripe-Version": stripeApiVersion } : {}),
     },
     body: params,
   });
   const stripeBody = await stripeResponse.json().catch(() => ({}));
   if (!stripeResponse.ok) {
     return json({ error: stripeBody?.error?.message || "Stripe Checkout session could not be created" }, 502);
+  }
+  if (!stripeBody?.id || !stripeBody?.url) {
+    return json({ error: "Stripe Checkout returned an incomplete session" }, 502);
   }
 
   await insertAuditEvent(admin, {
@@ -150,6 +195,7 @@ Deno.serve(async (req) => {
       customer_email: validEmail(customer.email) ? customer.email.trim() : null,
       channel: "app",
       payment_kind: "full_balance",
+      idempotency_key: idempotencyKey,
     },
   });
 
