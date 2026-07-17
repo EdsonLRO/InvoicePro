@@ -1,8 +1,8 @@
 # CODEX.md — Working Guide for Tallyo
 
 > Instructions for an AI coding agent (Codex) working on this repository.
-> Read this before making changes. When unsure, ask or mark **Unknown / needs confirmation** rather than guessing.
-> Also read `AUTOMATION_MODEL_ORCHESTRATION.md` for the authoritative hierarchy, queue, locks, handoffs, approval boundaries, and model/work-mode routing. Read `TALLYO_LEGAL_COMPLIANCE_AGENT.md` when work may be legally material. Read `AGENT_HIERARCHY_AND_COMPUTER_USE.md` before operating a graphical dashboard.
+> Start with `AGENTS.md`, `APP_STATUS.md`, and `docs/INDEX.md`. Read this guide when routed here. When unsure, ask or mark **Unknown / needs confirmation** rather than guessing.
+> Read the compact core context, classify the task, and use `docs/INDEX.md` to load only the specialist documents triggered by the task's scope and risk. A complete governance review is required only for governance, architecture, major cross-cutting changes, security-critical work, legally material work or release preparation.
 
 ---
 
@@ -129,14 +129,15 @@ Do not introduce Tallyo subscription billing, workspaces, RBAC, or SaaS entitlem
 
 ## 11. First tasks Codex should perform
 
-1. **Read governance and current sources of truth first:** `AUTOMATION_MODEL_ORCHESTRATION.md`, `TALLYO_LEGAL_COMPLIANCE_AGENT.md`, `AGENT_HIERARCHY_AND_COMPUTER_USE.md`, `AUTONOMOUS_EXECUTION_PERMISSION.md`, `APP_STATUS.md`, `PRODUCT_COMPLETION_LEDGER.md`, `DECISION_LOG.md`, and `RELEASE_READINESS.md`.
-2. **Read the code before implementation:** `index.html`, `config.js`, `schema.sql`, `recurring_setup.sql`, and the relevant Edge Function. Confirm anything marked "Unknown / needs confirmation" from the source, not assumptions.
-3. **Maintain the visible Tallyo rebrand:**
+1. **Load compact context:** read `AGENTS.md`, `APP_STATUS.md`, `docs/INDEX.md`, any real active-task record, and source files directly affected by the task.
+2. **Classify and route:** identify task risk and specialist triggers, then load only the policies and evidence routed by `docs/INDEX.md`. Read complete relevant specialist policies for high-risk work.
+3. **Read affected code before implementation:** inspect the files and mappings the change actually touches. Confirm anything marked "Unknown / needs confirmation" from source rather than assumptions.
+4. **Maintain the visible Tallyo rebrand:**
    - Keep user-facing app text, `manifest.json`, and PWA icons branded as Tallyo.
    - Do **not** rename the repo/URL unless Supabase Auth allowed/redirect URLs are updated at the same time.
-4. **Verify nothing broke:** load the app, sign in, create an invoice, mark Sent, record a payment, export a PDF — confirm no regressions.
-5. **Re-verify recurring automation** if any backend/function change was made (function deployed; cron job active).
-6. Only then move on to the current app-hardening roadmap: Stripe lifecycle testing, backup/restore, append-only audit events, MFA recovery acceptance and operations, provider password hardening, and documentation updates. Keep SaaS subscriptions/website work deferred unless explicitly requested.
+5. **Validate proportionately:** run focused checks for narrow changes and full regression only for cross-cutting or release work.
+6. **Re-verify recurring automation** only when the relevant backend/function or scheduler boundary changed.
+7. Keep SaaS subscriptions/website work deferred unless explicitly requested.
 
 ---
 
