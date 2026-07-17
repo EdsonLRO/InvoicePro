@@ -1,6 +1,6 @@
 # Tallyo Professional Backup Service Options - 2026-07-17
 
-Internal D08-D09 provider-category shortlist for `LEGAL-OPS-001`. On 2026-07-17, the Owner confirmed that no trusted person or existing professional adviser is available as Tallyo's backup privacy operator. This document uses public provider directories only and contains no candidate names or contact details.
+Internal D08-D09 provider-category shortlist for `LEGAL-OPS-001`. On 2026-07-17, the Owner confirmed that no trusted person or existing professional adviser is available as Tallyo's backup privacy operator. The Owner subsequently authorised public candidate research and unsent quote drafts only; the results are recorded in `PROFESSIONAL_BACKUP_CANDIDATES_AND_DRAFTS_2026-07-17.md`.
 
 This is not a provider selection, endorsement, quote request, external communication, engagement, spending approval, access grant, legal advice, or authorization to handle real cases.
 
@@ -84,8 +84,6 @@ Do not send repository access, screenshots, private identity/contact details, ar
 
 ## Current Gate
 
-The professional-backup route is required before real customers, but no external action is authorized. The next safe Owner decision is:
+The professional-backup route is required before real customers. Public research and unsent drafts are complete in `PROFESSIONAL_BACKUP_CANDIDATES_AND_DRAFTS_2026-07-17.md`; no provider was contacted.
 
-> May Codex identify up to three public candidates in each category and prepare draft quote messages for the Owner's review, without contacting anyone?
-
-An approval would authorize research and unsent drafts only. Sending a message, entering private details, requesting account access, accepting terms, starting a trial, spending, or engaging a provider would remain separately blocked.
+The next safe Owner decision is whether to approve one specific candidate and final message for initial contact. That approval would authorise only the identified quote request through the approved sender route. Entering unapproved private details, granting access, accepting terms, starting a trial, spending, configuring a provider, or engaging a provider would remain separately blocked.
