@@ -1,6 +1,6 @@
 # Tallyo Google Workspace Privacy Case Plan - 2026-07-17
 
-Internal D07 configuration and synthetic-acceptance plan for `LEGAL-OPS-001`. On 2026-07-17, the Owner reported that Tallyo's Gmail service uses its business domain. The Google Workspace route is therefore the preferred candidate, but the exact Workspace edition and Google Vault entitlement are not yet confirmed.
+Internal D07 configuration and synthetic-acceptance plan for `LEGAL-OPS-001`. On 2026-07-17, the Owner reported that Tallyo's Gmail service uses its business domain and that the current edition is Business Standard. The Google Workspace route remains the preferred candidate, but Business Standard does not include Google Vault. The Owner chose to remain on Standard for now; no upgrade or add-on is authorized.
 
 This plan does not authorize account inspection, mailbox inspection, provider configuration, a trial, an upgrade, spending, contract acceptance, real personal data, live cases, external sharing, or retention/deletion rules.
 
@@ -8,7 +8,7 @@ This plan does not authorize account inspection, mailbox inspection, provider co
 
 Do not configure or use the case system until all of these are satisfied:
 
-1. the Owner reports the Workspace edition without disclosing the account address; Business Plus or another edition/add-on that includes Google Vault is required for the proposed retention design;
+1. the Owner later approves either Business Plus or a confirmed compatible Vault add-on; Business Standard alone does not meet the proposed retention/hold design;
 2. the applicable subscription terms, [Google Cloud Data Processing Addendum](https://workspace.google.com/terms/dpa_terms.html), subprocessors, locations/transfers, deletion behaviour, support path, and breach terms have been reviewed and accepted through the existing legal/vendor gate;
 3. the Owner separately approves any upgrade, new licensed operator, spending, trial, provider configuration, or contract acceptance;
 4. D08-D09 role names and backup coverage are assigned, including an independent reviewer for disclosure, deletion, refusal, extension, incident-notification, and retention-rule decisions;
@@ -89,6 +89,14 @@ Pass requires the criteria in `PRIVACY_OPERATIONS_RUNBOOK.md`, complete provider
 
 ## Current Gate
 
-The business-domain Google Workspace route is recorded, but D07 remains open. The next safe Owner answer is only the plan name shown in Google Admin under **Billing > Subscriptions**: `Business Plus`, another plan name, or `not sure`. Do not send the account address, invoice, billing details, screenshot, password, MFA value, or recovery material.
+The business-domain Google Workspace Business Standard route is recorded, but D07 remains open. [Google's current edition comparison](https://workspace.google.com/intl/en_gb/business/) includes Vault with Business Plus, while [Google's Vault licensing guidance](https://support.google.com/vault/answer/2557687?hl=en) says an edition without Vault may be able to buy add-on licences. An online add-on starts a 30-day trial and can later bill, so Codex has not opened or activated it.
 
-After the edition is confirmed, Codex may reconcile feature/licensing gaps and present the exact synthetic-only configuration approval. No provider change will be made until that separate approval is explicit.
+Current published annual-commitment prices are GBP 11.80 per user/month for Standard and GBP 18.40 for Plus, a GBP 6.60 per-user monthly difference before any tax or contract-specific adjustment. Flexible prices are GBP 14 and GBP 22 respectively. These are comparison signals only, not a purchase recommendation or authorization.
+
+The safe options remain:
+
+1. stay on Standard and keep real-customer privacy-case operations blocked;
+2. later approve a Business Plus upgrade review; or
+3. later approve checking Vault add-on eligibility and price, without starting the trial.
+
+The Owner selected option 1 for now. Safe internal role, procedure, and synthetic-test preparation may continue, but no provider configuration or live case is allowed.

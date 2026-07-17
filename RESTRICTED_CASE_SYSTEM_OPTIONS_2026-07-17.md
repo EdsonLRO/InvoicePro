@@ -1,6 +1,6 @@
 # Tallyo Restricted Case-System Options - 2026-07-17
 
-Internal D07 shortlist for `LEGAL-OPS-001`. Provider information and published prices were checked against official sources on 2026-07-17. On 2026-07-17, the Owner reported that the existing Gmail service uses Tallyo's business domain; the Google Workspace route is now the preferred candidate, subject to edition/Vault confirmation and the controls in `GOOGLE_WORKSPACE_PRIVACY_CASE_PLAN_2026-07-17.md`. This is not a final provider selection, purchasing approval, account-creation approval, legal advice, or authorization to place real personal data in any candidate system.
+Internal D07 shortlist for `LEGAL-OPS-001`. Provider information and published prices were checked against official sources on 2026-07-17. On 2026-07-17, the Owner reported that the existing Gmail service uses Tallyo's business domain and is on Business Standard. The Google Workspace route is the preferred candidate, but Standard does not include Vault and the Owner chose to remain on Standard for now. The gap and blocked controls are recorded in `GOOGLE_WORKSPACE_PRIVACY_CASE_PLAN_2026-07-17.md`. This is not a final provider selection, purchasing approval, account-creation approval, legal advice, or authorization to place real personal data in any candidate system.
 
 ## Recommendation In Plain English
 
@@ -64,8 +64,6 @@ Prices are comparison signals only and may change. Starting a free trial can cre
 
 ## D07 Decision Still Required
 
-The business-domain Google Workspace route is recorded. The exact edition and Vault entitlement remain unconfirmed. The next Owner fact can be supplied without giving an address, password, code, or mailbox content:
+Business-domain Google Workspace Business Standard is recorded. D07 remains blocked because Vault is not included and no upgrade/add-on is approved. Safe D08-D09 role preparation may continue under `PRIVACY_INCIDENT_ROLE_OPTIONS_2026-07-17.md`.
 
-> In Google Admin under Billing > Subscriptions, is the plan `Business Plus`, another plan name, or `not sure`?
-
-After that answer, Codex may reconcile the provider-specific configuration and synthetic acceptance plan. Account creation, trial activation, contract acceptance, paid subscription, private-email inspection, provider configuration, live data, and destructive retention remain separately blocked.
+Account creation, trial activation, contract acceptance, paid subscription, private-email inspection, provider configuration, live data, and destructive retention remain separately blocked.
