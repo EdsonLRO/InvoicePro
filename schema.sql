@@ -126,13 +126,31 @@ create table public.invoices (
     recurring_occurrence_date date,
 
     created_at        timestamptz default now(),
-    updated_at        timestamptz default now()
+    updated_at        timestamptz default now(),
+    stripe_event_version bigint not null default 0
 );
 create index invoices_user_id_idx on public.invoices(user_id);
 create index invoices_customer_id_idx on public.invoices(customer_id);
 -- invoice numbers must be unique PER USER and per document type
 create unique index invoices_user_number_idx
     on public.invoices(user_id, doc_type, number);
+
+create or replace function public.bump_invoice_stripe_event_version()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+    new.stripe_event_version := old.stripe_event_version + 1;
+    return new;
+end;
+$$;
+revoke execute on function public.bump_invoice_stripe_event_version()
+    from public, anon, authenticated;
+
+create trigger bump_invoice_stripe_event_version
+    before update on public.invoices
+    for each row execute function public.bump_invoice_stripe_event_version();
 
 
 -- ============================================================================

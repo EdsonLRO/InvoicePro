@@ -49,10 +49,21 @@ function refundableForPayment(payments: InvoicePayment[], payment: InvoicePaymen
 async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
   try {
     const { error } = await admin.from("audit_events").insert(payload);
-    if (error) console.warn("audit event insert skipped", error.message);
+    if (error) console.warn("refund request audit insert skipped", error.message);
   } catch (e) {
-    console.warn("audit event insert skipped", String(e));
+    console.warn("refund request audit insert skipped", String(e));
   }
+}
+
+function stripeKeyMatchesConfiguredMode(key: string): boolean {
+  const expectsLive = Deno.env.get("STRIPE_LIVE_MODE") === "true";
+  return expectsLive ? /^(?:sk|rk)_live_/.test(key) : /^(?:sk|rk)_test_/.test(key);
+}
+
+function stripePaymentsEnabled(): boolean {
+  return Deno.env.get("STRIPE_LIVE_MODE") === "true"
+    ? Deno.env.get("STRIPE_PAYMENTS_ENABLED") === "true"
+    : Deno.env.get("STRIPE_PAYMENTS_ENABLED") !== "false";
 }
 
 Deno.serve(async (req) => {
@@ -61,6 +72,16 @@ Deno.serve(async (req) => {
 
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
   if (!stripeKey) return json({ error: "Stripe is not configured" }, 500);
+  if (!stripeKeyMatchesConfiguredMode(stripeKey)) {
+    return json({ error: "Stripe key mode does not match STRIPE_LIVE_MODE" }, 500);
+  }
+  if (!stripePaymentsEnabled()) {
+    return json({ error: "Card refunds are temporarily unavailable" }, 503);
+  }
+  const stripeApiVersion = Deno.env.get("STRIPE_API_VERSION")?.trim();
+  if (Deno.env.get("STRIPE_LIVE_MODE") === "true" && !stripeApiVersion) {
+    return json({ error: "STRIPE_API_VERSION is required in live mode" }, 500);
+  }
 
   const authHeader = req.headers.get("Authorization") || "";
   if (!authHeader.startsWith("Bearer ")) return json({ error: "Missing authorization" }, 401);
@@ -134,6 +155,7 @@ Deno.serve(async (req) => {
       Authorization: `Bearer ${stripeKey}`,
       "Content-Type": "application/x-www-form-urlencoded",
       "Idempotency-Key": idempotencyKey,
+      ...(stripeApiVersion ? { "Stripe-Version": stripeApiVersion } : {}),
     },
     body: params,
   });

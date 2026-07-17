@@ -11,6 +11,8 @@ For capability tracking and release gates, see `PRODUCT_COMPLETION_LEDGER.md` an
 
 Finish the existing app and its security hardening before starting the future SaaS website/subscription platform.
 
+**Closed handoff:** `tasks/AUTH-002_THREAD_HANDOFF_2026-07-17.md` records the four completed MFA recovery acceptance gates, Owner approval, merged PR #44, and verified controlled test/portfolio publication.
+
 The current product is a single-user-per-account invoicing workspace backed by Supabase. It is a real working app and a security-focused portfolio project. It is not yet a public paid SaaS platform.
 
 ## Current app stage
@@ -41,10 +43,11 @@ Implemented:
 Still to finish before treating the app as customer-ready:
 
 - Stripe sandbox lifecycle verification is complete for signature rejection, unrelated-event rejection, successful payment/refund replay, a known-payment dispute, and a genuine failed-refund reversal. Live mode remains disabled and approval-gated.
+- PAY-LIVE-001 has a reviewed-source candidate for atomic invoice/audit webhook commits, bounded concurrency retries, current-provider refund reconciliation, deterministic Checkout idempotency, explicit test/live key matching, and a server-side live kill switch. Focused local checks pass; production migration/deployment and deployed sandbox replay remain pending and approval-gated.
 - Review and operationally test the internal chargeback/refund/support procedure in `PAYMENT_OPERATIONS_RUNBOOK.md`; customer-facing policy remains legally blocked.
 - The Owner-approved non-production restore test passed on 2026-07-15. The isolated temporary project was deleted after approval and production remained healthy; evidence is in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
 - Expand append-only audit logging to remaining sensitive actions and operational monitoring. Recurring-generation failures and overdue-reminder provider/history failures now have privacy-safe evidence; company/settings saves are covered at a category level, while backup/restore evidence remains a separate controlled record.
-- MFA browser acceptance is complete for fail-closed routing, primary/backup factor lifecycle, primary-specific and backup-specific recovery, wrong-code rejection, and email-only bypass rejection. Robust all-factors-lost recovery remains a paid/public-launch condition.
+- MFA browser acceptance is complete for fail-closed routing, primary/backup factor lifecycle, primary-specific and backup-specific recovery, wrong-code rejection, and email-only bypass rejection. The all-factors-lost backend is deployed and has passed boundary, privilege, AAL, rolled-back RLS, authenticated lifecycle, audit-minimisation, rollback-only live-throttling, notification-delivery/minimisation, and real-Android recovery acceptance. A mobile recovery-code modal clipping issue was corrected and retested on the phone. After explicit Owner approval, PR #44 merged and the controlled test/portfolio frontend was published successfully. External UK legal/privacy review remains required before paid/public onboarding.
 - Future upgrade to all-devices logout with email-code confirmation and stronger server-side revocation evidence.
 - Resolve the remaining Supabase SMTP/rate-limit and abuse-control decisions in `DEFERRED_MANUAL_CONFIGURATION.md`. Leaked-password protection and a verified 12-character provider minimum are enabled. Graceful unexpected-session expiry handling is implemented, harness-tested, merged, and present in the public deployment. The Owner-approved 7-day session timebox and 24-hour inactivity timeout were enabled and read back from production on 2026-07-15; the one-hour JWT lifetime, refresh rotation, and multi-device sessions remain unchanged.
 - The Owner accepted the applicable Cloudflare account terms and reported creating the controlled Managed test widget on 2026-07-16. Controlled pre-enforcement browser acceptance passed for the frontend integration at desktop, 390 px, and 320 px, and the real test widget succeeded on its authorised GitHub Pages hostname. `TURNSTILE_BROWSER_ACCEPTANCE_2026-07-16.md` records the evidence and limits. The repository site key remains blank, the secret is not stored by Tallyo, and Supabase CAPTCHA enforcement remains off pending unresolved legal/vendor decisions, the final application hostname, a separate production widget, and separately approved activation.
@@ -59,6 +62,7 @@ Stripe invoice payments are implemented and the handled lifecycle is verified in
 Do not send payment links to real customers until:
 
 - Stripe live keys and live webhook secret are configured intentionally.
+- The PAY-LIVE-001 migration and matching Edge Functions are reviewed, deployed in order, and replay-verified in sandbox.
 - The live webhook destination is verified.
 - Refund, dispute, failed-payment, and chargeback behavior is tested and documented for the approved live configuration.
 - Terms, privacy, refund, and support processes are ready.
@@ -90,15 +94,15 @@ Strong controls already implemented:
 - Vault-backed scheduler authentication for recurring and overdue automation; the privileged recurring endpoint rejects unsigned calls.
 - Signed Resend and Stripe webhooks.
 - CSP, SRI, and self-hosted Tailwind.
-- All nine Edge Functions pin `@supabase/supabase-js` to exact version `2.110.1`; unused floating import-map aliases were removed.
-- A read-only GitHub Actions security gate uses immutable action commit SHAs, exact Deno `2.2.15` LTS, and per-function frozen dependency locks. It type-checks all nine functions and runs the focused security harnesses without repository write permission or secrets.
+- All ten repository Edge Functions, including deployed `mfa-recovery` version 1, pin `@supabase/supabase-js` to exact version `2.110.1`; production currently has ten active functions.
+- A read-only GitHub Actions security gate uses immutable action commit SHAs, exact Deno `2.2.15` LTS, and per-function frozen dependency locks. It type-checks all ten repository functions and runs the focused security harnesses without repository write permission or secrets.
 - Honest activity history wording.
 
 Known limits:
 
 - Activity history is useful, but not tamper-proof.
 - `audit_events` now covers provider events and selected sensitive app actions, including manual financial-state changes, but it is not a full compliance or SIEM audit system.
-- Supabase does not provide recovery codes. Tallyo supports a second authenticator and prevents email-only MFA bypass. AUTH-001 acceptance is Verified. The interim all-factors-lost support response is approved and deny-by-default; robust recovery is still required before paid/public onboarding.
+- Supabase does not provide native recovery codes. Tallyo supports backup authenticators and its own one-time recovery-code flow without permitting email-only MFA bypass. AUTH-001 and AUTH-002 acceptance are Verified for the controlled test/portfolio stage. Paid/public onboarding remains subject to the separate legal, privacy, provider, and launch gates.
 - All-devices logout exists, but a future email-code confirmation flow would be stronger for production account recovery/security UX.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
 - Supabase Pro daily backups and one isolated timed restore are verified. Complete service recovery still needs manual Auth/provider reconfiguration, and tested privacy/incident operations remain unfinished.

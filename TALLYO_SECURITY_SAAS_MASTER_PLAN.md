@@ -74,7 +74,7 @@ A finding is not `fixed` while any material security or compatibility check is u
 
 ### SEC-001 — MFA assurance checks must fail closed
 
-**Status:** Verified under AUTH-001 on 2026-07-14; robust all-factors-lost recovery remains a paid/public-launch condition.
+**Status:** AUTH-001 was Verified on 2026-07-14. AUTH-002 all-factors-lost recovery is locally implemented and tested; production deployment and live acceptance remain a paid/public-launch condition.
 If the Supabase Authenticator Assurance Level check errors or returns an unknown state, the app must remain restricted or sign out. Full application initialisation must occur only after the required assurance level is proven. Test fresh login, restored sessions, API/network failure, expired sessions, wrong TOTP, valid TOTP and non-enrolled accounts.
 
 ### SEC-002 — Sensitive operations need trusted AAL2 enforcement
@@ -120,7 +120,7 @@ Document and test signup/login/reset throttling, password strength, bot controls
 ### SEC-010 — MFA recovery and disablement require stronger controls
 
 **Status:** Partially implemented; operational support decision remains.
-Tallyo supports a second verified TOTP authenticator, MFA-gated password recovery, fresh-code checks for factor removal/disablement, and allowlisted recovery/factor audit events. Supabase does not provide recovery codes. The Owner approved an interim deny-by-default all-factors-lost response for the current portfolio build: no email-only or administrator bypass, no identity-document collection, and no account-data transfer. A robust, risk-assessed recovery method remains required before paid/public onboarding. See `MFA_RECOVERY_RUNBOOK.md`.
+Tallyo supports a second verified TOTP authenticator, MFA-gated password recovery, fresh-code checks for factor removal/disablement, and allowlisted recovery/factor audit events. Supabase does not provide native recovery codes. AUTH-002 therefore implements server-managed one-time codes with HMAC-only storage, throttling, global factor/session cleanup, restrictive RLS, security notices, and forced re-enrolment. The interim deny-by-default response remains active until the candidate passes production deployment and live acceptance. See `MFA_RECOVERY_RUNBOOK.md`.
 
 ### SEC-011 — Backup and restoration are not proven
 
@@ -282,7 +282,7 @@ Additionally requires workspace/RBAC isolation, server-enforced entitlements, St
 1. Define the operational refund/chargeback/support process; the implemented Stripe sandbox lifecycle and replay checks are Verified.
 2. Create and prove backup/restore.
 3. Expand audit coverage and alerts.
-4. Preserve the Verified MFA recovery controls, design robust all-factors-lost recovery before paid/public onboarding, and finish session-revocation design.
+4. Preserve the Verified MFA controls, deploy and accept AUTH-002 before paid/public onboarding, and finish any later session-revocation upgrade separately.
 5. Add password and abuse hardening.
 6. Complete privacy, terms, retention, rights and breach operations.
 7. Run final mobile/PDF regression and synchronise evidence.

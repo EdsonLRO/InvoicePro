@@ -6,9 +6,9 @@ Do not record live cases, customer personal data, identity documents, secrets, p
 
 ## Current Disposition
 
-**Legal, Privacy and Regulatory Agent disposition, 2026-07-15:** `Approved with conditions` for internal preparation, portfolio demonstrations, sandbox payments, and controlled test-account use only.
+**Legal, Privacy and Regulatory Agent disposition, refreshed 2026-07-17:** `Approved with conditions` for internal preparation, portfolio demonstrations, sandbox payments, and controlled test-account use only.
 
-Paid/public onboarding and real-customer processing remain `Blocked` until the open legal and operational conditions in `LEGAL_PRIVACY_READINESS.md` are resolved and approved by the Owner with appropriate professional advice.
+Paid/public onboarding and real-customer processing remain `Blocked` until the open legal and operational conditions in `LEGAL_PRIVACY_READINESS.md` are resolved and approved by the Owner, including focused professional advice where Tallyo's current material-uncertainty policy requires it. A retained DPO, backup operator, Workspace support service, Vault licence and cyber-response retainer are not automatic prerequisites for the approved initial scope.
 
 ## Working Record Of Processing Activities
 
@@ -16,13 +16,14 @@ This is a preparation aid for a Record of Processing Activities (ROPA), not an a
 
 | Processing activity | Data and people | Purpose and systems | Working role / lawful basis | Recipients and transfers | Retention / deletion | Status |
 |---|---|---|---|---|---|---|
-| Account and security administration | User email, Auth identifiers, MFA metadata, session and security events | Create and protect accounts in Supabase Auth | Role and lawful basis not approved | Supabase; transfer evidence required | Period not approved; provider and app deletion paths need testing | Open |
+| Account and security administration | User email, Auth identifiers, MFA metadata, session and security events | Create and protect accounts in Supabase Auth | Role and lawful basis not approved | Supabase; current DPA/transfer evidence collected, acceptance pending | Period not approved; provider and app deletion paths need testing | Open |
 | Public Auth abuse detection (prepared; inactive) | Account applicants and users; IP address, TLS/browser fingerprint signals, user agent, sitekey/origin and challenge result | Distinguish automated abuse from legitimate sign-up, sign-in and password-reset requests using Cloudflare Turnstile and Supabase Auth validation | Tallyo likely controller for selecting the control; Cloudflare states processor for site protection and controller for service improvement; lawful basis not approved | Cloudflare global processing and subprocessors; DPA/UK Addendum evidence recorded, transfer-risk decision open | Product-specific signal/analytics retention is not established; do not activate until decided | Open / inactive |
-| Invoicing workspace | Business profile, customer contacts, invoice/quote/credit-note content, saved items | User-requested invoicing in Supabase Postgres | Business user likely controller for entered customer data; Tallyo role requires review | Supabase; transfer evidence required | Accounting, closure, correction and deletion periods not approved | Open |
-| Document and reminder email | Recipient address, document/PDF, message and delivery metadata | Send requested documents and opt-in reminders through Resend | Roles and lawful basis not approved | Resend and email-chain providers; transfer evidence required | Delivery, suppression and deletion periods not approved | Open |
-| Invoice card payment | Customer email, invoice reference, amount, currency and provider identifiers; card data stays with Stripe Checkout | Accept and reconcile invoice payments and refunds | Controller split and lawful bases require review | Stripe; transfer and independent-controller evidence required | Accounting, fraud, chargeback and provider retention not approved | Open |
+| Invoicing workspace | Business profile, customer contacts, invoice/quote/credit-note content, saved items | User-requested invoicing in Supabase Postgres | Business user likely controller for entered customer data; Tallyo role requires review | Supabase; current DPA/transfer evidence collected, acceptance pending | Accounting, closure, correction and deletion periods not approved | Open |
+| Document and reminder email | Recipient address, document/PDF, message and delivery metadata | Send requested documents and opt-in reminders through Resend | Roles and lawful basis not approved | Resend and email-chain providers; current DPA/subprocessor/transfer evidence collected, acceptance pending | Delivery, suppression and deletion periods not approved | Open |
+| Invoice card payment | Customer email, invoice reference, amount, currency and provider identifiers; card data stays with Stripe Checkout | Accept and reconcile invoice payments and refunds | Controller split and lawful bases require review | Stripe; role/transfer/subprocessor evidence collected, acceptance pending; sandbox only | Accounting, fraud, chargeback and provider retention not approved | Open |
 | Security and operational audit | User/account reference, action category, object reference, provider event ID and minimised metadata | Detect misuse, investigate incidents and prove sensitive actions | Role and lawful basis not approved | Supabase; no intentional public disclosure | Security value must be balanced against minimisation; period not approved | Open |
-| Managed backup and recovery | Database content, including personal data present at snapshot time | Resilience, restoration and incident recovery | Mirrors underlying processing roles; legal basis not separately approved | Supabase managed backups | Current technical window documented; deletion-in-backups procedure needs testing | Open |
+| Managed backup and recovery | Database content, including personal data present at snapshot time | Resilience, restoration and incident recovery | Mirrors underlying processing roles; legal basis not separately approved | Supabase managed backups | Seven-day technical window and isolated timed restore verified; deletion-in-backups procedure still needs testing | Open |
+| Privacy and incident case operations (proposed) | Request/case identity, correspondence, evidence, decisions, delivery and incident records | Recognise and handle rights requests and personal-data incidents | Tallyo likely controller for its accountability records and may handle processor-assistance material; requires qualified confirmation | Google Workspace Business Standard candidate; no active subscription or case configuration verified | Manual case schedule and provider deletion/recovery limitations require approval and synthetic testing | Pending purchase and D07/D10 acceptance |
 
 ICO documentation guidance: <https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/accountability-and-governance/guide-to-accountability-and-governance/documentation/>.
 
@@ -81,9 +82,15 @@ ICO international-transfer guidance: <https://ico.org.uk/for-organisations/uk-gd
 
 For each data category, record the purpose, start event, proposed period, legal/operational justification, exceptions, active-system deletion method, backup expiry behaviour, provider deletion process, evidence, owner, approval date, and review date. No period becomes approved merely because it appears in a provider default or this repository.
 
+## Operational Acceptance Gate
+
+`PRIVACY_OPERATIONS_RUNBOOK.md` is the implementable operating authority for rights, correction, deletion, provider assistance, secure delivery, and personal-data incidents. Business Standard is the selected candidate and the Owner-led role model is accepted, but no Standard subscription is verified active. Contract/purchase approval, restricted fictional-data configuration, all four synthetic exercises and recovery/absence checks remain outstanding. Repository templates and the 2026-07-15 tabletop do not by themselves satisfy this gate.
+
+`LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md`, `LEGAL_OWNER_ACTIONS_BEFORE_LAUNCH_2026-07-17.md`, `LEGAL_BASIS_RETENTION_OPTIONS_2026-07-17.md`, `ICO_ACCOUNTABILITY_PREPARATION_2026-07-17.md`, `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`, the four unpublished customer-document drafts listed in `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md`, and the rest of that review pack define the remaining decisions, deferred Owner actions, current basis/retention proposal, fuller assessment, provider evidence, draft customer wording, and qualified-review deliverables.
+
 ## DPIA Screening
 
-This screening is preliminary and is not a completed Data Protection Impact Assessment (DPIA).
+This screening remains the compact ROPA-linked screen. The fuller provisional assessment is now in `ICO_ACCOUNTABILITY_PREPARATION_2026-07-17.md`; it does not decide conclusively whether the statutory DPIA threshold is met and is not a final approved DPIA.
 
 | Screening factor | Current observation |
 |---|---|
@@ -106,7 +113,7 @@ ICO DPIA guidance: <https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-re
 ## Exercise And Review Schedule
 
 1. Run a fictional rights-request and breach tabletop before public onboarding and after material architecture or vendor changes.
-2. Run a timed non-production backup restore after exact cost approval; record privacy and side-effect handling.
+2. Preserve the completed isolated timed-restore evidence; test approved deleted-data expiry/reappearance handling separately before real-customer processing.
 3. Test approved export, correction, deletion and processor-assistance procedures before real customer data.
 4. Review vendor/transfer evidence before enabling a provider or changing region/service scope.
 5. Review retention decisions at least annually and after legal, tax, product or incident changes.
