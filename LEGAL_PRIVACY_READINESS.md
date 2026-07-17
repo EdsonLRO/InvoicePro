@@ -46,7 +46,7 @@ No analytics, advertising, or non-essential cookie provider is approved in the c
 
 No final retention period is approved yet. Before launch, the Owner and Legal Agent must set and justify each period, including exceptions and deletion evidence.
 
-`LEGAL_BASIS_RETENTION_OPTIONS_2026-07-17.md` contains the current D05/D06 proposal. It separates Tallyo's own sole-trader tax records from business-user workspace records, proposes a 30-day account-closure/export window, category-specific operational periods, and seven-day backup expiry, and leaves all production deletion/migration work separately blocked.
+`LEGAL_BASIS_RETENTION_OPTIONS_2026-07-17.md` contains the Owner-approved working D05/D06 position for qualified review. It separates Tallyo's own sole-trader tax records from business-user workspace records, proposes a 30-day account-closure/export window, category-specific operational periods, and seven-day backup expiry, and leaves all production deletion/migration work separately blocked. No period is final until qualified review and implementation acceptance.
 
 | Category | Current position | Required decision |
 |---|---|---|

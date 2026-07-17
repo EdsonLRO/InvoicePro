@@ -1,6 +1,6 @@
 # Tallyo Lawful-Basis And Retention Options - 2026-07-17
 
-Internal decision proposal for `LEGAL-OPS-001`. Sources were checked on 2026-07-17. This is not legal advice, an approved retention policy, customer-facing wording, or authorization to delete or retain production data.
+Internal decision proposal for `LEGAL-OPS-001`. Sources were checked on 2026-07-17. On 2026-07-17, the Owner approved this as the working D05/D06 position for qualified UK legal/privacy and accounting review. It is not legal advice, a final retention policy, customer-facing wording, or authorization to delete or retain production data.
 
 The recommended baseline is deliberately privacy-lean: keep identifiable data only for a defined purpose, use short operational periods, and extend a record only for a documented tax, dispute, incident, legal-hold, or provider obligation. Qualified UK legal/privacy review remains required before these positions become final.
 
@@ -99,8 +99,8 @@ The current app has no approved account-closure/deletion automation or category-
 
 ## Decisions Requested From The Owner
 
-The Owner may approve this as a **working baseline for qualified review**, without approving production deletion or customer wording. Specific periods may be changed after professional advice.
+**Owner decision, 2026-07-17:** `Approved as the working baseline for qualified review.` This does not approve production deletion, migration, customer wording, legal publication, real-customer processing, or spending. Specific bases and periods may be changed after professional advice.
 
 Requested decision:
 
-> Approve the proposed lawful-basis map and privacy-lean retention schedule as the working position to send for qualified UK legal/privacy and accounting review, while keeping every production, migration, deletion, legal-publication and real-customer action separately blocked.
+> The proposed lawful-basis map and privacy-lean retention schedule may be sent as the working position for qualified UK legal/privacy and accounting review, while every production, migration, deletion, legal-publication and real-customer action remains separately blocked.
