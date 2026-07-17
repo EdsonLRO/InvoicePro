@@ -144,13 +144,6 @@ async function verifiedCheckoutSession(
   return Math.abs(expectedAmount - amount) < 0.01;
 }
 
-async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
-  const { error } = await admin.from("audit_events").insert(payload);
-  if (!error) return;
-  if (error.code === "23505") return;
-  throw new Error(`audit event insert failed: ${error.message}`);
-}
-
 function historyHasProviderMarker(history: unknown, marker: string): boolean {
   return Array.isArray(history) &&
     history.some((entry) => entry?.providerMarker === marker);
@@ -172,6 +165,36 @@ async function findPaymentAuditByIntent(admin: any, paymentIntentId: string) {
   return data;
 }
 
+async function retrieveStripeRefund(refundId: string): Promise<any> {
+  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+  if (!stripeKey) throw new Error("Stripe API is not configured for refund reconciliation");
+  const expectsLive = Deno.env.get("STRIPE_LIVE_MODE") === "true";
+  const keyModeMatches = expectsLive
+    ? /^(?:sk|rk)_live_/.test(stripeKey)
+    : /^(?:sk|rk)_test_/.test(stripeKey);
+  if (!keyModeMatches) {
+    throw new Error("Stripe key mode does not match STRIPE_LIVE_MODE");
+  }
+  const stripeApiVersion = Deno.env.get("STRIPE_API_VERSION")?.trim();
+  if (expectsLive && !stripeApiVersion) {
+    throw new Error("STRIPE_API_VERSION is required in live mode");
+  }
+  const response = await fetch(
+    `https://api.stripe.com/v1/refunds/${encodeURIComponent(refundId)}`,
+    {
+      headers: {
+        Authorization: `Bearer ${stripeKey}`,
+        ...(stripeApiVersion ? { "Stripe-Version": stripeApiVersion } : {}),
+      },
+    },
+  );
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(body?.error?.message || "Stripe refund reconciliation failed");
+  }
+  return body;
+}
+
 async function loadInvoice(admin: any, invoiceId: string, userId: string) {
   const { data: inv, error } = await admin.from("invoices")
     .select("*")
@@ -182,7 +205,41 @@ async function loadInvoice(admin: any, invoiceId: string, userId: string) {
   return inv;
 }
 
-async function handleCheckoutCompleted(admin: any, event: any) {
+async function applyStripeInvoiceEvent(
+  admin: any,
+  inv: any,
+  event: any,
+  payments: InvoicePayment[],
+  history: any[],
+  status: string,
+  eventType: string,
+  metadata: Record<string, unknown>,
+  processedAt: string,
+): Promise<string> {
+  const { data, error } = await admin.rpc("apply_stripe_invoice_event", {
+    p_invoice_id: inv.id,
+    p_user_id: inv.user_id,
+    p_expected_version: Number(inv.stripe_event_version) || 0,
+    p_payments: payments,
+    p_history: history,
+    p_status: status,
+    p_event_type: eventType,
+    p_provider_event_id: event.id,
+    p_metadata: metadata,
+    p_processed_at: processedAt,
+  });
+  if (error) throw new Error(`atomic invoice event failed: ${error.message}`);
+  return String(data || "");
+}
+
+function mutationResult(result: string) {
+  if (result === "applied") return { ok: true };
+  if (result === "duplicate") return { ok: true, duplicate: true };
+  if (result === "missing") return { ignored: "invoice not found" };
+  return null;
+}
+
+async function handleCheckoutCompleted(admin: any, event: any, attempt = 0): Promise<any> {
   const session = event.data?.object || {};
   if (session.payment_status !== "paid") {
     return { ignored: "checkout not paid" };
@@ -273,22 +330,15 @@ async function handleCheckoutCompleted(admin: any, event: any) {
     });
   }
 
-  const { error: updateError } = await admin.from("invoices")
-    .update({ payments, history, status: nextStatus, updated_at: nowISO })
-    .eq("id", invoiceId)
-    .eq("user_id", userId);
-  if (updateError) throw new Error(updateError.message);
-
-  await insertAuditEvent(admin, {
-    user_id: userId,
-    actor_user_id: null,
-    event_type: "stripe_payment_completed",
-    object_type: "invoice",
-    object_id: invoiceId,
-    source: "provider_webhook",
-    provider: "stripe",
-    provider_event_id: event.id,
-    metadata: {
+  const result = await applyStripeInvoiceEvent(
+    admin,
+    inv,
+    event,
+    payments,
+    history,
+    nextStatus,
+    "stripe_payment_completed",
+    {
       session_id: session.id || null,
       payment_intent: session.payment_intent || null,
       amount,
@@ -298,12 +348,17 @@ async function handleCheckoutCompleted(admin: any, event: any) {
       customer_email: session.customer_details?.email ||
         session.customer_email || null,
     },
-  });
-
-  return { ok: true };
+    nowISO,
+  );
+  const settled = mutationResult(result);
+  if (settled) return settled;
+  if (result === "stale" && attempt < 4) {
+    return await handleCheckoutCompleted(admin, event, attempt + 1);
+  }
+  throw new Error("invoice changed repeatedly while recording Stripe payment");
 }
 
-async function handleCheckoutPaymentFailed(admin: any, event: any) {
+async function handleCheckoutPaymentFailed(admin: any, event: any, attempt = 0): Promise<any> {
   const session = event.data?.object || {};
   const invoiceId = String(
     session.metadata?.invoice_id || session.client_reference_id || "",
@@ -353,22 +408,15 @@ async function handleCheckoutPaymentFailed(admin: any, event: any) {
     providerMarker: `stripe-failed:${event.id}`,
   });
 
-  const { error: updateError } = await admin.from("invoices")
-    .update({ history, updated_at: nowISO })
-    .eq("id", invoiceId)
-    .eq("user_id", userId);
-  if (updateError) throw new Error(updateError.message);
-
-  await insertAuditEvent(admin, {
-    user_id: userId,
-    actor_user_id: null,
-    event_type: "stripe_payment_failed",
-    object_type: "invoice",
-    object_id: invoiceId,
-    source: "provider_webhook",
-    provider: "stripe",
-    provider_event_id: event.id,
-    metadata: {
+  const result = await applyStripeInvoiceEvent(
+    admin,
+    inv,
+    event,
+    Array.isArray(inv.payments) ? inv.payments : [],
+    history,
+    inv.status || "Sent",
+    "stripe_payment_failed",
+    {
       session_id: session.id || null,
       payment_intent: session.payment_intent || null,
       amount: amount > 0 ? amount : null,
@@ -377,17 +425,33 @@ async function handleCheckoutPaymentFailed(admin: any, event: any) {
       customer_email: session.customer_details?.email ||
         session.customer_email || null,
     },
-  });
-
-  return { ok: true };
+    nowISO,
+  );
+  const settled = mutationResult(result);
+  if (settled) return settled;
+  if (result === "stale" && attempt < 4) {
+    return await handleCheckoutPaymentFailed(admin, event, attempt + 1);
+  }
+  throw new Error("invoice changed repeatedly while recording failed Stripe payment");
 }
 
-async function handleRefund(admin: any, event: any) {
-  const refund = event.data?.object || {};
+async function handleRefund(admin: any, event: any, attempt = 0): Promise<any> {
+  const eventRefund = event.data?.object || {};
+  const refundId = String(eventRefund.id || "");
+  const eventPaymentIntentId = String(eventRefund.payment_intent || "");
+  if (!eventPaymentIntentId || !refundId) {
+    return { ignored: "refund missing payment intent" };
+  }
+
+  // Stripe does not guarantee event ordering. Re-read the current Refund so an
+  // older succeeded/updated delivery cannot undo a later failed state.
+  const refund = await retrieveStripeRefund(refundId);
   const paymentIntentId = String(refund.payment_intent || "");
-  const refundId = String(refund.id || "");
   if (!paymentIntentId || !refundId) {
     return { ignored: "refund missing payment intent" };
+  }
+  if (paymentIntentId !== eventPaymentIntentId || String(refund.id || "") !== refundId) {
+    throw new Error("Stripe refund reconciliation identity mismatch");
   }
 
   const paymentAudit = await findPaymentAuditByIntent(admin, paymentIntentId);
@@ -435,8 +499,8 @@ async function handleRefund(admin: any, event: any) {
   );
   const refundStatus = String(refund.status || "").toLowerCase();
   const refundSucceeded = refundStatus === "succeeded";
-  const refundFailed = event.type === "refund.failed" ||
-    refundStatus === "failed";
+  const refundFailed = refundStatus === "failed";
+  const refundUnsuccessful = refundFailed || refundStatus === "canceled";
   const eventType = refundSucceeded
     ? "stripe_refund_succeeded"
     : refundFailed
@@ -473,11 +537,11 @@ async function handleRefund(admin: any, event: any) {
       text: `Stripe refund of ${formatMoney(currency, refundAmount)} confirmed`,
       providerMarker: `stripe-refund:${event.id}`,
     });
-  } else if (refundFailed && recordedRefund && !failedRefundReversed) {
+  } else if (refundUnsuccessful && recordedRefund && !failedRefundReversed) {
     payments.push({
       amount: Math.abs(Number(recordedRefund.amount) || refundAmount),
       date: nowISO.split("T")[0],
-      note: "Stripe refund failed reversal",
+      note: `Stripe refund ${refundStatus} reversal`,
       provider: "stripe",
       providerEventId: event.id,
       providerRefundId: refundId,
@@ -488,7 +552,7 @@ async function handleRefund(admin: any, event: any) {
     history.push({
       ts: nowISO,
       type: "refund",
-      text: `Stripe refund failed for ${
+      text: `Stripe refund ${refundStatus} for ${
         formatMoney(currency, refundAmount)
       }; invoice balance restored`,
       providerMarker: `stripe-refund-failed-reversal:${event.id}`,
@@ -505,22 +569,15 @@ async function handleRefund(admin: any, event: any) {
   }
 
   const nextStatus = statusAfterPaymentChange(inv, amountPaid(payments));
-  const { error: updateError } = await admin.from("invoices")
-    .update({ payments, history, status: nextStatus, updated_at: nowISO })
-    .eq("id", invoiceId)
-    .eq("user_id", userId);
-  if (updateError) throw new Error(updateError.message);
-
-  await insertAuditEvent(admin, {
-    user_id: userId,
-    actor_user_id: null,
-    event_type: eventType,
-    object_type: "invoice",
-    object_id: invoiceId,
-    source: "provider_webhook",
-    provider: "stripe",
-    provider_event_id: event.id,
-    metadata: {
+  const result = await applyStripeInvoiceEvent(
+    admin,
+    inv,
+    event,
+    payments,
+    history,
+    nextStatus,
+    eventType,
+    {
       refund_id: refundId,
       payment_intent: paymentIntentId,
       charge: refund.charge || null,
@@ -529,12 +586,17 @@ async function handleRefund(admin: any, event: any) {
       status: refund.status || null,
       invoice_number: inv.number || null,
     },
-  });
-
-  return { ok: true };
+    nowISO,
+  );
+  const settled = mutationResult(result);
+  if (settled) return settled;
+  if (result === "stale" && attempt < 4) {
+    return await handleRefund(admin, event, attempt + 1);
+  }
+  throw new Error("invoice changed repeatedly while recording Stripe refund");
 }
 
-async function handleDispute(admin: any, event: any) {
+async function handleDispute(admin: any, event: any, attempt = 0): Promise<any> {
   const dispute = event.data?.object || {};
   const paymentIntentId = String(dispute.payment_intent || "");
   if (!paymentIntentId) return { ignored: "dispute missing payment intent" };
@@ -579,22 +641,15 @@ async function handleDispute(admin: any, event: any) {
     providerMarker: `stripe-dispute:${event.id}`,
   });
 
-  const { error: updateError } = await admin.from("invoices")
-    .update({ history, updated_at: nowISO })
-    .eq("id", invoiceId)
-    .eq("user_id", userId);
-  if (updateError) throw new Error(updateError.message);
-
-  await insertAuditEvent(admin, {
-    user_id: userId,
-    actor_user_id: null,
-    event_type: event.type.replaceAll(".", "_"),
-    object_type: "invoice",
-    object_id: invoiceId,
-    source: "provider_webhook",
-    provider: "stripe",
-    provider_event_id: event.id,
-    metadata: {
+  const result = await applyStripeInvoiceEvent(
+    admin,
+    inv,
+    event,
+    Array.isArray(inv.payments) ? inv.payments : [],
+    history,
+    inv.status || "Sent",
+    event.type.replaceAll(".", "_"),
+    {
       dispute_id: dispute.id || null,
       payment_intent: paymentIntentId,
       charge: dispute.charge || null,
@@ -604,9 +659,14 @@ async function handleDispute(admin: any, event: any) {
       status: dispute.status || null,
       invoice_number: inv.number || null,
     },
-  });
-
-  return { ok: true };
+    nowISO,
+  );
+  const settled = mutationResult(result);
+  if (settled) return settled;
+  if (result === "stale" && attempt < 4) {
+    return await handleDispute(admin, event, attempt + 1);
+  }
+  throw new Error("invoice changed repeatedly while recording Stripe dispute");
 }
 
 Deno.serve(async (req) => {

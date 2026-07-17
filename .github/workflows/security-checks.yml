@@ -44,6 +44,7 @@ jobs:
           node tests/pwa-update-harness.cjs
           node tests/security-workflow-harness.cjs
           node tests/session-expiry-harness.cjs
+          node tests/stripe-payment-integrity-harness.cjs
 
       - name: Type-check Edge Functions with frozen locks
         shell: bash

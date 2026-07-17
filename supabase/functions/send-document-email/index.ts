@@ -495,10 +495,48 @@ async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
   }
 }
 
+async function insertRequiredAuditEvent(admin: any, payload: Record<string, unknown>) {
+  const { error } = await admin.from("audit_events").insert(payload);
+  if (!error || error.code === "23505") return;
+  throw new Error(`required audit event insert failed: ${error.message}`);
+}
+
+function stripeKeyMatchesConfiguredMode(key: string): boolean {
+  const expectsLive = Deno.env.get("STRIPE_LIVE_MODE") === "true";
+  return expectsLive ? /^(?:sk|rk)_live_/.test(key) : /^(?:sk|rk)_test_/.test(key);
+}
+
+function stripePaymentsEnabled(): boolean {
+  return Deno.env.get("STRIPE_LIVE_MODE") === "true"
+    ? Deno.env.get("STRIPE_PAYMENTS_ENABLED") === "true"
+    : Deno.env.get("STRIPE_PAYMENTS_ENABLED") !== "false";
+}
+
+async function checkoutIdempotencyKey(parts: string[]): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(parts.join("\u001f")),
+  );
+  const hex = Array.from(new Uint8Array(digest)).map((byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+  return `tallyo-checkout-${hex}`;
+}
+
 async function createStripeCheckoutUrl(inv: any, userId: string, to: string, admin: any, amount: number, kind: string): Promise<string | null> {
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
   const appUrl = Deno.env.get("APP_BASE_URL")?.replace(/\/+$/, "");
   if (!stripeKey || !appUrl) return null;
+  if (!stripeKeyMatchesConfiguredMode(stripeKey)) {
+    throw new Error("Stripe key mode does not match STRIPE_LIVE_MODE");
+  }
+  if (!stripePaymentsEnabled()) {
+    throw new Error("Card payments are temporarily unavailable");
+  }
+  const stripeApiVersion = Deno.env.get("STRIPE_API_VERSION")?.trim();
+  if (Deno.env.get("STRIPE_LIVE_MODE") === "true" && !stripeApiVersion) {
+    throw new Error("STRIPE_API_VERSION is required in live mode");
+  }
   if (inv.doc_type !== "invoice" || inv.status === "Cancelled" || inv.status === "Paid") return null;
 
   const outstanding = outstandingAmount(inv);
@@ -525,21 +563,35 @@ async function createStripeCheckoutUrl(inv: any, userId: string, to: string, adm
   params.set("payment_intent_data[metadata][payment_kind]", kind);
   if (validEmail(to)) params.set("customer_email", to.trim());
 
+  const idempotencyKey = await checkoutIdempotencyKey([
+    String(inv.id),
+    userId,
+    currency,
+    String(amountMinor),
+    kind,
+    "document_email",
+    to.trim().toLowerCase(),
+  ]);
+
   const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${stripeKey}`,
       "Content-Type": "application/x-www-form-urlencoded",
+      "Idempotency-Key": idempotencyKey,
+      ...(stripeApiVersion ? { "Stripe-Version": stripeApiVersion } : {}),
     },
     body: params,
   });
   const stripeBody = await stripeResponse.json().catch(() => ({}));
   if (!stripeResponse.ok) {
-    console.warn("Stripe Checkout link skipped", stripeBody?.error?.message || stripeResponse.status);
-    return null;
+    throw new Error(stripeBody?.error?.message || "Stripe Checkout link could not be created");
+  }
+  if (!stripeBody?.id || !stripeBody?.url) {
+    throw new Error("Stripe Checkout returned an incomplete session");
   }
 
-  await insertAuditEvent(admin, {
+  await insertRequiredAuditEvent(admin, {
     user_id: userId,
     actor_user_id: userId,
     event_type: "stripe_checkout_created",
@@ -555,6 +607,7 @@ async function createStripeCheckoutUrl(inv: any, userId: string, to: string, adm
       customer_email: to,
       channel: "document_email",
       payment_kind: kind,
+      idempotency_key: idempotencyKey,
     },
   });
 

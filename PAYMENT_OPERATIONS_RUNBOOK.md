@@ -52,6 +52,40 @@ Card-not-present transactions carry chargeback risk. GOV.UK describes chargeback
 | Dispute/chargeback appears | Follow the dispute procedure and preserve evidence. |
 | Suspected key compromise | Stop payment operations, contain access, preserve logs, and rotate secrets only with Owner approval. |
 
+## Controlled Live Activation
+
+The following order is mandatory. Do not place secret values, webhook payloads, customer details, or bank details in repository evidence.
+
+### Technical deployment candidate
+
+1. Merge the reviewed payment-readiness PR only after its required `verify` check passes and there are no unresolved comments or conflicts.
+2. Take the normal Supabase backup/snapshot evidence and record the release commit.
+3. Apply migration `20260717165044_atomic_stripe_invoice_events.sql` before deploying the matching webhook. Verify that `apply_stripe_invoice_event` is executable by `service_role` only and that invoice RLS and append-only audit triggers are unchanged.
+4. Deploy `stripe-webhook`, `create-stripe-checkout`, `create-stripe-refund`, and `send-document-email` from the same reviewed commit.
+5. Keep the public `window.STRIPE_LIVE_MODE` flag `false` and keep `STRIPE_PAYMENTS_ENABLED` disabled for live mode until the provider configuration below is complete.
+
+### Owner/provider activation
+
+1. Confirm the Stripe account is approved for live charges and that the Owner has completed required identity, business, bank, payout, tax, and account-security steps directly with Stripe.
+2. In Stripe live mode, create the production webhook endpoint for the deployed `stripe-webhook` URL, pin its API version, and subscribe only to:
+   - `checkout.session.completed`;
+   - `checkout.session.async_payment_succeeded`;
+   - `checkout.session.async_payment_failed`;
+   - `refund.created`, `refund.updated`, and `refund.failed`;
+   - `charge.dispute.created`, `charge.dispute.updated`, `charge.dispute.closed`, `charge.dispute.funds_withdrawn`, and `charge.dispute.funds_reinstated`.
+3. Enter the live Stripe server key and live webhook signing secret directly in Supabase secret management. Set the exact approved HTTPS `APP_BASE_URL` and set `STRIPE_API_VERSION` to the same reviewed version pinned on the live webhook endpoint. Never place secret values in browser code, chat, screenshots, commits, or evidence.
+4. Set `STRIPE_LIVE_MODE=true`, then set `STRIPE_PAYMENTS_ENABLED=true`. The functions reject test/live key mismatches and live payments remain disabled unless both switches are explicit.
+5. With separate approval for a real-money acceptance test, send one minimum-value invoice to an Owner-controlled address, pay it once, and verify Checkout amount/currency, signed webhook success, one invoice payment, one append-only audit event, correct invoice status, and Stripe settlement state. Refund it only if separately approved, then verify the signed refund lifecycle and balance restoration.
+6. Only after that verification, change the public `window.STRIPE_LIVE_MODE` flag to `true`, publish the reviewed frontend, and perform a no-data smoke check. Real customer use and customer communications remain subject to the separate release/legal gate below.
+
+### Rollback and containment
+
+1. Set `STRIPE_PAYMENTS_ENABLED=false` first. This blocks new live Checkout Sessions and in-app refunds while allowing the webhook to finish processing already-created provider events.
+2. Set the public `window.STRIPE_LIVE_MODE` flag to `false` and publish the controlled frontend so the test/development notice is visible.
+3. Do not delete invoice payments or audit events and do not roll back the transaction function while unresolved Stripe events exist. Reconcile in-flight Checkout Sessions, refunds, and disputes against Stripe.
+4. If webhook integrity is affected, leave the endpoint available only when safe, preserve privacy-minimised evidence, correct the configuration/code, and replay provider events from Stripe after review.
+5. Rotate or revoke a suspected key only through the approved Owner/provider process. Record identifiers and outcomes, never the secret value.
+
 ## Support Record
 
 For each material case record: internal case reference, invoice reference, provider event type, amount/currency, status, timestamps, decision owner, customer communication status, and outcome. Do not record full card data, secret keys, webhook payloads, passwords, TOTP codes, or identity documents.

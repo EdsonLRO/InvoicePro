@@ -43,6 +43,7 @@ Implemented:
 Still to finish before treating the app as customer-ready:
 
 - Stripe sandbox lifecycle verification is complete for signature rejection, unrelated-event rejection, successful payment/refund replay, a known-payment dispute, and a genuine failed-refund reversal. Live mode remains disabled and approval-gated.
+- PAY-LIVE-001 has a reviewed-source candidate for atomic invoice/audit webhook commits, bounded concurrency retries, current-provider refund reconciliation, deterministic Checkout idempotency, explicit test/live key matching, and a server-side live kill switch. Focused local checks pass; production migration/deployment and deployed sandbox replay remain pending and approval-gated.
 - Review and operationally test the internal chargeback/refund/support procedure in `PAYMENT_OPERATIONS_RUNBOOK.md`; customer-facing policy remains legally blocked.
 - The Owner-approved non-production restore test passed on 2026-07-15. The isolated temporary project was deleted after approval and production remained healthy; evidence is in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
 - Expand append-only audit logging to remaining sensitive actions and operational monitoring. Recurring-generation failures and overdue-reminder provider/history failures now have privacy-safe evidence; company/settings saves are covered at a category level, while backup/restore evidence remains a separate controlled record.
@@ -61,6 +62,7 @@ Stripe invoice payments are implemented and the handled lifecycle is verified in
 Do not send payment links to real customers until:
 
 - Stripe live keys and live webhook secret are configured intentionally.
+- The PAY-LIVE-001 migration and matching Edge Functions are reviewed, deployed in order, and replay-verified in sandbox.
 - The live webhook destination is verified.
 - Refund, dispute, failed-payment, and chargeback behavior is tested and documented for the approved live configuration.
 - Terms, privacy, refund, and support processes are ready.
