@@ -86,11 +86,11 @@ For each data category, record the purpose, start event, proposed period, legal/
 
 `PRIVACY_OPERATIONS_RUNBOOK.md` is the implementable operating authority for rights, correction, deletion, provider assistance, secure delivery, and personal-data incidents. Business Standard is the selected candidate and the Owner-led role model is accepted, but no Standard subscription is verified active. Contract/purchase approval, restricted fictional-data configuration, all four synthetic exercises and recovery/absence checks remain outstanding. Repository templates and the 2026-07-15 tabletop do not by themselves satisfy this gate.
 
-`LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md`, `LEGAL_BASIS_RETENTION_OPTIONS_2026-07-17.md`, `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`, and `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md` define the remaining decisions, current lawful-basis/retention proposal, provider evidence, and qualified-review deliverables.
+`LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md`, `LEGAL_OWNER_ACTIONS_BEFORE_LAUNCH_2026-07-17.md`, `LEGAL_BASIS_RETENTION_OPTIONS_2026-07-17.md`, `ICO_ACCOUNTABILITY_PREPARATION_2026-07-17.md`, `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md`, the four unpublished customer-document drafts listed in `EXTERNAL_LEGAL_REVIEW_PACK_2026-07-17.md`, and the rest of that review pack define the remaining decisions, deferred Owner actions, current basis/retention proposal, fuller assessment, provider evidence, draft customer wording, and qualified-review deliverables.
 
 ## DPIA Screening
 
-This screening is preliminary and is not a completed Data Protection Impact Assessment (DPIA).
+This screening remains the compact ROPA-linked screen. The fuller provisional assessment is now in `ICO_ACCOUNTABILITY_PREPARATION_2026-07-17.md`; it does not decide conclusively whether the statutory DPIA threshold is met and is not a final approved DPIA.
 
 | Screening factor | Current observation |
 |---|---|

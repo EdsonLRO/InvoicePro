@@ -32,6 +32,9 @@ Provide only the current files needed for advice, after a secret/PII review:
 - `LEGAL_OPERATIONS_RECORDS.md` - working ROPA, templates and DPIA screening;
 - `LEGAL_TABLETOP_EVIDENCE_2026-07-15.md` - fictional exercise evidence and operational gaps;
 - `LEGAL_LAUNCH_DECISION_PACK_2026-07-17.md` - exact Owner decisions;
+- `LEGAL_OWNER_ACTIONS_BEFORE_LAUNCH_2026-07-17.md` - consolidated actions that still require private facts, Owner authority, provider action or external review;
+- `ICO_ACCOUNTABILITY_PREPARATION_2026-07-17.md` - private-fact-free ICO fee worksheet, provisional DPIA-style assessment, LIA worksheets and review calendar;
+- `DRAFT_PRIVACY_NOTICE_2026-07-17.md`, `DRAFT_TERMS_OF_SERVICE_2026-07-17.md`, `DRAFT_BUSINESS_USER_DATA_PROCESSING_TERMS_2026-07-17.md`, and `DRAFT_SUPPORT_COMPLAINTS_PAYMENT_TERMS_2026-07-17.md` - visibly unpublished working customer wording requiring correction and approval;
 - `VENDOR_TRANSFER_EVIDENCE_2026-07-17.md` - dated official provider evidence and limitations;
 - `PRIVACY_OPERATIONS_RUNBOOK.md` - required live-operating controls and synthetic acceptance gate;
 - `PAYMENT_OPERATIONS_RUNBOOK.md` and current Stripe sandbox evidence - implemented payment/refund/dispute behaviour;
