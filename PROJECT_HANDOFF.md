@@ -6,6 +6,8 @@
 > Handoff for an AI coding agent (e.g. ChatGPT / Codex) taking over development.
 > Read this fully for a meaningful project/session handoff or when routed here. Where facts are uncertain they are marked **Unknown / needs confirmation**.
 
+> **Current active task:** read `tasks/AUTH-002_THREAD_HANDOFF_2026-07-17.md` before continuing PR #44. It is the compact source for the current branch, completed evidence, retained locks, four remaining gates, and approval boundary.
+
 ---
 
 ## 1. Project overview
@@ -134,7 +136,7 @@ Assumed context: mostly UK-based (GBP, UK-oriented), non-technical users, often 
 - **PDF/export:** client-side (jsPDF + html2canvas; SheetJS/xlsx for spreadsheets). **Unknown / needs confirmation:** exact library versions (pinned with SRI in the HTML).
 - **Hosting:** GitHub Pages (static). PWA via `manifest.json` + `service-worker.js`.
 - **Automation:** Supabase Edge Function (Deno/TypeScript) + `pg_cron` schedule.
-- **Edge dependency control:** all ten repository function sources, including the undeployed `mfa-recovery` candidate, pin `@supabase/supabase-js` to exact version `2.110.1`; each function has a Deno v4 lockfile with the remote-module digest. `tests/edge-dependency-pin-harness.cjs` rejects floating versions or missing/incompatible locks. Production currently has nine active functions.
+- **Edge dependency control:** all ten repository function sources, including deployed `mfa-recovery` version 1, pin `@supabase/supabase-js` to exact version `2.110.1`; each function has a Deno v4 lockfile with the remote-module digest. `tests/edge-dependency-pin-harness.cjs` rejects floating versions or missing/incompatible locks. Production currently has ten active functions.
 - **Automated security gate:** `.github/workflows/security-checks.yml` uses immutable action SHAs, read-only permissions, no secrets, and Deno `2.2.15` LTS to run all ten frozen checks plus the focused Node security harnesses on pull requests and `main`.
 - **Local dev (current author):** Windows + VS Code + Supabase CLI. Node.js installed.
 

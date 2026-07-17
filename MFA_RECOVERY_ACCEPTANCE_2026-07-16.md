@@ -23,7 +23,7 @@ The migration, server-only pepper, and JWT-protected Edge Function are deployed.
 | One-time semantics | Passed by harness | Claiming one valid code deletes the complete generation before factor cleanup. |
 | Recovery lock | Passed by harness | Restrictive policies cover all six tenant-data tables and deny access while recovery is pending. |
 | Browser state clearing | Passed by harness | Raw code and recovery-entry state clear on sign-out; recovery routing checks state before business-data initialisation. |
-| Pre-deployment shell regression | Passed | Local build `2026.07.16.2` rendered at desktop, 390 px, and 320 px with no page-level horizontal overflow or captured browser warning/error. Recovery-specific authenticated screens remain pending live acceptance. |
+| Pre-deployment shell regression | Passed | Local build `2026.07.16.2` rendered at desktop, 390 px, and 320 px with no page-level horizontal overflow or captured browser warning/error. Later read-only authenticated Account-page checks at 1280x800, 390x844, and 320x700 also showed the Recovery Codes controls without horizontal overflow or browser warning/error. This does not replace a real-phone recovery-flow test. |
 | Regression suite | Passed | All repository security harnesses passed after implementation. |
 | Legal/privacy/security review | Conditional | `LEGAL_MFA_RECOVERY_REVIEW_2026-07-16.md` permits implementation/testing but blocks production until its conditions and this live matrix are closed. |
 
@@ -53,6 +53,7 @@ Static checks do not prove hosted database behaviour, global session invalidatio
 | Recovery completion | Passed | The user verified a new authenticator privately. The app restored access to the invoice workspace and removed the recovery setup screen. |
 | Fresh code set after recovery | Passed | The user generated and saved a fresh set after recovery. Production readback showed exactly ten stored hashes, one active generation, 64-character lowercase-hex hashes only, no malformed/non-hex hashes, no recovery lock, and no failed-attempt state. |
 | Audit minimisation | Passed | Recent recovery audit events contained only approved recovery event types and no password, TOTP, secret, token, JWT, or recovery-code-shaped metadata. |
+| Security-notice provider acceptance | Partial | Privacy-safe production evidence shows the generation, recovery-started, and recovery-completed notice calls were accepted by the Resend API. This does not prove inbox delivery or message-content minimisation; Owner confirmation remains required. |
 
 ## Approval-Gated Deployment Evidence
 

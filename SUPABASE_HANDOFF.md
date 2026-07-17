@@ -196,7 +196,7 @@ Other current Edge Functions:
 
 Dependency rule: every function source pins `@supabase/supabase-js` to `2.110.1`, and every function directory carries a Deno v4 lockfile with the matching remote-module digest. Do not replace the exact version with `@2`, `latest`, a caret, or another floating specification. Review and regenerate all locks with the repository's Deno `2.2.15` LTS compatibility line before an intentional dependency deployment. `tests/edge-dependency-pin-harness.cjs` enforces the pin and lock rule; `.github/workflows/security-checks.yml` runs frozen checks for all ten repository functions with read-only permissions and no secrets.
 
-Live deployment snapshot on 2026-07-13: all nine functions were active; `generate-recurring` was v13 and `resend-webhook` was v11 after the hardening/type-check deployments. JWT verification is enabled for user-authenticated functions and intentionally disabled only for signature-verified provider webhooks or custom-secret scheduled functions.
+Live deployment snapshots: on 2026-07-13 the original nine functions were active; `generate-recurring` was v13 and `resend-webhook` was v11 after the hardening/type-check deployments. On 2026-07-16, JWT-protected `mfa-recovery` version 1 became the tenth active function. JWT verification is enabled for user-authenticated functions and intentionally disabled only for signature-verified provider webhooks or custom-secret scheduled functions.
 
 Deploy after edits:
 

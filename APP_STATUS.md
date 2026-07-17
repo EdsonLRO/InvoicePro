@@ -11,6 +11,8 @@ For capability tracking and release gates, see `PRODUCT_COMPLETION_LEDGER.md` an
 
 Finish the existing app and its security hardening before starting the future SaaS website/subscription platform.
 
+**Active handoff:** `tasks/AUTH-002_THREAD_HANDOFF_2026-07-17.md` records the exact branch, PR, verified evidence, retained security boundaries, and four remaining acceptance gates for the current MFA recovery task. A fresh Codex task should use that compact record instead of reconstructing this work from conversation history.
+
 The current product is a single-user-per-account invoicing workspace backed by Supabase. It is a real working app and a security-focused portfolio project. It is not yet a public paid SaaS platform.
 
 ## Current app stage
@@ -90,7 +92,7 @@ Strong controls already implemented:
 - Vault-backed scheduler authentication for recurring and overdue automation; the privileged recurring endpoint rejects unsigned calls.
 - Signed Resend and Stripe webhooks.
 - CSP, SRI, and self-hosted Tailwind.
-- All ten repository Edge Functions, including the undeployed `mfa-recovery` candidate, pin `@supabase/supabase-js` to exact version `2.110.1`; production currently has nine active functions.
+- All ten repository Edge Functions, including deployed `mfa-recovery` version 1, pin `@supabase/supabase-js` to exact version `2.110.1`; production currently has ten active functions.
 - A read-only GitHub Actions security gate uses immutable action commit SHAs, exact Deno `2.2.15` LTS, and per-function frozen dependency locks. It type-checks all ten repository functions and runs the focused security harnesses without repository write permission or secrets.
 - Honest activity history wording.
 
