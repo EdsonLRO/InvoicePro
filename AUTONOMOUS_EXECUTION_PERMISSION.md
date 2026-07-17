@@ -22,6 +22,24 @@ Codex may:
 
 The Orchestrator must assign one owner role, classify risk, record affected files, acquire edit locks for non-trivial work, define evidence, and close the task only after required verification. No specialist role may use this standing permission to bypass an Owner-only boundary.
 
+## Autonomous Git And Pull-Request Integration
+
+Codex may create a feature branch, commit, push, open or update a pull request, and merge it without further Owner approval only for a low-risk task or a qualifying medium-risk task. A medium-risk task qualifies only when the Orchestrator records that no sensitive domain or Owner-only boundary is triggered.
+
+Every condition below must be satisfied before an autonomous merge:
+
+- the work remains within the approved task and file scope;
+- all required tests, linting, type checks, builds, security checks, and branch protections pass against the latest branch state;
+- no required check, review, protection, or verification is skipped, disabled, bypassed, or weakened;
+- the task does not affect authentication, MFA, sessions, account recovery, authorization, RLS, tenant isolation, secrets, payments, financial calculations, production or deployment state, database or provider migrations, customer or private data, legal or privacy matters, destructive operations, external paid services, or irreversible actions;
+- no migration, schema change, or new runtime dependency is introduced;
+- the final diff contains no secret, sensitive value, unrelated change, or unresolved task/file-scope conflict;
+- the change can be reverted through the repository's normal version-control and deployment process;
+- no unresolved review comment, requested change, merge conflict, failing check, or unknown required result remains; and
+- repository rules do not require a human approval or another Owner-only action.
+
+Autonomous merging must use the repository's normal protected pull-request workflow and must never use an administrative bypass, force push, protection change, or skipped check. If any condition is false or uncertain, Codex may prepare and push the branch and pull request but must stop before merging and request the required review or approval. Governance or policy changes that alter approval, security, legal, privacy, payment, production, or release boundaries never qualify for autonomous merge under this section.
+
 ## Security Finding Record
 
 For each meaningful security finding, record before making the fix:
