@@ -86,7 +86,7 @@ assert.match(edge, /account_mfa_recovery_completed/);
 assert.doesNotMatch(edge, /Access-Control-Allow-Origin": "\*"/);
 assert.doesNotMatch(edge, /console\.(?:log|error|warn)\([^\n]*(?:body\.code|normalized|codeHash|hashes|codes)/i);
 
-const emailFunction = edge.match(/function securityEmail[\s\S]*?\n}\n\nasync function sendSecurityNotice/);
+const emailFunction = edge.match(/function securityEmail[\s\S]*?\r?\n}\r?\n\r?\nasync function sendSecurityNotice/);
 assert(emailFunction, 'Security-notification template was not found.');
 assert.doesNotMatch(emailFunction[0], /\$\{[^}]*code/i, 'Security email must not interpolate recovery codes.');
 
