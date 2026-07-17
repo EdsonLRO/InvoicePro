@@ -96,6 +96,14 @@ assert.match(html, /authMode === 'mfa-recovery-enroll'/);
 assert.match(html, /Use a recovery code/);
 assert.match(html, /this\.mfaRecovery\.codes = \[\]/);
 assert.doesNotMatch(html, /localStorage[^\n]*(?:recovery|mfaRecovery|codes)/i);
+assert.match(html, /\.recovery-codes-overlay \{ align-items: flex-start; overflow-y: auto; \}/,
+  'Recovery-code modal must scroll from the full mobile viewport.');
+assert.match(html, /@media \(min-width: 640px\)[\s\S]*\.recovery-codes-dialog \{ max-height: 90vh; margin: 0; overflow-y: auto; \}/,
+  'Recovery-code modal must retain its bounded desktop scroller.');
+assert.match(html, /class="recovery-codes-overlay [^"]*"[^>]*role="dialog"/,
+  'Recovery-code modal overlay must use the mobile scroll class.');
+assert.match(html, /class="recovery-codes-dialog [^"]*"/,
+  'Recovery-code modal body must use the responsive dialog class.');
 
 const route = html.match(/async routeAfterAuth\(user\) \{[\s\S]*?\n            async verifyMfaLogin/);
 assert(route, 'Auth routing method was not found.');

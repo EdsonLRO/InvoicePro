@@ -54,6 +54,12 @@
         .no-spin { -moz-appearance: textfield; }
         .auth-scroll-shell { min-height: 0; overflow-y: auto; }
         .auth-scroll-card { margin-top: auto; margin-bottom: auto; }
+        .recovery-codes-overlay { align-items: flex-start; overflow-y: auto; }
+        .recovery-codes-dialog { flex-shrink: 0; margin: 0.5rem 0; }
+        @media (min-width: 640px) {
+            .recovery-codes-overlay { align-items: center; }
+            .recovery-codes-dialog { max-height: 90vh; margin: 0; overflow-y: auto; }
+        }
         .pdf-mode tbody td { vertical-align: middle !important; padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; }
         #invoice-canvas .font-bold.text-slate-400 { color: var(--brand) !important; }
         @media (max-width: 1024px) {
@@ -391,8 +397,8 @@
                     </div>
                 </div>
 
-                <div v-if="mfaRecovery.codes.length" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4" role="dialog" aria-modal="true" aria-labelledby="recovery-codes-title">
-                    <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl bg-white p-5 sm:p-7 shadow-2xl">
+                <div v-if="mfaRecovery.codes.length" class="recovery-codes-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4" role="dialog" aria-modal="true" aria-labelledby="recovery-codes-title">
+                    <div class="recovery-codes-dialog w-full max-w-lg rounded-xl bg-white p-5 sm:p-7 shadow-2xl">
                         <h2 id="recovery-codes-title" class="text-xl font-semibold mb-2">Save your recovery codes</h2>
                         <p class="text-sm text-slate-600 mb-4">These codes are shown once. Each is single-use, and this set replaced every previous set.</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-100 rounded-lg p-4 mb-4">

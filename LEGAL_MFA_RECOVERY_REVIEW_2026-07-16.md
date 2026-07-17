@@ -1,8 +1,8 @@
 # Tallyo MFA Recovery Legal, Privacy And Security Review
 
-**Review date:** 16 July 2026  
-**Jurisdiction:** United Kingdom  
-**Disposition:** Approved with conditions for implementation and controlled testing. Not approved for production deployment until the migration, Edge Function, notification delivery, RLS lock, and recovery acceptance tests have passed.
+**Review date:** 16 July 2026; final disposition 17 July 2026
+**Jurisdiction:** United Kingdom
+**Final internal disposition:** Approved with conditions for Owner-approved merge and controlled test/portfolio frontend publication. All mandatory AUTH-002 technical, notification, and real-device acceptance conditions are verified. External qualified UK legal/privacy review remains required before paid/public onboarding or real-customer use, including final lawful-basis, retention, support wording, public Privacy Notice, and vendor-record decisions.
 
 This review supports risk management and does not claim legal compliance, NIST certification, or that account recovery is risk-free.
 
@@ -30,7 +30,7 @@ Tallyo acts as controller for account-security and recovery records. Supabase pr
 
 ## 5. Current Behaviour And Evidence
 
-Tallyo currently supports primary and backup TOTP factors and deliberately refuses email-only MFA bypass. If both factors are lost, the interim support runbook denies recovery. That is safe for the portfolio build but unsuitable for public paid onboarding. The existing browser cannot use the Supabase service role and cannot remove a verified factor without a valid TOTP code.
+Tallyo supports primary and backup TOTP factors and deliberately refuses email-only MFA bypass. The recovery backend is deployed with server-only HMAC storage, atomic one-time consumption, attempt locking, global factor/session cleanup, restrictive recovery-state RLS, minimal audit metadata, and forced re-enrolment. Boundary, privilege, AAL, tenant-isolation, throttling, notification-delivery/minimisation, and physical-Android recovery/re-enrolment acceptance passed with privacy-safe evidence. The browser cannot use the Supabase service role. The recovery frontend remains unpublished pending Owner approval for PR #44.
 
 ## 6. Foreseeable Failure Scenarios
 
@@ -89,4 +89,4 @@ NIST is used as a security benchmark, not as a binding UK legal standard for Tal
 
 ## 13. Release Conditions
 
-Implementation may proceed on a branch. Production migration, secret creation, Edge Function deployment, and public enablement remain blocked until the Owner approves the deployment boundary and the required evidence passes. Any failure of atomic consumption, restrictive RLS, session revocation, throttling, or security notifications blocks release.
+The migration, server-only secret, Edge Function, and required acceptance evidence are complete. PR #44 may be marked ready, merged, and published only after explicit Owner approval. Any regression in atomic consumption, restrictive RLS, session revocation, throttling, notification minimisation, or forced re-enrolment blocks release. Paid/public onboarding and real-customer use remain blocked pending the external UK legal/privacy review and broader launch conditions recorded in `RELEASE_READINESS.md`.
