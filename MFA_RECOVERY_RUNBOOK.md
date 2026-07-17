@@ -2,9 +2,9 @@
 
 This runbook records how Tallyo handles multi-factor authentication (MFA) recovery. It is an operational guide, not a claim that account recovery is risk-free.
 
-## Current Recovery Model
+## Current Production Recovery Model
 
-Tallyo uses time-based one-time password (TOTP) authenticators through Supabase Auth. At the time this was checked on 2026-07-13, Supabase Auth did not provide recovery codes.
+Tallyo uses time-based one-time password (TOTP) authenticators through Supabase Auth. Supabase Auth did not provide native recovery codes when rechecked on 2026-07-16.
 
 The supported recovery method is therefore a second verified authenticator:
 
@@ -15,6 +15,16 @@ The supported recovery method is therefore a second verified authenticator:
 5. Turning MFA off requires a fresh authenticator code and removes the enrolled factors.
 
 Tallyo does not use email, SMS, security questions, or a browser-stored code as an MFA bypass.
+
+The production user experience still uses this model. The recovery database controls, server-only pepper, and JWT-protected Edge Function were deployed on 2026-07-16. Authenticated generation, replacement, one-time recovery, forced re-enrolment, audit-minimisation, recovery-lock behaviour, rollback-only production throttling, Owner-confirmed notification delivery/minimisation, and real-Android acceptance passed by 2026-07-17. The final internal legal disposition permits Owner-approved controlled test/portfolio publication, but the browser UI remains unpublished until PR #44 receives that approval. The feature is therefore not yet described as fully live.
+
+## Recovery-Code Candidate
+
+The candidate design adds ten one-time codes that are shown once to an already AAL2-verified user. Each code contains 100 bits of randomness. Raw codes are not stored, emailed, logged, or sent to audit history. Postgres stores only HMAC-SHA256 values made with a server-only `MFA_RECOVERY_PEPPER`.
+
+Recovery requires both the account password session at AAL1 and one saved recovery code. A successful claim atomically invalidates the complete code set, removes the old TOTP factors through the server-side Supabase Admin API, globally signs out existing sessions, and places the account in a database-enforced recovery state. Restrictive RLS policies deny the six tenant-data tables until a new TOTP factor is verified at AAL2 and the recovery state is completed.
+
+The function sends security notices when codes are replaced, when recovery starts, and when recovery completes. Notices contain no password, TOTP secret, or recovery code. Five failed attempts within the active window cause a 15-minute lock. This is a risk-assessed Tallyo control; it is not a claim of NIST conformance or legal compliance.
 
 ## Password Recovery
 
@@ -33,7 +43,7 @@ The password-reset email proves access to the registered mailbox, but it does no
 | Primary authenticator unavailable, backup available | Use the backup authenticator, then replace the lost factor while signed in. |
 | Backup authenticator unavailable, primary available | Use the primary authenticator and remove/re-enrol the backup. |
 | Password forgotten, at least one authenticator available | Use the password-reset email and complete the TOTP challenge. |
-| All authenticators lost | No self-service bypass is currently available. Do not disable MFA solely because someone controls the email account. |
+| All authenticators lost | Production currently has no self-service bypass. After the candidate is deployed and accepted, use the password plus one saved one-time recovery code, then enrol a new authenticator before business data is unlocked. |
 
 ## All Factors Lost
 
@@ -46,7 +56,7 @@ The Owner accepted the following interim deny-by-default process on 2026-07-14 f
 5. The account and its data remain subject to the normal retention and deletion rules. Support must not migrate data to a replacement account or disclose account contents through another channel.
 6. A suspicious, coercive, or disputed request is escalated as a security incident; it does not create an exception to the policy.
 
-This defines what support does today without creating an administrator bypass. It is acceptable for the current portfolio build, but it is not an adequate recovery capability for a paid public service. Before real customer onboarding, Tallyo must implement and review a robust method such as properly designed one-time recovery codes or another risk-assessed recovery mechanism.
+This defines what support does today without creating an administrator bypass. Keep it in force until the recovery-code candidate passes live acceptance. No support or administrator exception is introduced by the candidate.
 
 Security and privacy basis checked on 2026-07-14:
 
@@ -68,6 +78,16 @@ For each release that changes Auth or MFA:
 6. Confirm password recovery uses masked fields and rejects weak or mismatched passwords.
 7. Confirm an MFA account cannot reset its password with email access alone.
 8. Confirm audit events contain no passwords, TOTP codes, tokens, or account contact data.
+9. Generate a recovery-code set from an AAL2 session and confirm it is displayed once only.
+10. Confirm the database contains ten 64-character HMAC values and no raw code.
+11. Confirm a wrong code is rejected, five failures trigger the 15-minute lock, and no tenant data becomes accessible.
+12. Confirm a valid code is one-time, deletes the complete set, removes old factors, and globally signs out existing sessions.
+13. Confirm the recovery-state RLS lock denies all six tenant-data tables before new-factor verification.
+14. Enrol and verify a new authenticator, complete recovery, and confirm tenant access returns only at AAL2.
+15. Confirm generation, recovery-started, and recovery-completed notices arrive without sensitive values.
+16. Confirm audit events contain only the allowlisted event type and minimal phase/count/notice status.
+17. Repeat the isolation probes with two accounts and confirm neither can see or change the other's state or data.
+18. Replace the recovery-code set and confirm every code from the previous generation is invalid.
 
 ## Current Evidence And Limits
 
@@ -80,3 +100,22 @@ For each release that changes Auth or MFA:
 - `log-app-event` version 4 was deployed with JWT verification enabled; a no-credential request returned HTTP 401. A live 2026-07-14 review of recent account-security events found only the `user_agent` metadata key, no sensitive metadata keys, no password/TOTP/token terms, and no email-like values. The function also passed a Deno type check.
 - MFA sign-in, backup-factor lifecycle, primary-specific and backup-specific masked password recovery, wrong-code recovery rejection, email-only bypass rejection, privacy-safe audit-content review, and fail-closed routing simulation passed. The actual shipped `routeAfterAuth` method passed five controlled scenarios: assurance lookup failure, factor lookup failure, and missing verified factors all forced local sign-out without initialising app data; valid MFA routing and an existing AAL2 session still followed their intended paths. Both rejected recovery attempts left the existing password valid. The interim all-factors-lost support process is defined and approved, while robust recoverability remains a paid/public-launch condition. The current `AUTH-001` implementation and acceptance scope is Verified.
 - Supabase leaked-password protection was enabled on 2026-07-13 through the Auth Management API, its value was read back as enabled, and the live security advisor cleared the warning. On 2026-07-14, a known-compromised candidate passed Tallyo's local format checks, reached Supabase after current-password and MFA verification, and was rejected by the provider. Only the pass/fail result was recorded.
+- On 2026-07-16, the recovery migration, server-only pepper, and `mfa-recovery` version 1 were deployed backend-first with JWT verification. Missing credentials returned 401, an unapproved origin returned 403, and a publishable key without a user session returned 401. Structural readback passed. A rolled-back live probe confirmed AAL1 denial, AAL2 own-data access, and recovery-lock denial across all six tenant tables without retaining test state.
+- The first live policy probe exposed a permission failure when the documented optional-MFA template read `auth.mfa_factors` directly. Tallyo corrected this with a current-user-only security-definer helper in non-exposed schema `private`; no Auth-table grant was added. The repeated probe passed and the related security/performance advisor warnings cleared.
+- On 2026-07-17, a dedicated test account stopped at the live AAL1 authenticator challenge received HTTP 403 when a local-only, allowlisted probe attempted only recovery-code generation. After the Owner completed AAL2 privately, generation succeeded and the replacement set was handled without sharing any code. The temporary probe was removed and never committed or published.
+- Authenticated generation, replacement, one-time recovery, factor/session cleanup, recovery-state lock, audit metadata, two-account isolation, rollback-only production throttling, and notification delivery/minimisation passed with privacy-safe evidence. The throttling probe returned four invalid attempts followed by a 15-minute lock on attempt five, then rolled back and left no failed-attempt or lock state.
+- On 2026-07-17, a physical Android device reached the local branch through ADB reverse port mapping, preserving the existing `127.0.0.1` origin instead of publishing the frontend. A privately entered recovery code was accepted, existing sessions were signed out, recovery-state RLS kept business data unavailable, and access returned only after new-factor verification at AAL2. Aggregate readback showed the recovery lock active after the claim and cleared after completion, with no active failure state. The Owner then generated a fresh code set privately.
+- The phone exposed a clipped bottom confirmation control in the generated-code dialog. Overlay-level scrolling was added for mobile while retaining a bounded desktop scroller; focused harness assertions and a placeholder-only real-phone retest passed. The final internal legal disposition now permits an Owner-approved merge and controlled test/portfolio publication, while external UK legal/privacy review remains required before paid/public onboarding.
+
+## Approval-Gated Deployment Order
+
+Do not merge or publish the frontend before its backend dependencies exist. The safe order is:
+
+1. **Completed 2026-07-16:** apply the recovery migrations through `20260716161054`.
+2. **Completed 2026-07-16:** generate and install a new server-only `MFA_RECOVERY_PEPPER` without displaying or committing it.
+3. **Completed 2026-07-16:** deploy `mfa-recovery` version 1 with JWT verification enabled.
+4. **Completed 2026-07-17:** unauthorized, wrong-origin, rolled-back AAL/RLS, authenticated generation, replacement, one-time-use, forced re-enrolment, audit-minimisation, two-account, rollback-only live-throttling, notification-delivery/minimisation, and desktop/phone acceptance passed.
+5. **Owner approval required:** mark PR #44 ready, merge it, and publish the frontend only after the Owner explicitly approves this retained boundary.
+6. After publication, record the release commit and complete a focused smoke check without repeating unrelated regression work.
+
+If any backend step fails, leave the current deny-by-default production UI in place and do not publish the recovery-code frontend.

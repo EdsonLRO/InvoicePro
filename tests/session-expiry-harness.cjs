@@ -120,6 +120,7 @@ async function run() {
         itemForm: { name: 'Private Item' },
         activityNote: 'Private activity note',
         mfa: { enabled: true, verifiedFactors: [{ id: 'factor' }], secret: 'private-totp' },
+        mfaRecovery: { busy: false, pending: false, enrollmentVerified: false, code: 'PRIVATE-CODE', error: '', codes: ['PRIVATE-CODE'], codesGeneratedAt: '2026-07-16T00:00:00Z' },
         mfaPasswordConfirm: { visible: true, code: '123456' },
         sessionConfirm: { visible: true, password: 'private-password' }
     });
@@ -136,6 +137,8 @@ async function run() {
     assert.equal(app.userProfileEmail, '');
     assert.equal(app.activityNote, '');
     assert.equal(app.mfa.secret, '');
+    assert.equal(app.mfaRecovery.code, '');
+    assert.equal(app.mfaRecovery.codes.length, 0);
     assert.equal(app.mfaPasswordConfirm.code, '');
     assert.equal(app.sessionConfirm.password, '');
     assert(app.draft.items.every((item) => !item.name && !item.description && !item.price));
@@ -184,9 +187,24 @@ async function run() {
         data: { totp: [{ id: 'factor', status: 'verified' }] },
         error: null
     });
+    app.fetchMfaRecoveryState = async () => ({ recovery_required: false, codes_generated_at: null });
     await app.routeAfterAuth({ id: 'user-a' });
     assert.equal(app.authSignOutRequested, false);
     assert.equal(app.authMode, 'mfa');
+
+    let recoveryEnrollmentStarted = false;
+    let signedInDataStarted = false;
+    app.fetchMfaRecoveryState = async () => ({ recovery_required: true, codes_generated_at: null });
+    app.beginMfaRecoveryEnrollment = async () => { recoveryEnrollmentStarted = true; };
+    app.onSignedIn = async () => { signedInDataStarted = true; };
+    supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel = async () => ({
+        data: { currentLevel: 'aal1', nextLevel: 'aal1' },
+        error: null
+    });
+    supabaseClient.auth.mfa.listFactors = async () => ({ data: { totp: [], all: [] }, error: null });
+    await app.routeAfterAuth({ id: 'user-a' });
+    assert.equal(recoveryEnrollmentStarted, true, 'pending recovery must force authenticator enrollment');
+    assert.equal(signedInDataStarted, false, 'pending recovery must not initialize business data');
 
     alerts = [];
     app.isLoggedIn = true;
