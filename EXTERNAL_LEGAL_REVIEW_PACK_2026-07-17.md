@@ -10,12 +10,13 @@ The desired output is a written disposition for each question: `approved`, `appr
 
 ## Product Facts To Verify
 
-- Tallyo is a working browser-based invoicing workspace for freelancers, sole traders, and small businesses. The initial eligible-user scope is not yet approved.
+- Tallyo is a working browser-based invoicing workspace. The approved initial scope is UK business account holders aged 18 or over using it for ordinary business invoicing, with personal/household account use, sensitive case-record use, and non-UK onboarding excluded pending separate review.
 - An account holder stores their business profile, customer contacts, invoices, quotes, credit notes, saved items, payment summaries, and delivery/audit events.
 - Supabase provides Auth, Postgres, Edge Functions, scheduled jobs/Vault support, and managed backups in the documented London region, with possible provider/subprocessor processing elsewhere.
 - Resend sends requested documents, opt-in reminders, and security notices. Email content, PDF attachments, recipient addresses, delivery events, and provider logs may contain personal data.
 - Stripe Checkout/payment/refund/dispute handling is implemented and verified in sandbox only. Card data stays with Stripe. Live mode is disabled.
 - GitHub Pages currently hosts static public assets. It intentionally stores no workspace database, but receives ordinary visitor request/usage metadata under the applicable GitHub terms.
+- Google Workspace Business Standard is the selected candidate for controlled legal/privacy intake and restricted case operations, but no active Standard subscription is verified. Trial/purchase, contract acceptance, configuration and real case data remain blocked pending separate decisions.
 - Cloudflare Turnstile support is present but dormant: no repository site key, no stored secret, and no Supabase enforcement. Production activation is separately blocked.
 - Accounts use email confirmation, password controls, optional TOTP MFA, one-time MFA recovery codes, AAL enforcement, global sign-out during recovery, and forced authenticator re-enrolment. Raw passwords, TOTP secrets, recovery codes, and service secrets must not be disclosed for review.
 - Tenant data is protected with RLS and scoped server-side authorization. Account-holder export is verified for controlled testing. Live correction, deletion, provider assistance, secure delivery, and restricted case operations are not yet verified.
@@ -46,7 +47,7 @@ Do not provide environment files, tokens, passwords, MFA/recovery material, priv
 3. What lawful basis should apply to each purpose: account/service delivery, security and fraud prevention, audit evidence, document/reminder email, payment/refund/dispute handling, support, rights cases, incidents, backups, and dormant Turnstile?
 4. What privacy information must Tallyo give account holders and non-account invoice recipients, and who is responsible for delivering it? Is a business-user notice template or contractual obligation needed?
 5. What retention periods and deletion exceptions are appropriate for Auth/account, workspace/invoice, email/delivery, payment/refund/dispute, audit/security, support/rights/incident, and backup records, accounting for UK tax/company obligations and legal claims?
-6. Are the Supabase, Resend, Stripe, GitHub Pages, and Turnstile contracts, roles, locations, subprocessors, UK transfer mechanisms, and proposed safeguards adequate for the exact use? What transfer risk assessments or supplementary measures are required?
+6. Are the Supabase, Resend, Stripe, GitHub Pages, pending Google Workspace Business Standard, and Turnstile contracts, roles, locations, subprocessors, UK transfer mechanisms, and proposed safeguards adequate for the exact use? What transfer risk assessments or supplementary measures are required before purchase or production use?
 7. Does the current GitHub Pages arrangement provide adequate contractual/privacy terms for real-customer hosting, or is a different hosting contract required before launch?
 8. Does the current DPIA screening require a formal DPIA, and are any additional assessments needed for legitimate interests, transfers, children/vulnerable people, invisible invoice-recipient processing, MFA recovery, or payments?
 9. What restricted case-system, identity verification, secure delivery, processor-assistance, correction/deletion, backup, and incident-decision controls are legally necessary before onboarding?
@@ -71,6 +72,9 @@ Sources below were checked on 2026-07-17. The reviewer must confirm currency and
 - [GOV.UK business setup](https://www.gov.uk/set-up-business)
 - [GOV.UK limited-company website and stationery disclosures](https://www.gov.uk/running-a-limited-company/signs-stationery-and-promotional-material)
 - [GOV.UK required invoice content](https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include)
+- [Google Workspace Business pricing and editions](https://workspace.google.com/intl/en_gb/business/)
+- [Google Cloud Data Processing Addendum](https://workspace.google.com/terms/dpa_terms.html)
+- [Google Workspace subprocessors](https://workspace.google.com/terms/subprocessors.html)
 
 The Data (Use and Access) Act is a 2025 Act with staged commencement in 2025-2026. Sources or search summaries calling it the “Data Use and Access Act 2026” must not be relied on without checking GOV.UK and legislation.gov.uk.
 

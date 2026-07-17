@@ -28,7 +28,7 @@ These firms are comparison candidates only. The Owner should verify both the fir
 | Damson Cloud | Public [Workspace support](https://damsoncloud.com/google-workspace/workspace-support/) and [security review](https://damsoncloud.com/google-workspace/workspace-security-review/) services describe admin support, security management, incident planning, and UK coverage. | Sole-trader minimums; emergency response and alternate coverage; whether support requires licence resale or standing admin access; data locations/subprocessors; exit and access revocation; current Google partner status. |
 | Qodea Limited | Current public [Workspace managed-tenant terms](https://www.bynd.com/policies/product-specific-terms-msp-workspace-managed-tenant) describe incident and service-request support; a public [UK Digital Marketplace service record](https://www.applytosupply.digitalmarketplace.service.gov.uk/g-cloud/services/732277718134656) records the legacy Netpremacy Workspace support capability now associated with the wider Qodea group. | Whether its service is proportionate for a one-user micro-business; current entity and contract; minimum term/fees; response hours; emergency-only and least-privilege model; ownership and exit terms; current Google partner status. |
 
-Business Standard remains the approved edition for now. No candidate may upgrade the edition, add Vault or another tool, transfer reseller control, change DNS, create accounts, or receive administrative access without a separate Owner-approved review.
+Business Standard remains the selected candidate but is not verified active. No candidate may start a trial or subscription, upgrade the edition, add Vault or another tool, transfer reseller control, change DNS, create accounts, or receive administrative access without a separate Owner-approved review.
 
 ## C. NCSC-Assured Cyber Incident Response Providers
 
@@ -48,9 +48,9 @@ Any future contract should state that assured response work is performed under t
 >
 > I operate Tallyo as a UK sole trader and am preparing a small invoicing SaaS for UK business account holders. It is pre-launch and has no real customers. The initial service excludes consumer account use, non-UK onboarding, and sensitive or regulated case-record workflows.
 >
-> I would like a quote for a qualified UK privacy/data-protection review and an optional light on-call arrangement. The review pack covers controller/processor allocation, lawful bases, retention, privacy and terms drafts, business-user processing terms, data-subject rights operations, personal-data-breach decisions, UK transfer issues, and provider evidence. I also need a named escalation route for difficult rights requests or incidents and an independent review before high-risk disclosure, deletion, refusal, or notification decisions.
+> I would like a fixed-scope quote for a one-off qualified UK privacy/data-protection launch review. The review pack covers controller/processor allocation, lawful bases, retention, privacy and terms drafts, business-user processing terms, data-subject rights operations, personal-data-breach decisions, UK transfer issues, and provider evidence, including a pending Google Workspace Business Standard purchase decision. Ongoing outsourced operations or a retainer are not requested.
 >
-> Please confirm: the proposed named solicitor and relevant SaaS/privacy experience; scope and exclusions; fixed-fee, capped, ad-hoc, or retainer options; minimum fees and VAT; ordinary and urgent response targets; substitute coverage; conflicts process; professional indemnity; contract term and exit; and your data-processing, subprocessor, location/transfer, retention/deletion, security-incident, and file-return terms.
+> Please confirm: the proposed named solicitor and relevant SaaS/privacy experience; scope and exclusions; fixed or capped fee and VAT; expected delivery time; revision/follow-up allowance; conflicts process; professional indemnity; contract and exit terms; and your data-processing, subprocessor, location/transfer, retention/deletion, security-incident, and file-return terms.
 >
 > For quotation, I will provide only a sanitised evidence pack. I will not provide credentials, customer data, private emails, identity documents, repository access, or production access. Please identify any information you require and whether it can be supplied in a similarly minimised form.
 >
@@ -65,13 +65,13 @@ Any future contract should state that assured response work is performed under t
 
 > Hello [provider name],
 >
-> I operate Tallyo as a UK sole trader and use Google Workspace Business Standard on the business domain. I am seeking a proportionate continuity arrangement for a one-user, pre-launch micro-SaaS, not a migration or immediate licence upgrade.
+> I operate Tallyo as a UK sole trader and have selected Google Workspace Business Standard as a possible future restricted-case system, but no subscription is active or authorised. I am seeking pricing information for a possible proportionate continuity arrangement for a one-user, pre-launch micro-SaaS, not a migration or licence purchase.
 >
 > Please quote for an emergency-only named operator and alternate who can assist if the Owner is unavailable or locked out. The required model uses the provider's own named account and MFA, least privilege, time-limited elevation, recorded actions, rapid revocation, and no shared Owner credentials or recovery material. Tallyo must retain control of the domain, billing, super-administrator decisions, data, and exit.
 >
 > Please confirm: whether you support a one-user sole trader; minimum fees and VAT; term and cancellation; service hours and emergency response target; alternate coverage; whether licence resale, domain transfer, standing admin access, or third-party tools are required; the proposed access design; audit/export capability; security-incident notice; subprocessors and data locations/transfers; retention/deletion; and handover without lock-in.
 >
-> Business Standard is to remain unchanged for now. No Vault addition, upgrade, reseller transfer, DNS change, new account, or provider access is authorised by this request. A synthetic exercise with no real customer data would be required before any live reliance.
+> No Business Standard trial, subscription, Vault addition, upgrade, reseller transfer, DNS change, new account, or provider access is authorised by this request. If Tallyo later subscribes, a synthetic exercise with no real customer data would be required before any live reliance.
 >
 > I will not provide credentials, recovery material, private email contents, customer data, repository access, billing information, or production access during quotation.
 >
@@ -86,7 +86,7 @@ Any future contract should state that assured response work is performed under t
 
 > Hello [provider name],
 >
-> I operate Tallyo as a UK sole trader and am preparing a pre-launch invoicing SaaS for UK business account holders. There are no real customers yet. The service uses a static frontend, Supabase, Resend, a dormant Stripe test integration, and Google Workspace Business Standard.
+> I operate Tallyo as a UK sole trader and am preparing a pre-launch invoicing SaaS for UK business account holders. There are no real customers yet. The service uses a static frontend, Supabase, Resend, and a dormant Stripe test integration; Google Workspace Business Standard is only a pending restricted-case-system candidate.
 >
 > I am seeking a pre-identified NCSC CIR Standard response route suitable for a very small UK business. Please quote both an ad-hoc/call-off option and, if available, the lightest retainer. The expected scope includes rapid triage, containment and recovery advice, evidence preservation, affected-system/data assessment, coordination with privacy/legal counsel, and a clear post-incident report.
 >
@@ -101,4 +101,4 @@ Any future contract should state that assured response work is performed under t
 
 ## Current Disposition
 
-Research and drafting are complete within the Owner-approved scope. All three messages remain **UNSENT** and the shortlist is now an optional contingency reference, not a launch requirement. Re-open contact only if a documented complexity, availability, scale, insurer/customer or incident trigger justifies it. Provider selection, contact, contract acceptance, spending, account changes, access grants, and live-data use remain separate later gates.
+Research and drafting are complete within the Owner-approved scope. All three messages remain **UNSENT**. Draft A and the three SRA-regulated comparison candidates remain available for the focused one-off legal launch review required by Tallyo's current governance. Drafts B and C are deferred optional contingencies and should be reopened only if a documented complexity, availability, scale, insurer/customer or incident trigger justifies them. Provider selection, contact, contract acceptance, spending, account changes, access grants, and live-data use remain separate later gates.

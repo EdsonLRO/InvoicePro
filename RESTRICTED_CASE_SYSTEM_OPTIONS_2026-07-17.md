@@ -1,12 +1,12 @@
 # Tallyo Restricted Case-System Options - 2026-07-17
 
-Internal D07 shortlist for `LEGAL-OPS-001`. Provider information and published prices were checked against official sources on 2026-07-17. The Owner selected the existing business-domain Google Workspace Business Standard edition as the proportionate initial candidate. Standard does not include Vault, but Vault is not an automatic requirement for the approved low-volume sole-trader scope. The remaining configuration and synthetic gates are recorded in `GOOGLE_WORKSPACE_PRIVACY_CASE_PLAN_2026-07-17.md`. This is not purchasing approval, provider-configuration approval, legal advice, or authorization to place real personal data in the system.
+Internal D07 shortlist for `LEGAL-OPS-001`. Provider information and published prices were checked against official sources on 2026-07-17. The Owner selected Google Workspace Business Standard as the proportionate initial candidate, but browser verification showed that the controlled account is not subscribed and Google presented a trial/checkout. Standard is therefore `Pending purchase`, not existing or accepted. Standard does not include Vault, but Vault is not an automatic requirement for the approved low-volume sole-trader scope. The remaining purchase, configuration and synthetic gates are recorded in `GOOGLE_WORKSPACE_PRIVACY_CASE_PLAN_2026-07-17.md`. This is not purchasing approval, provider-configuration approval, legal advice, or authorization to place real personal data in the system.
 
 ## Recommendation In Plain English
 
 Tallyo needs a locked case cabinet, not an ordinary inbox. The selected setup must keep privacy requests and incidents away from Git and ordinary chat/email, require MFA, restrict who can open cases, record important activity, warn before deadlines, protect attachments, support retention/deletion, and provide tested account recovery.
 
-1. **Use the existing Google Workspace Business Standard account first:** only the restricted case area may hold cases; the inbox remains an intake route. The setup must pass access, audit, deadline, secure-delivery, retention/deletion, recovery and synthetic-case tests before live use.
+1. **Keep Google Workspace Business Standard as the candidate:** complete the contract, price and vendor/transfer decision before any trial or purchase. If purchased, only the restricted case area may hold cases; the inbox remains an intake route, and the setup must pass all acceptance tests before live use.
 2. **Consider Business Plus/Vault only when triggered:** a legal hold, e-discovery need, higher volume, customer/insurer term or documented risk assessment may justify an upgrade later. No upgrade is required merely because Vault exists.
 3. **Consider Microsoft 365 or Zendesk only if Standard fails the synthetic acceptance or operating volume outgrows the manual model:** a new service would add migration, contract, transfer, access and cost risks and is not the default path.
 
@@ -30,7 +30,7 @@ No candidate satisfies D07 merely by being purchased. The selected configuration
 
 | Candidate | Published position checked 2026-07-17 | Cost caveat |
 |---|---|---|
-| Google Workspace Business Standard | Already selected and in use. Google's public page lists GBP 11.80 per user/month with a one-year commitment, or GBP 14 on the flexible plan. | Existing contract-specific price and VAT may differ. This decision creates no new purchase or upgrade. |
+| Google Workspace Business Standard | Selected candidate; not verified active. Google's public page lists GBP 11.80 per user/month with a one-year commitment, or GBP 14 on the flexible plan. The observed checkout offered a 14-day trial followed by GBP 14 per user/month plus tax. | Trial, agreement acceptance, billing and purchase require separate Owner approval. Flexible has no fixed commitment; annual pricing carries a one-year commitment. |
 | Microsoft 365 Business Premium | Microsoft lists GBP 16.90 per user/month, paid yearly, excluding VAT. | Confirm monthly alternative, any second licensed operator, retention features, storage, and contract terms before purchase. |
 | Zendesk Enterprise | Current public pricing directs Enterprise buyers to Sales. | Obtain a written quote covering Enterprise audit/custom roles, secure attachments, data-location activation, retention/add-ons, number of agents, tax, and contract length. No quote request is authorized yet. |
 
@@ -64,6 +64,6 @@ Prices are comparison signals only and may change. Starting a free trial can cre
 
 ## D07 Configuration Acceptance Still Required
 
-Business-domain Google Workspace Business Standard is selected. D07 remains open because the restricted case area, secure delivery, audit review, deadline tracking, manual retention/deletion, recovery and synthetic cases have not yet been configured and accepted. The absence of Vault or a second operator is not by itself a blocker.
+Google Workspace Business Standard is the selected candidate, but subscription/contract acceptance is pending and no configuration occurred. D07 remains open through purchase review, restricted-area configuration, secure-delivery and audit review, deadline tracking, manual retention/deletion, recovery and synthetic acceptance. The absence of Vault or a second operator is not by itself a blocker.
 
-Account creation, trial activation, contract acceptance, paid upgrade, private-email inspection, provider configuration, live data, and destructive retention remain separately blocked. The next decision is whether to authorise fictional-data configuration and synthetic acceptance in the existing Standard account.
+Account creation, trial activation, contract acceptance, payment, private-email inspection, provider configuration, live data, and destructive retention remain separately blocked. The next decision is whether to approve or reject the Standard subscription after the recorded contract, price and vendor/transfer review; configuration remains a later gate.

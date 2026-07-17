@@ -2,7 +2,7 @@
 
 Internal evidence register for `LEGAL-OPS-001`. Sources were checked on 2026-07-17. This is contract and transfer issue-spotting, not legal advice, acceptance of provider terms, a transfer-risk conclusion, or evidence of compliance.
 
-No dashboard secrets, provider payloads, customer data, payment details, or private account information were inspected. Provider statements are recorded as provider claims and must not be presented as Tallyo certifications.
+No dashboard secrets, provider payloads, customer data, payment details, mailbox contents, or private identifiers are recorded here. The Google Workspace browser check was limited to plan capability and checkout state. Provider statements are recorded as provider claims and must not be presented as Tallyo certifications.
 
 ## Supabase
 
@@ -60,6 +60,22 @@ No dashboard secrets, provider payloads, customer data, payment details, or priv
 **Evidence limitation:** the current public/free Pages arrangement has not been shown to be governed by an executed GitHub Customer Agreement or the Enterprise DPA. Therefore the Enterprise DPA/subprocessor terms must not be treated as accepted protection for this deployment.
 
 **Open before launch:** obtain a documented answer on the applicable Pages terms, provider role, visitor-log/cookie scope, retention, transfer mechanism, rights/incident route, custom-domain and response-header constraints; decide whether Pages is an acceptable real-customer host or whether migration to a contractually suitable host is required. A hosting migration, custom domain, Auth URL change, or paid plan requires a separate scoped task and approvals.
+
+## Google Workspace - Pending Candidate
+
+**Proposed use:** controlled business/legal/privacy intake plus a restricted fictional-data case area under the D07 design. On 2026-07-17, browser verification showed consumer Drive capability rather than an active Business Standard organisation, and Google's checkout offered a 14-day Business Standard trial followed by a paid flexible subscription. No checkout, agreement acceptance, billing setup, provider configuration, mailbox inspection, or case-data use occurred.
+
+**Current official evidence:**
+
+- [Business edition pricing](https://workspace.google.com/intl/en_gb/business/) and Google's [payment-plan comparison](https://support.google.com/a/answer/1247360?hl=en) list Business Standard at GBP 14 per user/month on the no-fixed-term Flexible Plan or GBP 11.80 per user/month with a one-year Annual/Fixed-Term commitment. Prices can exclude tax. The observed checkout matched the flexible GBP 14 route; this is evidence for a future decision, not purchase approval.
+- The current [Cloud Data Processing Addendum](https://workspace.google.com/terms/dpa_terms.html) states that Google is a processor and the customer is a controller or processor as applicable. A processor customer must have the relevant third-party controller's authorization for its instructions and Google's subprocessor chain.
+- The Addendum provides service-function access, rectification, restriction, export and deletion support; states that customer-triggered deletion can take up to 180 days; and provides up to a 30-day recovery period followed by up to 180 days for end-of-term deletion, subject to applicable-law exceptions. Tallyo must not promise immediate or irrecoverable deletion.
+- Google states that it will notify a customer promptly and without undue delay after becoming aware of a data incident, while leaving the customer responsible for its own legal assessment, account security, configuration and appropriate backup/retention decisions.
+- Customer data may be processed in countries where Google or its subprocessors maintain facilities, subject to applicable data-location and transfer commitments. The Addendum includes UK GDPR within its European-law framework and provides SCC or alternative-transfer-solution mechanics for restricted transfers. The current [Workspace subprocessor register](https://workspace.google.com/terms/subprocessors.html) lists activities and processing locations across multiple countries; Google provides at least 30 days' notice before a new subprocessor begins processing and a contractual objection/termination route.
+- [Business-edition data-region guidance](https://support.google.com/a/answer/14316863?hl=en) shows fundamental data-at-rest region policy for Business Standard, but not the granular processing-region controls and reports offered by higher editions. A selected at-rest region must not be described as keeping all support, telemetry or subprocessor processing in that region.
+- [Google cancellation guidance](https://support.google.com/a/answer/1257646?hl=en) says a trial may be cancelled without charge, but warns that Workspace user data is deleted and cannot be restored after subscription cancellation; required exports must occur first. Flexible-plan cancellation does not remove the separate data-handling and account-continuity risks.
+
+**Open before trial/purchase:** identify the exact contracting customer and billing plan through a secure route; confirm domain ownership and administrator continuity; review the agreement, service-specific terms, DPA incorporation, notification address, subprocessor notice route, UK transfer assessment, fundamental data-region scope, support path, export/deletion/cancellation behaviour and tax; then obtain separate Owner approval for contract acceptance and spending. If purchased, D07 configuration and synthetic acceptance remain later gates.
 
 ## Cloudflare Turnstile
 

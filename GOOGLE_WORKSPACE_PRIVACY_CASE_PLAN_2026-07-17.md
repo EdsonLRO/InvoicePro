@@ -1,6 +1,6 @@
 # Tallyo Google Workspace Privacy Case Plan - 2026-07-17
 
-Internal D07 configuration and synthetic-acceptance plan for `LEGAL-OPS-001`. On 2026-07-17, the Owner reported that Tallyo's Gmail service uses its business domain and that the current edition is Business Standard, then selected that existing edition as the proportionate initial case-system candidate. Business Standard does not include Google Vault, but Vault is an optional e-discovery/hold control rather than an automatic prerequisite for the approved sole-trader, low-volume scope. No upgrade or add-on is authorized.
+Internal D07 configuration and synthetic-acceptance plan for `LEGAL-OPS-001`. On 2026-07-17, the Owner selected Google Workspace Business Standard as the proportionate initial case-system candidate. Subsequent browser verification found only consumer Drive capability in the controlled account, and Google presented a Business Standard trial/checkout rather than an active subscription. Subscription and configuration are therefore pending. Business Standard does not include Google Vault, but Vault remains an optional e-discovery/hold control rather than an automatic prerequisite for the approved sole-trader, low-volume scope.
 
 This plan does not authorize account inspection, mailbox inspection, provider configuration, a trial, an upgrade, spending, contract acceptance, real personal data, live cases, external sharing, or retention/deletion rules.
 
@@ -8,7 +8,7 @@ This plan does not authorize account inspection, mailbox inspection, provider co
 
 Do not configure or use the case system until all of these are satisfied:
 
-1. the Owner approves a Business Standard restricted case area for fictional-data configuration and testing; no Vault purchase is required for this initial test;
+1. the contract, pricing, cancellation, DPA, subprocessor and transfer review is completed, then the Owner separately approves the Business Standard trial/subscription and any fictional-data configuration; no Vault purchase is required for the initial design;
 2. the applicable subscription terms, [Google Cloud Data Processing Addendum](https://workspace.google.com/terms/dpa_terms.html), subprocessors, locations/transfers, deletion behaviour, support path, and breach terms have been reviewed and accepted through the existing legal/vendor gate;
 3. the Owner separately approves any upgrade, new licensed operator, spending, trial, provider configuration, or contract acceptance;
 4. D08-D09 record the Owner as initial operator, the optional-alternate position, the absence/monitoring plan, and the legal/security escalation triggers;
@@ -89,9 +89,9 @@ Pass requires the criteria in `PRIVACY_OPERATIONS_RUNBOOK.md`, complete provider
 
 ## Current Gate
 
-The business-domain Google Workspace Business Standard route is selected, but D07 remains open until the restricted configuration and synthetic acceptance pass. [Google's current edition comparison](https://workspace.google.com/intl/en_gb/business/) places Vault in Business Plus, while [Google's current reporting guidance](https://support.google.com/a/answer/7061566?hl=en) states that Drive log events are normally retained for six months. Those facts define limitations; they do not by themselves require an upgrade.
+Google Workspace Business Standard remains the selected candidate, but the subscription is `Pending / not verified active`. Google presented a 14-day trial with a later paid charge; no checkout, agreement acceptance, billing setup or configuration is authorised by the earlier fictional-data approval. D07 cannot proceed until the vendor/transfer review and a separate subscription decision are complete. If purchased, [Google's current edition comparison](https://workspace.google.com/intl/en_gb/business/) places Vault in Business Plus, while [Google's current reporting guidance](https://support.google.com/a/answer/7061566?hl=en) states that Drive log events are normally retained for six months. Those facts define limitations; they do not by themselves require an upgrade.
 
-Current published pricing remains a comparison signal only. Tallyo already uses Standard, and this plan does not authorise an upgrade, add-on, trial or other spending.
+Current published pricing remains a comparison signal only. Standard is not verified active, and this plan does not authorise a subscription, add-on, trial, agreement acceptance, billing setup or other spending.
 
 The proportionate path is:
 
