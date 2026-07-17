@@ -4,7 +4,7 @@ Task ID: PAY-LIVE-001
 Title: Harden and prepare the current invoice-payment flow for controlled live activation
 Objective: Complete every safe repository, sandbox and deployment-preparation step needed to reduce live Stripe activation to explicit Owner/provider actions, without charging a real customer, exposing secrets, applying an unapproved production migration, publishing legal wording or launching publicly.
 Priority: High
-Status: In Progress
+Status: In Review
 Phase: Draft PR preparation; production deployment and live activation retained
 Owner role: Payments Agent
 Assigned specialists: Backend / Supabase Agent; Security Agent; QA Agent; Documentation Agent; Release Agent
@@ -33,6 +33,7 @@ Implementation result: Source candidate complete. Migration `20260717165044` add
 Review result: Payments/security review found and corrected timestamp-version collision and concurrent app-edit cases by moving to a trigger-maintained integer mutation version. QA review passed duplicate, distinct-event concurrency, stale retry, concurrent app-edit retry, privilege, out-of-order refund, idempotency, audit-failure, mode-mismatch and kill-switch checks. Release review confirms migration-before-function ordering and rollback/containment instructions. Legal/public release block remains unchanged.
 Evidence: Existing `STRIPE_SANDBOX_TEST_EVIDENCE.md`; updated SEC-PAY-002; `tests/stripe-payment-integrity-harness.cjs`; `tests/stripe-payment-transaction-schema.sql`; `tests/stripe-payment-transaction-probe.sql`; isolated PostgreSQL 17.6 probe passed for atomic, duplicate, stale, concurrent app-edit retry and service-role-only execution; all nine focused CI harnesses and all ten frozen Edge checks passed; current official Stripe go-live guidance checked 2026-07-17; Supabase changelog reviewed for relevant Edge Function/database breaking changes. Deno formatting was not made a new gate because all four affected function files already fail `deno fmt --check` on `origin/main`; no broad mechanical reformat was introduced.
 Branch: `codex/live-payment-readiness`
+Draft PR: #49
 Commit: `97d7297` (`Harden Stripe live payment readiness`)
 Blocked reason: None for repository and local/sandbox-safe preparation. Production and live actions remain approval-gated.
-Next action: Complete diff/secret review, commit, push, open a draft PR, and wait for required `verify`. Do not apply the production migration, deploy the functions, change live secrets/mode, publish the live frontend flag, send a real customer invoice, or initiate real money without the exact retained approval.
+Next action: Wait for draft PR #49's required `verify`, resolve any review/check issue within scope, and stop for exact Owner approval before merge or any production/live action. Do not apply the production migration, deploy the functions, change live secrets/mode, publish the live frontend flag, send a real customer invoice, or initiate real money without that approval.
