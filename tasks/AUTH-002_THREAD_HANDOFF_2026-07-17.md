@@ -28,7 +28,7 @@ Approval boundary: Stop before merge, public frontend publication, any secret re
 
 Implementation result: The migration, server-only pepper, and JWT-protected Edge Function are deployed. Authenticated generation and replacement, one-time recovery, factor/session cleanup, forced re-enrolment, restrictive recovery-state RLS, two-account isolation, audit minimisation, and five-attempt/15-minute throttling have passed. The Owner completed a private recovery lifecycle and generated a fresh code set without sharing any secret value.
 
-Review result: Local security harnesses and frozen Deno checks for all ten Edge Functions pass. GitHub PR #44 is open, draft, mergeable, and its required `verify` check passed on commit `420c143` in run `29570841136`.
+Review result: Local security harnesses and frozen Deno checks for all ten Edge Functions pass. GitHub PR #44 is open, draft, mergeable, and its required `verify` check passes on the latest pushed branch state. Confirm the live PR status before closure rather than relying on a frozen run number.
 
 Evidence:
 
@@ -42,7 +42,7 @@ Evidence:
 - Read-only account-screen checks passed at 1280x800, 390x844, and 320x700 with no horizontal overflow or browser console warning/error. This is not a completed real-phone recovery-flow test.
 
 Branch: `codex/mfa-recovery-codes`
-Implementation/evidence baseline commit: `420c143`
+Implementation/evidence baseline commit: `420c143`; use current Git `HEAD` for the later handoff-only documentation commits
 Pull request: [PR #44](https://github.com/EdsonLRO/InvoicePro/pull/44), draft and mergeable as checked on 2026-07-17
 
 ## Remaining Gates
