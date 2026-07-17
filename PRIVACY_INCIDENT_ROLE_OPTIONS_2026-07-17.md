@@ -1,6 +1,6 @@
 # Tallyo Privacy And Incident Role Options - 2026-07-17
 
-Internal D08-D09 proposal for `LEGAL-OPS-001`. It is designed for Tallyo's initial sole-trader operation and uses role names only. Do not record private names, addresses, telephone numbers, private emails, identity documents, credentials, or customer/case data in this repository.
+Internal D08-D09 proposal for `LEGAL-OPS-001`. It is designed for Tallyo's initial sole-trader operation and uses role names only. On 2026-07-17, the Owner confirmed that no trusted person or existing professional adviser is available as backup. The professional route in `PROFESSIONAL_BACKUP_SERVICE_OPTIONS_2026-07-17.md` is therefore required before real customers. Do not record private names, addresses, telephone numbers, private emails, identity documents, credentials, or customer/case data in this repository.
 
 This proposal is not a staffing engagement, spending approval, authorization to grant provider access, legal advice, or authorization to handle real cases.
 
@@ -57,10 +57,10 @@ Before real customers:
 - legal and security routes must have accepted scope, response expectations, confidentiality, data handling, retention, and cost terms; and
 - no real case may be accepted while the backup and qualified escalation routes are unavailable.
 
-## Next Owner Decision
+## Owner Decision And Next Gate
 
-The next safe answer is only `yes` or `no`:
+**Owner decision, 2026-07-17:** no trusted person or existing adviser is currently available to act as backup privacy operator. No individual identity was requested or recorded.
 
-> Is there at least one trusted person or existing professional adviser who could potentially act as Tallyo's backup privacy operator, using their own account and MFA?
+This means the informal-backup option is unavailable. Tallyo must select contracted privacy, Workspace-continuity, and incident-response coverage before real cases. `PROFESSIONAL_BACKUP_SERVICE_OPTIONS_2026-07-17.md` records the provider categories, selection criteria, and bounded next approval.
 
-Do not identify the person here. A `yes` permits a later restricted suitability/access plan; it does not authorize contact or access. A `no` means Tallyo must shortlist a contracted backup/privacy service before real customers; it does not authorize quotes, spending, or engagement.
+No provider identification, contact, quote, spending, engagement, account, or access grant is authorized yet.
