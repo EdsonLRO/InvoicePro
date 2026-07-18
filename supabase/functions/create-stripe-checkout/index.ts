@@ -157,6 +157,7 @@ Deno.serve(async (req) => {
     userData.user.id,
     currency,
     String(amountMinor),
+    String(inv.stripe_event_version || 0),
     "full_balance",
     "app",
     validEmail(customer.email) ? customer.email.trim().toLowerCase() : "",

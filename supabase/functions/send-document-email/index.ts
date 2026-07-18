@@ -580,6 +580,7 @@ async function createStripeCheckoutUrl(inv: any, userId: string, to: string, adm
     userId,
     currency,
     String(amountMinor),
+    String(inv.stripe_event_version || 0),
     kind,
     "document_email",
     to.trim().toLowerCase(),

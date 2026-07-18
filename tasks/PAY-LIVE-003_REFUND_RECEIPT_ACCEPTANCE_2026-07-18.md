@@ -52,7 +52,10 @@ after a separate approval, Codex submitted one full GBP 1.00 refund through
 Tallyo. Stripe sent no automatic refund receipt. The local remediation adds
 `customer_creation=always` to both Tallyo Checkout paths so future successful
 Checkout Sessions attach the charge to a Stripe Customer with a stored Checkout
-email. It does not request future-use setup or save the card.\
+email. It does not request future-use setup or save the card. Both Checkout paths
+also include the reconciled invoice `stripe_event_version` in their idempotency
+key so a payment/refund lifecycle rotates the key while repeated clicks against
+unchanged financial state continue to reuse one session.\
 Review result: The payment and refund reconciliations completed successfully.
 Invoice #0004 returned to `Sent`, records GBP 0.00 paid and GBP 1.00 balance due,
 and exposes exactly one confirmed Stripe card payment and one confirmed Stripe
@@ -62,7 +65,10 @@ receipt or reference. Stripe's live `Refunds` customer-email switch is enabled,
 but the prior Checkout source supplied only `customer_email` and did not create
 or attach a Stripe Customer, which does not meet Stripe's documented automatic
 refund-email condition. The focused integrity harness and Deno checks for both
-changed Edge Functions pass.\
+changed Edge Functions pass. After the first refund, an Owner retry reached the
+already-completed original Checkout Session and took no second payment. Static
+review identified the omitted financial lifecycle version in the deterministic
+Checkout key; the local remediation now covers this post-refund replay case.\
 Evidence: Value-free browser observation only: selected status `Sent`; `Paid:
 GBP 0.00`; `Balance: GBP 1.00`; exactly one `Stripe card payment confirmed`
 entry; exactly one `Stripe refund confirmed` entry for GBP 1.00; no card, payer
