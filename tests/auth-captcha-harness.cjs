@@ -112,6 +112,21 @@ async function run() {
     vm.createContext(context);
     vm.runInContext(inlineScript[1], context);
 
+    const renderSource = component.methods.renderTurnstile.toString();
+    assert.match(renderSource, /this\.turnstile\.loading/,
+        'Concurrent next-tick callbacks must not render duplicate Turnstile widgets.');
+    assert.match(renderSource, /this\.isLoggedIn/,
+        'A restored signed-in session must not retain a background Auth widget.');
+    assert.match(renderSource, /container\.isConnected === false/,
+        'An async provider load must not render into a detached Auth container.');
+    const signedInSource = component.methods.onSignedIn.toString();
+    assert.ok(
+        signedInSource.indexOf('this.removeTurnstileWidget()') < signedInSource.indexOf('this.isLoggedIn = true'),
+        'Sign-in must remove the challenge before replacing the signed-out Auth shell.'
+    );
+    assert.match(component.methods.clearSignedOutState.toString(), /this\.\$nextTick\(\(\) => this\.renderTurnstile\(\)\)/,
+        'Sign-out must schedule a fresh challenge after restoring the Auth shell.');
+
     context.window.TURNSTILE_ENABLED = false;
     const rollbackApp = { ...component.methods };
     Object.assign(rollbackApp, component.data.call(rollbackApp));
