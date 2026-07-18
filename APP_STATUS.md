@@ -17,11 +17,13 @@ Finish the existing app and its security hardening before starting the future Sa
 
 **Closed UX release:** `tasks/UX-001_CUSTOMER_FRIENDLY_RESPONSIVE_UI_2026-07-18.md` records responsive navigation and customer-facing status improvements, exact Owner approval, merged PR #72, successful post-merge security/Pages runs, and verified public build `2026.07.18.10`.
 
+**Closed account-copy release:** `tasks/UX-002_CUSTOMER_FRIENDLY_COPY_2026-07-19.md` records removal of the customer-facing status panel, clearer account and workflow wording, exact Owner approval, merged PR #74, successful post-merge security/Pages runs, and verified public build `2026.07.19.1`.
+
 The current product is a single-user-per-account invoicing workspace backed by Supabase. It is a real working app and a security-focused portfolio project. It is not yet a public paid SaaS platform.
 
 ## Current app stage
 
-**Current invoicing-app scope:** feature-complete and regression-verified on public build `2026.07.18.10`, with controlled live Stripe invoice payments activated and acceptance-tested. This functional activation is not a legal-compliance or unrestricted customer-onboarding approval; the remaining legal, privacy and operational conditions below still apply.
+**Current invoicing-app scope:** feature-complete and regression-verified on public build `2026.07.19.1`, with controlled live Stripe invoice payments activated and acceptance-tested. This functional activation is not a legal-compliance or unrestricted customer-onboarding approval; the remaining legal, privacy and operational conditions below still apply.
 
 Implemented:
 
@@ -43,7 +45,7 @@ Implemented:
 - Supabase Auth, email confirmation, optional TOTP MFA, RLS, CSP, SRI, and server-side secrets.
 - Active Cloudflare Turnstile protection for public sign-up, password sign-in, and reset requests, with exact-origin CSP, a public production Site Key, an explicit rollback switch, Supabase enforcement, and focused/live acceptance.
 - Stripe failed-payment, refund, refund-failure, and dispute lifecycle awareness in the webhook.
-- Public build `2026.07.18.10` with consistent customer/item edge validation, the verified `FUNC-READY-002` non-money synthetic journey, expanded refund-state evidence, responsive primary navigation, centred document-type badges, plain-language System Status, required/post-merge checks, and Pages/readback acceptance.
+- Public build `2026.07.19.1` with consistent customer/item edge validation, the verified `FUNC-READY-002` non-money synthetic journey, expanded refund-state evidence, responsive primary navigation, centred document-type badges, the customer-facing status panel removed, clearer account and workflow wording, required/post-merge checks, and Pages/readback acceptance.
 
 Still to finish before treating the app as customer-ready:
 
