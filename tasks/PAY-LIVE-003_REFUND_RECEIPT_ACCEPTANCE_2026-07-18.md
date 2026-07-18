@@ -51,8 +51,11 @@ banners; no email action; no card, payer, Auth, secret, token or provider
 payload inspected.\
 Branch: `codex/refund-receipt-acceptance`\
 Commit: Pending\
-Blocked reason: Browser popup policy requires the Owner to click `Pay by Card`
-in the prepared invoice and complete Stripe Checkout privately.\
-Next action: Owner clicks `Pay by Card`, completes the GBP 1 payment, returns to
-Tallyo and reports that the payment-success page appeared. Codex then verifies
-value-free settlement evidence and stops for separate refund approval.
+Blocked reason: The authenticated browser session expired during the Checkout
+handoff. The Owner must sign in privately; Codex will never request or inspect
+the password or MFA value. Browser popup policy then requires the Owner to click
+`Pay by Card` and complete Stripe Checkout privately.\
+Next action: Owner signs in to the visible Tallyo tab and reports “signed in”.
+Codex will reopen the prepared invoice and hand off `Pay by Card`; after the
+Owner completes GBP 1 Checkout, Codex verifies value-free settlement evidence
+and stops for separate refund approval.
