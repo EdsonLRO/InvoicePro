@@ -64,9 +64,11 @@ Completed functional activation:
 - The active live webhook destination is pinned to the reviewed API version and only the eleven handled events.
 - A fictional GBP 1.00 live Checkout recorded one payment, Paid status, zero balance and the expected append-only audit evidence.
 - The same acceptance payment was later refunded in full through Tallyo after separate approval. Signed webhook processing recorded one negative GBP 1.00 refund plus one request and one success audit, reopened the invoice to Sent, and restored the GBP 1.00 balance.
+- Refund-acceptance evidence PR #56 merged as `ad90c9e` after its required check passed.
+- After separate Owner approval, Stripe Customer emails > Refunds was enabled. Stripe may now send its refund receipt automatically to the email on the original payment; Tallyo does not send a duplicate Resend refund email.
 - PR #54 merged after its required check passed; GitHub Pages serves `window.STRIPE_LIVE_MODE=true` over HTTPS with no live-secret pattern in the public file.
 
-Still separately gated: each future refund or real-customer link/email action, legal/privacy publication, and unrestricted public onboarding. The Owner may use the now-functional live app directly within those retained boundaries.
+Still separately gated: each future refund, any real-customer link/email outside the provider receipt that follows an approved refund, legal/privacy publication, and unrestricted public onboarding. The Owner may use the now-functional live app directly within those retained boundaries.
 
 ## Current email status
 
