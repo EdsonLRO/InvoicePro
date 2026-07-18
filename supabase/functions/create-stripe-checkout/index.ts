@@ -135,6 +135,7 @@ Deno.serve(async (req) => {
 
   const params = new URLSearchParams();
   params.set("mode", "payment");
+  params.set("customer_creation", "always");
   params.set("success_url", `${appUrl}?payment=success&invoice=${encodeURIComponent(documentId)}`);
   params.set("cancel_url", `${appUrl}?payment=cancelled&invoice=${encodeURIComponent(documentId)}`);
   params.set("client_reference_id", documentId);

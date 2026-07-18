@@ -40,10 +40,12 @@ assert.match(webhook, /refundFailed \|\| refundStatus === "canceled"/);
 assert.doesNotMatch(webhook, /event\.type === "refund\.failed"\s*\|\|/);
 
 // Both app-created and email-created Checkout Sessions are deterministic and
-// the trusted creation audit is required before a URL can leave the server.
+// create a Stripe Customer so automatic refund receipts have a stored email.
+// The trusted creation audit is required before a URL can leave the server.
 for (const [label, source] of [['app checkout', checkout], ['email checkout', email]]) {
   assert.match(source, /checkoutIdempotencyKey\(/, `${label} must derive an idempotency key`);
   assert.match(source, /"Idempotency-Key": idempotencyKey/, `${label} must send its key to Stripe`);
+  assert.match(source, /params\.set\("customer_creation", "always"\)/, `${label} must create a Stripe Customer for refund receipts`);
   assert.match(source, /required audit event insert failed/, `${label} audit failure must fail closed`);
   assert.match(source, /Stripe key mode does not match STRIPE_LIVE_MODE/, `${label} must reject mixed test\/live configuration`);
   assert.match(source, /STRIPE_PAYMENTS_ENABLED/, `${label} must retain the server-side live kill switch`);

@@ -558,6 +558,7 @@ async function createStripeCheckoutUrl(inv: any, userId: string, to: string, adm
   const currency = String(inv.currency || "GBP").toLowerCase();
   const params = new URLSearchParams();
   params.set("mode", "payment");
+  params.set("customer_creation", "always");
   params.set("success_url", `${appUrl}?payment=success&invoice=${encodeURIComponent(inv.id)}`);
   params.set("cancel_url", `${appUrl}?payment=cancelled&invoice=${encodeURIComponent(inv.id)}`);
   params.set("client_reference_id", String(inv.id));
