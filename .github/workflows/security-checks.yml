@@ -42,6 +42,7 @@ jobs:
           node tests/financial-action-audit-harness.cjs
           node tests/mfa-recovery-harness.cjs
           node tests/pwa-update-harness.cjs
+          node tests/refund-consequence-preview-harness.cjs
           node tests/security-workflow-harness.cjs
           node tests/session-expiry-harness.cjs
           node tests/stripe-payment-integrity-harness.cjs
