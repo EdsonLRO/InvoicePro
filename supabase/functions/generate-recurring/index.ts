@@ -269,29 +269,49 @@ async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
   }
 }
 
+async function resendIdempotencyKey(parts: string[]): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(parts.join("\u001f")),
+  );
+  const hex = Array.from(new Uint8Array(digest)).map((byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+  return `tallyo-recurring-email-${hex}`;
+}
+
 async function sendInvoiceEmail(resendKey: string, invoice: any, company: any, to: string, userId: string) {
   const email = buildEmail(invoice, company || {});
-  const resendResponse = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${resendKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: FROM_EMAIL,
-      to: [to],
-      subject: email.subject,
-      html: email.html,
-      text: email.text,
-      tags: [
-        { name: "category", value: "document_email" },
-        { name: "document_id", value: invoice.id },
-        { name: "user_id", value: userId },
-      ],
-    }),
-  });
+  const resendRequestKey = await resendIdempotencyKey([String(invoice.id), userId, to.toLowerCase()]);
+  let resendResponse: Response;
+  try {
+    resendResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": resendRequestKey,
+      },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: [to],
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
+        tags: [
+          { name: "category", value: "document_email" },
+          { name: "document_id", value: invoice.id },
+          { name: "user_id", value: userId },
+        ],
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch (error) {
+    const timedOut = error instanceof DOMException && error.name === "TimeoutError";
+    return { ok: false, status: timedOut ? 504 : 502, body: {}, subject: email.subject, reason: timedOut ? "provider_timeout" : "provider_request_failed" };
+  }
   const body = await resendResponse.json().catch(() => ({}));
-  return { ok: resendResponse.ok, status: resendResponse.status, body, subject: email.subject };
+  return { ok: resendResponse.ok, status: resendResponse.status, body, subject: email.subject, reason: resendResponse.ok ? null : "provider_rejected_request" };
 }
 
 Deno.serve(async (req) => {
@@ -503,12 +523,12 @@ Deno.serve(async (req) => {
           if (sendResult.ok) {
             emailed++;
             const invoiceHistory = Array.isArray(inserted.history) ? inserted.history : [];
-            invoiceHistory.push({ ts: sentAt, type: "sent", text: `Emailed to ${to}` });
+            invoiceHistory.push({ ts: sentAt, type: "sent", text: `Sent to email provider for delivery to ${to}` });
             await admin.from("invoices")
               .update({ history: invoiceHistory, updated_at: sentAt })
               .eq("id", inserted.id)
               .eq("user_id", userId);
-            hist.push({ ts: sentAt, type: "email", text: `Emailed invoice #${invoiceNumber} to ${to}` });
+            hist.push({ ts: sentAt, type: "email", text: `Sent invoice #${invoiceNumber} to email provider for ${to}` });
             await insertAuditEvent(admin, {
               user_id: userId,
               actor_user_id: userId,
@@ -539,7 +559,7 @@ Deno.serve(async (req) => {
               provider: "resend",
               metadata: {
                 status: sendResult.status,
-                reason: "provider_rejected_request",
+                reason: sendResult.reason || "provider_rejected_request",
                 automated: true,
                 recurring_template_id: tpl.id,
               },

@@ -86,7 +86,7 @@ function getTag(tags: unknown, name: string): string | null {
 function eventText(type: string, to: string | null): string {
   const suffix = to ? ` for ${to}` : "";
   const map: Record<string, string> = {
-    "email.sent": `Email sent${suffix}`,
+    "email.sent": `Email sent to provider${suffix}`,
     "email.delivered": `Email delivered${suffix}`,
     "email.delivery_delayed": `Email delivery delayed${suffix}`,
     "email.bounced": `Email bounced${suffix}`,
@@ -122,9 +122,10 @@ Deno.serve(async (req) => {
 
   const type = String(payload.type || "");
   const data = payload.data || {};
+  const svixId = String(req.headers.get("svix-id") || "");
   const providerEventId = String(payload.id || payload.event_id || data.id || data.email_id || "");
   const providerEmailId = data.email_id ? String(data.email_id) : null;
-  const auditProviderEventId = `${type}:${providerEventId || providerEmailId || crypto.randomUUID()}`;
+  const auditProviderEventId = `${type}:${svixId || providerEventId || providerEmailId}`;
   const tags = data.tags || payload.tags;
   const userId = getTag(tags, "user_id");
   const documentId = getTag(tags, "document_id");
@@ -145,8 +146,7 @@ Deno.serve(async (req) => {
     resend_event_id: providerEventId || null,
     resend_email_id: providerEmailId,
     to,
-    subject: data.subject || null,
-    raw: payload,
+    provider_created_at: data.created_at || payload.created_at || null,
   };
 
   const { error: auditError } = await admin.from("audit_events").insert({
@@ -180,7 +180,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (!invError && inv) {
       const history = Array.isArray(inv.history) ? inv.history : [];
-      const marker = `${type}:${providerEventId || providerEmailId || ""}`;
+      const marker = `${type}:${svixId || providerEventId || providerEmailId || ""}`;
       const exists = history.some((ev: any) => ev && ev.providerMarker === marker);
       if (!exists) {
         history.push({

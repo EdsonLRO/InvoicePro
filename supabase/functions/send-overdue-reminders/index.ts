@@ -77,8 +77,21 @@ function reminderEntries(history: unknown): ReminderHistory[] {
     if (!entry || entry.type !== "reminder") return false;
     const text = String(entry.text || "");
     return text.startsWith("Payment reminder emailed to ") ||
-      text.startsWith("Automatic payment reminder emailed to ");
+      text.startsWith("Automatic payment reminder emailed to ") ||
+      text.startsWith("Payment reminder sent to email provider for ") ||
+      text.startsWith("Automatic payment reminder sent to email provider for ");
   });
+}
+
+async function resendIdempotencyKey(parts: string[]): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(parts.join("\u001f")),
+  );
+  const hex = Array.from(new Uint8Array(digest)).map((byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+  return `tallyo-overdue-email-${hex}`;
 }
 
 function lastReminderDate(history: unknown) {
@@ -246,11 +259,18 @@ Deno.serve(async (req) => {
       let resendResponse: Response;
       try {
         email = buildEmail(inv, company, outstanding, overdueDays);
+        const resendRequestKey = await resendIdempotencyKey([
+          String(inv.id),
+          userId,
+          to.toLowerCase(),
+          String(reminders.length + 1),
+        ]);
         resendResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${resendKey}`,
             "Content-Type": "application/json",
+            "Idempotency-Key": resendRequestKey,
           },
           body: JSON.stringify({
             from: FROM_EMAIL,
@@ -265,21 +285,23 @@ Deno.serve(async (req) => {
               { name: "automated", value: "true" },
             ],
           }),
+          signal: AbortSignal.timeout(15_000),
         });
       } catch (error) {
         failed++;
-        console.error("payment reminder request failed", inv.id, String(error));
+        const timedOut = error instanceof DOMException && error.name === "TimeoutError";
+        console.error("payment reminder request failed", inv.id, timedOut ? "provider_timeout" : "provider_request_failed");
         await insertAuditEvent(admin, {
           user_id: userId,
           actor_user_id: null,
-          event_type: "payment_reminder_processing_failed",
+          event_type: "email_send_failed",
           object_type: "invoice",
           object_id: inv.id,
           source: "edge_function",
           provider: "resend",
           metadata: {
             stage: "provider_request",
-            reason: "unexpected_error",
+            reason: timedOut ? "provider_timeout" : "provider_request_failed",
             category: "payment_reminder",
             automated: true,
           },
@@ -312,7 +334,7 @@ Deno.serve(async (req) => {
       history.push({
         ts: nowISO,
         type: "reminder",
-        text: `Automatic payment reminder emailed to ${to} (${overdueDays} days overdue)`,
+        text: `Automatic payment reminder sent to email provider for ${to} (${overdueDays} days overdue)`,
       });
 
       const { error: updateError } = await admin.from("invoices")

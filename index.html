@@ -553,7 +553,7 @@
                             <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }} ({{ c.symbol }}) - {{ c.name }}</option>
                         </select>
                         <button v-if="draft.docType === 'quote'" @click="convertToInvoice(draft)" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">Convert to Invoice</button>
-                        <button @click="sendDocumentEmail(draft)" :disabled="emailSendingId === draft.id || emailSendingId === 'draft'" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm disabled:opacity-50">{{ (emailSendingId === draft.id || emailSendingId === 'draft') ? 'Sending...' : 'Email' }}</button>
+                        <button @click="sendDocumentEmail(draft)" :disabled="emailSendingId === draft.id || emailSendingId === 'draft'" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm disabled:opacity-50">{{ (emailSendingId === draft.id || emailSendingId === 'draft') ? (emailSendingStage === 'prepared' ? 'Prepared...' : 'Queued...') : 'Email' }}</button>
                         <button @click="saveInvoice" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-colors">Save {{ docTypeNoun(draft.docType) }}</button>
                     </div>
                 </div>
@@ -1167,7 +1167,7 @@
                                 <td class="p-4 text-right whitespace-nowrap">
                                     <div class="flex justify-end items-center space-x-3">
                                         <button @click="duplicateInvoice(inv)" class="text-slate-500 hover:text-slate-800 text-sm font-medium">Duplicate</button>
-                                        <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id" class="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50">{{ emailSendingId === inv.id ? 'Sending...' : 'Email' }}</button>
+                                        <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id" class="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50">{{ emailSendingId === inv.id ? (emailSendingStage === 'prepared' ? 'Prepared...' : 'Queued...') : 'Email' }}</button>
                                         <button @click="exportPDF(inv)" class="text-emerald-600 hover:text-emerald-800 text-sm font-medium">PDF</button>
                                         <span class="text-slate-300">|</span>
                                         <button @click="deleteInvoice(inv)" class="text-red-500 hover:text-red-700 text-sm font-medium">Delete</button>
@@ -1885,7 +1885,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.18.2';
+    const APP_BUILD = '2026.07.18.3';
     const { createApp } = Vue;
 
     createApp({
@@ -1942,6 +1942,7 @@
                 selectedInvoices: [],
                 invoiceBulkBusy: false,
                 emailSendingId: null,
+                emailSendingStage: null,
                 stripeCheckoutBusyId: null,
                 stripeLiveMode: window.STRIPE_LIVE_MODE === true,
                 stripeRefundBusyKey: null,
@@ -2897,6 +2898,7 @@
                 this.selectedInvoices = [];
                 this.invoiceBulkBusy = false;
                 this.emailSendingId = null;
+                this.emailSendingStage = null;
                 this.stripeCheckoutBusyId = null;
                 this.stripeRefundBusyKey = null;
                 this.newPayment = { amount: null, date: new Date().toISOString().split('T')[0], note: '' };
@@ -3368,7 +3370,7 @@
                         .from('audit_events')
                         .select('event_type, object_id, provider, provider_event_id, created_at, metadata')
                         .eq('object_type', 'invoice')
-                        .in('event_type', ['document_email_sent', 'email_sent', 'email_delivered', 'email_delivery_delayed', 'email_bounced', 'email_complained', 'email_failed', 'email_opened', 'email_clicked', 'email_received', 'charge_dispute_created', 'charge_dispute_updated', 'charge_dispute_closed', 'charge_dispute_funds_withdrawn', 'charge_dispute_funds_reinstated'])
+                        .in('event_type', ['document_email_sent', 'payment_reminder_email_sent', 'email_send_failed', 'email_sent', 'email_delivered', 'email_delivery_delayed', 'email_bounced', 'email_complained', 'email_failed', 'email_opened', 'email_clicked', 'email_received', 'charge_dispute_created', 'charge_dispute_updated', 'charge_dispute_closed', 'charge_dispute_funds_withdrawn', 'charge_dispute_funds_reinstated'])
                         .order('created_at', { ascending: false })
                         .limit(500);
                     if (!error && this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) {
@@ -3753,31 +3755,52 @@
                 return meta;
             },
             emailStatusFor(id) {
-                const events = (this.emailEventsByDocument[id] || []).filter(ev => String(ev.event_type || '').startsWith('email_') || ev.event_type === 'document_email_sent');
+                const events = (this.emailEventsByDocument[id] || []).filter(ev => String(ev.event_type || '').startsWith('email_') || ev.event_type === 'document_email_sent' || ev.event_type === 'payment_reminder_email_sent');
+                if (this.emailSendingId === id || (this.emailSendingId === 'draft' && this.draft && this.draft.id === id)) {
+                    const state = this.emailSendingStage === 'prepared' ? 'email_prepared' : 'email_queued';
+                    const label = state === 'email_prepared' ? 'Prepared' : 'Queued';
+                    return { state, label, detail: label + ' for provider submission', event: null };
+                }
                 if (!events.length) return null;
+                const eventTime = ev => {
+                    const value = Date.parse((ev && ev.created_at) || '');
+                    return Number.isFinite(value) ? value : 0;
+                };
+                const ordered = [...events].sort((a, b) => eventTime(b) - eventTime(a));
+                const attemptStart = ordered.find(ev => ev.event_type === 'document_email_sent' || ev.event_type === 'payment_reminder_email_sent' || ev.event_type === 'email_send_failed');
+                let attemptEvents = ordered;
+                if (attemptStart && attemptStart.event_type === 'email_send_failed') attemptEvents = [attemptStart];
+                else if (attemptStart && attemptStart.provider_event_id) {
+                    const emailId = String(attemptStart.provider_event_id);
+                    attemptEvents = ordered.filter(ev => ev === attemptStart || String((ev.metadata || {}).resend_email_id || '') === emailId);
+                }
                 const rank = {
                     email_complained: 7,
                     email_failed: 7,
+                    email_send_failed: 7,
                     email_bounced: 6,
                     email_delivery_delayed: 5,
                     email_delivered: 4,
                     email_sent: 3,
                     document_email_sent: 2,
+                    payment_reminder_email_sent: 2,
                     email_opened: 1,
                     email_clicked: 1,
                     email_received: 1
                 };
-                let best = events[0];
-                events.forEach(ev => { if ((rank[ev.event_type] || 0) > (rank[best.event_type] || 0)) best = ev; });
+                let best = attemptEvents[0];
+                attemptEvents.forEach(ev => { if ((rank[ev.event_type] || 0) > (rank[best.event_type] || 0)) best = ev; });
                 const meta = best.metadata || {};
                 const to = meta.to || (meta.raw && meta.raw.data && meta.raw.data.to && meta.raw.data.to[0]) || '';
                 const labels = {
-                    document_email_sent: 'Email sent',
-                    email_sent: 'Email sent',
+                    document_email_sent: 'Sent to provider',
+                    payment_reminder_email_sent: 'Sent to provider',
+                    email_sent: 'Sent to provider',
                     email_delivered: 'Delivered',
                     email_delivery_delayed: 'Delayed',
                     email_bounced: 'Bounced',
                     email_complained: 'Complaint',
+                    email_send_failed: 'Failed',
                     email_failed: 'Failed',
                     email_opened: 'Opened',
                     email_clicked: 'Clicked',
@@ -3790,9 +3813,10 @@
             },
             emailStatusClass(state) {
                 if (state === 'email_delivered') return 'bg-green-100 text-green-700';
-                if (state === 'email_bounced' || state === 'email_complained' || state === 'email_failed') return 'bg-red-100 text-red-700';
+                if (state === 'email_bounced' || state === 'email_complained' || state === 'email_failed' || state === 'email_send_failed') return 'bg-red-100 text-red-700';
                 if (state === 'email_delivery_delayed') return 'bg-amber-100 text-amber-700';
-                if (state === 'email_sent' || state === 'document_email_sent') return 'bg-blue-100 text-blue-700';
+                if (state === 'email_prepared' || state === 'email_queued') return 'bg-indigo-100 text-indigo-700';
+                if (state === 'email_sent' || state === 'document_email_sent' || state === 'payment_reminder_email_sent') return 'bg-blue-100 text-blue-700';
                 return 'bg-slate-100 text-slate-600';
             },
             disputeStateFor(id) {
@@ -3886,14 +3910,15 @@
                 if (!to) return;
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return alert('Enter a valid email address.');
 
+                this.emailSendingId = this.isUuid(inv.id) ? inv.id : 'draft';
+                this.emailSendingStage = 'prepared';
                 let target = inv;
                 const isCurrentDraft = this.draft && inv.id === this.draft.id;
                 if (!this.isUuid(inv.id) || isCurrentDraft) {
                     const repeat = this.draft.repeat ? JSON.parse(JSON.stringify(this.draft.repeat)) : null;
                     const invSnapshot = JSON.parse(JSON.stringify(this.draft));
-                    this.emailSendingId = this.isUuid(inv.id) ? inv.id : 'draft';
                     const ok = await this.persistDraft();
-                    if (!ok) { this.emailSendingId = null; return; }
+                    if (!ok) { this.emailSendingId = null; this.emailSendingStage = null; return; }
                     if (repeat && repeat.enabled && !repeat._created) {
                         try { await this.createScheduleFromInvoice(invSnapshot, repeat); if (this.draft.repeat) this.draft.repeat._created = true; }
                         catch (e) { console.error('Schedule create failed:', e); alert('Document saved and email will continue, but the recurring schedule could not be created: ' + (e.message || e)); }
@@ -3902,10 +3927,12 @@
                 }
                 if (!this.isUuid(target.id)) {
                     this.emailSendingId = null;
+                    this.emailSendingStage = null;
                     return alert('Save this document before emailing it.');
                 }
 
                 this.emailSendingId = target.id;
+                this.emailSendingStage = 'queued';
                 try {
                     const { data, error } = await supabaseClient.functions.invoke('send-document-email', {
                         body: { documentId: target.id, to }
@@ -3914,12 +3941,13 @@
                     if (data && data.error) throw new Error(data.error);
                     if (data && data.invoice) this.applyInvoiceRow(data.invoice);
                     await this.loadAuditEvents();
-                    alert('Email sent to ' + to + '.');
+                    alert('Email sent to the provider for delivery to ' + to + '. Delivery status will update when the provider reports it.');
                 } catch (e) {
                     console.error('Email send failed:', e);
                     alert('Could not send email: ' + (e.message || e));
                 } finally {
                     this.emailSendingId = null;
+                    this.emailSendingStage = null;
                 }
             },
             async openStripeCheckout(inv) {
@@ -4019,7 +4047,7 @@
                     }
                     await this.loadAuditEvents();
                     this.selectedInvoices = [];
-                    alert('Email complete. Sent ' + sent + ', skipped ' + skipped + ', failed ' + failed + '.');
+                    alert('Provider submission complete. Accepted ' + sent + ', skipped ' + skipped + ', failed ' + failed + '. Delivery statuses will update separately.');
                 } finally {
                     this.invoiceBulkBusy = false;
                 }
@@ -4567,7 +4595,7 @@
                     if (data && data.invoice) this.applyInvoiceRow(data.invoice);
                     await this.loadAuditEvents();
                     this.reminderModal.open = false;
-                    alert('Reminder emailed to ' + to + '.');
+                    alert('Reminder sent to the provider for delivery to ' + to + '. Delivery status will update separately.');
                 } catch (e) {
                     console.error('Reminder email failed:', e);
                     alert('Could not send reminder: ' + (e.message || e));
