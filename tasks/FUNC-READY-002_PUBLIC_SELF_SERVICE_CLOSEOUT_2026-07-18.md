@@ -8,8 +8,8 @@ actions involving live money/refunds, private inbox or credentials, unavailable
 iPhone Safari, destructive production cleanup, high-risk merge/publication, or a
 material accounting decision.\
 Priority: High\
-Status: In Progress\
-Phase: Release-candidate review and exact Owner gates\
+Status: Awaiting Owner Approval\
+Phase: Exact Owner merge/publication gate\
 Owner role: Master Orchestrator\
 Assigned specialist: Product, Frontend, Backend/Supabase, Payments and QA
 responsibilities performed sequentially\
@@ -114,7 +114,8 @@ type-check with frozen locks, all changed/untracked files pass the focused
 secret-pattern scan, and the branch is current with `origin/main`. Payment
 integrity, tenant attribution, Auth/CAPTCHA/MFA/session, audit, dispute,
 email-state, export, operational-health, PWA, scale and lifecycle boundaries
-remain intact. The remote required check remains before closure.\
+remain intact. Draft PR #68 is mergeable and its required `verify` check passed
+against release-candidate commit `54763e0`.\
 Evidence: A clean fictional downstream journey completed in the confirmed
 synthetic production account without sending email, entering Checkout, moving
 money or deleting data: customer and item creation; invoice creation,
@@ -126,15 +127,15 @@ direct two-account RLS evidence remains current because no
 RLS/privileged-function source changed. Genuine Firefox is not installed and
 iPhone Safari was not simulated.\
 Branch: `codex/public-self-service-closeout`\
-Commit: Branch head; authoritative remote SHA will be recorded by the pull request\
-Blocked reason: Safe autonomous work is complete up to release-candidate review.
-Exact Owner action is still required for high-risk merge/publication, any new
-live GBP 1 payment/refund and private receipt check, destructive production
-cleanup, iPhone Safari participation, and any decision to introduce
-invoice-linked credit allocation.\
-Next action: Push the reviewed branch and open a draft high-risk PR, then verify
-the required remote check. Stop before merge/publication and present only the
-exact remaining Owner actions.
+Commit: `54763e01853abaa3259fc89aa8f27dc6e3808376` plus this evidence-only
+follow-up\
+Blocked reason: Safe autonomous work is complete and draft PR #68 passes its
+required check. Exact Owner action is now required for high-risk
+ready-for-review/merge/publication, any new live GBP 1 payment/refund and
+private receipt check, destructive production cleanup, iPhone Safari
+participation, and any decision to introduce invoice-linked credit allocation.\
+Next action: Obtain exact Owner approval before marking PR #68 ready, merging it
+and publishing build `2026.07.18.9`.
 
 ## Safe execution evidence
 
