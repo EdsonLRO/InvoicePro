@@ -13,10 +13,10 @@ async function run() {
 
     assert.match(html, /script-src[^;]*https:\/\/challenges\.cloudflare\.com/);
     assert.match(html, /frame-src https:\/\/challenges\.cloudflare\.com/);
-    assert.match(config, /window\.TURNSTILE_SITE_KEY\s*=\s*'';/,
-        'The production Turnstile site key must remain blank until activation is approved.');
+    assert.match(config, /window\.TURNSTILE_SITE_KEY\s*=\s*'0x4AAAAAAD3Dby1bdtNSIb94';/,
+        'The reviewed public production Turnstile site key must remain configured exactly.');
     assert.match(config, /window\.TURNSTILE_ENABLED\s*=\s*true;/,
-        'The public kill switch must be explicit even while the site key is blank.');
+        'The public kill switch must remain explicit for controlled rollback.');
     assert.match(config, /disable Supabase CAPTCHA enforcement first/,
         'Rollback ordering must prevent frontend/provider configuration drift.');
     assert.match(inlineScript[1], /https:\/\/challenges\.cloudflare\.com\/turnstile\/v0\/api\.js\?render=explicit/);
