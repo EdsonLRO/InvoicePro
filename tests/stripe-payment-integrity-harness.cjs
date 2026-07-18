@@ -58,7 +58,7 @@ assert.match(webhook, /Stripe key mode does not match STRIPE_LIVE_MODE/);
 assert.match(webhook, /STRIPE_API_VERSION is required in live mode/);
 assert.match(app, /v-if="!stripeLiveMode"[\s\S]*?Stripe test mode/);
 assert.match(app, /stripeLiveMode: window\.STRIPE_LIVE_MODE === true/);
-assert.match(publicConfig, /window\.STRIPE_LIVE_MODE = false;/);
+assert.match(publicConfig, /window\.STRIPE_LIVE_MODE = true;/);
 
 // Model the optimistic-concurrency contract: two workers can read version 1,
 // one becomes stale, retries from version 2, and both distinct events survive.
