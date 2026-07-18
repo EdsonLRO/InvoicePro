@@ -413,6 +413,29 @@
                     </div>
                 </div>
 
+                <section class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200" aria-labelledby="operational-health-title">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5 border-b pb-4">
+                        <div>
+                            <h2 id="operational-health-title" class="text-2xl font-semibold">Operational Health</h2>
+                            <p class="text-sm text-slate-600 mt-1">Account-scoped signals from Tallyo automation and signed provider events. No email addresses, message content, or provider secrets are shown here.</p>
+                        </div>
+                        <span class="self-start px-3 py-1 rounded-full text-xs font-bold" :class="operationalHealth.attentionCount ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'" role="status" aria-live="polite">
+                            {{ operationalHealth.attentionCount ? (operationalHealth.attentionCount + ' need attention') : 'No recorded failures' }}
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <article v-for="card in operationalHealth.cards" :key="card.key" class="rounded-lg border border-slate-200 bg-slate-50 p-4 min-w-0">
+                            <div class="flex items-start justify-between gap-3">
+                                <h3 class="text-sm font-semibold text-slate-800">{{ card.label }}</h3>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap" :class="operationalHealthStatusClass(card.state)">{{ card.status }}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-2 break-words">{{ card.detail }}</p>
+                            <p v-if="card.at" class="text-xs text-slate-400 mt-1">{{ formatDateTime(card.at) }}</p>
+                        </article>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-4">Provider delivery outages, unsigned requests, and function transport failures may appear only in Stripe, Resend, or Supabase logs. This panel reports persisted account evidence; it does not claim that missing evidence proves no failure occurred.</p>
+                </section>
+
                 <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-2xl font-semibold mb-3">Data Export</h2>
                     <p class="text-sm text-slate-600 mb-5">Download a structured JSON copy of the account, company settings, customers, saved items, documents, recurring schedules, and audit events currently associated with your signed-in account.</p>
@@ -1885,7 +1908,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.18.4';
+    const APP_BUILD = '2026.07.18.5';
     const { createApp } = Vue;
 
     createApp({
@@ -2030,6 +2053,74 @@
                 });
                 Object.keys(map).forEach(id => map[id].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))));
                 return map;
+            },
+            operationalHealth() {
+                const events = [...(this.auditEvents || [])].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+                const latest = types => events.find(ev => types.includes(String(ev.event_type || ''))) || null;
+                const runCard = (key, label, active, event) => {
+                    if (!active) return { key, label, state: 'neutral', status: 'Not in use', detail: 'No active configuration currently requires this automation.', at: '' };
+                    if (!event) return { key, label, state: 'attention', status: 'No run recorded', detail: 'No account-scoped run summary is available yet. Check the scheduled function and Supabase logs.', at: '' };
+                    const metadata = event.metadata || {};
+                    const failed = Math.max(0, Number(metadata.failed) || 0);
+                    return {
+                        key,
+                        label,
+                        state: failed > 0 || metadata.status === 'attention' ? 'attention' : 'ok',
+                        status: failed > 0 ? (failed + ' failed') : 'Last run OK',
+                        detail: (Math.max(0, Number(metadata.checked) || 0)) + ' eligible record(s) checked' + (metadata.sent !== undefined ? (', ' + (Math.max(0, Number(metadata.sent) || 0)) + ' reminder(s) sent') : '') + '.',
+                        at: event.created_at || ''
+                    };
+                };
+                const failureTypes = ['recurring_invoice_generation_failed', 'recurring_schedule_history_update_failed', 'payment_reminder_processing_failed', 'email_send_failed', 'email_failed', 'email_bounced', 'stripe_refund_failed', 'stripe_payment_failed'];
+                const recentCutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
+                const recentFailure = events.find(ev => failureTypes.includes(String(ev.event_type || '')) && Date.parse(ev.created_at || '') >= recentCutoff) || null;
+                const latestRefund = latest(['stripe_refund_failed', 'stripe_refund_succeeded', 'stripe_refund_updated']);
+                const latestProvider = events.find(ev => ev.source === 'provider_webhook') || null;
+                const activeDisputeCount = (this.invoices || []).filter(inv => {
+                    const dispute = this.disputeStateFor(inv.id);
+                    return dispute && ['needs_response', 'warning_needs_response', 'under_review', 'warning_under_review'].includes(dispute.status);
+                }).length;
+                const cards = [
+                    runCard('recurring', 'Recurring invoice automation', (this.recurringTemplates || []).some(t => t.active !== false), latest(['recurring_automation_run_completed'])),
+                    runCard('reminders', 'Overdue reminder automation', (this.invoices || []).some(inv => inv.docType === 'invoice' && inv.overdueRemindersEnabled === true), latest(['overdue_reminder_run_completed'])),
+                    {
+                        key: 'failures', label: 'Recent processing failure', state: recentFailure ? 'attention' : 'ok',
+                        status: recentFailure ? 'Recorded' : 'None recorded',
+                        detail: recentFailure ? this.operationalEventLabel(recentFailure.event_type) : 'No retained account failure event appears in the current audit window.',
+                        at: recentFailure ? recentFailure.created_at : ''
+                    },
+                    {
+                        key: 'refund', label: 'Latest refund outcome', state: latestRefund && latestRefund.event_type === 'stripe_refund_failed' ? 'attention' : 'neutral',
+                        status: !latestRefund ? 'No refund event' : (latestRefund.event_type === 'stripe_refund_failed' ? 'Failed' : 'Provider updated'),
+                        detail: latestRefund ? this.operationalEventLabel(latestRefund.event_type) : 'No refund outcome is retained in the current audit window.',
+                        at: latestRefund ? latestRefund.created_at : ''
+                    },
+                    {
+                        key: 'disputes', label: 'Active Stripe disputes', state: activeDisputeCount ? 'attention' : 'ok',
+                        status: activeDisputeCount ? String(activeDisputeCount) : 'None recorded',
+                        detail: activeDisputeCount ? 'Open the affected invoice and Stripe dashboard for the required response.' : 'No active dispute state is retained for the loaded invoices.',
+                        at: ''
+                    },
+                    {
+                        key: 'provider', label: 'Latest signed provider event', state: 'neutral',
+                        status: latestProvider ? 'Received' : 'No event loaded',
+                        detail: latestProvider ? this.operationalEventLabel(latestProvider.event_type) : 'No signed Stripe or Resend event appears in the current audit window.',
+                        at: latestProvider ? latestProvider.created_at : ''
+                    },
+                    {
+                        key: 'stripe', label: 'Stripe client mode', state: this.stripeLiveMode ? 'ok' : 'neutral',
+                        status: this.stripeLiveMode ? 'Live' : 'Test',
+                        detail: this.stripeLiveMode ? 'The published client configuration requests live Stripe checkout.' : 'The client is configured for Stripe test mode.',
+                        at: ''
+                    },
+                    {
+                        key: 'auth-abuse', label: 'Auth abuse protection', state: this.turnstile.enabled ? 'ok' : 'attention',
+                        status: this.turnstile.enabled ? 'Active' : 'Not active',
+                        detail: this.turnstile.enabled ? 'The browser requires a Turnstile token for supported Auth actions.' : 'Turnstile remains dormant until the approved site key, Supabase enforcement, and frontend flag are activated together.',
+                        at: ''
+                    }
+                ];
+                return { cards, attentionCount: cards.filter(card => card.state === 'attention').length };
             },
             dueTemplates() {
                 const today = new Date().toISOString().split('T')[0];
@@ -3375,9 +3466,8 @@
                 try {
                     const { data, error } = await supabaseClient
                         .from('audit_events')
-                        .select('event_type, object_id, provider, provider_event_id, created_at, metadata')
-                        .eq('object_type', 'invoice')
-                        .in('event_type', ['document_email_sent', 'payment_reminder_email_sent', 'email_send_failed', 'email_sent', 'email_delivered', 'email_delivery_delayed', 'email_bounced', 'email_complained', 'email_failed', 'email_opened', 'email_clicked', 'email_received', 'charge_dispute_created', 'charge_dispute_updated', 'charge_dispute_closed', 'charge_dispute_funds_withdrawn', 'charge_dispute_funds_reinstated'])
+                        .select('event_type, object_type, object_id, source, provider, provider_event_id, created_at, metadata')
+                        .in('event_type', ['document_email_sent', 'payment_reminder_email_sent', 'email_send_failed', 'email_sent', 'email_delivered', 'email_delivery_delayed', 'email_bounced', 'email_complained', 'email_failed', 'email_opened', 'email_clicked', 'email_received', 'charge_dispute_created', 'charge_dispute_updated', 'charge_dispute_closed', 'charge_dispute_funds_withdrawn', 'charge_dispute_funds_reinstated', 'recurring_automation_run_completed', 'overdue_reminder_run_completed', 'recurring_invoice_generation_failed', 'recurring_schedule_history_update_failed', 'payment_reminder_processing_failed', 'stripe_refund_failed', 'stripe_refund_succeeded', 'stripe_refund_updated', 'stripe_payment_failed'])
                         .order('created_at', { ascending: false })
                         .limit(500);
                     if (!error && this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) {
@@ -3582,6 +3672,10 @@
                 const { data, error } = await supabaseClient.from('recurring_templates').insert(row).select().single();
                 if (error) throw error;
                 this.recurringTemplates.unshift(this.rowToTemplate(data));
+                await this.logAppAuditEvent('recurring_schedule_created', 'recurring_template', data.id, {
+                    frequency: tpl.frequency,
+                    email_enabled: tpl.emailEnabled === true
+                });
                 alert('Recurring schedule created. You can manage or pause it on the Recurring page.');
             },
             async persistDraft() {
@@ -3604,12 +3698,33 @@
                         if (idx >= 0) this.invoices[idx] = mapped;
                         this.draft = JSON.parse(JSON.stringify(mapped));
                         this.draft.repeat = priorRepeat;
+                        if (existing.docType === 'quote' && mapped.docType === 'invoice') {
+                            await this.logAppAuditEvent('quote_converted_to_invoice', 'document', mapped.id, {
+                                resulting_status: mapped.status || 'Draft'
+                            });
+                        }
+                        const reminderChanged = existing.overdueRemindersEnabled !== mapped.overdueRemindersEnabled ||
+                            Number(existing.overdueFirstReminderDays) !== Number(mapped.overdueFirstReminderDays) ||
+                            Number(existing.overdueRepeatReminderDays) !== Number(mapped.overdueRepeatReminderDays) ||
+                            Number(existing.overdueMaxReminders) !== Number(mapped.overdueMaxReminders);
+                        if (reminderChanged) {
+                            await this.logAppAuditEvent('reminder_settings_changed', 'document', mapped.id, {
+                                enabled: mapped.overdueRemindersEnabled === true,
+                                first_days: Number(mapped.overdueFirstReminderDays) || 0,
+                                repeat_days: Number(mapped.overdueRepeatReminderDays) || 0,
+                                maximum: Number(mapped.overdueMaxReminders) || 0
+                            });
+                        }
                     } else {
                         const { data, error } = await supabaseClient.from('invoices').insert(row).select().single();
                         if (error) throw error;
                         const mapped = this.rowToInvoice(data);
                         this.invoices.unshift(mapped);
                         this.draft.id = mapped.id; // adopt the database id so further edits update, not duplicate
+                        await this.logAppAuditEvent(mapped.docType === 'credit' ? 'credit_note_created' : 'document_created', 'document', mapped.id, {
+                            document_type: mapped.docType || 'invoice',
+                            status: mapped.status || 'Draft'
+                        });
                     }
                     return true;
                 } catch (e) {
@@ -3797,8 +3912,6 @@
                 };
                 let best = attemptEvents[0];
                 attemptEvents.forEach(ev => { if ((rank[ev.event_type] || 0) > (rank[best.event_type] || 0)) best = ev; });
-                const meta = best.metadata || {};
-                const to = meta.to || (meta.raw && meta.raw.data && meta.raw.data.to && meta.raw.data.to[0]) || '';
                 const labels = {
                     document_email_sent: 'Sent to provider',
                     payment_reminder_email_sent: 'Sent to provider',
@@ -3815,7 +3928,7 @@
                 };
                 const state = best.event_type;
                 const label = labels[state] || 'Email event';
-                const detail = label + (to ? (' to ' + to) : '') + (best.created_at ? (' on ' + this.formatHistoryTime(best.created_at)) : '');
+                const detail = label + (best.created_at ? (' on ' + this.formatHistoryTime(best.created_at)) : '');
                 return { state, label, detail, event: best };
             },
             emailStatusClass(state) {
@@ -3825,6 +3938,37 @@
                 if (state === 'email_prepared' || state === 'email_queued') return 'bg-indigo-100 text-indigo-700';
                 if (state === 'email_sent' || state === 'document_email_sent' || state === 'payment_reminder_email_sent') return 'bg-blue-100 text-blue-700';
                 return 'bg-slate-100 text-slate-600';
+            },
+            operationalHealthStatusClass(state) {
+                if (state === 'ok') return 'bg-green-100 text-green-700';
+                if (state === 'attention') return 'bg-amber-100 text-amber-800';
+                return 'bg-slate-200 text-slate-700';
+            },
+            operationalEventLabel(eventType) {
+                return {
+                    recurring_invoice_generation_failed: 'Recurring invoice generation failed.',
+                    recurring_schedule_history_update_failed: 'Recurring schedule history could not be updated.',
+                    payment_reminder_processing_failed: 'An overdue reminder could not be finalised.',
+                    email_send_failed: 'An email request failed before provider acceptance.',
+                    email_failed: 'The email provider reported a delivery failure.',
+                    email_bounced: 'The email provider reported a bounce.',
+                    stripe_refund_failed: 'Stripe reported a failed refund.',
+                    stripe_refund_succeeded: 'Stripe reported a successful refund.',
+                    stripe_refund_updated: 'Stripe reported a refund update.',
+                    stripe_payment_failed: 'Stripe reported a failed payment.',
+                    charge_dispute_created: 'Stripe reported a new dispute.',
+                    charge_dispute_updated: 'Stripe reported a dispute update.',
+                    charge_dispute_closed: 'Stripe reported a closed dispute.',
+                    charge_dispute_funds_withdrawn: 'Stripe reported disputed funds withdrawn.',
+                    charge_dispute_funds_reinstated: 'Stripe reported disputed funds reinstated.',
+                    email_sent: 'Resend accepted an email for delivery.',
+                    email_delivered: 'Resend reported delivery to the recipient mail server.',
+                    email_delivery_delayed: 'Resend reported delayed delivery.',
+                    email_complained: 'Resend reported a spam complaint.',
+                    email_opened: 'Resend reported an open event.',
+                    email_clicked: 'Resend reported a link click.',
+                    email_received: 'Resend reported an inbound email event.'
+                }[eventType] || 'A signed provider event was recorded.';
             },
             disputeStateFor(id) {
                 if (!id) return null;
@@ -4458,10 +4602,20 @@
                         if (error) throw error;
                         const idx = this.recurringTemplates.findIndex(x => x.id === t.id);
                         if (idx >= 0) this.recurringTemplates[idx] = this.rowToTemplate(data);
+                        await this.logAppAuditEvent('recurring_schedule_updated', 'recurring_template', data.id, {
+                            frequency: t.frequency || 'monthly',
+                            email_enabled: t.emailEnabled === true,
+                            active: t.active !== false
+                        });
                     } else {
                         const { data, error } = await supabaseClient.from('recurring_templates').insert(row).select().single();
                         if (error) throw error;
                         this.recurringTemplates.unshift(this.rowToTemplate(data));
+                        await this.logAppAuditEvent('recurring_schedule_created', 'recurring_template', data.id, {
+                            frequency: t.frequency || 'monthly',
+                            email_enabled: t.emailEnabled === true,
+                            active: t.active !== false
+                        });
                     }
                     this.backToRecurring();
                 } catch (e) { console.error('Save template failed:', e); alert('Could not save schedule: ' + (e.message || e)); }

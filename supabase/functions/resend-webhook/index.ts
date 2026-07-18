@@ -130,7 +130,6 @@ Deno.serve(async (req) => {
   const userId = getTag(tags, "user_id");
   const documentId = getTag(tags, "document_id");
   const to = Array.isArray(data.to) ? String(data.to[0] || "") : (data.to ? String(data.to) : null);
-
   if (!userId || !documentId) {
     console.warn("Webhook missing Tallyo tags; event ignored", { type, providerEventId });
     return json({ ok: true, ignored: "missing Tallyo tags" }, 202);
@@ -145,7 +144,6 @@ Deno.serve(async (req) => {
     resend_event_type: type,
     resend_event_id: providerEventId || null,
     resend_email_id: providerEmailId,
-    to,
     provider_created_at: data.created_at || payload.created_at || null,
   };
 

@@ -173,11 +173,8 @@ async function run() {
     assert.equal(auditCalls[0].name, 'log-app-event');
     assert.equal(auditCalls[0].options.body.eventType, 'account_data_exported');
     assert.match(writer, /"account_data_exported"/, 'The export event must be allowlisted server-side.');
-    assert.match(
-        writer,
-        /if \(eventType !== "account_data_exported"\) \{\s*metadata\.user_agent =/,
-        'The export audit event must not retain the generic user-agent enrichment.'
-    );
+    assert.doesNotMatch(writer, /metadata\.user_agent|headers\.get\("user-agent"\)/,
+        'Audit events must not retain browser user-agent enrichment.');
     assert.deepEqual(alerts, ['Account data export downloaded. Keep the file secure.']);
     assert.equal(app.accountExportBusy, false);
 

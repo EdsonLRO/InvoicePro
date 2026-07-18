@@ -777,7 +777,7 @@ Deno.serve(async (req) => {
     source: "edge_function",
     provider: "resend",
     provider_event_id: resendBody?.id || null,
-    metadata: { to, from: FROM_EMAIL, subject: email.subject },
+    metadata: {},
   });
 
   return json({ ok: true, emailId: resendBody?.id || null, invoice: updated });

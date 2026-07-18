@@ -29,6 +29,7 @@ for (const harness of [
   'edge-dependency-pin-harness.cjs',
   'financial-action-audit-harness.cjs',
   'mfa-recovery-harness.cjs',
+  'operational-health-harness.cjs',
   'refund-consequence-preview-harness.cjs',
   'security-workflow-harness.cjs',
   'session-expiry-harness.cjs',

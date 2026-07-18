@@ -43,6 +43,7 @@ jobs:
           node tests/edge-dependency-pin-harness.cjs
           node tests/financial-action-audit-harness.cjs
           node tests/mfa-recovery-harness.cjs
+          node tests/operational-health-harness.cjs
           node tests/pwa-update-harness.cjs
           node tests/refund-consequence-preview-harness.cjs
           node tests/security-workflow-harness.cjs
