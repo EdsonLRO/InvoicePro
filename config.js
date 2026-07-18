@@ -13,5 +13,8 @@ window.SUPABASE_ANON_KEY = 'sb_publishable_sN8qt13wD8IZcDP222T6tA_ze5fxp-t';
 
 // Public Cloudflare Turnstile site key. Leave blank until the production widget
 // is provisioned and tested. The matching secret belongs only in Supabase Auth.
+// For rollback, disable Supabase CAPTCHA enforcement first, then set this false
+// and publish the reviewed frontend. Never rely on this client flag alone.
+window.TURNSTILE_ENABLED = true;
 window.TURNSTILE_SITE_KEY = '';
 window.STRIPE_LIVE_MODE = true;

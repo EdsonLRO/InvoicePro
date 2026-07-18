@@ -15,6 +15,10 @@ async function run() {
     assert.match(html, /frame-src https:\/\/challenges\.cloudflare\.com/);
     assert.match(config, /window\.TURNSTILE_SITE_KEY\s*=\s*'';/,
         'The production Turnstile site key must remain blank until activation is approved.');
+    assert.match(config, /window\.TURNSTILE_ENABLED\s*=\s*true;/,
+        'The public kill switch must be explicit even while the site key is blank.');
+    assert.match(config, /disable Supabase CAPTCHA enforcement first/,
+        'Rollback ordering must prevent frontend/provider configuration drift.');
     assert.match(inlineScript[1], /https:\/\/challenges\.cloudflare\.com\/turnstile\/v0\/api\.js\?render=explicit/);
     assert.match(inlineScript[1], /if \(!window\.turnstile\) script\.remove\(\);/,
         'A failed provider script must be removable so Retry can perform a fresh load.');
@@ -95,6 +99,7 @@ async function run() {
         window: {
             SUPABASE_URL: 'https://example.supabase.co',
             SUPABASE_ANON_KEY: 'public-key',
+            TURNSTILE_ENABLED: true,
             TURNSTILE_SITE_KEY: '1x00000000000000000000AA',
             turnstile,
             supabase: { createClient() { return supabaseClient; } },
@@ -106,6 +111,12 @@ async function run() {
     context.window.window = context.window;
     vm.createContext(context);
     vm.runInContext(inlineScript[1], context);
+
+    context.window.TURNSTILE_ENABLED = false;
+    const rollbackApp = { ...component.methods };
+    Object.assign(rollbackApp, component.data.call(rollbackApp));
+    assert.equal(rollbackApp.turnstile.enabled, false, 'The public kill switch must disable the widget even when a site key exists.');
+    context.window.TURNSTILE_ENABLED = true;
 
     const app = { ...component.methods };
     Object.assign(app, component.data.call(app));
@@ -119,7 +130,21 @@ async function run() {
     assert.equal(widgetConfig.appearance, 'interaction-only');
     assert.equal(widgetConfig['feedback-enabled'], false);
     assert.equal(widgetConfig['response-field'], false);
+    assert.equal(widgetConfig.retry, 'auto');
+    assert.equal(widgetConfig['retry-interval'], 8000);
     assert.equal(widgetConfig['refresh-expired'], 'manual');
+    assert.equal(widgetConfig['refresh-timeout'], 'auto');
+
+    widgetConfig['timeout-callback']();
+    assert.equal(app.turnstile.token, '');
+    assert.equal(app.turnstile.error, 'Security check timed out. Retry the security check.');
+    widgetConfig.callback('fresh-captcha-token');
+    assert.equal(app.turnstile.token, 'fresh-captcha-token', 'A later provider retry must clear a transient timeout.');
+
+    widgetConfig['error-callback']();
+    assert.equal(app.turnstile.token, '');
+    widgetConfig.callback('captcha-token');
+    assert.equal(app.turnstile.error, '', 'A successful automatic retry must clear the provider error.');
 
     app.auth = { username: 'owner@example.test', password: 'Long-Passphrase-42!', confirm: 'Long-Passphrase-42!' };
     await app.register();
@@ -169,6 +194,10 @@ async function run() {
     await app.login();
     assert.equal(calls.signIn.length, signInCount + 1);
     assert.equal(calls.signIn.at(-1).options, undefined, 'Dormant integration must preserve existing Auth behavior.');
+
+    assert.equal((html.match(/role="group" aria-label="Security verification"/g) || []).length, 3);
+    assert.equal((html.match(/role="alert"/g) || []).length >= 3, true);
+    assert.match(html, /Retry security check/);
 
     console.log('Auth CAPTCHA harness passed.');
 }

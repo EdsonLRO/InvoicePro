@@ -101,9 +101,9 @@
                     <input type="password" v-model="auth.password" @keyup.enter="login" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div v-if="turnstile.enabled">
-                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;"></div>
-                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" aria-live="polite">Loading security check...</p>
-                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" aria-live="polite">{{ turnstile.error }} <button @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry</button></p>
+                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;" role="group" aria-label="Security verification"></div>
+                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" role="status" aria-live="polite">Loading security check...</p>
+                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" role="alert">{{ turnstile.error }} <button type="button" @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry security check</button></p>
                 </div>
                 <button @click="login" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Signing in...' : 'Sign In' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
@@ -130,9 +130,9 @@
                     <input type="password" v-model="auth.confirm" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div v-if="turnstile.enabled">
-                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;"></div>
-                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" aria-live="polite">Loading security check...</p>
-                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" aria-live="polite">{{ turnstile.error }} <button @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry</button></p>
+                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;" role="group" aria-label="Security verification"></div>
+                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" role="status" aria-live="polite">Loading security check...</p>
+                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" role="alert">{{ turnstile.error }} <button type="button" @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry security check</button></p>
                 </div>
                 <button @click="register" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Creating account...' : 'Create Account' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
@@ -222,9 +222,9 @@
                     <input type="email" v-model="auth.username" @keyup.enter="sendPasswordReset" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div v-if="turnstile.enabled">
-                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;"></div>
-                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" aria-live="polite">Loading security check...</p>
-                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" aria-live="polite">{{ turnstile.error }} <button @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry</button></p>
+                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;" role="group" aria-label="Security verification"></div>
+                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" role="status" aria-live="polite">Loading security check...</p>
+                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" role="alert">{{ turnstile.error }} <button type="button" @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry security check</button></p>
                 </div>
                 <button @click="sendPasswordReset" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Sending...' : 'Send Reset Link' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
@@ -1885,7 +1885,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.18.3';
+    const APP_BUILD = '2026.07.18.4';
     const { createApp } = Vue;
 
     createApp({
@@ -1903,7 +1903,7 @@
                 authSessionVersion: 0,
                 dataLoading: false,
                 turnstile: {
-                    enabled: Boolean(String(window.TURNSTILE_SITE_KEY || '').trim()),
+                    enabled: window.TURNSTILE_ENABLED !== false && Boolean(String(window.TURNSTILE_SITE_KEY || '').trim()),
                     siteKey: String(window.TURNSTILE_SITE_KEY || '').trim(),
                     loading: false,
                     widgetId: null,
@@ -2357,7 +2357,10 @@
                         tabindex: 0,
                         'response-field': false,
                         'feedback-enabled': false,
+                        retry: 'auto',
+                        'retry-interval': 8000,
                         'refresh-expired': 'manual',
+                        'refresh-timeout': 'auto',
                         callback: token => {
                             if (mode !== this.authMode) return;
                             this.turnstile.token = String(token || '');
@@ -2366,6 +2369,10 @@
                         'expired-callback': () => {
                             this.turnstile.token = '';
                             this.turnstile.error = 'Security check expired.';
+                        },
+                        'timeout-callback': () => {
+                            this.turnstile.token = '';
+                            this.turnstile.error = 'Security check timed out. Retry the security check.';
                         },
                         'error-callback': () => {
                             this.turnstile.token = '';
