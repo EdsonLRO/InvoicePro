@@ -109,6 +109,16 @@ const documents = Array.from({ length: 2000 }, (_, index) => ({
   assert.match(app, /bindAccessibleLabels\(\)/);
   assert.match(app, /new MutationObserver\(\(\) => this\.bindAccessibleLabels\(\)\)/);
   assert.match(app, /role="status" aria-live="polite" aria-label="Loading account data"/);
+  assert.match(app, /class="primary-menu-toggle[^\"]*" aria-label="Menu" aria-controls="primary-navigation" :aria-expanded=/,
+    'the menu button must remain available until the full navigation fits');
+  assert.match(app, /\.primary-navigation \{[\s\S]*?max-height: calc\(100vh - 4rem\);[\s\S]*?overflow-y: auto;/,
+    'the compact navigation must remain scrollable on short windows');
+  assert.match(app, /@media \(min-width: 1280px\) \{[\s\S]*?\.primary-menu-toggle \{ display: none; \}[\s\S]*?\.primary-navigation \{[\s\S]*?display: flex !important;/,
+    'the full navigation must replace the menu button only at a safe desktop width');
+  assert.match(app, /id="primary-navigation"[\s\S]*?:class="mobileMenuOpen \? 'flex' : 'hidden'"[\s\S]*?class="primary-navigation"/,
+    'compact navigation visibility must follow the menu state');
+  assert.match(app, /inline-flex min-w-16 items-center justify-center rounded px-2 py-1 text-center text-xs font-medium leading-tight/,
+    'document type badges must remain centred when labels wrap');
   for (const label of ['Remove line item', 'Close new customer dialog', 'Close reminder dialog', 'Close refund dialog']) {
     assert.ok(app.includes(`aria-label="${label}"`), `${label} must have an accessible name`);
   }

@@ -12,6 +12,10 @@ const documentEmail = fs.readFileSync(path.join(root, 'supabase', 'functions', '
 const reminderEmail = fs.readFileSync(path.join(root, 'supabase', 'functions', 'send-reminder-email', 'index.ts'), 'utf8');
 
 assert.match(app, /id="operational-health-title"/);
+assert.match(app, />System Status</);
+assert.doesNotMatch(app, />Operational Health</);
+assert.match(app, /How this status works/);
+assert.match(app, /Everything looks good/);
 assert.match(app, /persisted account evidence; it does not claim that missing evidence proves no failure occurred/i);
 assert.match(app, /\.select\('event_type, object_type, object_id, source, provider, provider_event_id, created_at, metadata'\)/);
 

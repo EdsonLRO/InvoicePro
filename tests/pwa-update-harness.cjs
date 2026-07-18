@@ -113,7 +113,7 @@ function fetchEvent(request) {
   assert.equal(harness.skipWaitingCalls, 1, 'new worker must activate without waiting for old tabs to close');
 
   const cacheNames = await harness.cacheApi.keys();
-  assert.deepEqual(cacheNames, ['tallyo-shell-2026-07-18-9']);
+  assert.deepEqual(cacheNames, ['tallyo-shell-2026-07-18-10']);
   const shellStore = harness.stores.get(cacheNames[0]);
   for (const asset of ['./', './index.html', './tailwind.css', './config.js', './manifest.json', './icon-192.png', './icon-512.png']) {
     assert(shellStore.has(cacheKey(asset)), `missing app-shell asset: ${asset}`);
@@ -160,7 +160,7 @@ function fetchEvent(request) {
   offline.listeners.fetch(missingEvent);
   await assert.rejects(missingEvent.responsePromise, /offline/, 'uncached non-navigation failure must not fabricate a response');
 
-  assert.match(indexSource, /const APP_BUILD = '2026\.07\.18\.9';/, 'frontend build marker must match the worker release');
+  assert.match(indexSource, /const APP_BUILD = '2026\.07\.18\.10';/, 'frontend build marker must match the worker release');
   assert.equal((indexSource.match(/Tallyo build \{\{ appBuild \}\}/g) || []).length, 2, 'build marker must appear on signed-out and Account views');
   assert.match(indexSource, /serviceWorker\.register\('\.\/service-worker\.js', \{ updateViaCache: 'none' \}\)/, 'worker script must bypass the HTTP cache during update checks');
 
