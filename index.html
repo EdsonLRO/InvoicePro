@@ -1447,7 +1447,7 @@
                         <div class="space-y-5">
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Item Name *</label><input type="text" v-model="itemForm.name" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Description (Optional)</label><textarea v-model="itemForm.description" rows="3" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Default Price</label><input type="number" v-model.number="itemForm.price" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Default Price</label><input type="number" min="0" step="0.01" v-model.number="itemForm.price" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
                             <div class="pt-2 flex gap-3">
                                 <button @click="saveSavedItem" :disabled="itemSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ itemSaveBusy ? 'Saving…' : 'Save Item' }}</button>
                                 <button @click="backToItems" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
@@ -1920,7 +1920,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.18.8';
+    const APP_BUILD = '2026.07.18.9';
     const { createApp } = Vue;
 
     createApp({
@@ -3396,14 +3396,28 @@
             rowToCustomer(r) {
                 return { id: r.id, name: r.name, address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '' };
             },
+            validateCustomerForSave(customer) {
+                if (!String(customer && customer.name || '').trim()) return 'Customer Name is required';
+                const email = String(customer && customer.email || '').trim();
+                if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Enter a valid customer email address.';
+                return '';
+            },
             customerToRow(c) {
-                return { name: c.name, address: c.address || null, phone: c.phone || null, mobile: c.mobile || null, email: c.email || null, tax_id: c.taxId || null, additional_info: c.additionalInfo || null };
+                const clean = value => String(value || '').trim();
+                return { name: clean(c.name), address: clean(c.address) || null, phone: clean(c.phone) || null, mobile: clean(c.mobile) || null, email: clean(c.email) || null, tax_id: clean(c.taxId) || null, additional_info: clean(c.additionalInfo) || null };
             },
             rowToItem(r) {
                 return { id: r.id, name: r.name, description: r.description || '', price: Number(r.price) || 0 };
             },
+            validateSavedItemForSave(item) {
+                if (!String(item && item.name || '').trim()) return 'Item Name is required';
+                const price = Number(item && item.price);
+                if (!Number.isFinite(price) || price < 0) return 'Enter a valid non-negative default price.';
+                return '';
+            },
             itemToRow(i) {
-                return { name: i.name, description: i.description || null, price: i.price || 0 };
+                const price = Math.round((Number(i.price) || 0) * 100) / 100;
+                return { name: String(i.name || '').trim(), description: String(i.description || '').trim() || null, price };
             },
             rowToCompany(r) {
                 return { name: r.name || '', address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '', logo: r.logo_url || '', invoicePrefix: r.invoice_prefix || '', quotePrefix: r.quote_prefix || 'QUO-', creditPrefix: r.credit_prefix || 'CN-', defaultCurrency: r.default_currency || 'GBP', paymentDetails: r.payment_details || '', defaultNotes: r.default_notes || '', defaultTerms: r.default_terms || '', invoiceFooter: r.invoice_footer || '', brandColor: r.brand_color || '#4f46e5', logoPosition: r.logo_position || 'left', overdueFirstReminderDays: Number(r.overdue_first_reminder_days) || 3, overdueRepeatReminderDays: Number(r.overdue_repeat_reminder_days) || 7, overdueMaxReminders: Number(r.overdue_max_reminders) || 3 };
@@ -3657,7 +3671,10 @@
             },
             async saveAsNewPreset(index) {
                 const item = this.draft.items[index];
-                const { data, error } = await supabaseClient.from('saved_items').insert(this.itemToRow({ name: item.name.trim(), description: '', price: item.price || 0 })).select().single();
+                const preset = { name: item.name, description: '', price: item.price };
+                const validationIssue = this.validateSavedItemForSave(preset);
+                if (validationIssue) return alert(validationIssue);
+                const { data, error } = await supabaseClient.from('saved_items').insert(this.itemToRow(preset)).select().single();
                 if (error) { console.error(error); alert("Could not save preset: " + error.message); return; }
                 this.savedItems.push(this.rowToItem(data));
                 item.showSuggestions = false;
@@ -5109,7 +5126,8 @@
                 }
             },
             async saveQuickCustomer() {
-                if (!this.quickCustomer.name) return alert("Customer Name is required");
+                const validationIssue = this.validateCustomerForSave(this.quickCustomer);
+                if (validationIssue) return alert(validationIssue);
                 if (this.quickCustomerSaveBusy) return;
                 this.quickCustomerSaveBusy = true;
                 try {
@@ -5128,7 +5146,8 @@
             },
             closeQuickCustomer() { this.showQuickCustomer = false; },
             async saveCustomer() {
-                if(!this.customerForm.name) return alert("Customer Name is required");
+                const validationIssue = this.validateCustomerForSave(this.customerForm);
+                if (validationIssue) return alert(validationIssue);
                 if (this.customerSaveBusy) return;
                 this.customerSaveBusy = true;
                 const row = this.customerToRow(this.customerForm);
@@ -5193,7 +5212,8 @@
             },
             resetCustomerForm() { this.editingCustomer = null; this.customerForm = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' }; },
             async saveSavedItem() {
-                if(!this.itemForm.name) return;
+                const validationIssue = this.validateSavedItemForSave(this.itemForm);
+                if (validationIssue) return alert(validationIssue);
                 if (this.itemSaveBusy) return;
                 this.itemSaveBusy = true;
                 const row = this.itemToRow(this.itemForm);
