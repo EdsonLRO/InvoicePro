@@ -39,8 +39,8 @@ function status(events, extra = {}) {
   }, invoiceId);
 }
 
-assert.equal(status([], { emailSendingId: invoiceId, emailSendingStage: 'prepared' }).label, 'Prepared');
-assert.equal(status([], { emailSendingId: invoiceId, emailSendingStage: 'queued' }).label, 'Queued');
+assert.equal(status([], { emailSendingId: invoiceId, emailSendingStage: 'prepared' }).label, 'Preparing');
+assert.equal(status([], { emailSendingId: invoiceId, emailSendingStage: 'queued' }).label, 'Sending');
 
 const accepted = {
   event_type: 'document_email_sent',
@@ -48,7 +48,7 @@ const accepted = {
   created_at: '2026-07-18T12:00:00Z',
   metadata: { to: 'synthetic@example.test' }
 };
-assert.equal(status([accepted]).label, 'Sent to provider', 'API acceptance must not claim delivery');
+assert.equal(status([accepted]).label, 'Accepted for delivery', 'API acceptance must not claim delivery');
 assert.equal(status([
   { event_type: 'email_delivered', created_at: '2026-07-18T12:01:00Z', metadata: { resend_email_id: 'email-new' } },
   accepted
@@ -66,7 +66,7 @@ assert.equal(status([
   { ...accepted, provider_event_id: 'email-retry', created_at: '2026-07-18T13:00:00Z' },
   { event_type: 'email_bounced', created_at: '2026-07-18T12:30:00Z', metadata: { resend_email_id: 'email-old' } },
   { ...accepted, provider_event_id: 'email-old', created_at: '2026-07-18T12:00:00Z' }
-]).label, 'Sent to provider', 'a later accepted retry must supersede an older bounce');
+]).label, 'Accepted for delivery', 'a later accepted retry must supersede an older bounce');
 
 assert.equal(status([
   { event_type: 'email_send_failed', created_at: '2026-07-18T13:00:00Z', metadata: { reason: 'provider_timeout' } },
@@ -79,7 +79,7 @@ assert.equal(status([{
   provider_event_id: 'reminder-new',
   created_at: '2026-07-18T14:00:00Z',
   metadata: {}
-}]).label, 'Sent to provider');
+}]).label, 'Accepted for delivery');
 
 for (const source of [documentEmail, reminderEmail, overdueEmail, recurringEmail]) {
   assert.match(source, /"Idempotency-Key": resendRequestKey/);
@@ -94,7 +94,8 @@ assert.match(resendWebhook, /req\.headers\.get\("svix-id"\)/);
 assert.match(resendWebhook, /"email\.sent": `Email sent to provider/);
 assert.doesNotMatch(resendWebhook, /raw:\s*payload/);
 assert.match(app, /'payment_reminder_email_sent', 'email_send_failed'/);
-assert.match(app, /Delivery status will update when the provider reports it/);
-assert.match(app, /Provider submission complete\. Accepted/);
+assert.match(app, /You can follow its status in Activity History/);
+assert.match(app, /Emails processed\. Accepted for delivery:/);
+assert.doesNotMatch(app, /Provider submission complete|Delivery status will update when the provider reports it/);
 
 console.log('Email status accuracy harness passed.');
