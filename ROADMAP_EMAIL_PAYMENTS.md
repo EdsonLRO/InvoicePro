@@ -34,7 +34,8 @@ Current boundary: this document covers invoice/customer payment features inside 
 - Done: successful Stripe refunds are recorded as locked negative payment entries and can reopen the invoice balance.
 - Done: Stripe sandbox webhook destination is subscribed to the 11 events Tallyo currently handles.
 - Done: Stripe sandbox positive lifecycle verification covers trusted payment binding, successful refund, genuine asynchronous failed-refund reversal, known-payment dispute awareness, and duplicate replay idempotency.
-- Current caveat: Stripe should still be treated as test/development unless live mode is explicitly approved and configured.
+- Done: PAY-LIVE-002 completed the separately approved live account, webhook, server-switch, minimum-payment and public-flag gates. A fictional GBP 1.00 live Checkout settled exactly once to Paid with zero balance and the expected audits; PR #54 published the live frontend after its required check passed.
+- Current caveat: the live invoice-payment path is functionally active, but refunds, real-customer communications and legal/public onboarding remain separate approval gates.
 
 ## Required deploy/setup checks
 
@@ -123,7 +124,7 @@ Near term:
 - Done: added a concise payment threat model section to the security story.
 - Done: payment list shows clearer remaining-balance wording after a seller-approved deposit.
 - Done: payment/refund duplicate replay and unrelated-event rejection passed on 2026-07-13; a known-payment dispute and genuine `refund.failed` lifecycle, including duplicate replay, passed on 2026-07-14. See `STRIPE_SANDBOX_TEST_EVIDENCE.md`.
-- Done: app payment panel shows a private/admin-facing reminder that Stripe is in test/development until live mode is intentionally configured.
+- Done: the app payment panel conditionally shows a private/admin-facing test-mode reminder; the approved production flag now hides it for live operation.
 - Keep README, handoff, security story, Supabase handoff, and operations docs in sync with the real app state.
 
 Later:
@@ -137,7 +138,7 @@ Later:
 
 ## Production caveats
 
-- Stripe is still being used in test/development context unless explicitly changed.
+- Stripe invoice payments are in approved live mode. Changing live configuration, executing a refund, or communicating with a real customer remains separately controlled.
 - Tallyo should not claim GDPR compliance.
 - Activity history is useful, but not tamper-proof.
 - Email and payment automation depend on correctly configured DNS, secrets, webhooks, and scheduled jobs.
