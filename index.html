@@ -888,6 +888,39 @@
                         <div>{{ paymentAttentionFor(draft).text }}</div>
                     </div>
 
+                    <div v-if="draftDisputeState" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-4 text-sm" aria-live="polite">
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                            <div>
+                                <div class="font-semibold text-red-800">Stripe dispute</div>
+                                <div class="text-xs text-slate-500 mt-1">The original payment remains in the invoice history. Tallyo does not automatically mark the invoice unpaid.</div>
+                            </div>
+                            <span class="self-start px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap" :class="disputeStatusClass(draftDisputeState.status)">{{ draftDisputeState.label }}</span>
+                        </div>
+                        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                            <div>
+                                <dt class="text-xs font-bold text-slate-500 uppercase">Amount affected</dt>
+                                <dd class="font-semibold text-slate-800 mt-1">{{ getCurrencySymbol(draftDisputeState.currency) }}{{ draftDisputeState.amount.toFixed(2) }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs font-bold text-slate-500 uppercase">Funds movement</dt>
+                                <dd class="font-semibold text-slate-800 mt-1">{{ draftDisputeState.fundsLabel }}</dd>
+                            </div>
+                            <div v-if="draftDisputeState.reason">
+                                <dt class="text-xs font-bold text-slate-500 uppercase">Reason</dt>
+                                <dd class="text-slate-700 mt-1">{{ draftDisputeState.reason }}</dd>
+                            </div>
+                            <div v-if="draftDisputeState.dueBy">
+                                <dt class="text-xs font-bold text-slate-500 uppercase">Evidence deadline</dt>
+                                <dd class="text-slate-700 mt-1">{{ draftDisputeState.dueBy }}{{ draftDisputeState.pastDue ? ' (deadline passed)' : '' }}</dd>
+                            </div>
+                        </dl>
+                        <div class="mt-4 rounded-lg border border-red-200 bg-white p-3">
+                            <div class="text-xs font-bold text-slate-500 uppercase mb-1">Next action</div>
+                            <p class="text-slate-700">{{ draftDisputeState.nextAction }}</p>
+                            <a :href="disputeDashboardUrl" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-indigo-600 hover:text-indigo-800 font-medium">Open Stripe disputes</a>
+                        </div>
+                    </div>
+
                     <div v-if="draft.payments && draft.payments.length" class="divide-y divide-slate-100 mb-4 border border-slate-100 rounded-lg">
                         <div v-for="(p, i) in draft.payments" :key="i" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-2 text-sm">
                             <div class="min-w-0">
@@ -1852,7 +1885,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.18.1';
+    const APP_BUILD = '2026.07.18.2';
     const { createApp } = Vue;
 
     createApp({
@@ -2016,6 +2049,8 @@
                 return (this.draft.items || []).some(it => it.showSuggestions && it.name);
             },
             draftBalance() { return this.totals.grandTotal - this.draftPaid; },
+            draftDisputeState() { return this.disputeStateFor(this.draft && this.draft.id); },
+            disputeDashboardUrl() { return this.stripeLiveMode ? 'https://dashboard.stripe.com/disputes' : 'https://dashboard.stripe.com/test/disputes'; },
             refundPreview() {
                 const requested = Number(this.refundModal.amount);
                 const maximum = Number(this.refundModal.max) || 0;
@@ -3333,7 +3368,7 @@
                         .from('audit_events')
                         .select('event_type, object_id, provider, provider_event_id, created_at, metadata')
                         .eq('object_type', 'invoice')
-                        .in('event_type', ['document_email_sent', 'email_sent', 'email_delivered', 'email_delivery_delayed', 'email_bounced', 'email_complained', 'email_failed', 'email_opened', 'email_clicked', 'email_received'])
+                        .in('event_type', ['document_email_sent', 'email_sent', 'email_delivered', 'email_delivery_delayed', 'email_bounced', 'email_complained', 'email_failed', 'email_opened', 'email_clicked', 'email_received', 'charge_dispute_created', 'charge_dispute_updated', 'charge_dispute_closed', 'charge_dispute_funds_withdrawn', 'charge_dispute_funds_reinstated'])
                         .order('created_at', { ascending: false })
                         .limit(500);
                     if (!error && this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) {
@@ -3718,7 +3753,7 @@
                 return meta;
             },
             emailStatusFor(id) {
-                const events = this.emailEventsByDocument[id] || [];
+                const events = (this.emailEventsByDocument[id] || []).filter(ev => String(ev.event_type || '').startsWith('email_') || ev.event_type === 'document_email_sent');
                 if (!events.length) return null;
                 const rank = {
                     email_complained: 7,
@@ -3758,6 +3793,75 @@
                 if (state === 'email_bounced' || state === 'email_complained' || state === 'email_failed') return 'bg-red-100 text-red-700';
                 if (state === 'email_delivery_delayed') return 'bg-amber-100 text-amber-700';
                 if (state === 'email_sent' || state === 'document_email_sent') return 'bg-blue-100 text-blue-700';
+                return 'bg-slate-100 text-slate-600';
+            },
+            disputeStateFor(id) {
+                if (!id) return null;
+                const allowed = new Set(['charge_dispute_created', 'charge_dispute_updated', 'charge_dispute_closed', 'charge_dispute_funds_withdrawn', 'charge_dispute_funds_reinstated']);
+                const eventTime = ev => {
+                    const providerCreated = Number(ev && ev.metadata && ev.metadata.provider_created);
+                    if (Number.isFinite(providerCreated) && providerCreated > 0) return providerCreated * 1000;
+                    const received = Date.parse((ev && ev.created_at) || '');
+                    return Number.isFinite(received) ? received : 0;
+                };
+                const events = (this.emailEventsByDocument[id] || [])
+                    .filter(ev => allowed.has(String(ev.event_type || '')))
+                    .sort((a, b) => eventTime(b) - eventTime(a));
+                if (!events.length) return null;
+
+                const latest = events.find(ev => ev.metadata && ev.metadata.status) || events[0];
+                const metadata = latest.metadata || {};
+                const rawStatus = String(metadata.status || 'unknown').toLowerCase();
+                const labels = {
+                    warning_needs_response: 'Inquiry needs response',
+                    warning_under_review: 'Inquiry under review',
+                    warning_closed: 'Inquiry closed',
+                    needs_response: 'Needs response',
+                    under_review: 'Under review',
+                    won: 'Won',
+                    lost: 'Lost',
+                    prevented: 'Prevented'
+                };
+                const nextActions = {
+                    warning_needs_response: 'Review the inquiry in Stripe now and respond before its evidence deadline.',
+                    needs_response: 'Review the dispute in Stripe now and either accept it or submit evidence before the deadline.',
+                    warning_under_review: 'Monitor Stripe for the issuer response and keep the supporting records available.',
+                    under_review: 'Monitor Stripe for the issuer decision and keep the supporting records available.',
+                    warning_closed: 'No response is currently required. Keep the invoice and case record.',
+                    prevented: 'No response is currently required. Keep the invoice and case record.',
+                    won: 'Reconcile the Stripe balance and confirm whether the disputed funds were reinstated.',
+                    lost: 'Reconcile the Stripe balance, preserve the case record, and follow the support procedure.'
+                };
+                const amountEvent = events.find(ev => Number(ev.metadata && ev.metadata.amount) > 0) || latest;
+                const amountMetadata = amountEvent.metadata || {};
+                const fundsEvent = events.find(ev => ev.event_type === 'charge_dispute_funds_withdrawn' || ev.event_type === 'charge_dispute_funds_reinstated');
+                const fundsLabel = !fundsEvent
+                    ? 'No separate funds update recorded'
+                    : fundsEvent.event_type === 'charge_dispute_funds_reinstated'
+                    ? 'Reinstated to Stripe balance'
+                    : 'Withdrawn from Stripe balance';
+                const dueBySeconds = Number(metadata.evidence_due_by);
+                const dueBy = Number.isFinite(dueBySeconds) && dueBySeconds > 0
+                    ? new Date(dueBySeconds * 1000).toLocaleString()
+                    : '';
+                const reason = String(metadata.reason || '').replaceAll('_', ' ').replace(/^./, char => char.toUpperCase());
+                return {
+                    status: rawStatus,
+                    label: labels[rawStatus] || 'Dispute update',
+                    amount: Math.max(0, Number(amountMetadata.amount) || 0),
+                    currency: String(amountMetadata.currency || metadata.currency || 'GBP').toUpperCase(),
+                    reason,
+                    dueBy,
+                    pastDue: metadata.evidence_past_due === true,
+                    fundsLabel,
+                    nextAction: nextActions[rawStatus] || 'Review the current dispute and required action in Stripe.'
+                };
+            },
+            disputeStatusClass(status) {
+                if (status === 'won' || status === 'prevented' || status === 'warning_closed') return 'bg-green-100 text-green-700';
+                if (status === 'lost') return 'bg-red-100 text-red-700';
+                if (status === 'needs_response' || status === 'warning_needs_response') return 'bg-amber-100 text-amber-700';
+                if (status === 'under_review' || status === 'warning_under_review') return 'bg-blue-100 text-blue-700';
                 return 'bg-slate-100 text-slate-600';
             },
             applyInvoiceRow(row) {
@@ -4029,7 +4133,11 @@
                     const type = ev && ev.type;
                     const text = String((ev && ev.text) || '').toLowerCase();
                     if (type === 'dispute' && (text.includes('closed') || text.includes('reinstated'))) return null;
-                    if (type === 'payment_failed' || type === 'dispute' || (type === 'refund' && text.includes('failed'))) {
+                    if (type === 'dispute') {
+                        if (!this.disputeStateFor(inv && inv.id)) return { text: ev.text || 'Payment provider event needs attention.' };
+                        continue;
+                    }
+                    if (type === 'payment_failed' || (type === 'refund' && text.includes('failed'))) {
                         return { text: ev.text || 'Payment provider event needs attention.' };
                     }
                 }

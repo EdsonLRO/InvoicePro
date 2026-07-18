@@ -657,6 +657,15 @@ async function handleDispute(admin: any, event: any, attempt = 0): Promise<any> 
       currency,
       reason: dispute.reason || null,
       status: dispute.status || null,
+      provider_created: Number.isFinite(Number(event.created))
+        ? Number(event.created)
+        : null,
+      evidence_due_by:
+        Number.isFinite(Number(dispute.evidence_details?.due_by)) &&
+          Number(dispute.evidence_details?.due_by) > 0
+          ? Number(dispute.evidence_details.due_by)
+          : null,
+      evidence_past_due: dispute.evidence_details?.past_due === true,
       invoice_number: inv.number || null,
     },
     nowISO,

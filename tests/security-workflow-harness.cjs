@@ -24,6 +24,7 @@ assert.match(workflow, /persist-credentials: false/);
 
 for (const harness of [
   'auth-captcha-harness.cjs',
+  'dispute-lifecycle-visibility-harness.cjs',
   'edge-dependency-pin-harness.cjs',
   'financial-action-audit-harness.cjs',
   'mfa-recovery-harness.cjs',
