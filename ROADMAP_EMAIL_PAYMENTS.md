@@ -35,7 +35,8 @@ Current boundary: this document covers invoice/customer payment features inside 
 - Done: Stripe sandbox webhook destination is subscribed to the 11 events Tallyo currently handles.
 - Done: Stripe sandbox positive lifecycle verification covers trusted payment binding, successful refund, genuine asynchronous failed-refund reversal, known-payment dispute awareness, and duplicate replay idempotency.
 - Done: PAY-LIVE-002 completed the separately approved live account, webhook, server-switch, minimum-payment and public-flag gates. A fictional GBP 1.00 live Checkout settled exactly once to Paid with zero balance and the expected audits; PR #54 published the live frontend after its required check passed.
-- Current caveat: the live invoice-payment path is functionally active, but refunds, real-customer communications and legal/public onboarding remain separate approval gates.
+- Done: after later separate approval, the same payment was refunded in full through Tallyo. One signed success lifecycle recorded one negative GBP 1.00 payment, one request audit and one success audit and restored the invoice balance.
+- Current caveat: the live invoice-payment and seller-authorised refund paths are functionally active, but each future refund, real-customer communication and legal/public onboarding remains separately controlled.
 
 ## Required deploy/setup checks
 

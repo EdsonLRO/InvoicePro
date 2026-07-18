@@ -42,7 +42,7 @@ Implemented:
 
 Still to finish before treating the app as customer-ready:
 
-- Review and operationally test the internal chargeback/refund/support procedure in `PAYMENT_OPERATIONS_RUNBOOK.md`; customer-facing policy remains legally blocked.
+- The authenticated live refund procedure is operationally verified. Continue the separate chargeback/support exercises; customer-facing policy remains legally blocked.
 - The Owner-approved non-production restore test passed on 2026-07-15. The isolated temporary project was deleted after approval and production remained healthy; evidence is in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
 - Expand append-only audit logging to remaining sensitive actions and operational monitoring. Recurring-generation failures and overdue-reminder provider/history failures now have privacy-safe evidence; company/settings saves are covered at a category level, while backup/restore evidence remains a separate controlled record.
 - MFA browser acceptance is complete for fail-closed routing, primary/backup factor lifecycle, primary-specific and backup-specific recovery, wrong-code rejection, and email-only bypass rejection. The all-factors-lost backend is deployed and has passed boundary, privilege, AAL, rolled-back RLS, authenticated lifecycle, audit-minimisation, rollback-only live-throttling, notification-delivery/minimisation, and real-Android recovery acceptance. A mobile recovery-code modal clipping issue was corrected and retested on the phone. After explicit Owner approval, PR #44 merged and the controlled test/portfolio frontend was published successfully. External UK legal/privacy review remains required before paid/public onboarding.
@@ -63,9 +63,10 @@ Completed functional activation:
 - The PAY-LIVE-001 migration and matching Edge Functions were reviewed, deployed in order, and replay-verified in sandbox.
 - The active live webhook destination is pinned to the reviewed API version and only the eleven handled events.
 - A fictional GBP 1.00 live Checkout recorded one payment, Paid status, zero balance and the expected append-only audit evidence.
+- The same acceptance payment was later refunded in full through Tallyo after separate approval. Signed webhook processing recorded one negative GBP 1.00 refund plus one request and one success audit, reopened the invoice to Sent, and restored the GBP 1.00 balance.
 - PR #54 merged after its required check passed; GitHub Pages serves `window.STRIPE_LIVE_MODE=true` over HTTPS with no live-secret pattern in the public file.
 
-Still separately gated: executing a live refund, sending a link or email to a real customer, legal/privacy publication, and unrestricted public onboarding. The Owner may use the now-functional live app directly within those retained boundaries.
+Still separately gated: each future refund or real-customer link/email action, legal/privacy publication, and unrestricted public onboarding. The Owner may use the now-functional live app directly within those retained boundaries.
 
 ## Current email status
 

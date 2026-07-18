@@ -4,11 +4,11 @@ Internal operating procedure for invoice payments handled through Stripe. This i
 
 ## Current Boundary
 
-- Stripe remains in sandbox/test mode.
+- Stripe invoice payments operate in controlled live mode; sandbox remains the safe regression environment.
 - Tallyo uses Stripe-hosted Checkout; Tallyo does not collect or store full card details.
 - A payment changes an invoice only after a signed Stripe webhook is verified and matched to a Tallyo-created Checkout Session.
 - A refund changes the invoice balance only after a signed Stripe refund webhook confirms the provider outcome.
-- Live activation, real customer payment links, customer-facing terms, and public claims remain approval-gated.
+- The controlled live activation and one full fictional acceptance refund are verified. Each future refund, real-customer payment link, customer-facing term, and public claim remains separately controlled.
 
 ## Roles
 
@@ -78,6 +78,8 @@ The following order is mandatory. Do not place secret values, webhook payloads, 
 5. With separate approval for a real-money acceptance test, send one minimum-value invoice to an Owner-controlled address, pay it once, and verify Checkout amount/currency, signed webhook success, one invoice payment, one append-only audit event, correct invoice status, and Stripe settlement state. Refund it only if separately approved, then verify the signed refund lifecycle and balance restoration.
 6. Only after that verification, change the public `window.STRIPE_LIVE_MODE` flag to `true`, publish the reviewed frontend, and perform a no-data smoke check. Real customer use and customer communications remain subject to the separate release/legal gate below.
 
+**Controlled acceptance, 2026-07-18:** The fictional GBP 1.00 live payment settled once, and a later separately approved full refund was requested through Tallyo. The first browser attempt returned a transport error and database readback confirmed no effect; one controlled retry succeeded. Signed webhook reconciliation recorded one negative GBP 1.00 refund, one request audit and one success audit, reopened the invoice to Sent, and restored the GBP 1.00 balance. No customer communication occurred.
+
 ### Rollback and containment
 
 1. Set `STRIPE_PAYMENTS_ENABLED=false` first. This blocks new live Checkout Sessions and in-app refunds while allowing the webhook to finish processing already-created provider events.
@@ -92,7 +94,7 @@ For each material case record: internal case reference, invoice reference, provi
 
 ## Release Gate
 
-Technical sandbox handling is verified, but real-customer use remains blocked until:
+Technical sandbox handling and the controlled live payment/refund paths are verified, but unrestricted real-customer use remains blocked until:
 
 - the timed restore exercise is complete;
 - the Auth/session/SMTP/abuse-control decisions are resolved;
