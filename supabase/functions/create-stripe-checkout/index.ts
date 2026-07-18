@@ -135,6 +135,7 @@ Deno.serve(async (req) => {
 
   const params = new URLSearchParams();
   params.set("mode", "payment");
+  params.set("customer_creation", "always");
   params.set("success_url", `${appUrl}?payment=success&invoice=${encodeURIComponent(documentId)}`);
   params.set("cancel_url", `${appUrl}?payment=cancelled&invoice=${encodeURIComponent(documentId)}`);
   params.set("client_reference_id", documentId);
@@ -156,6 +157,7 @@ Deno.serve(async (req) => {
     userData.user.id,
     currency,
     String(amountMinor),
+    String(inv.stripe_event_version || 0),
     "full_balance",
     "app",
     validEmail(customer.email) ? customer.email.trim().toLowerCase() : "",
