@@ -32,13 +32,15 @@ audit-event loading and all protected workflows remain unchanged. Build prepared
 as `2026.07.19.1`.\
 Review result: Focused operational-evidence/customer-copy, email-status,
 account-export, MFA-recovery, session-expiry, scale/accessibility/destructive-safety
-and PWA-update harnesses passed. `git diff --check` passed.\
+and PWA-update harnesses passed. `git diff --check`, focused secret scan and the
+required GitHub `verify` check passed.\
 Evidence: Browser QA passed at 390x844 and 1280x800. The status panel was absent;
 all five retained preview sections stayed within the mobile viewport; no horizontal
 overflow or technical-copy match was present; and the desktop content remained
 centred at its intended width.\
 Branch: `codex/customer-friendly-copy`\
-Commit: Pending\
+Implementation commit: `b0401a16499bfac15a85fb0c615c435ade10a763`\
+Pull request: #74, draft — https://github.com/EdsonLRO/InvoicePro/pull/74\
 Blocked reason: None during implementation. Publishing the frontend retains the
 Owner approval boundary.\
 Next action: Open a draft pull request, wait for the required verify check, then
