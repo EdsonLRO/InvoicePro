@@ -175,7 +175,7 @@ async function run() {
     assert.match(writer, /"account_data_exported"/, 'The export event must be allowlisted server-side.');
     assert.doesNotMatch(writer, /metadata\.user_agent|headers\.get\("user-agent"\)/,
         'Audit events must not retain browser user-agent enrichment.');
-    assert.deepEqual(alerts, ['Account data export downloaded. Keep the file secure.']);
+    assert.deepEqual(alerts, ['Your account data has been downloaded. Keep it somewhere secure.']);
     assert.equal(app.accountExportBusy, false);
 
     forcedErrorTable = 'invoices';

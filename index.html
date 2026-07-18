@@ -152,7 +152,7 @@
             <div v-if="authMode === 'register'" class="space-y-5">
                 <h2 class="text-xl font-semibold">Create Account</h2>
                 <div class="bg-blue-50 text-blue-800 text-xs p-3 rounded-lg border border-blue-100">
-                    <strong>Before you start:</strong> Your account is created securely with our authentication provider, and you'll need to confirm your email address before signing in. Use a real email you can access.
+                    <strong>Before you start:</strong> Use an email address you can access. We’ll send you a confirmation link before you sign in.
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Email Address</label>
@@ -161,7 +161,7 @@
                 <div>
                     <label class="block text-sm font-medium mb-1">Password</label>
                     <input type="password" v-model="auth.password" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                    <p class="text-xs text-slate-400 mt-1">Use at least 12 characters. A longer passphrase is fine; avoid common words and your email.</p>
+                    <p class="text-xs text-slate-400 mt-1">Use at least 12 characters and choose a password that is unique to Tallyo.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Confirm Password</label>
@@ -212,7 +212,7 @@
             <div v-if="authMode === 'mfa-recovery-code'" class="space-y-5">
                 <h2 class="text-xl font-semibold">Use a recovery code</h2>
                 <div class="bg-amber-50 text-amber-800 text-sm p-4 rounded-lg border border-amber-200">
-                    Enter one unused code from the recovery set you saved. A successful recovery signs out every device and requires a new authenticator before business data is available.
+                    Enter one unused code from the recovery set you saved. If recovery succeeds, Tallyo signs you out everywhere. You’ll then set up a new authenticator before you can see your business data.
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Recovery Code</label>
@@ -278,7 +278,7 @@
                 <div>
                     <label class="block text-sm font-medium mb-1">New Password</label>
                     <input type="password" autocomplete="new-password" v-model="pwdRecovery.new" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                    <p class="text-xs text-slate-400 mt-1">Use at least 12 characters. A longer passphrase is recommended.</p>
+                    <p class="text-xs text-slate-400 mt-1">Use at least 12 characters and choose a password that is unique to Tallyo.</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Confirm New Password</label>
@@ -343,10 +343,10 @@
                             {{ userProfileEmail.charAt(0) }}
                         </div>
                         <div>
-                            <p class="text-sm text-slate-500 uppercase font-bold tracking-wider mb-1">Registered Email</p>
+                            <p class="text-sm text-slate-500 uppercase font-bold tracking-wider mb-1">Account Email</p>
                             <p class="text-xl font-medium text-slate-800">{{ userProfileEmail }}</p>
                             <span class="inline-flex items-center mt-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                Email Verified
+                                Email Confirmed
                             </span>
                         </div>
                     </div>
@@ -367,7 +367,7 @@
                         <div>
                             <label class="block text-sm font-bold text-slate-600 mb-1">New Password</label>
                             <input type="password" v-model="pwdChange.new" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <p class="text-xs text-slate-500 mt-1">Use at least 12 characters. A longer passphrase is fine; avoid common words and your email.</p>
+                            <p class="text-xs text-slate-500 mt-1">Use at least 12 characters and choose a password that is unique to Tallyo.</p>
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-600 mb-1">Confirm New Password</label>
@@ -385,7 +385,7 @@
                         <span v-if="mfa.enabled" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Enabled</span>
                         <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">Off</span>
                     </div>
-                    <p class="text-sm text-slate-600 mb-5">Add a second step at sign-in using an authenticator app (Google Authenticator, Authy, Microsoft Authenticator, etc.). Even if someone learns your password, they can't sign in without the code from your phone.</p>
+                    <p class="text-sm text-slate-600 mb-5">Protect your account with a code from an authenticator app when you sign in. This helps keep your account safe if someone gets your password.</p>
                     <div v-if="!mfa.enabled && mfa.step === 'idle'">
                         <button @click="startMfaEnroll('primary')" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Preparing...' : 'Enable Two-Factor' }}</button>
                     </div>
@@ -421,15 +421,15 @@
                                 <button v-if="mfa.verifiedFactors.length > 1" @click="removeMfaFactor(factor.id)" :disabled="mfa.busy" class="text-sm text-red-600 hover:underline disabled:opacity-50">Remove</button>
                             </div>
                         </div>
-                        <p v-if="mfaFactorRolesNeedRepair(mfa.verifiedFactors)" class="text-sm text-amber-700 mb-4">This account has duplicated authenticator roles. Remove one factor using a current code from the other, then add the missing role shown by Tallyo.</p>
-                        <p v-if="mfa.verifiedFactors.length < 2" class="text-sm text-amber-700 mb-4">Add another authenticator now. A separately stored backup authenticator remains useful even when recovery codes are enabled.</p>
+                        <p v-if="mfaFactorRolesNeedRepair(mfa.verifiedFactors)" class="text-sm text-amber-700 mb-4">Tallyo found a problem with your primary and backup authenticator labels. Remove one using a code from the other, then add the missing authenticator again.</p>
+                        <p v-if="mfa.verifiedFactors.length < 2" class="text-sm text-amber-700 mb-4">For extra protection, add a backup authenticator on another device.</p>
                         <div class="flex flex-col sm:flex-row gap-3">
                             <button v-if="mfa.verifiedFactors.length < 2" @click="startMfaEnroll()" :disabled="mfa.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ mfa.busy ? 'Preparing...' : (mfaNextEnrollKind() === 'primary' ? 'Add Primary Authenticator' : 'Add Backup Authenticator') }}</button>
                             <button @click="disableMfa" :disabled="mfa.busy" class="bg-white border border-red-300 text-red-600 px-6 py-2.5 rounded-lg hover:bg-red-50 font-medium transition disabled:opacity-50">{{ mfa.busy ? 'Working...' : 'Turn Off Two-Factor' }}</button>
                         </div>
                         <div class="mt-6 pt-5 border-t border-slate-200">
                             <h3 class="text-lg font-semibold mb-2">Recovery Codes</h3>
-                            <p class="text-sm text-slate-600 mb-3">Keep one-time recovery codes offline or in a trusted password manager. They require your password and cannot bypass it.</p>
+                            <p class="text-sm text-slate-600 mb-3">Keep these one-time codes somewhere safe, such as a trusted password manager. You’ll still need your password when you use one.</p>
                             <p v-if="mfaRecovery.codesGeneratedAt" class="text-xs text-slate-500 mb-3">Current set generated {{ formatDateTime(mfaRecovery.codesGeneratedAt) }}.</p>
                             <button @click="generateMfaRecoveryCodes" :disabled="mfaRecovery.busy" class="bg-slate-900 text-white px-6 py-2.5 rounded-lg hover:bg-slate-800 font-medium transition disabled:opacity-50">{{ mfaRecovery.busy ? 'Generating...' : (mfaRecovery.codesGeneratedAt ? 'Replace Recovery Codes' : 'Generate Recovery Codes') }}</button>
                         </div>
@@ -439,7 +439,7 @@
                 <div v-if="mfaRecovery.codes.length" class="recovery-codes-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4" role="dialog" aria-modal="true" aria-labelledby="recovery-codes-title">
                     <div class="recovery-codes-dialog w-full max-w-lg rounded-xl bg-white p-5 sm:p-7 shadow-2xl">
                         <h2 id="recovery-codes-title" class="text-xl font-semibold mb-2">Save your recovery codes</h2>
-                        <p class="text-sm text-slate-600 mb-4">These codes are shown once. Each is single-use, and this set replaced every previous set.</p>
+                        <p class="text-sm text-slate-600 mb-4">These codes are shown once, and each works only one time. Creating this set cancelled any older recovery codes.</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-100 rounded-lg p-4 mb-4">
                             <code v-for="code in mfaRecovery.codes" :key="code" class="text-sm text-center bg-white border border-slate-200 rounded px-2 py-2">{{ code }}</code>
                         </div>
@@ -452,52 +452,26 @@
                     </div>
                 </div>
 
-                <section class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200" aria-labelledby="operational-health-title">
-                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5 border-b pb-4">
-                        <div>
-                            <h2 id="operational-health-title" class="text-2xl font-semibold">System Status</h2>
-                            <p class="text-sm text-slate-600 mt-1">A simple overview of recent payments, emails, recurring invoices, reminders, and sign-in protection for this account.</p>
-                        </div>
-                        <span class="self-start px-3 py-1 rounded-full text-xs font-bold" :class="operationalHealth.attentionCount ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'" role="status" aria-live="polite">
-                            {{ operationalHealth.attentionCount ? (operationalHealth.attentionCount + ' need attention') : 'Everything looks good' }}
-                        </span>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <article v-for="card in operationalHealth.cards" :key="card.key" class="rounded-lg border border-slate-200 bg-slate-50 p-4 min-w-0">
-                            <div class="flex items-start justify-between gap-3">
-                                <h3 class="text-sm font-semibold text-slate-800">{{ card.label }}</h3>
-                                <span class="px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap" :class="operationalHealthStatusClass(card.state)">{{ card.status }}</span>
-                            </div>
-                            <p class="text-xs text-slate-600 mt-2 break-words">{{ card.detail }}</p>
-                            <p v-if="card.at" class="text-xs text-slate-400 mt-1">{{ formatDateTime(card.at) }}</p>
-                        </article>
-                    </div>
-                    <details class="mt-4 rounded-lg border border-slate-200 bg-white px-4 py-3 text-xs text-slate-600">
-                        <summary class="cursor-pointer font-semibold text-slate-700">How this status works</summary>
-                        <p class="mt-2">Tallyo summarises activity saved to this account. Provider delivery outages, unsigned requests, and function transport failures may appear only in Stripe, Resend, or Supabase logs. This panel reports persisted account evidence; it does not claim that missing evidence proves no failure occurred.</p>
-                    </details>
-                </section>
-
                 <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-2xl font-semibold mb-3">Data Export</h2>
-                    <p class="text-sm text-slate-600 mb-5">Download a structured JSON copy of the account, company settings, customers, saved items, documents, recurring schedules, and audit events currently associated with your signed-in account.</p>
+                    <p class="text-sm text-slate-600 mb-5">Download a copy of your Tallyo data, including company settings, customers, saved items, invoices and other documents, recurring invoices, and activity history.</p>
                     <div class="bg-amber-50 text-amber-800 text-sm p-4 rounded-lg border border-amber-200 mb-5">
-                        The file can contain sensitive business, customer, invoice, payment, and security-event information. Store it only on a trusted device.
+                        This download contains private business and customer information. Keep it on a device you trust.
                     </div>
                     <button @click="exportAccountData" :disabled="accountExportBusy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">
                         {{ accountExportBusy ? 'Preparing export...' : 'Download Account Data' }}
                     </button>
-                    <p class="text-xs text-slate-500 mt-3">The export is created in this browser and is not uploaded to another Tallyo storage location.</p>
+                    <p class="text-xs text-slate-500 mt-3">Your file is prepared and downloaded directly on this device.</p>
                 </div>
 
                 <div class="bg-red-50 p-5 sm:p-8 rounded-xl border border-red-200">
-                    <h2 class="text-xl font-semibold text-red-700 mb-2">Session Controls</h2>
-                    <p class="text-red-600 text-sm mb-6">Choose whether to end only this browser session or revoke refresh tokens for every signed-in device.</p>
+                    <h2 class="text-xl font-semibold text-red-700 mb-2">Sign Out</h2>
+                    <p class="text-red-600 text-sm mb-6">Sign out on this device, or sign out everywhere your Tallyo account is open.</p>
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <button @click="confirmLogoutLocal" class="bg-white border border-red-300 text-red-700 px-6 py-3 rounded-lg hover:bg-red-50 font-medium transition">Log Out This Device</button>
-                        <button @click="confirmLogoutAllDevices" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 font-medium shadow-sm transition">Log Out All Devices</button>
+                        <button @click="confirmLogoutLocal" class="bg-white border border-red-300 text-red-700 px-6 py-3 rounded-lg hover:bg-red-50 font-medium transition">Sign Out This Device</button>
+                        <button @click="confirmLogoutAllDevices" class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 font-medium shadow-sm transition">Sign Out Everywhere</button>
                     </div>
-                    <p class="text-xs text-red-500 mt-3">All-devices logout asks for your password, and MFA too when enabled.</p>
+                    <p class="text-xs text-red-500 mt-3">For your security, signing out everywhere requires your password and, if enabled, an authenticator code.</p>
                 </div>
 
                 <p class="text-center text-xs text-slate-400">Tallyo build {{ appBuild }}</p>
@@ -506,8 +480,8 @@
 
             <div v-if="sessionConfirm.visible" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4">
                 <div class="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md p-6">
-                    <h2 class="text-xl font-semibold text-slate-800 mb-2">Confirm all-devices logout</h2>
-                    <p class="text-sm text-slate-600 mb-5">Enter your current password before ending sessions on every device.</p>
+                    <h2 class="text-xl font-semibold text-slate-800 mb-2">Sign out everywhere?</h2>
+                    <p class="text-sm text-slate-600 mb-5">Enter your current password to confirm. This will sign you out on every device.</p>
                     <label class="block text-sm font-bold text-slate-600 mb-1">Current password</label>
                     <input type="password" v-model="sessionConfirm.password" @keyup.enter="submitSessionPasswordConfirm" class="w-full border rounded-lg px-3 py-3 focus:ring-2 focus:ring-indigo-500 outline-none">
                     <p v-if="sessionConfirm.error" class="text-sm text-red-600 mt-2">{{ sessionConfirm.error }}</p>
@@ -618,7 +592,7 @@
                             <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }} ({{ c.symbol }}) - {{ c.name }}</option>
                         </select>
                         <button v-if="draft.docType === 'quote'" @click="convertToInvoice(draft)" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">Convert to Invoice</button>
-                        <button @click="sendDocumentEmail(draft)" :disabled="emailSendingId === draft.id || emailSendingId === 'draft'" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm disabled:opacity-50">{{ (emailSendingId === draft.id || emailSendingId === 'draft') ? (emailSendingStage === 'prepared' ? 'Prepared...' : 'Queued...') : 'Email' }}</button>
+                        <button @click="sendDocumentEmail(draft)" :disabled="emailSendingId === draft.id || emailSendingId === 'draft'" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm disabled:opacity-50">{{ (emailSendingId === draft.id || emailSendingId === 'draft') ? (emailSendingStage === 'prepared' ? 'Preparing...' : 'Sending...') : 'Email' }}</button>
                         <button @click="saveInvoice" :disabled="documentSaveBusy" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-colors disabled:opacity-50">{{ documentSaveBusy ? 'Saving…' : ('Save ' + docTypeNoun(draft.docType)) }}</button>
                     </div>
                 </div>
@@ -912,7 +886,7 @@
                     <div class="flex items-center justify-between flex-wrap gap-3">
                         <div>
                             <h3 class="text-lg font-semibold">Automatic reminders</h3>
-                            <p class="text-xs text-slate-500 mt-1">Opt in per invoice. The scheduled server run only sends after this invoice is saved and overdue.</p>
+                            <p class="text-xs text-slate-500 mt-1">Turn this on if you want Tallyo to email a reminder when this saved invoice becomes overdue.</p>
                         </div>
                         <button type="button" @click="toggleOverdueReminders" :class="draft.overdueRemindersEnabled ? 'bg-indigo-600' : 'bg-slate-300'" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0">
                             <span :class="draft.overdueRemindersEnabled ? 'translate-x-6' : 'translate-x-1'" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"></span>
@@ -1236,7 +1210,7 @@
                                 <td class="p-4 text-right whitespace-nowrap">
                                     <div class="flex justify-end items-center space-x-3">
                                         <button @click="duplicateInvoice(inv)" class="text-slate-500 hover:text-slate-800 text-sm font-medium">Duplicate</button>
-                                        <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id" class="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50">{{ emailSendingId === inv.id ? (emailSendingStage === 'prepared' ? 'Prepared...' : 'Queued...') : 'Email' }}</button>
+                                        <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id" class="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50">{{ emailSendingId === inv.id ? (emailSendingStage === 'prepared' ? 'Preparing...' : 'Sending...') : 'Email' }}</button>
                                         <button @click="exportPDF(inv)" class="text-emerald-600 hover:text-emerald-800 text-sm font-medium">PDF</button>
                                         <span class="text-slate-300">|</span>
                                         <button @click="deleteInvoice(inv)" class="text-red-500 hover:text-red-700 text-sm font-medium">Delete</button>
@@ -1571,7 +1545,7 @@
                         <div class="flex items-center justify-between flex-wrap gap-3">
                             <div>
                                 <h3 class="font-semibold text-amber-800">{{ dueTemplates.length }} recurring invoice{{ dueTemplates.length > 1 ? 's' : '' }} due</h3>
-                                <p class="text-sm text-amber-700 mt-0.5">This manual catch-up creates Sent invoices in the app. Automatic email is handled by the scheduled server run.</p>
+                                <p class="text-sm text-amber-700 mt-0.5">This creates the missing invoices as Sent. Tallyo emails them only when automatic email is enabled for the recurring schedule.</p>
                             </div>
                             <button @click="generateAllDue" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-colors whitespace-nowrap">Generate all due</button>
                         </div>
@@ -1890,7 +1864,7 @@
                 '<div style="max-width:640px;margin:60px auto;font-family:system-ui,sans-serif;padding:24px;border:1px solid #fca5a5;background:#fef2f2;border-radius:12px;color:#7f1d1d">' +
                 '<h2 style="margin:0 0 8px">Tallyo could not start</h2>' +
                 '<p style="margin:0 0 8px">' + msg + '</p>' +
-                '<p style="margin:0;font-size:13px;color:#991b1b">Open the browser console (F12) for technical details.</p></div>';
+                '<p style="margin:0;font-size:13px;color:#991b1b">Reload the page and try again.</p></div>';
             throw new Error(msg);
         }
         if (!window.supabase || !window.supabase.createClient) {
@@ -1954,7 +1928,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.18.10';
+    const APP_BUILD = '2026.07.19.1';
     const { createApp } = Vue;
 
     createApp({
@@ -2105,74 +2079,6 @@
                 });
                 Object.keys(map).forEach(id => map[id].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))));
                 return map;
-            },
-            operationalHealth() {
-                const events = [...(this.auditEvents || [])].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
-                const latest = types => events.find(ev => types.includes(String(ev.event_type || ''))) || null;
-                const runCard = (key, label, active, event) => {
-                    if (!active) return { key, label, state: 'neutral', status: 'Not in use', detail: 'You have not enabled this feature for any current records.', at: '' };
-                    if (!event) return { key, label, state: 'attention', status: 'No recent activity', detail: 'Tallyo has not recorded a recent run yet. Open the feature to review its schedule.', at: '' };
-                    const metadata = event.metadata || {};
-                    const failed = Math.max(0, Number(metadata.failed) || 0);
-                    return {
-                        key,
-                        label,
-                        state: failed > 0 || metadata.status === 'attention' ? 'attention' : 'ok',
-                        status: failed > 0 ? (failed + ' need attention') : 'Working normally',
-                        detail: (Math.max(0, Number(metadata.checked) || 0)) + ' record(s) checked' + (metadata.sent !== undefined ? (', ' + (Math.max(0, Number(metadata.sent) || 0)) + ' reminder(s) sent') : '') + '.',
-                        at: event.created_at || ''
-                    };
-                };
-                const failureTypes = ['recurring_invoice_generation_failed', 'recurring_schedule_history_update_failed', 'payment_reminder_processing_failed', 'email_send_failed', 'email_failed', 'email_bounced', 'stripe_refund_failed', 'stripe_payment_failed'];
-                const recentCutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
-                const recentFailure = events.find(ev => failureTypes.includes(String(ev.event_type || '')) && Date.parse(ev.created_at || '') >= recentCutoff) || null;
-                const latestRefund = latest(['stripe_refund_failed', 'stripe_refund_succeeded', 'stripe_refund_updated']);
-                const latestProvider = events.find(ev => ev.source === 'provider_webhook') || null;
-                const activeDisputeCount = (this.invoices || []).filter(inv => {
-                    const dispute = this.disputeStateFor(inv.id);
-                    return dispute && ['needs_response', 'warning_needs_response', 'under_review', 'warning_under_review'].includes(dispute.status);
-                }).length;
-                const cards = [
-                    runCard('recurring', 'Recurring invoices', (this.recurringTemplates || []).some(t => t.active !== false), latest(['recurring_automation_run_completed'])),
-                    runCard('reminders', 'Overdue reminders', (this.invoices || []).some(inv => inv.docType === 'invoice' && inv.overdueRemindersEnabled === true), latest(['overdue_reminder_run_completed'])),
-                    {
-                        key: 'failures', label: 'Recent processing issues', state: recentFailure ? 'attention' : 'ok',
-                        status: recentFailure ? 'Needs attention' : 'No issues found',
-                        detail: recentFailure ? this.operationalEventLabel(recentFailure.event_type) : 'No processing issue was recorded for this account in the last 7 days.',
-                        at: recentFailure ? recentFailure.created_at : ''
-                    },
-                    {
-                        key: 'refund', label: 'Latest refund', state: latestRefund && latestRefund.event_type === 'stripe_refund_failed' ? 'attention' : 'neutral',
-                        status: !latestRefund ? 'No recent refund' : (latestRefund.event_type === 'stripe_refund_failed' ? 'Needs attention' : 'Completed'),
-                        detail: latestRefund ? this.operationalEventLabel(latestRefund.event_type) : 'No recent refund activity is available for this account.',
-                        at: latestRefund ? latestRefund.created_at : ''
-                    },
-                    {
-                        key: 'disputes', label: 'Payment disputes', state: activeDisputeCount ? 'attention' : 'ok',
-                        status: activeDisputeCount ? (activeDisputeCount + ' open') : 'None open',
-                        detail: activeDisputeCount ? 'Open the affected invoice for details and the next action.' : 'No active payment dispute is recorded for the loaded invoices.',
-                        at: ''
-                    },
-                    {
-                        key: 'provider', label: 'Latest payment or email update', state: 'neutral',
-                        status: latestProvider ? 'Received' : 'No recent update',
-                        detail: latestProvider ? this.operationalEventLabel(latestProvider.event_type) : 'No recent Stripe or Resend update is available for this account.',
-                        at: latestProvider ? latestProvider.created_at : ''
-                    },
-                    {
-                        key: 'stripe', label: 'Card payment mode', state: this.stripeLiveMode ? 'ok' : 'neutral',
-                        status: this.stripeLiveMode ? 'Live' : 'Test',
-                        detail: this.stripeLiveMode ? 'Card checkouts use live Stripe payments.' : 'Card checkouts use Stripe test mode.',
-                        at: ''
-                    },
-                    {
-                        key: 'auth-abuse', label: 'Sign-in protection', state: this.turnstile.enabled ? 'ok' : 'attention',
-                        status: this.turnstile.enabled ? 'Active' : 'Not active',
-                        detail: this.turnstile.enabled ? 'Extra automated protection is active for supported sign-in actions.' : 'Extra automated sign-in protection is not active.',
-                        at: ''
-                    }
-                ];
-                return { cards, attentionCount: cards.filter(card => card.state === 'attention').length };
             },
             dueTemplates() {
                 const today = new Date().toISOString().split('T')[0];
@@ -2585,7 +2491,7 @@
                 const commonTerms = ['password', 'qwerty', 'letmein', 'welcome', 'admin', 'tallyo', 'invoicepro', '12345678', '123456789', '1234567890'];
                 if (commonTerms.some(term => lower.includes(term))) return 'Password is too easy to guess. Avoid common words, app names, and simple number patterns.';
                 const classes = [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].filter(re => re.test(value)).length;
-                if (value.length < 16 && classes < 3) return 'Use a longer passphrase, or mix at least three of lowercase, uppercase, numbers, and symbols.';
+                if (value.length < 16 && classes < 3) return 'Make your password longer, or use a mix of uppercase and lowercase letters, numbers, and symbols.';
                 return '';
             },
             async register() {
@@ -3003,7 +2909,7 @@
                     if (!factors.length) return alert("No verified authenticator was found.");
                     const verifierId = factors[0].id;
                     const code = await this.requestPasswordMfaCode({
-                        title: 'Confirm before turning off MFA',
+                        title: 'Confirm before turning off two-factor authentication',
                         message: `Enter a fresh code from ${this.mfaFactorLabel(factors[0], 0)} before turning off two-factor authentication.`
                     });
                     await this.completeMfaForCurrentSession(code, { force: true, factorId: verifierId });
@@ -3165,7 +3071,7 @@
                 this.sessionConfirm = { visible: false, busy: false, password: '', error: '' };
             },
             async confirmLogoutAllDevices() {
-                if(!confirm("Log out of Tallyo on every device? You'll need to sign in again everywhere.")) return;
+                if(!confirm("Sign out of Tallyo everywhere? You'll need to sign in again on each device.")) return;
                 try {
                     const password = await this.requestSessionPasswordConfirm();
                     const { error: reauthError } = await supabaseClient.auth.signInWithPassword({
@@ -3175,16 +3081,16 @@
                     if (reauthError) return alert("Current password is incorrect.");
                     if (await this.currentSessionNeedsMfa()) {
                         const code = await this.requestPasswordMfaCode({
-                            title: 'Confirm all-devices logout',
-                            message: 'Enter the 6-digit code from your authenticator app before ending sessions on every device.'
+                            title: 'Confirm sign out everywhere',
+                            message: 'Enter the 6-digit code from your authenticator app to sign out on every device.'
                         });
                         await this.completeMfaForCurrentSession(code);
                     }
                     await this.logAppAuditEvent('account_logout_all_devices', 'account', null, {});
                     await this.signOutWithScope('global');
-                    alert("You have been logged out on all devices.");
+                    alert("You have been signed out on every device.");
                 } catch (e) {
-                    alert("Could not log out all devices: " + (e.message || e));
+                    alert("Could not sign out everywhere: " + (e.message || e));
                 }
             },
             async sendPasswordReset() {
@@ -3958,7 +3864,7 @@
                     await this.logAppAuditEvent('account_data_exported', 'account', null, {
                         format: 'json', export_version: 1
                     });
-                    alert('Account data export downloaded. Keep the file secure.');
+                    alert('Your account data has been downloaded. Keep it somewhere secure.');
                 } catch (error) {
                     console.error('Account data export failed:', error);
                     alert(error && error.message ? error.message : 'Could not export account data.');
@@ -4008,8 +3914,8 @@
                 const events = (this.emailEventsByDocument[id] || []).filter(ev => String(ev.event_type || '').startsWith('email_') || ev.event_type === 'document_email_sent' || ev.event_type === 'payment_reminder_email_sent');
                 if (this.emailSendingId === id || (this.emailSendingId === 'draft' && this.draft && this.draft.id === id)) {
                     const state = this.emailSendingStage === 'prepared' ? 'email_prepared' : 'email_queued';
-                    const label = state === 'email_prepared' ? 'Prepared' : 'Queued';
-                    return { state, label, detail: label + ' for provider submission', event: null };
+                    const label = state === 'email_prepared' ? 'Preparing' : 'Sending';
+                    return { state, label, detail: label + ' email', event: null };
                 }
                 if (!events.length) return null;
                 const eventTime = ev => {
@@ -4041,9 +3947,9 @@
                 let best = attemptEvents[0];
                 attemptEvents.forEach(ev => { if ((rank[ev.event_type] || 0) > (rank[best.event_type] || 0)) best = ev; });
                 const labels = {
-                    document_email_sent: 'Sent to provider',
-                    payment_reminder_email_sent: 'Sent to provider',
-                    email_sent: 'Sent to provider',
+                    document_email_sent: 'Accepted for delivery',
+                    payment_reminder_email_sent: 'Accepted for delivery',
+                    email_sent: 'Accepted for delivery',
                     email_delivered: 'Delivered',
                     email_delivery_delayed: 'Delayed',
                     email_bounced: 'Bounced',
@@ -4055,7 +3961,7 @@
                     email_received: 'Received'
                 };
                 const state = best.event_type;
-                const label = labels[state] || 'Email event';
+                const label = labels[state] || 'Email update';
                 const detail = label + (best.created_at ? (' on ' + this.formatHistoryTime(best.created_at)) : '');
                 return { state, label, detail, event: best };
             },
@@ -4066,37 +3972,6 @@
                 if (state === 'email_prepared' || state === 'email_queued') return 'bg-indigo-100 text-indigo-700';
                 if (state === 'email_sent' || state === 'document_email_sent' || state === 'payment_reminder_email_sent') return 'bg-blue-100 text-blue-700';
                 return 'bg-slate-100 text-slate-600';
-            },
-            operationalHealthStatusClass(state) {
-                if (state === 'ok') return 'bg-green-100 text-green-700';
-                if (state === 'attention') return 'bg-amber-100 text-amber-800';
-                return 'bg-slate-200 text-slate-700';
-            },
-            operationalEventLabel(eventType) {
-                return {
-                    recurring_invoice_generation_failed: 'Recurring invoice generation failed.',
-                    recurring_schedule_history_update_failed: 'Recurring schedule history could not be updated.',
-                    payment_reminder_processing_failed: 'An overdue reminder could not be finalised.',
-                    email_send_failed: 'An email request failed before provider acceptance.',
-                    email_failed: 'The email provider reported a delivery failure.',
-                    email_bounced: 'The email provider reported a bounce.',
-                    stripe_refund_failed: 'Stripe reported a failed refund.',
-                    stripe_refund_succeeded: 'Stripe reported a successful refund.',
-                    stripe_refund_updated: 'Stripe reported a refund update.',
-                    stripe_payment_failed: 'Stripe reported a failed payment.',
-                    charge_dispute_created: 'Stripe reported a new dispute.',
-                    charge_dispute_updated: 'Stripe reported a dispute update.',
-                    charge_dispute_closed: 'Stripe reported a closed dispute.',
-                    charge_dispute_funds_withdrawn: 'Stripe reported disputed funds withdrawn.',
-                    charge_dispute_funds_reinstated: 'Stripe reported disputed funds reinstated.',
-                    email_sent: 'Resend accepted an email for delivery.',
-                    email_delivered: 'Resend reported delivery to the recipient mail server.',
-                    email_delivery_delayed: 'Resend reported delayed delivery.',
-                    email_complained: 'Resend reported a spam complaint.',
-                    email_opened: 'Resend reported an open event.',
-                    email_clicked: 'Resend reported a link click.',
-                    email_received: 'Resend reported an inbound email event.'
-                }[eventType] || 'A signed provider event was recorded.';
             },
             disputeStateFor(id) {
                 if (!id) return null;
@@ -4220,7 +4095,7 @@
                     if (data && data.error) throw new Error(data.error);
                     if (data && data.invoice) this.applyInvoiceRow(data.invoice);
                     await this.loadAuditEvents();
-                    alert('Email sent to the provider for delivery to ' + to + '. Delivery status will update when the provider reports it.');
+                    alert('Email accepted for delivery to ' + to + '. You can follow its status in Activity History.');
                 } catch (e) {
                     console.error('Email send failed:', e);
                     alert('Could not send email: ' + (e.message || e));
@@ -4326,7 +4201,7 @@
                     }
                     await this.loadAuditEvents();
                     this.selectedInvoices = [];
-                    alert('Provider submission complete. Accepted ' + sent + ', skipped ' + skipped + ', failed ' + failed + '. Delivery statuses will update separately.');
+                    alert('Emails processed. Accepted for delivery: ' + sent + '. Skipped: ' + skipped + '. Failed: ' + failed + '. Follow delivery in Activity History.');
                 } finally {
                     this.invoiceBulkBusy = false;
                 }
@@ -4447,11 +4322,11 @@
                     const text = String((ev && ev.text) || '').toLowerCase();
                     if (type === 'dispute' && (text.includes('closed') || text.includes('reinstated'))) return null;
                     if (type === 'dispute') {
-                        if (!this.disputeStateFor(inv && inv.id)) return { text: ev.text || 'Payment provider event needs attention.' };
+                        if (!this.disputeStateFor(inv && inv.id)) return { text: ev.text || 'A payment update needs attention.' };
                         continue;
                     }
                     if (type === 'payment_failed' || (type === 'refund' && text.includes('failed'))) {
-                        return { text: ev.text || 'Payment provider event needs attention.' };
+                        return { text: ev.text || 'A payment update needs attention.' };
                     }
                 }
                 return null;
@@ -4562,7 +4437,7 @@
             },
             async removePayment(index) {
                 const removed = this.draft.payments[index];
-                if (removed && removed.provider === 'stripe') return alert('Stripe payments are provider-confirmed and cannot be removed manually.');
+                if (removed && removed.provider === 'stripe') return alert('Card payments are confirmed by Stripe and cannot be removed manually.');
                 const amt = removed ? (parseFloat(removed.amount) || 0) : 0;
                 const paidAfter = Math.max(0, this.draftPaid - amt);
                 const outstandingAfter = Math.max(0, this.totals.grandTotal - paidAfter);
@@ -4847,7 +4722,7 @@
                         count++;
                     } catch (e) { console.error('Generate failed for template', t.id, e); }
                 }
-                if (count > 0) alert(count + ' invoice' + (count > 1 ? 's' : '') + ' generated and marked as Sent. Automatic email only runs from the scheduled server automation.');
+                if (count > 0) alert(count + ' invoice' + (count > 1 ? 's' : '') + ' created and marked as Sent. Automatic emails follow the recurring schedule settings.');
             },
 
             // ================= OVERDUE REMINDERS =================
@@ -4901,7 +4776,7 @@
                     if (data && data.invoice) this.applyInvoiceRow(data.invoice);
                     await this.loadAuditEvents();
                     this.reminderModal.open = false;
-                    alert('Reminder sent to the provider for delivery to ' + to + '. Delivery status will update separately.');
+                    alert('Reminder accepted for delivery to ' + to + '. You can follow its status in Activity History.');
                 } catch (e) {
                     console.error('Reminder email failed:', e);
                     alert('Could not send reminder: ' + (e.message || e));

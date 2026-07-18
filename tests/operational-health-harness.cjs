@@ -11,23 +11,36 @@ const resendWebhook = fs.readFileSync(path.join(root, 'supabase', 'functions', '
 const documentEmail = fs.readFileSync(path.join(root, 'supabase', 'functions', 'send-document-email', 'index.ts'), 'utf8');
 const reminderEmail = fs.readFileSync(path.join(root, 'supabase', 'functions', 'send-reminder-email', 'index.ts'), 'utf8');
 
-assert.match(app, /id="operational-health-title"/);
-assert.match(app, />System Status</);
-assert.doesNotMatch(app, />Operational Health</);
-assert.match(app, /How this status works/);
-assert.match(app, /Everything looks good/);
-assert.match(app, /persisted account evidence; it does not claim that missing evidence proves no failure occurred/i);
+assert.doesNotMatch(app, /id="operational-health-title"|>System Status<|>Operational Health</,
+  'The account page must not render a separate status panel.');
+assert.doesNotMatch(app, /operationalHealth\(\)|operationalHealthStatusClass|operationalEventLabel/,
+  'Status-panel-only presentation code must be removed with the panel.');
 assert.match(app, /\.select\('event_type, object_type, object_id, source, provider, provider_event_id, created_at, metadata'\)/);
+assert.match(app, /emailEventsByDocument\(\)/,
+  'Removing the status panel must preserve document Activity History evidence.');
+assert.match(app, />Activity History</,
+  'The customer-facing document Activity History must remain available.');
 
-for (const eventType of [
-  'recurring_automation_run_completed',
-  'overdue_reminder_run_completed',
-  'recurring_invoice_generation_failed',
-  'payment_reminder_processing_failed',
-  'stripe_refund_failed',
-  'charge_dispute_created',
+for (const text of [
+  'Download a copy of your Tallyo data',
+  'Your file is prepared and downloaded directly on this device.',
+  'Sign out on this device, or sign out everywhere your Tallyo account is open.',
+  'signing out everywhere requires your password and, if enabled, an authenticator code.',
+  'Turn this on if you want Tallyo to email a reminder when this saved invoice becomes overdue.',
+  'Use at least 12 characters and choose a password that is unique to Tallyo.',
 ]) {
-  assert.match(app, new RegExp(eventType), `${eventType} must feed the operator health view`);
+  assert.match(app, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+    `Expected customer-friendly copy: ${text}`);
+}
+for (const technicalCopy of [
+  'revoke refresh tokens',
+  'structured JSON copy',
+  'another Tallyo storage location',
+  'scheduled server run',
+  'All-devices logout asks',
+]) {
+  assert.doesNotMatch(app, new RegExp(technicalCopy, 'i'),
+    `Technical customer-facing copy must be removed: ${technicalCopy}`);
 }
 
 for (const eventType of [
@@ -61,4 +74,4 @@ assert.match(recurring, /const ok = generationFailed === 0 && historyUpdateFaile
 assert.match(reminders, /event_type: "overdue_reminder_run_completed"/);
 assert.match(reminders, /const ok = failed === 0 && monitoringFailed === 0/);
 
-console.log('Operational health harness passed.');
+console.log('Operational evidence and customer copy harness passed.');
