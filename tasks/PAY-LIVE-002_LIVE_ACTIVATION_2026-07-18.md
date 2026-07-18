@@ -1,0 +1,30 @@
+# PAY-LIVE-002 Stripe Live Activation - 2026-07-18
+
+Task ID: PAY-LIVE-002
+Title: Activate the verified invoice-payment integration for controlled live use
+Objective: Complete the provider and configuration steps that switch the existing, deployed Stripe Checkout integration from verified test mode to controlled live mode without exposing secrets, weakening payment integrity, or using real customer data during acceptance.
+Priority: High
+Status: In Progress
+Phase: Owner Stripe account activation required
+Owner role: Payments Agent
+Assigned specialists: Backend / Supabase Agent; Security Agent; QA Agent; Release Agent
+Required reviewers: Payments Agent; Security Agent; QA Agent; Release Agent; Owner at each live-money boundary
+Model/work mode: Sol for payment and release decisions; Terra for privacy-safe evidence collection
+Risk level: High
+Affected files and systems: Stripe live account and webhook destination; Supabase Edge Function secret names and live-mode flags; `config.js`; this task record; authoritative payment/release documents only after live state changes
+Files or paths locked: Stripe live-provider configuration, Supabase live-payment switches, and the public Stripe live-mode flag on `codex/stripe-live-activation`
+Lock acquired: 2026-07-18
+Documents read: `AGENTS.md`; `APP_STATUS.md`; `docs/INDEX.md`; full orchestration, autonomous-permission, security and legal specialist policies; `tasks/PAY-LIVE-001_PAYMENT_READINESS_2026-07-17.md`; `ROADMAP_EMAIL_PAYMENTS.md`; `PAYMENT_OPERATIONS_RUNBOOK.md`; `RELEASE_READINESS.md`; relevant Stripe functions/tests; current official Stripe go-live guidance
+Dependencies: PAY-LIVE-001 Verified; migration `20260717165044` and matching Checkout v6, Refund v4 and Webhook v11 deployed; public `window.STRIPE_LIVE_MODE=false`; Stripe account approved for live charges and payouts; Owner-controlled live secrets and provider facts
+Acceptance criteria: Stripe account live activation completed by the Owner; one live webhook destination pinned to the reviewed API version and subscribed only to the eleven handled events; live key and webhook secret entered directly in Supabase by the Owner; `STRIPE_API_VERSION`, `STRIPE_LIVE_MODE=true`, then `STRIPE_PAYMENTS_ENABLED=true` set without exposing values; public flag remains false until a minimum Owner-controlled live payment passes; signed webhook, amount/currency, invoice state, one payment, append-only audit and settlement state verified; optional refund requires separate approval and signed lifecycle verification; public flag changed and frontend published only after acceptance
+Required tests: do not repeat PAY-LIVE-001 sandbox regression without a relevant source/deployment change; run privacy-safe live configuration readback, negative mode/kill-switch checks, one minimum-value Owner-controlled live payment, duplicate-event verification if available without exposing payloads, and a final no-data published-shell smoke check
+Security boundary: never request, inspect, display, store or commit passwords, MFA values, live API keys, webhook secrets, identity/banking details, provider payloads, private emails, customer data, card data or reusable Checkout URLs; preserve signed raw-body verification, mode matching, idempotency, amount/currency and invoice/user binding, atomic invoice/audit mutation, append-only evidence, RLS and rollback order
+Payment impact: High; this task enables real money only after the exact provider, secret-entry, live-switch and acceptance gates pass
+Production impact: Live Stripe provider and Supabase configuration plus a later public frontend flag change; each step remains reversible through the documented kill switch and rollback order
+Owner permission required: The Owner approved beginning functional live-payment readiness on 2026-07-18. Separate action-time approval remains required before the minimum real-money payment, any refund, any real customer link/email, and public release.
+Legal/privacy scope: No legal, ICO, regulatory or customer-document work is performed in this task. Existing repository release boundaries are not removed or represented as satisfied.
+Approval boundary: Codex must stop before entering or revealing secrets, completing identity or banking fields, starting a real-money payment/refund, sending a customer link/email, or changing the public flag unless the exact action has been approved.
+Implementation result: PR #53 merged as `df8f3c8` and local `main` was synchronized. Stripe's signed-in live dashboard opens, but the account onboarding page still shows `Activate your account`; `Business details` and `Review and submit` are not complete. No private field was opened or inspected. Supabase secret-name-only readback confirms `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `APP_BASE_URL` exist; `STRIPE_API_VERSION`, `STRIPE_LIVE_MODE`, and `STRIPE_PAYMENTS_ENABLED` are not yet present. The public flag remains false. No provider configuration, secret, payment, customer communication or production data changed.
+Review result: Repository/source inspection confirms the deployed functions fail closed on key-mode mismatch, require a pinned API version in live mode, require the explicit server kill switch, and keep the public live flag separate. Current Stripe guidance confirms that live use requires account setup, live keys and a registered live webhook endpoint. Existing PAY-LIVE-001 deployed test-mode evidence is reused because no relevant source changed.
+Blocked reason: Stripe account activation requires the Owner to complete private business, identity, banking/payout and submission steps directly in Stripe. Live keys and the live webhook signing secret must then be entered directly into Supabase without Codex seeing them.
+Next action: Owner completes Stripe's `Activate your account` flow in the retained Stripe browser tab, then confirms only `Stripe account activated` without sharing any private field or secret. Codex will resume with the live webhook and Supabase configuration checklist.
