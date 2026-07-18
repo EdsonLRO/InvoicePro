@@ -43,6 +43,10 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         [v-cloak] { display: none; }
+        :focus-visible { outline: 3px solid #4f46e5 !important; outline-offset: 2px !important; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+        }
         
         .pdf-mode input, .pdf-mode select, .pdf-mode textarea { display: none !important; }
         .pdf-mode .pdf-text { display: block !important; }
@@ -292,6 +296,10 @@
                 </div>
             </div>
         </header>
+
+        <div v-if="dataLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" role="status" aria-live="polite" aria-label="Loading account data">
+            <div class="rounded-xl bg-white px-6 py-4 shadow-xl text-sm font-semibold text-slate-700">Loading your Tallyo data…</div>
+        </div>
 
         <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto">
             
@@ -577,8 +585,12 @@
                         </select>
                         <button v-if="draft.docType === 'quote'" @click="convertToInvoice(draft)" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">Convert to Invoice</button>
                         <button @click="sendDocumentEmail(draft)" :disabled="emailSendingId === draft.id || emailSendingId === 'draft'" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm disabled:opacity-50">{{ (emailSendingId === draft.id || emailSendingId === 'draft') ? (emailSendingStage === 'prepared' ? 'Prepared...' : 'Queued...') : 'Email' }}</button>
-                        <button @click="saveInvoice" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-colors">Save {{ docTypeNoun(draft.docType) }}</button>
+                        <button @click="saveInvoice" :disabled="documentSaveBusy" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-colors disabled:opacity-50">{{ documentSaveBusy ? 'Saving…' : ('Save ' + docTypeNoun(draft.docType)) }}</button>
                     </div>
+                </div>
+
+                <div v-if="draft.docType === 'credit'" role="note" class="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    <strong>Standalone credit note:</strong> this document does not automatically link to an invoice or reduce its outstanding balance. Reconcile it separately and do not assume the customer's debt has changed.
                 </div>
 
                 <div id="invoice-canvas" :class="{'pdf-mode': isExportingPDF}" :style="brandStyle" class="bg-white p-4 sm:p-6 lg:p-10 rounded-xl shadow-sm border border-slate-200 relative">
@@ -732,7 +744,7 @@
                                     </td>
                                     <td class="p-3 text-right font-medium text-slate-700 align-top pt-5">{{ getCurrencySymbol(draft.currency) }}{{ calculateRowTotal(item).toFixed(2) }}</td>
                                     <td class="p-3 text-center align-top pt-3 no-print">
-                                        <button @click="removeItem(index)" class="text-slate-400 hover:text-red-500 font-bold text-xl transition-colors">&times;</button>
+                                        <button @click="removeItem(index)" aria-label="Remove line item" class="text-slate-400 hover:text-red-500 font-bold text-xl transition-colors">&times;</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -1042,7 +1054,7 @@
                 <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-semibold">Add New Customer</h3>
-                        <button @click="closeQuickCustomer" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+                        <button @click="closeQuickCustomer" aria-label="Close new customer dialog" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
                     </div>
                     <div class="space-y-4">
                         <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Name / Company *</label><input type="text" v-model="quickCustomer.name" @keyup.enter="saveQuickCustomer" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
@@ -1057,7 +1069,7 @@
                         </div>
                         <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Additional Info</label><textarea v-model="quickCustomer.additionalInfo" rows="2" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
                         <div class="pt-2 flex gap-3">
-                            <button @click="saveQuickCustomer" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Save & Select</button>
+                            <button @click="saveQuickCustomer" :disabled="quickCustomerSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ quickCustomerSaveBusy ? 'Saving…' : 'Save & Select' }}</button>
                             <button @click="closeQuickCustomer" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
                         </div>
                     </div>
@@ -1211,7 +1223,7 @@
                 <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
                     <div class="flex items-center justify-between mb-1">
                         <h3 class="text-lg font-semibold">Payment reminder</h3>
-                        <button @click="reminderModal.open = false" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+                        <button @click="reminderModal.open = false" aria-label="Close reminder dialog" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
                     </div>
                     <p class="text-xs text-slate-500 mb-4">Email the reminder to the customer on this invoice, or copy the text if you want to send it another way.</p>
                     <textarea v-model="reminderModal.text" rows="9" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none mb-4"></textarea>
@@ -1361,7 +1373,7 @@
                             </div>
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Additional Info</label><textarea v-model="customerForm.additionalInfo" rows="3" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
                             <div class="pt-2 flex gap-3">
-                                <button @click="saveCustomer" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Save Customer</button>
+                                <button @click="saveCustomer" :disabled="customerSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ customerSaveBusy ? 'Saving…' : 'Save Customer' }}</button>
                                 <button @click="backToCustomers" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
                             </div>
                         </div>
@@ -1437,7 +1449,7 @@
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Description (Optional)</label><textarea v-model="itemForm.description" rows="3" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Default Price</label><input type="number" v-model.number="itemForm.price" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
                             <div class="pt-2 flex gap-3">
-                                <button @click="saveSavedItem" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Save Item</button>
+                                <button @click="saveSavedItem" :disabled="itemSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ itemSaveBusy ? 'Saving…' : 'Save Item' }}</button>
                                 <button @click="backToItems" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
                             </div>
                         </div>
@@ -1681,7 +1693,7 @@
                         </div>
 
                         <div class="flex gap-3 pt-2 border-t border-slate-100">
-                            <button @click="saveTemplate" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors mt-4">Save Schedule</button>
+                            <button @click="saveTemplate" :disabled="scheduleSaveBusy" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors mt-4 disabled:opacity-50">{{ scheduleSaveBusy ? 'Saving…' : 'Save Schedule' }}</button>
                             <button @click="backToRecurring" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-lg font-medium transition-colors mt-4">Cancel</button>
                         </div>
                     </div>
@@ -1908,7 +1920,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.18.5';
+    const APP_BUILD = '2026.07.18.6';
     const { createApp } = Vue;
 
     createApp({
@@ -1925,6 +1937,12 @@
                 authSignOutRequested: false,
                 authSessionVersion: 0,
                 dataLoading: false,
+                documentSaveBusy: false,
+                quickCustomerSaveBusy: false,
+                customerSaveBusy: false,
+                itemSaveBusy: false,
+                scheduleSaveBusy: false,
+                accessibleLabelCounter: 0,
                 turnstile: {
                     enabled: window.TURNSTILE_ENABLED !== false && Boolean(String(window.TURNSTILE_SITE_KEY || '').trim()),
                     siteKey: String(window.TURNSTILE_SITE_KEY || '').trim(),
@@ -2318,6 +2336,23 @@
             }
         },
         methods: {
+            bindAccessibleLabels() {
+                if (typeof document.querySelectorAll !== 'function') return;
+                document.querySelectorAll('#app label').forEach(label => {
+                    if (label.htmlFor || label.querySelector('input, select, textarea')) return;
+                    const findSingleControl = candidate => {
+                        if (!candidate) return null;
+                        if (candidate.matches && candidate.matches('input, select, textarea')) return candidate;
+                        const controls = candidate.querySelectorAll ? candidate.querySelectorAll('input, select, textarea') : [];
+                        return controls.length === 1 ? controls[0] : null;
+                    };
+                    let control = findSingleControl(label.nextElementSibling);
+                    if (!control && label.parentElement) control = findSingleControl(label.parentElement.nextElementSibling);
+                    if (!control) return;
+                    if (!control.id) control.id = 'tallyo-field-' + (++this.accessibleLabelCounter);
+                    label.htmlFor = control.id;
+                });
+            },
             pageInfo(total, page) {
                 const safeTotal = Math.max(1, total || 1);
                 const safePage = Math.min(Math.max(page || 1, 1), safeTotal);
@@ -2908,7 +2943,7 @@
                 const target = factors.find(factor => factor.id === factorId);
                 const verifier = factors.find(factor => factor.id !== factorId);
                 if (!target || !verifier) return alert("Could not identify the authenticator.");
-                if (!confirm("Remove this authenticator?")) return;
+                if (!confirm(`Remove ${this.mfaFactorLabel(target, factors.indexOf(target))}? You will continue signing in with ${this.mfaFactorLabel(verifier, factors.indexOf(verifier))}.`)) return;
                 try {
                     const code = await this.requestPasswordMfaCode({
                         title: 'Remove authenticator',
@@ -3039,6 +3074,11 @@
                 this.resolveSessionPasswordConfirm = null;
                 this.rejectSessionPasswordConfirm = null;
                 this.dataLoading = false;
+                this.documentSaveBusy = false;
+                this.quickCustomerSaveBusy = false;
+                this.customerSaveBusy = false;
+                this.itemSaveBusy = false;
+                this.scheduleSaveBusy = false;
                 this.draft = this.getEmptyDraft();
             },
             async signOutWithScope(scope) {
@@ -3382,7 +3422,7 @@
                     globalDiscount: Number(r.global_discount) || 0, taxRate: Number(r.tax_rate) || 0,
                     taxMode: r.tax_mode || 'exclusive',
                     shippingCost: Number(r.shipping_cost) || 0,
-                    notes: r.notes || '', terms: r.terms || ''
+                    notes: r.notes || '', terms: r.terms || '', updatedAt: r.updated_at || null
                 };
                 inv.totals = this.calcTotals(inv);
                 return inv;
@@ -3416,32 +3456,27 @@
                 const loadSessionVersion = this.authSessionVersion;
                 this.dataLoading = true;
                 try {
-                    const [companyRes, custRes, itemRes, invRes] = await Promise.all([
+                    const [companyRes, customerRows, itemRows, invoiceRows] = await Promise.all([
                         supabaseClient.from('company_settings').select('*').maybeSingle(),
-                        supabaseClient.from('customers').select('*').order('name'),
-                        supabaseClient.from('saved_items').select('*').order('name'),
-                        supabaseClient.from('invoices').select('*').order('created_at', { ascending: false })
+                        this.fetchAllOwnedRows('customers', 'name'),
+                        this.fetchAllOwnedRows('saved_items', 'name'),
+                        this.fetchAllOwnedRows('invoices', 'created_at', 1000, false)
                     ]);
                     if (companyRes.error) throw companyRes.error;
-                    if (custRes.error) throw custRes.error;
-                    if (itemRes.error) throw itemRes.error;
-                    if (invRes.error) throw invRes.error;
                     if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
 
                     if (companyRes.data) this.company = this.rowToCompany(companyRes.data);
                     this.companyAuditSnapshot = this.cloneCompanyForAudit();
-                    this.customers = (custRes.data || []).map(r => this.rowToCustomer(r));
-                    this.savedItems = (itemRes.data || []).map(r => this.rowToItem(r));
-                    this.invoices = (invRes.data || []).map(r => this.rowToInvoice(r));
+                    this.customers = customerRows.map(r => this.rowToCustomer(r));
+                    this.savedItems = itemRows.map(r => this.rowToItem(r));
+                    this.invoices = invoiceRows.map(r => this.rowToInvoice(r));
                     await this.loadAuditEvents();
                     if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
                     this.draft = this.getEmptyDraft();
                     // Recurring templates — best effort; the table may not exist until the setup SQL is run.
                     try {
-                        const recRes = await supabaseClient.from('recurring_templates').select('*').order('created_at', { ascending: false });
-                        if (!recRes.error && this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) {
-                            this.recurringTemplates = (recRes.data || []).map(r => this.rowToTemplate(r));
-                        }
+                        const recurringRows = await this.fetchAllOwnedRows('recurring_templates', 'created_at', 1000, false);
+                        if (this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) this.recurringTemplates = recurringRows.map(r => this.rowToTemplate(r));
                     } catch (recErr) { console.warn('Recurring templates unavailable (run recurring_setup.sql):', recErr); }
                 } catch (e) {
                     if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
@@ -3680,8 +3715,15 @@
             },
             async persistDraft() {
                 // Insert (new) or update (existing) the current draft in the database.
+                if (this.documentSaveBusy) return false;
                 this.normalizeDeposit();
                 this.normalizeReminderSchedule();
+                const validationIssue = this.validateDraftForSave(this.draft);
+                if (validationIssue) {
+                    alert(validationIssue);
+                    return false;
+                }
+                this.documentSaveBusy = true;
                 const inv = JSON.parse(JSON.stringify(this.draft));
                 if (!inv.status) inv.status = 'Draft';
                 if (!inv.docType) inv.docType = 'invoice';
@@ -3691,8 +3733,11 @@
                 const existing = this.isUuid(inv.id) ? this.invoices.find(i => i.id === inv.id) : null;
                 try {
                     if (existing) {
-                        const { data, error } = await supabaseClient.from('invoices').update(row).eq('id', inv.id).select().single();
+                        let updateQuery = supabaseClient.from('invoices').update(row).eq('id', inv.id);
+                        if (existing.updatedAt) updateQuery = updateQuery.eq('updated_at', existing.updatedAt);
+                        const { data, error } = await updateQuery.select().maybeSingle();
                         if (error) throw error;
+                        if (!data) throw new Error('This document changed in another tab or device. Reload Tallyo, review the latest version, and apply your change again.');
                         const mapped = this.rowToInvoice(data);
                         const idx = this.invoices.findIndex(i => i.id === inv.id);
                         if (idx >= 0) this.invoices[idx] = mapped;
@@ -3731,10 +3776,36 @@
                     console.error("Save invoice failed:", e);
                     alert("Could not save: " + (e.message || e));
                     return false;
+                } finally {
+                    this.documentSaveBusy = false;
                 }
             },
             docTypeLabel(t) {
                 return { invoice: 'INVOICE', quote: 'QUOTE', credit: 'CREDIT NOTE' }[t || 'invoice'] || 'INVOICE';
+            },
+            validateDraftForSave(src) {
+                const items = Array.isArray(src && src.items) ? src.items : [];
+                if (!items.length) return 'Add at least one line item before saving.';
+                for (let index = 0; index < items.length; index += 1) {
+                    const item = items[index] || {};
+                    const line = index + 1;
+                    if (!String(item.name || '').trim()) return 'Line ' + line + ': enter an item or description.';
+                    const qty = Number(item.qty);
+                    if (!Number.isFinite(qty) || qty <= 0) return 'Line ' + line + ': quantity must be greater than zero.';
+                    const price = Number(item.price);
+                    if (!Number.isFinite(price) || price < 0) return 'Line ' + line + ': unit price cannot be negative.';
+                    const discount = Number(item.discount || 0);
+                    if (!Number.isFinite(discount) || discount < 0 || discount > 100) return 'Line ' + line + ': discount must be between 0% and 100%.';
+                    const tax = Number(item.tax || 0);
+                    if (!Number.isFinite(tax) || tax < 0 || tax > 100) return 'Line ' + line + ': tax must be between 0% and 100%.';
+                }
+                const globalDiscount = Number((src && src.globalDiscount) || 0);
+                if (!Number.isFinite(globalDiscount) || globalDiscount < 0 || globalDiscount > 100) return 'Global discount must be between 0% and 100%.';
+                const shipping = Number((src && src.shippingCost) || 0);
+                if (!Number.isFinite(shipping) || shipping < 0) return 'Shipping cannot be negative.';
+                const grandTotal = Number(this.calcTotals(src).grandTotal);
+                if (!Number.isFinite(grandTotal) || grandTotal <= 0) return 'Document total must be greater than zero.';
+                return '';
             },
             docTypeNoun(t) {
                 return { invoice: 'Invoice', quote: 'Quote', credit: 'Credit Note' }[t || 'invoice'] || 'Invoice';
@@ -3757,15 +3828,16 @@
                     console.warn('Audit event skipped:', eventType, e && (e.message || e));
                 }
             },
-            async fetchAllOwnedRows(table, orderColumn, pageSize = 1000) {
+            async fetchAllOwnedRows(table, orderColumn, pageSize = 1000, ascending = true) {
                 const rows = [];
                 let from = 0;
                 while (true) {
-                    const { data, error } = await supabaseClient
+                    let query = supabaseClient
                         .from(table)
                         .select('*')
-                        .order(orderColumn, { ascending: true })
-                        .range(from, from + pageSize - 1);
+                        .order(orderColumn, { ascending });
+                    if (orderColumn !== 'id') query = query.order('id', { ascending: true });
+                    const { data, error } = await query.range(from, from + pageSize - 1);
                     if (error) throw new Error(`Could not export ${table}.`);
                     const page = data || [];
                     rows.push(...page);
@@ -4224,7 +4296,9 @@
             async bulkDeleteInvoices() {
                 const rows = this.selectedInvoiceRows;
                 if (!rows.length) return;
-                if (!confirm('Delete ' + rows.length + ' selected document' + (rows.length === 1 ? '' : 's') + '? This cannot be undone.')) return;
+                const blocked = rows.filter(inv => this.documentDeletionReason(inv));
+                if (blocked.length) return alert('Only unpaid drafts without active disputes can be deleted. Remove ' + blocked.length + ' issued, paid, refunded, or disputed document' + (blocked.length === 1 ? '' : 's') + ' from the selection and use status controls instead.');
+                if (!confirm('Permanently delete ' + rows.length + ' selected draft' + (rows.length === 1 ? '' : 's') + ' and their Tallyo activity histories? This cannot be undone.')) return;
                 this.invoiceBulkBusy = true;
                 try {
                     const ids = rows.map(inv => inv.id);
@@ -4275,6 +4349,10 @@
             async recordPayment() {
                 const amt = parseFloat(this.newPayment.amount);
                 if (!amt || amt <= 0) return alert("Enter a valid payment amount.");
+                const outstanding = Math.max(0, Number(this.draftBalance) || 0);
+                if (amt > outstanding + 0.001) {
+                    return alert('Payment cannot exceed the outstanding balance of ' + this.getCurrencySymbol(this.draft.currency) + outstanding.toFixed(2) + '.');
+                }
                 if (!this.draft.payments) this.draft.payments = [];
                 this.draft.payments.push({ amount: amt, date: this.newPayment.date || new Date().toISOString().split('T')[0], note: this.newPayment.note || '' });
                 const wasPaid = this.draft.status === 'Paid';
@@ -4429,8 +4507,10 @@
             async removePayment(index) {
                 const removed = this.draft.payments[index];
                 if (removed && removed.provider === 'stripe') return alert('Stripe payments are provider-confirmed and cannot be removed manually.');
-                if (!confirm('Remove this payment? This cannot be undone.')) return;
                 const amt = removed ? (parseFloat(removed.amount) || 0) : 0;
+                const paidAfter = Math.max(0, this.draftPaid - amt);
+                const outstandingAfter = Math.max(0, this.totals.grandTotal - paidAfter);
+                if (!confirm('Remove the manual payment of ' + this.getCurrencySymbol(this.draft.currency) + amt.toFixed(2) + '? The paid amount will become ' + this.getCurrencySymbol(this.draft.currency) + paidAfter.toFixed(2) + ' and the outstanding balance will become ' + this.getCurrencySymbol(this.draft.currency) + outstandingAfter.toFixed(2) + '. This cannot be undone.')) return;
                 this.draft.payments.splice(index, 1);
                 if (this.draftBalance > 0.001 && this.draft.status === 'Paid') this.draft.status = 'Sent';
                 this.addHistory('payment_removed', 'Payment of ' + this.getCurrencySymbol(this.draft.currency) + amt.toFixed(2) + ' removed');
@@ -4580,6 +4660,8 @@
                 const t = this.recurringForm;
                 if (!t.customer) return alert('Please choose a customer for this recurring schedule.');
                 if (!t.startDate) return alert('Please set a start date.');
+                if (this.scheduleSaveBusy) return;
+                this.scheduleSaveBusy = true;
                 // On first save, next_run starts at the start date.
                 if (this.editingTemplate === null) t.nextRun = t.startDate;
                 try {
@@ -4618,10 +4700,17 @@
                         });
                     }
                     this.backToRecurring();
-                } catch (e) { console.error('Save template failed:', e); alert('Could not save schedule: ' + (e.message || e)); }
+                } catch (e) {
+                    console.error('Save template failed:', e);
+                    alert('Could not save schedule: ' + (e.message || e));
+                } finally {
+                    this.scheduleSaveBusy = false;
+                }
             },
             async toggleTemplateActive(t) {
-                t.active = !t.active;
+                const nextActive = !t.active;
+                if (!nextActive && !confirm('Pause this recurring schedule? No future invoices will be generated until you resume it. Existing invoices are kept.')) return;
+                t.active = nextActive;
                 if (!t.history) t.history = [];
                 t.history.push({ ts: new Date().toISOString(), type: t.active ? 'resumed' : 'paused', text: t.active ? 'Schedule resumed' : 'Schedule paused' });
                 try {
@@ -4802,7 +4891,9 @@
                 this.navigateTo('edit');
             },
             async deleteInvoice(inv) {
-                if(confirm("Delete this invoice?")) {
+                const reason = this.documentDeletionReason(inv);
+                if (reason) return alert(reason);
+                if(confirm('Permanently delete draft ' + this.docTypeNoun(inv.docType).toLowerCase() + ' #' + (inv.number || '') + ' and its Tallyo activity history? This cannot be undone.')) {
                     const { error } = await supabaseClient.from('invoices').delete().eq('id', inv.id);
                     if (error) return alert("Could not delete: " + error.message);
                     const i = this.invoices.findIndex(x => x.id === inv.id);
@@ -4813,6 +4904,13 @@
                         status: this.effectiveStatus(inv)
                     });
                 }
+            },
+            documentDeletionReason(inv) {
+                if (!inv) return 'Choose a valid document.';
+                if (this.normalizedStatus(inv) !== 'Draft') return 'Only drafts can be deleted. Cancel or retain an issued document so its financial history remains available.';
+                if (Math.abs(this.amountPaid(inv)) > 0.001) return 'This draft has payment or refund history and cannot be deleted.';
+                if (this.disputeStateFor(inv.id)) return 'This document has Stripe dispute history and cannot be deleted.';
+                return '';
             },
             amountPaid(inv) { return (inv.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0); },
             balanceDue(inv) { const total = inv.totals ? inv.totals.grandTotal : 0; return total - this.amountPaid(inv); },
@@ -5007,17 +5105,27 @@
             },
             async saveQuickCustomer() {
                 if (!this.quickCustomer.name) return alert("Customer Name is required");
-                const { data, error } = await supabaseClient.from('customers').insert(this.customerToRow(this.quickCustomer)).select().single();
-                if (error) return alert("Could not save customer: " + error.message);
-                const c = this.rowToCustomer(data);
-                this.customers.push(c);
-                this.customers.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-                this.draft.customer = c; // auto-select the new customer on this invoice
-                this.showQuickCustomer = false;
+                if (this.quickCustomerSaveBusy) return;
+                this.quickCustomerSaveBusy = true;
+                try {
+                    const { data, error } = await supabaseClient.from('customers').insert(this.customerToRow(this.quickCustomer)).select().single();
+                    if (error) throw error;
+                    const c = this.rowToCustomer(data);
+                    this.customers.push(c);
+                    this.customers.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                    this.draft.customer = c; // auto-select the new customer on this invoice
+                    this.showQuickCustomer = false;
+                } catch (e) {
+                    alert("Could not save customer: " + (e.message || e));
+                } finally {
+                    this.quickCustomerSaveBusy = false;
+                }
             },
             closeQuickCustomer() { this.showQuickCustomer = false; },
             async saveCustomer() {
                 if(!this.customerForm.name) return alert("Customer Name is required");
+                if (this.customerSaveBusy) return;
+                this.customerSaveBusy = true;
                 const row = this.customerToRow(this.customerForm);
                 try {
                     if (this.editingCustomer !== null) {
@@ -5037,6 +5145,8 @@
                 } catch (e) {
                     console.error("Save customer failed:", e);
                     alert("Could not save customer: " + (e.message || e));
+                } finally {
+                    this.customerSaveBusy = false;
                 }
             },
             editCustomer(customer) { 
@@ -5049,7 +5159,7 @@
                 this.setRouteKey('customers-form');
             },
             async deleteCustomer(customer) {
-                if(confirm("Delete this customer?")) {
+                if(confirm('Delete this customer from the address book? Existing documents keep their saved customer snapshot. This cannot be undone.')) {
                     const { error } = await supabaseClient.from('customers').delete().eq('id', customer.id);
                     if (error) return alert("Could not delete customer: " + error.message);
                     const i = this.customers.indexOf(customer);
@@ -5061,7 +5171,7 @@
             async bulkDeleteCustomers() {
                 const rows = this.selectedCustomerRows;
                 if (!rows.length) return;
-                if (!confirm('Delete ' + rows.length + ' selected customer' + (rows.length === 1 ? '' : 's') + '?')) return;
+                if (!confirm('Delete ' + rows.length + ' selected customer' + (rows.length === 1 ? '' : 's') + ' from the address book? Existing documents keep their saved customer snapshots. This cannot be undone.')) return;
                 this.customerBulkBusy = true;
                 try {
                     const ids = rows.map(customer => customer.id);
@@ -5079,6 +5189,8 @@
             resetCustomerForm() { this.editingCustomer = null; this.customerForm = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' }; },
             async saveSavedItem() {
                 if(!this.itemForm.name) return;
+                if (this.itemSaveBusy) return;
+                this.itemSaveBusy = true;
                 const row = this.itemToRow(this.itemForm);
                 try {
                     if (this.editingItem !== null) {
@@ -5098,6 +5210,8 @@
                 } catch (e) {
                     console.error("Save item failed:", e);
                     alert("Could not save item: " + (e.message || e));
+                } finally {
+                    this.itemSaveBusy = false;
                 }
             },
             newItem() {
@@ -5117,7 +5231,7 @@
                 this.setRouteKey('items-form');
             },
             async deleteSavedItem(item) {
-                if(!confirm("Delete this saved item?")) return;
+                if(!confirm('Delete this saved item from the catalogue? Existing document line items are unchanged. This cannot be undone.')) return;
                 const { error } = await supabaseClient.from('saved_items').delete().eq('id', item.id);
                 if (error) return alert("Could not delete item: " + error.message);
                 const i = this.savedItems.indexOf(item);
@@ -5128,7 +5242,7 @@
             async bulkDeleteItems() {
                 const rows = this.selectedItemRows;
                 if (!rows.length) return;
-                if (!confirm('Delete ' + rows.length + ' selected saved item' + (rows.length === 1 ? '' : 's') + '?')) return;
+                if (!confirm('Delete ' + rows.length + ' selected saved item' + (rows.length === 1 ? '' : 's') + ' from the catalogue? Existing document line items are unchanged. This cannot be undone.')) return;
                 this.itemBulkBusy = true;
                 try {
                     const ids = rows.map(item => item.id);
@@ -5193,6 +5307,12 @@
         },
         async mounted() {
             window.addEventListener('hashchange', this.handleHashChange);
+            this.bindAccessibleLabels();
+            const appRoot = typeof document.getElementById === 'function' ? document.getElementById('app') : null;
+            if (appRoot && 'MutationObserver' in window) {
+                this.accessibleLabelObserver = new MutationObserver(() => this.bindAccessibleLabels());
+                this.accessibleLabelObserver.observe(appRoot, { childList: true, subtree: true });
+            }
             if (this.turnstile.enabled) this.$nextTick(() => this.renderTurnstile());
             // Register the service worker only on the live HTTPS site (not on
             // localhost), so local development never serves stale cached files.
@@ -5227,6 +5347,10 @@
             } else if (data.session && this.authMode !== 'recovery') {
                 await this.routeAfterAuth(data.session.user);
             }
+        },
+        beforeUnmount() {
+            window.removeEventListener('hashchange', this.handleHashChange);
+            if (this.accessibleLabelObserver) this.accessibleLabelObserver.disconnect();
         }
     }).mount('#app');
 </script>

@@ -38,6 +38,7 @@ jobs:
         run: |
           node tests/account-data-export-harness.cjs
           node tests/auth-captcha-harness.cjs
+          node tests/core-lifecycle-harness.cjs
           node tests/dispute-lifecycle-visibility-harness.cjs
           node tests/email-status-accuracy-harness.cjs
           node tests/edge-dependency-pin-harness.cjs
@@ -46,9 +47,12 @@ jobs:
           node tests/operational-health-harness.cjs
           node tests/pwa-update-harness.cjs
           node tests/refund-consequence-preview-harness.cjs
+          node tests/recurring-calendar-reliability-harness.cjs
+          node tests/scale-accessibility-safety-harness.cjs
           node tests/security-workflow-harness.cjs
           node tests/session-expiry-harness.cjs
           node tests/stripe-payment-integrity-harness.cjs
+          node tests/tenant-isolation-attribution-harness.cjs
 
       - name: Type-check Edge Functions with frozen locks
         shell: bash
