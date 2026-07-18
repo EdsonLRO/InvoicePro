@@ -269,29 +269,63 @@ async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
   }
 }
 
+async function insertRunAuditEvent(admin: any, payload: Record<string, unknown>): Promise<boolean> {
+  try {
+    const { error } = await admin.from("audit_events").insert(payload);
+    if (error) {
+      console.error("automation run audit insert failed", error.message);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("automation run audit insert failed", error instanceof Error ? error.name : "unknown");
+    return false;
+  }
+}
+
+async function resendIdempotencyKey(parts: string[]): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(parts.join("\u001f")),
+  );
+  const hex = Array.from(new Uint8Array(digest)).map((byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+  return `tallyo-recurring-email-${hex}`;
+}
+
 async function sendInvoiceEmail(resendKey: string, invoice: any, company: any, to: string, userId: string) {
   const email = buildEmail(invoice, company || {});
-  const resendResponse = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${resendKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: FROM_EMAIL,
-      to: [to],
-      subject: email.subject,
-      html: email.html,
-      text: email.text,
-      tags: [
-        { name: "category", value: "document_email" },
-        { name: "document_id", value: invoice.id },
-        { name: "user_id", value: userId },
-      ],
-    }),
-  });
+  const resendRequestKey = await resendIdempotencyKey([String(invoice.id), userId, to.toLowerCase()]);
+  let resendResponse: Response;
+  try {
+    resendResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": resendRequestKey,
+      },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: [to],
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
+        tags: [
+          { name: "category", value: "document_email" },
+          { name: "document_id", value: invoice.id },
+          { name: "user_id", value: userId },
+        ],
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch (error) {
+    const timedOut = error instanceof DOMException && error.name === "TimeoutError";
+    return { ok: false, status: timedOut ? 504 : 502, body: {}, subject: email.subject, reason: timedOut ? "provider_timeout" : "provider_request_failed" };
+  }
   const body = await resendResponse.json().catch(() => ({}));
-  return { ok: resendResponse.ok, status: resendResponse.status, body, subject: email.subject };
+  return { ok: resendResponse.ok, status: resendResponse.status, body, subject: email.subject, reason: resendResponse.ok ? null : "provider_rejected_request" };
 }
 
 Deno.serve(async (req) => {
@@ -317,6 +351,25 @@ Deno.serve(async (req) => {
 
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
 
+  const { data: activeOwners, error: activeOwnerError } = await admin.from("recurring_templates")
+    .select("user_id").eq("active", true);
+  if (activeOwnerError) return new Response(JSON.stringify({ error: activeOwnerError.message }), { status: 500 });
+
+  const monitoredUsers = new Set<string>();
+  for (const owner of activeOwners || []) {
+    const userId = String(owner.user_id || "");
+    if (userId) monitoredUsers.add(userId);
+  }
+  const dueByUser = new Map<string, number>();
+  for (const template of due || []) {
+    const userId = String(template.user_id || "");
+    if (userId) dueByUser.set(userId, (dueByUser.get(userId) || 0) + 1);
+  }
+  const failuresByUser = new Map<string, number>();
+  const markFailure = (userId: string) => {
+    if (userId) failuresByUser.set(userId, (failuresByUser.get(userId) || 0) + 1);
+  };
+
   let generated = 0;
   let emailed = 0;
   let emailSkipped = 0;
@@ -337,6 +390,7 @@ Deno.serve(async (req) => {
       const occurrenceDate = String(tpl.next_run || "");
       if (!occurrenceDate) {
         generationFailed++;
+        markFailure(userId);
         await insertAuditEvent(admin, {
           user_id: userId,
           actor_user_id: null,
@@ -389,6 +443,7 @@ Deno.serve(async (req) => {
             .maybeSingle();
           if (existingError || !existing) {
             generationFailed++;
+            markFailure(userId);
             console.error("idempotent invoice lookup failed", tpl.id, existingError?.message || "not found");
             await insertAuditEvent(admin, {
               user_id: userId,
@@ -415,6 +470,7 @@ Deno.serve(async (req) => {
           });
         } else {
           generationFailed++;
+          markFailure(userId);
           console.error("insert failed", tpl.id, insErr.message);
           await insertAuditEvent(admin, {
             user_id: userId,
@@ -451,7 +507,10 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (claimError || !claimed) {
-        if (claimError) generationFailed++;
+        if (claimError) {
+          generationFailed++;
+          markFailure(userId);
+        }
         console.warn("recurring occurrence was not claimed", tpl.id, claimError?.message || "already claimed or changed");
         await insertAuditEvent(admin, {
           user_id: userId,
@@ -503,12 +562,12 @@ Deno.serve(async (req) => {
           if (sendResult.ok) {
             emailed++;
             const invoiceHistory = Array.isArray(inserted.history) ? inserted.history : [];
-            invoiceHistory.push({ ts: sentAt, type: "sent", text: `Emailed to ${to}` });
+            invoiceHistory.push({ ts: sentAt, type: "sent", text: `Sent to email provider for delivery to ${to}` });
             await admin.from("invoices")
               .update({ history: invoiceHistory, updated_at: sentAt })
               .eq("id", inserted.id)
               .eq("user_id", userId);
-            hist.push({ ts: sentAt, type: "email", text: `Emailed invoice #${invoiceNumber} to ${to}` });
+            hist.push({ ts: sentAt, type: "email", text: `Sent invoice #${invoiceNumber} to email provider for ${to}` });
             await insertAuditEvent(admin, {
               user_id: userId,
               actor_user_id: userId,
@@ -518,10 +577,11 @@ Deno.serve(async (req) => {
               source: "edge_function",
               provider: "resend",
               provider_event_id: sendResult.body?.id || null,
-              metadata: { to, from: FROM_EMAIL, subject: sendResult.subject, automated: true, recurring_template_id: tpl.id },
+              metadata: { automated: true, recurring_template_id: tpl.id },
             });
           } else {
             emailFailed++;
+            markFailure(userId);
             const invoiceHistory = Array.isArray(inserted.history) ? inserted.history : [];
             invoiceHistory.push({ ts: sentAt, type: "email", text: `Automatic email failed to ${to}` });
             await admin.from("invoices")
@@ -539,7 +599,7 @@ Deno.serve(async (req) => {
               provider: "resend",
               metadata: {
                 status: sendResult.status,
-                reason: "provider_rejected_request",
+                reason: sendResult.reason || "provider_rejected_request",
                 automated: true,
                 recurring_template_id: tpl.id,
               },
@@ -555,6 +615,7 @@ Deno.serve(async (req) => {
           .eq("user_id", userId);
         if (historyError) {
           historyUpdateFailed++;
+          markFailure(userId);
           console.error("schedule history update failed", tpl.id, historyError.message);
           await insertAuditEvent(admin, {
             user_id: userId,
@@ -572,6 +633,7 @@ Deno.serve(async (req) => {
       console.error("template failed", tpl.id, String(e));
       const userId = String(tpl.user_id || "");
       if (userId) {
+        markFailure(userId);
         await insertAuditEvent(admin, {
           user_id: userId,
           actor_user_id: null,
@@ -585,7 +647,26 @@ Deno.serve(async (req) => {
     }
   }
 
-  const ok = generationFailed === 0 && historyUpdateFailed === 0;
+  let monitoringFailed = 0;
+  for (const userId of monitoredUsers) {
+    const failureCount = failuresByUser.get(userId) || 0;
+    const recorded = await insertRunAuditEvent(admin, {
+      user_id: userId,
+      actor_user_id: null,
+      event_type: "recurring_automation_run_completed",
+      object_type: "account",
+      object_id: null,
+      source: "edge_function",
+      metadata: {
+        checked: dueByUser.get(userId) || 0,
+        failed: failureCount,
+        status: failureCount > 0 ? "attention" : "ok",
+      },
+    });
+    if (!recorded) monitoringFailed++;
+  }
+
+  const ok = generationFailed === 0 && historyUpdateFailed === 0 && emailFailed === 0 && monitoringFailed === 0;
   return new Response(JSON.stringify({
     ok,
     generated,
@@ -595,6 +676,7 @@ Deno.serve(async (req) => {
     generationFailed,
     duplicatePrevented,
     historyUpdateFailed,
+    monitoringFailed,
     checked: (due || []).length,
   }), {
     status: ok ? 200 : 500,

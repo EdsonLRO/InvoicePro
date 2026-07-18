@@ -77,8 +77,21 @@ function reminderEntries(history: unknown): ReminderHistory[] {
     if (!entry || entry.type !== "reminder") return false;
     const text = String(entry.text || "");
     return text.startsWith("Payment reminder emailed to ") ||
-      text.startsWith("Automatic payment reminder emailed to ");
+      text.startsWith("Automatic payment reminder emailed to ") ||
+      text.startsWith("Payment reminder sent to email provider for ") ||
+      text.startsWith("Automatic payment reminder sent to email provider for ");
   });
+}
+
+async function resendIdempotencyKey(parts: string[]): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(parts.join("\u001f")),
+  );
+  const hex = Array.from(new Uint8Array(digest)).map((byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+  return `tallyo-overdue-email-${hex}`;
 }
 
 function lastReminderDate(history: unknown) {
@@ -145,6 +158,20 @@ async function insertAuditEvent(admin: any, payload: Record<string, unknown>) {
   }
 }
 
+async function insertRunAuditEvent(admin: any, payload: Record<string, unknown>): Promise<boolean> {
+  try {
+    const { error } = await admin.from("audit_events").insert(payload);
+    if (error) {
+      console.error("automation run audit insert failed", error.message);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error("automation run audit insert failed", error instanceof Error ? error.name : "unknown");
+    return false;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST" && req.method !== "GET") {
     return json({ error: "Method not allowed" }, 405);
@@ -190,6 +217,24 @@ Deno.serve(async (req) => {
 
   if (invoiceError) return json({ error: invoiceError.message }, 500);
 
+  const { data: reminderOwners, error: reminderOwnerError } = await admin.from("invoices")
+    .select("user_id")
+    .eq("overdue_reminders_enabled", true)
+    .eq("doc_type", "invoice");
+  if (reminderOwnerError) return json({ error: reminderOwnerError.message }, 500);
+
+  const monitoredUsers = new Set<string>();
+  for (const owner of reminderOwners || []) {
+    const userId = String(owner.user_id || "");
+    if (userId) monitoredUsers.add(userId);
+  }
+  const checkedByUser = new Map<string, number>();
+  const sentByUser = new Map<string, number>();
+  const failuresByUser = new Map<string, number>();
+  const markFailure = (userId: string) => {
+    if (userId) failuresByUser.set(userId, (failuresByUser.get(userId) || 0) + 1);
+  };
+
   const activeUsers = new Set<string>();
 
   for (const inv of invoices || []) {
@@ -200,6 +245,7 @@ Deno.serve(async (req) => {
         continue;
       }
       activeUsers.add(userId);
+      checkedByUser.set(userId, (checkedByUser.get(userId) || 0) + 1);
       const company = settingsByUser.get(userId) || {};
 
       const firstDays = Math.max(1, Number(inv.overdue_first_reminder_days) || Number(company.overdue_first_reminder_days) || 3);
@@ -246,11 +292,18 @@ Deno.serve(async (req) => {
       let resendResponse: Response;
       try {
         email = buildEmail(inv, company, outstanding, overdueDays);
+        const resendRequestKey = await resendIdempotencyKey([
+          String(inv.id),
+          userId,
+          to.toLowerCase(),
+          String(reminders.length + 1),
+        ]);
         resendResponse = await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${resendKey}`,
             "Content-Type": "application/json",
+            "Idempotency-Key": resendRequestKey,
           },
           body: JSON.stringify({
             from: FROM_EMAIL,
@@ -265,21 +318,24 @@ Deno.serve(async (req) => {
               { name: "automated", value: "true" },
             ],
           }),
+          signal: AbortSignal.timeout(15_000),
         });
       } catch (error) {
         failed++;
-        console.error("payment reminder request failed", inv.id, String(error));
+        markFailure(userId);
+        const timedOut = error instanceof DOMException && error.name === "TimeoutError";
+        console.error("payment reminder request failed", inv.id, timedOut ? "provider_timeout" : "provider_request_failed");
         await insertAuditEvent(admin, {
           user_id: userId,
           actor_user_id: null,
-          event_type: "payment_reminder_processing_failed",
+          event_type: "email_send_failed",
           object_type: "invoice",
           object_id: inv.id,
           source: "edge_function",
           provider: "resend",
           metadata: {
             stage: "provider_request",
-            reason: "unexpected_error",
+            reason: timedOut ? "provider_timeout" : "provider_request_failed",
             category: "payment_reminder",
             automated: true,
           },
@@ -290,6 +346,7 @@ Deno.serve(async (req) => {
 
       if (!resendResponse.ok) {
         failed++;
+        markFailure(userId);
         await insertAuditEvent(admin, {
           user_id: userId,
           actor_user_id: userId,
@@ -312,7 +369,7 @@ Deno.serve(async (req) => {
       history.push({
         ts: nowISO,
         type: "reminder",
-        text: `Automatic payment reminder emailed to ${to} (${overdueDays} days overdue)`,
+        text: `Automatic payment reminder sent to email provider for ${to} (${overdueDays} days overdue)`,
       });
 
       const { error: updateError } = await admin.from("invoices")
@@ -322,6 +379,7 @@ Deno.serve(async (req) => {
 
       if (updateError) {
         failed++;
+        markFailure(userId);
         console.error("invoice history update failed", inv.id, updateError.message);
         await insertAuditEvent(admin, {
           user_id: userId,
@@ -349,12 +407,33 @@ Deno.serve(async (req) => {
         source: "edge_function",
         provider: "resend",
         provider_event_id: resendBody?.id || null,
-        metadata: { to, from: FROM_EMAIL, subject: email.subject, outstanding, overdue_days: overdueDays, automated: true },
+        metadata: { outstanding, overdue_days: overdueDays, automated: true },
       });
 
       sent++;
+      sentByUser.set(userId, (sentByUser.get(userId) || 0) + 1);
   }
 
-  const ok = failed === 0;
-  return json({ ok, users: activeUsers.size, checked, sent, skipped, failed }, ok ? 200 : 500);
+  let monitoringFailed = 0;
+  for (const userId of monitoredUsers) {
+    const failureCount = failuresByUser.get(userId) || 0;
+    const recorded = await insertRunAuditEvent(admin, {
+      user_id: userId,
+      actor_user_id: null,
+      event_type: "overdue_reminder_run_completed",
+      object_type: "account",
+      object_id: null,
+      source: "edge_function",
+      metadata: {
+        checked: checkedByUser.get(userId) || 0,
+        sent: sentByUser.get(userId) || 0,
+        failed: failureCount,
+        status: failureCount > 0 ? "attention" : "ok",
+      },
+    });
+    if (!recorded) monitoringFailed++;
+  }
+
+  const ok = failed === 0 && monitoringFailed === 0;
+  return json({ ok, users: activeUsers.size, checked, sent, skipped, failed, monitoringFailed }, ok ? 200 : 500);
 });

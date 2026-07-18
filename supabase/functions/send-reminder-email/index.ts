@@ -36,6 +36,17 @@ function validEmail(value: unknown): value is string {
   return typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+async function resendIdempotencyKey(parts: string[]): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(parts.join("\u001f")),
+  );
+  const hex = Array.from(new Uint8Array(digest)).map((byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+  return `tallyo-reminder-email-${hex}`;
+}
+
 function currencySymbol(code: string) {
   return ({ GBP: "£", EUR: "€", USD: "$" } as Record<string, string>)[code] || `${code} `;
 }
@@ -176,14 +187,39 @@ Deno.serve(async (req) => {
     ],
   };
 
-  const resendResponse = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${resendKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(resendPayload),
-  });
+  const resendRequestKey = await resendIdempotencyKey([
+    documentId,
+    userData.user.id,
+    to.toLowerCase(),
+    String(inv.updated_at || inv.created_at || ""),
+    message,
+  ]);
+  let resendResponse: Response;
+  try {
+    resendResponse = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": resendRequestKey,
+      },
+      body: JSON.stringify(resendPayload),
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch (error) {
+    const timedOut = error instanceof DOMException && error.name === "TimeoutError";
+    await insertAuditEvent(admin, {
+      user_id: userData.user.id,
+      actor_user_id: userData.user.id,
+      event_type: "email_send_failed",
+      object_type: "invoice",
+      object_id: documentId,
+      source: "edge_function",
+      provider: "resend",
+      metadata: { reason: timedOut ? "provider_timeout" : "provider_request_failed", category: "payment_reminder" },
+    });
+    return json({ error: timedOut ? "Email provider timed out; it is safe to retry" : "Email provider could not be reached" }, timedOut ? 504 : 502);
+  }
   const resendBody = await resendResponse.json().catch(() => ({}));
   if (!resendResponse.ok) {
     await insertAuditEvent(admin, {
@@ -204,7 +240,7 @@ Deno.serve(async (req) => {
   history.push({
     ts: nowISO,
     type: "reminder",
-    text: `Payment reminder emailed to ${to} (${overdueDays} days overdue)`,
+    text: `Payment reminder sent to email provider for ${to} (${overdueDays} days overdue)`,
   });
 
   const { data: updated, error: updateError } = await admin.from("invoices")
@@ -224,7 +260,7 @@ Deno.serve(async (req) => {
     source: "edge_function",
     provider: "resend",
     provider_event_id: resendBody?.id || null,
-    metadata: { to, from: FROM_EMAIL, subject: email.subject, outstanding, overdue_days: overdueDays },
+    metadata: { outstanding, overdue_days: overdueDays },
   });
 
   return json({ ok: true, emailId: resendBody?.id || null, invoice: updated });

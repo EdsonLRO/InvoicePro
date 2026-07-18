@@ -43,6 +43,10 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         [v-cloak] { display: none; }
+        :focus-visible { outline: 3px solid #4f46e5 !important; outline-offset: 2px !important; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+        }
         
         .pdf-mode input, .pdf-mode select, .pdf-mode textarea { display: none !important; }
         .pdf-mode .pdf-text { display: block !important; }
@@ -101,9 +105,9 @@
                     <input type="password" v-model="auth.password" @keyup.enter="login" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div v-if="turnstile.enabled">
-                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;"></div>
-                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" aria-live="polite">Loading security check...</p>
-                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" aria-live="polite">{{ turnstile.error }} <button @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry</button></p>
+                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;" role="group" aria-label="Security verification"></div>
+                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" role="status" aria-live="polite">Loading security check...</p>
+                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" role="alert">{{ turnstile.error }} <button type="button" @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry security check</button></p>
                 </div>
                 <button @click="login" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Signing in...' : 'Sign In' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
@@ -130,9 +134,9 @@
                     <input type="password" v-model="auth.confirm" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div v-if="turnstile.enabled">
-                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;"></div>
-                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" aria-live="polite">Loading security check...</p>
-                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" aria-live="polite">{{ turnstile.error }} <button @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry</button></p>
+                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;" role="group" aria-label="Security verification"></div>
+                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" role="status" aria-live="polite">Loading security check...</p>
+                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" role="alert">{{ turnstile.error }} <button type="button" @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry security check</button></p>
                 </div>
                 <button @click="register" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Creating account...' : 'Create Account' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
@@ -222,9 +226,9 @@
                     <input type="email" v-model="auth.username" @keyup.enter="sendPasswordReset" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div v-if="turnstile.enabled">
-                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;"></div>
-                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" aria-live="polite">Loading security check...</p>
-                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" aria-live="polite">{{ turnstile.error }} <button @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry</button></p>
+                    <div ref="turnstileContainer" class="w-full" style="min-height: 65px;" role="group" aria-label="Security verification"></div>
+                    <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" role="status" aria-live="polite">Loading security check...</p>
+                    <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" role="alert">{{ turnstile.error }} <button type="button" @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry security check</button></p>
                 </div>
                 <button @click="sendPasswordReset" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Sending...' : 'Send Reset Link' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
@@ -292,6 +296,10 @@
                 </div>
             </div>
         </header>
+
+        <div v-if="dataLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" role="status" aria-live="polite" aria-label="Loading account data">
+            <div class="rounded-xl bg-white px-6 py-4 shadow-xl text-sm font-semibold text-slate-700">Loading your Tallyo data…</div>
+        </div>
 
         <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto">
             
@@ -412,6 +420,29 @@
                         </div>
                     </div>
                 </div>
+
+                <section class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200" aria-labelledby="operational-health-title">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5 border-b pb-4">
+                        <div>
+                            <h2 id="operational-health-title" class="text-2xl font-semibold">Operational Health</h2>
+                            <p class="text-sm text-slate-600 mt-1">Account-scoped signals from Tallyo automation and signed provider events. No email addresses, message content, or provider secrets are shown here.</p>
+                        </div>
+                        <span class="self-start px-3 py-1 rounded-full text-xs font-bold" :class="operationalHealth.attentionCount ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'" role="status" aria-live="polite">
+                            {{ operationalHealth.attentionCount ? (operationalHealth.attentionCount + ' need attention') : 'No recorded failures' }}
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <article v-for="card in operationalHealth.cards" :key="card.key" class="rounded-lg border border-slate-200 bg-slate-50 p-4 min-w-0">
+                            <div class="flex items-start justify-between gap-3">
+                                <h3 class="text-sm font-semibold text-slate-800">{{ card.label }}</h3>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap" :class="operationalHealthStatusClass(card.state)">{{ card.status }}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-2 break-words">{{ card.detail }}</p>
+                            <p v-if="card.at" class="text-xs text-slate-400 mt-1">{{ formatDateTime(card.at) }}</p>
+                        </article>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-4">Provider delivery outages, unsigned requests, and function transport failures may appear only in Stripe, Resend, or Supabase logs. This panel reports persisted account evidence; it does not claim that missing evidence proves no failure occurred.</p>
+                </section>
 
                 <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-2xl font-semibold mb-3">Data Export</h2>
@@ -553,9 +584,13 @@
                             <option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }} ({{ c.symbol }}) - {{ c.name }}</option>
                         </select>
                         <button v-if="draft.docType === 'quote'" @click="convertToInvoice(draft)" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">Convert to Invoice</button>
-                        <button @click="sendDocumentEmail(draft)" :disabled="emailSendingId === draft.id || emailSendingId === 'draft'" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm disabled:opacity-50">{{ (emailSendingId === draft.id || emailSendingId === 'draft') ? 'Sending...' : 'Email' }}</button>
-                        <button @click="saveInvoice" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-colors">Save {{ docTypeNoun(draft.docType) }}</button>
+                        <button @click="sendDocumentEmail(draft)" :disabled="emailSendingId === draft.id || emailSendingId === 'draft'" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm disabled:opacity-50">{{ (emailSendingId === draft.id || emailSendingId === 'draft') ? (emailSendingStage === 'prepared' ? 'Prepared...' : 'Queued...') : 'Email' }}</button>
+                        <button @click="saveInvoice" :disabled="documentSaveBusy" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-colors disabled:opacity-50">{{ documentSaveBusy ? 'Saving…' : ('Save ' + docTypeNoun(draft.docType)) }}</button>
                     </div>
+                </div>
+
+                <div v-if="draft.docType === 'credit'" role="note" class="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    <strong>Standalone credit note:</strong> this document does not automatically link to an invoice or reduce its outstanding balance. Reconcile it separately and do not assume the customer's debt has changed.
                 </div>
 
                 <div id="invoice-canvas" :class="{'pdf-mode': isExportingPDF}" :style="brandStyle" class="bg-white p-4 sm:p-6 lg:p-10 rounded-xl shadow-sm border border-slate-200 relative">
@@ -709,7 +744,7 @@
                                     </td>
                                     <td class="p-3 text-right font-medium text-slate-700 align-top pt-5">{{ getCurrencySymbol(draft.currency) }}{{ calculateRowTotal(item).toFixed(2) }}</td>
                                     <td class="p-3 text-center align-top pt-3 no-print">
-                                        <button @click="removeItem(index)" class="text-slate-400 hover:text-red-500 font-bold text-xl transition-colors">&times;</button>
+                                        <button @click="removeItem(index)" aria-label="Remove line item" class="text-slate-400 hover:text-red-500 font-bold text-xl transition-colors">&times;</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -888,6 +923,39 @@
                         <div>{{ paymentAttentionFor(draft).text }}</div>
                     </div>
 
+                    <div v-if="draftDisputeState" class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-4 text-sm" aria-live="polite">
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                            <div>
+                                <div class="font-semibold text-red-800">Stripe dispute</div>
+                                <div class="text-xs text-slate-500 mt-1">The original payment remains in the invoice history. Tallyo does not automatically mark the invoice unpaid.</div>
+                            </div>
+                            <span class="self-start px-2.5 py-1 rounded-full text-xs font-bold whitespace-nowrap" :class="disputeStatusClass(draftDisputeState.status)">{{ draftDisputeState.label }}</span>
+                        </div>
+                        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+                            <div>
+                                <dt class="text-xs font-bold text-slate-500 uppercase">Amount affected</dt>
+                                <dd class="font-semibold text-slate-800 mt-1">{{ getCurrencySymbol(draftDisputeState.currency) }}{{ draftDisputeState.amount.toFixed(2) }}</dd>
+                            </div>
+                            <div>
+                                <dt class="text-xs font-bold text-slate-500 uppercase">Funds movement</dt>
+                                <dd class="font-semibold text-slate-800 mt-1">{{ draftDisputeState.fundsLabel }}</dd>
+                            </div>
+                            <div v-if="draftDisputeState.reason">
+                                <dt class="text-xs font-bold text-slate-500 uppercase">Reason</dt>
+                                <dd class="text-slate-700 mt-1">{{ draftDisputeState.reason }}</dd>
+                            </div>
+                            <div v-if="draftDisputeState.dueBy">
+                                <dt class="text-xs font-bold text-slate-500 uppercase">Evidence deadline</dt>
+                                <dd class="text-slate-700 mt-1">{{ draftDisputeState.dueBy }}{{ draftDisputeState.pastDue ? ' (deadline passed)' : '' }}</dd>
+                            </div>
+                        </dl>
+                        <div class="mt-4 rounded-lg border border-red-200 bg-white p-3">
+                            <div class="text-xs font-bold text-slate-500 uppercase mb-1">Next action</div>
+                            <p class="text-slate-700">{{ draftDisputeState.nextAction }}</p>
+                            <a :href="disputeDashboardUrl" target="_blank" rel="noopener noreferrer" class="inline-block mt-2 text-indigo-600 hover:text-indigo-800 font-medium">Open Stripe disputes</a>
+                        </div>
+                    </div>
+
                     <div v-if="draft.payments && draft.payments.length" class="divide-y divide-slate-100 mb-4 border border-slate-100 rounded-lg">
                         <div v-for="(p, i) in draft.payments" :key="i" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 py-2 text-sm">
                             <div class="min-w-0">
@@ -986,7 +1054,7 @@
                 <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-xl font-semibold">Add New Customer</h3>
-                        <button @click="closeQuickCustomer" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+                        <button @click="closeQuickCustomer" aria-label="Close new customer dialog" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
                     </div>
                     <div class="space-y-4">
                         <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Name / Company *</label><input type="text" v-model="quickCustomer.name" @keyup.enter="saveQuickCustomer" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
@@ -1001,7 +1069,7 @@
                         </div>
                         <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Additional Info</label><textarea v-model="quickCustomer.additionalInfo" rows="2" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
                         <div class="pt-2 flex gap-3">
-                            <button @click="saveQuickCustomer" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Save & Select</button>
+                            <button @click="saveQuickCustomer" :disabled="quickCustomerSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ quickCustomerSaveBusy ? 'Saving…' : 'Save & Select' }}</button>
                             <button @click="closeQuickCustomer" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
                         </div>
                     </div>
@@ -1134,7 +1202,7 @@
                                 <td class="p-4 text-right whitespace-nowrap">
                                     <div class="flex justify-end items-center space-x-3">
                                         <button @click="duplicateInvoice(inv)" class="text-slate-500 hover:text-slate-800 text-sm font-medium">Duplicate</button>
-                                        <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id" class="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50">{{ emailSendingId === inv.id ? 'Sending...' : 'Email' }}</button>
+                                        <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id" class="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50">{{ emailSendingId === inv.id ? (emailSendingStage === 'prepared' ? 'Prepared...' : 'Queued...') : 'Email' }}</button>
                                         <button @click="exportPDF(inv)" class="text-emerald-600 hover:text-emerald-800 text-sm font-medium">PDF</button>
                                         <span class="text-slate-300">|</span>
                                         <button @click="deleteInvoice(inv)" class="text-red-500 hover:text-red-700 text-sm font-medium">Delete</button>
@@ -1155,7 +1223,7 @@
                 <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
                     <div class="flex items-center justify-between mb-1">
                         <h3 class="text-lg font-semibold">Payment reminder</h3>
-                        <button @click="reminderModal.open = false" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+                        <button @click="reminderModal.open = false" aria-label="Close reminder dialog" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
                     </div>
                     <p class="text-xs text-slate-500 mb-4">Email the reminder to the customer on this invoice, or copy the text if you want to send it another way.</p>
                     <textarea v-model="reminderModal.text" rows="9" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none mb-4"></textarea>
@@ -1166,14 +1234,14 @@
                 </div>
             </div>
 
-            <div v-if="refundModal.open" class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50" @click.self="closeStripeRefundModal">
-                <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div v-if="refundModal.open" class="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 overflow-y-auto" @click.self="closeStripeRefundModal">
+                <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6" style="max-height: calc(100vh - 2rem); overflow-y: auto;" role="dialog" aria-modal="true" aria-labelledby="stripe-refund-title" aria-describedby="stripe-refund-summary">
                     <div class="flex items-start justify-between gap-4 mb-4">
                         <div>
-                            <h3 class="text-lg font-semibold">Stripe refund</h3>
+                            <h3 id="stripe-refund-title" class="text-lg font-semibold">Stripe refund</h3>
                             <p class="text-xs text-slate-500 mt-1">Request a full or partial refund for this confirmed Stripe payment.</p>
                         </div>
-                        <button @click="closeStripeRefundModal" :disabled="refundModal.submitting" class="text-slate-400 hover:text-slate-700 text-xl leading-none disabled:opacity-50">&times;</button>
+                        <button @click="closeStripeRefundModal" :disabled="refundModal.submitting" aria-label="Close refund dialog" class="text-slate-400 hover:text-slate-700 text-xl leading-none disabled:opacity-50">&times;</button>
                     </div>
                     <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 mb-4 text-sm">
                         <div class="flex justify-between gap-3">
@@ -1185,16 +1253,42 @@
                             <span class="font-semibold text-slate-800">{{ getCurrencySymbol(draft.currency) }}{{ Number(refundModal.max || 0).toFixed(2) }}</span>
                         </div>
                     </div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Refund amount</label>
+                    <label for="stripe-refund-amount" class="block text-xs font-bold text-slate-500 uppercase mb-1">Refund amount</label>
                     <div class="flex items-center gap-2 mb-2">
                         <span class="text-slate-500">{{ getCurrencySymbol(draft.currency) }}</span>
-                        <input type="number" min="0.01" :max="refundModal.max" step="0.01" v-model.number="refundModal.amount" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <input id="stripe-refund-amount" type="number" min="0.01" :max="refundModal.max" step="0.01" v-model.number="refundModal.amount" aria-describedby="stripe-refund-summary" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
                     </div>
                     <p v-if="refundModal.error" class="text-sm text-red-600 mb-3">{{ refundModal.error }}</p>
+                    <div id="stripe-refund-summary" class="rounded-lg border border-amber-200 bg-amber-50 p-4 mt-4 mb-4" aria-live="polite">
+                        <p class="text-sm font-semibold text-amber-800 mb-3">What this refund will do</p>
+                        <dl class="space-y-2 text-sm">
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-slate-600">Amount returned to customer</dt>
+                                <dd class="font-semibold text-slate-800">{{ refundPreview.valid ? getCurrencySymbol(draft.currency) + refundPreview.amount.toFixed(2) : '—' }}</dd>
+                            </div>
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-slate-600">Paid amount after refund</dt>
+                                <dd class="font-semibold text-slate-800">{{ refundPreview.valid ? getCurrencySymbol(draft.currency) + refundPreview.paidAfter.toFixed(2) : '—' }}</dd>
+                            </div>
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-slate-600">Outstanding balance after refund</dt>
+                                <dd class="font-semibold text-slate-800">{{ refundPreview.valid ? getCurrencySymbol(draft.currency) + refundPreview.outstanding.toFixed(2) : '—' }}</dd>
+                            </div>
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-slate-600">Invoice status after refund</dt>
+                                <dd class="font-semibold text-slate-800">{{ refundPreview.valid ? refundPreview.status : '—' }}</dd>
+                            </div>
+                        </dl>
+                        <p class="text-xs text-amber-800 mt-3"><strong>Current payment-correction model:</strong> the refund reduces the paid amount and restores any outstanding balance. It does not cancel the sale or create a credit note.</p>
+                    </div>
+                    <div class="rounded-lg border border-slate-200 bg-slate-50 p-3 mb-5 text-xs text-slate-600">
+                        <p class="font-semibold text-slate-800 mb-1">Customer receipt behaviour</p>
+                        <p>Stripe may email a refund receipt to the payer email used at Checkout. Tallyo does not send a duplicate refund email.</p>
+                    </div>
                     <p class="text-xs text-slate-500 mb-5">Stripe processes the money movement. Tallyo updates this invoice only after the signed Stripe webhook confirms the refund.</p>
                     <div class="flex gap-2 justify-end flex-wrap">
                         <button @click="closeStripeRefundModal" :disabled="refundModal.submitting" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-medium text-sm transition-colors disabled:opacity-50">Cancel</button>
-                        <button @click="submitStripeRefund" :disabled="refundModal.submitting" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50">{{ refundModal.submitting ? 'Requesting...' : 'Request refund' }}</button>
+                        <button @click="submitStripeRefund" :disabled="refundModal.submitting || !refundPreview.valid" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors disabled:opacity-50">{{ refundModal.submitting ? 'Requesting...' : 'Confirm refund request' }}</button>
                     </div>
                 </div>
             </div>
@@ -1279,7 +1373,7 @@
                             </div>
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Additional Info</label><textarea v-model="customerForm.additionalInfo" rows="3" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
                             <div class="pt-2 flex gap-3">
-                                <button @click="saveCustomer" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Save Customer</button>
+                                <button @click="saveCustomer" :disabled="customerSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ customerSaveBusy ? 'Saving…' : 'Save Customer' }}</button>
                                 <button @click="backToCustomers" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
                             </div>
                         </div>
@@ -1355,7 +1449,7 @@
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Description (Optional)</label><textarea v-model="itemForm.description" rows="3" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Default Price</label><input type="number" v-model.number="itemForm.price" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
                             <div class="pt-2 flex gap-3">
-                                <button @click="saveSavedItem" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Save Item</button>
+                                <button @click="saveSavedItem" :disabled="itemSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ itemSaveBusy ? 'Saving…' : 'Save Item' }}</button>
                                 <button @click="backToItems" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
                             </div>
                         </div>
@@ -1599,7 +1693,7 @@
                         </div>
 
                         <div class="flex gap-3 pt-2 border-t border-slate-100">
-                            <button @click="saveTemplate" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors mt-4">Save Schedule</button>
+                            <button @click="saveTemplate" :disabled="scheduleSaveBusy" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors mt-4 disabled:opacity-50">{{ scheduleSaveBusy ? 'Saving…' : 'Save Schedule' }}</button>
                             <button @click="backToRecurring" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-lg font-medium transition-colors mt-4">Cancel</button>
                         </div>
                     </div>
@@ -1826,7 +1920,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.16.2';
+    const APP_BUILD = '2026.07.18.6';
     const { createApp } = Vue;
 
     createApp({
@@ -1843,8 +1937,14 @@
                 authSignOutRequested: false,
                 authSessionVersion: 0,
                 dataLoading: false,
+                documentSaveBusy: false,
+                quickCustomerSaveBusy: false,
+                customerSaveBusy: false,
+                itemSaveBusy: false,
+                scheduleSaveBusy: false,
+                accessibleLabelCounter: 0,
                 turnstile: {
-                    enabled: Boolean(String(window.TURNSTILE_SITE_KEY || '').trim()),
+                    enabled: window.TURNSTILE_ENABLED !== false && Boolean(String(window.TURNSTILE_SITE_KEY || '').trim()),
                     siteKey: String(window.TURNSTILE_SITE_KEY || '').trim(),
                     loading: false,
                     widgetId: null,
@@ -1883,6 +1983,7 @@
                 selectedInvoices: [],
                 invoiceBulkBusy: false,
                 emailSendingId: null,
+                emailSendingStage: null,
                 stripeCheckoutBusyId: null,
                 stripeLiveMode: window.STRIPE_LIVE_MODE === true,
                 stripeRefundBusyKey: null,
@@ -1971,6 +2072,74 @@
                 Object.keys(map).forEach(id => map[id].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''))));
                 return map;
             },
+            operationalHealth() {
+                const events = [...(this.auditEvents || [])].sort((a, b) => String(b.created_at || '').localeCompare(String(a.created_at || '')));
+                const latest = types => events.find(ev => types.includes(String(ev.event_type || ''))) || null;
+                const runCard = (key, label, active, event) => {
+                    if (!active) return { key, label, state: 'neutral', status: 'Not in use', detail: 'No active configuration currently requires this automation.', at: '' };
+                    if (!event) return { key, label, state: 'attention', status: 'No run recorded', detail: 'No account-scoped run summary is available yet. Check the scheduled function and Supabase logs.', at: '' };
+                    const metadata = event.metadata || {};
+                    const failed = Math.max(0, Number(metadata.failed) || 0);
+                    return {
+                        key,
+                        label,
+                        state: failed > 0 || metadata.status === 'attention' ? 'attention' : 'ok',
+                        status: failed > 0 ? (failed + ' failed') : 'Last run OK',
+                        detail: (Math.max(0, Number(metadata.checked) || 0)) + ' eligible record(s) checked' + (metadata.sent !== undefined ? (', ' + (Math.max(0, Number(metadata.sent) || 0)) + ' reminder(s) sent') : '') + '.',
+                        at: event.created_at || ''
+                    };
+                };
+                const failureTypes = ['recurring_invoice_generation_failed', 'recurring_schedule_history_update_failed', 'payment_reminder_processing_failed', 'email_send_failed', 'email_failed', 'email_bounced', 'stripe_refund_failed', 'stripe_payment_failed'];
+                const recentCutoff = Date.now() - (7 * 24 * 60 * 60 * 1000);
+                const recentFailure = events.find(ev => failureTypes.includes(String(ev.event_type || '')) && Date.parse(ev.created_at || '') >= recentCutoff) || null;
+                const latestRefund = latest(['stripe_refund_failed', 'stripe_refund_succeeded', 'stripe_refund_updated']);
+                const latestProvider = events.find(ev => ev.source === 'provider_webhook') || null;
+                const activeDisputeCount = (this.invoices || []).filter(inv => {
+                    const dispute = this.disputeStateFor(inv.id);
+                    return dispute && ['needs_response', 'warning_needs_response', 'under_review', 'warning_under_review'].includes(dispute.status);
+                }).length;
+                const cards = [
+                    runCard('recurring', 'Recurring invoice automation', (this.recurringTemplates || []).some(t => t.active !== false), latest(['recurring_automation_run_completed'])),
+                    runCard('reminders', 'Overdue reminder automation', (this.invoices || []).some(inv => inv.docType === 'invoice' && inv.overdueRemindersEnabled === true), latest(['overdue_reminder_run_completed'])),
+                    {
+                        key: 'failures', label: 'Recent processing failure', state: recentFailure ? 'attention' : 'ok',
+                        status: recentFailure ? 'Recorded' : 'None recorded',
+                        detail: recentFailure ? this.operationalEventLabel(recentFailure.event_type) : 'No retained account failure event appears in the current audit window.',
+                        at: recentFailure ? recentFailure.created_at : ''
+                    },
+                    {
+                        key: 'refund', label: 'Latest refund outcome', state: latestRefund && latestRefund.event_type === 'stripe_refund_failed' ? 'attention' : 'neutral',
+                        status: !latestRefund ? 'No refund event' : (latestRefund.event_type === 'stripe_refund_failed' ? 'Failed' : 'Provider updated'),
+                        detail: latestRefund ? this.operationalEventLabel(latestRefund.event_type) : 'No refund outcome is retained in the current audit window.',
+                        at: latestRefund ? latestRefund.created_at : ''
+                    },
+                    {
+                        key: 'disputes', label: 'Active Stripe disputes', state: activeDisputeCount ? 'attention' : 'ok',
+                        status: activeDisputeCount ? String(activeDisputeCount) : 'None recorded',
+                        detail: activeDisputeCount ? 'Open the affected invoice and Stripe dashboard for the required response.' : 'No active dispute state is retained for the loaded invoices.',
+                        at: ''
+                    },
+                    {
+                        key: 'provider', label: 'Latest signed provider event', state: 'neutral',
+                        status: latestProvider ? 'Received' : 'No event loaded',
+                        detail: latestProvider ? this.operationalEventLabel(latestProvider.event_type) : 'No signed Stripe or Resend event appears in the current audit window.',
+                        at: latestProvider ? latestProvider.created_at : ''
+                    },
+                    {
+                        key: 'stripe', label: 'Stripe client mode', state: this.stripeLiveMode ? 'ok' : 'neutral',
+                        status: this.stripeLiveMode ? 'Live' : 'Test',
+                        detail: this.stripeLiveMode ? 'The published client configuration requests live Stripe checkout.' : 'The client is configured for Stripe test mode.',
+                        at: ''
+                    },
+                    {
+                        key: 'auth-abuse', label: 'Auth abuse protection', state: this.turnstile.enabled ? 'ok' : 'attention',
+                        status: this.turnstile.enabled ? 'Active' : 'Not active',
+                        detail: this.turnstile.enabled ? 'The browser requires a Turnstile token for supported Auth actions.' : 'Turnstile remains dormant until the approved site key, Supabase enforcement, and frontend flag are activated together.',
+                        at: ''
+                    }
+                ];
+                return { cards, attentionCount: cards.filter(card => card.state === 'attention').length };
+            },
             dueTemplates() {
                 const today = new Date().toISOString().split('T')[0];
                 const p = s => { const [y,m,d] = String(s).split('-').map(Number); return new Date(Date.UTC(y, m-1, d)); };
@@ -1990,6 +2159,32 @@
                 return (this.draft.items || []).some(it => it.showSuggestions && it.name);
             },
             draftBalance() { return this.totals.grandTotal - this.draftPaid; },
+            draftDisputeState() { return this.disputeStateFor(this.draft && this.draft.id); },
+            disputeDashboardUrl() { return this.stripeLiveMode ? 'https://dashboard.stripe.com/disputes' : 'https://dashboard.stripe.com/test/disputes'; },
+            refundPreview() {
+                const requested = Number(this.refundModal.amount);
+                const maximum = Number(this.refundModal.max) || 0;
+                const valid = Number.isFinite(requested) && requested > 0 && requested <= maximum + 0.001;
+                if (!valid) return { valid: false, amount: 0, paidAfter: 0, outstanding: 0, status: '' };
+
+                const roundMoney = value => Math.round((Number(value) + Number.EPSILON) * 100) / 100;
+                const amount = roundMoney(requested);
+                const total = roundMoney(this.totals.grandTotal);
+                const paidAfter = Math.max(0, roundMoney(this.draftPaid - amount));
+                const outstanding = Math.max(0, roundMoney(total - paidAfter));
+                let storedStatus = this.normalizedStatus(this.draft);
+                if (storedStatus !== 'Cancelled') {
+                    if (paidAfter >= total - 0.001) storedStatus = 'Paid';
+                    else if (storedStatus === 'Paid' || (storedStatus === 'Draft' && paidAfter > 0.001)) storedStatus = 'Sent';
+                }
+                const projected = {
+                    ...this.draft,
+                    status: storedStatus,
+                    totals: { ...this.totals },
+                    payments: [...(this.draft.payments || []), { amount: -amount, provider: 'stripe', lifecycleEvent: 'refund' }]
+                };
+                return { valid: true, amount, paidAfter, outstanding, status: this.effectiveStatus(projected) };
+            },
             filteredInvoices() {
                 let list = this.invoices.slice();
                 const q = this.invoiceSearch.trim().toLowerCase();
@@ -2141,6 +2336,23 @@
             }
         },
         methods: {
+            bindAccessibleLabels() {
+                if (typeof document.querySelectorAll !== 'function') return;
+                document.querySelectorAll('#app label').forEach(label => {
+                    if (label.htmlFor || label.querySelector('input, select, textarea')) return;
+                    const findSingleControl = candidate => {
+                        if (!candidate) return null;
+                        if (candidate.matches && candidate.matches('input, select, textarea')) return candidate;
+                        const controls = candidate.querySelectorAll ? candidate.querySelectorAll('input, select, textarea') : [];
+                        return controls.length === 1 ? controls[0] : null;
+                    };
+                    let control = findSingleControl(label.nextElementSibling);
+                    if (!control && label.parentElement) control = findSingleControl(label.parentElement.nextElementSibling);
+                    if (!control) return;
+                    if (!control.id) control.id = 'tallyo-field-' + (++this.accessibleLabelCounter);
+                    label.htmlFor = control.id;
+                });
+            },
             pageInfo(total, page) {
                 const safeTotal = Math.max(1, total || 1);
                 const safePage = Math.min(Math.max(page || 1, 1), safeTotal);
@@ -2271,7 +2483,10 @@
                         tabindex: 0,
                         'response-field': false,
                         'feedback-enabled': false,
+                        retry: 'auto',
+                        'retry-interval': 8000,
                         'refresh-expired': 'manual',
+                        'refresh-timeout': 'auto',
                         callback: token => {
                             if (mode !== this.authMode) return;
                             this.turnstile.token = String(token || '');
@@ -2280,6 +2495,10 @@
                         'expired-callback': () => {
                             this.turnstile.token = '';
                             this.turnstile.error = 'Security check expired.';
+                        },
+                        'timeout-callback': () => {
+                            this.turnstile.token = '';
+                            this.turnstile.error = 'Security check timed out. Retry the security check.';
                         },
                         'error-callback': () => {
                             this.turnstile.token = '';
@@ -2724,7 +2943,7 @@
                 const target = factors.find(factor => factor.id === factorId);
                 const verifier = factors.find(factor => factor.id !== factorId);
                 if (!target || !verifier) return alert("Could not identify the authenticator.");
-                if (!confirm("Remove this authenticator?")) return;
+                if (!confirm(`Remove ${this.mfaFactorLabel(target, factors.indexOf(target))}? You will continue signing in with ${this.mfaFactorLabel(verifier, factors.indexOf(verifier))}.`)) return;
                 try {
                     const code = await this.requestPasswordMfaCode({
                         title: 'Remove authenticator',
@@ -2812,6 +3031,7 @@
                 this.selectedInvoices = [];
                 this.invoiceBulkBusy = false;
                 this.emailSendingId = null;
+                this.emailSendingStage = null;
                 this.stripeCheckoutBusyId = null;
                 this.stripeRefundBusyKey = null;
                 this.newPayment = { amount: null, date: new Date().toISOString().split('T')[0], note: '' };
@@ -2854,6 +3074,11 @@
                 this.resolveSessionPasswordConfirm = null;
                 this.rejectSessionPasswordConfirm = null;
                 this.dataLoading = false;
+                this.documentSaveBusy = false;
+                this.quickCustomerSaveBusy = false;
+                this.customerSaveBusy = false;
+                this.itemSaveBusy = false;
+                this.scheduleSaveBusy = false;
                 this.draft = this.getEmptyDraft();
             },
             async signOutWithScope(scope) {
@@ -3197,7 +3422,7 @@
                     globalDiscount: Number(r.global_discount) || 0, taxRate: Number(r.tax_rate) || 0,
                     taxMode: r.tax_mode || 'exclusive',
                     shippingCost: Number(r.shipping_cost) || 0,
-                    notes: r.notes || '', terms: r.terms || ''
+                    notes: r.notes || '', terms: r.terms || '', updatedAt: r.updated_at || null
                 };
                 inv.totals = this.calcTotals(inv);
                 return inv;
@@ -3231,32 +3456,27 @@
                 const loadSessionVersion = this.authSessionVersion;
                 this.dataLoading = true;
                 try {
-                    const [companyRes, custRes, itemRes, invRes] = await Promise.all([
+                    const [companyRes, customerRows, itemRows, invoiceRows] = await Promise.all([
                         supabaseClient.from('company_settings').select('*').maybeSingle(),
-                        supabaseClient.from('customers').select('*').order('name'),
-                        supabaseClient.from('saved_items').select('*').order('name'),
-                        supabaseClient.from('invoices').select('*').order('created_at', { ascending: false })
+                        this.fetchAllOwnedRows('customers', 'name'),
+                        this.fetchAllOwnedRows('saved_items', 'name'),
+                        this.fetchAllOwnedRows('invoices', 'created_at', 1000, false)
                     ]);
                     if (companyRes.error) throw companyRes.error;
-                    if (custRes.error) throw custRes.error;
-                    if (itemRes.error) throw itemRes.error;
-                    if (invRes.error) throw invRes.error;
                     if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
 
                     if (companyRes.data) this.company = this.rowToCompany(companyRes.data);
                     this.companyAuditSnapshot = this.cloneCompanyForAudit();
-                    this.customers = (custRes.data || []).map(r => this.rowToCustomer(r));
-                    this.savedItems = (itemRes.data || []).map(r => this.rowToItem(r));
-                    this.invoices = (invRes.data || []).map(r => this.rowToInvoice(r));
+                    this.customers = customerRows.map(r => this.rowToCustomer(r));
+                    this.savedItems = itemRows.map(r => this.rowToItem(r));
+                    this.invoices = invoiceRows.map(r => this.rowToInvoice(r));
                     await this.loadAuditEvents();
                     if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
                     this.draft = this.getEmptyDraft();
                     // Recurring templates — best effort; the table may not exist until the setup SQL is run.
                     try {
-                        const recRes = await supabaseClient.from('recurring_templates').select('*').order('created_at', { ascending: false });
-                        if (!recRes.error && this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) {
-                            this.recurringTemplates = (recRes.data || []).map(r => this.rowToTemplate(r));
-                        }
+                        const recurringRows = await this.fetchAllOwnedRows('recurring_templates', 'created_at', 1000, false);
+                        if (this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) this.recurringTemplates = recurringRows.map(r => this.rowToTemplate(r));
                     } catch (recErr) { console.warn('Recurring templates unavailable (run recurring_setup.sql):', recErr); }
                 } catch (e) {
                     if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
@@ -3281,9 +3501,8 @@
                 try {
                     const { data, error } = await supabaseClient
                         .from('audit_events')
-                        .select('event_type, object_id, provider, provider_event_id, created_at, metadata')
-                        .eq('object_type', 'invoice')
-                        .in('event_type', ['document_email_sent', 'email_sent', 'email_delivered', 'email_delivery_delayed', 'email_bounced', 'email_complained', 'email_failed', 'email_opened', 'email_clicked', 'email_received'])
+                        .select('event_type, object_type, object_id, source, provider, provider_event_id, created_at, metadata')
+                        .in('event_type', ['document_email_sent', 'payment_reminder_email_sent', 'email_send_failed', 'email_sent', 'email_delivered', 'email_delivery_delayed', 'email_bounced', 'email_complained', 'email_failed', 'email_opened', 'email_clicked', 'email_received', 'charge_dispute_created', 'charge_dispute_updated', 'charge_dispute_closed', 'charge_dispute_funds_withdrawn', 'charge_dispute_funds_reinstated', 'recurring_automation_run_completed', 'overdue_reminder_run_completed', 'recurring_invoice_generation_failed', 'recurring_schedule_history_update_failed', 'payment_reminder_processing_failed', 'stripe_refund_failed', 'stripe_refund_succeeded', 'stripe_refund_updated', 'stripe_payment_failed'])
                         .order('created_at', { ascending: false })
                         .limit(500);
                     if (!error && this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) {
@@ -3488,12 +3707,23 @@
                 const { data, error } = await supabaseClient.from('recurring_templates').insert(row).select().single();
                 if (error) throw error;
                 this.recurringTemplates.unshift(this.rowToTemplate(data));
+                await this.logAppAuditEvent('recurring_schedule_created', 'recurring_template', data.id, {
+                    frequency: tpl.frequency,
+                    email_enabled: tpl.emailEnabled === true
+                });
                 alert('Recurring schedule created. You can manage or pause it on the Recurring page.');
             },
             async persistDraft() {
                 // Insert (new) or update (existing) the current draft in the database.
+                if (this.documentSaveBusy) return false;
                 this.normalizeDeposit();
                 this.normalizeReminderSchedule();
+                const validationIssue = this.validateDraftForSave(this.draft);
+                if (validationIssue) {
+                    alert(validationIssue);
+                    return false;
+                }
+                this.documentSaveBusy = true;
                 const inv = JSON.parse(JSON.stringify(this.draft));
                 if (!inv.status) inv.status = 'Draft';
                 if (!inv.docType) inv.docType = 'invoice';
@@ -3503,29 +3733,79 @@
                 const existing = this.isUuid(inv.id) ? this.invoices.find(i => i.id === inv.id) : null;
                 try {
                     if (existing) {
-                        const { data, error } = await supabaseClient.from('invoices').update(row).eq('id', inv.id).select().single();
+                        let updateQuery = supabaseClient.from('invoices').update(row).eq('id', inv.id);
+                        if (existing.updatedAt) updateQuery = updateQuery.eq('updated_at', existing.updatedAt);
+                        const { data, error } = await updateQuery.select().maybeSingle();
                         if (error) throw error;
+                        if (!data) throw new Error('This document changed in another tab or device. Reload Tallyo, review the latest version, and apply your change again.');
                         const mapped = this.rowToInvoice(data);
                         const idx = this.invoices.findIndex(i => i.id === inv.id);
                         if (idx >= 0) this.invoices[idx] = mapped;
                         this.draft = JSON.parse(JSON.stringify(mapped));
                         this.draft.repeat = priorRepeat;
+                        if (existing.docType === 'quote' && mapped.docType === 'invoice') {
+                            await this.logAppAuditEvent('quote_converted_to_invoice', 'document', mapped.id, {
+                                resulting_status: mapped.status || 'Draft'
+                            });
+                        }
+                        const reminderChanged = existing.overdueRemindersEnabled !== mapped.overdueRemindersEnabled ||
+                            Number(existing.overdueFirstReminderDays) !== Number(mapped.overdueFirstReminderDays) ||
+                            Number(existing.overdueRepeatReminderDays) !== Number(mapped.overdueRepeatReminderDays) ||
+                            Number(existing.overdueMaxReminders) !== Number(mapped.overdueMaxReminders);
+                        if (reminderChanged) {
+                            await this.logAppAuditEvent('reminder_settings_changed', 'document', mapped.id, {
+                                enabled: mapped.overdueRemindersEnabled === true,
+                                first_days: Number(mapped.overdueFirstReminderDays) || 0,
+                                repeat_days: Number(mapped.overdueRepeatReminderDays) || 0,
+                                maximum: Number(mapped.overdueMaxReminders) || 0
+                            });
+                        }
                     } else {
                         const { data, error } = await supabaseClient.from('invoices').insert(row).select().single();
                         if (error) throw error;
                         const mapped = this.rowToInvoice(data);
                         this.invoices.unshift(mapped);
                         this.draft.id = mapped.id; // adopt the database id so further edits update, not duplicate
+                        await this.logAppAuditEvent(mapped.docType === 'credit' ? 'credit_note_created' : 'document_created', 'document', mapped.id, {
+                            document_type: mapped.docType || 'invoice',
+                            status: mapped.status || 'Draft'
+                        });
                     }
                     return true;
                 } catch (e) {
                     console.error("Save invoice failed:", e);
                     alert("Could not save: " + (e.message || e));
                     return false;
+                } finally {
+                    this.documentSaveBusy = false;
                 }
             },
             docTypeLabel(t) {
                 return { invoice: 'INVOICE', quote: 'QUOTE', credit: 'CREDIT NOTE' }[t || 'invoice'] || 'INVOICE';
+            },
+            validateDraftForSave(src) {
+                const items = Array.isArray(src && src.items) ? src.items : [];
+                if (!items.length) return 'Add at least one line item before saving.';
+                for (let index = 0; index < items.length; index += 1) {
+                    const item = items[index] || {};
+                    const line = index + 1;
+                    if (!String(item.name || '').trim()) return 'Line ' + line + ': enter an item or description.';
+                    const qty = Number(item.qty);
+                    if (!Number.isFinite(qty) || qty <= 0) return 'Line ' + line + ': quantity must be greater than zero.';
+                    const price = Number(item.price);
+                    if (!Number.isFinite(price) || price < 0) return 'Line ' + line + ': unit price cannot be negative.';
+                    const discount = Number(item.discount || 0);
+                    if (!Number.isFinite(discount) || discount < 0 || discount > 100) return 'Line ' + line + ': discount must be between 0% and 100%.';
+                    const tax = Number(item.tax || 0);
+                    if (!Number.isFinite(tax) || tax < 0 || tax > 100) return 'Line ' + line + ': tax must be between 0% and 100%.';
+                }
+                const globalDiscount = Number((src && src.globalDiscount) || 0);
+                if (!Number.isFinite(globalDiscount) || globalDiscount < 0 || globalDiscount > 100) return 'Global discount must be between 0% and 100%.';
+                const shipping = Number((src && src.shippingCost) || 0);
+                if (!Number.isFinite(shipping) || shipping < 0) return 'Shipping cannot be negative.';
+                const grandTotal = Number(this.calcTotals(src).grandTotal);
+                if (!Number.isFinite(grandTotal) || grandTotal <= 0) return 'Document total must be greater than zero.';
+                return '';
             },
             docTypeNoun(t) {
                 return { invoice: 'Invoice', quote: 'Quote', credit: 'Credit Note' }[t || 'invoice'] || 'Invoice';
@@ -3548,15 +3828,16 @@
                     console.warn('Audit event skipped:', eventType, e && (e.message || e));
                 }
             },
-            async fetchAllOwnedRows(table, orderColumn, pageSize = 1000) {
+            async fetchAllOwnedRows(table, orderColumn, pageSize = 1000, ascending = true) {
                 const rows = [];
                 let from = 0;
                 while (true) {
-                    const { data, error } = await supabaseClient
+                    let query = supabaseClient
                         .from(table)
                         .select('*')
-                        .order(orderColumn, { ascending: true })
-                        .range(from, from + pageSize - 1);
+                        .order(orderColumn, { ascending });
+                    if (orderColumn !== 'id') query = query.order('id', { ascending: true });
+                    const { data, error } = await query.range(from, from + pageSize - 1);
                     if (error) throw new Error(`Could not export ${table}.`);
                     const page = data || [];
                     rows.push(...page);
@@ -3668,31 +3949,50 @@
                 return meta;
             },
             emailStatusFor(id) {
-                const events = this.emailEventsByDocument[id] || [];
+                const events = (this.emailEventsByDocument[id] || []).filter(ev => String(ev.event_type || '').startsWith('email_') || ev.event_type === 'document_email_sent' || ev.event_type === 'payment_reminder_email_sent');
+                if (this.emailSendingId === id || (this.emailSendingId === 'draft' && this.draft && this.draft.id === id)) {
+                    const state = this.emailSendingStage === 'prepared' ? 'email_prepared' : 'email_queued';
+                    const label = state === 'email_prepared' ? 'Prepared' : 'Queued';
+                    return { state, label, detail: label + ' for provider submission', event: null };
+                }
                 if (!events.length) return null;
+                const eventTime = ev => {
+                    const value = Date.parse((ev && ev.created_at) || '');
+                    return Number.isFinite(value) ? value : 0;
+                };
+                const ordered = [...events].sort((a, b) => eventTime(b) - eventTime(a));
+                const attemptStart = ordered.find(ev => ev.event_type === 'document_email_sent' || ev.event_type === 'payment_reminder_email_sent' || ev.event_type === 'email_send_failed');
+                let attemptEvents = ordered;
+                if (attemptStart && attemptStart.event_type === 'email_send_failed') attemptEvents = [attemptStart];
+                else if (attemptStart && attemptStart.provider_event_id) {
+                    const emailId = String(attemptStart.provider_event_id);
+                    attemptEvents = ordered.filter(ev => ev === attemptStart || String((ev.metadata || {}).resend_email_id || '') === emailId);
+                }
                 const rank = {
                     email_complained: 7,
                     email_failed: 7,
+                    email_send_failed: 7,
                     email_bounced: 6,
                     email_delivery_delayed: 5,
                     email_delivered: 4,
                     email_sent: 3,
                     document_email_sent: 2,
+                    payment_reminder_email_sent: 2,
                     email_opened: 1,
                     email_clicked: 1,
                     email_received: 1
                 };
-                let best = events[0];
-                events.forEach(ev => { if ((rank[ev.event_type] || 0) > (rank[best.event_type] || 0)) best = ev; });
-                const meta = best.metadata || {};
-                const to = meta.to || (meta.raw && meta.raw.data && meta.raw.data.to && meta.raw.data.to[0]) || '';
+                let best = attemptEvents[0];
+                attemptEvents.forEach(ev => { if ((rank[ev.event_type] || 0) > (rank[best.event_type] || 0)) best = ev; });
                 const labels = {
-                    document_email_sent: 'Email sent',
-                    email_sent: 'Email sent',
+                    document_email_sent: 'Sent to provider',
+                    payment_reminder_email_sent: 'Sent to provider',
+                    email_sent: 'Sent to provider',
                     email_delivered: 'Delivered',
                     email_delivery_delayed: 'Delayed',
                     email_bounced: 'Bounced',
                     email_complained: 'Complaint',
+                    email_send_failed: 'Failed',
                     email_failed: 'Failed',
                     email_opened: 'Opened',
                     email_clicked: 'Clicked',
@@ -3700,14 +4000,115 @@
                 };
                 const state = best.event_type;
                 const label = labels[state] || 'Email event';
-                const detail = label + (to ? (' to ' + to) : '') + (best.created_at ? (' on ' + this.formatHistoryTime(best.created_at)) : '');
+                const detail = label + (best.created_at ? (' on ' + this.formatHistoryTime(best.created_at)) : '');
                 return { state, label, detail, event: best };
             },
             emailStatusClass(state) {
                 if (state === 'email_delivered') return 'bg-green-100 text-green-700';
-                if (state === 'email_bounced' || state === 'email_complained' || state === 'email_failed') return 'bg-red-100 text-red-700';
+                if (state === 'email_bounced' || state === 'email_complained' || state === 'email_failed' || state === 'email_send_failed') return 'bg-red-100 text-red-700';
                 if (state === 'email_delivery_delayed') return 'bg-amber-100 text-amber-700';
-                if (state === 'email_sent' || state === 'document_email_sent') return 'bg-blue-100 text-blue-700';
+                if (state === 'email_prepared' || state === 'email_queued') return 'bg-indigo-100 text-indigo-700';
+                if (state === 'email_sent' || state === 'document_email_sent' || state === 'payment_reminder_email_sent') return 'bg-blue-100 text-blue-700';
+                return 'bg-slate-100 text-slate-600';
+            },
+            operationalHealthStatusClass(state) {
+                if (state === 'ok') return 'bg-green-100 text-green-700';
+                if (state === 'attention') return 'bg-amber-100 text-amber-800';
+                return 'bg-slate-200 text-slate-700';
+            },
+            operationalEventLabel(eventType) {
+                return {
+                    recurring_invoice_generation_failed: 'Recurring invoice generation failed.',
+                    recurring_schedule_history_update_failed: 'Recurring schedule history could not be updated.',
+                    payment_reminder_processing_failed: 'An overdue reminder could not be finalised.',
+                    email_send_failed: 'An email request failed before provider acceptance.',
+                    email_failed: 'The email provider reported a delivery failure.',
+                    email_bounced: 'The email provider reported a bounce.',
+                    stripe_refund_failed: 'Stripe reported a failed refund.',
+                    stripe_refund_succeeded: 'Stripe reported a successful refund.',
+                    stripe_refund_updated: 'Stripe reported a refund update.',
+                    stripe_payment_failed: 'Stripe reported a failed payment.',
+                    charge_dispute_created: 'Stripe reported a new dispute.',
+                    charge_dispute_updated: 'Stripe reported a dispute update.',
+                    charge_dispute_closed: 'Stripe reported a closed dispute.',
+                    charge_dispute_funds_withdrawn: 'Stripe reported disputed funds withdrawn.',
+                    charge_dispute_funds_reinstated: 'Stripe reported disputed funds reinstated.',
+                    email_sent: 'Resend accepted an email for delivery.',
+                    email_delivered: 'Resend reported delivery to the recipient mail server.',
+                    email_delivery_delayed: 'Resend reported delayed delivery.',
+                    email_complained: 'Resend reported a spam complaint.',
+                    email_opened: 'Resend reported an open event.',
+                    email_clicked: 'Resend reported a link click.',
+                    email_received: 'Resend reported an inbound email event.'
+                }[eventType] || 'A signed provider event was recorded.';
+            },
+            disputeStateFor(id) {
+                if (!id) return null;
+                const allowed = new Set(['charge_dispute_created', 'charge_dispute_updated', 'charge_dispute_closed', 'charge_dispute_funds_withdrawn', 'charge_dispute_funds_reinstated']);
+                const eventTime = ev => {
+                    const providerCreated = Number(ev && ev.metadata && ev.metadata.provider_created);
+                    if (Number.isFinite(providerCreated) && providerCreated > 0) return providerCreated * 1000;
+                    const received = Date.parse((ev && ev.created_at) || '');
+                    return Number.isFinite(received) ? received : 0;
+                };
+                const events = (this.emailEventsByDocument[id] || [])
+                    .filter(ev => allowed.has(String(ev.event_type || '')))
+                    .sort((a, b) => eventTime(b) - eventTime(a));
+                if (!events.length) return null;
+
+                const latest = events.find(ev => ev.metadata && ev.metadata.status) || events[0];
+                const metadata = latest.metadata || {};
+                const rawStatus = String(metadata.status || 'unknown').toLowerCase();
+                const labels = {
+                    warning_needs_response: 'Inquiry needs response',
+                    warning_under_review: 'Inquiry under review',
+                    warning_closed: 'Inquiry closed',
+                    needs_response: 'Needs response',
+                    under_review: 'Under review',
+                    won: 'Won',
+                    lost: 'Lost',
+                    prevented: 'Prevented'
+                };
+                const nextActions = {
+                    warning_needs_response: 'Review the inquiry in Stripe now and respond before its evidence deadline.',
+                    needs_response: 'Review the dispute in Stripe now and either accept it or submit evidence before the deadline.',
+                    warning_under_review: 'Monitor Stripe for the issuer response and keep the supporting records available.',
+                    under_review: 'Monitor Stripe for the issuer decision and keep the supporting records available.',
+                    warning_closed: 'No response is currently required. Keep the invoice and case record.',
+                    prevented: 'No response is currently required. Keep the invoice and case record.',
+                    won: 'Reconcile the Stripe balance and confirm whether the disputed funds were reinstated.',
+                    lost: 'Reconcile the Stripe balance, preserve the case record, and follow the support procedure.'
+                };
+                const amountEvent = events.find(ev => Number(ev.metadata && ev.metadata.amount) > 0) || latest;
+                const amountMetadata = amountEvent.metadata || {};
+                const fundsEvent = events.find(ev => ev.event_type === 'charge_dispute_funds_withdrawn' || ev.event_type === 'charge_dispute_funds_reinstated');
+                const fundsLabel = !fundsEvent
+                    ? 'No separate funds update recorded'
+                    : fundsEvent.event_type === 'charge_dispute_funds_reinstated'
+                    ? 'Reinstated to Stripe balance'
+                    : 'Withdrawn from Stripe balance';
+                const dueBySeconds = Number(metadata.evidence_due_by);
+                const dueBy = Number.isFinite(dueBySeconds) && dueBySeconds > 0
+                    ? new Date(dueBySeconds * 1000).toLocaleString()
+                    : '';
+                const reason = String(metadata.reason || '').replaceAll('_', ' ').replace(/^./, char => char.toUpperCase());
+                return {
+                    status: rawStatus,
+                    label: labels[rawStatus] || 'Dispute update',
+                    amount: Math.max(0, Number(amountMetadata.amount) || 0),
+                    currency: String(amountMetadata.currency || metadata.currency || 'GBP').toUpperCase(),
+                    reason,
+                    dueBy,
+                    pastDue: metadata.evidence_past_due === true,
+                    fundsLabel,
+                    nextAction: nextActions[rawStatus] || 'Review the current dispute and required action in Stripe.'
+                };
+            },
+            disputeStatusClass(status) {
+                if (status === 'won' || status === 'prevented' || status === 'warning_closed') return 'bg-green-100 text-green-700';
+                if (status === 'lost') return 'bg-red-100 text-red-700';
+                if (status === 'needs_response' || status === 'warning_needs_response') return 'bg-amber-100 text-amber-700';
+                if (status === 'under_review' || status === 'warning_under_review') return 'bg-blue-100 text-blue-700';
                 return 'bg-slate-100 text-slate-600';
             },
             applyInvoiceRow(row) {
@@ -3732,14 +4133,15 @@
                 if (!to) return;
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return alert('Enter a valid email address.');
 
+                this.emailSendingId = this.isUuid(inv.id) ? inv.id : 'draft';
+                this.emailSendingStage = 'prepared';
                 let target = inv;
                 const isCurrentDraft = this.draft && inv.id === this.draft.id;
                 if (!this.isUuid(inv.id) || isCurrentDraft) {
                     const repeat = this.draft.repeat ? JSON.parse(JSON.stringify(this.draft.repeat)) : null;
                     const invSnapshot = JSON.parse(JSON.stringify(this.draft));
-                    this.emailSendingId = this.isUuid(inv.id) ? inv.id : 'draft';
                     const ok = await this.persistDraft();
-                    if (!ok) { this.emailSendingId = null; return; }
+                    if (!ok) { this.emailSendingId = null; this.emailSendingStage = null; return; }
                     if (repeat && repeat.enabled && !repeat._created) {
                         try { await this.createScheduleFromInvoice(invSnapshot, repeat); if (this.draft.repeat) this.draft.repeat._created = true; }
                         catch (e) { console.error('Schedule create failed:', e); alert('Document saved and email will continue, but the recurring schedule could not be created: ' + (e.message || e)); }
@@ -3748,10 +4150,12 @@
                 }
                 if (!this.isUuid(target.id)) {
                     this.emailSendingId = null;
+                    this.emailSendingStage = null;
                     return alert('Save this document before emailing it.');
                 }
 
                 this.emailSendingId = target.id;
+                this.emailSendingStage = 'queued';
                 try {
                     const { data, error } = await supabaseClient.functions.invoke('send-document-email', {
                         body: { documentId: target.id, to }
@@ -3760,12 +4164,13 @@
                     if (data && data.error) throw new Error(data.error);
                     if (data && data.invoice) this.applyInvoiceRow(data.invoice);
                     await this.loadAuditEvents();
-                    alert('Email sent to ' + to + '.');
+                    alert('Email sent to the provider for delivery to ' + to + '. Delivery status will update when the provider reports it.');
                 } catch (e) {
                     console.error('Email send failed:', e);
                     alert('Could not send email: ' + (e.message || e));
                 } finally {
                     this.emailSendingId = null;
+                    this.emailSendingStage = null;
                 }
             },
             async openStripeCheckout(inv) {
@@ -3865,7 +4270,7 @@
                     }
                     await this.loadAuditEvents();
                     this.selectedInvoices = [];
-                    alert('Email complete. Sent ' + sent + ', skipped ' + skipped + ', failed ' + failed + '.');
+                    alert('Provider submission complete. Accepted ' + sent + ', skipped ' + skipped + ', failed ' + failed + '. Delivery statuses will update separately.');
                 } finally {
                     this.invoiceBulkBusy = false;
                 }
@@ -3891,7 +4296,9 @@
             async bulkDeleteInvoices() {
                 const rows = this.selectedInvoiceRows;
                 if (!rows.length) return;
-                if (!confirm('Delete ' + rows.length + ' selected document' + (rows.length === 1 ? '' : 's') + '? This cannot be undone.')) return;
+                const blocked = rows.filter(inv => this.documentDeletionReason(inv));
+                if (blocked.length) return alert('Only unpaid drafts without active disputes can be deleted. Remove ' + blocked.length + ' issued, paid, refunded, or disputed document' + (blocked.length === 1 ? '' : 's') + ' from the selection and use status controls instead.');
+                if (!confirm('Permanently delete ' + rows.length + ' selected draft' + (rows.length === 1 ? '' : 's') + ' and their Tallyo activity histories? This cannot be undone.')) return;
                 this.invoiceBulkBusy = true;
                 try {
                     const ids = rows.map(inv => inv.id);
@@ -3942,6 +4349,10 @@
             async recordPayment() {
                 const amt = parseFloat(this.newPayment.amount);
                 if (!amt || amt <= 0) return alert("Enter a valid payment amount.");
+                const outstanding = Math.max(0, Number(this.draftBalance) || 0);
+                if (amt > outstanding + 0.001) {
+                    return alert('Payment cannot exceed the outstanding balance of ' + this.getCurrencySymbol(this.draft.currency) + outstanding.toFixed(2) + '.');
+                }
                 if (!this.draft.payments) this.draft.payments = [];
                 this.draft.payments.push({ amount: amt, date: this.newPayment.date || new Date().toISOString().split('T')[0], note: this.newPayment.note || '' });
                 const wasPaid = this.draft.status === 'Paid';
@@ -3979,7 +4390,11 @@
                     const type = ev && ev.type;
                     const text = String((ev && ev.text) || '').toLowerCase();
                     if (type === 'dispute' && (text.includes('closed') || text.includes('reinstated'))) return null;
-                    if (type === 'payment_failed' || type === 'dispute' || (type === 'refund' && text.includes('failed'))) {
+                    if (type === 'dispute') {
+                        if (!this.disputeStateFor(inv && inv.id)) return { text: ev.text || 'Payment provider event needs attention.' };
+                        continue;
+                    }
+                    if (type === 'payment_failed' || (type === 'refund' && text.includes('failed'))) {
                         return { text: ev.text || 'Payment provider event needs attention.' };
                     }
                 }
@@ -4092,8 +4507,10 @@
             async removePayment(index) {
                 const removed = this.draft.payments[index];
                 if (removed && removed.provider === 'stripe') return alert('Stripe payments are provider-confirmed and cannot be removed manually.');
-                if (!confirm('Remove this payment? This cannot be undone.')) return;
                 const amt = removed ? (parseFloat(removed.amount) || 0) : 0;
+                const paidAfter = Math.max(0, this.draftPaid - amt);
+                const outstandingAfter = Math.max(0, this.totals.grandTotal - paidAfter);
+                if (!confirm('Remove the manual payment of ' + this.getCurrencySymbol(this.draft.currency) + amt.toFixed(2) + '? The paid amount will become ' + this.getCurrencySymbol(this.draft.currency) + paidAfter.toFixed(2) + ' and the outstanding balance will become ' + this.getCurrencySymbol(this.draft.currency) + outstandingAfter.toFixed(2) + '. This cannot be undone.')) return;
                 this.draft.payments.splice(index, 1);
                 if (this.draftBalance > 0.001 && this.draft.status === 'Paid') this.draft.status = 'Sent';
                 this.addHistory('payment_removed', 'Payment of ' + this.getCurrencySymbol(this.draft.currency) + amt.toFixed(2) + ' removed');
@@ -4243,6 +4660,8 @@
                 const t = this.recurringForm;
                 if (!t.customer) return alert('Please choose a customer for this recurring schedule.');
                 if (!t.startDate) return alert('Please set a start date.');
+                if (this.scheduleSaveBusy) return;
+                this.scheduleSaveBusy = true;
                 // On first save, next_run starts at the start date.
                 if (this.editingTemplate === null) t.nextRun = t.startDate;
                 try {
@@ -4265,16 +4684,33 @@
                         if (error) throw error;
                         const idx = this.recurringTemplates.findIndex(x => x.id === t.id);
                         if (idx >= 0) this.recurringTemplates[idx] = this.rowToTemplate(data);
+                        await this.logAppAuditEvent('recurring_schedule_updated', 'recurring_template', data.id, {
+                            frequency: t.frequency || 'monthly',
+                            email_enabled: t.emailEnabled === true,
+                            active: t.active !== false
+                        });
                     } else {
                         const { data, error } = await supabaseClient.from('recurring_templates').insert(row).select().single();
                         if (error) throw error;
                         this.recurringTemplates.unshift(this.rowToTemplate(data));
+                        await this.logAppAuditEvent('recurring_schedule_created', 'recurring_template', data.id, {
+                            frequency: t.frequency || 'monthly',
+                            email_enabled: t.emailEnabled === true,
+                            active: t.active !== false
+                        });
                     }
                     this.backToRecurring();
-                } catch (e) { console.error('Save template failed:', e); alert('Could not save schedule: ' + (e.message || e)); }
+                } catch (e) {
+                    console.error('Save template failed:', e);
+                    alert('Could not save schedule: ' + (e.message || e));
+                } finally {
+                    this.scheduleSaveBusy = false;
+                }
             },
             async toggleTemplateActive(t) {
-                t.active = !t.active;
+                const nextActive = !t.active;
+                if (!nextActive && !confirm('Pause this recurring schedule? No future invoices will be generated until you resume it. Existing invoices are kept.')) return;
+                t.active = nextActive;
                 if (!t.history) t.history = [];
                 t.history.push({ ts: new Date().toISOString(), type: t.active ? 'resumed' : 'paused', text: t.active ? 'Schedule resumed' : 'Schedule paused' });
                 try {
@@ -4409,7 +4845,7 @@
                     if (data && data.invoice) this.applyInvoiceRow(data.invoice);
                     await this.loadAuditEvents();
                     this.reminderModal.open = false;
-                    alert('Reminder emailed to ' + to + '.');
+                    alert('Reminder sent to the provider for delivery to ' + to + '. Delivery status will update separately.');
                 } catch (e) {
                     console.error('Reminder email failed:', e);
                     alert('Could not send reminder: ' + (e.message || e));
@@ -4455,7 +4891,9 @@
                 this.navigateTo('edit');
             },
             async deleteInvoice(inv) {
-                if(confirm("Delete this invoice?")) {
+                const reason = this.documentDeletionReason(inv);
+                if (reason) return alert(reason);
+                if(confirm('Permanently delete draft ' + this.docTypeNoun(inv.docType).toLowerCase() + ' #' + (inv.number || '') + ' and its Tallyo activity history? This cannot be undone.')) {
                     const { error } = await supabaseClient.from('invoices').delete().eq('id', inv.id);
                     if (error) return alert("Could not delete: " + error.message);
                     const i = this.invoices.findIndex(x => x.id === inv.id);
@@ -4466,6 +4904,13 @@
                         status: this.effectiveStatus(inv)
                     });
                 }
+            },
+            documentDeletionReason(inv) {
+                if (!inv) return 'Choose a valid document.';
+                if (this.normalizedStatus(inv) !== 'Draft') return 'Only drafts can be deleted. Cancel or retain an issued document so its financial history remains available.';
+                if (Math.abs(this.amountPaid(inv)) > 0.001) return 'This draft has payment or refund history and cannot be deleted.';
+                if (this.disputeStateFor(inv.id)) return 'This document has Stripe dispute history and cannot be deleted.';
+                return '';
             },
             amountPaid(inv) { return (inv.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0); },
             balanceDue(inv) { const total = inv.totals ? inv.totals.grandTotal : 0; return total - this.amountPaid(inv); },
@@ -4660,17 +5105,27 @@
             },
             async saveQuickCustomer() {
                 if (!this.quickCustomer.name) return alert("Customer Name is required");
-                const { data, error } = await supabaseClient.from('customers').insert(this.customerToRow(this.quickCustomer)).select().single();
-                if (error) return alert("Could not save customer: " + error.message);
-                const c = this.rowToCustomer(data);
-                this.customers.push(c);
-                this.customers.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-                this.draft.customer = c; // auto-select the new customer on this invoice
-                this.showQuickCustomer = false;
+                if (this.quickCustomerSaveBusy) return;
+                this.quickCustomerSaveBusy = true;
+                try {
+                    const { data, error } = await supabaseClient.from('customers').insert(this.customerToRow(this.quickCustomer)).select().single();
+                    if (error) throw error;
+                    const c = this.rowToCustomer(data);
+                    this.customers.push(c);
+                    this.customers.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                    this.draft.customer = c; // auto-select the new customer on this invoice
+                    this.showQuickCustomer = false;
+                } catch (e) {
+                    alert("Could not save customer: " + (e.message || e));
+                } finally {
+                    this.quickCustomerSaveBusy = false;
+                }
             },
             closeQuickCustomer() { this.showQuickCustomer = false; },
             async saveCustomer() {
                 if(!this.customerForm.name) return alert("Customer Name is required");
+                if (this.customerSaveBusy) return;
+                this.customerSaveBusy = true;
                 const row = this.customerToRow(this.customerForm);
                 try {
                     if (this.editingCustomer !== null) {
@@ -4690,6 +5145,8 @@
                 } catch (e) {
                     console.error("Save customer failed:", e);
                     alert("Could not save customer: " + (e.message || e));
+                } finally {
+                    this.customerSaveBusy = false;
                 }
             },
             editCustomer(customer) { 
@@ -4702,7 +5159,7 @@
                 this.setRouteKey('customers-form');
             },
             async deleteCustomer(customer) {
-                if(confirm("Delete this customer?")) {
+                if(confirm('Delete this customer from the address book? Existing documents keep their saved customer snapshot. This cannot be undone.')) {
                     const { error } = await supabaseClient.from('customers').delete().eq('id', customer.id);
                     if (error) return alert("Could not delete customer: " + error.message);
                     const i = this.customers.indexOf(customer);
@@ -4714,7 +5171,7 @@
             async bulkDeleteCustomers() {
                 const rows = this.selectedCustomerRows;
                 if (!rows.length) return;
-                if (!confirm('Delete ' + rows.length + ' selected customer' + (rows.length === 1 ? '' : 's') + '?')) return;
+                if (!confirm('Delete ' + rows.length + ' selected customer' + (rows.length === 1 ? '' : 's') + ' from the address book? Existing documents keep their saved customer snapshots. This cannot be undone.')) return;
                 this.customerBulkBusy = true;
                 try {
                     const ids = rows.map(customer => customer.id);
@@ -4732,6 +5189,8 @@
             resetCustomerForm() { this.editingCustomer = null; this.customerForm = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' }; },
             async saveSavedItem() {
                 if(!this.itemForm.name) return;
+                if (this.itemSaveBusy) return;
+                this.itemSaveBusy = true;
                 const row = this.itemToRow(this.itemForm);
                 try {
                     if (this.editingItem !== null) {
@@ -4751,6 +5210,8 @@
                 } catch (e) {
                     console.error("Save item failed:", e);
                     alert("Could not save item: " + (e.message || e));
+                } finally {
+                    this.itemSaveBusy = false;
                 }
             },
             newItem() {
@@ -4770,7 +5231,7 @@
                 this.setRouteKey('items-form');
             },
             async deleteSavedItem(item) {
-                if(!confirm("Delete this saved item?")) return;
+                if(!confirm('Delete this saved item from the catalogue? Existing document line items are unchanged. This cannot be undone.')) return;
                 const { error } = await supabaseClient.from('saved_items').delete().eq('id', item.id);
                 if (error) return alert("Could not delete item: " + error.message);
                 const i = this.savedItems.indexOf(item);
@@ -4781,7 +5242,7 @@
             async bulkDeleteItems() {
                 const rows = this.selectedItemRows;
                 if (!rows.length) return;
-                if (!confirm('Delete ' + rows.length + ' selected saved item' + (rows.length === 1 ? '' : 's') + '?')) return;
+                if (!confirm('Delete ' + rows.length + ' selected saved item' + (rows.length === 1 ? '' : 's') + ' from the catalogue? Existing document line items are unchanged. This cannot be undone.')) return;
                 this.itemBulkBusy = true;
                 try {
                     const ids = rows.map(item => item.id);
@@ -4846,6 +5307,12 @@
         },
         async mounted() {
             window.addEventListener('hashchange', this.handleHashChange);
+            this.bindAccessibleLabels();
+            const appRoot = typeof document.getElementById === 'function' ? document.getElementById('app') : null;
+            if (appRoot && 'MutationObserver' in window) {
+                this.accessibleLabelObserver = new MutationObserver(() => this.bindAccessibleLabels());
+                this.accessibleLabelObserver.observe(appRoot, { childList: true, subtree: true });
+            }
             if (this.turnstile.enabled) this.$nextTick(() => this.renderTurnstile());
             // Register the service worker only on the live HTTPS site (not on
             // localhost), so local development never serves stale cached files.
@@ -4880,6 +5347,10 @@
             } else if (data.session && this.authMode !== 'recovery') {
                 await this.routeAfterAuth(data.session.user);
             }
+        },
+        beforeUnmount() {
+            window.removeEventListener('hashchange', this.handleHashChange);
+            if (this.accessibleLabelObserver) this.accessibleLabelObserver.disconnect();
         }
     }).mount('#app');
 </script>

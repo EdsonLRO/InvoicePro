@@ -24,12 +24,20 @@ assert.match(workflow, /persist-credentials: false/);
 
 for (const harness of [
   'auth-captcha-harness.cjs',
+  'core-lifecycle-harness.cjs',
+  'dispute-lifecycle-visibility-harness.cjs',
+  'email-status-accuracy-harness.cjs',
   'edge-dependency-pin-harness.cjs',
   'financial-action-audit-harness.cjs',
   'mfa-recovery-harness.cjs',
+  'operational-health-harness.cjs',
+  'refund-consequence-preview-harness.cjs',
+  'recurring-calendar-reliability-harness.cjs',
+  'scale-accessibility-safety-harness.cjs',
   'security-workflow-harness.cjs',
   'session-expiry-harness.cjs',
   'stripe-payment-integrity-harness.cjs',
+  'tenant-isolation-attribution-harness.cjs',
 ]) {
   assert.ok(workflow.includes(`node tests/${harness}`), `${harness} must run in CI`);
 }

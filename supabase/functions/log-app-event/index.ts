@@ -21,6 +21,9 @@ const allowedEvents = new Set([
   "account_logout_all_devices",
   "account_data_exported",
   "company_settings_updated",
+  "document_created",
+  "credit_note_created",
+  "quote_converted_to_invoice",
   "document_deleted",
   "document_bulk_deleted",
   "document_pdf_exported",
@@ -37,6 +40,9 @@ const allowedEvents = new Set([
   "recurring_schedule_bulk_deleted",
   "recurring_schedule_paused",
   "recurring_schedule_resumed",
+  "recurring_schedule_created",
+  "recurring_schedule_updated",
+  "reminder_settings_changed",
 ]);
 
 const allowedObjectTypes = new Set([
@@ -121,9 +127,6 @@ Deno.serve(async (req) => {
   if (objectId && !isUuid(objectId)) return json({ error: "Invalid object ID" }, 400);
 
   const metadata = sanitizeMetadata(body.metadata);
-  if (eventType !== "account_data_exported") {
-    metadata.user_agent = (req.headers.get("user-agent") || "").slice(0, 120);
-  }
 
   const { error } = await admin.from("audit_events").insert({
     user_id: userData.user.id,
