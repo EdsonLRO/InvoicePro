@@ -1920,7 +1920,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.18.7';
+    const APP_BUILD = '2026.07.18.8';
     const { createApp } = Vue;
 
     createApp({
@@ -2464,7 +2464,7 @@
                 return 'login';
             },
             async renderTurnstile() {
-                if (!this.turnstile.enabled || !this.isTurnstileAuthMode() || this.turnstile.widgetId !== null) return;
+                if (!this.turnstile.enabled || this.isLoggedIn || !this.isTurnstileAuthMode() || this.turnstile.loading || this.turnstile.widgetId !== null) return;
                 const container = this.$refs.turnstileContainer;
                 if (!container) return;
                 const mode = this.authMode;
@@ -2472,7 +2472,7 @@
                 this.turnstile.error = '';
                 try {
                     const api = await loadTurnstileApi();
-                    if (mode !== this.authMode || !this.isTurnstileAuthMode()) return;
+                    if (mode !== this.authMode || this.isLoggedIn || !this.isTurnstileAuthMode() || container.isConnected === false) return;
                     this.turnstile.widgetId = api.render(container, {
                         sitekey: this.turnstile.siteKey,
                         action: this.turnstileAction(mode),
@@ -2994,6 +2994,10 @@
                 const signInSessionVersion = this.authSessionVersion;
                 this.currentUser = user;
                 this.userProfileEmail = user.email;
+                // Remove the signed-out challenge while its container still exists.
+                // Otherwise the provider retains a stale widget id after the Auth
+                // shell is replaced by the signed-in application.
+                this.removeTurnstileWidget();
                 this.isLoggedIn = true;
                 this.auth = { username: '', password: '', confirm: '', code: '' };
                 await this.loadAllData();
@@ -3080,6 +3084,7 @@
                 this.itemSaveBusy = false;
                 this.scheduleSaveBusy = false;
                 this.draft = this.getEmptyDraft();
+                if (this.turnstile.enabled) this.$nextTick(() => this.renderTurnstile());
             },
             async signOutWithScope(scope) {
                 this.authSignOutRequested = true;
