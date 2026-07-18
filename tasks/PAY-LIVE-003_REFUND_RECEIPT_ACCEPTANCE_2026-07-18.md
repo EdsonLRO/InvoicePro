@@ -5,8 +5,8 @@ Objective: Prove the minimum GBP 1 live payment/refund lifecycle and Stripe
 automatic refund-receipt outcome without recording private payment, inbox, Auth,
 provider or customer values.\
 Priority: High\
-Status: Awaiting Owner Action\
-Phase: Private Stripe Checkout handoff\
+Status: Awaiting Owner Approval\
+Phase: Full GBP 1 refund approval gate\
 Owner role: Master Orchestrator\
 Assigned specialist: Payments and QA responsibilities performed sequentially\
 Risk level: High — live money, Stripe, private payer details, customer
@@ -37,25 +37,25 @@ communication or configuration change.\
 Approval boundary: Codex may prepare the fictional invoice and Checkout handoff,
 but the Owner enters private payment details. Stop for separate exact refund
 approval after the payment is verified.\
-Implementation result: One fictional invoice was created for exactly GBP 1.00
-using the existing synthetic customer. It contains no real goods/services, was
-not emailed, remains unpaid, and exposes an enabled live `Pay by Card` action
-with no test-mode banner.\
-Review result: Invoice total, saved list row, live-mode UI and payment handoff
-guard passed. The automated new-window handoff was blocked by the in-app browser
-after one Checkout Session request; no payment or invoice mutation occurred. The
-unused provider session will expire normally.\
-Evidence: Value-free browser observation only: total GBP 1.00; one matching
-saved invoice; payment section present; live Pay button enabled; zero test-mode
-banners; no email action; no card, payer, Auth, secret, token or provider
-payload inspected.\
+Implementation result: Fictional invoice #0004 was created for exactly GBP 1.00
+using the existing synthetic customer. It contains no real goods/services and
+was not emailed. The Owner completed one live Stripe Checkout privately.\
+Review result: The signed payment reconciliation completed successfully. Invoice
+#0004 is `Paid`, records GBP 1.00 paid, has GBP 0.00 balance due, and exposes one
+confirmed Stripe card payment and one refund action. No duplicate payment was
+observed. The earlier unused Checkout Session remains unconsumed and will expire
+normally.\
+Evidence: Value-free browser observation only: selected status `Paid`; `Paid:
+GBP 1.00`; `Balance: GBP 0.00`; exactly one `Stripe card payment confirmed`
+entry; no card, payer email, Auth value, secret, token, provider identifier,
+webhook payload or inbox content inspected.\
 Branch: `codex/refund-receipt-acceptance`\
 Commit: Pending\
-Blocked reason: The authenticated browser session expired during the Checkout
-handoff. The Owner must sign in privately; Codex will never request or inspect
-the password or MFA value. Browser popup policy then requires the Owner to click
-`Pay by Card` and complete Stripe Checkout privately.\
-Next action: Owner signs in to the visible Tallyo tab and reports “signed in”.
-Codex will reopen the prepared invoice and hand off `Pay by Card`; after the
-Owner completes GBP 1 Checkout, Codex verifies value-free settlement evidence
-and stops for separate refund approval.
+Blocked reason: Live refunds and their foreseeable customer communication require
+separate exact Owner approval. The GBP 1 payment approval did not authorise a
+refund.\
+Next action: Owner provides exact approval for a full GBP 1.00 live refund of
+invoice #0004 through Tallyo and acknowledges that Stripe may email the payer a
+refund receipt. Codex will then submit one full refund, verify one signed refund
+reconciliation and restored invoice balance/status, and ask the Owner only for a
+value-free receipt outcome.
