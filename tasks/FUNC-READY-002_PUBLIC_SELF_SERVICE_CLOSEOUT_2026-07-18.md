@@ -8,8 +8,8 @@ actions involving live money/refunds, private inbox or credentials, unavailable
 iPhone Safari, destructive production cleanup, high-risk merge/publication, or a
 material accounting decision.\
 Priority: High\
-Status: Approved for Release\
-Phase: PR #68 merge and build `2026.07.18.9` publication\
+Status: Complete\
+Phase: Closed after verified public deployment\
 Owner role: Master Orchestrator\
 Assigned specialist: Product, Frontend, Backend/Supabase, Payments and QA
 responsibilities performed sequentially\
@@ -31,6 +31,7 @@ milestone-only updates to `PRODUCT_COMPLETION_LEDGER.md`,
 `RELEASE_READINESS.md`, and
 `FUNCTIONAL_PUBLIC_USE_READINESS_MATRIX_2026-07-18.md`\
 Lock acquired: 2026-07-18 on branch `codex/public-self-service-closeout`\
+Lock released: 2026-07-18 after merged PR #68 and verified public deployment\
 Expected release condition: focused implementation and evidence complete,
 required checks/reviews pass, high-risk PR is prepared, exact Owner approval is
 obtained before merge/publication, and locks are released at closure\
@@ -118,8 +119,10 @@ type-check with frozen locks, all changed/untracked files pass the focused
 secret-pattern scan, and the branch is current with `origin/main`. Payment
 integrity, tenant attribution, Auth/CAPTCHA/MFA/session, audit, dispute,
 email-state, export, operational-health, PWA, scale and lifecycle boundaries
-remain intact. Draft PR #68 is mergeable and its required `verify` check passed
-against release-candidate commit `a202b92`.\
+remain intact. PR #68's required check passed, the Owner approved its exact
+release, it merged as `238ad06`, and both the post-merge security run and Pages
+deployment passed. Public readback returned HTTP 200 for the index and service
+worker, matching build/cache `2026.07.18.9` with no live-secret pattern.\
 Evidence: A clean fictional downstream journey completed in the confirmed
 synthetic production account without sending email, entering Checkout, moving
 money or deleting data: customer and item creation; invoice creation,
@@ -131,13 +134,13 @@ direct two-account RLS evidence remains current because no
 RLS/privileged-function source changed. Genuine Firefox is not installed and
 iPhone Safari was not simulated.\
 Branch: `codex/public-self-service-closeout`\
-Commit: Branch head; PR #68 records the authoritative merge candidate\
-Blocked reason: No blocker to the approved PR #68 release. Separate exact Owner
+Commit: PR #68 merged as `238ad06ea4bb92851b75947030e2e4cdbd76cf53`\
+Blocked reason: No blocker to the completed PR #68 release. Separate exact Owner
 action remains required for any new live GBP 1 payment/refund and private
 receipt check, destructive production cleanup, iPhone Safari participation, and
 any decision to introduce invoice-linked credit allocation.\
-Next action: Mark PR #68 ready, merge it, publish build `2026.07.18.9`, and
-verify the public deployment before closing this task.
+Next action: None for this closed task. Future refund-receipt, cross-engine and
+linked-credit work must use their separate gates.
 
 ## Safe execution evidence
 
