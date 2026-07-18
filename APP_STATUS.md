@@ -17,7 +17,7 @@ The current product is a single-user-per-account invoicing workspace backed by S
 
 ## Current app stage
 
-**Current invoicing-app scope:** feature-complete and regression-verified for the intended test/portfolio stage. Real-customer release remains blocked by the security, legal, privacy, provider, and live-payment conditions below.
+**Current invoicing-app scope:** feature-complete and regression-verified, with controlled live Stripe invoice payments now activated and acceptance-tested. This functional activation is not a public-launch, legal-compliance, or unrestricted customer-onboarding approval; the remaining legal, privacy and operational conditions below still apply.
 
 Implemented:
 
@@ -42,8 +42,6 @@ Implemented:
 
 Still to finish before treating the app as customer-ready:
 
-- Stripe sandbox lifecycle verification is complete for signature rejection, unrelated-event rejection, successful payment/refund replay, a known-payment dispute, and a genuine failed-refund reversal. Live mode remains disabled and approval-gated.
-- PAY-LIVE-001's reviewed source for atomic invoice/audit webhook commits, bounded concurrency retries, current-provider refund reconciliation, deterministic Checkout idempotency, explicit test/live key matching, and a server-side live kill switch is merged in PR #49. After exact Owner approval, migration `20260717165044`, Checkout v6, Refund v4 and Webhook v11 were deployed in order. Schema, RLS, grants, append-only triggers, JWT/signature settings, negative HTTP paths and an unrelated signed sandbox event passed privacy-safe readback. A signed-in fictional GBP 1.00 Checkout then produced one Stripe-confirmed payment, Paid status and zero balance; resending the same completion event left the event version, payment counts and Stripe audit count unchanged. Deployed test-mode acceptance is complete; live mode and real-customer use remain disabled and separately gated.
 - Review and operationally test the internal chargeback/refund/support procedure in `PAYMENT_OPERATIONS_RUNBOOK.md`; customer-facing policy remains legally blocked.
 - The Owner-approved non-production restore test passed on 2026-07-15. The isolated temporary project was deleted after approval and production remained healthy; evidence is in `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`.
 - Expand append-only audit logging to remaining sensitive actions and operational monitoring. Recurring-generation failures and overdue-reminder provider/history failures now have privacy-safe evidence; company/settings saves are covered at a category level, while backup/restore evidence remains a separate controlled record.
@@ -57,16 +55,17 @@ Still to finish before treating the app as customer-ready:
 
 ## Current payment status
 
-Stripe invoice payments are implemented and the handled lifecycle is verified in sandbox, but the feature must still be treated as test/development until explicitly switched to live mode.
+Stripe invoice payments are implemented, live mode is active, and the minimum controlled live-payment path is verified. The public GitHub Pages configuration now selects live mode, while the server-side kill switch, signed webhook validation, mode matching, idempotency and atomic invoice/audit settlement remain enforced.
 
-Do not send payment links to real customers until:
+Completed functional activation:
 
-- Stripe live keys and live webhook secret are configured intentionally.
-- The PAY-LIVE-001 migration and matching Edge Functions are reviewed, deployed in order, and replay-verified in sandbox.
-- The live webhook destination is verified.
-- Refund, dispute, failed-payment, and chargeback behavior is tested and documented for the approved live configuration.
-- Terms, privacy, refund, and support processes are ready.
-- Backup/restore and incident response basics are in place.
+- The Owner entered the live provider credentials directly in Supabase; value-free readback confirmed the required configuration names.
+- The PAY-LIVE-001 migration and matching Edge Functions were reviewed, deployed in order, and replay-verified in sandbox.
+- The active live webhook destination is pinned to the reviewed API version and only the eleven handled events.
+- A fictional GBP 1.00 live Checkout recorded one payment, Paid status, zero balance and the expected append-only audit evidence.
+- PR #54 merged after its required check passed; GitHub Pages serves `window.STRIPE_LIVE_MODE=true` over HTTPS with no live-secret pattern in the public file.
+
+Still separately gated: executing a live refund, sending a link or email to a real customer, legal/privacy publication, and unrestricted public onboarding. The Owner may use the now-functional live app directly within those retained boundaries.
 
 ## Current email status
 

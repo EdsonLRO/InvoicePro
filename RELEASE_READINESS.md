@@ -8,7 +8,7 @@ Statuses: Planned, In Progress, Implemented, Verified, Blocked, Deferred, Not Ap
 
 **Status:** In Progress.
 
-Tallyo's current invoicing-app scope is feature-complete and regression-verified, but it is not yet live-customer-ready. Stripe remains test/development unless live mode is explicitly approved and configured.
+Tallyo's current invoicing-app scope is feature-complete and regression-verified, and its controlled live Stripe invoice-payment path is now activated and acceptance-tested. The app is not yet approved for unrestricted live-customer onboarding because the separate legal, privacy and operational gates remain open.
 
 ## Release Gates
 
@@ -26,7 +26,7 @@ Tallyo's current invoicing-app scope is feature-complete and regression-verified
 | Email sending and webhooks | Verified | Seven-day privacy-safe evidence on 2026-07-14 showed 31 sent and 31 delivered Resend events with no failed/bounced/complained signal. Signed webhook handling remains active. |
 | Overdue reminder automation | Verified | The active Vault-authenticated job completed its natural 2026-07-15 09:00 UTC run and retained HTTP 200 without timeout. No reminder was due and no audit/email event was produced; the earlier candidate check found no opt-in violation. Version 8 is deployed with privacy-safe per-invoice processing-failure evidence and returns non-success when any eligible invoice fails. |
 | Recurring invoice automation | Verified | The protected v14 function completed its natural 2026-07-15 06:00 UTC run. Cron succeeded, pg_net retained HTTP 200 without timeout, and database checks found zero duplicate recurring occurrence groups or generated-owner mismatches. No schedule was due, so no invoice/email was expected. |
-| Stripe payments | In Progress | The prior sandbox lifecycle passed signature rejection, trusted Checkout binding, payment/refund processing, failed-refund reversal, dispute awareness, and duplicate replay. PAY-LIVE-001's atomic transaction migration and matching Checkout v6, Refund v4 and Webhook v11 are deployed after exact Owner approval. Migration history, RLS, grants, append-only triggers, function authentication/signature settings, negative HTTP paths and an unrelated signed sandbox delivery passed privacy-safe readback. A signed-in fictional GBP 1.00 Checkout produced one Stripe-confirmed payment, Paid status and zero balance; replaying the same completion event left event version, payment counts and Stripe audit count unchanged. Deployed test-mode acceptance is complete. Live activation and real-customer use remain separate approval-gated actions. |
+| Stripe payments | Verified | The sandbox lifecycle passed signature rejection, trusted Checkout binding, payment/refund processing, failed-refund reversal, dispute awareness, and duplicate replay. PAY-LIVE-001's atomic transaction migration and matching Checkout v6, Refund v4 and Webhook v11 are deployed. PAY-LIVE-002 then completed the separately approved live account, webhook, configuration, minimum-payment and publication gates without exposing secret values or provider payloads. A dedicated fictional GBP 1.00 live Checkout settled exactly once to Paid with zero balance and one completion audit; PR #54's required check passed, it merged as `74de2ac`, and GitHub Pages serves the live public flag over HTTPS with no live-secret pattern. Refund execution, real-customer communications and legal/public onboarding remain separately gated. |
 | Refund/dispute/chargeback handling | In Progress | Technical sandbox handling is verified and the internal procedure is recorded in `PAYMENT_OPERATIONS_RUNBOOK.md`. Customer-facing policy and legal review remain blocked. |
 | Backups and restore | Verified | A selected daily backup restored to an isolated project on 2026-07-15. Exact data/structure counts matched, copied automation was disabled, and restored tenant isolation passed. The temporary project was deleted after approval and production remained healthy. Evidence: `BACKUP_RESTORE_TEST_EVIDENCE_2026-07-15.md`. |
 | Audit events | In Progress | Provider and selected app actions covered; failed-email and overdue-reminder failure evidence is minimised. Authenticated `log-app-event` v7 adds manual payment recording, document-status changes, and format/version-only account-export success metadata. This is not a full SIEM or compliance system. |
@@ -47,7 +47,7 @@ Public launch remains blocked when required legal documents are unfinished, mate
 Stop before:
 
 - Additional billed Supabase projects/add-ons, including PITR;
-- Stripe live mode;
+- changes to the approved Stripe live configuration or kill switch, and any live refund;
 - real customer emails or payment links;
 - public launch;
 - legal/terms publication;
@@ -57,7 +57,7 @@ Stop before:
 
 ## Final Release Evidence Required
 
-Current pass evidence is consolidated in `RELEASE_EVIDENCE_2026-07-15.md`.
+Core regression evidence is consolidated in `RELEASE_EVIDENCE_2026-07-15.md`; the later controlled live-payment evidence is authoritative in `tasks/PAY-LIVE-002_LIVE_ACTIVATION_2026-07-18.md`.
 
 - Git commit hash for release candidate.
 - List of deployed Supabase Edge Functions and dates.
