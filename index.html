@@ -453,7 +453,7 @@
                     <button @click="exportAccountData" :disabled="accountExportBusy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">
                         {{ accountExportBusy ? 'Preparing export...' : 'Download Account Data' }}
                     </button>
-                    
+                    <p class="text-xs text-slate-500 mt-3">The export is created in this browser and is not uploaded to another Tallyo storage location.</p>
                 </div>
 
                 <div class="bg-red-50 p-5 sm:p-8 rounded-xl border border-red-200">
