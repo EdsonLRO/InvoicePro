@@ -55,3 +55,23 @@ Outcome:
 - Known-payment binding, successful payment, successful refund, genuine failed-refund reversal, dispute awareness, unknown-event rejection, signature rejection, and duplicate-event idempotency now have recorded sandbox evidence.
 - Live mode remains deliberately untested and disabled. Operational refund, dispute, chargeback, support, legal/privacy, backup/restore, and release gates still apply before real customer use.
 - Distinct simultaneous events updating the same invoice remain a documented concurrency limitation because invoice payments and activity history are JSON arrays updated through read-modify-write operations.
+
+## 2026-07-18 - Deployed PAY-LIVE-001 negative-path acceptance
+
+Environment:
+
+- Supabase project `cuagwifetheefftleeup`; project status remained healthy.
+- Migration `20260717165044` and the matching Checkout v6, Refund v4 and Webhook v11 deployments were applied only after exact Owner approval.
+- Stripe remained in sandbox/test mode and the public live flag remained `false`.
+- No secret, provider payload, reusable URL, customer record, private email, payment method or credential was inspected or retained.
+
+Checks completed:
+
+| Scenario | Expected result | Privacy-safe evidence | Result |
+|---|---|---|---|
+| Migration and access readback | Preserve RLS and append-only controls; expose the transaction only to `service_role` | Remote migration history includes `20260717165044`; invoice/audit RLS and both audit mutation-prevention triggers remain active; `anon` and `authenticated` cannot execute the RPC, while `service_role` can | Pass |
+| Function deployment settings | Preserve authenticated Checkout/refund calls and signed unauthenticated webhook delivery | Checkout v6 and Refund v4 report `verify_jwt=true`; Webhook v11 reports `verify_jwt=false` and retains raw-body HMAC verification | Pass |
+| Direct unauthenticated requests | Reject calls that lack user authorization or a valid Stripe signature | Privacy-safe status-only requests returned HTTP 401 from all three functions | Pass |
+| Signed unrelated sandbox fixture | Accept provider delivery but make no invoice/audit mutation when the Checkout was not created by Tallyo | Provider-generated sandbox fixture reached Webhook v11 with HTTP 200; aggregate Stripe audit count stayed at 60 | Pass |
+
+The authenticated positive synthetic Checkout acceptance was not attempted because neither available browser profile held a signed-in Tallyo session. No password, MFA value, recovery code or session token was requested or inspected. Existing positive lifecycle evidence remains valid, but the newly deployed atomic path will not be marked accepted until one synthetic signed-in Checkout and duplicate replay pass.
