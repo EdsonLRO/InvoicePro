@@ -5,8 +5,8 @@ Objective: Prove the minimum GBP 1 live payment/refund lifecycle and Stripe
 automatic refund-receipt outcome without recording private payment, inbox, Auth,
 provider or customer values.\
 Priority: High\
-Status: Awaiting Owner Approval\
-Phase: Full GBP 1 refund approval gate\
+Status: Awaiting Owner Action\
+Phase: Private refund-receipt confirmation\
 Owner role: Master Orchestrator\
 Assigned specialist: Payments and QA responsibilities performed sequentially\
 Risk level: High — live money, Stripe, private payer details, customer
@@ -34,28 +34,34 @@ Owner approval recorded: On 2026-07-18 the Owner requested “lets do a 1 pound
 test”, authorising one GBP 1 live acceptance payment. This does not authorise
 the later refund, private inbox inspection by Codex, repeat payment, customer
 communication or configuration change.\
+Refund approval recorded: On 2026-07-18 the Owner explicitly approved one full
+GBP 1.00 live refund of invoice #0004 through Tallyo and acknowledged that
+Stripe may email the payer a refund receipt.\
 Approval boundary: Codex may prepare the fictional invoice and Checkout handoff,
 but the Owner enters private payment details. Stop for separate exact refund
 approval after the payment is verified.\
 Implementation result: Fictional invoice #0004 was created for exactly GBP 1.00
 using the existing synthetic customer. It contains no real goods/services and
-was not emailed. The Owner completed one live Stripe Checkout privately.\
-Review result: The signed payment reconciliation completed successfully. Invoice
-#0004 is `Paid`, records GBP 1.00 paid, has GBP 0.00 balance due, and exposes one
-confirmed Stripe card payment and one refund action. No duplicate payment was
-observed. The earlier unused Checkout Session remains unconsumed and will expire
-normally.\
-Evidence: Value-free browser observation only: selected status `Paid`; `Paid:
-GBP 1.00`; `Balance: GBP 0.00`; exactly one `Stripe card payment confirmed`
-entry; no card, payer email, Auth value, secret, token, provider identifier,
-webhook payload or inbox content inspected.\
+was not emailed. The Owner completed one live Stripe Checkout privately and,
+after a separate approval, Codex submitted one full GBP 1.00 refund through
+Tallyo.\
+Review result: The payment and refund reconciliations completed successfully.
+Invoice #0004 returned to `Sent`, records GBP 0.00 paid and GBP 1.00 balance due,
+and exposes exactly one confirmed Stripe card payment and one confirmed Stripe
+refund. No duplicate payment or refund was observed. The earlier unused Checkout
+Session remains unconsumed and will expire normally.\
+Evidence: Value-free browser observation only: selected status `Sent`; `Paid:
+GBP 0.00`; `Balance: GBP 1.00`; exactly one `Stripe card payment confirmed`
+entry; exactly one `Stripe refund confirmed` entry for GBP 1.00; no card, payer
+email, Auth value, secret, token, provider identifier, webhook payload or inbox
+content inspected.\
 Branch: `codex/refund-receipt-acceptance`\
 Commit: Pending\
-Blocked reason: Live refunds and their foreseeable customer communication require
-separate exact Owner approval. The GBP 1 payment approval did not authorise a
-refund.\
-Next action: Owner provides exact approval for a full GBP 1.00 live refund of
-invoice #0004 through Tallyo and acknowledges that Stripe may email the payer a
-refund receipt. Codex will then submit one full refund, verify one signed refund
-reconciliation and restored invoice balance/status, and ask the Owner only for a
-value-free receipt outcome.
+Blocked reason: Codex cannot inspect the private payer inbox. The Owner must
+confirm the receipt outcome without sharing the address, message content or any
+customer-facing reference value.\
+Next action: Owner privately checks whether Stripe's automatic refund receipt
+arrived and reports only `yes` or `no`. If present, the Owner may also report
+whether a customer-facing reference is shown, without sharing the reference
+itself. Codex will then close the acceptance evidence and prepare the draft PR
+for the required Owner merge/publish approval.
