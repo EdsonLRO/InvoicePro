@@ -8,7 +8,7 @@ const state = JSON.parse(fs.readFileSync(path.join(base, 'preview-acceptance.jso
 const record = fs.readFileSync(path.join(base, 'preview-acceptance.md'), 'utf8');
 const actions = fs.readFileSync(path.join(base, 'owner-actions.md'), 'utf8');
 
-assert.equal(state.status, 'provider-projects-created-builds-blocked');
+assert.equal(state.status, 'access-protected-builds-still-blocked');
 assert.equal(state.websitePreviewUrl, null);
 assert.equal(state.appPreviewUrl, null);
 assert.equal(state.providerProjectsCreated, true);
@@ -17,23 +17,34 @@ assert.deepEqual(state.initialBuilds, {
   website: 'blocked-by-access-guard',
   app: 'blocked-by-access-guard'
 });
+assert.deepEqual(state.accessControls, {
+  websiteWildcardPreview: 'owner-policy-enabled-unauthenticated-blocked',
+  appWildcardPreview: 'owner-policy-enabled-unauthenticated-blocked',
+  websiteMainPagesDev: 'owner-policy-enabled-unauthenticated-blocked',
+  appMainPagesDev: 'owner-policy-enabled-unauthenticated-blocked'
+});
 assert.equal(state.liveDnsChanged, false);
 assert.equal(state.productionReleased, false);
 assert.equal(state.githubPagesRollbackRetained, true);
-assert.ok(Object.values(state.checks).every((value) => value === 'pending'), 'no preview check may be pre-accepted');
-assert.ok(state.deferredHighRiskScopes.some((value) => value.includes('GitHub application authorization')));
+assert.equal(state.checks.mainHostnameAccessControlled, 'passed-provider-readback-and-unauthenticated-redirect');
+assert.equal(state.checks.previewHostnamesAccessControlled, 'passed-provider-readback-and-unauthenticated-redirect');
+for (const [name, value] of Object.entries(state.checks)) {
+  if (!['mainHostnameAccessControlled', 'previewHostnamesAccessControlled'].includes(name)) assert.equal(value, 'pending', `preview check ${name} must remain pending`);
+}
+assert.ok(state.deferredHighRiskScopes.some((value) => value.includes('deployment variables and build retries')));
 for (const scope of ['financial calculations', 'private account data', 'Supabase Auth', 'Stripe', 'Turnstile', 'custom-domain DNS']) {
   assert.ok(state.deferredHighRiskScopes.some((value) => value.includes(scope)), `missing deferred High-risk scope: ${scope}`);
 }
 
 assert.match(record, /no preview deployment exists yet/i);
 assert.match(record, /Both blocked by the reviewed Access guard; no deployment available/);
+assert.match(record, /Main `pages\.dev` Access \| Owner policy enabled/);
 assert.match(record, /Preview accepted by Owner: \*\*Pending\*\*/);
 assert.match(record, /Acceptance of a preview is not approval for custom-domain DNS/);
 assert.match(record, /`noindex` is not a privacy control/);
 assert.match(record, /main project hostname and wildcard branch-preview hostnames/);
 assert.doesNotMatch(record, /https:\/\/[a-z0-9-]+\.pages\.dev/i, 'do not invent preview URLs');
-assert.doesNotMatch(record, /\[[xX]\]/, 'no preview acceptance checkbox may be pre-checked');
+assert.equal((record.match(/\[[xX]\]/g) || []).length, 2, 'only the two verified Access checks may be complete');
 
 for (let step = 1; step <= 14; step += 1) assert.match(actions, new RegExp(`^${step}\\. `, 'm'), `missing separate Owner action ${step}`);
 for (const boundary of ['Free document generator (High)', 'Supabase Auth and MFA migration (High)', 'Stripe and email-link migration (High)', 'Connect custom domains and DNS (High)', 'Final production release (High)']) {
@@ -43,6 +54,7 @@ assert.match(actions, /Approval for one does not approve any later gate/);
 assert.match(actions, /Current analytics and advertising remain disabled/);
 assert.match(actions, /access limited to\s+`EdsonLRO\/InvoicePro`/);
 assert.match(actions, /Both initial builds stopped at\s+the reviewed Access guard/);
+assert.match(actions, /unauthenticated requests to all four destinations\s+redirected to Cloudflare Access sign-in/);
 assert.doesNotMatch(actions, /password\s*[:=]|sb_secret_|sk_live_|whsec_/i);
 
 console.log('Preview acceptance readiness harness passed.');

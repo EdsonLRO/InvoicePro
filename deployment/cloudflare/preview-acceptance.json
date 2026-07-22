@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "provider-projects-created-builds-blocked",
+  "status": "access-protected-builds-still-blocked",
   "websitePreviewUrl": null,
   "appPreviewUrl": null,
   "providerProjectsCreated": true,
@@ -12,13 +12,19 @@
     "website": "blocked-by-access-guard",
     "app": "blocked-by-access-guard"
   },
+  "accessControls": {
+    "websiteWildcardPreview": "owner-policy-enabled-unauthenticated-blocked",
+    "appWildcardPreview": "owner-policy-enabled-unauthenticated-blocked",
+    "websiteMainPagesDev": "owner-policy-enabled-unauthenticated-blocked",
+    "appMainPagesDev": "owner-policy-enabled-unauthenticated-blocked"
+  },
   "liveDnsChanged": false,
   "productionReleased": false,
   "githubPagesRollbackRetained": true,
   "checks": {
     "immutableCommitRecorded": "pending",
-    "mainHostnameAccessControlled": "pending",
-    "previewHostnamesAccessControlled": "pending",
+    "mainHostnameAccessControlled": "passed-provider-readback-and-unauthenticated-redirect",
+    "previewHostnamesAccessControlled": "passed-provider-readback-and-unauthenticated-redirect",
     "websiteRoutesAnd404": "pending",
     "websiteNoindex": "pending",
     "websiteHeadersAndRedirects": "pending",
@@ -34,7 +40,7 @@
     "rollbackRehearsal": "pending"
   },
   "deferredHighRiskScopes": [
-    "Cloudflare GitHub application authorization and Access policies",
+    "Cloudflare deployment variables and build retries",
     "free document financial calculations",
     "first-use guidance based on private account data",
     "Supabase Auth and MFA origin changes",

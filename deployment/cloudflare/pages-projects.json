@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "status": "provider-projects-created-fail-closed",
+  "status": "access-protected-builds-still-blocked",
   "defaultDeploymentReachability": "public-unless-cloudflare-access-is-enabled",
   "accessConfirmationVariable": "TALLYO_CLOUDFLARE_ACCESS_CONFIRMED",
   "githubIntegration": {
@@ -16,6 +16,8 @@
       "outputDirectory": "dist",
       "previewMode": "noindex",
       "accessPolicyRequiredBeforeFirstSuccessfulDeploy": true,
+      "wildcardPreviewAccess": "owner-policy-enabled-unauthenticated-blocked",
+      "productionPagesDevAccess": "owner-policy-enabled-unauthenticated-blocked",
       "providerState": "created-no-production-deployment",
       "initialBuild": "blocked-by-access-guard",
       "productionBuildRequiresOwnerApproval": true
@@ -27,11 +29,19 @@
       "outputDirectory": "app-dist",
       "previewMode": "noindex",
       "accessPolicyRequiredBeforeFirstSuccessfulDeploy": true,
+      "wildcardPreviewAccess": "owner-policy-enabled-unauthenticated-blocked",
+      "productionPagesDevAccess": "owner-policy-enabled-unauthenticated-blocked",
       "providerState": "created-no-production-deployment",
       "initialBuild": "blocked-by-access-guard",
       "productionBuildRequiresOwnerApproval": true
     }
   },
+  "zeroTrustPlan": {
+    "status": "free-active",
+    "billingDetailsHandledPrivately": true,
+    "overageAuthorizationOwnerManaged": true
+  },
+  "accessVerification": "main-and-wildcard-redirect-to-cloudflare-access-login",
   "liveDnsChanged": false,
   "providerProjectsCreated": true,
   "existingGitHubPagesRollbackRetained": true
