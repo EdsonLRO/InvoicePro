@@ -5,7 +5,7 @@ Owner: Master Orchestrator
 Assigned roles: Product, Frontend, Payments, Legal/Privacy, Security, QA, Release  
 Not triggered: Backend, Supabase/Auth, MFA, RLS, Stripe provider configuration, Resend, database migrations  
 Risk: High — financial calculations, tax presentation and printable business documents  
-Status: Owner-approved for merge  
+Status: Owner-approved for merge
 Scope lock: `website/src/document-calculator.mjs`, `website/src/generator.js`, generator routes in `website/src/pages.mjs`, generator styles, website build/tests, and directly changed authoritative status records.
 
 ## Objective
