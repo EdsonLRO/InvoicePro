@@ -198,3 +198,20 @@ subtotal, discount, tax/VAT, shipping, rounding, totals and printable document
 content. Private account onboarding, protected provider/Auth/payment changes,
 Cloudflare project/production configuration, DNS and final release are separate
 later High-risk stages and are not implicitly approved.
+
+## Approved merge and app release closure — 2026-07-22
+
+The Owner approved the complete PR #76–#83 stack, its shared brand assets and the
+app release while operating in Sol High. The stack was marked ready and merged
+top-down without conflicts. Final required security run `29922330142` passed on
+the combined #76 branch state. PR #76 then merged to `main` as `17b8ee7`.
+Post-merge security run `29922434061` and GitHub Pages run `29922431260` passed.
+HTTPS readback confirmed `index.html` build `2026.07.22.2`, service-worker cache
+`tallyo-shell-2026-07-22-2`, and the expected public PNG brand asset.
+
+This release published only the existing GitHub Pages invoicing app updates:
+Help/install integration and the approved shared Tallyo identity. It did not
+launch the separate public website, configure Cloudflare, change DNS, publish
+legal documents, enable analytics, or change Auth, RLS, Supabase, Stripe, Resend,
+private data or secrets. The next isolated High-risk stage is tracked in
+`tasks/WEB-002_FREE_DOCUMENT_GENERATOR_2026-07-22.md`.

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { helpArticles, industries, notFoundPage, pages, productScenes } from "../src/pages.mjs";
 import { findHelperAnswer, futurePublicAiAdapter } from "../src/helper-core.mjs";
 import { analyticsConfiguration, createAnalytics, getConsentState, parseCampaignParameters } from "../src/analytics.mjs";
+import { calculateDocument, calculationPolicy, formatMoney, parseMoney, parsePercent, parseQuantity } from "../src/document-calculator.mjs";
 
 const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = join(websiteRoot, "dist");
@@ -135,6 +136,46 @@ const embeddedKnowledge = helper.match(/<script type="application\/json" id="hel
 assert.deepEqual(JSON.parse(embeddedKnowledge), helperKnowledge, "embedded helper knowledge matches reviewed source");
 const helperHash = createHash("sha256").update(embeddedKnowledge).digest("base64");
 
+const generator = read("free-invoice-generator/index.html");
+const quoteGenerator = read("free-quote-generator/index.html");
+for (const html of [generator, quoteGenerator]) {
+  assert.match(html, /data-generator/);
+  assert.match(html, /type="module" src="\/assets\/generator\.js"/);
+  assert.match(html, /does not save this document automatically/);
+  assert.match(html, /does not provide tax, legal or accounting advice/);
+  assert.match(html, /https:\/\/www\.gov\.uk\/invoicing-and-taking-payment-from-customers\/invoices-what-they-must-include/);
+  for (const field of ["documentType", "currency", "reference", "issueDate", "supplyDate", "dueDate", "senderName", "senderAddress", "customerName", "customerAddress", "additionalCost", "additionalTaxRate", "notes", "paymentInstructions"]) assert.match(html, new RegExp(`name="${field}"`));
+}
+assert.match(generator, /data-default-type="Invoice"/);
+assert.match(quoteGenerator, /data-default-type="Quote"/);
+
+assert.equal(parseMoney("12.34"), 1234n);
+assert.equal(parseMoney("00012.34"), 1234n);
+assert.equal(parseMoney(".50"), 50n);
+assert.equal(parseQuantity("1.125"), 1125n);
+assert.equal(parsePercent("20"), 2000n);
+assert.throws(() => parseMoney("1.234"), /up to 2 decimal places/);
+assert.throws(() => parseQuantity("-1"), /positive number/);
+assert.throws(() => parsePercent("100.01"), /too large/);
+assert.throws(() => parseMoney("1000000.01"), /too large/);
+assert.throws(() => parseMoney("9".repeat(40)), /too large/);
+assert.throws(() => calculateDocument({ items: [] }), /at least one/);
+const basicTotals = calculateDocument({ items: [{ quantity: "2", unitPrice: "10.00", discountRate: "10", taxRate: "20" }], additionalCost: "5.00", additionalTaxRate: "20" });
+assert.deepEqual({ subtotal: basicTotals.subtotal, discount: basicTotals.discount, additionalCost: basicTotals.additionalCost, net: basicTotals.net, tax: basicTotals.tax, total: basicTotals.total }, { subtotal: 2000n, discount: 200n, additionalCost: 500n, net: 2300n, tax: 460n, total: 2760n });
+const multipleRates = calculateDocument({ items: [
+  { quantity: "1", unitPrice: "10.00", discountRate: "0", taxRate: "20" },
+  { quantity: "2.5", unitPrice: "4.00", discountRate: "5", taxRate: "5" },
+  { quantity: "0", unitPrice: "999.99", discountRate: "0", taxRate: "0" }
+] });
+assert.deepEqual({ subtotal: multipleRates.subtotal, discount: multipleRates.discount, net: multipleRates.net, tax: multipleRates.tax, total: multipleRates.total }, { subtotal: 2000n, discount: 50n, net: 1950n, tax: 248n, total: 2198n });
+const rounding = calculateDocument({ items: [{ quantity: "0.333", unitPrice: "1.00", discountRate: "0", taxRate: "20" }] });
+assert.deepEqual({ subtotal: rounding.subtotal, tax: rounding.tax, total: rounding.total }, { subtotal: 33n, tax: 7n, total: 40n });
+assert.equal(formatMoney(123456n, "GBP"), "£1,234.56");
+const largeTotals = calculateDocument({ items: Array.from({ length: 50 }, () => ({ quantity: "100000", unitPrice: "1000000", discountRate: "0", taxRate: "100" })) });
+assert.equal(largeTotals.total, 1_000_000_000_000_000n);
+assert.equal(formatMoney(largeTotals.total, "GBP"), "£10,000,000,000,000.00");
+assert.deepEqual(calculationPolicy, { quantityPrecision: 3, moneyPrecision: 2, percentagePrecision: 2, rounding: "half-up-to-minor-unit-per-line", taxBasis: "after-line-discount" });
+
 const headers = read("_headers");
 assert.match(headers, /default-src 'self'/);
 assert.match(headers, /connect-src 'none'/);
@@ -199,6 +240,8 @@ assert.ok(statSync(join(distRoot, "assets", "styles.css")).size < 60_000, "CSS b
 assert.ok(statSync(join(distRoot, "assets", "site.js")).size < 10_000, "JS baseline under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper.js")).size < 10_000, "helper UI stays under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper-core.mjs")).size < 10_000, "helper matcher stays under 10 KB");
+assert.ok(statSync(join(distRoot, "assets", "generator.js")).size < 20_000, "generator UI stays under 20 KB");
+assert.ok(statSync(join(distRoot, "assets", "document-calculator.mjs")).size < 10_000, "generator calculator stays under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "analytics.mjs")).size < 10_000, "analytics boundary stays under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "growth.js")).size < 10_000, "growth integration stays under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "analytics-policy.mjs")).size < 30_000, "event policy stays under 30 KB");
@@ -213,6 +256,11 @@ for (const helperAsset of ["helper.js", "helper-core.mjs"]) {
   const source = read(`assets/${helperAsset}`);
   assert.doesNotMatch(source, /fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage|indexedDB/, `${helperAsset} remains browser-local without persistence or network calls`);
   assert.doesNotMatch(source, /https?:\/\//, `${helperAsset} has no provider endpoint`);
+}
+for (const generatorAsset of ["generator.js", "document-calculator.mjs"]) {
+  const source = read(`assets/${generatorAsset}`);
+  assert.doesNotMatch(source, /fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|document\.cookie|localStorage|sessionStorage|indexedDB/, `${generatorAsset} remains browser-local without persistence, tracking or network calls`);
+  assert.doesNotMatch(source, /https?:\/\//, `${generatorAsset} has no provider endpoint`);
 }
 for (const growthAsset of ["analytics.mjs", "growth.js"]) {
   const source = read(`assets/${growthAsset}`);

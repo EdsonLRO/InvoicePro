@@ -9,7 +9,7 @@ For capability tracking and release gates, see `PRODUCT_COMPLETION_LEDGER.md` an
 
 ## Current focus
 
-Finish the existing app and its security hardening before starting the future SaaS website/subscription platform.
+Keep the verified invoicing app stable while building the separate public website and free tools through isolated, risk-routed stages. Public website launch, Cloudflare production configuration, DNS and unrestricted onboarding remain separately gated.
 
 **Closed handoff:** `tasks/AUTH-002_THREAD_HANDOFF_2026-07-17.md` records the four completed MFA recovery acceptance gates, Owner approval, merged PR #44, and verified controlled test/portfolio publication.
 
@@ -19,11 +19,15 @@ Finish the existing app and its security hardening before starting the future Sa
 
 **Closed account-copy release:** `tasks/UX-002_CUSTOMER_FRIENDLY_COPY_2026-07-19.md` records removal of the customer-facing status panel, clearer account and workflow wording, exact Owner approval, merged PR #74, successful post-merge security/Pages runs, and verified public build `2026.07.19.1`.
 
+**Closed website-foundation/app-brand release:** `tasks/WEB-001_PUBLIC_WEBSITE_PROGRAMME_2026-07-22.md` records the merged PR #76–#83 programme foundation, shared Owner-approved Tallyo branding, exact release approval, passed required/post-merge security runs, successful GitHub Pages deployment and verified public app build `2026.07.22.2`. The separate public website was not launched.
+
+**Active website task:** `tasks/WEB-002_FREE_DOCUMENT_GENERATOR_2026-07-22.md` contains the isolated High-risk calculation, privacy, printable-output and review gates for the account-free invoice/quote generator.
+
 The current product is a single-user-per-account invoicing workspace backed by Supabase. It is a real working app and a security-focused portfolio project. It is not yet a public paid SaaS platform.
 
 ## Current app stage
 
-**Current invoicing-app scope:** feature-complete and regression-verified on public build `2026.07.19.1`, with controlled live Stripe invoice payments activated and acceptance-tested. This functional activation is not a legal-compliance or unrestricted customer-onboarding approval; the remaining legal, privacy and operational conditions below still apply.
+**Current invoicing-app scope:** feature-complete and regression-verified on public build `2026.07.22.2`, with controlled live Stripe invoice payments activated and acceptance-tested. This functional activation is not a legal-compliance or unrestricted customer-onboarding approval; the remaining legal, privacy and operational conditions below still apply.
 
 Implemented:
 
@@ -45,7 +49,7 @@ Implemented:
 - Supabase Auth, email confirmation, optional TOTP MFA, RLS, CSP, SRI, and server-side secrets.
 - Active Cloudflare Turnstile protection for public sign-up, password sign-in, and reset requests, with exact-origin CSP, a public production Site Key, an explicit rollback switch, Supabase enforcement, and focused/live acceptance.
 - Stripe failed-payment, refund, refund-failure, and dispute lifecycle awareness in the webhook.
-- Public build `2026.07.19.1` with consistent customer/item edge validation, the verified `FUNC-READY-002` non-money synthetic journey, expanded refund-state evidence, responsive primary navigation, centred document-type badges, the customer-facing status panel removed, clearer account and workflow wording, required/post-merge checks, and Pages/readback acceptance.
+- Public build `2026.07.22.2` retains the verified functional/UX baseline and adds the customer-facing Help/install integration plus the shared folded blue-and-mint Tallyo identity across website, app and PWA artwork. Required security run `29922330142`, post-merge security run `29922434061`, Pages run `29922431260`, and HTTPS build/service-worker/brand-asset readback passed.
 
 Still to finish before treating the app as customer-ready:
 

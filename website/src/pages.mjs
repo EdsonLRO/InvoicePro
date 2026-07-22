@@ -152,11 +152,59 @@ const about = `
   <section class="section section-soft" aria-labelledby="audience-title"><div class="section-heading"><p class="eyebrow">Who it serves</p><h2 id="audience-title">Built broadly for UK small businesses.</h2><p>Freelancers, sole traders, consultants, tradespeople and independent service companies can adapt the same core workflow to their work.</p></div></section>
   ${finalCta()}`;
 
-const generatorPlaceholder = `
-  <section class="page-hero"><p class="eyebrow">Free Invoice Maker</p><h1>A privacy-first invoice maker is on the way.</h1><p>This route is reserved for the browser-local free invoice and quote generator. It will not require an account or send document details to Tallyo by default.</p></section>
-  <section class="section section-soft"><div class="section-heading"><p class="eyebrow">Foundation ready</p><h2>The complete generator is the next focused website milestone.</h2><p>Until then, create an account to use Tallyo’s working authenticated invoice tools.</p></div><p class="section-link"><a data-analytics-placement="generator" data-signup-link href="#">Open Tallyo →</a></p></section>`;
-
-const quotePlaceholder = generatorPlaceholder.replaceAll("Invoice Maker", "Quote Maker").replaceAll("invoice maker", "quote maker").replaceAll("invoice and quote", "quote and invoice");
+const generatorPage = (defaultType) => {
+  const lowerType = defaultType.toLowerCase();
+  return `
+  <section class="page-hero generator-hero"><p class="eyebrow">Free ${defaultType} Maker</p><h1>Create a professional ${lowerType}, free.</h1><p>No account needed. While you work, this page keeps your document details and selected logo in your browser and does not send them to Tallyo, analytics or another service.</p></section>
+  <section class="generator-shell" data-generator data-default-type="${defaultType}">
+    <div class="generator-editor">
+      <div class="privacy-note" role="note"><strong>Private by default</strong><span>Tallyo does not save this document automatically. Refreshing the page clears the document draft.</span></div>
+      <form data-generator-form novalidate>
+        <fieldset><legend>Document details</legend><div class="generator-fields generator-fields-three">
+          <label>Document type<select name="documentType"><option>Invoice</option><option>Quote</option><option>Estimate</option></select></label>
+          <label>Currency<select name="currency"><option value="GBP">GBP — British pound</option><option value="EUR">EUR — Euro</option><option value="USD">USD — US dollar</option></select></label>
+          <label>Reference number<input name="reference" maxlength="40" value="0001" autocomplete="off"></label>
+          <label>Issue date<input name="issueDate" type="date"></label>
+          <label>Supply date<input name="supplyDate" type="date"><span>Use for invoices when it differs from the issue date.</span></label>
+          <label>Due or valid-until date<input name="dueDate" type="date"></label>
+        </div></fieldset>
+        <fieldset><legend>Your business</legend><div class="generator-fields generator-fields-two">
+          <label>Business or trading name<input name="senderName" maxlength="100" autocomplete="organization"></label>
+          <label>Your name <span>(sole traders)</span><input name="senderLegalName" maxlength="100" autocomplete="name"></label>
+          <label class="wide">Business address<textarea name="senderAddress" rows="3" maxlength="300" autocomplete="street-address"></textarea></label>
+          <label>Email or phone<input name="senderContact" maxlength="120" autocomplete="email"></label>
+          <label>VAT number <span>(if registered)</span><input name="vatNumber" maxlength="30" autocomplete="off"></label>
+          <label class="wide logo-field">Logo <span>(optional, stays in this browser)</span><input name="logo" type="file" accept="image/png,image/jpeg,image/webp"><button class="text-button" type="button" data-remove-logo hidden>Remove logo</button></label>
+        </div></fieldset>
+        <fieldset><legend>Customer</legend><div class="generator-fields generator-fields-two">
+          <label>Customer or company name<input name="customerName" maxlength="100" autocomplete="organization"></label>
+          <label class="wide">Customer address<textarea name="customerAddress" rows="3" maxlength="300" autocomplete="street-address"></textarea></label>
+        </div></fieldset>
+        <fieldset><legend>Items</legend><div class="generator-item-list" data-items></div><button class="button button-secondary button-small" type="button" data-add-item>Add another item</button></fieldset>
+        <fieldset><legend>Additional cost</legend><div class="generator-fields generator-fields-two">
+          <label>Shipping or other cost<input name="additionalCost" type="number" min="0" max="1000000" step="0.01" value="0.00" inputmode="decimal"></label>
+          <label>Tax on additional cost (%)<input name="additionalTaxRate" type="number" min="0" max="100" step="0.01" value="0" inputmode="decimal"></label>
+        </div></fieldset>
+        <fieldset><legend>Finishing details</legend><div class="generator-fields generator-fields-two">
+          <label class="wide">Notes<textarea name="notes" rows="3" maxlength="500"></textarea></label>
+          <label class="wide">Payment instructions<textarea name="paymentInstructions" rows="3" maxlength="500"></textarea></label>
+        </div></fieldset>
+        <div class="generator-actions"><button class="button button-primary" type="button" data-print>Print or save PDF</button><button class="button button-secondary" type="reset">Clear everything</button></div>
+        <p class="generator-status" data-generator-status role="status" aria-live="polite"></p>
+      </form>
+      <aside class="generator-guidance" aria-labelledby="generator-guidance-title"><h2 id="generator-guidance-title">Before you send it</h2><p>Prices are treated as excluding tax. Tax is rounded to the nearest penny for each line after its discount. Check that the document suits your business and tax position.</p><p>VAT-registered businesses may need extra invoice information. This free maker does not produce the required sterling VAT totals for foreign-currency VAT invoices.</p><p><a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">Read the current GOV.UK invoice requirements</a>. Tallyo does not provide tax, legal or accounting advice.</p></aside>
+    </div>
+    <div class="generator-preview-wrap"><p class="preview-label">Live preview</p><article class="generator-preview" data-preview aria-label="Document preview">
+      <header><img data-preview-logo alt="Business logo" hidden><div><p data-preview-type>${defaultType}</p><h2 data-preview-reference>${defaultType} 0001</h2><p data-preview-dates></p></div></header>
+      <div class="preview-parties"><section><h3>From</h3><p data-preview-sender></p></section><section><h3>To</h3><p data-preview-customer></p></section></div>
+      <div class="preview-table-wrap"><table><caption class="sr-only">Items and calculated amounts</caption><thead><tr><th>Description</th><th>Qty / unit</th><th>Unit price</th><th>Discount</th><th>Tax</th><th>Net</th><th>Total</th></tr></thead><tbody data-preview-items></tbody></table></div>
+      <dl class="preview-totals"><div><dt>Items before discount</dt><dd data-preview-subtotal></dd></div><div data-preview-discount-row><dt>Discount</dt><dd data-preview-discount></dd></div><div data-preview-additional-row><dt>Additional cost</dt><dd data-preview-additional></dd></div><div><dt>Net total</dt><dd data-preview-net></dd></div><div><dt>Tax</dt><dd data-preview-tax></dd></div><div class="grand-total"><dt>Total</dt><dd data-preview-total></dd></div></dl>
+      <div class="preview-notes"><section data-preview-notes-section><h3>Notes</h3><p data-preview-notes></p></section><section data-preview-payment-section><h3>Payment instructions</h3><p data-preview-payment></p></section></div>
+      <footer>Created with Tallyo</footer>
+    </article></div>
+  </section>
+  <section class="section section-cta generator-conversion" data-generator-conversion hidden><div><p class="eyebrow">Need to do more?</p><h2>Keep customers, track payments and repeat less admin.</h2><p>Create a Tallyo account when you want saved customers and services, card payments, recurring invoices and reminders.</p></div><a class="button button-light" id="cta_generator_create_account" data-analytics-placement="generator" data-signup-link href="#">Create account</a></section>`;
+};
 
 const foundationPages = [
   { route: "/", output: "index.html", title: "Professional invoices. Faster payments. Less admin.", description: "Tallyo helps UK small businesses create professional invoices and quotes, accept card payments and automate recurring invoicing work.", content: home, schema: "software" },
@@ -168,8 +216,8 @@ const foundationPages = [
   { route: "/help/", output: "help/index.html", title: "Tallyo Help Centre", description: "Find step-by-step guidance for Tallyo documents, payments, recurring work, account protection, delivery and installation.", content: help, schema: "webpage" },
   { route: "/faq/", output: "faq/index.html", title: "Tallyo frequently asked questions", description: "Answers about Tallyo invoices, quotes, recurring work, card payments, refunds, security, installation and internet access.", content: faq, schema: "faq" },
   { route: "/about/", output: "about/index.html", title: "About Tallyo", description: "Learn why Tallyo is building a straightforward invoicing and business-records workspace for UK small businesses.", content: about, schema: "webpage" },
-  { route: "/free-invoice-generator/", output: "free-invoice-generator/index.html", title: "Free invoice maker — Tallyo", description: "Prepare for Tallyo’s privacy-first browser-local free invoice maker for UK small businesses.", content: generatorPlaceholder, schema: "webpage" },
-  { route: "/free-quote-generator/", output: "free-quote-generator/index.html", title: "Free quote maker — Tallyo", description: "Prepare for Tallyo’s privacy-first browser-local free quote maker for UK small businesses.", content: quotePlaceholder, schema: "webpage" }
+  { route: "/free-invoice-generator/", output: "free-invoice-generator/index.html", title: "Free invoice maker — Tallyo", description: "Create and print a privacy-first, browser-local invoice for your UK small business without making an account.", content: generatorPage("Invoice"), schema: "webpage", scripts: ["/assets/generator.js"] },
+  { route: "/free-quote-generator/", output: "free-quote-generator/index.html", title: "Free quote maker — Tallyo", description: "Create and print a privacy-first, browser-local quote for your UK small business without making an account.", content: generatorPage("Quote"), schema: "webpage", scripts: ["/assets/generator.js"] }
 ];
 
 const helpPages = helpArticles.map((article) => ({
