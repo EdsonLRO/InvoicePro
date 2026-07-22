@@ -145,17 +145,20 @@ deployment was created or changed. The synthetic app Pages package rendered buil
 `2026.07.22.1` at 320, 390, 768 and 1280 px without horizontal overflow or
 console errors. The deployment harness, PWA/workflow harnesses and complete
 26-route website build/test suite pass.\
+PR #81 contains that milestone as a draft, and manual required verification run
+`29918689461` passed against head
+`d94970b0b317d29c9af88f40700b13a6b69793d6`. The PR is stacked on #80 and has
+not been marked ready, merged or deployed.\
 Pull requests: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76; #77 —
 https://github.com/EdsonLRO/InvoicePro/pull/77; #78 —
 https://github.com/EdsonLRO/InvoicePro/pull/78; #79 —
 https://github.com/EdsonLRO/InvoicePro/pull/79; #80 —
-https://github.com/EdsonLRO/InvoicePro/pull/80\
+https://github.com/EdsonLRO/InvoicePro/pull/80; #81 —
+https://github.com/EdsonLRO/InvoicePro/pull/81\
 Blocked reason: PR #76 merge remains Owner-gated because the milestone contains
 legally material public marketing/security claims and begins the public-website
 release sequence. This does not block stacked repository implementation.\
-Next action: Complete focused PR 7 diff, output-allowlist, secret, header,
-redirect and rollback checks; publish it stacked on #80 and verify required CI.
-Then prepare PR 8 preview-acceptance checklists and the exact Owner-only action
-sequence without creating provider projects. First-use account-data guidance,
-the free document generator, production configuration and final release remain
-deferred for explicit Sol High review.
+Next action: Prepare PR 8 preview-acceptance checklists and the exact Owner-only
+action sequence without creating provider projects. First-use account-data
+guidance, the free document generator, production configuration and final release
+remain deferred for explicit Sol High review.
