@@ -16,6 +16,7 @@ assert.equal(state.liveDnsChanged, false);
 assert.equal(state.productionReleased, false);
 assert.equal(state.githubPagesRollbackRetained, true);
 assert.ok(Object.values(state.checks).every((value) => value === 'pending'), 'no preview check may be pre-accepted');
+assert.ok(state.deferredHighRiskScopes.some((value) => value.includes('GitHub application authorization')));
 for (const scope of ['financial calculations', 'private account data', 'Supabase Auth', 'Stripe', 'Turnstile', 'custom-domain DNS']) {
   assert.ok(state.deferredHighRiskScopes.some((value) => value.includes(scope)), `missing deferred High-risk scope: ${scope}`);
 }
@@ -23,6 +24,8 @@ for (const scope of ['financial calculations', 'private account data', 'Supabase
 assert.match(record, /no Cloudflare preview exists yet/i);
 assert.match(record, /Preview accepted by Owner: \*\*Pending\*\*/);
 assert.match(record, /Acceptance of a preview is not approval for custom-domain DNS/);
+assert.match(record, /`noindex` is not a privacy control/);
+assert.match(record, /main project hostname and wildcard branch-preview hostnames/);
 assert.doesNotMatch(record, /https:\/\/[a-z0-9-]+\.pages\.dev/i, 'do not invent preview URLs');
 assert.doesNotMatch(record, /\[[xX]\]/, 'no preview acceptance checkbox may be pre-checked');
 
@@ -32,6 +35,8 @@ for (const boundary of ['Free document generator (High)', 'Supabase Auth and MFA
 }
 assert.match(actions, /Approval for one does not approve any later gate/);
 assert.match(actions, /Current analytics and advertising remain disabled/);
+assert.match(actions, /access limited to `EdsonLRO\/InvoicePro`/);
+assert.match(actions, /Initial Cloudflare builds must remain blocked/);
 assert.doesNotMatch(actions, /password\s*[:=]|sb_secret_|sk_live_|whsec_/i);
 
 console.log('Preview acceptance readiness harness passed.');
