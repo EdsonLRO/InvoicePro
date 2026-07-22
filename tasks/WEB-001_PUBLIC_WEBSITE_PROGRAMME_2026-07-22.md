@@ -177,8 +177,10 @@ public-integration, Cloudflare-package, responsive-safety and complete 26-route
 website checks pass. Local visual QA confirms the identity on the website and
 app sign-in screen without app horizontal overflow. The repository-only app
 build marker is `2026.07.22.2`; it has not been published. PR #83 contains the
-milestone as a draft stacked on #82 and has not been marked ready, merged or
-deployed.\
+milestone as a draft stacked on #82. Required workflow-dispatch verification
+run `29920972328` passed against head
+`0e22c154718f2f1a288b5cbca4a25705935fda35`. The PR has not been marked ready,
+merged or deployed.\
 Pull requests: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76; #77 —
 https://github.com/EdsonLRO/InvoicePro/pull/77; #78 —
 https://github.com/EdsonLRO/InvoicePro/pull/78; #79 —
