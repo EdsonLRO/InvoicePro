@@ -5,7 +5,7 @@ Owner: Master Orchestrator
 Assigned roles: Product, Frontend, Payments, Legal/Privacy, Security, QA, Release  
 Not triggered: Backend, Supabase/Auth, MFA, RLS, Stripe provider configuration, Resend, database migrations  
 Risk: High — financial calculations, tax presentation and printable business documents  
-Status: In progress  
+Status: Owner-approved for merge  
 Scope lock: `website/src/document-calculator.mjs`, `website/src/generator.js`, generator routes in `website/src/pages.mjs`, generator styles, website build/tests, and directly changed authoritative status records.
 
 ## Objective
@@ -74,7 +74,10 @@ their own position and are linked to the current GOV.UK requirements.
 - [x] Draft PR #84 contains implementation commit `7ff3434`; required Security
   checks run `29924082269` passed with no merge conflict. The evidence-only
   follow-up must retain a passing required check on the final branch state.
-- [ ] Owner approves ready/merge and any later public website release separately.
+- [x] On 2026-07-22 the Owner explicitly approved marking PR #84 ready and
+  merging it, acknowledging that this merges the browser-only generator into
+  `main` without publishing the separate public website.
+- [ ] Any later public website release remains separately Owner-gated.
 
 ## Legal disposition
 
