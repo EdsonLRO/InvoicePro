@@ -126,16 +126,19 @@ rendered build `2026.07.22.1` without horizontal overflow; only the expected
 localhost Turnstile site-key warning appeared. Signed-in panel acceptance remains
 for a later preview stage because no credentials or private session data were
 requested or inspected.\
+PR #80 contains that milestone as a draft, is mergeable, and manual required
+verification run `29918114759` passed against head
+`a5742e7c7804574484d75da6a5d89c8e8e73831a`. The PR is stacked on #79 and has
+not been marked ready, merged or deployed.\
 Pull requests: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76; #77 —
 https://github.com/EdsonLRO/InvoicePro/pull/77; #78 —
 https://github.com/EdsonLRO/InvoicePro/pull/78; #79 —
-https://github.com/EdsonLRO/InvoicePro/pull/79\
+https://github.com/EdsonLRO/InvoicePro/pull/79; #80 —
+https://github.com/EdsonLRO/InvoicePro/pull/80\
 Blocked reason: PR #76 merge remains Owner-gated because the milestone contains
 legally material public marketing/security claims and begins the public-website
 release sequence. This does not block stacked repository implementation.\
-Next action: Complete the focused PR 6 diff/secret/boundary review, publish it
-stacked on #79 and verify required checks. Then continue repository-only
-Cloudflare/custom-domain readiness without creating a provider project, changing
-DNS or performing production release. First-use account-data guidance, the free
-document generator, production configuration and final release remain deferred
-for explicit Sol High review.
+Next action: Continue repository-only Cloudflare/custom-domain readiness without
+creating a provider project, changing DNS or performing production release.
+First-use account-data guidance, the free document generator, production
+configuration and final release remain deferred for explicit Sol High review.
