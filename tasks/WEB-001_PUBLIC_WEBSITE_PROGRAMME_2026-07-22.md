@@ -6,7 +6,7 @@ focused website, free-tool, helper, growth, app-integration and Cloudflare
 readiness milestones without public launch or protected-provider changes.\
 Priority: High\
 Status: In Progress\
-Phase: PR 8 — Preview acceptance and Owner-action readiness\
+Phase: Medium programme complete — stopped at Sol High boundary\
 Owner role: Master Orchestrator\
 Assigned specialists: Product, Frontend, QA, Documentation, Security and Legal
 responsibilities performed sequentially\
@@ -141,6 +141,10 @@ tracking and advertising inactive. The action sequence identifies the exact
 stages that require Sol High: financial document calculations, private account
 onboarding, Supabase Auth/MFA origins, Turnstile, Stripe/email links, production
 variables, DNS and final release. Focused readiness and workflow-policy tests pass.\
+PR #82 contains that milestone as a draft, and manual required verification run
+`29919001545` passed against head
+`b23cae0e53556750fc790f260b3263582acd7774`. The PR is stacked on #81 and has
+not been marked ready, merged or deployed.\
 PR 7 adds machine-readable settings for two separate Cloudflare Pages projects,
 a strict allowlist app build, generated browser-only configuration, app response
 headers/SPA fallback, preview/rollback instructions and a domain migration map.
@@ -164,11 +168,14 @@ https://github.com/EdsonLRO/InvoicePro/pull/77; #78 —
 https://github.com/EdsonLRO/InvoicePro/pull/78; #79 —
 https://github.com/EdsonLRO/InvoicePro/pull/79; #80 —
 https://github.com/EdsonLRO/InvoicePro/pull/80; #81 —
-https://github.com/EdsonLRO/InvoicePro/pull/81\
+https://github.com/EdsonLRO/InvoicePro/pull/81; #82 —
+https://github.com/EdsonLRO/InvoicePro/pull/82\
 Blocked reason: PR #76 merge remains Owner-gated because the milestone contains
 legally material public marketing/security claims and begins the public-website
 release sequence. This does not block stacked repository implementation.\
-Next action: Publish PR 8 stacked on #81 and verify required CI. Then stop the
-Medium programme before the remaining Sol High scopes: free-document financial
-calculations, private account onboarding, protected provider/Auth/payment changes,
-Cloudflare project/production configuration, DNS and final release.
+Next action: Switch to Sol High and select the first High-risk scope. The natural
+next implementation is the free invoice/quote generator, requiring review of
+subtotal, discount, tax/VAT, shipping, rounding, totals and printable document
+content. Private account onboarding, protected provider/Auth/payment changes,
+Cloudflare project/production configuration, DNS and final release are separate
+later High-risk stages and are not implicitly approved.
