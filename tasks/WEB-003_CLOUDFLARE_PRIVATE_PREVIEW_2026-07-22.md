@@ -120,8 +120,8 @@ Pages packaging, preview acceptance state, security workflow policy,
 
 Branch: `codex/cloudflare-private-preview-deployments`
 
-Commit: Pending evidence commit; deployed source commit is
-`9fc3f9063527057aa04b9c4544290b0095fc043e`
+Commit: This evidence branch records the successful private deployments; the
+deployed source commit is `9fc3f9063527057aa04b9c4544290b0095fc043e`
 
 Blocked reason: Authenticated content acceptance requires the Owner to complete
 Cloudflare Access sign-in privately
