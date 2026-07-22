@@ -36,6 +36,8 @@ await copyFile(join(websiteRoot, "src", "analytics.mjs"), join(distRoot, "assets
 await copyFile(join(websiteRoot, "src", "growth.js"), join(distRoot, "assets", "growth.js"));
 await writeFile(join(distRoot, "assets", "analytics-policy.mjs"), `export const eventPolicy = Object.freeze(${JSON.stringify(eventPolicy)});\n`, "utf8");
 await copyFile(join(websiteRoot, "public", "assets", "icon-192.png"), join(distRoot, "assets", "icon-192.png"));
+await copyFile(join(websiteRoot, "public", "assets", "tallyo-mark.png"), join(distRoot, "assets", "tallyo-mark.png"));
+await copyFile(join(websiteRoot, "public", "assets", "tallyo-wordmark-white.png"), join(distRoot, "assets", "tallyo-wordmark-white.png"));
 await copyFile(join(websiteRoot, "public", "assets", "tallyo-social-card.webp"), join(distRoot, "assets", "tallyo-social-card.webp"));
 await copyFile(join(websiteRoot, "public", "_redirects"), join(distRoot, "_redirects"));
 
@@ -58,7 +60,7 @@ const robots = siteConfig.preview
   : `User-agent: *\nAllow: /\nSitemap: ${siteConfig.canonicalOrigin}/sitemap.xml\n`;
 await writeFile(join(distRoot, "robots.txt"), robots, "utf8");
 
-const assetFiles = ["assets/styles.css", "assets/site.js", "assets/helper.js", "assets/helper-core.mjs", "assets/analytics.mjs", "assets/growth.js", "assets/analytics-policy.mjs", "assets/icon-192.png", "assets/tallyo-social-card.webp"];
+const assetFiles = ["assets/styles.css", "assets/site.js", "assets/helper.js", "assets/helper-core.mjs", "assets/analytics.mjs", "assets/growth.js", "assets/analytics-policy.mjs", "assets/icon-192.png", "assets/tallyo-mark.png", "assets/tallyo-wordmark-white.png", "assets/tallyo-social-card.webp"];
 const assetBytes = {};
 for (const file of assetFiles) assetBytes[file] = (await stat(join(distRoot, file))).size;
 await writeFile(join(distRoot, "build-report.json"), `${JSON.stringify({ mode: siteConfig.mode, routes: pages.length, externalOrigins: 0, assetBytes }, null, 2)}\n`, "utf8");

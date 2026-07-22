@@ -1,0 +1,27 @@
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net; frame-src https://challenges.cloudflare.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), geolocation=(), microphone=(), payment=(), usb=()
+  X-Frame-Options: DENY
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/index.html
+  Cache-Control: no-cache
+
+/config.js
+  Cache-Control: no-store
+
+/service-worker.js
+  Cache-Control: no-cache
+
+/manifest.json
+  Cache-Control: no-cache
+
+/tailwind.css
+  Cache-Control: public, max-age=604800
+
+/icon-*.png
+  Cache-Control: public, max-age=604800
