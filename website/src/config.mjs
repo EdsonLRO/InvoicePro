@@ -15,11 +15,15 @@ export const siteConfig = Object.freeze({
     "Create quotes and invoices, accept card payments, automate recurring work and keep customer transactions organised in one straightforward workspace.",
   locale: "en_GB",
   themeColor: "#111a31",
+  socialImagePath: "/assets/tallyo-social-card.webp",
+  googleSiteVerification: process.env.TALLYO_GOOGLE_SITE_VERIFICATION || "",
+  bingSiteVerification: process.env.TALLYO_BING_SITE_VERIFICATION || "",
   preview: mode !== "production"
 });
 
 export const navigation = Object.freeze([
   { label: "Features", href: "/features/" },
+  { label: "Product Tour", href: "/product-tour/" },
   { label: "Free Invoice Maker", href: "/free-invoice-generator/" },
   { label: "Pricing", href: "/pricing/" },
   { label: "Security", href: "/security/" },
@@ -31,6 +35,7 @@ export const footerGroups = Object.freeze([
     title: "Product",
     links: [
       { label: "Features", href: "/features/" },
+      { label: "Product Tour", href: "/product-tour/" },
       { label: "Free Invoice Maker", href: "/free-invoice-generator/" },
       { label: "Pricing", href: "/pricing/" },
       { label: "Security", href: "/security/" }

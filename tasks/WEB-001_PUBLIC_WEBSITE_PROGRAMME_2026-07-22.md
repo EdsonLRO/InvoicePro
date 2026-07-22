@@ -6,7 +6,7 @@ focused website, free-tool, helper, growth, app-integration and Cloudflare
 readiness milestones without public launch or protected-provider changes.\
 Priority: High\
 Status: In Progress\
-Phase: PR 1 ready; PR 2 product presentation and content system next\
+Phase: PR 2 — Product presentation and content system verification\
 Owner role: Master Orchestrator\
 Assigned specialists: Product, Frontend, QA, Documentation, Security and Legal
 responsibilities performed sequentially\
@@ -16,10 +16,8 @@ any live financial action remain high-risk Owner-only boundaries\
 Affected files: `website/`; `.github/workflows/security-checks.yml`; the master
 specification; focused website tests; this task record; milestone-only
 authoritative documentation\
-Files locked: `website/`, `.github/workflows/security-checks.yml`,
-`TALLYO_PUBLIC_WEBSITE_APP_GROWTH_MASTER_PROMPT.md`, `tests/website-*`, and this
-task record during PR 1\
-Lock acquired: 2026-07-22 on branch `codex/tallyo-website-foundation`\
+Files locked: `website/` and this task record during PR 2\
+Lock acquired: 2026-07-22 on branch `codex/tallyo-website-product-content`\
 Dependencies: Existing app remains unchanged and deployed at the current GitHub
 Pages URL; the final website and app domains require later Owner-approved
 provider and DNS work.\
@@ -60,12 +58,27 @@ schema matched 11 visible questions, and the browser console had no errors.
 Preview assets measured 15,900-byte CSS, 1,591-byte JavaScript and zero external
 origins. The committed master specification exactly matches the Owner-supplied
 file (SHA-256 `FD8AAA926F14D9DA312951238CF6B5B9B60533D736B3F2385F9BBEDBF4F94A8B`).
-Implementation commit `2076fe4fbe468db235b8ee956c57af699cfafb96` is
-published in draft PR #76; required `verify` run `29913823154` passed against
-that commit.\
+Implementation commit `2076fe4fbe468db235b8ee956c57af699cfafb96` and its
+evidence follow-up are published in PR #76. The PR is ready, mergeable and clean;
+required `verify` run `29913992436` passed against final head
+`e296e254fd48e95b87f03bb8fecfda2f396e3808`. PR 2 builds 25 routes plus a real
+404: a complete fictional-data product tour covering 11 supported workflows,
+nine step-by-step help guides, six deliberately selected industry landing pages,
+expanded factual FAQs and a planning-only 20-topic SEO map. Shared components
+generate help and industry routes. HowTo and BreadcrumbList structured data match
+visible content. A 1200×630, 35,612-byte WebP social card was generated with the
+approved Tallyo palette and exact positioning line; it contains no price, rating,
+provider logo or real data. Focused tests validate every route, product scene,
+guide, schema, industry boundary, social asset and content-map entry. Browser QA
+passed at 320, 390, 768, 1024 and 1280 px with no horizontal overflow. The mobile
+menu remains active at 1024 px so navigation does not disappear between
+breakpoints; open, Escape, focus return and scroll locking passed. Product-tour
+and help-guide mobile views were visually inspected, and the browser console had
+no errors.\
 Pull request: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76\
 Blocked reason: PR #76 merge remains Owner-gated because the milestone contains
 legally material public marketing/security claims and begins the public-website
 release sequence. This does not block stacked repository implementation.\
-Next action: Record the final PR 1 evidence, mark it ready without merging, then
-branch PR 2 from the verified PR 1 head and continue safe implementation.
+Next action: Complete focused diff, production-mode, secret and asset checks;
+commit and publish stacked PR 2; wait for required checks; then continue to the
+privacy-first free invoice and quote generator on a new stacked branch.

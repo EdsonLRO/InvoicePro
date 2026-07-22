@@ -9,8 +9,6 @@ const escapeAttribute = (value) => String(value)
 
 const absoluteUrl = (path) => `${siteConfig.canonicalOrigin}${path === "/" ? "/" : path}`;
 
-const navMarkup = navigation.map((item) => `<a href="${item.href}">${item.label}</a>`).join("");
-
 const footerMarkup = footerGroups.map((group) => `
   <div class="footer-group">
     <h2>${group.title}</h2>
@@ -55,6 +53,36 @@ const schemaFor = (page) => {
     };
   }
 
+  const graph = [base];
+  if (page.breadcrumbs) {
+    graph.push({
+      "@type": "BreadcrumbList",
+      itemListElement: page.breadcrumbs.map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: item.name,
+        item: absoluteUrl(item.path)
+      }))
+    });
+  }
+
+  if (page.schema === "howto") {
+    graph.push({
+      "@type": "HowTo",
+      name: page.title,
+      description: page.description,
+      step: page.steps.map(([name, text], index) => ({
+        "@type": "HowToStep",
+        position: index + 1,
+        name,
+        text,
+        url: `${absoluteUrl(page.route)}#step-${index + 1}`
+      }))
+    });
+  }
+
+  if (graph.length > 1) return { "@context": "https://schema.org", "@graph": graph.map(({ "@context": ignored, ...item }) => item) };
+
   return base;
 };
 
@@ -62,6 +90,12 @@ export const renderPage = (page) => {
   const canonical = absoluteUrl(page.route);
   const title = page.route === "/" ? siteConfig.defaultTitle : `${page.title} | Tallyo`;
   const robots = siteConfig.preview ? "noindex, nofollow, noarchive" : "index, follow";
+  const socialImage = `${siteConfig.canonicalOrigin}${siteConfig.socialImagePath}`;
+  const navMarkup = navigation.map((item) => `<a href="${item.href}"${page.route === item.href ? ' aria-current="page"' : ""}>${item.label}</a>`).join("");
+  const verificationMarkup = [
+    siteConfig.googleSiteVerification ? `<meta name="google-site-verification" content="${escapeAttribute(siteConfig.googleSiteVerification)}">` : "",
+    siteConfig.bingSiteVerification ? `<meta name="msvalidate.01" content="${escapeAttribute(siteConfig.bingSiteVerification)}">` : ""
+  ].filter(Boolean).join("\n  ");
   const content = page.content
     .replaceAll('data-signup-link href="#"', `data-signup-link href="${escapeAttribute(siteConfig.signupUrl)}"`)
     .replaceAll('data-login-link href="#"', `data-login-link href="${escapeAttribute(siteConfig.appUrl)}"`);
@@ -85,9 +119,15 @@ export const renderPage = (page) => {
   <meta property="og:title" content="${escapeAttribute(title)}">
   <meta property="og:description" content="${escapeAttribute(page.description)}">
   <meta property="og:url" content="${canonical}">
-  <meta name="twitter:card" content="summary">
+  <meta property="og:image" content="${socialImage}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Tallyo — Professional invoices. Faster payments. Less admin.">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeAttribute(title)}">
   <meta name="twitter:description" content="${escapeAttribute(page.description)}">
+  <meta name="twitter:image" content="${socialImage}">
+  ${verificationMarkup}
   <link rel="stylesheet" href="/assets/styles.css">
   <script type="application/ld+json">${schema}</script>
   <script src="/assets/site.js" defer></script>
@@ -105,7 +145,7 @@ export const renderPage = (page) => {
       </nav>
     </div>
   </header>
-  <main id="main-content">${content}</main>
+  <main id="main-content" tabindex="-1">${content}</main>
   <footer class="site-footer">
     <div class="footer-main">
       <div class="footer-intro"><a class="brand brand-footer" href="/"><span class="brand-mark" aria-hidden="true">T</span><span>Tallyo</span></a><p>Professional invoices, clearer payment tracking and less repeated admin for UK small businesses.</p></div>
