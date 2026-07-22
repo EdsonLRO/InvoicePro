@@ -14,7 +14,7 @@ export const finalCta = ({ secondary = true } = {}) => `
       <p>Create professional documents, track payments and spend less time repeating the same setup.</p>
     </div>
     <div class="cta-row">
-      <a class="button button-light" id="cta_footer_create_account" data-signup-link href="#">Create account</a>
+      <a class="button button-light" id="cta_footer_create_account" data-analytics-placement="footer" data-signup-link href="#">Create account</a>
       ${secondary ? '<a class="button button-ghost-light" href="/features/">Explore features</a>' : ""}
     </div>
   </section>`;
@@ -73,7 +73,7 @@ export const helpArticlePage = (article) => `
 
 export const industryLandingPage = (industry) => `
   ${breadcrumbs([{ label: "Home", href: "/" }, { label: "Industries", href: "/#industries" }, { label: industry.name }])}
-  <section class="page-hero industry-hero"><p class="eyebrow">Tallyo for ${escapeHtml(industry.name)}</p><h1>Keep invoicing work clear from first document to payment.</h1><p>${escapeHtml(industry.summary)}</p><p><a class="button button-primary" data-signup-link href="#">Create account</a> <a class="button button-secondary" href="/product-tour/">See the product tour</a></p></section>
+  <section class="page-hero industry-hero"><p class="eyebrow">Tallyo for ${escapeHtml(industry.name)}</p><h1>Keep invoicing work clear from first document to payment.</h1><p>${escapeHtml(industry.summary)}</p><p><a class="button button-primary" data-analytics-placement="hero" data-signup-link href="#">Create account</a> <a class="button button-secondary" href="/product-tour/">See the product tour</a></p></section>
   <section class="section split" aria-labelledby="industry-focus-${escapeHtml(industry.slug)}"><div><p class="eyebrow">A focused workflow</p><h2 id="industry-focus-${escapeHtml(industry.slug)}">Useful invoicing tools for the way you work.</h2><p>Tallyo connects customers, documents, payment status and repeat work without claiming to replace specialist trade or accounting software.</p></div>${list(industry.focus)}</section>
   <section class="section section-soft" aria-labelledby="industry-outcome-${escapeHtml(industry.slug)}"><div class="section-heading"><p class="eyebrow">The connected outcome</p><h2 id="industry-outcome-${escapeHtml(industry.slug)}">Quote → Invoice → Payment → Follow-up</h2><p>Use the parts that fit your work: prepare a quote, convert agreed work, request payment and keep the result with the document.</p></div><p class="section-link"><a href="/features/">Explore every supported feature →</a></p></section>
   ${finalCta()}`;

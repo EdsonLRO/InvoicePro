@@ -6,6 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { helpArticles, industries, notFoundPage, pages, productScenes } from "../src/pages.mjs";
 import { findHelperAnswer, futurePublicAiAdapter } from "../src/helper-core.mjs";
+import { analyticsConfiguration, createAnalytics, getConsentState, parseCampaignParameters } from "../src/analytics.mjs";
 
 const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = join(websiteRoot, "dist");
@@ -43,9 +44,12 @@ for (const page of [...pages, notFoundPage]) {
   assert.match(html, /property="og:title"/, `Open Graph title for ${page.route}`);
   assert.match(html, /property="og:image" content="https:\/\/tallyo\.co\.uk\/assets\/tallyo-social-card\.webp"/, `Open Graph image for ${page.route}`);
   assert.match(html, /name="twitter:card" content="summary_large_image"/, `large social card for ${page.route}`);
+  assert.match(html, /type="module" src="\/assets\/growth\.js"/, `provider-neutral growth module for ${page.route}`);
   assert.doesNotMatch(html, prohibitedClaims, `prohibited claim on ${page.route}`);
   assert.doesNotMatch(html, fakeProof, `fake proof on ${page.route}`);
   assert.doesNotMatch(html, /<script[^>]+src="https?:\/\//, `no external script on ${page.route}`);
+  assert.doesNotMatch(html, /data-(?:signup|login)-link[^>]+href="#"/, `configured account links for ${page.route}`);
+  assert.doesNotMatch(html, /href="[^"]*utm_(?:source|medium|campaign|content|term)/, `campaign parameters never enter links on ${page.route}`);
   const schemaText = html.match(/<script type="application\/ld\+json">([^<]+)<\/script>/)?.[1];
   assert.ok(schemaText, `structured data for ${page.route}`);
   assert.doesNotThrow(() => JSON.parse(schemaText), `valid structured data for ${page.route}`);
@@ -140,6 +144,52 @@ assert.doesNotMatch(headers, /unsafe-inline|unsafe-eval/);
 assert.match(headers, /sha256-/);
 assert.match(headers, new RegExp(`sha256-${helperHash.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`), "CSP allows only the exact embedded helper knowledge");
 
+const eventPolicy = JSON.parse(readFileSync(join(websiteRoot, "content", "analytics-events.json"), "utf8"));
+const websiteEvents = ["view_home", "view_features", "view_pricing", "view_security", "view_help_article", "view_industry_page", "open_tallyo_helper", "helper_answer_found", "helper_answer_not_found", "start_free_invoice", "complete_free_invoice", "download_free_invoice", "print_free_invoice", "click_create_account", "click_login", "view_install_instructions", "click_install_app"];
+const applicationEvents = ["signup_started", "signup_completed", "email_verified", "first_login", "business_profile_completed", "first_customer_created", "first_invoice_created", "first_invoice_sent", "payment_link_created", "recurring_invoice_enabled", "pwa_install_prompt_shown", "pwa_installed"];
+assert.deepEqual(Object.keys(eventPolicy.events).sort(), [...websiteEvents, ...applicationEvents].sort(), "authoritative event dictionary is complete");
+assert.equal(eventPolicy.defaultEnabled, false);
+assert.ok(eventPolicy.globalProhibitedProperties.includes("email"));
+assert.ok(eventPolicy.globalProhibitedProperties.includes("amount"));
+assert.ok(eventPolicy.globalProhibitedProperties.includes("free_text"));
+for (const [name, definition] of Object.entries(eventPolicy.events)) {
+  assert.ok(definition.description && definition.exactTrigger && definition.routeComponent, `documented trigger for ${name}`);
+  assert.equal(definition.consentCategory, "analytics", `consent category for ${name}`);
+  assert.ok(["primary", "secondary", "diagnostic"].includes(definition.classification), `classification for ${name}`);
+  assert.ok(definition.status, `implementation status for ${name}`);
+}
+
+assert.deepEqual(getConsentState(), { necessary: "granted", analytics: "denied", advertising: "denied", preferences: "denied" });
+assert.equal(analyticsConfiguration.enabled, false);
+assert.equal(analyticsConfiguration.provider, null);
+assert.equal(analyticsConfiguration.ga4MeasurementId, "");
+assert.equal(analyticsConfiguration.googleTagManagerContainerId, "");
+assert.equal(analyticsConfiguration.googleAdsConversionId, "");
+
+const providerCalls = [];
+const enabledAnalytics = createAnalytics({ policy: eventPolicy, enabled: true, environment: "production", consent: () => ({ analytics: "granted" }), provider: (name, properties) => providerCalls.push({ name, properties }) });
+assert.deepEqual(enabledAnalytics.trackEvent("click_create_account", { placement: "header" }), { accepted: true, reason: "sent" });
+assert.deepEqual(providerCalls, [{ name: "click_create_account", properties: { placement: "header" } }]);
+assert.equal(enabledAnalytics.trackEvent("unknown_event").reason, "unknown-event");
+assert.equal(enabledAnalytics.trackEvent("click_create_account", { placement: "user-entered" }).reason, "invalid-properties");
+assert.equal(enabledAnalytics.trackEvent("view_home", { free_text: "private" }).reason, "invalid-properties");
+const disabledCalls = [];
+const disabledAnalytics = createAnalytics({ policy: eventPolicy, enabled: false, environment: "production", consent: () => ({ analytics: "granted" }), provider: (...args) => disabledCalls.push(args) });
+assert.equal(disabledAnalytics.trackEvent("view_home").reason, "disabled");
+assert.equal(disabledCalls.length, 0);
+const deniedAnalytics = createAnalytics({ policy: eventPolicy, enabled: true, environment: "production", consent: () => ({ analytics: "denied" }), provider: () => providerCalls.push("unexpected") });
+assert.equal(deniedAnalytics.trackEvent("view_home").reason, "consent-denied");
+const failingAnalytics = createAnalytics({ policy: eventPolicy, enabled: true, environment: "production", consent: () => ({ analytics: "granted" }), provider: () => { throw new Error("provider failure"); } });
+assert.equal(failingAnalytics.trackEvent("view_home").reason, "provider-error");
+
+assert.deepEqual(parseCampaignParameters("https://tallyo.co.uk/?utm_source=google&utm_medium=cpc&utm_campaign=uk-invoicing&utm_content=sole-trader&utm_term=invoice"), { utm_source: "google", utm_medium: "cpc", utm_campaign: "uk-invoicing", utm_content: "sole-trader", utm_term: "invoice" });
+assert.deepEqual(parseCampaignParameters("https://tallyo.co.uk/?customer_id=private&invoice=private"), {});
+assert.equal(parseCampaignParameters(`https://tallyo.co.uk/?utm_campaign=${"x".repeat(120)}`).utm_campaign.length, 80);
+
+const generatedPolicySource = read("assets/analytics-policy.mjs");
+const generatedPolicyJson = generatedPolicySource.match(/Object\.freeze\((.+)\);\s*$/s)?.[1];
+assert.deepEqual(JSON.parse(generatedPolicyJson), eventPolicy, "generated browser policy matches authoritative dictionary");
+
 assert.equal(read("robots.txt"), "User-agent: *\nDisallow: /\n");
 const sitemap = read("sitemap.xml");
 for (const page of pages) assert.match(sitemap, new RegExp(`https://tallyo\\.co\\.uk${page.route.replaceAll("/", "\\/")}`));
@@ -149,7 +199,14 @@ assert.ok(statSync(join(distRoot, "assets", "styles.css")).size < 60_000, "CSS b
 assert.ok(statSync(join(distRoot, "assets", "site.js")).size < 10_000, "JS baseline under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper.js")).size < 10_000, "helper UI stays under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper-core.mjs")).size < 10_000, "helper matcher stays under 10 KB");
+assert.ok(statSync(join(distRoot, "assets", "analytics.mjs")).size < 10_000, "analytics boundary stays under 10 KB");
+assert.ok(statSync(join(distRoot, "assets", "growth.js")).size < 10_000, "growth integration stays under 10 KB");
+assert.ok(statSync(join(distRoot, "assets", "analytics-policy.mjs")).size < 30_000, "event policy stays under 30 KB");
 assert.ok(existsSync(join(distRoot, "assets", "icon-192.png")), "favicon asset exists");
+assert.ok(existsSync(join(distRoot, "assets", "tallyo-mark.png")), "brand mark asset exists");
+assert.ok(existsSync(join(distRoot, "assets", "tallyo-wordmark-white.png")), "brand wordmark asset exists");
+assert.ok(statSync(join(distRoot, "assets", "tallyo-mark.png")).size < 75_000, "brand mark stays under 75 KB");
+assert.ok(statSync(join(distRoot, "assets", "tallyo-wordmark-white.png")).size < 50_000, "brand wordmark stays under 50 KB");
 assert.ok(existsSync(join(distRoot, "assets", "tallyo-social-card.webp")), "social card asset exists");
 assert.ok(statSync(join(distRoot, "assets", "tallyo-social-card.webp")).size < 100_000, "social card stays under 100 KB");
 for (const helperAsset of ["helper.js", "helper-core.mjs"]) {
@@ -157,6 +214,12 @@ for (const helperAsset of ["helper.js", "helper-core.mjs"]) {
   assert.doesNotMatch(source, /fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage|indexedDB/, `${helperAsset} remains browser-local without persistence or network calls`);
   assert.doesNotMatch(source, /https?:\/\//, `${helperAsset} has no provider endpoint`);
 }
+for (const growthAsset of ["analytics.mjs", "growth.js"]) {
+  const source = read(`assets/${growthAsset}`);
+  assert.doesNotMatch(source, /fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|document\.cookie|localStorage|sessionStorage|indexedDB/, `${growthAsset} has no tracking transport, cookie or storage API`);
+  assert.doesNotMatch(source, /https?:\/\/[^"'\s]*(?:googletagmanager|google-analytics|doubleclick|facebook|hotjar|segment\.com)/i, `${growthAsset} has no provider endpoint`);
+}
+assert.doesNotMatch(home, /cookie banner|accept all cookies|google tag manager|google analytics/i, "no unnecessary consent banner or provider is rendered");
 
 const contentMap = JSON.parse(readFileSync(join(websiteRoot, "content", "seo-content-map.json"), "utf8"));
 assert.equal(contentMap.status, "planning-only");
