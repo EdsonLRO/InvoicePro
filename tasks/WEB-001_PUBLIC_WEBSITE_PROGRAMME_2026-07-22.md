@@ -6,20 +6,21 @@ focused website, free-tool, helper, growth, app-integration and Cloudflare
 readiness milestones without public launch or protected-provider changes.\
 Priority: High\
 Status: In Progress\
-Phase: PR 1 ready; PR 2 product presentation and content system next\
+Phase: Medium programme and shared brand integration complete — stopped at Sol High boundary\
 Owner role: Master Orchestrator\
 Assigned specialists: Product, Frontend, QA, Documentation, Security and Legal
 responsibilities performed sequentially\
 Risk level: Medium for repository-only website implementation; public launch,
 legal publication, tracking activation, production domain/provider changes and
 any live financial action remain high-risk Owner-only boundaries\
-Affected files: `website/`; `.github/workflows/security-checks.yml`; the master
-specification; focused website tests; this task record; milestone-only
-authoritative documentation\
-Files locked: `website/`, `.github/workflows/security-checks.yml`,
-`TALLYO_PUBLIC_WEBSITE_APP_GROWTH_MASTER_PROMPT.md`, `tests/website-*`, and this
-task record during PR 1\
-Lock acquired: 2026-07-22 on branch `codex/tallyo-website-foundation`\
+Affected files: Shared Tallyo logo/icon assets; public website header, footer and
+build pipeline; app sign-in/header, manifest icons, app-shell packaging; focused
+brand/PWA/readiness tests; `.github/workflows/security-checks.yml`; and this task
+record\
+Files locked: The listed branding integration files and this task record during
+the shared-brand milestone\
+Lock acquired: 2026-07-22 on branch
+`codex/tallyo-brand-logo`\
 Dependencies: Existing app remains unchanged and deployed at the current GitHub
 Pages URL; the final website and app domains require later Owner-approved
 provider and DNS work.\
@@ -48,7 +49,7 @@ authoritative status documents when their state materially changes.\
 Approval boundary: Do not activate tracking, publish legal pages, merge a change
 that would publicly launch the site, create Cloudflare projects, change provider
 configuration/DNS, or perform production cutover without the required approval.\
-Branch: `codex/tallyo-website-foundation`\
+Branch: `codex/tallyo-brand-logo`\
 Evidence: Dependency-free static generator builds nine routes plus a real 404.
 Preview and production-mode crawl directives passed; preview is the default.
 Automated route, link, unique metadata, canonical, structured-data, CTA,
@@ -60,12 +61,140 @@ schema matched 11 visible questions, and the browser console had no errors.
 Preview assets measured 15,900-byte CSS, 1,591-byte JavaScript and zero external
 origins. The committed master specification exactly matches the Owner-supplied
 file (SHA-256 `FD8AAA926F14D9DA312951238CF6B5B9B60533D736B3F2385F9BBEDBF4F94A8B`).
-Implementation commit `2076fe4fbe468db235b8ee956c57af699cfafb96` is
-published in draft PR #76; required `verify` run `29913823154` passed against
-that commit.\
-Pull request: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76\
+Implementation commit `2076fe4fbe468db235b8ee956c57af699cfafb96` and its
+evidence follow-up are published in PR #76. The PR is ready, mergeable and clean;
+required `verify` run `29913992436` passed against final head
+`e296e254fd48e95b87f03bb8fecfda2f396e3808`. PR 2 builds 25 routes plus a real
+404: a complete fictional-data product tour covering 11 supported workflows,
+nine step-by-step help guides, six deliberately selected industry landing pages,
+expanded factual FAQs and a planning-only 20-topic SEO map. Shared components
+generate help and industry routes. HowTo and BreadcrumbList structured data match
+visible content. A 1200×630, 35,612-byte WebP social card was generated with the
+approved Tallyo palette and exact positioning line; it contains no price, rating,
+provider logo or real data. Focused tests validate every route, product scene,
+guide, schema, industry boundary, social asset and content-map entry. Browser QA
+passed at 320, 390, 768, 1024 and 1280 px with no horizontal overflow. The mobile
+menu remains active at 1024 px so navigation does not disappear between
+breakpoints; open, Escape, focus return and scroll locking passed. Product-tour
+and help-guide mobile views were visually inspected, and the browser console had
+no errors. PR #77 contains that milestone, is ready, mergeable and clean, and
+workflow-dispatch verification run `29915122978` passed against head
+`da25f69dc5382e1975cd236105c3b30eb79f6719`. The PR is stacked on #76. PR 3 is
+deferred before implementation because invoice/quote subtotal, discount,
+tax/VAT, shipping, rounding and total calculations plus legally sensitive
+document content require Sol High review. Unrelated Medium work continued with
+PR 4. The deterministic Tallyo Helper uses an 18-entry reviewed public JSON
+knowledge base, browser-local matching, explicit sensitive/private/advice/internal
+boundaries, safe DOM rendering, useful public links, no-answer fallback, reset,
+keyboard submission, screen-reader labels and a disabled provider-neutral future
+AI adapter. It performs no network request or browser persistence and has no
+account, Supabase, Stripe, Resend or AI-provider access. Focused tests validate
+all answers, links, boundaries, fallback, CSP hash, disabled adapter and asset
+budgets. Browser interaction QA passed suggestion, typed fallback, secret
+omission, Enter submission, reset and responsive layouts at 320, 390, 768, 1024
+and 1280 px with no console errors or external scripts/styles. PR #78 contains
+that milestone, is ready, mergeable and clean, and workflow-dispatch verification
+run `29915837793` passed against head
+`ce107fa0056912e70bd250c2d5e0425445f5552e`. The PR is stacked on #77. PR 5 adds
+an authoritative 29-event dictionary covering current disabled website events
+and explicitly future-only application activation events. The provider-neutral
+API is disabled by default, accepts only enumerated events/properties/values,
+requires production plus granted analytics consent before a provider can run,
+and swallows provider failures. Current provider and GA4/GTM/Ads identifiers are
+empty. Consent defaults to necessary only. UTM values are recognised in page
+memory only and never enter account links. Campaign, landing-page, negative-keyword,
+testing, editorial and storage/consent readiness are documented without enabling
+ads or tracking. Focused tests prove unknown events, free text, unapproved values,
+denied consent, disabled state and provider errors cannot send; generated browser
+policy equals the authoritative source; no transport, cookie, storage or provider
+endpoint exists. Production/preview crawl tests pass. Browser QA confirmed one
+local growth module, no provider scripts, no cookie banner, no placeholder account
+links, canonical UTM exclusion, no UTM propagation into account links, continuing
+Helper operation and no console errors.\
+PR #79 contains that milestone, is ready, mergeable and clean, and
+workflow-dispatch verification run `29916487362` passed against head
+`2bfb8057e519c36f896ee08635f09bebca85decc`. The PR is stacked on #78. PR 6
+adds an isolated, browser-local Help & install panel for signed-in users, with
+platform-specific installation guidance, explicit user-initiated install
+prompts, focus return, Escape/overlay close, an accurate online-data notice and
+optional public Website, Help and Security links that remain hidden until a
+validated HTTPS (or localhost development) base URL is configured. No production
+URL, provider setting, Auth state, private business record, payment code,
+analytics transport, storage or network request is added. The helper is included
+in the network-first app shell and has a safe no-feature fallback if it is
+unavailable. The app/worker build marker is `2026.07.22.1`; this is repository
+evidence only and has not been published. All 19 app regression harnesses and the
+complete 26-route public-website build/test suite pass. The local signed-out app
+rendered build `2026.07.22.1` without horizontal overflow; only the expected
+localhost Turnstile site-key warning appeared. Signed-in panel acceptance remains
+for a later preview stage because no credentials or private session data were
+requested or inspected.\
+PR #80 contains that milestone as a draft, is mergeable, and manual required
+verification run `29918114759` passed against head
+`a5742e7c7804574484d75da6a5d89c8e8e73831a`. The PR is stacked on #79 and has
+not been marked ready, merged or deployed.\
+PR 8 adds an explicitly pending machine-readable preview state, separate website,
+app and rollback acceptance checklists, and 14 independently approvable Owner
+actions. No preview URL or acceptance result is invented. The record states that
+local builds cannot prove Cloudflare acceptance, retains GitHub Pages, prohibits
+real/private acceptance data and keeps provider projects, DNS, production release,
+tracking and advertising inactive. The action sequence identifies the exact
+stages that require Sol High: financial document calculations, private account
+onboarding, Supabase Auth/MFA origins, Turnstile, Stripe/email links, production
+variables, DNS and final release. Focused readiness and workflow-policy tests pass.\
+PR #82 contains that milestone as a draft, and manual required verification run
+`29919001545` passed against head
+`b23cae0e53556750fc790f260b3263582acd7774`. The PR is stacked on #81 and has
+not been marked ready, merged or deployed.\
+PR 7 adds machine-readable settings for two separate Cloudflare Pages projects,
+a strict allowlist app build, generated browser-only configuration, app response
+headers/SPA fallback, preview/rollback instructions and a domain migration map.
+The app build requires explicit public deployment variables, rejects recognised
+secret/service-role values without echoing them and excludes repository/docs/test
+files from output. Both deployments remain noindex for preview. HSTS is
+deliberately absent until accepted custom-domain HTTPS. The domain map classifies
+Supabase Auth URLs, MFA origins, Stripe returns/links, Resend/Auth links,
+Turnstile hostname configuration, DNS and retirement of GitHub Pages as deferred
+High-risk actions. No provider project, variable, secret, DNS record or live
+deployment was created or changed. The synthetic app Pages package rendered build
+`2026.07.22.1` at 320, 390, 768 and 1280 px without horizontal overflow or
+console errors. The deployment harness, PWA/workflow harnesses and complete
+26-route website build/test suite pass.\
+PR #81 contains that milestone as a draft, and manual required verification run
+`29918689461` passed against head
+`d94970b0b317d29c9af88f40700b13a6b69793d6`. The PR is stacked on #80 and has
+not been marked ready, merged or deployed.\
+The shared-brand milestone replaces the temporary letter tile and text-only app
+identity with the Owner-selected folded blue-and-mint Tallyo mark. Transparent,
+web-optimised mark and white-wordmark assets now serve the public website and
+app; matching navy-backed 192 px and 512 px install icons replace the previous
+PWA artwork. The website uses decorative imagery beside live text in its light
+header and an accessible white wordmark in its dark footer. The app uses the
+mark beside its live sign-in heading and the complete wordmark in its signed-in
+header. The strict app build and offline shell include only these public assets.
+No Auth, account-data or payment behaviour changed. Focused brand, PWA,
+public-integration, Cloudflare-package, responsive-safety and complete 26-route
+website checks pass. Local visual QA confirms the identity on the website and
+app sign-in screen without app horizontal overflow. The repository-only app
+build marker is `2026.07.22.2`; it has not been published. PR #83 contains the
+milestone as a draft stacked on #82. Required workflow-dispatch verification
+run `29920972328` passed against head
+`0e22c154718f2f1a288b5cbca4a25705935fda35`. The PR has not been marked ready,
+merged or deployed.\
+Pull requests: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76; #77 —
+https://github.com/EdsonLRO/InvoicePro/pull/77; #78 —
+https://github.com/EdsonLRO/InvoicePro/pull/78; #79 —
+https://github.com/EdsonLRO/InvoicePro/pull/79; #80 —
+https://github.com/EdsonLRO/InvoicePro/pull/80; #81 —
+https://github.com/EdsonLRO/InvoicePro/pull/81; #82 —
+https://github.com/EdsonLRO/InvoicePro/pull/82; #83 —
+https://github.com/EdsonLRO/InvoicePro/pull/83\
 Blocked reason: PR #76 merge remains Owner-gated because the milestone contains
 legally material public marketing/security claims and begins the public-website
 release sequence. This does not block stacked repository implementation.\
-Next action: Record the final PR 1 evidence, mark it ready without merging, then
-branch PR 2 from the verified PR 1 head and continue safe implementation.
+Next action: Switch to Sol High and select the first High-risk scope. The natural
+next implementation is the free invoice/quote generator, requiring review of
+subtotal, discount, tax/VAT, shipping, rounding, totals and printable document
+content. Private account onboarding, protected provider/Auth/payment changes,
+Cloudflare project/production configuration, DNS and final release are separate
+later High-risk stages and are not implicitly approved.
