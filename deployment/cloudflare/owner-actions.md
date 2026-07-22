@@ -21,16 +21,15 @@ payment details in chat or repository evidence.
    the exact settings in `pages-projects.json`. Both initial builds stopped at
    the reviewed Access guard and created no production deployment. No custom
    domain, paid plan or deployment variable was configured.
-5. **Partially completed 2026-07-22 — enable Access and enter preview deployment
-   variables (High configuration action).** Wildcard preview restriction now
-   reports enabled for both projects; the app policy was independently read back
-   as a single-email Owner allow rule. Main `pages.dev` protection remains
-   pending because Cloudflare requires private billing details and authorization
-   for usage above the Zero Trust Free limits. The Owner must complete that
-   provider step privately. Do not set `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`
-   or enter any other deployment variable until both main and wildcard hostnames
-   are verified as blocked to unauthenticated visitors. Keep live Stripe and
-   Turnstile disabled until their separate reviews.
+5. **Access completed 2026-07-22; variables and builds pending (High
+   configuration action).** The Owner activated Zero Trust Free privately.
+   Owner-policy applications protect the main and wildcard `pages.dev` hostnames
+   for both projects, and unauthenticated requests to all four destinations
+   redirected to Cloudflare Access sign-in. No billing details or identity value
+   are recorded. Fresh exact Owner approval remains required before setting
+   `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`, entering any other deployment
+   variable or retrying either build. Keep live Stripe and Turnstile disabled
+   until their separate reviews.
 6. **Run and accept previews.** Record immutable commits/URLs and complete
    `preview-acceptance.md` with fictional data and a synthetic account.
 7. **Supabase Auth and MFA migration (High).** Review accepted preview/production

@@ -1,6 +1,6 @@
 # Cloudflare preview acceptance record
 
-Status: **Wildcard previews restricted; main Access pending — no preview deployment exists yet.**
+Status: **Main and wildcard Access verified — no preview deployment exists yet.**
 
 This record must not be marked accepted from local builds alone. Complete it only
 after the relevant feature PRs are reviewed, the Owner separately approves the
@@ -23,13 +23,13 @@ build is allowed to succeed.
 | App commit/build | Pending |
 | Cloudflare project names | Created `tallyo-website` and `tallyo-app` |
 | Initial production builds | Both blocked by the reviewed Access guard; no deployment available |
-| Wildcard preview Access | Restricted on both projects; app policy independently read back as a single-email Owner allow rule |
-| Main `pages.dev` Access | Pending; Zero Trust plan activation requires private billing details and overage authorization |
+| Wildcard preview Access | Owner policy enabled on both projects; unauthenticated requests redirected to Cloudflare Access sign-in |
+| Main `pages.dev` Access | Owner policy enabled on both projects; unauthenticated requests redirected to Cloudflare Access sign-in |
 | GitHub Pages rollback | Retained |
 
 ## Website preview
 
-- [ ] An unauthenticated request is denied on the main and wildcard preview
+- [x] An unauthenticated request is denied on the main and wildcard preview
   hostnames before website content is deployed.
 - [ ] HTTPS is valid and the preview hostname is recorded.
 - [ ] Homepage, Features, Product Tour, Pricing, Security, Help, FAQ, About,
@@ -52,7 +52,7 @@ before implementation and preview acceptance.
 
 ## App preview
 
-- [ ] An unauthenticated request is denied on the main and wildcard preview
+- [x] An unauthenticated request is denied on the main and wildcard preview
   hostnames before app content is deployed.
 - [ ] App root and refresh fallback render the same reviewed build.
 - [ ] Delivered headers include CSP, frame denial and preview noindex policy.
