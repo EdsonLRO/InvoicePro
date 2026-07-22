@@ -10,7 +10,7 @@ without publishing content before access controls are verified.
 Risk level: High because later stages change provider authorization, hosting and
 production-adjacent configuration; this repository-only guard is reversible.
 
-Phase: Access-protected deployments created; authenticated acceptance pending
+Phase: Authenticated public-content acceptance partially complete
 
 Owner role: Master Orchestrator
 
@@ -113,6 +113,20 @@ Access-protected preview URLs are recorded in
 `deployment/cloudflare/preview-acceptance.md`. Public readback also confirmed the
 GitHub Pages rollback remains reachable on build `2026.07.22.2`.
 
+Authenticated browser acceptance then confirmed that all 26 website routes and
+the real 404 render behind Access with the expected structure and branding; all
+26 routes expose the reviewed noindex and production canonical metadata; the
+responsive menu opens and closes; the website uses only its two local scripts;
+and the Helper maintains its public/private/advice/internal-prompt boundaries.
+The website account links still target the retained GitHub Pages rollback. The
+app root and supported hash-route refresh load build `2026.07.22.2`; its live
+manifest and service worker contain the reviewed standalone, relative-scope and
+network-first update design. No account sign-in, private data, CAPTCHA, email or
+payment flow was exercised. Direct live `robots.txt` navigation was blocked by
+the in-app client, so live delivered headers, live robots delivery, operating-
+system installation/update UX, the authenticated Help & install panel and the
+separately reviewed synthetic Auth journey remain open.
+
 Focused validation passed: all 26 website routes plus 404, fail-closed website
 and app build behavior including preservation of existing output, Cloudflare
 Pages packaging, preview acceptance state, security workflow policy,
@@ -123,9 +137,12 @@ Branch: `codex/cloudflare-private-preview-deployments`
 Commit: This evidence branch records the successful private deployments; the
 deployed source commit is `9fc3f9063527057aa04b9c4544290b0095fc043e`
 
-Blocked reason: Authenticated content acceptance requires the Owner to complete
-Cloudflare Access sign-in privately
+Blocked reason: None for the completed public-content checks. The remaining
+synthetic Auth/MFA journey requires a separate High-risk Supabase Auth
+configuration review, and operating-system install/update UX requires a real
+device acceptance step.
 
-Next action: The Owner signs in to both previews through Cloudflare Access without
-sharing the identity value or login code; Codex then runs the focused authenticated
-website/app acceptance matrix with fictional data.
+Next action: Complete the remaining non-Auth preview evidence that can be proved
+without provider mutation, then request a separate Owner decision for any
+synthetic Auth/MFA origin testing. Do not infer that decision from Cloudflare
+Access sign-in.
