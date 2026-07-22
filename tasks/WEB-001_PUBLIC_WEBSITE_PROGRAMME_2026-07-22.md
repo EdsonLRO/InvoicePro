@@ -6,18 +6,19 @@ focused website, free-tool, helper, growth, app-integration and Cloudflare
 readiness milestones without public launch or protected-provider changes.\
 Priority: High\
 Status: In Progress\
-Phase: PR 6 — App public-site and install integration verification\
+Phase: PR 7 — Cloudflare Pages and custom-domain repository readiness\
 Owner role: Master Orchestrator\
 Assigned specialists: Product, Frontend, QA, Documentation, Security and Legal
 responsibilities performed sequentially\
 Risk level: Medium for repository-only website implementation; public launch,
 legal publication, tracking activation, production domain/provider changes and
 any live financial action remain high-risk Owner-only boundaries\
-Affected files: `index.html`; `app-help-install.js`; `manifest.json`;
-`service-worker.js`; focused app/PWA tests; `.github/workflows/security-checks.yml`;
-and this task record\
-Files locked: The listed app-integration files and this task record during PR 6\
-Lock acquired: 2026-07-22 on branch `codex/tallyo-app-public-integration`\
+Affected files: `deployment/cloudflare/`; `scripts/build-app-pages.mjs`;
+`.gitignore`; `website/README.md`; focused deployment tests;
+`.github/workflows/security-checks.yml`; and this task record\
+Files locked: The listed deployment-readiness files and this task record during
+PR 7\
+Lock acquired: 2026-07-22 on branch `codex/tallyo-cloudflare-readiness`\
 Dependencies: Existing app remains unchanged and deployed at the current GitHub
 Pages URL; the final website and app domains require later Owner-approved
 provider and DNS work.\
@@ -46,7 +47,7 @@ authoritative status documents when their state materially changes.\
 Approval boundary: Do not activate tracking, publish legal pages, merge a change
 that would publicly launch the site, create Cloudflare projects, change provider
 configuration/DNS, or perform production cutover without the required approval.\
-Branch: `codex/tallyo-app-public-integration`\
+Branch: `codex/tallyo-cloudflare-readiness`\
 Evidence: Dependency-free static generator builds nine routes plus a real 404.
 Preview and production-mode crawl directives passed; preview is the default.
 Automated route, link, unique metadata, canonical, structured-data, CTA,
@@ -130,6 +131,20 @@ PR #80 contains that milestone as a draft, is mergeable, and manual required
 verification run `29918114759` passed against head
 `a5742e7c7804574484d75da6a5d89c8e8e73831a`. The PR is stacked on #79 and has
 not been marked ready, merged or deployed.\
+PR 7 adds machine-readable settings for two separate Cloudflare Pages projects,
+a strict allowlist app build, generated browser-only configuration, app response
+headers/SPA fallback, preview/rollback instructions and a domain migration map.
+The app build requires explicit public deployment variables, rejects recognised
+secret/service-role values without echoing them and excludes repository/docs/test
+files from output. Both deployments remain noindex for preview. HSTS is
+deliberately absent until accepted custom-domain HTTPS. The domain map classifies
+Supabase Auth URLs, MFA origins, Stripe returns/links, Resend/Auth links,
+Turnstile hostname configuration, DNS and retirement of GitHub Pages as deferred
+High-risk actions. No provider project, variable, secret, DNS record or live
+deployment was created or changed. The synthetic app Pages package rendered build
+`2026.07.22.1` at 320, 390, 768 and 1280 px without horizontal overflow or
+console errors. The deployment harness, PWA/workflow harnesses and complete
+26-route website build/test suite pass.\
 Pull requests: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76; #77 —
 https://github.com/EdsonLRO/InvoicePro/pull/77; #78 —
 https://github.com/EdsonLRO/InvoicePro/pull/78; #79 —
@@ -138,7 +153,9 @@ https://github.com/EdsonLRO/InvoicePro/pull/80\
 Blocked reason: PR #76 merge remains Owner-gated because the milestone contains
 legally material public marketing/security claims and begins the public-website
 release sequence. This does not block stacked repository implementation.\
-Next action: Continue repository-only Cloudflare/custom-domain readiness without
-creating a provider project, changing DNS or performing production release.
-First-use account-data guidance, the free document generator, production
-configuration and final release remain deferred for explicit Sol High review.
+Next action: Complete focused PR 7 diff, output-allowlist, secret, header,
+redirect and rollback checks; publish it stacked on #80 and verify required CI.
+Then prepare PR 8 preview-acceptance checklists and the exact Owner-only action
+sequence without creating provider projects. First-use account-data guidance,
+the free document generator, production configuration and final release remain
+deferred for explicit Sol High review.
