@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "pending-owner-actions",
+  "websitePreviewUrl": null,
+  "appPreviewUrl": null,
+  "providerProjectsCreated": false,
+  "liveDnsChanged": false,
+  "productionReleased": false,
+  "githubPagesRollbackRetained": true,
+  "checks": {
+    "immutableCommitRecorded": "pending",
+    "websiteRoutesAnd404": "pending",
+    "websiteNoindex": "pending",
+    "websiteHeadersAndRedirects": "pending",
+    "websiteResponsiveAndAccessible": "pending",
+    "helperPublicBoundary": "pending",
+    "appRefreshAndRouting": "pending",
+    "appNoindex": "pending",
+    "appHeaders": "pending",
+    "pwaInstallAndUpdate": "pending",
+    "helpAndInstallPanel": "pending",
+    "syntheticAuthJourney": "pending",
+    "crossDeploymentLinks": "pending",
+    "rollbackRehearsal": "pending"
+  },
+  "deferredHighRiskScopes": [
+    "free document financial calculations",
+    "first-use guidance based on private account data",
+    "Supabase Auth and MFA origin changes",
+    "Stripe return URLs and payment-link behaviour",
+    "Turnstile hostname and enforcement activation",
+    "production provider variables",
+    "custom-domain DNS and final production release"
+  ]
+}

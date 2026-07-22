@@ -33,8 +33,10 @@ Supported build configuration:
   value, supplied only through the approved deployment environment.
 
 No real identifiers, secrets or provider credentials belong in these variables.
-Cloudflare Pages configuration and final domain cutover are handled in later,
-approval-gated milestones.
+Repository-only Cloudflare Pages settings, preview variables, rollback and the
+domain migration map are documented in `../deployment/cloudflare/`. Creating a
+provider project, setting production variables and final domain cutover remain
+separate approval-gated actions.
 
 ## Search release checklist
 

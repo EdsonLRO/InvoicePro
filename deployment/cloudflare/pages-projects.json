@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "status": "repository-readiness-only",
+  "projects": {
+    "website": {
+      "expectedName": "tallyo-website",
+      "rootDirectory": "website",
+      "buildCommand": "npm run build",
+      "outputDirectory": "dist",
+      "previewMode": "noindex",
+      "productionBuildRequiresOwnerApproval": true
+    },
+    "app": {
+      "expectedName": "tallyo-app",
+      "rootDirectory": ".",
+      "buildCommand": "node scripts/build-app-pages.mjs",
+      "outputDirectory": "app-dist",
+      "previewMode": "noindex",
+      "productionBuildRequiresOwnerApproval": true
+    }
+  },
+  "liveDnsChanged": false,
+  "providerProjectsCreated": false,
+  "existingGitHubPagesRollbackRetained": true
+}
