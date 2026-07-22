@@ -6,18 +6,18 @@ focused website, free-tool, helper, growth, app-integration and Cloudflare
 readiness milestones without public launch or protected-provider changes.\
 Priority: High\
 Status: In Progress\
-Phase: PR 5 — Disabled SEO, analytics and growth foundations verification\
+Phase: PR 6 — App public-site and install integration verification\
 Owner role: Master Orchestrator\
 Assigned specialists: Product, Frontend, QA, Documentation, Security and Legal
 responsibilities performed sequentially\
 Risk level: Medium for repository-only website implementation; public launch,
 legal publication, tracking activation, production domain/provider changes and
 any live financial action remain high-risk Owner-only boundaries\
-Affected files: `website/`; `.github/workflows/security-checks.yml`; the master
-specification; focused website tests; this task record; milestone-only
-authoritative documentation\
-Files locked: `website/` and this task record during PR 5\
-Lock acquired: 2026-07-22 on branch `codex/tallyo-growth-foundations`\
+Affected files: `index.html`; `app-help-install.js`; `manifest.json`;
+`service-worker.js`; focused app/PWA tests; `.github/workflows/security-checks.yml`;
+and this task record\
+Files locked: The listed app-integration files and this task record during PR 6\
+Lock acquired: 2026-07-22 on branch `codex/tallyo-app-public-integration`\
 Dependencies: Existing app remains unchanged and deployed at the current GitHub
 Pages URL; the final website and app domains require later Owner-approved
 provider and DNS work.\
@@ -46,7 +46,7 @@ authoritative status documents when their state materially changes.\
 Approval boundary: Do not activate tracking, publish legal pages, merge a change
 that would publicly launch the site, create Cloudflare projects, change provider
 configuration/DNS, or perform production cutover without the required approval.\
-Branch: `codex/tallyo-growth-foundations`\
+Branch: `codex/tallyo-app-public-integration`\
 Evidence: Dependency-free static generator builds nine routes plus a real 404.
 Preview and production-mode crawl directives passed; preview is the default.
 Automated route, link, unique metadata, canonical, structured-data, CTA,
@@ -108,13 +108,34 @@ endpoint exists. Production/preview crawl tests pass. Browser QA confirmed one
 local growth module, no provider scripts, no cookie banner, no placeholder account
 links, canonical UTM exclusion, no UTM propagation into account links, continuing
 Helper operation and no console errors.\
+PR #79 contains that milestone, is ready, mergeable and clean, and
+workflow-dispatch verification run `29916487362` passed against head
+`2bfb8057e519c36f896ee08635f09bebca85decc`. The PR is stacked on #78. PR 6
+adds an isolated, browser-local Help & install panel for signed-in users, with
+platform-specific installation guidance, explicit user-initiated install
+prompts, focus return, Escape/overlay close, an accurate online-data notice and
+optional public Website, Help and Security links that remain hidden until a
+validated HTTPS (or localhost development) base URL is configured. No production
+URL, provider setting, Auth state, private business record, payment code,
+analytics transport, storage or network request is added. The helper is included
+in the network-first app shell and has a safe no-feature fallback if it is
+unavailable. The app/worker build marker is `2026.07.22.1`; this is repository
+evidence only and has not been published. All 19 app regression harnesses and the
+complete 26-route public-website build/test suite pass. The local signed-out app
+rendered build `2026.07.22.1` without horizontal overflow; only the expected
+localhost Turnstile site-key warning appeared. Signed-in panel acceptance remains
+for a later preview stage because no credentials or private session data were
+requested or inspected.\
 Pull requests: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76; #77 —
 https://github.com/EdsonLRO/InvoicePro/pull/77; #78 —
-https://github.com/EdsonLRO/InvoicePro/pull/78\
+https://github.com/EdsonLRO/InvoicePro/pull/78; #79 —
+https://github.com/EdsonLRO/InvoicePro/pull/79\
 Blocked reason: PR #76 merge remains Owner-gated because the milestone contains
 legally material public marketing/security claims and begins the public-website
 release sequence. This does not block stacked repository implementation.\
-Next action: Complete focused diff, production-mode, provider-ID, secret and
-tracking-boundary checks; commit and publish PR 5 stacked on #78; then inspect PR
-6 app-integration scope and continue only the portions that remain outside Auth,
-private data, payment logic and other Sol High boundaries.
+Next action: Complete the focused PR 6 diff/secret/boundary review, publish it
+stacked on #79 and verify required checks. Then continue repository-only
+Cloudflare/custom-domain readiness without creating a provider project, changing
+DNS or performing production release. First-use account-data guidance, the free
+document generator, production configuration and final release remain deferred
+for explicit Sol High review.
