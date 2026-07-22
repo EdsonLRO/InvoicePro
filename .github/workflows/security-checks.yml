@@ -55,6 +55,10 @@ jobs:
           node tests/stripe-payment-integrity-harness.cjs
           node tests/tenant-isolation-attribution-harness.cjs
 
+      - name: Build and test public website
+        working-directory: website
+        run: npm test
+
       - name: Type-check Edge Functions with frozen locks
         shell: bash
         run: |
