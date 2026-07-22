@@ -32,6 +32,8 @@ await copyFile(join(websiteRoot, "src", "styles.css"), join(distRoot, "assets", 
 await copyFile(join(websiteRoot, "src", "site.js"), join(distRoot, "assets", "site.js"));
 await copyFile(join(websiteRoot, "src", "helper.js"), join(distRoot, "assets", "helper.js"));
 await copyFile(join(websiteRoot, "src", "helper-core.mjs"), join(distRoot, "assets", "helper-core.mjs"));
+await copyFile(join(websiteRoot, "src", "generator.js"), join(distRoot, "assets", "generator.js"));
+await copyFile(join(websiteRoot, "src", "document-calculator.mjs"), join(distRoot, "assets", "document-calculator.mjs"));
 await copyFile(join(websiteRoot, "src", "analytics.mjs"), join(distRoot, "assets", "analytics.mjs"));
 await copyFile(join(websiteRoot, "src", "growth.js"), join(distRoot, "assets", "growth.js"));
 await writeFile(join(distRoot, "assets", "analytics-policy.mjs"), `export const eventPolicy = Object.freeze(${JSON.stringify(eventPolicy)});\n`, "utf8");
@@ -60,7 +62,7 @@ const robots = siteConfig.preview
   : `User-agent: *\nAllow: /\nSitemap: ${siteConfig.canonicalOrigin}/sitemap.xml\n`;
 await writeFile(join(distRoot, "robots.txt"), robots, "utf8");
 
-const assetFiles = ["assets/styles.css", "assets/site.js", "assets/helper.js", "assets/helper-core.mjs", "assets/analytics.mjs", "assets/growth.js", "assets/analytics-policy.mjs", "assets/icon-192.png", "assets/tallyo-mark.png", "assets/tallyo-wordmark-white.png", "assets/tallyo-social-card.webp"];
+const assetFiles = ["assets/styles.css", "assets/site.js", "assets/helper.js", "assets/helper-core.mjs", "assets/generator.js", "assets/document-calculator.mjs", "assets/analytics.mjs", "assets/growth.js", "assets/analytics-policy.mjs", "assets/icon-192.png", "assets/tallyo-mark.png", "assets/tallyo-wordmark-white.png", "assets/tallyo-social-card.webp"];
 const assetBytes = {};
 for (const file of assetFiles) assetBytes[file] = (await stat(join(distRoot, file))).size;
 await writeFile(join(distRoot, "build-report.json"), `${JSON.stringify({ mode: siteConfig.mode, routes: pages.length, externalOrigins: 0, assetBytes }, null, 2)}\n`, "utf8");
