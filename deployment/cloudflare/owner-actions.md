@@ -21,11 +21,15 @@ payment details in chat or repository evidence.
    the exact settings in `pages-projects.json`. Both initial builds stopped at
    the reviewed Access guard and created no production deployment. No custom
    domain, paid plan or deployment variable was configured.
-5. **Enable Access and enter preview deployment variables (High configuration
-   action).** Protect both the main and wildcard preview `pages.dev` hostnames,
-   verify unauthenticated access is blocked, and only then set
-   `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`. Enter browser-publishable values
-   directly in Cloudflare without exposing them to Codex. Keep live Stripe and
+5. **Partially completed 2026-07-22 — enable Access and enter preview deployment
+   variables (High configuration action).** Wildcard preview restriction now
+   reports enabled for both projects; the app policy was independently read back
+   as a single-email Owner allow rule. Main `pages.dev` protection remains
+   pending because Cloudflare requires private billing details and authorization
+   for usage above the Zero Trust Free limits. The Owner must complete that
+   provider step privately. Do not set `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`
+   or enter any other deployment variable until both main and wildcard hostnames
+   are verified as blocked to unauthenticated visitors. Keep live Stripe and
    Turnstile disabled until their separate reviews.
 6. **Run and accept previews.** Record immutable commits/URLs and complete
    `preview-acceptance.md` with fictional data and a synthetic account.

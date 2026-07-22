@@ -52,7 +52,7 @@ assert.notEqual(rejectedSecret.status, 0, 'secret-like Supabase credentials must
 assert.match(rejectedSecret.stderr, /browser-publishable key/);
 assert.doesNotMatch(rejectedSecret.stderr, /sb_secret_never_browser_side/, 'rejected values must not be echoed');
 
-assert.equal(projectConfig.status, 'provider-projects-created-fail-closed');
+assert.equal(projectConfig.status, 'preview-access-partial-fail-closed');
 assert.equal(projectConfig.githubIntegration.connected, true);
 assert.equal(projectConfig.githubIntegration.repository, 'EdsonLRO/InvoicePro');
 assert.equal(projectConfig.githubIntegration.scope, 'selected-repository-only');
@@ -63,17 +63,25 @@ assert.equal(projectConfig.projects.website.outputDirectory, 'dist');
 assert.equal(projectConfig.projects.website.previewMode, 'noindex');
 assert.equal(projectConfig.projects.website.providerState, 'created-no-production-deployment');
 assert.equal(projectConfig.projects.website.initialBuild, 'blocked-by-access-guard');
+assert.equal(projectConfig.projects.website.wildcardPreviewAccess, 'restricted-generated-policy');
+assert.equal(projectConfig.projects.website.productionPagesDevAccess, 'pending-zero-trust-plan-activation');
 assert.equal(projectConfig.projects.app.expectedName, 'tallyo-app');
 assert.equal(projectConfig.projects.app.buildCommand, 'node scripts/build-app-pages.mjs');
 assert.equal(projectConfig.projects.app.outputDirectory, 'app-dist');
 assert.equal(projectConfig.projects.app.providerState, 'created-no-production-deployment');
 assert.equal(projectConfig.projects.app.initialBuild, 'blocked-by-access-guard');
+assert.equal(projectConfig.projects.app.wildcardPreviewAccess, 'restricted-generated-owner-policy');
+assert.equal(projectConfig.projects.app.productionPagesDevAccess, 'pending-zero-trust-plan-activation');
 assert.equal(projectConfig.projects.website.accessPolicyRequiredBeforeFirstSuccessfulDeploy, true);
 assert.equal(projectConfig.projects.app.accessPolicyRequiredBeforeFirstSuccessfulDeploy, true);
 assert.equal(projectConfig.accessConfirmationVariable, 'TALLYO_CLOUDFLARE_ACCESS_CONFIRMED');
 assert.equal(projectConfig.defaultDeploymentReachability, 'public-unless-cloudflare-access-is-enabled');
 assert.equal(projectConfig.liveDnsChanged, false);
 assert.equal(projectConfig.providerProjectsCreated, true);
+assert.deepEqual(projectConfig.zeroTrustPlan, {
+  status: 'not-activated',
+  blocker: 'billing-details-and-overage-authorization-required'
+});
 assert.equal(projectConfig.existingGitHubPagesRollbackRetained, true);
 
 const headers = fs.readFileSync(path.join(output, '_headers'), 'utf8');

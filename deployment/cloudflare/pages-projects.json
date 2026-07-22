@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "status": "provider-projects-created-fail-closed",
+  "status": "preview-access-partial-fail-closed",
   "defaultDeploymentReachability": "public-unless-cloudflare-access-is-enabled",
   "accessConfirmationVariable": "TALLYO_CLOUDFLARE_ACCESS_CONFIRMED",
   "githubIntegration": {
@@ -16,6 +16,8 @@
       "outputDirectory": "dist",
       "previewMode": "noindex",
       "accessPolicyRequiredBeforeFirstSuccessfulDeploy": true,
+      "wildcardPreviewAccess": "restricted-generated-policy",
+      "productionPagesDevAccess": "pending-zero-trust-plan-activation",
       "providerState": "created-no-production-deployment",
       "initialBuild": "blocked-by-access-guard",
       "productionBuildRequiresOwnerApproval": true
@@ -27,10 +29,16 @@
       "outputDirectory": "app-dist",
       "previewMode": "noindex",
       "accessPolicyRequiredBeforeFirstSuccessfulDeploy": true,
+      "wildcardPreviewAccess": "restricted-generated-owner-policy",
+      "productionPagesDevAccess": "pending-zero-trust-plan-activation",
       "providerState": "created-no-production-deployment",
       "initialBuild": "blocked-by-access-guard",
       "productionBuildRequiresOwnerApproval": true
     }
+  },
+  "zeroTrustPlan": {
+    "status": "not-activated",
+    "blocker": "billing-details-and-overage-authorization-required"
   },
   "liveDnsChanged": false,
   "providerProjectsCreated": true,

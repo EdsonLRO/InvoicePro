@@ -23,7 +23,7 @@ Keep the verified invoicing app stable while building the separate public websit
 
 **Closed free-document-generator release:** `tasks/WEB-002_FREE_DOCUMENT_GENERATOR_2026-07-22.md` records the reviewed browser-only generator merged in PR #84. It is present in source, but the separate public website remains unpublished.
 
-**Active Cloudflare preview task:** `tasks/WEB-003_CLOUDFLARE_PRIVATE_PREVIEW_2026-07-22.md` records the repository-scoped GitHub integration and two free Pages projects. Their initial builds stopped at the fail-closed guard and neither project has a production deployment. Access, deployment variables, custom domains, DNS and any successful deployment remain separately gated.
+**Active Cloudflare preview task:** `tasks/WEB-003_CLOUDFLARE_PRIVATE_PREVIEW_2026-07-22.md` records the repository-scoped GitHub integration and two free Pages projects. Their initial builds stopped at the fail-closed guard and neither project has a production deployment. Wildcard preview restriction now reports enabled on both projects, while main `pages.dev` Access is blocked on private Zero Trust billing activation. Deployment variables, custom domains, DNS and any successful deployment remain separately gated.
 
 The current product is a single-user-per-account invoicing workspace backed by Supabase. It is a real working app and a security-focused portfolio project. It is not yet a public paid SaaS platform.
 

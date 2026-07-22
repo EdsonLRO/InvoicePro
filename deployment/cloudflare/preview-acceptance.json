@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "provider-projects-created-builds-blocked",
+  "status": "wildcard-access-restricted-main-access-pending",
   "websitePreviewUrl": null,
   "appPreviewUrl": null,
   "providerProjectsCreated": true,
@@ -11,6 +11,12 @@
   "initialBuilds": {
     "website": "blocked-by-access-guard",
     "app": "blocked-by-access-guard"
+  },
+  "accessControls": {
+    "websiteWildcardPreview": "restricted-generated-policy",
+    "appWildcardPreview": "restricted-generated-owner-policy",
+    "websiteMainPagesDev": "pending-zero-trust-plan-activation",
+    "appMainPagesDev": "pending-zero-trust-plan-activation"
   },
   "liveDnsChanged": false,
   "productionReleased": false,

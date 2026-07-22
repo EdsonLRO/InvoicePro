@@ -1,6 +1,6 @@
 # Cloudflare preview acceptance record
 
-Status: **Cloudflare projects created fail-closed — no preview deployment exists yet.**
+Status: **Wildcard previews restricted; main Access pending — no preview deployment exists yet.**
 
 This record must not be marked accepted from local builds alone. Complete it only
 after the relevant feature PRs are reviewed, the Owner separately approves the
@@ -23,6 +23,8 @@ build is allowed to succeed.
 | App commit/build | Pending |
 | Cloudflare project names | Created `tallyo-website` and `tallyo-app` |
 | Initial production builds | Both blocked by the reviewed Access guard; no deployment available |
+| Wildcard preview Access | Restricted on both projects; app policy independently read back as a single-email Owner allow rule |
+| Main `pages.dev` Access | Pending; Zero Trust plan activation requires private billing details and overage authorization |
 | GitHub Pages rollback | Retained |
 
 ## Website preview
