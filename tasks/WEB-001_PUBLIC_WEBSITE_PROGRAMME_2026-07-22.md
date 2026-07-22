@@ -6,19 +6,20 @@ focused website, free-tool, helper, growth, app-integration and Cloudflare
 readiness milestones without public launch or protected-provider changes.\
 Priority: High\
 Status: In Progress\
-Phase: PR 7 — Cloudflare Pages and custom-domain repository readiness\
+Phase: PR 8 — Preview acceptance and Owner-action readiness\
 Owner role: Master Orchestrator\
 Assigned specialists: Product, Frontend, QA, Documentation, Security and Legal
 responsibilities performed sequentially\
 Risk level: Medium for repository-only website implementation; public launch,
 legal publication, tracking activation, production domain/provider changes and
 any live financial action remain high-risk Owner-only boundaries\
-Affected files: `deployment/cloudflare/`; `scripts/build-app-pages.mjs`;
-`.gitignore`; `website/README.md`; focused deployment tests;
+Affected files: `deployment/cloudflare/preview-acceptance.json`;
+`deployment/cloudflare/preview-acceptance.md`;
+`deployment/cloudflare/owner-actions.md`; focused readiness tests;
 `.github/workflows/security-checks.yml`; and this task record\
-Files locked: The listed deployment-readiness files and this task record during
-PR 7\
-Lock acquired: 2026-07-22 on branch `codex/tallyo-cloudflare-readiness`\
+Files locked: The listed preview-acceptance files and this task record during PR 8\
+Lock acquired: 2026-07-22 on branch
+`codex/tallyo-preview-acceptance-readiness`\
 Dependencies: Existing app remains unchanged and deployed at the current GitHub
 Pages URL; the final website and app domains require later Owner-approved
 provider and DNS work.\
@@ -47,7 +48,7 @@ authoritative status documents when their state materially changes.\
 Approval boundary: Do not activate tracking, publish legal pages, merge a change
 that would publicly launch the site, create Cloudflare projects, change provider
 configuration/DNS, or perform production cutover without the required approval.\
-Branch: `codex/tallyo-cloudflare-readiness`\
+Branch: `codex/tallyo-preview-acceptance-readiness`\
 Evidence: Dependency-free static generator builds nine routes plus a real 404.
 Preview and production-mode crawl directives passed; preview is the default.
 Automated route, link, unique metadata, canonical, structured-data, CTA,
@@ -131,6 +132,15 @@ PR #80 contains that milestone as a draft, is mergeable, and manual required
 verification run `29918114759` passed against head
 `a5742e7c7804574484d75da6a5d89c8e8e73831a`. The PR is stacked on #79 and has
 not been marked ready, merged or deployed.\
+PR 8 adds an explicitly pending machine-readable preview state, separate website,
+app and rollback acceptance checklists, and 14 independently approvable Owner
+actions. No preview URL or acceptance result is invented. The record states that
+local builds cannot prove Cloudflare acceptance, retains GitHub Pages, prohibits
+real/private acceptance data and keeps provider projects, DNS, production release,
+tracking and advertising inactive. The action sequence identifies the exact
+stages that require Sol High: financial document calculations, private account
+onboarding, Supabase Auth/MFA origins, Turnstile, Stripe/email links, production
+variables, DNS and final release. Focused readiness and workflow-policy tests pass.\
 PR 7 adds machine-readable settings for two separate Cloudflare Pages projects,
 a strict allowlist app build, generated browser-only configuration, app response
 headers/SPA fallback, preview/rollback instructions and a domain migration map.
@@ -158,7 +168,7 @@ https://github.com/EdsonLRO/InvoicePro/pull/81\
 Blocked reason: PR #76 merge remains Owner-gated because the milestone contains
 legally material public marketing/security claims and begins the public-website
 release sequence. This does not block stacked repository implementation.\
-Next action: Prepare PR 8 preview-acceptance checklists and the exact Owner-only
-action sequence without creating provider projects. First-use account-data
-guidance, the free document generator, production configuration and final release
-remain deferred for explicit Sol High review.
+Next action: Publish PR 8 stacked on #81 and verify required CI. Then stop the
+Medium programme before the remaining Sol High scopes: free-document financial
+calculations, private account onboarding, protected provider/Auth/payment changes,
+Cloudflare project/production configuration, DNS and final release.
