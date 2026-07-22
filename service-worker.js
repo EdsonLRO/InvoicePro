@@ -4,7 +4,7 @@
 // when the device is offline). Requests to other origins (Supabase, CDNs) are left
 // alone and always go straight to the network.
 
-const CACHE = 'tallyo-shell-2026-07-22-1';
+const CACHE = 'tallyo-shell-2026-07-22-2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,6 +12,8 @@ const APP_SHELL = [
   './config.js',
   './app-help-install.js',
   './manifest.json',
+  './tallyo-mark.png',
+  './tallyo-wordmark-white.png',
   './icon-192.png',
   './icon-512.png'
 ];

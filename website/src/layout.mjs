@@ -141,7 +141,7 @@ export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
   ${siteConfig.preview ? '<div class="preview-banner" role="status">Private preview build — not for public indexing</div>' : ""}
   <header class="site-header" data-header>
     <div class="header-inner">
-      <a class="brand" href="/" aria-label="Tallyo home"><span class="brand-mark" aria-hidden="true">T</span><span>Tallyo</span></a>
+      <a class="brand" href="/" aria-label="Tallyo home"><img class="brand-mark" src="/assets/tallyo-mark.png" alt="" aria-hidden="true"><span>Tallyo</span></a>
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-button><span class="sr-only">Open main menu</span><i></i><i></i><i></i></button>
       <nav class="primary-nav" id="primary-navigation" aria-label="Main navigation" data-navigation>
         <div class="nav-links">${navMarkup}</div>
@@ -152,7 +152,7 @@ export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
   <main id="main-content" tabindex="-1">${content}</main>
   <footer class="site-footer">
     <div class="footer-main">
-      <div class="footer-intro"><a class="brand brand-footer" href="/"><span class="brand-mark" aria-hidden="true">T</span><span>Tallyo</span></a><p>Professional invoices, clearer payment tracking and less repeated admin for UK small businesses.</p></div>
+      <div class="footer-intro"><a class="brand brand-footer" href="/" aria-label="Tallyo home"><img class="brand-wordmark" src="/assets/tallyo-wordmark-white.png" alt="" aria-hidden="true"><span class="sr-only">Tallyo</span></a><p>Professional invoices, clearer payment tracking and less repeated admin for UK small businesses.</p></div>
       ${footerMarkup}
       <div class="footer-group"><h2>Account</h2><a data-login-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/#install">Install Tallyo</a></div>
     </div>

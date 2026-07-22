@@ -6,20 +6,21 @@ focused website, free-tool, helper, growth, app-integration and Cloudflare
 readiness milestones without public launch or protected-provider changes.\
 Priority: High\
 Status: In Progress\
-Phase: Medium programme complete — stopped at Sol High boundary\
+Phase: Medium programme and shared brand integration complete — stopped at Sol High boundary\
 Owner role: Master Orchestrator\
 Assigned specialists: Product, Frontend, QA, Documentation, Security and Legal
 responsibilities performed sequentially\
 Risk level: Medium for repository-only website implementation; public launch,
 legal publication, tracking activation, production domain/provider changes and
 any live financial action remain high-risk Owner-only boundaries\
-Affected files: `deployment/cloudflare/preview-acceptance.json`;
-`deployment/cloudflare/preview-acceptance.md`;
-`deployment/cloudflare/owner-actions.md`; focused readiness tests;
-`.github/workflows/security-checks.yml`; and this task record\
-Files locked: The listed preview-acceptance files and this task record during PR 8\
+Affected files: Shared Tallyo logo/icon assets; public website header, footer and
+build pipeline; app sign-in/header, manifest icons, app-shell packaging; focused
+brand/PWA/readiness tests; `.github/workflows/security-checks.yml`; and this task
+record\
+Files locked: The listed branding integration files and this task record during
+the shared-brand milestone\
 Lock acquired: 2026-07-22 on branch
-`codex/tallyo-preview-acceptance-readiness`\
+`codex/tallyo-brand-logo`\
 Dependencies: Existing app remains unchanged and deployed at the current GitHub
 Pages URL; the final website and app domains require later Owner-approved
 provider and DNS work.\
@@ -48,7 +49,7 @@ authoritative status documents when their state materially changes.\
 Approval boundary: Do not activate tracking, publish legal pages, merge a change
 that would publicly launch the site, create Cloudflare projects, change provider
 configuration/DNS, or perform production cutover without the required approval.\
-Branch: `codex/tallyo-preview-acceptance-readiness`\
+Branch: `codex/tallyo-brand-logo`\
 Evidence: Dependency-free static generator builds nine routes plus a real 404.
 Preview and production-mode crawl directives passed; preview is the default.
 Automated route, link, unique metadata, canonical, structured-data, CTA,
@@ -163,6 +164,19 @@ PR #81 contains that milestone as a draft, and manual required verification run
 `29918689461` passed against head
 `d94970b0b317d29c9af88f40700b13a6b69793d6`. The PR is stacked on #80 and has
 not been marked ready, merged or deployed.\
+The shared-brand milestone replaces the temporary letter tile and text-only app
+identity with the Owner-selected folded blue-and-mint Tallyo mark. Transparent,
+web-optimised mark and white-wordmark assets now serve the public website and
+app; matching navy-backed 192 px and 512 px install icons replace the previous
+PWA artwork. The website uses decorative imagery beside live text in its light
+header and an accessible white wordmark in its dark footer. The app uses the
+mark beside its live sign-in heading and the complete wordmark in its signed-in
+header. The strict app build and offline shell include only these public assets.
+No Auth, account-data or payment behaviour changed. Focused brand, PWA,
+public-integration, Cloudflare-package, responsive-safety and complete 26-route
+website checks pass. Local visual QA confirms the identity on the website and
+app sign-in screen without app horizontal overflow. The repository-only app
+build marker is `2026.07.22.2`; it has not been published.\
 Pull requests: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76; #77 —
 https://github.com/EdsonLRO/InvoicePro/pull/77; #78 —
 https://github.com/EdsonLRO/InvoicePro/pull/78; #79 —

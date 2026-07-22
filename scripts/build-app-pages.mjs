@@ -63,6 +63,8 @@ const appAssets = [
   "app-help-install.js",
   "manifest.json",
   "service-worker.js",
+  "tallyo-mark.png",
+  "tallyo-wordmark-white.png",
   "icon-192.png",
   "icon-512.png"
 ];
