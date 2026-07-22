@@ -5,5 +5,7 @@ config.js
 supabase/.temp/
 tmp/
 private-backups/
+website/dist/
+app-dist/
 *.backup
 *.dump

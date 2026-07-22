@@ -1,0 +1,26 @@
+{
+  "status": "planning-only",
+  "publicationRule": "Publish only after factual review, useful original content, and the required release approval.",
+  "topics": [
+    { "topic": "Free invoice generator UK", "intent": "tool", "route": "/free-invoice-generator/", "status": "reserved-for-pr3" },
+    { "topic": "Free quote generator UK", "intent": "tool", "route": "/free-quote-generator/", "status": "reserved-for-pr3" },
+    { "topic": "Invoice template for UK sole traders", "intent": "template", "route": null, "status": "planned" },
+    { "topic": "How to create an invoice UK", "intent": "guide", "route": null, "status": "planned" },
+    { "topic": "What an invoice must include", "intent": "guide", "route": null, "status": "legal-review-required" },
+    { "topic": "Quote vs invoice", "intent": "guide", "route": "/help/create-invoices-quotes-and-credit-notes/", "status": "covered-by-help" },
+    { "topic": "Credit note explained", "intent": "guide", "route": "/help/create-invoices-quotes-and-credit-notes/", "status": "covered-by-help" },
+    { "topic": "How invoice deposits work", "intent": "guide", "route": "/help/payment-links-and-deposits/", "status": "covered-by-help" },
+    { "topic": "How to chase an overdue invoice", "intent": "guide", "route": "/help/overdue-reminders/", "status": "partially-covered" },
+    { "topic": "Recurring invoice software UK", "intent": "product", "route": "/help/recurring-invoices/", "status": "partially-covered" },
+    { "topic": "Invoice reminder software", "intent": "product", "route": "/help/overdue-reminders/", "status": "partially-covered" },
+    { "topic": "Invoicing software for freelancers", "intent": "industry", "route": "/industries/freelancers/", "status": "implemented" },
+    { "topic": "Invoicing software for cleaners", "intent": "industry", "route": "/industries/cleaners/", "status": "implemented" },
+    { "topic": "Invoicing software for electricians", "intent": "industry", "route": "/industries/electricians/", "status": "implemented" },
+    { "topic": "Invoicing software for consultants", "intent": "industry", "route": "/industries/consultants/", "status": "implemented" },
+    { "topic": "Invoicing software for photographers", "intent": "industry", "route": "/industries/photographers/", "status": "implemented" },
+    { "topic": "Invoicing software for custom-printing businesses", "intent": "industry", "route": null, "status": "planned" },
+    { "topic": "Simple invoicing software for sole traders", "intent": "industry", "route": "/industries/sole-traders/", "status": "implemented" },
+    { "topic": "Invoice payment-link software", "intent": "product", "route": "/help/payment-links-and-deposits/", "status": "partially-covered" },
+    { "topic": "How to install Tallyo", "intent": "guide", "route": "/help/install-tallyo/", "status": "implemented" }
+  ]
+}
