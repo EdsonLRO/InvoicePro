@@ -21,17 +21,20 @@ payment details in chat or repository evidence.
    the exact settings in `pages-projects.json`. Both initial builds stopped at
    the reviewed Access guard and created no production deployment. No custom
    domain, paid plan or deployment variable was configured.
-5. **Access completed 2026-07-22; variables and builds pending (High
+5. **Completed 2026-07-22 — Access, preview variables and first builds (High
    configuration action).** The Owner activated Zero Trust Free privately.
    Owner-policy applications protect the main and wildcard `pages.dev` hostnames
    for both projects, and unauthenticated requests to all four destinations
    redirected to Cloudflare Access sign-in. No billing details or identity value
-   are recorded. Fresh exact Owner approval remains required before setting
-   `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`, entering any other deployment
-   variable or retrying either build. Keep live Stripe and Turnstile disabled
-   until their separate reviews.
-6. **Run and accept previews.** Record immutable commits/URLs and complete
-   `preview-acceptance.md` with fictional data and a synthetic account.
+   are recorded. After fresh exact approval, Codex entered only the documented
+   browser-publishable variables, kept live Stripe and Turnstile disabled, set
+   `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`, and retried each build once. Both
+   deployments succeeded and all four unauthenticated checks still redirected
+   to Access.
+6. **Run and accept previews.** The immutable commit and URLs are recorded.
+   The Owner must now sign in through Cloudflare Access without sharing the
+   identity value or login code; then complete `preview-acceptance.md` with
+   fictional data and a synthetic account.
 7. **Supabase Auth and MFA migration (High).** Review accepted preview/production
    origins, add exact allowed/redirect URLs, update the MFA recovery allowlist,
    preserve rollback URLs and run focused Auth/MFA tests.

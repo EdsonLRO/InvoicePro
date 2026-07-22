@@ -23,7 +23,7 @@ Keep the verified invoicing app stable while building the separate public websit
 
 **Closed free-document-generator release:** `tasks/WEB-002_FREE_DOCUMENT_GENERATOR_2026-07-22.md` records the reviewed browser-only generator merged in PR #84. It is present in source, but the separate public website remains unpublished.
 
-**Active Cloudflare preview task:** `tasks/WEB-003_CLOUDFLARE_PRIVATE_PREVIEW_2026-07-22.md` records the repository-scoped GitHub integration and two free Pages projects. Their initial builds stopped at the fail-closed guard and neither project has a production deployment. Owner-policy Access now protects both main and wildcard `pages.dev` hostnames, with unauthenticated redirects verified for all four destinations. Deployment variables, build retries, custom domains, DNS and any successful deployment remain separately gated.
+**Active Cloudflare preview task:** `tasks/WEB-003_CLOUDFLARE_PRIVATE_PREVIEW_2026-07-22.md` records the repository-scoped GitHub integration and two free Pages projects. Their initial builds stopped at the fail-closed guard. After exact Owner approval, only the documented browser-publishable variables were entered, live Stripe and Turnstile stayed disabled, and one retry per project deployed merged commit `9fc3f90`. Owner-policy Access still redirects unauthenticated requests on both main and wildcard `pages.dev` hostnames for both projects. Authenticated preview acceptance, custom domains, DNS and public release remain separately gated.
 
 The current product is a single-user-per-account invoicing workspace backed by Supabase. It is a real working app and a security-focused portfolio project. It is not yet a public paid SaaS platform.
 

@@ -1,6 +1,6 @@
 # Cloudflare preview acceptance record
 
-Status: **Main and wildcard Access verified — no preview deployment exists yet.**
+Status: **Access-protected deployments created — authenticated acceptance pending.**
 
 This record must not be marked accepted from local builds alone. Complete it only
 after the relevant feature PRs are reviewed, the Owner separately approves the
@@ -17,21 +17,21 @@ build is allowed to succeed.
 
 | Item | Evidence |
 | --- | --- |
-| Website preview URL | Pending |
-| Website commit | Pending |
-| App preview URL | Pending |
-| App commit/build | Pending |
+| Website preview URL | `https://f7d12c7b.tallyo-website.pages.dev` |
+| Website commit | `9fc3f9063527057aa04b9c4544290b0095fc043e` |
+| App preview URL | `https://e8ac6e50.tallyo-app.pages.dev` |
+| App commit/build | `9fc3f9063527057aa04b9c4544290b0095fc043e` / `2026.07.22.2` |
 | Cloudflare project names | Created `tallyo-website` and `tallyo-app` |
-| Initial production builds | Both blocked by the reviewed Access guard; no deployment available |
-| Wildcard preview Access | Owner policy enabled on both projects; unauthenticated requests redirected to Cloudflare Access sign-in |
-| Main `pages.dev` Access | Owner policy enabled on both projects; unauthenticated requests redirected to Cloudflare Access sign-in |
+| Initial production builds | Both blocked by the reviewed Access guard; the separately approved one-time retries then succeeded |
+| Wildcard preview Access | Owner policy enabled on both projects; unauthenticated requests still redirected to Cloudflare Access sign-in after deployment |
+| Main `pages.dev` Access | Owner policy enabled on both projects; unauthenticated requests still redirected to Cloudflare Access sign-in after deployment |
 | GitHub Pages rollback | Retained |
 
 ## Website preview
 
-- [x] An unauthenticated request is denied on the main and wildcard preview
-  hostnames before website content is deployed.
-- [ ] HTTPS is valid and the preview hostname is recorded.
+- [x] An unauthenticated request is redirected to Cloudflare Access on the main
+  and wildcard preview hostnames after deployment.
+- [x] HTTPS is valid and the immutable preview hostname is recorded.
 - [ ] Homepage, Features, Product Tour, Pricing, Security, Help, FAQ, About,
   industry pages and real 404 routes render correctly.
 - [ ] Helper answers reviewed public-product questions and refuses private,
@@ -52,8 +52,8 @@ before implementation and preview acceptance.
 
 ## App preview
 
-- [x] An unauthenticated request is denied on the main and wildcard preview
-  hostnames before app content is deployed.
+- [x] An unauthenticated request is redirected to Cloudflare Access on the main
+  and wildcard preview hostnames after deployment.
 - [ ] App root and refresh fallback render the same reviewed build.
 - [ ] Delivered headers include CSP, frame denial and preview noindex policy.
 - [ ] The generated public configuration contains only approved browser-safe
@@ -72,7 +72,7 @@ before implementation and preview acceptance.
 
 ## Rollback acceptance
 
-- [ ] Current GitHub Pages app remains operational and unchanged.
+- [x] Current GitHub Pages app remains operational on build `2026.07.22.2`.
 - [ ] Removing an unaccepted Cloudflare preview does not affect GitHub Pages.
 - [ ] No custom-domain DNS points to the preview during acceptance.
 - [ ] No production Auth, payment, email or CAPTCHA URL is removed.
