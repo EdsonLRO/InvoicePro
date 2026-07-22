@@ -5,6 +5,9 @@ import { fileURLToPath } from "node:url";
 import { notFoundPage, pages } from "../src/pages.mjs";
 import { renderPage } from "../src/layout.mjs";
 import { siteConfig } from "../src/config.mjs";
+import { assertCloudflareAccessConfirmed } from "../../scripts/cloudflare-access-build-guard.mjs";
+
+assertCloudflareAccessConfirmed();
 
 const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = resolve(websiteRoot, "dist");

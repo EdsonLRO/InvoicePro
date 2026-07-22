@@ -8,6 +8,11 @@ provider actions, and immutable preview deployments exist. Use fictional data an
 a dedicated synthetic account; never record credentials, tokens, private email
 addresses, customer data or payment details here.
 
+`noindex` is not a privacy control. Cloudflare Pages URLs are public by default,
+so an accepted private preview must prove that Cloudflare Access protects both
+the main project hostname and wildcard branch-preview hostnames before either
+build is allowed to succeed.
+
 ## Deployment identity
 
 | Item | Evidence |
@@ -21,6 +26,8 @@ addresses, customer data or payment details here.
 
 ## Website preview
 
+- [ ] An unauthenticated request is denied on the main and wildcard preview
+  hostnames before website content is deployed.
 - [ ] HTTPS is valid and the preview hostname is recorded.
 - [ ] Homepage, Features, Product Tour, Pricing, Security, Help, FAQ, About,
   industry pages and real 404 routes render correctly.
@@ -42,6 +49,8 @@ before implementation and preview acceptance.
 
 ## App preview
 
+- [ ] An unauthenticated request is denied on the main and wildcard preview
+  hostnames before app content is deployed.
 - [ ] App root and refresh fallback render the same reviewed build.
 - [ ] Delivered headers include CSP, frame denial and preview noindex policy.
 - [ ] The generated public configuration contains only approved browser-safe

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { helpArticles, industries, notFoundPage, pages, productScenes } from "../src/pages.mjs";
@@ -11,7 +11,21 @@ import { calculateDocument, calculationPolicy, formatMoney, parseMoney, parsePer
 
 const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = join(websiteRoot, "dist");
-execFileSync(process.execPath, [join(websiteRoot, "scripts", "build.mjs")], { stdio: "inherit", env: { ...process.env, TALLYO_SITE_MODE: "preview" } });
+const buildScript = join(websiteRoot, "scripts", "build.mjs");
+const failClosedSentinel = join(distRoot, "fail-closed-sentinel.txt");
+mkdirSync(distRoot, { recursive: true });
+writeFileSync(failClosedSentinel, "preserve", "utf8");
+const blockedCloudflareBuild = spawnSync(process.execPath, [buildScript], {
+  encoding: "utf8",
+  env: { ...process.env, CF_PAGES: "1", TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "", TALLYO_SITE_MODE: "preview" }
+});
+assert.notEqual(blockedCloudflareBuild.status, 0, "Cloudflare website build must fail before Access is confirmed");
+assert.match(blockedCloudflareBuild.stderr, /required Access policies are confirmed/);
+assert.ok(existsSync(failClosedSentinel), "blocked Cloudflare website build must not alter existing output");
+execFileSync(process.execPath, [buildScript], {
+  stdio: "inherit",
+  env: { ...process.env, CF_PAGES: "", TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "", TALLYO_SITE_MODE: "preview" }
+});
 
 const read = (relative) => readFileSync(join(distRoot, relative), "utf8");
 const routeOutput = new Map([...pages, notFoundPage].map((page) => [page.route, page.output]));

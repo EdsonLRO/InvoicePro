@@ -1,6 +1,9 @@
 import { copyFile, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { assertCloudflareAccessConfirmed } from "./cloudflare-access-build-guard.mjs";
+
+assertCloudflareAccessConfirmed();
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const outputRoot = resolve(repositoryRoot, "app-dist");

@@ -1,6 +1,8 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "status": "repository-readiness-only",
+  "defaultDeploymentReachability": "public-unless-cloudflare-access-is-enabled",
+  "accessConfirmationVariable": "TALLYO_CLOUDFLARE_ACCESS_CONFIRMED",
   "projects": {
     "website": {
       "expectedName": "tallyo-website",
@@ -8,6 +10,7 @@
       "buildCommand": "npm run build",
       "outputDirectory": "dist",
       "previewMode": "noindex",
+      "accessPolicyRequiredBeforeFirstSuccessfulDeploy": true,
       "productionBuildRequiresOwnerApproval": true
     },
     "app": {
@@ -16,6 +19,7 @@
       "buildCommand": "node scripts/build-app-pages.mjs",
       "outputDirectory": "app-dist",
       "previewMode": "noindex",
+      "accessPolicyRequiredBeforeFirstSuccessfulDeploy": true,
       "productionBuildRequiresOwnerApproval": true
     }
   },

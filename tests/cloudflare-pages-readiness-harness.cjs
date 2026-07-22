@@ -10,6 +10,8 @@ const projectConfig = JSON.parse(fs.readFileSync(path.join(root, 'deployment', '
 
 const syntheticEnv = {
   ...process.env,
+  CF_PAGES: '1',
+  TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: 'true',
   TALLYO_SUPABASE_URL: 'https://public-preview.example.supabase.co',
   TALLYO_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_synthetic_preview_key',
   TALLYO_TURNSTILE_ENABLED: 'false',
@@ -17,6 +19,17 @@ const syntheticEnv = {
   TALLYO_STRIPE_LIVE_MODE: 'false',
   TALLYO_PUBLIC_SITE_URL: 'https://website-preview.example.test'
 };
+const failClosedSentinel = path.join(output, 'fail-closed-sentinel.txt');
+fs.mkdirSync(output, { recursive: true });
+fs.writeFileSync(failClosedSentinel, 'preserve', 'utf8');
+const blockedBeforeAccess = spawnSync(process.execPath, [buildScript], {
+  cwd: root,
+  env: { ...syntheticEnv, TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: '' },
+  encoding: 'utf8'
+});
+assert.notEqual(blockedBeforeAccess.status, 0, 'Cloudflare app build must fail before Access is confirmed');
+assert.match(blockedBeforeAccess.stderr, /required Access policies are confirmed/);
+assert.ok(fs.existsSync(failClosedSentinel), 'blocked Cloudflare app build must not alter existing output');
 const build = spawnSync(process.execPath, [buildScript], { cwd: root, env: syntheticEnv, encoding: 'utf8' });
 assert.equal(build.status, 0, build.stderr || build.stdout);
 assert.doesNotMatch(build.stdout, /synthetic_preview_key|public-preview\.example/, 'build output must never log public configuration values');
@@ -46,11 +59,16 @@ assert.deepEqual(projectConfig.projects.website, {
   buildCommand: 'npm run build',
   outputDirectory: 'dist',
   previewMode: 'noindex',
+  accessPolicyRequiredBeforeFirstSuccessfulDeploy: true,
   productionBuildRequiresOwnerApproval: true
 });
 assert.equal(projectConfig.projects.app.expectedName, 'tallyo-app');
 assert.equal(projectConfig.projects.app.buildCommand, 'node scripts/build-app-pages.mjs');
 assert.equal(projectConfig.projects.app.outputDirectory, 'app-dist');
+assert.equal(projectConfig.projects.website.accessPolicyRequiredBeforeFirstSuccessfulDeploy, true);
+assert.equal(projectConfig.projects.app.accessPolicyRequiredBeforeFirstSuccessfulDeploy, true);
+assert.equal(projectConfig.accessConfirmationVariable, 'TALLYO_CLOUDFLARE_ACCESS_CONFIRMED');
+assert.equal(projectConfig.defaultDeploymentReachability, 'public-unless-cloudflare-access-is-enabled');
 assert.equal(projectConfig.liveDnsChanged, false);
 assert.equal(projectConfig.providerProjectsCreated, false);
 assert.equal(projectConfig.existingGitHubPagesRollbackRetained, true);

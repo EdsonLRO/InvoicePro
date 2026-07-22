@@ -9,6 +9,8 @@
   "githubPagesRollbackRetained": true,
   "checks": {
     "immutableCommitRecorded": "pending",
+    "mainHostnameAccessControlled": "pending",
+    "previewHostnamesAccessControlled": "pending",
     "websiteRoutesAnd404": "pending",
     "websiteNoindex": "pending",
     "websiteHeadersAndRedirects": "pending",
@@ -24,6 +26,7 @@
     "rollbackRehearsal": "pending"
   },
   "deferredHighRiskScopes": [
+    "Cloudflare GitHub application authorization and Access policies",
     "free document financial calculations",
     "first-use guidance based on private account data",
     "Supabase Auth and MFA origin changes",
