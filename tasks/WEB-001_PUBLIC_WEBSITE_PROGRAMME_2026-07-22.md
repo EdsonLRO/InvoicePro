@@ -6,7 +6,7 @@ focused website, free-tool, helper, growth, app-integration and Cloudflare
 readiness milestones without public launch or protected-provider changes.\
 Priority: High\
 Status: In Progress\
-Phase: PR 2 — Product presentation and content system verification\
+Phase: PR 4 — Public deterministic Tallyo Helper verification; PR 3 deferred\
 Owner role: Master Orchestrator\
 Assigned specialists: Product, Frontend, QA, Documentation, Security and Legal
 responsibilities performed sequentially\
@@ -16,8 +16,8 @@ any live financial action remain high-risk Owner-only boundaries\
 Affected files: `website/`; `.github/workflows/security-checks.yml`; the master
 specification; focused website tests; this task record; milestone-only
 authoritative documentation\
-Files locked: `website/` and this task record during PR 2\
-Lock acquired: 2026-07-22 on branch `codex/tallyo-website-product-content`\
+Files locked: `website/` and this task record during PR 4\
+Lock acquired: 2026-07-22 on branch `codex/tallyo-public-helper`\
 Dependencies: Existing app remains unchanged and deployed at the current GitHub
 Pages URL; the final website and app domains require later Owner-approved
 provider and DNS work.\
@@ -46,7 +46,7 @@ authoritative status documents when their state materially changes.\
 Approval boundary: Do not activate tracking, publish legal pages, merge a change
 that would publicly launch the site, create Cloudflare projects, change provider
 configuration/DNS, or perform production cutover without the required approval.\
-Branch: `codex/tallyo-website-foundation`\
+Branch: `codex/tallyo-public-helper`\
 Evidence: Dependency-free static generator builds nine routes plus a real 404.
 Preview and production-mode crawl directives passed; preview is the default.
 Automated route, link, unique metadata, canonical, structured-data, CTA,
@@ -74,11 +74,27 @@ passed at 320, 390, 768, 1024 and 1280 px with no horizontal overflow. The mobil
 menu remains active at 1024 px so navigation does not disappear between
 breakpoints; open, Escape, focus return and scroll locking passed. Product-tour
 and help-guide mobile views were visually inspected, and the browser console had
-no errors.\
-Pull request: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76\
+no errors. PR #77 contains that milestone, is ready, mergeable and clean, and
+workflow-dispatch verification run `29915122978` passed against head
+`da25f69dc5382e1975cd236105c3b30eb79f6719`. The PR is stacked on #76. PR 3 is
+deferred before implementation because invoice/quote subtotal, discount,
+tax/VAT, shipping, rounding and total calculations plus legally sensitive
+document content require Sol High review. Unrelated Medium work continued with
+PR 4. The deterministic Tallyo Helper uses an 18-entry reviewed public JSON
+knowledge base, browser-local matching, explicit sensitive/private/advice/internal
+boundaries, safe DOM rendering, useful public links, no-answer fallback, reset,
+keyboard submission, screen-reader labels and a disabled provider-neutral future
+AI adapter. It performs no network request or browser persistence and has no
+account, Supabase, Stripe, Resend or AI-provider access. Focused tests validate
+all answers, links, boundaries, fallback, CSP hash, disabled adapter and asset
+budgets. Browser interaction QA passed suggestion, typed fallback, secret
+omission, Enter submission, reset and responsive layouts at 320, 390, 768, 1024
+and 1280 px with no console errors or external scripts/styles.\
+Pull requests: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76; #77 —
+https://github.com/EdsonLRO/InvoicePro/pull/77\
 Blocked reason: PR #76 merge remains Owner-gated because the milestone contains
 legally material public marketing/security claims and begins the public-website
 release sequence. This does not block stacked repository implementation.\
-Next action: Complete focused diff, production-mode, secret and asset checks;
-commit and publish stacked PR 2; wait for required checks; then continue to the
-privacy-first free invoice and quote generator on a new stacked branch.
+Next action: Complete focused diff, production-mode, secret and network-boundary
+checks; commit and publish PR 4 stacked on #77; then continue unrelated Medium
+SEO and growth foundations while PR 3 remains deferred for Sol High review.

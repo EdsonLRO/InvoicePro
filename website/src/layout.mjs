@@ -86,7 +86,7 @@ const schemaFor = (page) => {
   return base;
 };
 
-export const renderPage = (page) => {
+export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
   const canonical = absoluteUrl(page.route);
   const title = page.route === "/" ? siteConfig.defaultTitle : `${page.title} | Tallyo`;
   const robots = siteConfig.preview ? "noindex, nofollow, noarchive" : "index, follow";
@@ -98,8 +98,11 @@ export const renderPage = (page) => {
   ].filter(Boolean).join("\n  ");
   const content = page.content
     .replaceAll('data-signup-link href="#"', `data-signup-link href="${escapeAttribute(siteConfig.signupUrl)}"`)
-    .replaceAll('data-login-link href="#"', `data-login-link href="${escapeAttribute(siteConfig.appUrl)}"`);
+    .replaceAll('data-login-link href="#"', `data-login-link href="${escapeAttribute(siteConfig.appUrl)}"`)
+    .replace("__TALLYO_HELPER_KNOWLEDGE__", helperKnowledgeJson);
   const schema = JSON.stringify(schemaFor(page));
+  const pageScripts = (page.scripts || []).map((src) => `<script type="module" src="${escapeAttribute(src)}"></script>`).join("\n  ");
+  const inlineScripts = [schema, ...(page.helper ? [helperKnowledgeJson] : [])];
 
   return {
     html: `<!doctype html>
@@ -131,6 +134,7 @@ export const renderPage = (page) => {
   <link rel="stylesheet" href="/assets/styles.css">
   <script type="application/ld+json">${schema}</script>
   <script src="/assets/site.js" defer></script>
+  ${pageScripts}
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -156,6 +160,7 @@ export const renderPage = (page) => {
   </footer>
 </body>
 </html>`,
-    schema
+    schema,
+    inlineScripts
   };
 };
