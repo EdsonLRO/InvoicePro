@@ -69,10 +69,13 @@ before implementation and preview acceptance.
 
 ## Decision
 
-Preview accepted by Owner: **Pending**  
-Accepted commits: **Pending**  
-Accepted preview URLs: **Pending**  
-Residual risks acknowledged: **Pending**  
+Preview accepted by Owner: **Pending**
+
+Accepted commits: **Pending**
+
+Accepted preview URLs: **Pending**
+
+Residual risks acknowledged: **Pending**
 
 Acceptance of a preview is not approval for custom-domain DNS, public launch,
 legal publication, tracking activation, paid advertising or retirement of the
