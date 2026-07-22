@@ -71,7 +71,9 @@ their own position and are linked to the current GOV.UK requirements.
   bounded inputs, per-line rounding, browser-only privacy, text-only rendering of
   user values, SVG exclusion, accessible fieldsets/labels/status/table semantics,
   conservative tax wording, GOV.UK source links and the focused diff.
-- [ ] Required GitHub check passes on the final branch state.
+- [x] Draft PR #84 contains implementation commit `7ff3434`; required Security
+  checks run `29924082269` passed with no merge conflict. The evidence-only
+  follow-up must retain a passing required check on the final branch state.
 - [ ] Owner approves ready/merge and any later public website release separately.
 
 ## Legal disposition
