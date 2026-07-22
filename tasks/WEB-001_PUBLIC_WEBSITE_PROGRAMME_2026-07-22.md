@@ -176,14 +176,17 @@ No Auth, account-data or payment behaviour changed. Focused brand, PWA,
 public-integration, Cloudflare-package, responsive-safety and complete 26-route
 website checks pass. Local visual QA confirms the identity on the website and
 app sign-in screen without app horizontal overflow. The repository-only app
-build marker is `2026.07.22.2`; it has not been published.\
+build marker is `2026.07.22.2`; it has not been published. PR #83 contains the
+milestone as a draft stacked on #82 and has not been marked ready, merged or
+deployed.\
 Pull requests: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76; #77 —
 https://github.com/EdsonLRO/InvoicePro/pull/77; #78 —
 https://github.com/EdsonLRO/InvoicePro/pull/78; #79 —
 https://github.com/EdsonLRO/InvoicePro/pull/79; #80 —
 https://github.com/EdsonLRO/InvoicePro/pull/80; #81 —
 https://github.com/EdsonLRO/InvoicePro/pull/81; #82 —
-https://github.com/EdsonLRO/InvoicePro/pull/82\
+https://github.com/EdsonLRO/InvoicePro/pull/82; #83 —
+https://github.com/EdsonLRO/InvoicePro/pull/83\
 Blocked reason: PR #76 merge remains Owner-gated because the milestone contains
 legally material public marketing/security claims and begins the public-website
 release sequence. This does not block stacked repository implementation.\
