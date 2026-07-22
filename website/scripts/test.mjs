@@ -203,6 +203,10 @@ assert.ok(statSync(join(distRoot, "assets", "analytics.mjs")).size < 10_000, "an
 assert.ok(statSync(join(distRoot, "assets", "growth.js")).size < 10_000, "growth integration stays under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "analytics-policy.mjs")).size < 30_000, "event policy stays under 30 KB");
 assert.ok(existsSync(join(distRoot, "assets", "icon-192.png")), "favicon asset exists");
+assert.ok(existsSync(join(distRoot, "assets", "tallyo-mark.png")), "brand mark asset exists");
+assert.ok(existsSync(join(distRoot, "assets", "tallyo-wordmark-white.png")), "brand wordmark asset exists");
+assert.ok(statSync(join(distRoot, "assets", "tallyo-mark.png")).size < 75_000, "brand mark stays under 75 KB");
+assert.ok(statSync(join(distRoot, "assets", "tallyo-wordmark-white.png")).size < 50_000, "brand wordmark stays under 50 KB");
 assert.ok(existsSync(join(distRoot, "assets", "tallyo-social-card.webp")), "social card asset exists");
 assert.ok(statSync(join(distRoot, "assets", "tallyo-social-card.webp")).size < 100_000, "social card stays under 100 KB");
 for (const helperAsset of ["helper.js", "helper-core.mjs"]) {

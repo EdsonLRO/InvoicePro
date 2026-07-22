@@ -38,6 +38,7 @@ jobs:
         run: |
           node tests/account-data-export-harness.cjs
           node tests/app-public-integration-harness.cjs
+          node tests/brand-logo-harness.cjs
           node tests/auth-captcha-harness.cjs
           node tests/cloudflare-pages-readiness-harness.cjs
           node tests/core-lifecycle-harness.cjs
@@ -49,6 +50,7 @@ jobs:
           node tests/mfa-recovery-harness.cjs
           node tests/operational-health-harness.cjs
           node tests/pwa-update-harness.cjs
+          node tests/preview-acceptance-readiness-harness.cjs
           node tests/refund-consequence-preview-harness.cjs
           node tests/recurring-calendar-reliability-harness.cjs
           node tests/scale-accessibility-safety-harness.cjs

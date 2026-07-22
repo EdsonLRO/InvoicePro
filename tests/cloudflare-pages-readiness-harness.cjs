@@ -21,7 +21,7 @@ const build = spawnSync(process.execPath, [buildScript], { cwd: root, env: synth
 assert.equal(build.status, 0, build.stderr || build.stdout);
 assert.doesNotMatch(build.stdout, /synthetic_preview_key|public-preview\.example/, 'build output must never log public configuration values');
 
-const expectedAssets = ['_headers', '_redirects', 'app-help-install.js', 'build-report.json', 'config.js', 'icon-192.png', 'icon-512.png', 'index.html', 'manifest.json', 'service-worker.js', 'tailwind.css'];
+const expectedAssets = ['_headers', '_redirects', 'app-help-install.js', 'build-report.json', 'config.js', 'icon-192.png', 'icon-512.png', 'index.html', 'manifest.json', 'service-worker.js', 'tailwind.css', 'tallyo-mark.png', 'tallyo-wordmark-white.png'];
 assert.deepEqual(fs.readdirSync(output).sort(), expectedAssets, 'app Pages output must use a strict public-file allowlist');
 const generatedConfig = fs.readFileSync(path.join(output, 'config.js'), 'utf8');
 assert.match(generatedConfig, /sb_publishable_synthetic_preview_key/);
@@ -66,7 +66,7 @@ const manifest = JSON.parse(fs.readFileSync(path.join(output, 'manifest.json'), 
 assert.equal(manifest.start_url, './');
 assert.equal(manifest.scope, './');
 const worker = fs.readFileSync(path.join(output, 'service-worker.js'), 'utf8');
-for (const asset of ['./index.html', './config.js', './app-help-install.js', './manifest.json']) assert.ok(worker.includes(asset), `worker shell missing ${asset}`);
+for (const asset of ['./index.html', './config.js', './app-help-install.js', './manifest.json', './tallyo-mark.png', './tallyo-wordmark-white.png']) assert.ok(worker.includes(asset), `worker shell missing ${asset}`);
 
 const migrationMap = fs.readFileSync(path.join(root, 'deployment', 'cloudflare', 'domain-migration-map.md'), 'utf8');
 for (const boundary of ['Supabase allowed/site URLs', 'MFA recovery origin allowlist', 'Stripe success/cancel', 'Turnstile', 'Existing GitHub Pages deployment']) {
