@@ -76,8 +76,8 @@ Implementation result: Complete for repository scope. A shared guard now blocks
 both Cloudflare builds before any output mutation until the required Access
 confirmation variable is explicitly true.
 
-Review result: Local focused review passed; independent required GitHub checks
-remain pending on the draft PR.
+Review result: Local focused review passed. Required GitHub Security `verify`
+run `29927895060` passed on the first draft-PR commit.
 
 Evidence: Read-only Cloudflare inspection on 2026-07-22 confirmed a signed-in
 account with no Workers/Pages projects and an unconnected GitHub integration.
@@ -92,10 +92,11 @@ Pages packaging, preview acceptance state, security workflow policy,
 
 Branch: `codex/cloudflare-private-preview`
 
-Commit: Recorded by the draft pull request for this branch
+Commit: `cb75e1a0d0025bc02724b944ad43366b0eb01226`; draft PR #85
 
 Blocked reason: Provider authorization and project creation require exact Owner
 approval after this fail-closed branch is reviewed and merged
 
-Next action: Commit, push and open a draft PR for independent checks; do not
-change Cloudflare state.
+Next action: Obtain exact Owner approval before marking PR #85 ready or merging
+it. Cloudflare provider actions remain a separate later approval; do not change
+Cloudflare state.
