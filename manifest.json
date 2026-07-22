@@ -1,7 +1,7 @@
 {
   "name": "Tallyo",
   "short_name": "Tallyo",
-  "description": "Create and manage your invoices.",
+  "description": "Create invoices, quotes and credit notes, track payments and manage recurring work.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

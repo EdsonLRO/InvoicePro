@@ -33,8 +33,10 @@ Supported build configuration:
   value, supplied only through the approved deployment environment.
 
 No real identifiers, secrets or provider credentials belong in these variables.
-Cloudflare Pages configuration and final domain cutover are handled in later,
-approval-gated milestones.
+Repository-only Cloudflare Pages settings, preview variables, rollback and the
+domain migration map are documented in `../deployment/cloudflare/`. Creating a
+provider project, setting production variables and final domain cutover remain
+separate approval-gated actions.
 
 ## Search release checklist
 
@@ -53,3 +55,16 @@ After the final domain and public release are approved:
 The planning-only content map in `content/seo-content-map.json` does not authorise
 publishing a route. Each topic still needs useful original content, factual review
 and the applicable release approval.
+
+## Inactive growth foundation
+
+`content/analytics-events.json` is the authoritative event dictionary. The public
+scripts call a provider-neutral API that is disabled by default, has no provider
+and permits only enumerated properties and values. Current consent is necessary
+only; analytics, advertising and preferences are denied.
+
+No website code loads GA4, GTM, Google Ads or another analytics provider, and it
+does not set cookies, use browser storage or send analytics requests. Recognised
+UTM fields remain in page memory only and are not added to account, Auth, invoice,
+payment, support or redirect links. See `content/growth-readiness.md` and
+`content/storage-inventory.md` before proposing any activation.

@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "scope": "public-product-guidance-only",
+  "entries": [
+    {
+      "id": "what-is-tallyo",
+      "question": "What is Tallyo?",
+      "triggers": ["what is tallyo", "tell me about tallyo", "what does tallyo do"],
+      "answer": "Tallyo is a straightforward invoicing and business-records workspace for UK small businesses and independent operators.",
+      "links": [{ "label": "About Tallyo", "href": "/about/" }]
+    },
+    {
+      "id": "who-is-it-for",
+      "question": "Who is Tallyo for?",
+      "triggers": ["who is tallyo for", "who can use tallyo", "is tallyo for me"],
+      "answer": "Tallyo is designed for UK sole traders, freelancers, consultants, tradespeople and small service businesses that create quotes and invoices.",
+      "links": [{ "label": "Explore features", "href": "/features/" }]
+    },
+    {
+      "id": "features",
+      "question": "What features are available?",
+      "triggers": ["what features are available", "tallyo features", "what can tallyo do"],
+      "answer": "Tallyo supports invoices, quotes, credit notes, customers, saved items, branded PDFs, document email, payment status, Stripe-hosted card links, recurring invoices, opt-in overdue reminders, refunds, exports and account-protection controls.",
+      "links": [{ "label": "See all features", "href": "/features/" }, { "label": "Take the product tour", "href": "/product-tour/" }]
+    },
+    {
+      "id": "quote-vs-invoice",
+      "question": "What is the difference between a quote and an invoice?",
+      "triggers": ["difference between a quote and invoice", "quote vs invoice", "quote or invoice"],
+      "answer": "A quote sets out proposed work and prices before the work is agreed. An invoice requests payment for agreed or completed work. Tallyo can convert an accepted quote into an invoice.",
+      "links": [{ "label": "Read the document guide", "href": "/help/create-invoices-quotes-and-credit-notes/" }]
+    },
+    {
+      "id": "credit-note",
+      "question": "What is a credit note?",
+      "triggers": ["what is a credit note", "credit note explained", "when to use a credit note"],
+      "answer": "A credit note records a reduction to an issued invoice. It keeps the original invoice and the adjustment visible instead of treating the original document as if it never existed.",
+      "links": [{ "label": "Read the document guide", "href": "/help/create-invoices-quotes-and-credit-notes/" }]
+    },
+    {
+      "id": "recurring-invoices",
+      "question": "How do recurring invoices work?",
+      "triggers": ["how do recurring invoices work", "recurring invoice", "repeat invoices"],
+      "answer": "You save an invoice schedule, choose when it runs and decide whether each generated invoice should be emailed automatically. You can review or change the schedule when the work changes.",
+      "links": [{ "label": "Set up recurring invoices", "href": "/help/recurring-invoices/" }]
+    },
+    {
+      "id": "overdue-reminders",
+      "question": "How do overdue reminders work?",
+      "triggers": ["how do overdue reminders work", "overdue reminder", "chase overdue invoice"],
+      "answer": "Overdue reminders are opt-in for each invoice. Tallyo schedules follow-up only after a saved invoice becomes overdue and you have enabled reminders for that document.",
+      "links": [{ "label": "Choose overdue reminders", "href": "/help/overdue-reminders/" }]
+    },
+    {
+      "id": "stripe-payments",
+      "question": "How do Stripe card payments work?",
+      "triggers": ["how do stripe card payments work", "stripe card payment", "pay by card", "card payment link"],
+      "answer": "Tallyo opens a Stripe-hosted checkout for the amount requested. The customer enters card details with Stripe, and Tallyo updates the invoice after the payment provider confirms the result.",
+      "links": [{ "label": "Use payment links", "href": "/help/payment-links-and-deposits/" }]
+    },
+    {
+      "id": "card-storage",
+      "question": "Does Tallyo store card details?",
+      "triggers": ["does tallyo store card details", "card details stored", "store my card"],
+      "answer": "No. Customers enter card details on Stripe-hosted checkout pages, and Tallyo does not store full card details.",
+      "links": [{ "label": "Read about payment security", "href": "/security/" }]
+    },
+    {
+      "id": "deposits",
+      "question": "Can Tallyo process deposits?",
+      "triggers": ["can tallyo process deposits", "request a deposit", "invoice deposit"],
+      "answer": "Yes. For a saved invoice, the seller can request the full outstanding balance or set a deposit amount for a Stripe-hosted card checkout.",
+      "links": [{ "label": "Use payment links and deposits", "href": "/help/payment-links-and-deposits/" }]
+    },
+    {
+      "id": "refunds",
+      "question": "How do refunds work?",
+      "triggers": ["how do refunds work", "refund a payment", "refund invoice"],
+      "answer": "A supported full or partial refund is requested from the paid invoice. Tallyo updates the balance and activity after Stripe confirms the outcome. Another payment needs a fresh checkout session.",
+      "links": [{ "label": "Understand refunds", "href": "/help/refunds-and-payment-status/" }]
+    },
+    {
+      "id": "installation",
+      "question": "Can I install Tallyo?",
+      "triggers": ["can i install tallyo", "install tallyo", "add tallyo to home screen"],
+      "answer": "Yes. You can install Tallyo from supported desktop and mobile browsers for quick access. The exact browser action may be called Install app or Add to Home Screen.",
+      "links": [{ "label": "Installation guide", "href": "/help/install-tallyo/" }]
+    },
+    {
+      "id": "offline",
+      "question": "Does Tallyo work offline?",
+      "triggers": ["does tallyo work offline", "use tallyo offline", "no internet"],
+      "answer": "The app shell can open offline, but an internet connection is required to sign in and access or update authenticated business records.",
+      "links": [{ "label": "Read installation guidance", "href": "/help/install-tallyo/" }]
+    },
+    {
+      "id": "create-account",
+      "question": "How do I create an account?",
+      "triggers": ["how do i create an account", "create account", "sign up", "register for tallyo"],
+      "answer": "Choose Create account on the Tallyo website, enter your details in the Tallyo app and complete the email-confirmation step.",
+      "links": [{ "label": "Create account", "href": "app:signup" }]
+    },
+    {
+      "id": "log-in",
+      "question": "How do I log in?",
+      "triggers": ["how do i log in", "log in to tallyo", "sign in to tallyo"],
+      "answer": "Choose Log in on the Tallyo website to open the app. Use your confirmed account and complete authenticator verification when you have enabled it.",
+      "links": [{ "label": "Log in", "href": "app:login" }]
+    },
+    {
+      "id": "pricing",
+      "question": "Where can I find pricing?",
+      "triggers": ["where can i find pricing", "tallyo pricing", "how much is tallyo", "tallyo plans"],
+      "answer": "The Pricing page shows the current plan direction. Exact prices, limits and availability are still being finalised, and this website does not offer subscription checkout yet.",
+      "links": [{ "label": "View pricing direction", "href": "/pricing/" }]
+    },
+    {
+      "id": "support",
+      "question": "How do I get support?",
+      "triggers": ["how do i get support", "contact support", "help with tallyo", "tallyo support"],
+      "answer": "Start with the reviewed Help Centre guides and common questions. A public business support contact will be added only after it is approved.",
+      "links": [{ "label": "Open the Help Centre", "href": "/help/" }, { "label": "Read common questions", "href": "/faq/" }]
+    },
+    {
+      "id": "security",
+      "question": "Where can I read about security?",
+      "triggers": ["where can i read about security", "tallyo security", "is tallyo secure", "account security"],
+      "answer": "The Security page describes Tallyo's current account, data-access, payment and browser controls together with honest limitations.",
+      "links": [{ "label": "Read about security", "href": "/security/" }, { "label": "Protect your account", "href": "/help/account-security/" }]
+    }
+  ]
+}
