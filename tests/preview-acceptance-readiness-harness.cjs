@@ -8,10 +8,15 @@ const state = JSON.parse(fs.readFileSync(path.join(base, 'preview-acceptance.jso
 const record = fs.readFileSync(path.join(base, 'preview-acceptance.md'), 'utf8');
 const actions = fs.readFileSync(path.join(base, 'owner-actions.md'), 'utf8');
 
-assert.equal(state.status, 'pending-owner-actions');
+assert.equal(state.status, 'provider-projects-created-builds-blocked');
 assert.equal(state.websitePreviewUrl, null);
 assert.equal(state.appPreviewUrl, null);
-assert.equal(state.providerProjectsCreated, false);
+assert.equal(state.providerProjectsCreated, true);
+assert.deepEqual(state.providerProjectNames, ['tallyo-website', 'tallyo-app']);
+assert.deepEqual(state.initialBuilds, {
+  website: 'blocked-by-access-guard',
+  app: 'blocked-by-access-guard'
+});
 assert.equal(state.liveDnsChanged, false);
 assert.equal(state.productionReleased, false);
 assert.equal(state.githubPagesRollbackRetained, true);
@@ -21,7 +26,8 @@ for (const scope of ['financial calculations', 'private account data', 'Supabase
   assert.ok(state.deferredHighRiskScopes.some((value) => value.includes(scope)), `missing deferred High-risk scope: ${scope}`);
 }
 
-assert.match(record, /no Cloudflare preview exists yet/i);
+assert.match(record, /no preview deployment exists yet/i);
+assert.match(record, /Both blocked by the reviewed Access guard; no deployment available/);
 assert.match(record, /Preview accepted by Owner: \*\*Pending\*\*/);
 assert.match(record, /Acceptance of a preview is not approval for custom-domain DNS/);
 assert.match(record, /`noindex` is not a privacy control/);
@@ -35,8 +41,8 @@ for (const boundary of ['Free document generator (High)', 'Supabase Auth and MFA
 }
 assert.match(actions, /Approval for one does not approve any later gate/);
 assert.match(actions, /Current analytics and advertising remain disabled/);
-assert.match(actions, /access limited to `EdsonLRO\/InvoicePro`/);
-assert.match(actions, /Initial Cloudflare builds must remain blocked/);
+assert.match(actions, /access limited to\s+`EdsonLRO\/InvoicePro`/);
+assert.match(actions, /Both initial builds stopped at\s+the reviewed Access guard/);
 assert.doesNotMatch(actions, /password\s*[:=]|sb_secret_|sk_live_|whsec_/i);
 
 console.log('Preview acceptance readiness harness passed.');

@@ -1,8 +1,13 @@
 {
   "schemaVersion": 2,
-  "status": "repository-readiness-only",
+  "status": "provider-projects-created-fail-closed",
   "defaultDeploymentReachability": "public-unless-cloudflare-access-is-enabled",
   "accessConfirmationVariable": "TALLYO_CLOUDFLARE_ACCESS_CONFIRMED",
+  "githubIntegration": {
+    "connected": true,
+    "repository": "EdsonLRO/InvoicePro",
+    "scope": "selected-repository-only"
+  },
   "projects": {
     "website": {
       "expectedName": "tallyo-website",
@@ -11,6 +16,8 @@
       "outputDirectory": "dist",
       "previewMode": "noindex",
       "accessPolicyRequiredBeforeFirstSuccessfulDeploy": true,
+      "providerState": "created-no-production-deployment",
+      "initialBuild": "blocked-by-access-guard",
       "productionBuildRequiresOwnerApproval": true
     },
     "app": {
@@ -20,10 +27,12 @@
       "outputDirectory": "app-dist",
       "previewMode": "noindex",
       "accessPolicyRequiredBeforeFirstSuccessfulDeploy": true,
+      "providerState": "created-no-production-deployment",
+      "initialBuild": "blocked-by-access-guard",
       "productionBuildRequiresOwnerApproval": true
     }
   },
   "liveDnsChanged": false,
-  "providerProjectsCreated": false,
+  "providerProjectsCreated": true,
   "existingGitHubPagesRollbackRetained": true
 }
