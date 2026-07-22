@@ -1,6 +1,6 @@
 # Cloudflare preview acceptance record
 
-Status: **Pending Owner actions — no Cloudflare preview exists yet.**
+Status: **Cloudflare projects created fail-closed — no preview deployment exists yet.**
 
 This record must not be marked accepted from local builds alone. Complete it only
 after the relevant feature PRs are reviewed, the Owner separately approves the
@@ -21,7 +21,8 @@ build is allowed to succeed.
 | Website commit | Pending |
 | App preview URL | Pending |
 | App commit/build | Pending |
-| Cloudflare project names | Expected `tallyo-website` and `tallyo-app`; not created |
+| Cloudflare project names | Created `tallyo-website` and `tallyo-app` |
+| Initial production builds | Both blocked by the reviewed Access guard; no deployment available |
 | GitHub Pages rollback | Retained |
 
 ## Website preview

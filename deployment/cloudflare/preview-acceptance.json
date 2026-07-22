@@ -1,9 +1,17 @@
 {
   "schemaVersion": 1,
-  "status": "pending-owner-actions",
+  "status": "provider-projects-created-builds-blocked",
   "websitePreviewUrl": null,
   "appPreviewUrl": null,
-  "providerProjectsCreated": false,
+  "providerProjectsCreated": true,
+  "providerProjectNames": [
+    "tallyo-website",
+    "tallyo-app"
+  ],
+  "initialBuilds": {
+    "website": "blocked-by-access-guard",
+    "app": "blocked-by-access-guard"
+  },
   "liveDnsChanged": false,
   "productionReleased": false,
   "githubPagesRollbackRetained": true,

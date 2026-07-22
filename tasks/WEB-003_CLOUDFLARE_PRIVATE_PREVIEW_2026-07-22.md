@@ -10,7 +10,7 @@ without publishing content before access controls are verified.
 Risk level: High because later stages change provider authorization, hosting and
 production-adjacent configuration; this repository-only guard is reversible.
 
-Phase: Repository guard and exact provider-scope review
+Phase: Provider projects created fail-closed; stopped before Access configuration
 
 Owner role: Master Orchestrator
 
@@ -35,19 +35,22 @@ the affected Cloudflare readiness files
 Documents explicitly not required: Historical Auth, payment and closed-task
 evidence; no Auth, MFA, RLS, Stripe or customer-data change is in scope
 
-Dependencies: PR #84 merged at `a4d405c`; current GitHub Pages app remains the
-rollback; the Cloudflare account currently has no Workers/Pages projects and its
-GitHub integration is not connected
+Dependencies: PR #85 merged at
+`ce5bccfb80b0cb4cc67e48e54aeb367c4658e47a`; current GitHub Pages app remains
+the rollback; Cloudflare GitHub access is limited to `EdsonLRO/InvoicePro`
 
 Acceptance criteria: Both builds fail before writing output when `CF_PAGES=1`
 unless `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`; repository records state that
-`noindex` is not access control; provider actions remain pending
+`noindex` is not access control; Access, variables and successful deployments
+remain pending
 
 Required tests: Website test suite, Cloudflare Pages readiness harness, preview
 acceptance harness, workflow policy, secret scan and `git diff --check`
 
-Security boundary: No provider mutation, GitHub authorization, deployment
-variable, secret, Auth change, DNS, public release, tracking or real data
+Security boundary: The approved provider mutation was limited to the scoped
+GitHub connection and creation of two free projects. No Access policy,
+deployment variable, secret, Auth change, DNS, successful deployment, public
+release, tracking or real data
 
 Privacy/legal materiality: UK technical preview intended only for the Owner and
 approved reviewers. Cloudflare would host static public-product content and
@@ -64,39 +67,43 @@ Payment impact: None; live Stripe remains unchanged and disabled in preview
 
 Production impact: None from this branch; current GitHub Pages stays live
 
-Owner permission required: Exact approval before (1) authorizing the Cloudflare
-GitHub app for `EdsonLRO/InvoicePro`, (2) creating either free Pages project, (3)
-creating Access policies, or (4) setting any deployment variable/retrying builds
+Owner permission required: GitHub authorization and project creation were
+exactly approved and completed. Fresh exact approval remains required before
+creating Access policies, setting any deployment variable or retrying builds
 
 Approval boundary: Project creation is not approval for Access, variables,
 successful deployment, Auth/MFA origins, Turnstile, Stripe/email links, custom
 domains, DNS, legal publication or final release
 
-Implementation result: Complete for repository scope. A shared guard now blocks
-both Cloudflare builds before any output mutation until the required Access
-confirmation variable is explicitly true.
+Implementation result: The shared repository guard is merged. Cloudflare
+projects `tallyo-website` and `tallyo-app` were created with the reviewed build
+settings; both initial builds stopped at that guard and neither project has a
+production deployment.
 
-Review result: Local focused review passed. Required GitHub Security `verify`
-run `29927895060` passed on the first draft-PR commit.
+Review result: PR #85 required GitHub Security `verify` run `29927989825`,
+post-merge Security run `29928624196` and post-merge GitHub Pages run
+`29928621947` passed. Provider readback confirmed the exact project settings,
+empty deployment-variable sections and no production deployment.
 
-Evidence: Read-only Cloudflare inspection on 2026-07-22 confirmed a signed-in
-account with no Workers/Pages projects and an unconnected GitHub integration.
-Cloudflare documentation current on 2026-07-22 states Pages URLs are public by
-default and documents separate Access policies for the main and wildcard preview
-hostnames. No private account identifier is recorded here.
+Evidence: Cloudflare documentation current on 2026-07-22 states Pages URLs are
+public by default and documents separate Access policies for the main and
+wildcard preview hostnames. The Owner authorized the GitHub app for the selected
+repository only. Provider readback confirmed both named projects, their exact
+build/root/output settings, both guard failures and no production deployment.
+No private account identifier is recorded here.
 
 Focused validation passed: all 26 website routes plus 404, fail-closed website
 and app build behavior including preservation of existing output, Cloudflare
 Pages packaging, preview acceptance state, security workflow policy,
 `git diff --check` and a scoped secret-pattern scan.
 
-Branch: `codex/cloudflare-private-preview`
+Branch: `codex/cloudflare-preview-projects-evidence`
 
-Commit: `cb75e1a0d0025bc02724b944ad43366b0eb01226`; draft PR #85
+Commit: This evidence branch records the provider action; the guard release was
+merged as `ce5bccfb80b0cb4cc67e48e54aeb367c4658e47a` in PR #85
 
-Blocked reason: Provider authorization and project creation require exact Owner
-approval after this fail-closed branch is reviewed and merged
+Blocked reason: Cloudflare Access policies and every deployment variable remain
+outside the completed approval and require the next exact Owner approval
 
-Next action: Obtain exact Owner approval before marking PR #85 ready or merging
-it. Cloudflare provider actions remain a separate later approval; do not change
-Cloudflare state.
+Next action: Review and merge the evidence PR, then obtain exact Owner approval
+for the Access policies before entering variables or retrying either build.

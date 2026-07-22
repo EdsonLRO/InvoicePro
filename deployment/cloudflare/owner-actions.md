@@ -14,14 +14,13 @@ payment details in chat or repository evidence.
 3. **Private first-use guidance (High).** Decide whether to add onboarding that
    reads company/customer/document state. It must preserve tenant isolation and
    avoid analytics disclosure.
-4. **Connect GitHub and create fail-closed Cloudflare preview projects (High
-   provider and authorization action).** Separately approve the Cloudflare
-   GitHub app with access limited to `EdsonLRO/InvoicePro`, then approve
-   `tallyo-website` and `tallyo-app` using the exact build settings in
-   `pages-projects.json`. Initial Cloudflare builds must remain blocked until
-   Access protects both the main and wildcard preview `pages.dev` hostnames. Do
-   not connect custom domains, enable a paid plan or treat `noindex` as access
-   control.
+4. **Completed 2026-07-22 — connect GitHub and create fail-closed Cloudflare
+   preview projects (High provider and authorization action).** The Owner
+   approved the Cloudflare GitHub app with access limited to
+   `EdsonLRO/InvoicePro` and creation of `tallyo-website` and `tallyo-app` using
+   the exact settings in `pages-projects.json`. Both initial builds stopped at
+   the reviewed Access guard and created no production deployment. No custom
+   domain, paid plan or deployment variable was configured.
 5. **Enable Access and enter preview deployment variables (High configuration
    action).** Protect both the main and wildcard preview `pages.dev` hostnames,
    verify unauthenticated access is blocked, and only then set
