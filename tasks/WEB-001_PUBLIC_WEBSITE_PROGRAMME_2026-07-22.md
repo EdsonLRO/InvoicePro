@@ -6,7 +6,7 @@ focused website, free-tool, helper, growth, app-integration and Cloudflare
 readiness milestones without public launch or protected-provider changes.\
 Priority: High\
 Status: In Progress\
-Phase: PR 4 — Public deterministic Tallyo Helper verification; PR 3 deferred\
+Phase: PR 5 — Disabled SEO, analytics and growth foundations verification\
 Owner role: Master Orchestrator\
 Assigned specialists: Product, Frontend, QA, Documentation, Security and Legal
 responsibilities performed sequentially\
@@ -16,8 +16,8 @@ any live financial action remain high-risk Owner-only boundaries\
 Affected files: `website/`; `.github/workflows/security-checks.yml`; the master
 specification; focused website tests; this task record; milestone-only
 authoritative documentation\
-Files locked: `website/` and this task record during PR 4\
-Lock acquired: 2026-07-22 on branch `codex/tallyo-public-helper`\
+Files locked: `website/` and this task record during PR 5\
+Lock acquired: 2026-07-22 on branch `codex/tallyo-growth-foundations`\
 Dependencies: Existing app remains unchanged and deployed at the current GitHub
 Pages URL; the final website and app domains require later Owner-approved
 provider and DNS work.\
@@ -46,7 +46,7 @@ authoritative status documents when their state materially changes.\
 Approval boundary: Do not activate tracking, publish legal pages, merge a change
 that would publicly launch the site, create Cloudflare projects, change provider
 configuration/DNS, or perform production cutover without the required approval.\
-Branch: `codex/tallyo-public-helper`\
+Branch: `codex/tallyo-growth-foundations`\
 Evidence: Dependency-free static generator builds nine routes plus a real 404.
 Preview and production-mode crawl directives passed; preview is the default.
 Automated route, link, unique metadata, canonical, structured-data, CTA,
@@ -89,12 +89,32 @@ account, Supabase, Stripe, Resend or AI-provider access. Focused tests validate
 all answers, links, boundaries, fallback, CSP hash, disabled adapter and asset
 budgets. Browser interaction QA passed suggestion, typed fallback, secret
 omission, Enter submission, reset and responsive layouts at 320, 390, 768, 1024
-and 1280 px with no console errors or external scripts/styles.\
+and 1280 px with no console errors or external scripts/styles. PR #78 contains
+that milestone, is ready, mergeable and clean, and workflow-dispatch verification
+run `29915837793` passed against head
+`ce107fa0056912e70bd250c2d5e0425445f5552e`. The PR is stacked on #77. PR 5 adds
+an authoritative 29-event dictionary covering current disabled website events
+and explicitly future-only application activation events. The provider-neutral
+API is disabled by default, accepts only enumerated events/properties/values,
+requires production plus granted analytics consent before a provider can run,
+and swallows provider failures. Current provider and GA4/GTM/Ads identifiers are
+empty. Consent defaults to necessary only. UTM values are recognised in page
+memory only and never enter account links. Campaign, landing-page, negative-keyword,
+testing, editorial and storage/consent readiness are documented without enabling
+ads or tracking. Focused tests prove unknown events, free text, unapproved values,
+denied consent, disabled state and provider errors cannot send; generated browser
+policy equals the authoritative source; no transport, cookie, storage or provider
+endpoint exists. Production/preview crawl tests pass. Browser QA confirmed one
+local growth module, no provider scripts, no cookie banner, no placeholder account
+links, canonical UTM exclusion, no UTM propagation into account links, continuing
+Helper operation and no console errors.\
 Pull requests: #76 — https://github.com/EdsonLRO/InvoicePro/pull/76; #77 —
-https://github.com/EdsonLRO/InvoicePro/pull/77\
+https://github.com/EdsonLRO/InvoicePro/pull/77; #78 —
+https://github.com/EdsonLRO/InvoicePro/pull/78\
 Blocked reason: PR #76 merge remains Owner-gated because the milestone contains
 legally material public marketing/security claims and begins the public-website
 release sequence. This does not block stacked repository implementation.\
-Next action: Complete focused diff, production-mode, secret and network-boundary
-checks; commit and publish PR 4 stacked on #77; then continue unrelated Medium
-SEO and growth foundations while PR 3 remains deferred for Sol High review.
+Next action: Complete focused diff, production-mode, provider-ID, secret and
+tracking-boundary checks; commit and publish PR 5 stacked on #78; then inspect PR
+6 app-integration scope and continue only the portions that remain outside Auth,
+private data, payment logic and other Sol High boundaries.

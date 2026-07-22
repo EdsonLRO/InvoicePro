@@ -22,7 +22,7 @@ const home = `
       <h1 id="home-title">${productFacts.positioning}</h1>
       <p class="hero-lead">${productFacts.supporting}</p>
       <div class="cta-row">
-        <a class="button button-primary" id="cta_hero_create_account" data-signup-link href="#">Create account</a>
+        <a class="button button-primary" id="cta_hero_create_account" data-analytics-placement="hero" data-signup-link href="#">Create account</a>
         <a class="button button-secondary" id="cta_hero_free_invoice" href="/free-invoice-generator/">Make a free invoice</a>
       </div>
       <ul class="trust-list" aria-label="Tallyo product highlights">
@@ -104,7 +104,7 @@ const productTour = `
 
 const pricing = `
   <section class="page-hero"><p class="eyebrow">Pricing</p><h1>A clear plan direction, without made-up prices.</h1><p>Plans and pricing are being finalised. Tallyo is not offering subscriptions or trials through this website yet.</p></section>
-  <section class="section"><div class="plan-grid">${plans.map((plan) => `<article class="plan-card${plan.name === "Teams" ? " unavailable" : ""}"><p class="card-label">${plan.audience}</p><h2>${plan.name}</h2><p class="plan-status">${plan.status}</p>${list(plan.features)}${plan.name === "Teams" ? '<span class="status-pill">Future direction</span>' : '<a class="button button-secondary" data-signup-link href="#">Explore Tallyo</a>'}</article>`).join("")}</div></section>
+  <section class="section"><div class="plan-grid">${plans.map((plan) => `<article class="plan-card${plan.name === "Teams" ? " unavailable" : ""}"><p class="card-label">${plan.audience}</p><h2>${plan.name}</h2><p class="plan-status">${plan.status}</p>${list(plan.features)}${plan.name === "Teams" ? '<span class="status-pill">Future direction</span>' : '<a class="button button-secondary" data-analytics-placement="pricing" data-signup-link href="#">Explore Tallyo</a>'}</article>`).join("")}</div></section>
   <section class="section section-soft" aria-labelledby="pricing-faq-title"><div class="section-heading"><p class="eyebrow">What happens next</p><h2 id="pricing-faq-title">Prices, limits and availability will be published only when approved.</h2><p>There is no pricing checkout on this site. Teams workspaces and multi-user access are not currently implemented.</p></div></section>
   ${finalCta({ secondary: false })}`;
 
@@ -154,7 +154,7 @@ const about = `
 
 const generatorPlaceholder = `
   <section class="page-hero"><p class="eyebrow">Free Invoice Maker</p><h1>A privacy-first invoice maker is on the way.</h1><p>This route is reserved for the browser-local free invoice and quote generator. It will not require an account or send document details to Tallyo by default.</p></section>
-  <section class="section section-soft"><div class="section-heading"><p class="eyebrow">Foundation ready</p><h2>The complete generator is the next focused website milestone.</h2><p>Until then, create an account to use Tallyo’s working authenticated invoice tools.</p></div><p class="section-link"><a data-signup-link href="#">Open Tallyo →</a></p></section>`;
+  <section class="section section-soft"><div class="section-heading"><p class="eyebrow">Foundation ready</p><h2>The complete generator is the next focused website milestone.</h2><p>Until then, create an account to use Tallyo’s working authenticated invoice tools.</p></div><p class="section-link"><a data-analytics-placement="generator" data-signup-link href="#">Open Tallyo →</a></p></section>`;
 
 const quotePlaceholder = generatorPlaceholder.replaceAll("Invoice Maker", "Quote Maker").replaceAll("invoice maker", "quote maker").replaceAll("invoice and quote", "quote and invoice");
 

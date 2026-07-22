@@ -1,4 +1,5 @@
 import { findHelperAnswer } from "/assets/helper-core.mjs";
+import { trackEvent } from "/assets/growth.js";
 
 const root = document.querySelector("[data-helper]");
 const knowledgeElement = document.getElementById("helper-knowledge");
@@ -53,6 +54,8 @@ if (root && knowledgeElement) {
     const trimmed = question.trim().slice(0, 240);
     if (!trimmed) return;
     const reply = findHelperAnswer(knowledge, trimmed, entryId);
+    if (reply.reason === "knowledge") trackEvent("helper_answer_found", { answer_key: reply.id });
+    if (reply.reason === "no-answer") trackEvent("helper_answer_not_found");
     addMessage("user", reply.reason === "sensitive" ? "Sensitive information omitted" : trimmed);
     addMessage("assistant", reply.answer, reply.links || []);
     input.value = "";

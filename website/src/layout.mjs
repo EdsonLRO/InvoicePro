@@ -101,7 +101,7 @@ export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
     .replaceAll('data-login-link href="#"', `data-login-link href="${escapeAttribute(siteConfig.appUrl)}"`)
     .replace("__TALLYO_HELPER_KNOWLEDGE__", helperKnowledgeJson);
   const schema = JSON.stringify(schemaFor(page));
-  const pageScripts = (page.scripts || []).map((src) => `<script type="module" src="${escapeAttribute(src)}"></script>`).join("\n  ");
+  const pageScripts = ["/assets/growth.js", ...(page.scripts || [])].map((src) => `<script type="module" src="${escapeAttribute(src)}"></script>`).join("\n  ");
   const inlineScripts = [schema, ...(page.helper ? [helperKnowledgeJson] : [])];
 
   return {
@@ -145,7 +145,7 @@ export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-button><span class="sr-only">Open main menu</span><i></i><i></i><i></i></button>
       <nav class="primary-nav" id="primary-navigation" aria-label="Main navigation" data-navigation>
         <div class="nav-links">${navMarkup}</div>
-        <div class="nav-actions"><a class="login-link" id="cta_login" data-login-link href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a class="button button-primary button-small" id="cta_header_create_account" data-signup-link href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a></div>
+        <div class="nav-actions"><a class="login-link" id="cta_login" data-login-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a class="button button-primary button-small" id="cta_header_create_account" data-signup-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a></div>
       </nav>
     </div>
   </header>
@@ -154,7 +154,7 @@ export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
     <div class="footer-main">
       <div class="footer-intro"><a class="brand brand-footer" href="/"><span class="brand-mark" aria-hidden="true">T</span><span>Tallyo</span></a><p>Professional invoices, clearer payment tracking and less repeated admin for UK small businesses.</p></div>
       ${footerMarkup}
-      <div class="footer-group"><h2>Account</h2><a data-login-link href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/#install">Install Tallyo</a></div>
+      <div class="footer-group"><h2>Account</h2><a data-login-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/#install">Install Tallyo</a></div>
     </div>
     <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo. Product preview.</p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
   </footer>
