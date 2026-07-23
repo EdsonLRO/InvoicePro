@@ -54,6 +54,20 @@
         .pdf-mode .no-print { display: none !important; }
         .pdf-mode { border: none !important; box-shadow: none !important; }
         .pdf-mode .pdf-bold-row, .pdf-mode .pdf-bold-row * { font-weight: 700 !important; }
+        .pdf-export-surface {
+            position: fixed !important;
+            top: 0 !important;
+            left: -12000px !important;
+            width: 1024px !important;
+            max-width: none !important;
+            pointer-events: none !important;
+        }
+        .pdf-export-surface #invoice-canvas {
+            width: 800px !important;
+            min-width: 800px !important;
+            max-width: 800px !important;
+        }
+        .invoice-email-status-short { display: none; }
         .no-spin::-webkit-outer-spin-button, .no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .no-spin { -moz-appearance: textfield; }
         .auth-scroll-shell { min-height: 0; overflow-y: auto; }
@@ -111,6 +125,10 @@
             .recurring-table-frame table {
                 min-width: 980px;
             }
+        }
+        @media (max-width: 639px) {
+            .invoice-email-status-full { display: none; }
+            .invoice-email-status-short { display: inline; }
         }
     </style>
 </head>
@@ -589,7 +607,7 @@
                 </div>
             </div>
 
-            <div v-show="activeTab === 'create' || activeTab === 'edit'">
+            <div v-show="activeTab === 'create' || activeTab === 'edit' || isExportingPDF" :class="{'pdf-export-surface': isExportingPDF && activeTab !== 'create' && activeTab !== 'edit'}">
                 <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
                     <div class="flex items-center gap-4">
                         <h2 class="text-3xl font-semibold">{{ editingExisting ? 'Edit ' + docTypeNoun(draft.docType) + ' #' + draft.number : 'New ' + docTypeNoun(draft.docType) }}</h2>
@@ -780,7 +798,7 @@
                         <button @click="addItem" class="no-print mt-4 text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center gap-1">+ Add Line Item</button>
                     </div>
 
-                    <div class="flex flex-col-reverse md:flex-row md:justify-between md:items-start mt-8 gap-6 md:gap-0">
+                    <div class="pdf-summary-block flex flex-col-reverse md:flex-row md:justify-between md:items-start mt-8 gap-6 md:gap-0">
                         <div class="w-full md:w-1/2 md:pr-8 space-y-6">
                             <div>
                                 <label class="block text-sm font-bold text-slate-400 uppercase mb-2">Notes</label>
@@ -1225,7 +1243,10 @@
                                     <span v-else class="inline-block px-2 py-1 rounded text-xs font-bold uppercase text-center" style="min-width: 64px; white-space: nowrap;" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
                                 </td>
                                 <td class="p-4 whitespace-nowrap text-center">
-                                    <span v-if="emailStatusFor(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium" style="white-space: nowrap;" :class="emailStatusClass(emailStatusFor(inv.id).state)">{{ emailStatusFor(inv.id).label }}</span>
+                                    <span v-if="emailStatusFor(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium" style="white-space: nowrap;" :class="emailStatusClass(emailStatusFor(inv.id).state)">
+                                        <span class="invoice-email-status-full">{{ emailStatusFor(inv.id).label }}</span>
+                                        <span class="invoice-email-status-short">{{ compactEmailStatusLabel(emailStatusFor(inv.id).label) }}</span>
+                                    </span>
                                 </td>
                                 <td class="p-4 text-right whitespace-nowrap">
                                     <div class="flex justify-end items-center space-x-3">
@@ -1983,7 +2004,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.23.1';
+    const APP_BUILD = '2026.07.23.2';
     const { createApp } = Vue;
 
     createApp({
@@ -2030,7 +2051,7 @@
                 accountExportBusy: false,
 
                 // App State
-                activeTab: 'create',
+                activeTab: 'dashboard',
                 mobileMenuOpen: false,
                 publicSiteUrl: window.TallyoPublicIntegration ? window.TallyoPublicIntegration.normalisePublicSiteUrl(window.TALLYO_PUBLIC_SITE_URL) : '',
                 helpPanelOpen: false,
@@ -2435,11 +2456,11 @@
             },
             routeKeyFromHash() {
                 const key = (window.location.hash || '').replace(/^#\/?/, '').split(/[/?&]/)[0];
-                return key || 'create';
+                return key || 'dashboard';
             },
             tabFromRouteKey(routeKey) {
                 const key = String(routeKey || '').split('-')[0];
-                return this.routeTabs().includes(key) ? key : 'create';
+                return this.routeTabs().includes(key) ? key : 'dashboard';
             },
             tabFromHash() {
                 return this.tabFromRouteKey(this.routeKeyFromHash());
@@ -2448,7 +2469,7 @@
                 return `${window.location.pathname}${window.location.search}#${routeKey}`;
             },
             applyRoute(tab, routeKey = null) {
-                let nextTab = this.routeTabs().includes(tab) ? tab : 'create';
+                let nextTab = this.routeTabs().includes(tab) ? tab : 'dashboard';
                 if (nextTab === 'edit' && !this.editingExisting) nextTab = 'invoices';
                 this.activeTab = nextTab;
                 this.mobileMenuOpen = false;
@@ -3194,7 +3215,7 @@
                 this.authBusy = false;
                 this.auth = { username: '', password: '', confirm: '', code: '' };
                 this.authMode = 'login';
-                this.activeTab = 'create';
+                this.activeTab = 'dashboard';
                 this.mobileMenuOpen = false;
                 window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
                 this.editingExisting = false;
@@ -4202,6 +4223,9 @@
                 const detail = label + (best.created_at ? (' on ' + this.formatHistoryTime(best.created_at)) : '');
                 return { state, label, detail, event: best };
             },
+            compactEmailStatusLabel(label) {
+                return label === 'Accepted for delivery' ? 'Accepted' : label;
+            },
             emailStatusClass(state) {
                 if (state === 'email_delivered') return 'bg-green-100 text-green-700';
                 if (state === 'email_bounced' || state === 'email_complained' || state === 'email_failed' || state === 'email_send_failed') return 'bg-red-100 text-red-700';
@@ -5037,23 +5061,27 @@
                 this.draft.number = keepNumber;
                 this.draft.id = keepId;
             },
+            prepareInvoiceDraft(inv) {
+                const prepared = JSON.parse(JSON.stringify(inv));
+                if(prepared.globalDiscount === undefined) prepared.globalDiscount = 0;
+                if(prepared.taxRate === undefined) prepared.taxRate = 0;
+                if(prepared.shippingCost === undefined) prepared.shippingCost = 0;
+                if(prepared.taxMode === undefined) prepared.taxMode = 'exclusive';
+                (prepared.items || []).forEach(it => { if (it.tax === undefined) it.tax = 0; });
+                if(!prepared.payments) prepared.payments = [];
+                if(!prepared.history) prepared.history = [];
+                if(!prepared.repeat) prepared.repeat = { enabled: false, emailEnabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: (prepared.date || new Date().toISOString().split('T')[0]), _created: false };
+                if(prepared.repeat.emailEnabled === undefined) prepared.repeat.emailEnabled = false;
+                if(!prepared.docType) prepared.docType = 'invoice';
+                if(!prepared.currency) prepared.currency = 'GBP';
+                if(prepared.overdueRemindersEnabled === undefined) prepared.overdueRemindersEnabled = false;
+                if(!prepared.overdueFirstReminderDays) prepared.overdueFirstReminderDays = Number(this.company.overdueFirstReminderDays) || 3;
+                if(!prepared.overdueRepeatReminderDays) prepared.overdueRepeatReminderDays = Number(this.company.overdueRepeatReminderDays) || 7;
+                if(!prepared.overdueMaxReminders) prepared.overdueMaxReminders = Number(this.company.overdueMaxReminders) || 3;
+                return prepared;
+            },
             loadInvoice(inv) {
-                this.draft = JSON.parse(JSON.stringify(inv));
-                if(this.draft.globalDiscount === undefined) this.draft.globalDiscount = 0;
-                if(this.draft.taxRate === undefined) this.draft.taxRate = 0;
-                if(this.draft.shippingCost === undefined) this.draft.shippingCost = 0;
-                if(this.draft.taxMode === undefined) this.draft.taxMode = 'exclusive';
-                (this.draft.items || []).forEach(it => { if (it.tax === undefined) it.tax = 0; });
-                if(!this.draft.payments) this.draft.payments = [];
-                if(!this.draft.history) this.draft.history = [];
-                if(!this.draft.repeat) this.draft.repeat = { enabled: false, emailEnabled: false, frequency: 'monthly', customInterval: 1, customUnit: 'months', startDate: (this.draft.date || new Date().toISOString().split('T')[0]), _created: false };
-                if(this.draft.repeat.emailEnabled === undefined) this.draft.repeat.emailEnabled = false;
-                if(!this.draft.docType) this.draft.docType = 'invoice';
-                if(!this.draft.currency) this.draft.currency = 'GBP';
-                if(this.draft.overdueRemindersEnabled === undefined) this.draft.overdueRemindersEnabled = false;
-                if(!this.draft.overdueFirstReminderDays) this.draft.overdueFirstReminderDays = Number(this.company.overdueFirstReminderDays) || 3;
-                if(!this.draft.overdueRepeatReminderDays) this.draft.overdueRepeatReminderDays = Number(this.company.overdueRepeatReminderDays) || 7;
-                if(!this.draft.overdueMaxReminders) this.draft.overdueMaxReminders = Number(this.company.overdueMaxReminders) || 3;
+                this.draft = this.prepareInvoiceDraft(inv);
                 this.syncTimeFields();
                 this.editingExisting = true;
                 this.navigateTo('edit');
@@ -5131,114 +5159,156 @@
                 this.navigateTo('create');
             },
             async exportPDF(inv, audit = true) {
-                this.loadInvoice(inv);
+                const previousDraft = this.draft;
+                const previousEditingExisting = this.editingExisting;
+                this.draft = this.prepareInvoiceDraft(inv);
+                this.syncTimeFields();
+                this.editingExisting = true;
                 this.isExportingPDF = true;
-                await this.$nextTick();
-                return new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        const el = document.getElementById('invoice-canvas');
-                        // Capture at a fixed desktop width so the PDF looks the same on phone or computer,
-                        // not at the device's screen width (which made mobile exports a tall, cut-off sliver).
-                        window.html2canvas(el, {
-                            scale: 2,
-                            backgroundColor: '#ffffff',
-                            windowWidth: 1024,
-                            windowHeight: Math.max(1600, el.scrollHeight + 500),
-                            width: 800,
-                            scrollX: 0,
-                            scrollY: 0,
-                            onclone: (doc) => {
-                                doc.documentElement.style.width = '1024px';
-                                doc.documentElement.style.overflow = 'visible';
-                                doc.body.style.width = '1024px';
-                                doc.body.style.overflow = 'visible';
-                                const app = doc.getElementById('app');
-                                if (app) {
-                                    app.style.width = '1024px';
-                                    app.style.height = 'auto';
-                                    app.style.overflow = 'visible';
-                                }
-                                const main = doc.querySelector('main');
-                                if (main) {
-                                    main.style.width = '1024px';
-                                    main.style.height = 'auto';
-                                    main.style.overflow = 'visible';
-                                }
-                                const c = doc.getElementById('invoice-canvas');
-                                if (c) {
-                                    c.style.width = '800px';
-                                    c.style.minWidth = '800px';
-                                    c.style.maxWidth = '800px';
-                                    c.style.margin = '0';
-                                    c.style.overflow = 'visible';
-                                    this.addPdfRowPageBreaks(c);
-                                }
+                try {
+                    await this.$nextTick();
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    const el = document.getElementById('invoice-canvas');
+                    if (!el) throw new Error('Invoice export surface is unavailable.');
+                    // Capture at a fixed desktop width so the PDF looks the same on phone or computer,
+                    // not at the device's screen width (which made mobile exports a tall, cut-off sliver).
+                    const canvas = await window.html2canvas(el, {
+                        scale: 2,
+                        backgroundColor: '#ffffff',
+                        windowWidth: 1024,
+                        windowHeight: Math.max(1600, el.scrollHeight + 500),
+                        width: 800,
+                        scrollX: 0,
+                        scrollY: 0,
+                        onclone: (doc) => {
+                            doc.documentElement.style.width = '1024px';
+                            doc.documentElement.style.overflow = 'visible';
+                            doc.body.style.width = '1024px';
+                            doc.body.style.overflow = 'visible';
+                            const app = doc.getElementById('app');
+                            if (app) {
+                                app.style.width = '1024px';
+                                app.style.height = 'auto';
+                                app.style.overflow = 'visible';
                             }
-                        }).then(canvas => {
-                            const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
-                            const pageW = pdf.internal.pageSize.getWidth();
-                            const pageH = pdf.internal.pageSize.getHeight();
-                            const imgW = pageW;
-                            const imgH = (canvas.height * imgW) / canvas.width;
-                            // JPEG keeps text and branding sharp at this capture scale while
-                            // avoiding the very large RGBA payload produced by PNG exports.
-                            const imgData = canvas.toDataURL('image/jpeg', 0.92);
-                            const imageAlias = 'invoice-render';
-                            // Place the image, adding extra A4 pages if the invoice is taller than one page.
-                            let heightLeft = imgH;
-                            let position = 0;
-                            pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH, imageAlias, 'FAST');
-                            heightLeft -= pageH;
-                            while (heightLeft > 0) {
-                                position -= pageH;
-                                pdf.addPage();
-                                pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH, imageAlias, 'FAST');
-                                heightLeft -= pageH;
+                            const main = doc.querySelector('main');
+                            if (main) {
+                                main.style.width = '1024px';
+                                main.style.height = 'auto';
+                                main.style.overflow = 'visible';
                             }
-                            pdf.save(`Invoice_${inv.number}.pdf`);
-                            this.isExportingPDF = false;
-                            if (audit && this.isUuid(inv.id)) {
-                                this.logAppAuditEvent('document_pdf_exported', 'document', inv.id, {
-                                    docType: inv.docType || 'invoice',
-                                    status: this.effectiveStatus(inv)
-                                });
+                            const c = doc.getElementById('invoice-canvas');
+                            if (c) {
+                                c.style.width = '800px';
+                                c.style.minWidth = '800px';
+                                c.style.maxWidth = '800px';
+                                c.style.margin = '0';
+                                c.style.overflow = 'visible';
+                                this.addPdfRowPageBreaks(c);
                             }
-                            resolve();
-                        }).catch(err => {
-                            console.error('PDF export failed:', err);
-                            this.isExportingPDF = false;
-                            alert('Sorry, the PDF could not be generated. Please try again.');
-                            reject(err);
+                        }
+                    });
+                    const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+                    const pageW = pdf.internal.pageSize.getWidth();
+                    const pageH = pdf.internal.pageSize.getHeight();
+                    const imgW = pageW;
+                    const imgH = (canvas.height * imgW) / canvas.width;
+                    // JPEG keeps text and branding sharp at this capture scale while
+                    // avoiding the very large RGBA payload produced by PNG exports.
+                    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+                    const imageAlias = 'invoice-render';
+                    let heightLeft = imgH;
+                    let position = 0;
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH, imageAlias, 'FAST');
+                    heightLeft -= pageH;
+                    while (heightLeft > 0) {
+                        position -= pageH;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH, imageAlias, 'FAST');
+                        heightLeft -= pageH;
+                    }
+                    this.downloadPdfFile(pdf, `Invoice_${inv.number}.pdf`);
+                    if (audit && this.isUuid(inv.id)) {
+                        this.logAppAuditEvent('document_pdf_exported', 'document', inv.id, {
+                            docType: inv.docType || 'invoice',
+                            status: this.effectiveStatus(inv)
                         });
-                    }, 100);
-                });
+                    }
+                } catch (err) {
+                    console.error('PDF export failed:', err);
+                    alert('Sorry, the PDF could not be generated. Please try again.');
+                    throw err;
+                } finally {
+                    this.isExportingPDF = false;
+                    this.draft = previousDraft;
+                    this.editingExisting = previousEditingExisting;
+                    await this.$nextTick();
+                }
+            },
+            downloadPdfFile(pdf, filename) {
+                const sourceBlob = pdf.output('blob');
+                const blob = sourceBlob.type === 'application/pdf'
+                    ? sourceBlob
+                    : new Blob([sourceBlob], { type: 'application/pdf' });
+                const objectUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = objectUrl;
+                link.download = filename;
+                link.type = 'application/pdf';
+                link.rel = 'noopener';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.setTimeout(() => window.URL.revokeObjectURL(objectUrl), 60_000);
             },
             addPdfRowPageBreaks(container) {
                 const table = container.querySelector('.pdf-line-items');
                 if (!table) return;
                 const body = table.querySelector('tbody');
                 const rows = Array.from(body ? body.querySelectorAll('tr') : []);
-                if (!body || rows.length < 2) return;
-
+                const headerRow = table.querySelector('thead tr');
                 const pageHeightPx = 800 * (297 / 210); // A4 height at the fixed 800px PDF capture width.
                 const topGapPx = 24;
                 const bottomGapPx = 24;
                 const containerTop = container.getBoundingClientRect().top;
 
-                rows.forEach(row => {
-                    const rect = row.getBoundingClientRect();
-                    const rowTop = rect.top - containerTop;
-                    const rowHeight = rect.height;
-                    const pageOffset = rowTop % pageHeightPx;
+                if (body) {
+                    rows.forEach(row => {
+                        const rect = row.getBoundingClientRect();
+                        const rowTop = rect.top - containerTop;
+                        const rowHeight = rect.height;
+                        const pageOffset = rowTop % pageHeightPx;
 
-                    if (pageOffset > topGapPx && pageOffset + rowHeight > pageHeightPx - bottomGapPx) {
-                        const spacerHeight = (pageHeightPx - pageOffset) + topGapPx;
-                        const spacer = row.ownerDocument.createElement('tr');
-                        spacer.className = 'pdf-page-spacer';
-                        spacer.innerHTML = '<td colspan="7" style="height:' + spacerHeight + 'px; padding:0; border:0; background:#ffffff;"></td>';
-                        body.insertBefore(spacer, row);
-                    }
-                });
+                        if (pageOffset > topGapPx && pageOffset + rowHeight > pageHeightPx - bottomGapPx) {
+                            const spacerHeight = (pageHeightPx - pageOffset) + topGapPx;
+                            const spacer = row.ownerDocument.createElement('tr');
+                            spacer.className = 'pdf-page-spacer';
+                            spacer.setAttribute('aria-hidden', 'true');
+                            spacer.innerHTML = '<td colspan="7" style="height:' + spacerHeight + 'px; padding:0; border:0; background:#ffffff;"></td>';
+                            body.insertBefore(spacer, row);
+                            if (headerRow) {
+                                const repeatedHeader = headerRow.cloneNode(true);
+                                repeatedHeader.classList.add('pdf-repeated-header');
+                                repeatedHeader.setAttribute('aria-hidden', 'true');
+                                body.insertBefore(repeatedHeader, row);
+                            }
+                        }
+                    });
+                }
+
+                const summary = container.querySelector('.pdf-summary-block');
+                if (!summary) return;
+                const summaryRect = summary.getBoundingClientRect();
+                const summaryTop = summaryRect.top - containerTop;
+                const summaryOffset = summaryTop % pageHeightPx;
+                if (summaryOffset > topGapPx && summaryOffset + summaryRect.height > pageHeightPx - bottomGapPx) {
+                    const spacer = summary.ownerDocument.createElement('div');
+                    spacer.className = 'pdf-summary-spacer';
+                    spacer.setAttribute('aria-hidden', 'true');
+                    spacer.style.height = ((pageHeightPx - summaryOffset) + topGapPx) + 'px';
+                    spacer.style.background = '#ffffff';
+                    summary.parentNode.insertBefore(spacer, summary);
+                }
             },
             exportExcel() {
                 if(this.invoices.length === 0) return;
