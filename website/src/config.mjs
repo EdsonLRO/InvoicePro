@@ -3,6 +3,18 @@ const trimSlash = (value) => value.replace(/\/+$/, "");
 const mode = process.env.TALLYO_SITE_MODE === "production" ? "production" : "preview";
 const canonicalOrigin = trimSlash(process.env.TALLYO_CANONICAL_ORIGIN || "https://tallyo.co.uk");
 const appUrl = trimSlash(process.env.TALLYO_APP_URL || "https://edsonlro.github.io/InvoicePro/");
+const subscriptionCheckoutRequested = process.env.TALLYO_SUBSCRIPTIONS_ENABLED === "true";
+const aiHelperRequested = process.env.TALLYO_PUBLIC_AI_HELPER_ENABLED === "true";
+
+if (subscriptionCheckoutRequested) {
+  throw new Error("Subscription checkout is blocked until the approved offer, Stripe Billing backend and server-enforced entitlements exist");
+}
+if (aiHelperRequested && process.env.TALLYO_AI_PRIVATE_PREVIEW_APPROVED !== "true") {
+  throw new Error("AI Helper build blocked until the reviewed private-preview scope is approved");
+}
+if (aiHelperRequested && mode === "production" && process.env.TALLYO_AI_PUBLIC_RELEASE_APPROVED !== "true") {
+  throw new Error("AI Helper production build blocked until public release is approved");
+}
 
 export const siteConfig = Object.freeze({
   name: "Tallyo",
@@ -18,6 +30,8 @@ export const siteConfig = Object.freeze({
   socialImagePath: "/assets/tallyo-social-card.webp",
   googleSiteVerification: process.env.TALLYO_GOOGLE_SITE_VERIFICATION || "",
   bingSiteVerification: process.env.TALLYO_BING_SITE_VERIFICATION || "",
+  aiHelperEnabled: aiHelperRequested,
+  subscriptionCheckoutEnabled: false,
   preview: mode !== "production"
 });
 
