@@ -6,9 +6,9 @@ Title: Restore CAPTCHA-protected password reauthentication for sensitive account
 
 Priority: High
 
-Status: Implementation Complete — Production Acceptance Pending
+Status: Protected Preview Sign-Out Accepted — Production Publication Pending
 
-Phase: Repository validation complete
+Phase: Protected preview acceptance complete for global sign-out
 
 Owner role: Master Orchestrator
 
@@ -18,9 +18,9 @@ Model/work mode: Sol for Auth design and final review; focused implementation an
 
 Risk level: High — Supabase Auth, password reauthentication, MFA assurance and global session revocation
 
-Affected files: `index.html`, `service-worker.js`, `.github/workflows/security-checks.yml`, focused Auth CAPTCHA/session/PWA/integration tests, `SECURITY_FINDINGS_LEDGER.md`, this task record, and only authoritative Auth/release records whose state changes
+Affected files: `index.html`, `service-worker.js`, `.github/workflows/security-checks.yml`, focused Auth CAPTCHA/session/PWA/integration tests, `deployment/cloudflare/pages-projects.json`, `SECURITY_FINDINGS_LEDGER.md`, this task record, and only authoritative Auth/release records whose state changes
 
-Files or paths locked: `index.html`, `service-worker.js`, `.github/workflows/security-checks.yml`, focused Auth CAPTCHA/session/PWA/integration tests, `SECURITY_FINDINGS_LEDGER.md`, and this task record
+Files or paths locked: `index.html`, `service-worker.js`, `.github/workflows/security-checks.yml`, focused Auth CAPTCHA/session/PWA/integration tests, `deployment/cloudflare/pages-projects.json`, `SECURITY_FINDINGS_LEDGER.md`, and this task record
 
 Lock acquired: 2026-07-23 by the Master Orchestrator for AUTH-003
 
@@ -60,10 +60,12 @@ Implementation evidence: A shared signed-in Turnstile dialog obtains a fresh `pa
 
 Validation evidence: `node tests/sensitive-reauth-captcha-harness.cjs`; `node tests/auth-captcha-harness.cjs`; `node tests/session-expiry-harness.cjs`; `node tests/security-workflow-harness.cjs`; `node tests/scale-accessibility-safety-harness.cjs`; `node tests/pwa-update-harness.cjs`; and `node tests/app-public-integration-harness.cjs` all pass. The focused harnesses parse the inline application script. The required security workflow now executes the new sensitive-reauthentication harness. Final `git diff --check`, focused secret scan and final-diff inspection are required immediately before commit.
 
-Remote evidence: GitHub required check `verify` passed in security run `29969200606` at head `057f6cb`. The automatically attempted Cloudflare website and app branch-preview checks failed externally; they are not treated as production acceptance, were not retried, and require a separately approved provider-configuration investigation if they are to be made green. PR #88 remains draft and no candidate build was published.
+Remote evidence: GitHub required check `verify` passed in security run `29969272788` at head `1f5b7c8`. The automatic app and website Preview builds failed because Preview did not inherit the approved production Access-confirmation variable; the app also requires its existing browser-publishable configuration. With exact Owner approval, Preview received the same six reviewed browser-publishable app variables with Stripe live mode remaining false, and the website received only `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`. Exactly one app retry was performed. Deployment `99d5895c-56a5-4c37-b1f3-508f6c563eac` succeeded from `1f5b7c8` in 15 seconds and exposed the Access-protected branch alias. The website was not retried. PR #88 remains draft and no public production build was published.
+
+Protected preview acceptance: The Access-protected branch alias rendered Tallyo build `2026.07.23.1` with Turnstile present. The Owner privately entered the synthetic account password, completed the fresh sensitive-action security challenge and completed MFA without disclosing any value. `Sign Out Everywhere` succeeded and returned the preview to the clean signed-out shell; read-only browser inspection confirmed only the sign-in controls, Turnstile group and build marker remained visible. No password, CAPTCHA response, TOTP value, recovery code, JWT, private email or account data was read or recorded.
 
 Independent review: Sequential Security/QA review found one stale-widget callback race in the first implementation. A monotonic challenge-instance guard and same-action stale-callback regression were added; the complete focused suite then passed. No migration, dependency, RLS, payment, secret or production-provider change is present.
 
-Blocked reason: None for the reviewed repository commit and push. Production publication, marking PR #88 ready and merge remain blocked pending exact Owner approval and later live synthetic acceptance.
+Blocked reason: None for the reviewed repository commit and protected-preview global-sign-out evidence. Marking PR #88 ready, merging and production publication remain blocked pending exact Owner approval. The shared Change Password path is deterministically verified but has not received a separate manual protected-preview acceptance in this stage.
 
-Next action: Stop before readying, merging or publishing. A later exact Owner-approved production stage must resolve or disposition the external preview checks, publish the reviewed candidate, and privately accept both sensitive actions before SEC-AUTH-005 can be marked live-verified.
+Next action: Stop before readying, merging or publishing. A later exact Owner-approved stage may perform the separate Change Password protected-preview acceptance or explicitly disposition it, then mark PR #88 ready, merge and publish candidate build `2026.07.23.1` before production verification.
