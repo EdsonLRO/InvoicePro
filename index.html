@@ -495,6 +495,23 @@
                 </div>
             </div>
 
+            <div v-if="reauthChallenge.visible" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4">
+                <div class="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md p-6" role="dialog" aria-modal="true" aria-labelledby="reauth-challenge-title">
+                    <h2 id="reauth-challenge-title" class="text-xl font-semibold text-slate-800 mb-2">{{ reauthChallenge.title }}</h2>
+                    <p class="text-sm text-slate-600 mb-5">{{ reauthChallenge.message }}</p>
+                    <div role="group" aria-label="Security verification">
+                        <div ref="reauthTurnstileContainer" class="min-h-[65px] w-full"></div>
+                        <p v-if="reauthChallenge.loading" class="text-sm text-slate-500 mt-2" role="status">Loading security check...</p>
+                        <p v-if="reauthChallenge.error" class="text-sm text-red-600 mt-2" role="alert">{{ reauthChallenge.error }}</p>
+                        <button v-if="reauthChallenge.error" @click="retryReauthTurnstile" type="button" class="mt-3 text-sm font-semibold text-indigo-700 hover:text-indigo-800">Retry security check</button>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                        <button @click="submitReauthChallenge" :disabled="!reauthChallenge.token || reauthChallenge.loading" class="flex-1 bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">Continue</button>
+                        <button @click="cancelReauthChallenge" class="flex-1 bg-slate-100 text-slate-600 px-5 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
             <div v-if="mfaPasswordConfirm.visible" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4">
                 <div class="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md p-6">
                     <h2 class="text-xl font-semibold text-slate-800 mb-2">{{ mfaPasswordConfirm.title }}</h2>
@@ -1966,7 +1983,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.22.2';
+    const APP_BUILD = '2026.07.23.1';
     const { createApp } = Vue;
 
     createApp({
@@ -2001,6 +2018,8 @@
                 mfaRecovery: { busy: false, pending: false, enrollmentVerified: false, code: '', error: '', codes: [], codesGeneratedAt: null },
                 mfaPasswordConfirm: { visible: false, busy: false, code: '', error: '', title: 'Confirm with authenticator', message: 'Enter the 6-digit code from your authenticator app.' },
                 sessionConfirm: { visible: false, busy: false, password: '', error: '' },
+                reauthChallenge: { visible: false, loading: false, widgetId: null, token: '', error: '', context: '', title: 'Security verification', message: 'Complete the security check to continue.' },
+                reauthChallengeSequence: 0,
                 pendingAuth: null,
                 generatedCode: null,
                 encryptionKey: null,
@@ -2557,6 +2576,145 @@
                 if (!this.turnstile.token) throw new Error('Complete the security check before continuing.');
                 return this.turnstile.token;
             },
+            async renderReauthTurnstile() {
+                if (!this.turnstile.enabled || !this.reauthChallenge.visible || this.reauthChallenge.loading || this.reauthChallenge.widgetId !== null) return;
+                const container = this.$refs.reauthTurnstileContainer;
+                if (!container) return;
+                const context = this.reauthChallenge.context;
+                const challengeSequence = ++this.reauthChallengeSequence;
+                this.reauthChallenge.loading = true;
+                this.reauthChallenge.error = '';
+                try {
+                    const api = await loadTurnstileApi();
+                    if (!this.reauthChallenge.visible || context !== this.reauthChallenge.context || challengeSequence !== this.reauthChallengeSequence || container.isConnected === false) return;
+                    this.reauthChallenge.widgetId = api.render(container, {
+                        sitekey: this.turnstile.siteKey,
+                        action: 'password_reauth',
+                        theme: 'light',
+                        size: 'flexible',
+                        appearance: 'interaction-only',
+                        language: 'auto',
+                        tabindex: 0,
+                        'response-field': false,
+                        'feedback-enabled': false,
+                        retry: 'auto',
+                        'retry-interval': 8000,
+                        'refresh-expired': 'manual',
+                        'refresh-timeout': 'auto',
+                        callback: token => {
+                            if (!this.reauthChallenge.visible || context !== this.reauthChallenge.context || challengeSequence !== this.reauthChallengeSequence) return;
+                            this.reauthChallenge.token = String(token || '');
+                            this.reauthChallenge.error = '';
+                        },
+                        'expired-callback': () => {
+                            if (challengeSequence !== this.reauthChallengeSequence) return;
+                            this.reauthChallenge.token = '';
+                            this.reauthChallenge.error = 'Security check expired. Retry the security check.';
+                        },
+                        'timeout-callback': () => {
+                            if (challengeSequence !== this.reauthChallengeSequence) return;
+                            this.reauthChallenge.token = '';
+                            this.reauthChallenge.error = 'Security check timed out. Retry the security check.';
+                        },
+                        'error-callback': () => {
+                            if (challengeSequence !== this.reauthChallengeSequence) return;
+                            this.reauthChallenge.token = '';
+                            this.reauthChallenge.error = 'Security check could not be completed.';
+                        },
+                        'unsupported-callback': () => {
+                            if (challengeSequence !== this.reauthChallengeSequence) return;
+                            this.reauthChallenge.token = '';
+                            this.reauthChallenge.error = 'This browser cannot complete the security check.';
+                        }
+                    });
+                } catch (_) {
+                    this.reauthChallenge.error = 'Security check could not load. Check your connection or content blocker.';
+                } finally {
+                    this.reauthChallenge.loading = false;
+                }
+            },
+            removeReauthTurnstileWidget() {
+                this.reauthChallengeSequence += 1;
+                if (this.reauthChallenge.widgetId !== null && window.turnstile) {
+                    try { window.turnstile.remove(this.reauthChallenge.widgetId); } catch (_) { /* already removed */ }
+                }
+                this.reauthChallenge.widgetId = null;
+                this.reauthChallenge.token = '';
+                this.reauthChallenge.loading = false;
+                this.reauthChallenge.error = '';
+            },
+            retryReauthTurnstile() {
+                this.removeReauthTurnstileWidget();
+                this.$nextTick(() => this.renderReauthTurnstile());
+            },
+            requestReauthChallenge(context) {
+                if (!this.turnstile.enabled) return Promise.resolve('');
+                if (this.reauthChallenge.visible) return Promise.reject(new Error('Another security check is already in progress.'));
+                this.reauthChallenge = {
+                    visible: true,
+                    loading: false,
+                    widgetId: null,
+                    token: '',
+                    error: '',
+                    context: String(context || 'sensitive_action'),
+                    title: 'Security verification',
+                    message: 'Complete the security check to confirm it is you.'
+                };
+                const challenge = new Promise((resolve, reject) => {
+                    this.resolveReauthChallenge = resolve;
+                    this.rejectReauthChallenge = reject;
+                });
+                this.$nextTick(() => this.renderReauthTurnstile());
+                return challenge;
+            },
+            submitReauthChallenge() {
+                const token = String(this.reauthChallenge.token || '');
+                if (!token) {
+                    this.reauthChallenge.error = 'Complete the security check before continuing.';
+                    return;
+                }
+                const resolve = this.resolveReauthChallenge;
+                this.reauthChallenge.visible = false;
+                this.removeReauthTurnstileWidget();
+                this.reauthChallenge.context = '';
+                this.resolveReauthChallenge = null;
+                this.rejectReauthChallenge = null;
+                if (resolve) resolve(token);
+            },
+            cancelReauthChallenge() {
+                const reject = this.rejectReauthChallenge;
+                this.reauthChallenge.visible = false;
+                this.removeReauthTurnstileWidget();
+                this.reauthChallenge.context = '';
+                this.resolveReauthChallenge = null;
+                this.rejectReauthChallenge = null;
+                if (reject) reject(new Error('Account verification was cancelled.'));
+            },
+            reauthErrorMessage(error) {
+                const message = String(error && error.message ? error.message : error || '').toLowerCase();
+                if (/cancel/.test(message)) return 'Account verification was cancelled.';
+                if (/captcha|security check|challenge|verification/.test(message)) return 'Security verification expired or could not be confirmed. Try again.';
+                if (/rate limit|too many requests|over_request_rate_limit/.test(message)) return 'Too many attempts. Wait a moment and try again.';
+                if (/invalid login credentials|invalid credentials|wrong password|bad password/.test(message)) return 'Current password is incorrect.';
+                return 'Could not verify your account. Check your connection and try again.';
+            },
+            async reauthenticateCurrentUser(password, context) {
+                let captchaToken = '';
+                try {
+                    captchaToken = await this.requestReauthChallenge(context);
+                } catch (error) {
+                    throw new Error(this.reauthErrorMessage(error));
+                }
+                const credentials = { email: this.userProfileEmail, password };
+                if (captchaToken) credentials.options = { captchaToken };
+                let error = null;
+                try {
+                    ({ error } = await supabaseClient.auth.signInWithPassword(credentials));
+                } catch (requestError) {
+                    error = requestError;
+                }
+                if (error) throw new Error(this.reauthErrorMessage(error));
+            },
             passwordPolicyMessage(password, email = '') {
                 const value = String(password || '');
                 if (value.length < 12) return 'Password must be at least 12 characters.';
@@ -3013,6 +3171,7 @@
                 // Otherwise the provider retains a stale widget id after the Auth
                 // shell is replaced by the signed-in application.
                 this.removeTurnstileWidget();
+                this.removeReauthTurnstileWidget();
                 this.isLoggedIn = true;
                 this.auth = { username: '', password: '', confirm: '', code: '' };
                 await this.loadAllData();
@@ -3022,6 +3181,8 @@
                 this.navigateTo(this.tabFromHash(), { replace: !window.location.hash });
             },
             clearSignedOutState() {
+                const pendingReauthReject = this.rejectReauthChallenge;
+                this.removeReauthTurnstileWidget();
                 this.authSessionVersion += 1;
                 this.isLoggedIn = false;
                 this.currentUser = null;
@@ -3088,10 +3249,14 @@
                 this.passwordRecoveryStarted = false;
                 this.mfaPasswordConfirm = { visible: false, busy: false, code: '', error: '', title: 'Confirm with authenticator', message: 'Enter the 6-digit code from your authenticator app.' };
                 this.sessionConfirm = { visible: false, busy: false, password: '', error: '' };
+                this.reauthChallenge = { visible: false, loading: false, widgetId: null, token: '', error: '', context: '', title: 'Security verification', message: 'Complete the security check to continue.' };
                 this.resolvePasswordMfaCode = null;
                 this.rejectPasswordMfaCode = null;
                 this.resolveSessionPasswordConfirm = null;
                 this.rejectSessionPasswordConfirm = null;
+                this.resolveReauthChallenge = null;
+                this.rejectReauthChallenge = null;
+                if (pendingReauthReject) pendingReauthReject(new Error('Account verification was cancelled.'));
                 this.dataLoading = false;
                 this.documentSaveBusy = false;
                 this.quickCustomerSaveBusy = false;
@@ -3149,11 +3314,7 @@
                 if(!confirm("Sign out of Tallyo everywhere? You'll need to sign in again on each device.")) return;
                 try {
                     const password = await this.requestSessionPasswordConfirm();
-                    const { error: reauthError } = await supabaseClient.auth.signInWithPassword({
-                        email: this.userProfileEmail,
-                        password
-                    });
-                    if (reauthError) return alert("Current password is incorrect.");
+                    await this.reauthenticateCurrentUser(password, 'global_signout');
                     if (await this.currentSessionNeedsMfa()) {
                         const code = await this.requestPasswordMfaCode({
                             title: 'Confirm sign out everywhere',
@@ -3327,10 +3488,11 @@
                 if(this.pwdChange.new !== this.pwdChange.confirm) return alert("New passwords do not match.");
                 if(!this.pwdChange.old) return alert("Enter your current password.");
                 // Re-verify the current password before allowing a change
-                const { error: reauthError } = await supabaseClient.auth.signInWithPassword({
-                    email: this.userProfileEmail, password: this.pwdChange.old
-                });
-                if(reauthError) return alert("Current password is incorrect.");
+                try {
+                    await this.reauthenticateCurrentUser(this.pwdChange.old, 'password_change');
+                } catch (e) {
+                    return alert(e.message || 'Could not verify your account. Try again.');
+                }
                 try {
                     if (await this.currentSessionNeedsMfa()) {
                         const code = await this.requestPasswordMfaCode();

@@ -122,7 +122,8 @@ async function run() {
         mfa: { enabled: true, verifiedFactors: [{ id: 'factor' }], secret: 'private-totp' },
         mfaRecovery: { busy: false, pending: false, enrollmentVerified: false, code: 'PRIVATE-CODE', error: '', codes: ['PRIVATE-CODE'], codesGeneratedAt: '2026-07-16T00:00:00Z' },
         mfaPasswordConfirm: { visible: true, code: '123456' },
-        sessionConfirm: { visible: true, password: 'private-password' }
+        sessionConfirm: { visible: true, password: 'private-password' },
+        reauthChallenge: { visible: true, loading: false, widgetId: null, token: 'private-captcha-token', error: '', context: 'password_change' }
     });
     app.clearSignedOutState();
     app.clearSignedOutState();
@@ -141,6 +142,8 @@ async function run() {
     assert.equal(app.mfaRecovery.codes.length, 0);
     assert.equal(app.mfaPasswordConfirm.code, '');
     assert.equal(app.sessionConfirm.password, '');
+    assert.equal(app.reauthChallenge.token, '');
+    assert.equal(app.reauthChallenge.context, '');
     assert(app.draft.items.every((item) => !item.name && !item.description && !item.price));
     assert(app.draft.history.every((entry) => entry.text !== 'Private history'));
     assert.equal(app.draft.payments.length, 0);
