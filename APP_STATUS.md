@@ -23,13 +23,17 @@ Keep the verified invoicing app stable while building the separate public websit
 
 **Closed free-document-generator release:** `tasks/WEB-002_FREE_DOCUMENT_GENERATOR_2026-07-22.md` records the reviewed browser-only generator merged in PR #84. It is present in source, but the separate public website remains unpublished.
 
+**Closed sensitive-reauthentication release:** `tasks/AUTH-003_TURNSTILE_SENSITIVE_REAUTH_2026-07-23.md` records the shared one-time Turnstile/current-password/MFA reauthentication flow, deterministic Change Password coverage, Owner-operated protected-preview Sign Out Everywhere acceptance, the accepted Change Password test disposition, merged PR #88 and retained production behaviour in build `2026.07.23.2`.
+
+**Closed mobile/PDF usability release:** `tasks/UX-001_MOBILE_PDF_USABILITY_2026-07-23.md` records compact mobile delivery status, route-preserving PDF download, repeated continuation-page headers, intact summary pagination, Dashboard default routing, merged PR #89 and verified GitHub Pages/Access-protected Cloudflare build `2026.07.23.2`.
+
 **Active Cloudflare preview task:** `tasks/WEB-003_CLOUDFLARE_PRIVATE_PREVIEW_2026-07-22.md` records the repository-scoped GitHub integration and two free Pages projects. Their initial builds stopped at the fail-closed guard. After exact Owner approval, only the documented browser-publishable variables were entered, live Stripe and Turnstile stayed disabled, and one retry per project deployed merged commit `9fc3f90`. Owner-policy Access still redirects unauthenticated requests on both main and wildcard `pages.dev` hostnames for both projects. Authenticated acceptance now passes the 26 public website routes, real 404, metadata, responsive menu, Helper boundaries, website-to-app links, app root/hash refresh, and live manifest/service-worker checks without using account or payment data. Delivered headers, live `robots.txt`, operating-system install/update UX, the signed-in Help & install panel and the separately reviewed synthetic Auth/MFA journey remain open. Custom domains, DNS and public release remain separately gated.
 
 The current product is a single-user-per-account invoicing workspace backed by Supabase. It is a real working app and a security-focused portfolio project. It is not yet a public paid SaaS platform.
 
 ## Current app stage
 
-**Current invoicing-app scope:** feature-complete and regression-verified on public build `2026.07.22.2`, with controlled live Stripe invoice payments activated and acceptance-tested. This functional activation is not a legal-compliance or unrestricted customer-onboarding approval; the remaining legal, privacy and operational conditions below still apply.
+**Current invoicing-app scope:** feature-complete and regression-verified on public build `2026.07.23.2`, with controlled live Stripe invoice payments activated and acceptance-tested. This functional activation is not a legal-compliance or unrestricted customer-onboarding approval; the remaining legal, privacy and operational conditions below still apply.
 
 Implemented:
 
@@ -52,6 +56,7 @@ Implemented:
 - Active Cloudflare Turnstile protection for public sign-up, password sign-in, and reset requests, with exact-origin CSP, a public production Site Key, an explicit rollback switch, Supabase enforcement, and focused/live acceptance.
 - Stripe failed-payment, refund, refund-failure, and dispute lifecycle awareness in the webhook.
 - Public build `2026.07.22.2` retains the verified functional/UX baseline and adds the customer-facing Help/install integration plus the shared folded blue-and-mint Tallyo identity across website, app and PWA artwork. Required security run `29922330142`, post-merge security run `29922434061`, Pages run `29922431260`, and HTTPS build/service-worker/brand-asset readback passed.
+- Public build `2026.07.23.2` adds Turnstile-aware sensitive reauthentication, compact mobile delivery status, route-preserving MIME-safe PDF downloads, repeated continuation-page headers, intact summary pagination and Dashboard default routing. PRs #88 and #89 passed required and Access-protected preview checks; GitHub Pages and Cloudflare production readback returned build `2026.07.23.2`, and Cloudflare served cache marker `tallyo-shell-2026-07-23-2`.
 
 Still to finish before treating the app as customer-ready:
 
