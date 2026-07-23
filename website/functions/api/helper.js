@@ -1,4 +1,4 @@
-import knowledge from "../../content/helper-knowledge.json" with { type: "json" };
+import knowledge from "../../content/helper-knowledge.json";
 import { handlePublicHelperRequest } from "../lib/public-helper.mjs";
 
 export const onRequest = (context) => handlePublicHelperRequest({

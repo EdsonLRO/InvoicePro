@@ -75,3 +75,27 @@ plan names, features, limits, prices, tax display, free/trial approach and
 cancellation commitments. AI preview activation separately needs budget,
 rate-limit/provider configuration, privacy/content review and exact Owner
 approval.
+
+## Preview compatibility finding
+
+Finding ID: WEB-004-COMP-001
+
+Status: Validated — approved to fix under the standing source-maintenance
+permission.
+
+Severity: Medium. Cloudflare Pages cloned and built the website successfully,
+but its pinned Wrangler 3.114.17 Functions bundler rejected the newer JavaScript
+JSON import-attributes syntax in `website/functions/api/helper.js`. The
+deployment therefore failed before any Function or AI route was published.
+There was no secret exposure, provider call, weakened gate, customer impact or
+partial deployment.
+
+Fix: Use the bundler-compatible bare JSON module import while keeping the same
+reviewed knowledge file and all request, origin, rate, secret, content, provider
+and output controls unchanged.
+
+Required proof: Existing website and helper suites; JavaScript syntax checks;
+Wrangler 3.114.17 Pages Functions build; focused diff and secret checks; one
+bounded Cloudflare preview retry only after the source fix is pushed. Public AI
+activation, secret entry, binding creation, merge and production release remain
+outside this fix.
