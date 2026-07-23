@@ -50,7 +50,7 @@ Approval boundary: The Owner approved this exact High-risk Auth fix on 2026-07-2
 
 Branch: `codex/cloudflare-private-preview-deployments`
 
-Commit: Pending final focused commit on draft PR #88
+Commits: `b07f8e3` (implementation) and `057f6cb` (required-workflow alignment) on draft PR #88; this final evidence update follows on the same branch
 
 Evidence: The Owner reproduced `Current password is incorrect` using the same password that completed login. Shipped source shows ordinary login supplies `options.captchaToken`, while the password reauthentication calls for global sign-out and password change omit it and collapse every provider rejection into the password error. Current Supabase CAPTCHA documentation states that protected sign-in requests require a frontend CAPTCHA token. No relevant Auth breaking change was identified in the current changelog.
 
@@ -60,8 +60,10 @@ Implementation evidence: A shared signed-in Turnstile dialog obtains a fresh `pa
 
 Validation evidence: `node tests/sensitive-reauth-captcha-harness.cjs`; `node tests/auth-captcha-harness.cjs`; `node tests/session-expiry-harness.cjs`; `node tests/security-workflow-harness.cjs`; `node tests/scale-accessibility-safety-harness.cjs`; `node tests/pwa-update-harness.cjs`; and `node tests/app-public-integration-harness.cjs` all pass. The focused harnesses parse the inline application script. The required security workflow now executes the new sensitive-reauthentication harness. Final `git diff --check`, focused secret scan and final-diff inspection are required immediately before commit.
 
+Remote evidence: GitHub required check `verify` passed in security run `29969200606` at head `057f6cb`. The automatically attempted Cloudflare website and app branch-preview checks failed externally; they are not treated as production acceptance, were not retried, and require a separately approved provider-configuration investigation if they are to be made green. PR #88 remains draft and no candidate build was published.
+
 Independent review: Sequential Security/QA review found one stale-widget callback race in the first implementation. A monotonic challenge-instance guard and same-action stale-callback regression were added; the complete focused suite then passed. No migration, dependency, RLS, payment, secret or production-provider change is present.
 
 Blocked reason: None for the reviewed repository commit and push. Production publication, marking PR #88 ready and merge remain blocked pending exact Owner approval and later live synthetic acceptance.
 
-Next action: Complete final diff/secret checks, commit and push the focused implementation to draft PR #88, then stop before readying, merging or publishing.
+Next action: Stop before readying, merging or publishing. A later exact Owner-approved production stage must resolve or disposition the external preview checks, publish the reviewed candidate, and privately accept both sensitive actions before SEC-AUTH-005 can be marked live-verified.
