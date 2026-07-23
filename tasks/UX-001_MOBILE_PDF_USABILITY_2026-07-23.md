@@ -6,7 +6,7 @@ Title: Correct mobile invoice actions, PDF download/pagination and default routi
 
 Priority: High user impact
 
-Status: Release approved - PR checks and production publication pending
+Status: Closed - production verified
 
 Owner role: Master Orchestrator
 
@@ -20,7 +20,7 @@ Objective: Keep mobile invoice-list actions readable, download PDFs without navi
 
 Affected files: `index.html`, `service-worker.js`, a focused regression harness, and this task record
 
-Files or paths locked: `index.html`, `service-worker.js`, the focused UX-001 regression harness, and this task record
+Files or paths locked: Released after production verification on 2026-07-23
 
 Lock acquired: 2026-07-23 by the Master Orchestrator after the frozen AUTH-003 implementation transferred its edit lock on these two source files
 
@@ -70,8 +70,11 @@ Validation evidence:
 - Chrome generated `Invoice_TEST-004.pdf` from 42 synthetic line items while remaining on `#invoices`;
 - the file had a `%PDF-` signature, `.pdf` filename, A4 page size and four pages;
 - Poppler-rendered page inspection confirmed repeated line-item headers on pages 2 and 3, no sliced row, and the complete notes/terms/payment-details/totals block on page 4;
-- the test used fictional data only and did not sign in, call Supabase, alter payments or inspect private information.
+- the test used fictional data only and did not sign in, call Supabase, alter payments or inspect private information;
+- after a conflict-free rebase onto merged PR #88, the focused scale/accessibility, PWA-update and sensitive-reauthentication harnesses plus `git diff --check` and the changed-line secret scan passed again;
+- PR #89 passed required `verify` and both Access-protected Cloudflare preview checks, was marked ready and merged as `2910a87`;
+- GitHub Pages and the Access-protected Cloudflare app served build `2026.07.23.2`, and the Cloudflare service worker served cache marker `tallyo-shell-2026-07-23-2`.
 
-Blocked reason: None within the approved release scope.
+Blocked reason: None. The separate legal/privacy block on unrestricted public SaaS onboarding is unchanged.
 
-Next action: Commit this release-state update, push the rebased branch, create the pull request, require all checks and protected previews to pass, then merge and verify production build `2026.07.23.2`.
+Next action: None. UX-001 is closed and its locks are released.

@@ -6,9 +6,9 @@ Title: Restore CAPTCHA-protected password reauthentication for sensitive account
 
 Priority: High
 
-Status: Release approved — checks and production publication pending
+Status: Closed — production verified
 
-Phase: Protected preview acceptance complete for global sign-out
+Phase: Production release and verification complete
 
 Owner role: Master Orchestrator
 
@@ -20,13 +20,13 @@ Risk level: High — Supabase Auth, password reauthentication, MFA assurance and
 
 Affected files: `index.html`, `service-worker.js`, `.github/workflows/security-checks.yml`, focused Auth CAPTCHA/session/PWA/integration tests, `deployment/cloudflare/pages-projects.json`, `SECURITY_FINDINGS_LEDGER.md`, this task record, and only authoritative Auth/release records whose state changes
 
-Files or paths locked: Auth-specific tests, `.github/workflows/security-checks.yml`, `deployment/cloudflare/pages-projects.json`, `SECURITY_FINDINGS_LEDGER.md`, and this task record. The reviewed `index.html` and `service-worker.js` implementation is frozen at commit `1f5b7c8`; its edit lock transferred on 2026-07-23 to the stacked `UX-001` task without changing or releasing the AUTH-003 merge/publication gate.
+Files or paths locked: Released after production verification on 2026-07-23
 
 Lock acquired: 2026-07-23 by the Master Orchestrator for AUTH-003
 
 Expected release condition: focused implementation committed with legitimate/failure/bypass validation, required independent Security/QA evidence, and no production deployment
 
-Dependencies: Production Supabase CAPTCHA enforcement; reviewed Turnstile widget hostnames for GitHub Pages and the Access-protected Cloudflare app; draft PR #88
+Dependencies: Production Supabase CAPTCHA enforcement and reviewed Turnstile widget hostnames for GitHub Pages and the Access-protected Cloudflare app; satisfied
 
 Security boundary: Preserve CAPTCHA enforcement, fresh one-time challenge semantics, current-password confirmation, MFA/AAL2 confirmation, audit ordering, global refresh-token revocation, local state clearing, throttling and neutral Auth errors. Never retain, log, inspect or record passwords, CAPTCHA tokens, TOTP values, recovery codes, JWTs or private account identifiers.
 
@@ -56,11 +56,11 @@ Evidence: The Owner reproduced `Current password is incorrect` using the same pa
 
 Finding disposition: `validated — approved to fix` as SEC-AUTH-005.
 
-Implementation evidence: A shared signed-in Turnstile dialog obtains a fresh `password_reauth` token for `Sign Out Everywhere` and `Change Password`. The token is consumed once, cleared before password reauthentication, and protected from removed-widget callbacks by a monotonic challenge sequence. Password failure, CAPTCHA failure, throttling, cancellation and neutral request failure remain safely distinguishable. The rollback switch omits Auth `options` exactly as before. Existing current-password, MFA/AAL2, audit-before-revocation and `scope: 'global'` ordering remains intact. Candidate build and service-worker cache markers are `2026.07.23.1`; this candidate is not published.
+Implementation evidence: A shared signed-in Turnstile dialog obtains a fresh `password_reauth` token for `Sign Out Everywhere` and `Change Password`. The token is consumed once, cleared before password reauthentication, and protected from removed-widget callbacks by a monotonic challenge sequence. Password failure, CAPTCHA failure, throttling, cancellation and neutral request failure remain safely distinguishable. The rollback switch omits Auth `options` exactly as before. Existing current-password, MFA/AAL2, audit-before-revocation and `scope: 'global'` ordering remains intact. Build `2026.07.23.1` was published by PR #88 and then retained in the superseding UX build `2026.07.23.2`.
 
 Validation evidence: `node tests/sensitive-reauth-captcha-harness.cjs`; `node tests/auth-captcha-harness.cjs`; `node tests/session-expiry-harness.cjs`; `node tests/security-workflow-harness.cjs`; `node tests/scale-accessibility-safety-harness.cjs`; `node tests/pwa-update-harness.cjs`; and `node tests/app-public-integration-harness.cjs` all pass. The focused harnesses parse the inline application script. The required security workflow now executes the new sensitive-reauthentication harness. Final `git diff --check`, focused secret scan and final-diff inspection are required immediately before commit.
 
-Remote evidence: GitHub required check `verify` passed in security run `29969272788` at head `1f5b7c8`. The automatic app and website Preview builds failed because Preview did not inherit the approved production Access-confirmation variable; the app also requires its existing browser-publishable configuration. With exact Owner approval, Preview received the same six reviewed browser-publishable app variables with Stripe live mode remaining false, and the website received only `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`. Exactly one app retry was performed. Deployment `99d5895c-56a5-4c37-b1f3-508f6c563eac` succeeded from `1f5b7c8` in 15 seconds and exposed the Access-protected branch alias. The website was not retried. PR #88 remains draft and no public production build was published.
+Remote evidence: GitHub required check `verify` passed in security run `29969272788` at head `1f5b7c8`. The automatic app and website Preview builds initially failed because Preview did not inherit the approved production Access-confirmation variable; the app also requires its existing browser-publishable configuration. With exact Owner approval, Preview received the same six reviewed browser-publishable app variables with Stripe live mode remaining false, and the website received only `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`. The Owner-operated protected preview then passed. After the final disposition commit, PR #88 passed required `verify` plus both Access-protected Cloudflare preview checks, was marked ready and merged as `35880c7`. Production served build `2026.07.23.1` before the approved UX release superseded it with build `2026.07.23.2`.
 
 Protected preview acceptance: The Access-protected branch alias rendered Tallyo build `2026.07.23.1` with Turnstile present. The Owner privately entered the synthetic account password, completed the fresh sensitive-action security challenge and completed MFA without disclosing any value. `Sign Out Everywhere` succeeded and returned the preview to the clean signed-out shell; read-only browser inspection confirmed only the sign-in controls, Turnstile group and build marker remained visible. No password, CAPTCHA response, TOTP value, recovery code, JWT, private email or account data was read or recorded.
 
@@ -68,6 +68,6 @@ Independent review: Sequential Security/QA review found one stale-widget callbac
 
 Change Password acceptance disposition: A separate password mutation was deliberately not performed. The Change Password action uses the same reviewed fresh Turnstile/current-password/MFA reauthentication path that passed the Owner-operated protected-preview Sign Out Everywhere test, and its action-specific continuation and failure paths passed deterministic regression coverage. The Owner explicitly accepted this disposition on 2026-07-23. This minimises unnecessary Auth-state mutation while retaining shared-path manual evidence and action-specific automated evidence.
 
-Blocked reason: None within the approved release scope. Required checks, branch protection and production verification remain mandatory.
+Blocked reason: None. The separate legal/privacy block on unrestricted public SaaS onboarding is unchanged.
 
-Next action: Commit and push this final disposition, confirm all required checks and preview protections, then mark PR #88 ready, merge and publish candidate build `2026.07.23.1` under the recorded Owner approval.
+Next action: None. AUTH-003 is closed and its locks are released.
