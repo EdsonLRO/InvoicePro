@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "status": "design-only-provider-disabled",
+  "publicCheckoutEnabled": false,
+  "liveStripeBillingConfigured": false,
+  "pricesPublished": false,
+  "trialPublished": false,
+  "planDecision": "pending-owner",
+  "priceDecision": "pending-owner",
+  "currentWebsitePlanLabels": ["Free", "Essentials", "Automate", "Teams"],
+  "securityPlanCandidateLabels": ["Free", "Pro", "Business"],
+  "unresolvedNamingConflict": true,
+  "billingBoundary": "Tallyo subscription billing is separate from customer invoice payments",
+  "requiredLifecycleStates": [
+    "incomplete",
+    "trialing",
+    "active",
+    "past_due",
+    "grace",
+    "cancel_at_period_end",
+    "cancelled",
+    "unpaid",
+    "read_only"
+  ],
+  "requiredServerControls": [
+    "allowlisted Stripe Billing price identifiers",
+    "authenticated account-to-Stripe-customer mapping",
+    "signed and idempotent subscription webhooks",
+    "atomic subscription-state updates",
+    "server-enforced entitlements and usage limits",
+    "grace, past-due, cancelled and read-only behaviour",
+    "customer portal and cancellation handling",
+    "cross-account isolation tests",
+    "separate invoice-payment and subscription-payment evidence",
+    "rollback and provider-outage behaviour"
+  ],
+  "ownerGates": [
+    "final plan names and included features",
+    "usage limits for every plan",
+    "monthly and any annual GBP prices",
+    "tax-inclusive or tax-exclusive presentation",
+    "free plan versus trial decision",
+    "trial length if any",
+    "cancellation and refund commitments",
+    "Stripe Billing products and prices",
+    "production secrets and webhook destination",
+    "one controlled live subscription acceptance payment",
+    "public pricing and checkout release"
+  ]
+}

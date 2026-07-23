@@ -116,12 +116,12 @@ const security = `
   ${finalCta()}`;
 
 const helper = `
-  <section class="page-hero"><p class="eyebrow">Tallyo Helper</p><h1>General product guidance, without guessing.</h1><p>Ask about current Tallyo features, documents, payments, installation and account protection. Answers come from a reviewed public knowledge base in this browser.</p></section>
+  <section class="page-hero"><p class="eyebrow">Tallyo Helper</p><h1>General product guidance, without guessing.</h1><p>__TALLYO_HELPER_HERO_COPY__</p></section>
   <section class="section helper-intro" aria-labelledby="helper-boundary-title"><div><p class="eyebrow">What the helper can see</p><h2 id="helper-boundary-title">Public guidance only.</h2><p>Tallyo Helper provides general product guidance and cannot see your account or business records.</p></div>${list(["No sign-in or account access", "No invoice, customer or payment data", "No passwords, MFA codes or recovery codes", "No legal, tax or accounting advice"])}</section>
-  <section class="section section-soft helper-shell" data-helper aria-labelledby="helper-panel-title">
+  <section class="section section-soft helper-shell" data-helper data-ai-enabled="__TALLYO_AI_HELPER_ENABLED__" aria-labelledby="helper-panel-title">
     <div class="helper-suggestion-panel"><p class="card-label">Suggested questions</p><h2 id="helper-panel-title">What would you like to know?</h2><div class="helper-suggestions" data-helper-suggestions></div></div>
     <div class="helper-conversation-panel">
-      <div class="helper-toolbar"><div><p class="card-label">Conversation</p><p>Kept only on this page while it is open.</p></div><button class="button button-secondary button-small" type="button" data-helper-reset>Clear conversation</button></div>
+      <div class="helper-toolbar"><div><p class="card-label">Conversation</p><p>__TALLYO_HELPER_MODE_NOTE__</p></div><button class="button button-secondary button-small" type="button" data-helper-reset>Clear conversation</button></div>
       <ol class="helper-conversation" data-helper-conversation aria-label="Tallyo Helper conversation" aria-live="polite" aria-relevant="additions"></ol>
       <form class="helper-form" data-helper-form>
         <label for="helper-question">Ask a general question about Tallyo</label>
@@ -132,7 +132,7 @@ const helper = `
     </div>
     <script type="application/json" id="helper-knowledge">__TALLYO_HELPER_KNOWLEDGE__</script>
   </section>
-  <section class="section limitations" aria-labelledby="helper-limits-title"><div><p class="eyebrow">Clear limits</p><h2 id="helper-limits-title">A product guide, not an account assistant.</h2></div>${list(["The helper cannot authenticate, inspect or change an account.", "It never connects to Supabase, Stripe, Resend or an AI provider.", "It does not retain user-specific memory or send prompts to a third party.", "When reviewed knowledge does not answer a question, it says so and links to public help."])}</section>
+  <section class="section limitations" aria-labelledby="helper-limits-title"><div><p class="eyebrow">Clear limits</p><h2 id="helper-limits-title">A product guide, not an account assistant.</h2></div>${list(["The helper cannot authenticate, inspect or change an account.", "It never connects to Supabase, Stripe, Resend or private business records.", "__TALLYO_HELPER_PROVIDER_LIMIT__", "When reviewed knowledge does not answer a question, it says so and links to public help."])}</section>
   ${finalCta()}`;
 
 const help = `
@@ -212,7 +212,7 @@ const foundationPages = [
   { route: "/product-tour/", output: "product-tour/index.html", title: "Tallyo product tour", description: "Tour supported Tallyo workflows for documents, customers, payments, recurring invoices, activity, branding and account protection.", content: productTour, schema: "webpage" },
   { route: "/pricing/", output: "pricing/index.html", title: "Tallyo plans and pricing", description: "See the current Tallyo plan direction. Exact prices, limits and availability are being finalised and no subscription checkout is active.", content: pricing, schema: "webpage" },
   { route: "/security/", output: "security/index.html", title: "How Tallyo protects account access", description: "Learn about Tallyo account, data-access, payment and browser security controls, with honest limitations.", content: security, schema: "webpage" },
-  { route: "/helper/", output: "helper/index.html", title: "Tallyo Helper", description: "Ask Tallyo Helper for deterministic guidance about current public product features, payments, documents, installation and account protection.", content: helper, schema: "webpage", helper: true, scripts: ["/assets/helper.js"] },
+  { route: "/helper/", output: "helper/index.html", title: "Tallyo Helper", description: "Ask Tallyo Helper for reviewed public guidance about current product features, payments, documents, installation and account protection.", content: helper, schema: "webpage", helper: true, scripts: ["/assets/helper.js"] },
   { route: "/help/", output: "help/index.html", title: "Tallyo Help Centre", description: "Find step-by-step guidance for Tallyo documents, payments, recurring work, account protection, delivery and installation.", content: help, schema: "webpage" },
   { route: "/faq/", output: "faq/index.html", title: "Tallyo frequently asked questions", description: "Answers about Tallyo invoices, quotes, recurring work, card payments, refunds, security, installation and internet access.", content: faq, schema: "faq" },
   { route: "/about/", output: "about/index.html", title: "About Tallyo", description: "Learn why Tallyo is building a straightforward invoicing and business-records workspace for UK small businesses.", content: about, schema: "webpage" },

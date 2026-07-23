@@ -1,4 +1,4 @@
-import { findHelperAnswer } from "/assets/helper-core.mjs";
+import { createPublicAiAdapter, findHelperAnswer } from "/assets/helper-core.mjs";
 import { trackEvent } from "/assets/growth.js";
 
 const root = document.querySelector("[data-helper]");
@@ -12,6 +12,9 @@ if (root && knowledgeElement) {
   const suggestions = root.querySelector("[data-helper-suggestions]");
   const reset = root.querySelector("[data-helper-reset]");
   const status = root.querySelector("[data-helper-status]");
+  const submit = form.querySelector('button[type="submit"]');
+  const aiAdapter = createPublicAiAdapter({ enabled: root.dataset.aiEnabled === "true" });
+  let requestSequence = 0;
 
   const resolveHref = (href) => {
     if (href === "app:signup") return document.querySelector("[data-signup-link]")?.href || "/";
@@ -50,16 +53,33 @@ if (root && knowledgeElement) {
     [{ label: "Browse the Help Centre", href: "/help/" }]
   );
 
-  const ask = (question, entryId = "") => {
+  const ask = async (question, entryId = "") => {
     const trimmed = question.trim().slice(0, 240);
     if (!trimmed) return;
-    const reply = findHelperAnswer(knowledge, trimmed, entryId);
+    const sequence = ++requestSequence;
+    let reply = findHelperAnswer(knowledge, trimmed, entryId);
     if (reply.reason === "knowledge") trackEvent("helper_answer_found", { answer_key: reply.id });
-    if (reply.reason === "no-answer") trackEvent("helper_answer_not_found");
     addMessage("user", reply.reason === "sensitive" ? "Sensitive information omitted" : trimmed);
-    addMessage("assistant", reply.answer, reply.links || []);
     input.value = "";
-    status.textContent = "Tallyo Helper answered using reviewed public guidance.";
+    if (reply.reason === "no-answer" && aiAdapter.enabled) {
+      status.textContent = "Tallyo Helper is checking reviewed public guidance.";
+      submit.disabled = true;
+      form.setAttribute("aria-busy", "true");
+      try {
+        reply = await aiAdapter.answer(trimmed) || reply;
+      } catch {
+        reply = findHelperAnswer(knowledge, "");
+      } finally {
+        submit.disabled = false;
+        form.removeAttribute("aria-busy");
+      }
+    }
+    if (sequence !== requestSequence) return;
+    if (reply.reason === "no-answer") trackEvent("helper_answer_not_found");
+    addMessage("assistant", reply.answer, reply.links || []);
+    status.textContent = reply.reason === "ai"
+      ? "Tallyo Helper answered from reviewed public guidance."
+      : "Tallyo Helper answered using its reviewed guide.";
     input.focus();
   };
 
@@ -68,22 +88,23 @@ if (root && knowledgeElement) {
     button.type = "button";
     button.className = "helper-suggestion";
     button.textContent = entry.question;
-    button.addEventListener("click", () => ask(entry.question, entry.id));
+    button.addEventListener("click", () => void ask(entry.question, entry.id));
     suggestions.append(button);
   }
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
-    ask(input.value);
+    void ask(input.value);
   });
 
   input.addEventListener("keydown", (event) => {
     if (event.key !== "Enter" || event.isComposing) return;
     event.preventDefault();
-    ask(input.value);
+    void ask(input.value);
   });
 
   reset.addEventListener("click", () => {
+    requestSequence += 1;
     conversation.replaceChildren();
     initialMessage();
     status.textContent = "Conversation cleared. Nothing was saved.";

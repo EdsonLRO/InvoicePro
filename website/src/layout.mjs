@@ -99,7 +99,26 @@ export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
   const content = page.content
     .replaceAll('data-signup-link href="#"', `data-signup-link href="${escapeAttribute(siteConfig.signupUrl)}"`)
     .replaceAll('data-login-link href="#"', `data-login-link href="${escapeAttribute(siteConfig.appUrl)}"`)
-    .replace("__TALLYO_HELPER_KNOWLEDGE__", helperKnowledgeJson);
+    .replace("__TALLYO_HELPER_KNOWLEDGE__", helperKnowledgeJson)
+    .replaceAll("__TALLYO_AI_HELPER_ENABLED__", String(siteConfig.aiHelperEnabled))
+    .replaceAll(
+      "__TALLYO_HELPER_HERO_COPY__",
+      siteConfig.aiHelperEnabled
+        ? "Ask a general question in your own words. The assistant answers from reviewed public Tallyo guidance and falls back safely when it is unsure."
+        : "Ask about current Tallyo features, documents, payments, installation and account protection. Answers come from a reviewed public knowledge base in this browser."
+    )
+    .replaceAll(
+      "__TALLYO_HELPER_MODE_NOTE__",
+      siteConfig.aiHelperEnabled
+        ? "For questions that need a more flexible answer, your question is sent securely to OpenAI. Tallyo does not save this conversation."
+        : "Answers are matched in this browser and are not sent to an AI provider."
+    )
+    .replaceAll(
+      "__TALLYO_HELPER_PROVIDER_LIMIT__",
+      siteConfig.aiHelperEnabled
+        ? "The AI assistant receives only your current question and reviewed public Tallyo guidance. It has no account access or tools."
+        : "It does not retain user-specific memory or send prompts to a third party."
+    );
   const schema = JSON.stringify(schemaFor(page));
   const pageScripts = ["/assets/growth.js", ...(page.scripts || [])].map((src) => `<script type="module" src="${escapeAttribute(src)}"></script>`).join("\n  ");
   const inlineScripts = [schema, ...(page.helper ? [helperKnowledgeJson] : [])];
