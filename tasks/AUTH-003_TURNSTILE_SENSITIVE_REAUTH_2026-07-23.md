@@ -18,9 +18,9 @@ Model/work mode: Sol for Auth design and final review; focused implementation an
 
 Risk level: High — Supabase Auth, password reauthentication, MFA assurance and global session revocation
 
-Affected files: `index.html`, `service-worker.js`, focused Auth CAPTCHA/session/PWA tests, `SECURITY_FINDINGS_LEDGER.md`, this task record, and only authoritative Auth/release records whose state changes
+Affected files: `index.html`, `service-worker.js`, `.github/workflows/security-checks.yml`, focused Auth CAPTCHA/session/PWA/integration tests, `SECURITY_FINDINGS_LEDGER.md`, this task record, and only authoritative Auth/release records whose state changes
 
-Files or paths locked: `index.html`, `service-worker.js`, focused Auth CAPTCHA/session/PWA tests, `SECURITY_FINDINGS_LEDGER.md`, and this task record
+Files or paths locked: `index.html`, `service-worker.js`, `.github/workflows/security-checks.yml`, focused Auth CAPTCHA/session/PWA/integration tests, `SECURITY_FINDINGS_LEDGER.md`, and this task record
 
 Lock acquired: 2026-07-23 by the Master Orchestrator for AUTH-003
 
@@ -58,7 +58,7 @@ Finding disposition: `validated — approved to fix` as SEC-AUTH-005.
 
 Implementation evidence: A shared signed-in Turnstile dialog obtains a fresh `password_reauth` token for `Sign Out Everywhere` and `Change Password`. The token is consumed once, cleared before password reauthentication, and protected from removed-widget callbacks by a monotonic challenge sequence. Password failure, CAPTCHA failure, throttling, cancellation and neutral request failure remain safely distinguishable. The rollback switch omits Auth `options` exactly as before. Existing current-password, MFA/AAL2, audit-before-revocation and `scope: 'global'` ordering remains intact. Candidate build and service-worker cache markers are `2026.07.23.1`; this candidate is not published.
 
-Validation evidence: `node tests/sensitive-reauth-captcha-harness.cjs`; `node tests/auth-captcha-harness.cjs`; `node tests/session-expiry-harness.cjs`; `node tests/security-workflow-harness.cjs`; `node tests/scale-accessibility-safety-harness.cjs`; and `node tests/pwa-update-harness.cjs` all pass. The focused harnesses parse the inline application script. Final `git diff --check`, focused secret scan and final-diff inspection are required immediately before commit.
+Validation evidence: `node tests/sensitive-reauth-captcha-harness.cjs`; `node tests/auth-captcha-harness.cjs`; `node tests/session-expiry-harness.cjs`; `node tests/security-workflow-harness.cjs`; `node tests/scale-accessibility-safety-harness.cjs`; `node tests/pwa-update-harness.cjs`; and `node tests/app-public-integration-harness.cjs` all pass. The focused harnesses parse the inline application script. The required security workflow now executes the new sensitive-reauthentication harness. Final `git diff --check`, focused secret scan and final-diff inspection are required immediately before commit.
 
 Independent review: Sequential Security/QA review found one stale-widget callback race in the first implementation. A monotonic challenge-instance guard and same-action stale-callback regression were added; the complete focused suite then passed. No migration, dependency, RLS, payment, secret or production-provider change is present.
 

@@ -55,6 +55,7 @@ jobs:
           node tests/recurring-calendar-reliability-harness.cjs
           node tests/scale-accessibility-safety-harness.cjs
           node tests/security-workflow-harness.cjs
+          node tests/sensitive-reauth-captcha-harness.cjs
           node tests/session-expiry-harness.cjs
           node tests/stripe-payment-integrity-harness.cjs
           node tests/tenant-isolation-attribution-harness.cjs
