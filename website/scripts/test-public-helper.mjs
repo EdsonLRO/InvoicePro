@@ -421,7 +421,7 @@ assert.equal(rateWorkerConfig.workers_dev, false);
 assert.equal(rateWorkerConfig.preview_urls, false);
 assert.equal(rateWorkerConfig.observability.enabled, false);
 assert.equal(rateWorkerConfig.ratelimits[0].name, "RATE_LIMITER");
-assert.equal(rateWorkerConfig.ratelimits[0].simple.limit, 5);
+assert.equal(rateWorkerConfig.ratelimits[0].simple.limit, 3);
 assert.equal(rateWorkerConfig.ratelimits[0].simple.period, 60);
 assert.equal("routes" in rateWorkerConfig, false);
 

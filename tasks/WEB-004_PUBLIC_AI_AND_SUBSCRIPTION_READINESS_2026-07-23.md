@@ -122,7 +122,7 @@ does not log.
 
 Residual limits: Cloudflare describes its native limiter as per-location and
 eventually consistent. An IP-derived anonymous key can also group people behind
-one shared network. The preview proposal is five unmatched AI questions per
+one shared network. The preview proposal is three unmatched AI questions per
 60 seconds per derived key; that threshold, namespace, Worker creation and
 service binding remain Owner-reviewed provider configuration. OpenAI budget and
 usage controls are still required because this is not a hard global cost cap.
@@ -132,5 +132,13 @@ service-binding allow, limit and unavailable paths plus the private Worker's
 method, route, content-type, body, key, missing-binding, exception, limit and
 success paths. Syntax and diff checks pass. Wrangler 3.114.17 compiles the
 updated Pages Function, and Wrangler 4.36.0 dry-runs the non-public Worker with
-the proposed `RATE_LIMITER` binding at five requests per 60 seconds. No Worker,
+the proposed `RATE_LIMITER` binding at three requests per 60 seconds. No Worker,
 binding, variable or secret was created or changed in Cloudflare.
+
+Provider preflight: Read-only Cloudflare review found only the two existing
+Pages projects, no Worker name conflict and zero Worker requests on the free
+quota. Read-only OpenAI project review found zero API credit, zero requests,
+access to `gpt-5.6-terra`, and a current Free-tier limit of 3 RPM and 50 RPD for
+that model. The proposed Cloudflare threshold was reduced from five to three
+per minute before activation. A live provider test remains blocked until the
+Owner purchases prepaid API credit; no payment details were inspected.

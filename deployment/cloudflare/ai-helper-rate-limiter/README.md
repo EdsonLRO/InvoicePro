@@ -20,7 +20,8 @@ OpenAI key, visitor question, account access, tools or logging.
 
 `wrangler.example.jsonc` is a reviewed proposal rather than active provider
 configuration. It disables `workers.dev`, preview URLs and observability and
-proposes five unmatched AI questions per 60 seconds for each derived key.
+proposes three unmatched AI questions per 60 seconds for each derived key,
+matching the OpenAI project's current `gpt-5.6-terra` request limit.
 Cloudflare documents the native limiter as local to a Cloudflare location and
 eventually consistent, so it is an abuse layer rather than a hard global budget
 cap. OpenAI project budgets and usage alerts remain separately required.
@@ -28,7 +29,7 @@ cap. OpenAI project budgets and usage alerts remain separately required.
 Before any provider action:
 
 1. verify that namespace `2026072301` is unused in the account;
-2. review the five-per-minute preview threshold;
+2. review the three-per-minute preview threshold;
 3. deploy the Worker without a public route using a current Wrangler version;
 4. add a preview-only Pages service binding named
    `AI_HELPER_RATE_LIMITER` pointing to the Worker;
