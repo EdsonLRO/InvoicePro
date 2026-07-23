@@ -6,7 +6,7 @@ Title: Restore CAPTCHA-protected password reauthentication for sensitive account
 
 Priority: High
 
-Status: Protected Preview Sign-Out Accepted — Production Publication Pending
+Status: Release approved — checks and production publication pending
 
 Phase: Protected preview acceptance complete for global sign-out
 
@@ -46,7 +46,7 @@ Required tests: focused CAPTCHA reauthentication harness; existing Auth CAPTCHA,
 
 Required documentation: pre/post remediation finding in `SECURITY_FINDINGS_LEDGER.md`; this active record; release/Auth status only after verified acceptance
 
-Approval boundary: The Owner approved this exact High-risk Auth fix on 2026-07-23. Repository implementation, tests, commit and push may proceed. Production publication, marking PR #88 ready and merge remain separately Owner-gated.
+Approval boundary: The Owner approved this exact High-risk Auth fix on 2026-07-23. On 2026-07-23 the Owner explicitly approved the AUTH-003 Change Password test disposition, pushing the remaining evidence, marking PR #88 ready, merging it and publishing build `2026.07.23.1`.
 
 Branch: `codex/cloudflare-private-preview-deployments`
 
@@ -66,6 +66,8 @@ Protected preview acceptance: The Access-protected branch alias rendered Tallyo 
 
 Independent review: Sequential Security/QA review found one stale-widget callback race in the first implementation. A monotonic challenge-instance guard and same-action stale-callback regression were added; the complete focused suite then passed. No migration, dependency, RLS, payment, secret or production-provider change is present.
 
-Blocked reason: None for the reviewed repository commit and protected-preview global-sign-out evidence. Marking PR #88 ready, merging and production publication remain blocked pending exact Owner approval. The shared Change Password path is deterministically verified but has not received a separate manual protected-preview acceptance in this stage.
+Change Password acceptance disposition: A separate password mutation was deliberately not performed. The Change Password action uses the same reviewed fresh Turnstile/current-password/MFA reauthentication path that passed the Owner-operated protected-preview Sign Out Everywhere test, and its action-specific continuation and failure paths passed deterministic regression coverage. The Owner explicitly accepted this disposition on 2026-07-23. This minimises unnecessary Auth-state mutation while retaining shared-path manual evidence and action-specific automated evidence.
 
-Next action: Stop before readying, merging or publishing. A later exact Owner-approved stage may perform the separate Change Password protected-preview acceptance or explicitly disposition it, then mark PR #88 ready, merge and publish candidate build `2026.07.23.1` before production verification.
+Blocked reason: None within the approved release scope. Required checks, branch protection and production verification remain mandatory.
+
+Next action: Commit and push this final disposition, confirm all required checks and preview protections, then mark PR #88 ready, merge and publish candidate build `2026.07.23.1` under the recorded Owner approval.
