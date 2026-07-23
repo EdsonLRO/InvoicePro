@@ -80,18 +80,22 @@ const hashRateKey = async (request) => {
 };
 
 const enforceRateLimit = async (binding, key) => {
+  // A Cloudflare service-binding proxy exposes function-shaped RPC properties
+  // even when the target Worker implements only fetch. Prefer the explicit HTTP
+  // contract so a proxy cannot be mistaken for a direct RateLimit binding.
+  if (typeof binding?.fetch === "function") {
+    const response = await binding.fetch(new Request("https://tallyo-rate-limit.internal/limit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key })
+    }));
+    if (response.status === 204) return { success: true };
+    if (response.status === 429) return { success: false };
+    throw new Error("rate limiter unavailable");
+  }
   if (typeof binding?.limit === "function") {
     return binding.limit({ key });
   }
-  if (typeof binding?.fetch !== "function") throw new Error("rate limiter unavailable");
-
-  const response = await binding.fetch(new Request("https://tallyo-rate-limit.internal/limit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ key })
-  }));
-  if (response.status === 204) return { success: true };
-  if (response.status === 429) return { success: false };
   throw new Error("rate limiter unavailable");
 };
 

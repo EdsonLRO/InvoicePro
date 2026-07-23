@@ -220,6 +220,29 @@ const serviceLimiter = (status) => ({
   }
 });
 
+let hybridFetchCalls = 0;
+let hybridLimitCalls = 0;
+response = await run(
+  request("How does Tallyo make everyday admin easier?"),
+  {
+    ...baseEnv,
+    AI_HELPER_RATE_LIMITER: {
+      async fetch(serviceRequest) {
+        hybridFetchCalls += 1;
+        assert.equal(serviceRequest.url, "https://tallyo-rate-limit.internal/limit");
+        return new Response(null, { status: 204 });
+      },
+      async limit() {
+        hybridLimitCalls += 1;
+        return { success: false };
+      }
+    }
+  }
+);
+assert.equal(response.status, 200);
+assert.equal(hybridFetchCalls, 1);
+assert.equal(hybridLimitCalls, 0);
+
 response = await run(
   request("How does Tallyo make everyday admin easier?"),
   { ...baseEnv, AI_HELPER_RATE_LIMITER: serviceLimiter(204) }

@@ -6,7 +6,7 @@ future Tallyo subscription journey without making paid provider calls, creating
 live Stripe Billing products, changing production provider configuration,
 publishing the website, or inventing prices.
 Priority: High
-Status: Repository implementation ready for review — external activation blocked
+Status: Local rate-limiter routing fix validated — preview redeploy approval required
 Owner role: Master Orchestrator
 Triggered roles: Product, Backend, Security, Documentation, Legal/Privacy, QA,
 Payments for the subscription boundary
@@ -66,15 +66,12 @@ portal/cancellation, isolation and exact unresolved Owner decisions. A build
 with `TALLYO_SUBSCRIPTIONS_ENABLED=true` fails before changing output.
 `git diff --check`, JavaScript syntax checks and the focused secret-pattern scan
 pass.
-Remaining technical gate: Confirm that the Cloudflare website deployment can
-provide the required rate-limit binding. If Pages cannot expose that binding,
-place the endpoint in a dedicated same-origin Worker or use another reviewed
-fail-closed edge limit; do not remove the gate.
-Next action: Commit and publish a draft PR for review. Then obtain decisions on
-plan names, features, limits, prices, tax display, free/trial approach and
-cancellation commitments. AI preview activation separately needs budget,
-rate-limit/provider configuration, privacy/content review and exact Owner
-approval.
+Remaining technical gate: Push the validated service-binding dispatch fix,
+allow one protected website-preview rebuild, and confirm that one synthetic
+question passes the private rate limiter and receives a bounded provider answer.
+Next action: Obtain exact Owner approval to commit and push the focused fix to
+the existing draft PR, allow one automatic protected-preview rebuild, and make
+one synthetic paid OpenAI request. Do not merge or release publicly.
 
 ## Preview compatibility finding
 
@@ -142,3 +139,42 @@ access to `gpt-5.6-terra`, and a current Free-tier limit of 3 RPM and 50 RPD for
 that model. The proposed Cloudflare threshold was reduced from five to three
 per minute before activation. A live provider test remains blocked until the
 Owner purchases prepaid API credit; no payment details were inspected.
+
+## Protected preview activation evidence
+
+Owner approval covered a non-public Cloudflare rate-limiter Worker on the free
+quota, namespace `2026072301`, three requests per 60 seconds, a preview-only
+service binding, the documented AI preview settings, one preview redeployment
+and one synthetic paid OpenAI request. The Worker
+`tallyo-ai-helper-rate-limiter` was deployed with `workers_dev` and preview URLs
+disabled. Cloudflare build evidence confirms the native `RATE_LIMITER` binding
+at three requests per 60 seconds and no public deployment target.
+
+The `tallyo-website` preview environment received the approved feature,
+private-preview and origin variables, an encrypted `OPENAI_API_KEY` secret and
+the `AI_HELPER_RATE_LIMITER` service binding. Deployment
+`e3168985-f868-4531-9b4e-f137851c5286` of commit `8927c96` succeeded. The
+protected Helper preview displayed the AI-enabled notice.
+
+An unmatched synthetic question reached the private Worker. Cloudflare metrics
+recorded one Worker invocation and one uncaught exception, with no subrequest.
+The Helper failed closed to its deterministic no-answer guidance. A
+non-persistent Cloudflare live stream then captured the same failure on one
+diagnostic repeat while stored logs and traces remained disabled. The exception
+identified RPC method `limit`: the runtime canceled the request because the
+method would never produce a response.
+
+Root cause: Cloudflare's service-binding proxy exposes function-shaped RPC
+properties. The Pages Function checked `binding.limit` before `binding.fetch`,
+so the proxy was mistaken for a direct native RateLimit binding and the
+nonexistent RPC method was called. The focused local fix prefers the explicit
+HTTP `fetch` contract and retains direct native-binding support as the fallback.
+A regression test proves that a hybrid proxy calls `fetch` and never `limit`.
+The complete website/helper suite, 26-route preview build, syntax checks and
+`git diff --check` pass.
+
+OpenAI usage was refreshed after the diagnostic repeat and remained at zero
+requests, zero tokens and zero spend, so no paid provider request occurred.
+Wrangler live tail was not used because the non-interactive environment would
+require a new Cloudflare API credential. No credential was requested or
+inspected. No merge or public release occurred.
