@@ -119,6 +119,36 @@ const documents = Array.from({ length: 2000 }, (_, index) => ({
     'compact navigation visibility must follow the menu state');
   assert.match(app, /inline-flex min-w-16 items-center justify-center rounded px-2 py-1 text-center text-xs font-medium leading-tight/,
     'document type badges must remain centred when labels wrap');
+  assert.match(app, /@media \(max-width: 639px\) \{[\s\S]*?\.invoice-email-status-full \{ display: none; \}[\s\S]*?\.invoice-email-status-short \{ display: inline; \}/,
+    'mobile invoice rows must use the compact Email status label');
+  assert.match(app, /compactEmailStatusLabel\(label\) \{[\s\S]*?label === 'Accepted for delivery' \? 'Accepted' : label;/,
+    'the compact Email status must preserve provider-acceptance meaning');
+  assert.match(app, /v-show="activeTab === 'create' \|\| activeTab === 'edit' \|\| isExportingPDF"[\s\S]*?'pdf-export-surface': isExportingPDF && activeTab !== 'create' && activeTab !== 'edit'/,
+    'invoice export must use the off-screen surface without changing the visible route');
+
+  const exportPdfBody = extract(
+    /async exportPDF\(inv, audit = true\) \{([\s\S]*?)\r?\n            \},\r?\n            downloadPdfFile\(pdf, filename\)/,
+    'exportPDF must remain extractable'
+  )[1];
+  assert.doesNotMatch(exportPdfBody, /loadInvoice\(|navigateTo\(|window\.location/,
+    'PDF export must not navigate away from My Invoices');
+  assert.match(exportPdfBody, /const previousDraft = this\.draft;[\s\S]*?this\.draft = previousDraft;/,
+    'PDF export must preserve any draft already in progress');
+  assert.match(app, /downloadPdfFile\(pdf, filename\) \{[\s\S]*?pdf\.output\('blob'\)[\s\S]*?type: 'application\/pdf'[\s\S]*?link\.download = filename;[\s\S]*?link\.click\(\);/,
+    'PDF download must use a named application/pdf file instead of opening a navigation target');
+  assert.doesNotMatch(exportPdfBody, /pdf\.save\(/, 'PDF export must use the explicit MIME-safe downloader');
+  assert.match(app, /addPdfRowPageBreaks\(container\) \{[\s\S]*?cloneNode\(true\)[\s\S]*?pdf-repeated-header[\s\S]*?pdf-summary-block[\s\S]*?pdf-summary-spacer/,
+    'multi-page PDFs must repeat line-item headers and keep the summary together');
+  assert.match(app, /class="pdf-summary-block flex flex-col-reverse/,
+    'the totals and document notes must be grouped for page-break handling');
+
+  assert.match(app, /activeTab: 'dashboard'/, 'Dashboard must be the initial authenticated view');
+  assert.match(app, /routeKeyFromHash\(\) \{[\s\S]*?return key \|\| 'dashboard';/,
+    'an empty route must resolve to Dashboard');
+  assert.match(app, /tabFromRouteKey\(routeKey\) \{[\s\S]*?this\.routeTabs\(\)\.includes\(key\) \? key : 'dashboard';/,
+    'an unsupported route must resolve to Dashboard');
+  assert.match(app, /applyRoute\(tab, routeKey = null\) \{[\s\S]*?this\.routeTabs\(\)\.includes\(tab\) \? tab : 'dashboard';/,
+    'route application must fail safely to Dashboard');
   for (const label of ['Remove line item', 'Close new customer dialog', 'Close reminder dialog', 'Close refund dialog']) {
     assert.ok(app.includes(`aria-label="${label}"`), `${label} must have an accessible name`);
   }

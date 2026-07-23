@@ -44,6 +44,6 @@ for (const forbidden of ['fetch(', 'XMLHttpRequest', 'localStorage', 'sessionSto
   assert.equal(integrationSource.includes(forbidden), false, `integration helper must not use ${forbidden}`);
 }
 assert.match(workerSource, /'\.\/app-help-install\.js'/, 'integration helper must be part of the offline app shell');
-assert.match(workerSource, /tallyo-shell-2026-07-23-1/, 'service-worker cache marker must match this build');
+assert.match(workerSource, /tallyo-shell-2026-07-23-2/, 'service-worker cache marker must match this build');
 
 console.log('App public integration harness passed.');

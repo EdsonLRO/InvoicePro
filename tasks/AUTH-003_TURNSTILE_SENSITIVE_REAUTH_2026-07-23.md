@@ -20,7 +20,7 @@ Risk level: High — Supabase Auth, password reauthentication, MFA assurance and
 
 Affected files: `index.html`, `service-worker.js`, `.github/workflows/security-checks.yml`, focused Auth CAPTCHA/session/PWA/integration tests, `deployment/cloudflare/pages-projects.json`, `SECURITY_FINDINGS_LEDGER.md`, this task record, and only authoritative Auth/release records whose state changes
 
-Files or paths locked: `index.html`, `service-worker.js`, `.github/workflows/security-checks.yml`, focused Auth CAPTCHA/session/PWA/integration tests, `deployment/cloudflare/pages-projects.json`, `SECURITY_FINDINGS_LEDGER.md`, and this task record
+Files or paths locked: Auth-specific tests, `.github/workflows/security-checks.yml`, `deployment/cloudflare/pages-projects.json`, `SECURITY_FINDINGS_LEDGER.md`, and this task record. The reviewed `index.html` and `service-worker.js` implementation is frozen at commit `1f5b7c8`; its edit lock transferred on 2026-07-23 to the stacked `UX-001` task without changing or releasing the AUTH-003 merge/publication gate.
 
 Lock acquired: 2026-07-23 by the Master Orchestrator for AUTH-003
 
