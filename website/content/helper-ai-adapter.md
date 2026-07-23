@@ -20,7 +20,9 @@ An enabled browser build may send one question, limited to 240 characters, to
 - an exact approved HTTPS `Origin`;
 - `TALLYO_AI_HELPER_ENABLED=true`;
 - an encrypted `OPENAI_API_KEY` server-side secret;
-- a configured `AI_HELPER_RATE_LIMITER` binding;
+- a configured `AI_HELPER_RATE_LIMITER` binding. On Cloudflare Pages this is a
+  service binding to the non-public `tallyo-ai-helper-rate-limiter` Worker,
+  which owns the native `RATE_LIMITER` binding;
 - deterministic rejection of secrets, credentials, payment information,
   private-account requests, advice requests and internal-prompt requests;
 - local answers for exact reviewed questions, avoiding an AI request;
@@ -85,3 +87,9 @@ not substitutes for the approvals and evidence above.
 The adapter must not gain account, invoice, customer, support, payment or
 provider tools as part of activation. Any authenticated or tool-using assistant
 is a separate high-risk product.
+
+Cloudflare's current Pages documentation lists only a subset of bindings and
+does not list the native Rate Limiting binding. The prepared alternative is a
+preview-only service binding to a non-public Worker. The Worker receives only a
+SHA-256 rate key, fails closed, and has no provider key or question content.
+Its proposed threshold and namespace remain unactivated Owner-reviewed values.

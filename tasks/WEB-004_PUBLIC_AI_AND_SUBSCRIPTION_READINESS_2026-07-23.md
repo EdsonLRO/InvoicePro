@@ -99,3 +99,38 @@ Wrangler 3.114.17 Pages Functions build; focused diff and secret checks; one
 bounded Cloudflare preview retry only after the source fix is pushed. Public AI
 activation, secret entry, binding creation, merge and production release remain
 outside this fix.
+
+Post-remediation evidence: Local website/helper tests, syntax checks, diff
+check, focused secret scan and the exact Wrangler 3.114.17 Functions build
+passed. Commit `f4fb8f2` then passed required GitHub `verify`, the Cloudflare app
+preview and the Cloudflare website preview. The original parser failure no
+longer reproduces and no provider configuration changed.
+
+## Rate-limiter architecture disposition
+
+Cloudflare documentation checked on 2026-07-23 states that Pages Functions
+support only a listed subset of bindings, which does not include the native
+Rate Limiting binding. The Workers Rate Limiting API requires Wrangler 4.36.0
+or later and its binding is not visible in the Cloudflare dashboard.
+
+Disposition: Prepare, but do not deploy, a non-public Worker with a native
+`RATE_LIMITER` binding. The Pages Function accepts a service binding named
+`AI_HELPER_RATE_LIMITER` and sends it only the SHA-256 actor key, never the
+visitor question or provider credential. Missing, malformed and unavailable
+states fail closed. The proposed Worker disables public and preview URLs and
+does not log.
+
+Residual limits: Cloudflare describes its native limiter as per-location and
+eventually consistent. An IP-derived anonymous key can also group people behind
+one shared network. The preview proposal is five unmatched AI questions per
+60 seconds per derived key; that threshold, namespace, Worker creation and
+service binding remain Owner-reviewed provider configuration. OpenAI budget and
+usage controls are still required because this is not a hard global cost cap.
+
+Repository validation: The website/helper suite passes direct-binding and
+service-binding allow, limit and unavailable paths plus the private Worker's
+method, route, content-type, body, key, missing-binding, exception, limit and
+success paths. Syntax and diff checks pass. Wrangler 3.114.17 compiles the
+updated Pages Function, and Wrangler 4.36.0 dry-runs the non-public Worker with
+the proposed `RATE_LIMITER` binding at five requests per 60 seconds. No Worker,
+binding, variable or secret was created or changed in Cloudflare.

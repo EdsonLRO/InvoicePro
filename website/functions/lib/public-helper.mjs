@@ -79,6 +79,22 @@ const hashRateKey = async (request) => {
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 };
 
+const enforceRateLimit = async (binding, key) => {
+  if (typeof binding?.limit === "function") {
+    return binding.limit({ key });
+  }
+  if (typeof binding?.fetch !== "function") throw new Error("rate limiter unavailable");
+
+  const response = await binding.fetch(new Request("https://tallyo-rate-limit.internal/limit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ key })
+  }));
+  if (response.status === 204) return { success: true };
+  if (response.status === 429) return { success: false };
+  throw new Error("rate limiter unavailable");
+};
+
 const providerRequest = (question, publicKnowledge) => ({
   model: OPENAI_MODEL,
   reasoning: { effort: "low" },
@@ -171,10 +187,10 @@ export const handlePublicHelperRequest = async ({
     return json(200, { answered: true, source: "reviewed", answer: reviewed.answer, links: reviewed.links || [] });
   }
 
-  if (!env.AI_HELPER_RATE_LIMITER || typeof env.AI_HELPER_RATE_LIMITER.limit !== "function") return unavailable();
+  if (!env.AI_HELPER_RATE_LIMITER) return unavailable();
   let rate;
   try {
-    rate = await env.AI_HELPER_RATE_LIMITER.limit({ key: await hashRateKey(request) });
+    rate = await enforceRateLimit(env.AI_HELPER_RATE_LIMITER, await hashRateKey(request));
   } catch {
     return unavailable();
   }

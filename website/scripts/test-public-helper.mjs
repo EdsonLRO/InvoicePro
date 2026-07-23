@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import knowledge from "../content/helper-knowledge.json" with { type: "json" };
 import { createPublicAiAdapter } from "../src/helper-core.mjs";
 import { handlePublicHelperRequest, publicHelperPolicy } from "../functions/lib/public-helper.mjs";
+import { handleRateLimitRequest } from "../../deployment/cloudflare/ai-helper-rate-limiter/src/index.mjs";
 
 const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = join(websiteRoot, "dist");
@@ -207,6 +208,39 @@ response = await run(request("How does Tallyo make everyday admin easier?"), {
 });
 assert.equal(response.status, 503);
 
+let serviceRateCalls = 0;
+const serviceLimiter = (status) => ({
+  async fetch(serviceRequest) {
+    serviceRateCalls += 1;
+    assert.equal(serviceRequest.url, "https://tallyo-rate-limit.internal/limit");
+    assert.equal(serviceRequest.method, "POST");
+    assert.equal(serviceRequest.headers.get("Content-Type"), "application/json");
+    assert.match(JSON.parse(await serviceRequest.text()).key, /^[a-f0-9]{64}$/);
+    return new Response(null, { status });
+  }
+});
+
+response = await run(
+  request("How does Tallyo make everyday admin easier?"),
+  { ...baseEnv, AI_HELPER_RATE_LIMITER: serviceLimiter(204) }
+);
+assert.equal(response.status, 200);
+assert.equal(serviceRateCalls, 1);
+
+response = await run(
+  request("How does Tallyo make everyday admin easier?"),
+  { ...baseEnv, AI_HELPER_RATE_LIMITER: serviceLimiter(429) }
+);
+assert.equal(response.status, 429);
+assert.equal(serviceRateCalls, 2);
+
+response = await run(
+  request("How does Tallyo make everyday admin easier?"),
+  { ...baseEnv, AI_HELPER_RATE_LIMITER: serviceLimiter(503) }
+);
+assert.equal(response.status, 503);
+assert.equal(serviceRateCalls, 3);
+
 response = await run(
   request("How does Tallyo make everyday admin easier?"),
   baseEnv,
@@ -298,6 +332,98 @@ assert.doesNotMatch(functionSource, /\bsk-(?:proj-)?[A-Za-z0-9_-]{16,}\b/);
 assert.doesNotMatch(functionSource, /console\.(?:log|info|warn|error)/);
 assert.match(functionSource, /store: false/);
 assert.doesNotMatch(functionSource, /SUPABASE|STRIPE|RESEND|service_role/i);
+
+const rateWorkerRoot = resolve(websiteRoot, "..", "deployment", "cloudflare", "ai-helper-rate-limiter");
+const rateWorkerRequest = (bodyValue, options = {}) => new Request(
+  `https://tallyo-rate-limit.internal${options.path || "/limit"}`,
+  {
+    method: options.method || "POST",
+    headers: { "Content-Type": options.contentType || "application/json" },
+    body: (options.method || "POST") === "GET"
+      ? undefined
+      : options.rawBody === undefined ? JSON.stringify(bodyValue) : options.rawBody
+  }
+);
+const rateKey = "a".repeat(64);
+const allowRateEnv = {
+  RATE_LIMITER: {
+    async limit({ key }) {
+      assert.equal(key, rateKey);
+      return { success: true };
+    }
+  }
+};
+
+response = await handleRateLimitRequest({
+  request: rateWorkerRequest({ key: rateKey }, { method: "GET" }),
+  env: allowRateEnv
+});
+assert.equal(response.status, 405);
+
+response = await handleRateLimitRequest({
+  request: rateWorkerRequest({ key: rateKey }, { path: "/unknown" }),
+  env: allowRateEnv
+});
+assert.equal(response.status, 404);
+
+response = await handleRateLimitRequest({
+  request: rateWorkerRequest({ key: rateKey }, { contentType: "text/plain" }),
+  env: allowRateEnv
+});
+assert.equal(response.status, 415);
+
+for (const invalidBody of [
+  "{",
+  JSON.stringify({}),
+  JSON.stringify({ key: "not-a-hash" }),
+  JSON.stringify({ key: rateKey, extra: true }),
+  JSON.stringify({ key: "a".repeat(129) })
+]) {
+  response = await handleRateLimitRequest({
+    request: rateWorkerRequest({}, { rawBody: invalidBody }),
+    env: allowRateEnv
+  });
+  assert.ok([400, 413].includes(response.status));
+}
+
+response = await handleRateLimitRequest({
+  request: rateWorkerRequest({ key: rateKey }),
+  env: {}
+});
+assert.equal(response.status, 503);
+
+response = await handleRateLimitRequest({
+  request: rateWorkerRequest({ key: rateKey }),
+  env: { RATE_LIMITER: { async limit() { throw new Error("binding failed"); } } }
+});
+assert.equal(response.status, 503);
+
+response = await handleRateLimitRequest({
+  request: rateWorkerRequest({ key: rateKey }),
+  env: { RATE_LIMITER: { async limit() { return { success: false }; } } }
+});
+assert.equal(response.status, 429);
+
+response = await handleRateLimitRequest({
+  request: rateWorkerRequest({ key: rateKey }),
+  env: allowRateEnv
+});
+assert.equal(response.status, 204);
+assert.equal(response.headers.get("Cache-Control"), "no-store");
+
+const rateWorkerSource = readFileSync(join(rateWorkerRoot, "src", "index.mjs"), "utf8");
+assert.doesNotMatch(rateWorkerSource, /console\.(?:log|info|warn|error)/);
+assert.doesNotMatch(rateWorkerSource, /OPENAI|SUPABASE|STRIPE|RESEND|service_role/i);
+
+const rateWorkerConfig = JSON.parse(readFileSync(join(rateWorkerRoot, "wrangler.example.jsonc"), "utf8"));
+assert.equal(rateWorkerConfig.name, "tallyo-ai-helper-rate-limiter");
+assert.equal(rateWorkerConfig.workers_dev, false);
+assert.equal(rateWorkerConfig.preview_urls, false);
+assert.equal(rateWorkerConfig.observability.enabled, false);
+assert.equal(rateWorkerConfig.ratelimits[0].name, "RATE_LIMITER");
+assert.equal(rateWorkerConfig.ratelimits[0].simple.limit, 5);
+assert.equal(rateWorkerConfig.ratelimits[0].simple.period, 60);
+assert.equal("routes" in rateWorkerConfig, false);
 
 const subscriptionReadiness = JSON.parse(readFileSync(join(websiteRoot, "content", "subscription-readiness.json"), "utf8"));
 assert.equal(subscriptionReadiness.status, "design-only-provider-disabled");
