@@ -52,7 +52,7 @@ assert.notEqual(rejectedSecret.status, 0, 'secret-like Supabase credentials must
 assert.match(rejectedSecret.stderr, /browser-publishable key/);
 assert.doesNotMatch(rejectedSecret.stderr, /sb_secret_never_browser_side/, 'rejected values must not be echoed');
 
-assert.equal(projectConfig.status, 'access-protected-builds-still-blocked');
+assert.equal(projectConfig.status, 'access-protected-deployments-awaiting-authenticated-acceptance');
 assert.equal(projectConfig.githubIntegration.connected, true);
 assert.equal(projectConfig.githubIntegration.repository, 'EdsonLRO/InvoicePro');
 assert.equal(projectConfig.githubIntegration.scope, 'selected-repository-only');
@@ -61,15 +61,23 @@ assert.equal(projectConfig.projects.website.rootDirectory, 'website');
 assert.equal(projectConfig.projects.website.buildCommand, 'npm run build');
 assert.equal(projectConfig.projects.website.outputDirectory, 'dist');
 assert.equal(projectConfig.projects.website.previewMode, 'noindex');
-assert.equal(projectConfig.projects.website.providerState, 'created-no-production-deployment');
+assert.equal(projectConfig.projects.website.providerState, 'access-protected-production-deployment-created');
 assert.equal(projectConfig.projects.website.initialBuild, 'blocked-by-access-guard');
+assert.deepEqual(projectConfig.projects.website.approvedRetry, {
+  commit: '9fc3f9063527057aa04b9c4544290b0095fc043e',
+  result: 'successful'
+});
 assert.equal(projectConfig.projects.website.wildcardPreviewAccess, 'owner-policy-enabled-unauthenticated-blocked');
 assert.equal(projectConfig.projects.website.productionPagesDevAccess, 'owner-policy-enabled-unauthenticated-blocked');
 assert.equal(projectConfig.projects.app.expectedName, 'tallyo-app');
 assert.equal(projectConfig.projects.app.buildCommand, 'node scripts/build-app-pages.mjs');
 assert.equal(projectConfig.projects.app.outputDirectory, 'app-dist');
-assert.equal(projectConfig.projects.app.providerState, 'created-no-production-deployment');
+assert.equal(projectConfig.projects.app.providerState, 'access-protected-production-deployment-created');
 assert.equal(projectConfig.projects.app.initialBuild, 'blocked-by-access-guard');
+assert.deepEqual(projectConfig.projects.app.approvedRetry, {
+  commit: '9fc3f9063527057aa04b9c4544290b0095fc043e',
+  result: 'successful'
+});
 assert.equal(projectConfig.projects.app.wildcardPreviewAccess, 'owner-policy-enabled-unauthenticated-blocked');
 assert.equal(projectConfig.projects.app.productionPagesDevAccess, 'owner-policy-enabled-unauthenticated-blocked');
 assert.equal(projectConfig.projects.website.accessPolicyRequiredBeforeFirstSuccessfulDeploy, true);

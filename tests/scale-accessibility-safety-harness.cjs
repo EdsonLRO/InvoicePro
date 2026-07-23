@@ -131,7 +131,8 @@ const documents = Array.from({ length: 2000 }, (_, index) => ({
   assert.match(app, /No future invoices will be generated until you resume it/);
   assert.match(app, /The paid amount will become[\s\S]*outstanding balance will become/);
   assert.match(app, /requestPasswordMfaCode\(\{[\s\S]*?title: 'Remove authenticator'/);
-  assert.match(app, /confirmLogoutAllDevices\(\)[\s\S]*?signInWithPassword[\s\S]*?currentSessionNeedsMfa/);
+  assert.match(app, /confirmLogoutAllDevices\(\)[\s\S]*?reauthenticateCurrentUser\(password, 'global_signout'\)[\s\S]*?currentSessionNeedsMfa/);
+  assert.match(app, /reauthenticateCurrentUser\(password, context\)[\s\S]*?options = \{ captchaToken \}[\s\S]*?signInWithPassword/);
 
   console.log(`Scale, accessibility and destructive-safety harness passed in ${elapsed.toFixed(1)}ms.`);
 })().catch(error => {

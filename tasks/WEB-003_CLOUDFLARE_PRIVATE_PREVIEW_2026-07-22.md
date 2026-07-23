@@ -10,7 +10,7 @@ without publishing content before access controls are verified.
 Risk level: High because later stages change provider authorization, hosting and
 production-adjacent configuration; this repository-only guard is reversible.
 
-Phase: Main and wildcard Access verified; stopped before variables and build retries
+Phase: Authenticated public-content acceptance partially complete
 
 Owner role: Master Orchestrator
 
@@ -41,17 +41,17 @@ the rollback; Cloudflare GitHub access is limited to `EdsonLRO/InvoicePro`
 
 Acceptance criteria: Both builds fail before writing output when `CF_PAGES=1`
 unless `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`; repository records state that
-`noindex` is not access control; Access, variables and successful deployments
-remain pending
+`noindex` is not access control; the approved builds remain Access-protected;
+authenticated preview acceptance remains pending
 
 Required tests: Website test suite, Cloudflare Pages readiness harness, preview
 acceptance harness, workflow policy, secret scan and `git diff --check`
 
 Security boundary: The approved provider mutation includes Zero Trust Free
-activation performed privately by the Owner and four Owner-policy Access
-applications covering both projects' main and wildcard `pages.dev` hostnames.
-No deployment variable, secret, Auth change, DNS, successful deployment, public
-release, tracking or real data
+activation performed privately by the Owner, four Owner-policy Access
+applications covering both projects' main and wildcard `pages.dev` hostnames,
+documented browser-publishable build variables and one bounded successful retry
+per project. No secret, Auth change, DNS, public release, tracking or real data
 
 Privacy/legal materiality: UK technical preview intended only for the Owner and
 approved reviewers. Cloudflare would host static public-product content and
@@ -66,11 +66,14 @@ preview but remains required for final public legal documents and paid terms.
 
 Payment impact: None; live Stripe remains unchanged and disabled in preview
 
-Production impact: None from this branch; current GitHub Pages stays live
+Production impact: Cloudflare created Access-protected `pages.dev` production
+deployments from the merged evidence commit; current GitHub Pages stays live and
+custom-domain DNS remains unchanged
 
-Owner permission required: GitHub authorization, project creation and Owner-only
-Access configuration were approved and completed. Fresh exact approval remains
-required before setting any deployment variable or retrying builds
+Owner permission required: GitHub authorization, project creation, Owner-only
+Access configuration, browser-publishable variables and one retry per build were
+approved and completed. Owner interaction is now required only to sign in through
+Cloudflare Access for authenticated acceptance without sharing identity or codes
 
 Approval boundary: Project creation is not approval for Access, variables,
 successful deployment, Auth/MFA origins, Turnstile, Stripe/email links, custom
@@ -78,17 +81,22 @@ domains, DNS, legal publication or final release
 
 Implementation result: The shared repository guard is merged. Cloudflare
 projects `tallyo-website` and `tallyo-app` were created with the reviewed build
-settings; both initial builds stopped at that guard and neither project has a
-production deployment. Owner-policy Access applications protect the main and
-wildcard hostnames for both projects. Unauthenticated requests to all four
-destinations redirected to Cloudflare Access sign-in; no identity value is
-recorded.
+settings; both initial builds stopped at that guard. Owner-policy Access
+applications protect the main and wildcard hostnames for both projects. After
+the Owner approved the documented browser-publishable variables and one retry
+per build, both retries of merged commit
+`9fc3f9063527057aa04b9c4544290b0095fc043e` succeeded. Unauthenticated requests
+to all four deployed destinations still redirected to Cloudflare Access sign-in;
+no variable value, identity value or login code is recorded.
 
 Review result: PR #85 required GitHub Security `verify` run `29927989825`,
 post-merge Security run `29928624196` and post-merge GitHub Pages run
 `29928621947` passed. Provider readback confirmed the exact project settings,
 empty deployment-variable sections and no production deployment. PR #86 merged
 the provider-project evidence as `ab3f7b81b865d23e2dd8f6dbf61d6253e9844b17`.
+PR #87 then merged the completed Access evidence as
+`9fc3f9063527057aa04b9c4544290b0095fc043e`; its required Security check passed,
+while the two pre-variable Cloudflare guard failures remained expected evidence.
 
 Evidence: Cloudflare documentation current on 2026-07-22 states Pages URLs are
 public by default and documents separate Access policies for the main and
@@ -99,21 +107,42 @@ Both project settings subsequently reported wildcard previews restricted by an
 Access policy. Main-host applications were duplicated from those Owner-policy
 configurations without re-entering an identity. All four destinations redirected
 unauthenticated requests to Access sign-in. No identity, private account
-identifier or billing detail is recorded here.
+identifier or billing detail is recorded here. The successful deployment records
+reported assets published and site deployed for both projects; the immutable
+Access-protected preview URLs are recorded in
+`deployment/cloudflare/preview-acceptance.md`. Public readback also confirmed the
+GitHub Pages rollback remains reachable on build `2026.07.22.2`.
+
+Authenticated browser acceptance then confirmed that all 26 website routes and
+the real 404 render behind Access with the expected structure and branding; all
+26 routes expose the reviewed noindex and production canonical metadata; the
+responsive menu opens and closes; the website uses only its two local scripts;
+and the Helper maintains its public/private/advice/internal-prompt boundaries.
+The website account links still target the retained GitHub Pages rollback. The
+app root and supported hash-route refresh load build `2026.07.22.2`; its live
+manifest and service worker contain the reviewed standalone, relative-scope and
+network-first update design. No account sign-in, private data, CAPTCHA, email or
+payment flow was exercised. Direct live `robots.txt` navigation was blocked by
+the in-app client, so live delivered headers, live robots delivery, operating-
+system installation/update UX, the authenticated Help & install panel and the
+separately reviewed synthetic Auth journey remain open.
 
 Focused validation passed: all 26 website routes plus 404, fail-closed website
 and app build behavior including preservation of existing output, Cloudflare
 Pages packaging, preview acceptance state, security workflow policy,
 `git diff --check` and a scoped secret-pattern scan.
 
-Branch: `codex/cloudflare-access-partial-evidence`
+Branch: `codex/cloudflare-private-preview-deployments`
 
-Commit: This evidence branch records the completed Access action; the guard release
-was merged as `ce5bccfb80b0cb4cc67e48e54aeb367c4658e47a` in PR #85
+Commit: This evidence branch records the successful private deployments; the
+deployed source commit is `9fc3f9063527057aa04b9c4544290b0095fc043e`
 
-Blocked reason: Deployment variables and build retries remain outside the
-completed Access approval
+Blocked reason: None for the completed public-content checks. The remaining
+synthetic Auth/MFA journey requires a separate High-risk Supabase Auth
+configuration review, and operating-system install/update UX requires a real
+device acceptance step.
 
-Next action: Review and merge the completed Access evidence, then obtain exact
-Owner approval for the browser-publishable deployment variables, the Access
-confirmation variable and a bounded retry of both builds.
+Next action: Complete the remaining non-Auth preview evidence that can be proved
+without provider mutation, then request a separate Owner decision for any
+synthetic Auth/MFA origin testing. Do not infer that decision from Cloudflare
+Access sign-in.

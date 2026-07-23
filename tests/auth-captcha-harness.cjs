@@ -210,8 +210,8 @@ async function run() {
     assert.equal(calls.signIn.length, signInCount + 1);
     assert.equal(calls.signIn.at(-1).options, undefined, 'Dormant integration must preserve existing Auth behavior.');
 
-    assert.equal((html.match(/role="group" aria-label="Security verification"/g) || []).length, 3);
-    assert.equal((html.match(/role="alert"/g) || []).length >= 3, true);
+    assert.equal((html.match(/role="group" aria-label="Security verification"/g) || []).length, 4);
+    assert.equal((html.match(/role="alert"/g) || []).length >= 4, true);
     assert.match(html, /Retry security check/);
 
     console.log('Auth CAPTCHA harness passed.');

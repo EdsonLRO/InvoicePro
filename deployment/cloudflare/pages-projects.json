@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "status": "access-protected-builds-still-blocked",
+  "status": "access-protected-deployments-awaiting-authenticated-acceptance",
   "defaultDeploymentReachability": "public-unless-cloudflare-access-is-enabled",
   "accessConfirmationVariable": "TALLYO_CLOUDFLARE_ACCESS_CONFIRMED",
   "githubIntegration": {
@@ -18,8 +18,16 @@
       "accessPolicyRequiredBeforeFirstSuccessfulDeploy": true,
       "wildcardPreviewAccess": "owner-policy-enabled-unauthenticated-blocked",
       "productionPagesDevAccess": "owner-policy-enabled-unauthenticated-blocked",
-      "providerState": "created-no-production-deployment",
+      "providerState": "access-protected-production-deployment-created",
       "initialBuild": "blocked-by-access-guard",
+      "approvedRetry": {
+        "commit": "9fc3f9063527057aa04b9c4544290b0095fc043e",
+        "result": "successful"
+      },
+      "previewEnvironment": {
+        "accessConfirmationConfigured": true,
+        "latestBranchBuildNotRetried": true
+      },
       "productionBuildRequiresOwnerApproval": true
     },
     "app": {
@@ -31,8 +39,24 @@
       "accessPolicyRequiredBeforeFirstSuccessfulDeploy": true,
       "wildcardPreviewAccess": "owner-policy-enabled-unauthenticated-blocked",
       "productionPagesDevAccess": "owner-policy-enabled-unauthenticated-blocked",
-      "providerState": "created-no-production-deployment",
+      "providerState": "access-protected-production-deployment-created",
       "initialBuild": "blocked-by-access-guard",
+      "approvedRetry": {
+        "commit": "9fc3f9063527057aa04b9c4544290b0095fc043e",
+        "result": "successful"
+      },
+      "previewEnvironment": {
+        "accessConfirmationConfigured": true,
+        "browserPublishableConfigurationMirrorsReviewedProduction": true,
+        "stripeLiveMode": false,
+        "authFixAcceptance": {
+          "commit": "1f5b7c89887b56af3802a021942a92d2134c3d23",
+          "deploymentId": "99d5895c-56a5-4c37-b1f3-508f6c563eac",
+          "build": "2026.07.23.1",
+          "result": "successful",
+          "signOutEverywhere": "passed"
+        }
+      },
       "productionBuildRequiresOwnerApproval": true
     }
   },

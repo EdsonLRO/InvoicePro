@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "status": "access-protected-builds-still-blocked",
-  "websitePreviewUrl": null,
-  "appPreviewUrl": null,
+  "status": "authenticated-content-acceptance-partially-complete",
+  "websitePreviewUrl": "https://f7d12c7b.tallyo-website.pages.dev",
+  "appPreviewUrl": "https://e8ac6e50.tallyo-app.pages.dev",
   "providerProjectsCreated": true,
   "providerProjectNames": [
     "tallyo-website",
@@ -11,6 +11,11 @@
   "initialBuilds": {
     "website": "blocked-by-access-guard",
     "app": "blocked-by-access-guard"
+  },
+  "approvedRetries": {
+    "commit": "9fc3f9063527057aa04b9c4544290b0095fc043e",
+    "website": "successful",
+    "app": "successful"
   },
   "accessControls": {
     "websiteWildcardPreview": "owner-policy-enabled-unauthenticated-blocked",
@@ -22,25 +27,27 @@
   "productionReleased": false,
   "githubPagesRollbackRetained": true,
   "checks": {
-    "immutableCommitRecorded": "pending",
-    "mainHostnameAccessControlled": "passed-provider-readback-and-unauthenticated-redirect",
-    "previewHostnamesAccessControlled": "passed-provider-readback-and-unauthenticated-redirect",
-    "websiteRoutesAnd404": "pending",
-    "websiteNoindex": "pending",
+    "immutableCommitRecorded": "passed",
+    "mainHostnameAccessControlled": "passed-after-successful-deployment-unauthenticated-redirect",
+    "previewHostnamesAccessControlled": "passed-after-successful-deployment-unauthenticated-redirect",
+    "websiteRoutesAnd404": "passed-live-26-routes-and-real-404",
+    "websiteNoindex": "partial-live-all-route-meta-and-canonicals-local-robots-live-robots-client-blocked",
     "websiteHeadersAndRedirects": "pending",
-    "websiteResponsiveAndAccessible": "pending",
-    "helperPublicBoundary": "pending",
-    "appRefreshAndRouting": "pending",
+    "websiteResponsiveAndAccessible": "passed-live-menu-and-current-local-multi-viewport-suite",
+    "helperPublicBoundary": "passed-live-public-and-refusal-boundaries",
+    "appRefreshAndRouting": "passed-live-root-and-hash-route-refresh",
     "appNoindex": "pending",
     "appHeaders": "pending",
-    "pwaInstallAndUpdate": "pending",
+    "appBrowserSafeConfig": "passed-build-guard-and-live-shell-no-values-recorded",
+    "pwaInstallAndUpdate": "partial-live-manifest-scope-and-network-first-worker-os-install-pending",
     "helpAndInstallPanel": "pending",
     "syntheticAuthJourney": "pending",
-    "crossDeploymentLinks": "pending",
+    "crossDeploymentLinks": "passed-live-github-pages-rollback-target",
+    "noRealOrPaymentDataUsed": "passed",
+    "githubPagesRollbackReachable": "passed-public-build-2026.07.22.2",
     "rollbackRehearsal": "pending"
   },
   "deferredHighRiskScopes": [
-    "Cloudflare deployment variables and build retries",
     "free document financial calculations",
     "first-use guidance based on private account data",
     "Supabase Auth and MFA origin changes",
