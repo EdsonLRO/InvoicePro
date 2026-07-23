@@ -6,7 +6,7 @@ Title: Correct mobile invoice actions, PDF download/pagination and default routi
 
 Priority: High user impact
 
-Status: Local implementation and focused validation complete - publication pending
+Status: Release approved - PR checks and production publication pending
 
 Owner role: Master Orchestrator
 
@@ -24,7 +24,7 @@ Files or paths locked: `index.html`, `service-worker.js`, the focused UX-001 reg
 
 Lock acquired: 2026-07-23 by the Master Orchestrator after the frozen AUTH-003 implementation transferred its edit lock on these two source files
 
-Dependency: Stacked on the locally accepted AUTH-003 candidate at `4df5732`; PR #88 remains draft, unmerged and unpublished
+Dependency: Rebased without conflict onto `main` at `35880c7` after the approved AUTH-003 PR #88 merge
 
 Acceptance criteria:
 
@@ -46,11 +46,11 @@ Specialist triggers:
 - Payments: Not triggered - no calculation, Stripe, payment-state or refund source change
 - Auth/Security: Not triggered - the frozen AUTH-003 implementation is preserved
 - Legal/Privacy: Not triggered
-- Release: Not triggered until a later merge/publication request
+- Release: Triggered - the Owner approved the complete push, PR, merge and build `2026.07.23.2` publication sequence
 
-Production impact: None in this task stage. Commit, push, PR readiness, merge and publication are separate actions.
+Production impact: Publishes the reviewed frontend and service-worker update as build `2026.07.23.2`; no provider, Auth, payment, database or customer-data configuration changes.
 
-Approval boundary: Routine local implementation and focused validation may proceed. Do not mark PR #88 ready, merge it, publish its candidate, deploy this UX change or perform production-provider actions without the applicable later approval.
+Approval boundary: On 2026-07-23 the Owner explicitly approved pushing this branch, creating and merging its pull request, and publishing build `2026.07.23.2`. Required checks, branch protection and focused production verification remain mandatory.
 
 Branch: `codex/mobile-pdf-usability`
 
@@ -72,6 +72,6 @@ Validation evidence:
 - Poppler-rendered page inspection confirmed repeated line-item headers on pages 2 and 3, no sliced row, and the complete notes/terms/payment-details/totals block on page 4;
 - the test used fictional data only and did not sign in, call Supabase, alter payments or inspect private information.
 
-Blocked reason: Push and preview deployment are deferred because this stacked branch would trigger new Cloudflare provider builds. PR #88 readiness, merge and production publication retain their separate exact Owner boundary.
+Blocked reason: None within the approved release scope.
 
-Next action: Commit the verified local change. Stop before push or any preview/production deployment.
+Next action: Commit this release-state update, push the rebased branch, create the pull request, require all checks and protected previews to pass, then merge and verify production build `2026.07.23.2`.
