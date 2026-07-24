@@ -27,6 +27,7 @@
   "requiredServerControls": [
     "allowlisted Stripe Billing price identifiers",
     "authenticated account-to-Stripe-customer mapping",
+    "one active subscription Checkout claim per account",
     "signed and idempotent subscription webhooks",
     "atomic subscription-state updates",
     "server-enforced entitlements and usage limits",

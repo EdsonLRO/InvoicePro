@@ -131,6 +131,23 @@ function subscriptionIdFromEvent(event: any): string {
   );
 }
 
+function checkoutSessionIdFromEvent(event: any): string {
+  if (!event.type.startsWith("checkout.session.")) return "";
+  return String(event.data?.object?.id || "");
+}
+
+async function clearCheckoutClaim(admin: any, event: any): Promise<void> {
+  const sessionId = checkoutSessionIdFromEvent(event);
+  if (!/^cs_test_[A-Za-z0-9]+$/.test(sessionId)) {
+    throw new Error("Stripe Checkout Session identity is invalid");
+  }
+  const { error } = await admin.rpc(
+    "clear_stripe_billing_checkout_claim",
+    { p_stripe_checkout_session_id: sessionId },
+  );
+  if (error) throw new Error("Billing Checkout claim cleanup failed");
+}
+
 async function retrieveSubscription(
   subscriptionId: string,
   config: ReturnType<typeof testConfig>,
@@ -175,10 +192,15 @@ async function reconcile(
   event: any,
   config: ReturnType<typeof testConfig>,
 ) {
+  if (event.type === "checkout.session.expired") {
+    await clearCheckoutClaim(admin, event);
+    return { ok: true, ignored: "expired Checkout claim cleared" };
+  }
+
   const subscriptionId = subscriptionIdFromEvent(event);
   if (!/^sub_[A-Za-z0-9]+$/.test(subscriptionId)) {
-    if (event.type === "checkout.session.expired") {
-      return { ok: true, ignored: "expired before subscription creation" };
+    if (event.type === "checkout.session.completed") {
+      throw new Error("Completed Checkout is missing its subscription");
     }
     return { ok: true, ignored: "missing subscription" };
   }
@@ -250,6 +272,9 @@ async function reconcile(
   }
   if (!["applied", "duplicate", "stale"].includes(String(result))) {
     throw new Error("Billing reconciliation returned an invalid result");
+  }
+  if (event.type === "checkout.session.completed") {
+    await clearCheckoutClaim(admin, event);
   }
   return {
     ok: true,

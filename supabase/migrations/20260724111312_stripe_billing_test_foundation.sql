@@ -45,6 +45,35 @@ create table public.billing_subscriptions (
         on update restrict on delete restrict
 );
 
+create table public.billing_checkout_claims (
+    user_id uuid primary key references auth.users(id) on delete cascade,
+    stripe_customer_id text not null,
+    request_id uuid not null,
+    billing_interval text not null
+        check (billing_interval in ('monthly', 'annual')),
+    stripe_checkout_session_id text unique
+        check (
+            stripe_checkout_session_id is null
+            or stripe_checkout_session_id ~ '^cs_test_[A-Za-z0-9]+$'
+        ),
+    claim_expires_at timestamptz not null,
+    session_expires_at timestamptz,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    constraint billing_checkout_claims_customer_owner_fk
+        foreign key (user_id, stripe_customer_id)
+        references public.billing_customers(user_id, stripe_customer_id)
+        on update restrict on delete cascade,
+    constraint billing_checkout_claims_session_pair_check
+        check (
+            (stripe_checkout_session_id is null and session_expires_at is null)
+            or (
+                stripe_checkout_session_id is not null
+                and session_expires_at is not null
+            )
+        )
+);
+
 create table public.billing_events (
     stripe_event_id text primary key
         check (stripe_event_id ~ '^evt_[A-Za-z0-9]+$'),
@@ -89,6 +118,7 @@ create index billing_subscriptions_customer_idx
 
 alter table public.billing_customers enable row level security;
 alter table public.billing_subscriptions enable row level security;
+alter table public.billing_checkout_claims enable row level security;
 alter table public.billing_events enable row level security;
 alter table public.account_entitlements enable row level security;
 
@@ -118,6 +148,7 @@ create policy "own account entitlements - select"
 
 revoke all on public.billing_customers from public, anon, authenticated;
 revoke all on public.billing_subscriptions from public, anon, authenticated;
+revoke all on public.billing_checkout_claims from public, anon, authenticated;
 revoke all on public.billing_events from public, anon, authenticated;
 revoke all on public.account_entitlements from public, anon, authenticated;
 
@@ -128,6 +159,7 @@ grant select on public.account_entitlements to authenticated;
 
 grant all on public.billing_customers to service_role;
 grant all on public.billing_subscriptions to service_role;
+grant all on public.billing_checkout_claims to service_role;
 grant all on public.billing_events to service_role;
 grant all on public.account_entitlements to service_role;
 
@@ -151,6 +183,10 @@ create trigger set_billing_customers_updated_at
 
 create trigger set_billing_subscriptions_updated_at
     before update on public.billing_subscriptions
+    for each row execute function public.set_billing_updated_at();
+
+create trigger set_billing_checkout_claims_updated_at
+    before update on public.billing_checkout_claims
     for each row execute function public.set_billing_updated_at();
 
 create trigger set_account_entitlements_updated_at
@@ -177,6 +213,157 @@ create trigger prevent_billing_event_update
 create trigger prevent_billing_event_delete
     before delete on public.billing_events
     for each row execute function public.prevent_billing_event_mutation();
+
+create or replace function public.claim_stripe_billing_checkout(
+    p_user_id uuid,
+    p_stripe_customer_id text,
+    p_request_id uuid,
+    p_billing_interval text
+)
+returns text
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+    v_claimed_request_id uuid;
+    v_existing_request_id uuid;
+    v_existing_interval text;
+begin
+    perform 1
+      from public.billing_customers
+     where user_id = p_user_id
+       and stripe_customer_id = p_stripe_customer_id
+     for update;
+    if not found then
+        return 'customer_mismatch';
+    end if;
+
+    if exists (
+        select 1
+          from public.billing_subscriptions
+         where user_id = p_user_id
+           and provider_status not in ('canceled', 'incomplete_expired')
+    ) then
+        return 'subscription_exists';
+    end if;
+
+    insert into public.billing_checkout_claims (
+        user_id,
+        stripe_customer_id,
+        request_id,
+        billing_interval,
+        claim_expires_at
+    )
+    values (
+        p_user_id,
+        p_stripe_customer_id,
+        p_request_id,
+        p_billing_interval,
+        now() + interval '35 minutes'
+    )
+    on conflict (user_id) do update
+        set stripe_customer_id = excluded.stripe_customer_id,
+            request_id = excluded.request_id,
+            billing_interval = excluded.billing_interval,
+            stripe_checkout_session_id = null,
+            session_expires_at = null,
+            claim_expires_at = excluded.claim_expires_at
+        where public.billing_checkout_claims.claim_expires_at <= now()
+    returning request_id into v_claimed_request_id;
+
+    if v_claimed_request_id = p_request_id then
+        return 'claimed';
+    end if;
+
+    select request_id, billing_interval
+      into v_existing_request_id, v_existing_interval
+      from public.billing_checkout_claims
+     where user_id = p_user_id;
+
+    if v_existing_request_id = p_request_id
+       and v_existing_interval = p_billing_interval then
+        return 'claimed';
+    end if;
+
+    return 'checkout_pending';
+end;
+$$;
+
+revoke all on function public.claim_stripe_billing_checkout(
+    uuid, text, uuid, text
+) from public, anon, authenticated;
+grant execute on function public.claim_stripe_billing_checkout(
+    uuid, text, uuid, text
+) to service_role;
+
+create or replace function public.complete_stripe_billing_checkout_claim(
+    p_user_id uuid,
+    p_stripe_customer_id text,
+    p_request_id uuid,
+    p_stripe_checkout_session_id text,
+    p_session_expires_at timestamptz
+)
+returns boolean
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+    v_completed_user_id uuid;
+begin
+    if p_session_expires_at <= now()
+       or p_session_expires_at > now() + interval '25 hours' then
+        return false;
+    end if;
+
+    update public.billing_checkout_claims
+       set stripe_checkout_session_id = p_stripe_checkout_session_id,
+           session_expires_at = p_session_expires_at,
+           claim_expires_at = greatest(
+               claim_expires_at,
+               p_session_expires_at + interval '5 minutes'
+           )
+     where user_id = p_user_id
+       and stripe_customer_id = p_stripe_customer_id
+       and request_id = p_request_id
+       and claim_expires_at > now()
+    returning user_id into v_completed_user_id;
+
+    return v_completed_user_id = p_user_id;
+end;
+$$;
+
+revoke all on function public.complete_stripe_billing_checkout_claim(
+    uuid, text, uuid, text, timestamptz
+) from public, anon, authenticated;
+grant execute on function public.complete_stripe_billing_checkout_claim(
+    uuid, text, uuid, text, timestamptz
+) to service_role;
+
+create or replace function public.clear_stripe_billing_checkout_claim(
+    p_stripe_checkout_session_id text
+)
+returns boolean
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+    v_cleared_user_id uuid;
+begin
+    delete from public.billing_checkout_claims
+     where stripe_checkout_session_id = p_stripe_checkout_session_id
+    returning user_id into v_cleared_user_id;
+
+    return v_cleared_user_id is not null;
+end;
+$$;
+
+revoke all on function public.clear_stripe_billing_checkout_claim(text)
+    from public, anon, authenticated;
+grant execute on function public.clear_stripe_billing_checkout_claim(text)
+    to service_role;
 
 create or replace function public.apply_stripe_billing_event(
     p_user_id uuid,

@@ -277,6 +277,24 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Evidence:** GitHub ruleset `18994100` settings readback; PR #26; run `29423597762`; job `verify` (`87380131589`).
 - **Status:** Verified.
 
+### SEC-PAY-002 - Browser-controlled idempotency permits parallel subscription Checkout Sessions
+
+- **Date:** 2026-07-24
+- **Classification:** payment integrity / pre-activation duplicate subscription
+- **Status:** Validated — approved to fix in repository-only BILL-003.
+- **Finding:** The disabled `create-billing-checkout` candidate derives its Stripe idempotency key partly from the browser-supplied `requestId`. Until a signed webhook writes `billing_subscriptions`, the same authenticated account can submit different request IDs and reach multiple Checkout Session creation requests.
+- **Impact:** If Billing were activated unchanged, completing overlapping Sessions could create duplicate subscriptions and charges, while one account entitlement row could conceal the financial duplication. There is no current customer impact because the migration is unapplied, the function is undeployed and public subscription Checkout is disabled.
+- **Evidence:** `create-billing-checkout` validates only UUID shape and includes `requestId` in the idempotency hash; its database duplicate check depends on webhook-derived subscription state.
+- **Existing controls:** Auth/email confirmation, MFA assurance when enrolled, server Price allowlisting, a per-request Stripe idempotency key, signed webhooks and an existing-subscription check reduce other abuse but do not serialize different request IDs before the first webhook.
+- **Intended change:** Add a service-role-only atomic per-account Checkout claim, verify existing provider subscription state before session creation, bind completion to the claimed request/session and clear only the matching claim from signed lifecycle processing.
+- **Verification required:** concurrent different-request rejection, same-request retry safety, expired-claim recovery, existing-subscription rejection, cross-account and browser-role denial, signed completion/expiration cleanup, rollback and normal single-session behavior.
+- **Change:** Added a private per-account Checkout-claim table and three service-role-only invoker RPCs; Checkout atomically claims before provider access, verifies all current Customer subscriptions, sets an explicit Session expiry and completes the matching claim; the signed Billing webhook clears only the matching Session claim on completion/expiration.
+- **Verification:** The revised migration applied to disposable PostgreSQL 17.6. Deterministic claim/RLS/privilege/expiry/subscription-block probes passed. In a real two-connection test, the different request waited behind the first account transaction and returned `checkout_pending`. Billing, invoice-payment isolation, dependency, workflow, tenant-attribution, Deno format/type and diff checks passed.
+- **Residual risk:** Actual Stripe behavior, provider configuration and signed lifecycle cleanup still require the separately approved isolated sandbox acceptance. Checkout remains undeployed and disabled.
+- **Evidence:** `STRIPE_BILLING_TEST_ACCEPTANCE_PREPARATION_EVIDENCE_2026-07-24.md`; `STRIPE_BILLING_TEST_ACCEPTANCE_RUNBOOK.md`; the Billing migration/functions and focused tests.
+- **Status:** Resolved in the BILL-003 branch; high-risk PR merge remains Owner-gated.
+- **Residual gate:** Supabase application, Stripe test configuration, deployment, test Checkout and public activation remain separate Owner approvals.
+
 ## Open Follow-Ups
 
 - Keep the verified Supabase Auth policy evidence current after material provider changes: 12-character minimum, leaked-password rejection, one-hour JWT lifetime, refresh rotation, seven-day maximum session age, 24-hour inactivity timeout, custom SMTP, and the initial Auth rate limits.

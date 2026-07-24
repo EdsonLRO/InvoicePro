@@ -9,6 +9,7 @@
 - PR #92 is merged. Repository authority is simplified, the approved commercial offer is prepared, and general card-payment claims are qualified for the future multi-business boundary.
 - PR #94 is merged. The Stripe Billing test foundation is repository-only: its migration remains unapplied, its three Edge Functions remain undeployed, no provider settings exist, and Checkout remains disabled.
 - PR #96 is merged. The Billing migration passed disposable PostgreSQL 17.6 RLS, privilege, ownership, replay, rollback and entitlement probes; its service-role-only RPCs now use caller privileges. This did not apply or deploy Billing.
+- BILL-003 repository preparation adds one service-only Checkout claim per account, current-provider subscription verification, signed lifecycle cleanup, repeatable local claim probes and an isolated test-acceptance runbook. It does not apply or deploy anything, and public Checkout remains disabled.
 
 ## Implemented capabilities
 

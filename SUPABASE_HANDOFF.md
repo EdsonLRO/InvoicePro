@@ -78,7 +78,7 @@ All in the `public` schema. All have RLS enabled and are scoped to the owning us
 - `recurring_templates`
 - `audit_events`
 
-Unapplied Stripe Billing candidate tables: `billing_customers`, `billing_subscriptions`, `billing_events`, and `account_entitlements`. They do not exist in the live project unless migration `20260724111312_stripe_billing_test_foundation.sql` is separately approved and applied. The candidate grants authenticated users owner-scoped SELECT only; writes and atomic entitlement reconciliation remain service-role-only.
+Unapplied Stripe Billing candidate tables: `billing_customers`, `billing_subscriptions`, `billing_checkout_claims`, `billing_events`, and `account_entitlements`. They do not exist in the live project unless migration `20260724111312_stripe_billing_test_foundation.sql` is separately approved and applied. The four user-visible tables grant authenticated users owner-scoped SELECT only; the Checkout-claim table has no browser access. Writes, Checkout claims and atomic entitlement reconciliation remain service-role-only.
 
 ---
 
@@ -198,9 +198,9 @@ Other current Edge Functions:
 
 Repository-only, undeployed Stripe Billing candidates:
 
-- `create-billing-checkout` - confirmed authenticated owner; requires current AAL2 when MFA is enrolled; maps only monthly/annual choices to server allowlisted test Prices; fails closed unless the Billing kill switch and explicit test mode are enabled.
+- `create-billing-checkout` - confirmed authenticated owner; requires current AAL2 when MFA is enrolled; maps only monthly/annual choices to server allowlisted test Prices; atomically claims one active Checkout per account; verifies the mapped Stripe Customer has no non-terminal subscription; fails closed unless the Billing kill switch and explicit test mode are enabled.
 - `create-billing-portal` - confirmed authenticated owner; resolves only that owner's mapped Billing Customer; uses the same kill switch, MFA and test-mode gates.
-- `stripe-billing-webhook` - separate from invoice payments; verifies the raw-body signature, rejects live events, refreshes current Stripe subscription state, checks customer/Price ownership and applies state through the service-role-only atomic RPC.
+- `stripe-billing-webhook` - separate from invoice payments; verifies the raw-body signature, rejects live events, refreshes current Stripe subscription state, checks customer/Price ownership, applies state through the service-role-only atomic RPC and clears only the matching Checkout claim from signed completion/expiration lifecycle handling.
 
 These three functions are not deployed and their migration is not applied. Do not add their settings or deploy them without the separate Owner gate recorded in `tasks/ACTIVE.md`.
 
