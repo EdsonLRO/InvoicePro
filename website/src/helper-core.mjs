@@ -6,7 +6,7 @@ export const normaliseQuestion = (value) => String(value || "")
   .trim()
   .slice(0, 240);
 
-const boundaryRules = Object.freeze([
+export const boundaryRules = Object.freeze([
   {
     reason: "sensitive",
     pattern: /\b(password|passphrase|mfa code|2fa code|authenticator (?:code|secret)|one[- ]time (?:password|code)|otp|recovery code|card number|security code|cvv|bank details|sort code|secret key|api key|access token|jwt)\b/i,
@@ -39,13 +39,17 @@ export const noAnswer = Object.freeze({
   links: [{ label: "Open the Help Centre", href: "/help/" }, { label: "Read common questions", href: "/faq/" }]
 });
 
+export const findHelperBoundary = (question) => {
+  const normalised = normaliseQuestion(question);
+  return boundaryRules.find((rule) => rule.pattern.test(normalised)) || null;
+};
+
 export const findHelperAnswer = (knowledge, question, entryId = "") => {
   const entries = Array.isArray(knowledge?.entries) ? knowledge.entries : [];
   const normalised = normaliseQuestion(question);
 
-  for (const rule of boundaryRules) {
-    if (rule.pattern.test(normalised)) return rule;
-  }
+  const boundary = findHelperBoundary(normalised);
+  if (boundary) return boundary;
 
   if (entryId) {
     const selected = entries.find((entry) => entry.id === entryId);
@@ -65,6 +69,42 @@ export const findHelperAnswer = (knowledge, question, entryId = "") => {
 
   return noAnswer;
 };
+
+export const createPublicAiAdapter = ({
+  enabled = false,
+  endpoint = "/api/helper",
+  fetchImpl = globalThis.fetch,
+  timeoutMs = 8_000
+} = {}) => Object.freeze({
+  enabled,
+  provider: enabled ? "same-origin-server" : null,
+  async answer(question) {
+    if (!enabled) throw new Error("The future public AI adapter is disabled.");
+    if (typeof fetchImpl !== "function") throw new Error("Tallyo Helper is unavailable.");
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetchImpl(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: normaliseQuestion(question) }),
+        credentials: "same-origin",
+        signal: controller.signal
+      });
+      if (!response.ok) throw new Error("Tallyo Helper is unavailable.");
+      const payload = await response.json();
+      if (payload?.answered !== true || typeof payload.answer !== "string") return null;
+      return {
+        reason: "ai",
+        answer: payload.answer,
+        links: Array.isArray(payload.links) ? payload.links : []
+      };
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+});
 
 export const futurePublicAiAdapter = Object.freeze({
   enabled: false,
