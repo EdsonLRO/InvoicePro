@@ -7,7 +7,7 @@
 - The separate public website is implemented and privately previewed on Cloudflare Pages, but it is not published on `tallyo.co.uk`.
 - PR #91 is merged. The privately tested public AI Helper remains disabled by default. Production AI activation is a separate decision.
 - PR #92 is merged. Repository authority is simplified, the approved commercial offer is prepared, and general card-payment claims are qualified for the future multi-business boundary.
-- A Stripe Billing test foundation is being prepared on `codex/stripe-billing-test-foundation`. Its migration and three Edge Functions are repository-only, unapplied, undeployed and disabled without explicit server settings.
+- PR #94 is merged. The Stripe Billing test foundation is repository-only: its migration remains unapplied, its three Edge Functions remain undeployed, no provider settings exist, and Checkout remains disabled.
 
 ## Implemented capabilities
 
