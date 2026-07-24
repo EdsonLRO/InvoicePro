@@ -8,6 +8,7 @@
 - PR #91 is merged. The privately tested public AI Helper remains disabled by default. Production AI activation is a separate decision.
 - PR #92 is merged. Repository authority is simplified, the approved commercial offer is prepared, and general card-payment claims are qualified for the future multi-business boundary.
 - PR #94 is merged. The Stripe Billing test foundation is repository-only: its migration remains unapplied, its three Edge Functions remain undeployed, no provider settings exist, and Checkout remains disabled.
+- PR #96 is merged. The Billing migration passed disposable PostgreSQL 17.6 RLS, privilege, ownership, replay, rollback and entitlement probes; its service-role-only RPCs now use caller privileges. This did not apply or deploy Billing.
 
 ## Implemented capabilities
 
@@ -37,7 +38,7 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 
 ## Immediate launch blockers
 
-- Complete High review of the repository-only Stripe Billing foundation, then separately approve any test migration, provider configuration, deployment and controlled test Checkout.
+- The repository and disposable-local Billing review is complete. Applying the migration, configuring test-mode Stripe, deploying functions and running a controlled test Checkout remain separate High-risk Owner gates.
 - Design, implement and verify Stripe Connect separately before public business payment claims.
 - Complete domain/DNS, final operational checks, approved legal/privacy publication and production release as separate Owner-gated stages.
 
