@@ -1,19 +1,27 @@
-# Active programme
+# Active task: BILL-002 local Billing migration validation
 
-Objective: BILL-001 implemented a disabled-by-default, test-mode-only Stripe Billing repository foundation for Tallyo Pro without applying a migration, configuring providers or secrets, deploying functions, making a payment, enabling checkout or publishing a release.
-Status: Completed through merged PR #94.
-Branch: `main` at merge commit `01d51ba77412eaae10bf24fc786dbc9ec684b251`.
-Risk: High implementation completed under Payments, Supabase/backend, Security/Privacy and QA review.
-Completed: Owner-scoped read RLS; service-role-only writes; composite account/customer ownership; atomic, append-only and out-of-order-safe event reconciliation; provider-derived entitlements; monthly/annual server Price allowlisting; confirmed Auth and MFA assurance; disabled/test-mode gates; separate Checkout, Portal and signed webhook functions; invoice-payment isolation; focused CI and evidence.
-Runtime state: Migration unapplied; three Billing functions undeployed; Stripe products, Prices, secrets, webhook and Portal unconfigured; app write policies not connected to Billing; public checkout disabled.
-Validation: GitHub `verify` and both protected Cloudflare preview checks passed on the final PR head. Focused Billing, invoice-payment isolation, dependency, workflow, tenant-attribution, Deno format/type, website fail-closed, secret-scan and diff checks passed. Evidence is in `STRIPE_BILLING_TEST_FOUNDATION_EVIDENCE_2026-07-24.md`.
-Remaining: None within BILL-001. Applying the migration, configuring Stripe test mode, deploying functions, connecting write enforcement and conducting test Checkout/webhook/Portal acceptance form a separate High-risk programme.
-Owner-only actions: Any migration application; Stripe product/Price, Portal, webhook or secret configuration; function deployment; Stripe request/payment; Billing activation; public checkout; production configuration or release.
-Next action: Select and explicitly approve the isolated Stripe Billing test-environment application and acceptance stage. Keep High mode for that work.
+Objective: Apply and exercise the merged Stripe Billing migration only inside a disposable local PostgreSQL 17 container, correct any validation finding within the unapplied migration and focused harness, then remove that exact container.
+Status: Local validation and correction complete; awaiting Owner approval at the high-risk PR ready/merge boundary.
+Branch: `codex/billing-local-migration-validation`.
+Risk: High review because the test covers RLS, privileged functions, tenant ownership and payment entitlements. Runtime impact is locally isolated and reversible.
+Approved scope: Start the already available Docker engine; create the network-unpublished container `tallyo-billing-pg17-validation-20260724`; build a minimal Supabase-compatible role/Auth fixture; apply only `20260724111312_stripe_billing_test_foundation.sql`; run schema, RLS, grant, ownership, atomicity, replay, ordering, entitlement and rollback probes; correct only a confirmed migration finding and its focused regression assertion; verify the exact container identity; stop/remove only that container; record privacy-safe evidence.
+Excluded: Supabase cloud changes; remote SQL; migration history changes; Edge Function deployment; provider settings or secrets; Stripe writes; customer/payment data; public checkout; production release; deletion of any pre-existing Docker container, image, volume or user data.
+
+## Roles and gates
+
+- Master Orchestrator: scope, exact-target safety, evidence and closure.
+- Supabase/backend specialist: PostgreSQL fixture, migration execution and RLS/privilege probes.
+- Payments/Security specialist: atomic state, replay/order and entitlement review.
+- QA specialist: deterministic pass/fail assertions and cleanup verification.
+- Production Release, Stripe Provider, Legal and Customer Data: Not triggered; explicitly excluded.
 
 ## Lock
 
-- Assigned role: Master Orchestrator, with Payments, Supabase/backend, Security/Privacy and QA responsibilities performed sequentially.
-- Files or paths locked: Billing migration, Billing Edge Functions, focused tests and Billing authority/evidence.
+- Files or paths locked: `tasks/ACTIVE.md`, `supabase/migrations/20260724111312_stripe_billing_test_foundation.sql`, `tests/stripe-billing-foundation-harness.cjs` and `STRIPE_BILLING_LOCAL_MIGRATION_EVIDENCE_2026-07-24.md`.
+- Local resource released: Docker container name `tallyo-billing-pg17-validation-20260724`; the exact container was removed after the passing run and no container remains with that name.
 - Lock acquired: 2026-07-24.
-- Lock released: 2026-07-24 after PR #94 merged with all required checks passing.
+- Repository lock release condition: Owner-approved merge followed by authoritative closeout. Every local probe passed, the exact disposable container was removed and the evidence is focused.
+
+## Approval boundary
+
+The Owner approved this exact local disposable-container validation and removal. Stop again before any Supabase cloud mutation, Stripe configuration/write, secret handling, function deployment, provider request, payment or public/production activation.
