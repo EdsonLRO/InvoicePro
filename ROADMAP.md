@@ -2,12 +2,10 @@
 
 ## Now
 
-- Simplify repository authority and archive completed task records.
-- Finalise the Free Invoice Maker and one-plan Tallyo Pro offer.
-- Reconcile operational and proportionate legal launch requirements.
-- Complete public-domain preparation without DNS cutover.
-- Prepare Stripe Billing architecture and prevent public misuse of the current Owner Stripe payment path.
-- Complete the repository-side commercial-launch review while keeping subscriptions and the merged AI Helper disabled.
+- Keep the website private, the merged AI Helper disabled and subscription checkout inactive.
+- Select the next separately approved launch stage before changing providers, secrets, DNS or production state.
+- Resolve tax presentation and final contractual publication wording before subscription checkout or public pricing release.
+- Preserve the documented separation between Tallyo subscriptions and independent-business customer payments.
 
 ## Next
 

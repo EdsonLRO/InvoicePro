@@ -6,6 +6,7 @@
 - Public app build `2026.07.23.2` is deployed on GitHub Pages. An Access-protected Cloudflare app preview is also available.
 - The separate public website is implemented and privately previewed on Cloudflare Pages, but it is not published on `tallyo.co.uk`.
 - PR #91 is merged. The privately tested public AI Helper remains disabled by default, and the subscription architecture remains design-only. Production AI activation is a separate decision.
+- PR #92 is merged. Repository authority is simplified, the approved commercial offer is prepared, and general card-payment claims are qualified for the future multi-business boundary.
 
 ## Implemented capabilities
 
@@ -35,7 +36,6 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 
 ## Immediate launch blockers
 
-- Complete and review the repository-side commercial-launch PR.
 - Implement Stripe Billing later in test mode with server-enforced entitlements and High review.
 - Design, implement and verify Stripe Connect separately before public business payment claims.
 - Complete domain/DNS, final operational checks, approved legal/privacy publication and production release as separate Owner-gated stages.
