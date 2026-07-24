@@ -53,6 +53,7 @@ const hashes = [...new Set(rendered.flatMap(({ inlineScripts }) => inlineScripts
 const headerTemplate = await readFile(join(websiteRoot, "public", "_headers.template"), "utf8");
 const headers = headerTemplate
   .replace("{{SCRIPT_HASHES}}", hashes)
+  .replace("{{CONNECT_SRC}}", siteConfig.aiHelperEnabled ? "'self'" : "'none'")
   .replace("{{ROBOTS_HEADER}}", siteConfig.preview ? "X-Robots-Tag: noindex, nofollow, noarchive" : "");
 await writeFile(join(distRoot, "_headers"), headers, "utf8");
 
