@@ -7,7 +7,7 @@
 - Reconcile operational and proportionate legal launch requirements.
 - Complete public-domain preparation without DNS cutover.
 - Prepare Stripe Billing architecture and prevent public misuse of the current Owner Stripe payment path.
-- Finish and merge the privately tested AI Helper while keeping production disabled.
+- Complete the repository-side commercial-launch review while keeping subscriptions and the merged AI Helper disabled.
 
 ## Next
 

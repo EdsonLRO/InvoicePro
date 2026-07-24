@@ -169,22 +169,11 @@ For full details, see `SUPABASE_HANDOFF.md`.
 
 ## 9. Current roadmap
 
-Current app/security work:
-
-1. Define the operational refund, dispute, chargeback, and support process; the implemented Stripe sandbox lifecycle and duplicate replay behavior are Verified.
-2. Run the documented Owner-approved non-production restore test in `BACKUP_RESTORE_RUNBOOK.md`; current daily-backup evidence is verified through 2026-07-14.
-3. Expand append-only audit logging further, especially privileged automation failures and backup/restore evidence.
-4. Preserve the Verified `MFA_RECOVERY_RUNBOOK.md` controls and approved deny-by-default production response; deploy and accept the implemented all-factors-lost candidate before paid/public onboarding. Consider upgrading all-devices logout with a server-side email-code confirmation flow later.
-5. Complete the remaining provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; leaked-password rejection is already Verified.
-6. Complete privacy/data-protection groundwork before real customer use.
-7. Keep security docs, screenshots, and portfolio evidence in sync with the real app.
-
-Future phase, deliberately deferred:
-
-- Public marketing website at `tallyo.co.uk`.
-- Paid Tallyo subscriptions.
-- Plan tiers and server-enforced entitlements.
-- Workspaces, teams, RBAC, and full SaaS billing architecture.
+The compact current roadmap is maintained in [`ROADMAP.md`](ROADMAP.md).
+The immediate programme is repository simplification and commercial-launch
+preparation for the Free Invoice Maker and one-business, one-user Tallyo Pro.
+Subscription checkout, Stripe Billing/Connect runtime changes, DNS cutover and
+public release remain separately reviewed and Owner-gated.
 
 ---
 

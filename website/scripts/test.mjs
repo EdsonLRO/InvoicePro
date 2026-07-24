@@ -129,10 +129,18 @@ for (const page of publishedIndustryPages) {
 assert.ok(industries.length >= publishedIndustryPages.length, "homepage can show broader factual industry examples");
 
 const pricing = read("pricing/index.html");
-assert.match(pricing, /Plans and pricing are being finalised/);
-assert.match(pricing, /Teams workspaces and multi-user access are not currently implemented/);
-assert.doesNotMatch(pricing, /[£$€]\s*\d/);
-assert.doesNotMatch(pricing, /free trial|\d+-day trial/i);
+assert.match(pricing, /Free Invoice Maker/);
+assert.match(pricing, /Tallyo Pro/);
+assert.match(pricing, /£8/);
+assert.match(pricing, /£80/);
+assert.match(pricing, /Save £16/);
+assert.match(pricing, /Approximately £6\.67 per month/);
+assert.match(pricing, /Subscriptions are being prepared/);
+assert.match(pricing, /button[^>]+disabled[^>]*>Subscriptions are being prepared/);
+assert.match(pricing, /does not currently offer a full-feature free trial/);
+assert.match(pricing, /not included in the launch subscription yet/);
+assert.doesNotMatch(pricing, /Essentials|Automate|Teams|two months free|\d+-day trial/i);
+assert.doesNotMatch(pricing, /checkout\.stripe\.com|price_[A-Za-z0-9]+|prod_[A-Za-z0-9]+/);
 
 const helperKnowledge = JSON.parse(readFileSync(join(websiteRoot, "content", "helper-knowledge.json"), "utf8"));
 assert.equal(helperKnowledge.scope, "public-product-guidance-only");

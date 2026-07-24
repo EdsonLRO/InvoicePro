@@ -5,7 +5,7 @@
 - The authenticated invoicing app is feature-complete for its current one-business, one-user scope.
 - Public app build `2026.07.23.2` is deployed on GitHub Pages. An Access-protected Cloudflare app preview is also available.
 - The separate public website is implemented and privately previewed on Cloudflare Pages, but it is not published on `tallyo.co.uk`.
-- Draft PR #91 contains the privately tested, disabled-by-default public AI Helper and design-only subscription architecture. It remains unmerged pending exact Owner approval. Production AI activation is a separate decision.
+- PR #91 is merged. The privately tested public AI Helper remains disabled by default, and the subscription architecture remains design-only. Production AI activation is a separate decision.
 
 ## Implemented capabilities
 
@@ -36,7 +36,6 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 ## Immediate launch blockers
 
 - Complete and review the repository-side commercial-launch PR.
-- Obtain exact Owner approval before merging PR #91.
 - Implement Stripe Billing later in test mode with server-enforced entitlements and High review.
 - Design, implement and verify Stripe Connect separately before public business payment claims.
 - Complete domain/DNS, final operational checks, approved legal/privacy publication and production release as separate Owner-gated stages.

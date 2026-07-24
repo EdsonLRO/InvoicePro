@@ -4,11 +4,11 @@ Objective: Simplify repository authority and prepare Tallyo's approved commercia
 Branch: `codex/repository-simplification-commercial-launch`
 Risk: Medium for repository, content, SEO, accessibility and architecture documentation. High-risk runtime/provider actions are excluded.
 Current scope: Compact authoritative documents; archive completed task records; Free Invoice Maker and one Tallyo Pro offer; payment-claim qualification; design-only Stripe Billing and Connect architecture; proportionate launch checklist; disabled analytics measurement plan.
-Completed: AI Helper implementation preserved separately in draft PR #91 at the exact Owner merge-approval boundary. This branch starts from `origin/main` commit `c0ebf10` and does not edit PR #91's Helper source. Compact authority, task archives, approved commercial decisions, Billing/Connect architecture, the proportionate launch checklist, disabled market-evidence plan and a tested commercial-offer module are prepared.
-Remaining: After PR #91 merges, update this branch from `main`, wire the commercial offer into the public pages that PR #91 also changes, qualify public payment claims, run focused responsive/accessibility/build checks, review the full diff, commit, push and open one reviewable pull request.
-Validation already completed: Current invoicing app build `2026.07.23.2`; PR #91 focused Helper suite and protected-preview acceptance. On this branch, the existing 26-route website build and commercial-offer assertions pass. Unchanged high-risk regressions will not be repeated.
-Owner-only actions: PR #91 ready/merge approval; any public AI activation; live Stripe Billing or Connect configuration; provider secrets; DNS; legal publication; production release.
-Next action: Obtain exact Owner approval to mark PR #91 ready and merge its disabled-by-default capability. Then update this branch from merged `main` before editing the overlapping public-page files.
+Completed: PR #91 is merged with the AI Helper disabled by default. This branch is updated from merged `main` and preserves the Helper implementation and gates. Compact authority, task archives, approved commercial decisions, Billing/Connect architecture, the proportionate launch checklist, disabled market-evidence plan and commercial-offer module are prepared. The approved two-offer pricing is wired into the public pages and general card-payment claims are qualified.
+Remaining: Commit and push the reviewed diff, open one reviewable pull request, and hand it to the Owner without merging or publishing.
+Validation already completed: Current invoicing app build `2026.07.23.2`; PR #91 focused Helper suite and protected-preview acceptance. On this branch, the 26-route website build, commercial-offer assertions, AI Helper fail-closed/mock-provider suite, pricing-page semantic review, focused contradiction scan and `git diff --check` pass. Unchanged high-risk regressions were not repeated.
+Owner-only actions: Any public AI activation; live Stripe Billing or Connect configuration; provider secrets; DNS; legal publication; production release.
+Next action: Commit, push and open the commercial-launch pull request for Owner review.
 
 ## Lock
 

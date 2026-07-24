@@ -20,7 +20,7 @@
       "id": "features",
       "question": "What features are available?",
       "triggers": ["what features are available", "tallyo features", "what can tallyo do"],
-      "answer": "Tallyo supports invoices, quotes, credit notes, customers, saved items, branded PDFs, document email, payment status, Stripe-hosted card links, recurring invoices, opt-in overdue reminders, refunds, exports and account-protection controls.",
+      "answer": "Tallyo supports invoices, quotes, credit notes, customers, saved items, branded PDFs, document email, payment tracking, recurring invoices, opt-in overdue reminders, exports and account-protection controls. Online card payments for independent business accounts are being prepared.",
       "links": [{ "label": "See all features", "href": "/features/" }, { "label": "Take the product tour", "href": "/product-tour/" }]
     },
     {
@@ -53,31 +53,31 @@
     },
     {
       "id": "stripe-payments",
-      "question": "How do Stripe card payments work?",
+      "question": "Can customers pay by card?",
       "triggers": ["how do stripe card payments work", "stripe card payment", "pay by card", "card payment link"],
-      "answer": "Tallyo opens a Stripe-hosted checkout for the amount requested. The customer enters card details with Stripe, and Tallyo updates the invoice after the payment provider confirms the result.",
-      "links": [{ "label": "Use payment links", "href": "/help/payment-links-and-deposits/" }]
+      "answer": "Online card payments for independent business accounts are being prepared and are not included in the launch subscription yet. You can record payments received through another agreed route.",
+      "links": [{ "label": "Check payment availability", "href": "/help/payment-links-and-deposits/" }]
     },
     {
       "id": "card-storage",
       "question": "Does Tallyo store card details?",
       "triggers": ["does tallyo store card details", "card details stored", "store my card"],
-      "answer": "No. Customers enter card details on Stripe-hosted checkout pages, and Tallyo does not store full card details.",
+      "answer": "Tallyo does not currently collect card details for independent business accounts. Any future card-payment path will be introduced only with reviewed provider handling.",
       "links": [{ "label": "Read about payment security", "href": "/security/" }]
     },
     {
       "id": "deposits",
       "question": "Can Tallyo process deposits?",
       "triggers": ["can tallyo process deposits", "request a deposit", "invoice deposit"],
-      "answer": "Yes. For a saved invoice, the seller can request the full outstanding balance or set a deposit amount for a Stripe-hosted card checkout.",
-      "links": [{ "label": "Use payment links and deposits", "href": "/help/payment-links-and-deposits/" }]
+      "answer": "You can record a deposit received through an agreed payment route as a part-payment against the invoice. Online deposit checkout is not included in the launch subscription yet.",
+      "links": [{ "label": "Understand payment tracking", "href": "/help/payment-links-and-deposits/" }]
     },
     {
       "id": "refunds",
       "question": "How do refunds work?",
       "triggers": ["how do refunds work", "refund a payment", "refund invoice"],
-      "answer": "A supported full or partial refund is requested from the paid invoice. Tallyo updates the balance and activity after Stripe confirms the outcome. Another payment needs a fresh checkout session.",
-      "links": [{ "label": "Understand refunds", "href": "/help/refunds-and-payment-status/" }]
+      "answer": "Tallyo payment tracking does not itself move money or issue a bank or card refund. Complete the refund through the route used to receive the money, then keep your invoice records consistent.",
+      "links": [{ "label": "Understand payment status", "href": "/help/refunds-and-payment-status/" }]
     },
     {
       "id": "installation",
@@ -111,8 +111,8 @@
       "id": "pricing",
       "question": "Where can I find pricing?",
       "triggers": ["where can i find pricing", "tallyo pricing", "how much is tallyo", "tallyo plans"],
-      "answer": "The Pricing page shows the current plan direction. Exact prices, limits and availability are still being finalised, and this website does not offer subscription checkout yet.",
-      "links": [{ "label": "View pricing direction", "href": "/pricing/" }]
+      "answer": "The Free Invoice Maker costs £0 and requires no account. Tallyo Pro is £8 per month or £80 per year for one business and one user. Subscription checkout is still being prepared.",
+      "links": [{ "label": "View pricing", "href": "/pricing/" }]
     },
     {
       "id": "support",

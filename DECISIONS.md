@@ -12,7 +12,7 @@
 | One business and one user | Approved | Matches the current verified implementation. |
 | Teams are deferred | Approved | Multi-user workspace and role isolation are not implemented. |
 | OpenAI public product Helper implementation | Approved | The bounded public-information Helper is built and privately tested; preserve the work. |
-| Public AI Helper repository merge | Pending Owner approval | Code may be merged while disabled by default. |
+| Public AI Helper repository merge | Approved and merged | PR #91 merged the capability while keeping it disabled by default. |
 | Public AI Helper production activation | Pending | Requires separate notice, provider budget, configuration and release approval. |
 | Deterministic Helper | Retained | Provides a no-cost, privacy-minimised fallback. |
 | Authenticated AI access | Deferred | No approved private-data architecture or market evidence. |

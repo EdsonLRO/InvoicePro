@@ -22,9 +22,9 @@ export const siteConfig = Object.freeze({
   canonicalOrigin,
   appUrl,
   signupUrl: trimSlash(process.env.TALLYO_SIGNUP_URL || appUrl),
-  defaultTitle: "Tallyo — Professional invoices. Faster payments. Less admin.",
+  defaultTitle: "Tallyo — Professional invoices. Clearer payment tracking. Less admin.",
   defaultDescription:
-    "Create quotes and invoices, accept card payments, automate recurring work and keep customer transactions organised in one straightforward workspace.",
+    "Create quotes and invoices, track payments, automate recurring work and keep customer transactions organised in one straightforward workspace.",
   locale: "en_GB",
   themeColor: "#111a31",
   socialImagePath: "/assets/tallyo-social-card.webp",

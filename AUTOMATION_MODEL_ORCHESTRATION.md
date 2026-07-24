@@ -215,7 +215,7 @@ Material disagreement is resolved as follows:
 - Sol controls critical security, payment, and data-integrity decisions.
 - Terra controls routine implementation when no critical concern exists.
 - The Owner decides unresolved product, commercial, legal, or financial ambiguity.
-- Material disagreement and its resolution go in `DECISION_LOG.md`.
+- Material disagreement and its resolution go in `DECISIONS.md`.
 
 ### Risk-based specialist selection and review
 
@@ -242,7 +242,7 @@ High-risk work must load the complete relevant specialist policies. The context-
 
 ## 5. Orchestrator Task Queue
 
-The Orchestrator maintains the queue in `PRODUCT_COMPLETION_LEDGER.md` or a task-specific working record. Every active task must include:
+The Orchestrator maintains the current programme in `tasks/ACTIVE.md`. Every active task must include:
 
 ```text
 Task ID:
@@ -343,10 +343,10 @@ supabase/functions/create-stripe-checkout/
 supabase/functions/create-stripe-refund/
 supabase/functions/log-app-event/
 APP_STATUS.md
-PROJECT_HANDOFF.md
+tasks/ACTIVE.md
 AUTOMATION_MODEL_ORCHESTRATION.md
 TALLYO_LEGAL_COMPLIANCE_AGENT.md
-PRODUCT_COMPLETION_LEDGER.md
+ROADMAP.md
 RELEASE_READINESS.md
 legal/
 privacy/
@@ -522,13 +522,13 @@ Maintain these authorities:
 - legal/privacy/regulatory authority: `TALLYO_LEGAL_COMPLIANCE_AGENT.md`;
 - computer use: `AGENT_HIERARCHY_AND_COMPUTER_USE.md`;
 - owner permission: `AUTONOMOUS_EXECUTION_PERMISSION.md`;
-- project handoff: `PROJECT_HANDOFF.md`;
+- active programme and handoff: `tasks/ACTIVE.md`;
 - Supabase: `SUPABASE_HANDOFF.md`;
 - security story: `SECURITY_STORY.md`;
 - operations: `SECURITY_OPERATIONS.md`;
 - findings: `SECURITY_FINDINGS_LEDGER.md`;
-- capability/queue: `PRODUCT_COMPLETION_LEDGER.md`;
-- decisions: `DECISION_LOG.md`;
+- priorities and capability direction: `ROADMAP.md`;
+- decisions: `DECISIONS.md`;
 - release gates: `RELEASE_READINESS.md`.
 
 Do not promote Planned to Implemented or Verified without evidence.
@@ -537,10 +537,10 @@ Update a document when its authoritative state changes. Do not rewrite every aut
 
 - update the active task record during the task;
 - update `APP_STATUS.md` only for a material current-product status change;
-- update `DECISION_LOG.md` only for a genuine decision, exception, override or conflict;
-- update `PRODUCT_COMPLETION_LEDGER.md` only when capability or tracked-task status changes;
+- update `DECISIONS.md` only for a genuine decision, exception, override or conflict;
+- update `ROADMAP.md` only when priority or capability direction changes;
 - update `RELEASE_READINESS.md` only when a release condition changes;
-- update `PROJECT_HANDOFF.md` only for a meaningful milestone, ownership transfer or material session handoff;
+- update `tasks/ACTIVE.md` while the programme is active and at meaningful handoff boundaries;
 - update help, security and payment evidence only when their user-visible behaviour, claim, result or finding changes.
 
 Related documentation may be batched at task or milestone closure. Historical records are preserved but excluded from default context unless needed for regression, contradiction or explicit historical review.
