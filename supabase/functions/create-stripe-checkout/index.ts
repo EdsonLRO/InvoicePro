@@ -104,6 +104,12 @@ Deno.serve(async (req) => {
 
   const { data: userData, error: userError } = await userClient.auth.getUser();
   if (userError || !userData?.user) return json({ error: "Invalid session" }, 401);
+  const ownerUserId = Deno.env.get("STRIPE_OWNER_USER_ID") || "";
+  if (!isUuid(ownerUserId) || userData.user.id !== ownerUserId) {
+    return json({
+      error: "Card payments are not configured for this account",
+    }, 403);
+  }
 
   let body: any;
   try {

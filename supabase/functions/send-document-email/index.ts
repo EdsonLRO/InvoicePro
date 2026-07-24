@@ -535,6 +535,14 @@ async function resendIdempotencyKey(parts: string[]): Promise<string> {
 }
 
 async function createStripeCheckoutUrl(inv: any, userId: string, to: string, admin: any, amount: number, kind: string): Promise<string | null> {
+  const ownerUserId = Deno.env.get("STRIPE_OWNER_USER_ID") || "";
+  if (
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      .test(ownerUserId) ||
+    userId !== ownerUserId
+  ) {
+    return null;
+  }
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
   const appUrl = Deno.env.get("APP_BASE_URL")?.replace(/\/+$/, "");
   if (!stripeKey || !appUrl) return null;
@@ -627,9 +635,71 @@ async function createStripeCheckoutUrl(inv: any, userId: string, to: string, adm
   return stripeBody?.url || null;
 }
 
-async function createPaymentLinks(inv: any, userId: string, to: string, admin: any): Promise<PaymentLink[]> {
+async function createConnectedPaymentLink(
+  inv: any,
+  userId: string,
+  authHeader: string,
+  admin: any,
+  outstanding: number,
+): Promise<PaymentLink[] | null> {
+  const { data: mapping, error: mappingError } = await admin
+    .from("stripe_connected_accounts")
+    .select("onboarding_state")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (mappingError) {
+    throw new Error("Stripe connection lookup failed");
+  }
+  if (!mapping) return null;
+  if (mapping.onboarding_state !== "active") {
+    throw new Error("Finish Stripe setup before emailing a card payment link");
+  }
+
+  const response = await fetch(
+    `${Deno.env.get("SUPABASE_URL")!}/functions/v1/create-connect-checkout`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: authHeader,
+        apikey: Deno.env.get("SUPABASE_ANON_KEY")!,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        documentId: inv.id,
+        requestId: crypto.randomUUID(),
+      }),
+    },
+  );
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok || typeof body?.url !== "string") {
+    throw new Error(
+      typeof body?.error === "string"
+        ? body.error
+        : "Connected card payment link could not be created",
+    );
+  }
+  return [{
+    label: `Pay full balance ${
+      formatMoney(inv.currency || "GBP", outstanding)
+    } now`,
+    url: body.url,
+    amount: outstanding,
+    kind: "full_balance",
+  }];
+}
+
+async function createPaymentLinks(inv: any, userId: string, to: string, admin: any, authHeader: string): Promise<PaymentLink[]> {
   const outstanding = outstandingAmount(inv);
   if (outstanding <= 0.001) return [];
+
+  const connectedLinks = await createConnectedPaymentLink(
+    inv,
+    userId,
+    authHeader,
+    admin,
+    outstanding,
+  );
+  if (connectedLinks) return connectedLinks;
 
   const links: PaymentLink[] = [];
   const mode = String(inv.online_payment_mode || "full");
@@ -684,7 +754,13 @@ Deno.serve(async (req) => {
   if (inv.status === "Cancelled") return json({ error: "Cancelled documents cannot be emailed" }, 400);
 
   const { data: company } = await admin.from("company_settings").select("*").eq("user_id", userData.user.id).maybeSingle();
-  const paymentLinks = await createPaymentLinks(inv, userData.user.id, to, admin);
+  const paymentLinks = await createPaymentLinks(
+    inv,
+    userData.user.id,
+    to,
+    admin,
+    authHeader,
+  );
   const email = buildEmail(inv, company || {}, paymentLinks);
   const filenameNumber = String(inv.number || "invoice").replace(/[^a-z0-9_-]+/gi, "-");
   const resendPayload = {
