@@ -2,7 +2,7 @@
 
 ## Disposition
 
-Repository candidate only. The Stripe Billing foundation is disabled, unapplied, undeployed and unconfigured. It cannot create a Stripe Customer, Checkout Session, Portal Session, subscription or active entitlement in the current environment.
+Merged repository foundation only. PR #94 merged as `01d51ba77412eaae10bf24fc786dbc9ec684b251`. The Stripe Billing foundation is disabled, unapplied, undeployed and unconfigured. It cannot create a Stripe Customer, Checkout Session, Portal Session, subscription or active entitlement in the current environment.
 
 This evidence does not approve a migration, Stripe product/Price, secret, webhook destination, function deployment, test payment, public checkout, production configuration or release.
 

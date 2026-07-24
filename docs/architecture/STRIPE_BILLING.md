@@ -1,6 +1,6 @@
 # Stripe Billing architecture
 
-Status: Repository foundation implemented for review. The migration is unapplied, the Edge Functions are undeployed, provider configuration is absent and public subscription checkout remains disabled.
+Status: Repository foundation merged by PR #94. The migration is unapplied, the Edge Functions are undeployed, provider configuration is absent and public subscription checkout remains disabled.
 
 ## Boundary
 
@@ -108,4 +108,4 @@ The exact Stripe event names and API version must be verified against current of
 - approve production secrets, webhook destination, Customer Portal and live activation;
 - approve the production release separately.
 
-The repository foundation began under High review in a separate pull request. Applying it, configuring Stripe test objects/secrets, deploying it, connecting app write policies, making a test Checkout and enabling any public control remain separate Owner-gated actions.
+The repository foundation passed High review and merged in PR #94. Applying it, configuring Stripe test objects/secrets, deploying it, connecting app write policies, making a test Checkout and enabling any public control remain separate Owner-gated actions.
