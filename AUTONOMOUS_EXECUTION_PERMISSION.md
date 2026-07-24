@@ -113,9 +113,9 @@ Keep the following documents synchronised with the actual repository state:
 - `APP_STATUS.md`
 - `AUTOMATION_MODEL_ORCHESTRATION.md`
 - `AGENT_HIERARCHY_AND_COMPUTER_USE.md`
-- `PROJECT_HANDOFF.md`
-- `PRODUCT_COMPLETION_LEDGER.md`
-- `DECISION_LOG.md`
+- `tasks/ACTIVE.md`
+- `ROADMAP.md`
+- `DECISIONS.md`
 - `RELEASE_READINESS.md`
 - `SECURITY_STORY.md`
 - `SUPABASE_HANDOFF.md`

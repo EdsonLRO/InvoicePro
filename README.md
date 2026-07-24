@@ -16,27 +16,14 @@ It is designed to be simple, mobile-friendly, and security-conscious. It suits f
 
 ## 2. Current status
 
-**Working app / active hardening stage.**
+- The authenticated one-business, one-user app is feature-complete for its current scope and public build `2026.07.23.2` is deployed on GitHub Pages.
+- The separate public website is implemented and privately previewed, but is not published on `tallyo.co.uk`.
+- The approved launch direction is a browser-only Free Invoice Maker plus one Tallyo Pro plan at £8 monthly or £80 annually.
+- Subscription checkout is not active.
+- The current live Stripe invoice-payment path is controlled for the Owner's account and is not a public multi-business merchant architecture. Independent business payment accounts require a later Stripe Connect programme.
+- The bounded public AI Helper is preserved in draft PR #91, privately tested and disabled by default; merge and production activation remain separate Owner decisions.
 
-- Core invoicing, customers, saved items, payments, recurring billing, email, PDF export, and activity history are working.
-- Recurring invoice generation runs through a scheduled Supabase Edge Function with per-occurrence idempotency and a Vault-backed caller gate.
-- Document email is implemented through Resend.
-- Email delivery tracking is implemented through signed Resend webhooks and `audit_events`.
-- Overdue reminder email is implemented, with automation enabled per invoice.
-- Stripe Checkout invoice payments are implemented for full-balance and seller-approved deposit flows.
-- Stripe payment confirmation is handled by a signed webhook and Stripe-confirmed payments are locked from manual removal.
-- In-app Stripe refund requests are implemented through a server-side Edge Function.
-- Stripe should still be treated as test/development until explicitly moved to live mode.
-- Visible rebrand from InvoicePro to Tallyo is complete in the app UI, PWA manifest, and app icons. The repo/URL has not been renamed.
-- The app is not yet ready for real paid public use until backup/restore, privacy operations, payment lifecycle handling, and release gates are completed.
-
-For the short current-stage source of truth, see `APP_STATUS.md`.
-For authoritative agent hierarchy, task coordination, locks, handoffs, and autonomous development rules, see `AUTOMATION_MODEL_ORCHESTRATION.md`.
-For the active Legal, Privacy and Regulatory Agent's triggers, evidence standard, dispositions, and professional-advice limits, see `TALLYO_LEGAL_COMPLIANCE_AGENT.md`.
-For graphical-dashboard and computer-use safety controls, see `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
-For completion and release tracking, see `PRODUCT_COMPLETION_LEDGER.md` and `RELEASE_READINESS.md`. Internal live-readiness procedures are in `PAYMENT_OPERATIONS_RUNBOOK.md` and `LEGAL_PRIVACY_READINESS.md`; neither file is a published customer policy or legal-compliance claim.
-For owner, product, security, and operations decisions, see `DECISION_LOG.md`.
-For laptop-, identity-, provider-, or cost-dependent work intentionally left for later, see `DEFERRED_MANUAL_CONFIGURATION.md`.
+Start with `AGENTS.md`, `APP_STATUS.md`, `ROADMAP.md`, `DECISIONS.md`, `docs/INDEX.md` and `tasks/ACTIVE.md`. Specialist and historical documents are routed from `docs/INDEX.md`; archived records are not default context.
 
 ---
 
@@ -182,22 +169,11 @@ For full details, see `SUPABASE_HANDOFF.md`.
 
 ## 9. Current roadmap
 
-Current app/security work:
-
-1. Define the operational refund, dispute, chargeback, and support process; the implemented Stripe sandbox lifecycle and duplicate replay behavior are Verified.
-2. Run the documented Owner-approved non-production restore test in `BACKUP_RESTORE_RUNBOOK.md`; current daily-backup evidence is verified through 2026-07-14.
-3. Expand append-only audit logging further, especially privileged automation failures and backup/restore evidence.
-4. Preserve the Verified `MFA_RECOVERY_RUNBOOK.md` controls and approved deny-by-default production response; deploy and accept the implemented all-factors-lost candidate before paid/public onboarding. Consider upgrading all-devices logout with a server-side email-code confirmation flow later.
-5. Complete the remaining provider decisions in `DEFERRED_MANUAL_CONFIGURATION.md`; leaked-password rejection is already Verified.
-6. Complete privacy/data-protection groundwork before real customer use.
-7. Keep security docs, screenshots, and portfolio evidence in sync with the real app.
-
-Future phase, deliberately deferred:
-
-- Public marketing website at `tallyo.co.uk`.
-- Paid Tallyo subscriptions.
-- Plan tiers and server-enforced entitlements.
-- Workspaces, teams, RBAC, and full SaaS billing architecture.
+The compact current roadmap is maintained in [`ROADMAP.md`](ROADMAP.md).
+The immediate programme is repository simplification and commercial-launch
+preparation for the Free Invoice Maker and one-business, one-user Tallyo Pro.
+Subscription checkout, Stripe Billing/Connect runtime changes, DNS cutover and
+public release remain separately reviewed and Owner-gated.
 
 ---
 

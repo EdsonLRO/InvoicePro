@@ -1,12 +1,12 @@
 export const productFacts = Object.freeze({
-  positioning: "Professional invoices. Faster payments. Less admin.",
+  positioning: "Professional invoices. Clearer payment tracking. Less admin.",
   supporting:
-    "Create quotes and invoices, accept card payments, automate recurring work and keep every customer transaction organised in one straightforward workspace.",
+    "Create quotes and invoices, record payments, automate recurring work and keep customer transactions organised in one straightforward workspace.",
   limitations: [
     "An internet connection is required to access and update authenticated business records.",
     "Tallyo is not a full accounting suite and does not prepare tax returns.",
     "Tallyo does not provide legal, tax or accounting advice.",
-    "Stripe handles card entry on Stripe-hosted pages; Tallyo does not store full card details."
+    "Online card payments for independent business accounts are being prepared and are not included in the launch subscription yet."
   ]
 });
 
@@ -14,7 +14,7 @@ export const workflowSteps = Object.freeze([
   ["Set up your business", "Add the details and branding you want on your documents."],
   ["Add a customer", "Save the people and businesses you invoice regularly."],
   ["Create a quote or invoice", "Add services, prices, dates and payment details."],
-  ["Send or share a payment link", "Email a document, download it or open a Stripe-hosted card-payment link."],
+  ["Send or download the document", "Email a saved document to the customer or download its PDF for another agreed delivery route."],
   ["Track payment and follow up", "See what is paid, due or overdue and choose when reminders are sent."],
   ["Automate recurring work", "Schedule future invoices and decide whether each schedule emails automatically."]
 ]);
@@ -27,10 +27,10 @@ export const featureGroups = Object.freeze([
     items: ["Invoices, quotes and credit notes", "Branded PDF documents", "Email sending and delivery updates", "Excel list export"]
   },
   {
-    label: "Get paid",
-    title: "A clearer route from invoice to payment",
-    description: "Share Stripe-hosted card-payment links, request a deposit and see confirmed payments against the right invoice.",
-    items: ["Full-balance card links", "Seller-set deposits", "Manual and Stripe-confirmed payments", "Supported refund workflow"]
+    label: "Track payments",
+    title: "Keep payment progress with the invoice",
+    description: "Record full or partial payments and see the outstanding balance against the right invoice.",
+    items: ["Full and partial payment records", "Outstanding balances", "Payment notes and dates", "Online card payments being prepared"]
   },
   {
     label: "Save time",
@@ -59,7 +59,7 @@ export const productScenes = Object.freeze([
   { id: "customers", label: "Customers and saved items", title: "Reuse the details you need", caption: "Keep repeat customers and commonly used products or services ready for the next document.", variant: "customers" },
   { id: "recurring", label: "Recurring invoices", title: "Plan repeat invoicing", caption: "Choose the next run and decide whether a saved schedule should email each generated invoice.", variant: "recurring" },
   { id: "overdue", label: "Overdue work", title: "Follow up by choice", caption: "Review overdue balances and enable reminders only for the invoices you want Tallyo to follow up.", variant: "overdue" },
-  { id: "payments", label: "Payments", title: "Keep payment status with the invoice", caption: "See manual and Stripe-confirmed payments, remaining balance and supported refund activity together.", variant: "payments" },
+  { id: "payments", label: "Payments", title: "Keep payment status with the invoice", caption: "See recorded payments and the remaining balance together with the relevant invoice.", variant: "payments" },
   { id: "activity", label: "Activity history", title: "Understand what happened", caption: "Document, email, payment and refund activity stays attached to the relevant record.", variant: "activity" },
   { id: "branding", label: "Branding", title: "Make documents recognisably yours", caption: "Add business details, a logo and document styling that carry through to customer PDFs.", variant: "branding" },
   { id: "security", label: "Account security", title: "Choose stronger sign-in protection", caption: "Manage authenticator-app MFA, recovery codes and sign-out controls from Account Security.", variant: "security" },
@@ -68,15 +68,15 @@ export const productScenes = Object.freeze([
 
 export const industries = Object.freeze([
   { slug: "freelancers", name: "Freelancers", summary: "Create clear project invoices and keep repeat customers ready for next time.", focus: ["Project quotes and invoices", "Reusable customer details", "Clear paid and outstanding status"] },
-  { slug: "consultants", name: "Consultants", summary: "Move from quote to invoice and keep professional records for ongoing client work.", focus: ["Quote-to-invoice workflow", "Deposit or full-balance payment links", "Recurring client invoicing"] },
+  { slug: "consultants", name: "Consultants", summary: "Move from quote to invoice and keep professional records for ongoing client work.", focus: ["Quote-to-invoice workflow", "Clear payment tracking", "Recurring client invoicing"] },
   { slug: "cleaners", name: "Cleaners", summary: "Schedule repeat invoices and choose whether each recurring run emails automatically.", focus: ["Recurring service invoices", "Saved service items", "Opt-in overdue reminders"] },
   { slug: "electricians", name: "Electricians", summary: "Prepare itemised quotes, convert agreed work and follow the final invoice status.", focus: ["Itemised quotes", "Quote conversion", "Phone-friendly invoice updates"] },
   { slug: "plumbers", name: "Plumbers", summary: "Keep customer, service and payment details organised from estimate to settled invoice.", focus: ["Saved customers", "Reusable service items", "Payment status"] },
-  { slug: "decorators", name: "Decorators", summary: "Share professional quotes, request a deposit and invoice completed work clearly.", focus: ["Branded quotes", "Seller-set deposits", "Invoice PDFs"] },
+  { slug: "decorators", name: "Decorators", summary: "Share professional quotes and invoice completed work clearly.", focus: ["Branded quotes", "Payment records", "Invoice PDFs"] },
   { slug: "tutors", name: "Tutors", summary: "Create repeat invoices for regular sessions and see what remains due.", focus: ["Recurring invoices", "Customer history", "Outstanding balances"] },
-  { slug: "photographers", name: "Photographers", summary: "Add branding, request deposits and share polished customer documents.", focus: ["Branded documents", "Deposits", "Quote-to-invoice conversion"] },
+  { slug: "photographers", name: "Photographers", summary: "Add branding and share polished customer documents.", focus: ["Branded documents", "Payment tracking", "Quote-to-invoice conversion"] },
   { slug: "designers", name: "Designers", summary: "Keep proposals, invoices and project payment activity in one straightforward flow.", focus: ["Professional quotes", "Saved services", "Payment activity"] },
-  { slug: "custom-order-businesses", name: "Custom-order businesses", summary: "Keep quotes, deposits, invoices and payment status together for made-to-order work.", focus: ["Detailed quote items", "Deposit requests", "Credit notes and refunds"] },
+  { slug: "custom-order-businesses", name: "Custom-order businesses", summary: "Keep quotes, invoices and payment status together for made-to-order work.", focus: ["Detailed quote items", "Payment records", "Credit notes"] },
   { slug: "sole-traders", name: "Independent service companies", summary: "Use one focused workspace for customers, documents, payments and repeat work.", focus: ["Customer records", "Document statuses", "Account export"] }
 ]);
 
@@ -97,15 +97,15 @@ export const helpArticles = Object.freeze([
   },
   {
     slug: "payment-links-and-deposits",
-    title: "Use payment links and deposits",
-    description: "Offer a Stripe-hosted card-payment route for a full balance or seller-set deposit.",
+    title: "Online card-payment availability",
+    description: "Understand what is available now and what is still being prepared for independent business accounts.",
     steps: [
-      ["Save the invoice", "Payment options are created for a saved invoice with an amount still due."],
-      ["Choose the amount", "Offer the full outstanding balance or set the deposit amount you want to request."],
-      ["Open or share checkout", "The customer enters card details on a Stripe-hosted checkout page, not inside Tallyo."],
-      ["Wait for confirmation", "Tallyo updates the invoice after the payment provider confirms the result."]
+      ["Record payments today", "Use the invoice Payments section to record money received through an agreed route."],
+      ["Track part-payments", "Add each payment amount and date so the outstanding balance stays clear."],
+      ["Keep customer notes", "Use the payment note to identify the route or reference used."],
+      ["Check availability later", "Tallyo will announce online card-payment availability only when independent business accounts are supported."]
     ],
-    note: "A checkout session can be used only once. If an invoice becomes payable again after a refund, open a new Pay by Card session."
+    note: "Online card payments are being prepared and are not included in the launch subscription yet."
   },
   {
     slug: "recurring-invoices",
@@ -133,15 +133,15 @@ export const helpArticles = Object.freeze([
   },
   {
     slug: "refunds-and-payment-status",
-    title: "Understand refunds and payment status",
-    description: "See payments, remaining balance and supported refund activity against the relevant invoice.",
+    title: "Understand payment status",
+    description: "See recorded payments and the remaining balance against the relevant invoice.",
     steps: [
-      ["Open the paid invoice", "The Payments section shows confirmed entries and the amount still due."],
-      ["Review the payment", "Check the amount and provider-confirmed status before starting a refund."],
-      ["Choose a supported refund", "Use the available full or partial refund action and confirm the amount carefully."],
-      ["Wait for provider confirmation", "The invoice balance and activity update after Stripe confirms the refund outcome."]
+      ["Open the invoice", "The Payments section shows recorded entries and the amount still due."],
+      ["Review the payment", "Check the amount, date and note against your own payment records."],
+      ["Correct mistakes carefully", "Use a balancing entry and a clear note when a manually recorded payment needs correcting."],
+      ["Check the balance", "Confirm that the paid amount and remaining balance match your records."]
     ],
-    note: "A refund changes the invoice balance; it does not make a previously completed Stripe checkout reusable. Create a fresh checkout for another payment."
+    note: "Tallyo payment tracking does not itself move money or issue a bank or card refund."
   },
   {
     slug: "account-security",
@@ -202,20 +202,14 @@ export const faqs = Object.freeze([
   { question: "Can I create quotes as well as invoices?", answer: "Yes. You can create quotes and convert a quote into an invoice when the work is agreed." },
   { question: "How do recurring invoices work?", answer: "You choose a schedule for an invoice. Tallyo can create future invoices and, when you enable it for that schedule, email them automatically." },
   { question: "Can Tallyo send overdue reminders?", answer: "Yes. Reminders are opt-in for each invoice, so they are only scheduled when you choose to enable them." },
-  { question: "How are card payments handled?", answer: "Tallyo creates a payment link that opens a Stripe-hosted checkout page. Stripe handles the card entry and confirms the payment back to Tallyo." },
-  { question: "Does Tallyo store full card details?", answer: "No. Card details are entered on Stripe-hosted pages and are not stored by Tallyo." },
-  { question: "What happens after a refund?", answer: "The invoice balance and activity update after Stripe confirms the refund. A completed checkout cannot be reused, so another payment needs a fresh checkout session." },
+  { question: "Can customers pay an invoice by card?", answer: "Not through the launch subscription yet. Online card payments for independent business accounts are being prepared." },
+  { question: "How do I track payments?", answer: "Record full or partial payments against an invoice, including the date and an optional reference, so the remaining balance stays clear." },
+  { question: "Is there a free trial?", answer: "No. The Free Invoice Maker can be used without an account, while Tallyo Pro is the paid invoicing workspace." },
+  { question: "How much is Tallyo Pro?", answer: "Tallyo Pro is £8 per month or £80 per year. The annual option saves £16 compared with paying monthly for a year." },
   { question: "Can I use Tallyo on my phone?", answer: "Yes. The interface adapts to supported phone browsers and can be installed for quick access." },
   { question: "Can I export my records?", answer: "Yes. Tallyo can create a structured account export and offers Excel export for document lists." },
   { question: "How do I get support?", answer: "Use the reviewed Help Centre guidance for common tasks. A public support contact will be added only after the business contact is approved." },
   { question: "Does Tallyo replace accounting software?", answer: "No. Tallyo helps with invoicing and business records, but it is not a full accounting suite and does not prepare tax returns." }
-]);
-
-export const plans = Object.freeze([
-  { name: "Free", audience: "Getting started", status: "Details being finalised", features: ["Create professional documents", "Keep essential records", "Explore Tallyo at your pace"] },
-  { name: "Essentials", audience: "Regular invoicing", status: "Details being finalised", features: ["For consistent invoicing work", "Customer and service reuse", "Payment-status organisation"] },
-  { name: "Automate", audience: "Recurring work and follow-up", status: "Details being finalised", features: ["For repeat invoicing", "Recurring schedules", "Payment follow-up tools"] },
-  { name: "Teams", audience: "Growing businesses with staff", status: "Not currently available", features: ["Future multi-user direction", "No current workspace or team access", "Availability will be announced only when implemented"] }
 ]);
 
 export const installationSteps = Object.freeze([

@@ -145,6 +145,13 @@ p { color: var(--slate-600); }
 .plan-card { position: relative; display: flex; flex-direction: column; }
 .plan-card .check-list { margin-bottom: 1.5rem; }
 .plan-card .button { margin-top: auto; }
+.plan-card-featured { border-color: var(--blue-500); box-shadow: 0 18px 45px rgba(48, 65, 201, 0.12); }
+.plan-price { margin: 0.35rem 0 0.8rem; color: var(--navy-900); font-size: clamp(2rem, 4vw, 3rem); font-weight: 850; letter-spacing: -0.04em; }
+.plan-price span { color: var(--slate-600); font-size: 1rem; font-weight: 650; letter-spacing: 0; }
+.plan-annual, .plan-note { font-size: 0.9rem; }
+.plan-card h3 { margin-top: 1.5rem; font-size: 1rem; }
+.plan-card .button:disabled { color: var(--slate-700); background: var(--slate-200); cursor: not-allowed; opacity: 1; }
+.pricing-boundaries { display: grid; gap: 2rem; }
 .plan-status { color: var(--navy-900); font-weight: 750; }
 .plan-card.unavailable { background: var(--slate-100); }
 .status-pill { width: max-content; margin-top: auto; padding: 0.35rem 0.65rem; border-radius: 999px; color: var(--slate-700); background: var(--slate-200); font-size: 0.78rem; font-weight: 750; }
@@ -343,6 +350,7 @@ p { color: var(--slate-600); }
 @media (min-width: 50rem) {
   .hero { grid-template-columns: minmax(0, 1.02fr) minmax(22rem, 0.98fr); }
   .feature-grid, .plan-grid { grid-template-columns: repeat(2, 1fr); }
+  .plan-grid.plan-grid-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .section-dark, .split, .limitations { grid-template-columns: repeat(2, 1fr); }
   .article-layout { grid-template-columns: minmax(0, 1.5fr) minmax(15rem, 0.7fr); }
   .helper-intro { grid-template-columns: repeat(2, 1fr); }
@@ -366,6 +374,7 @@ p { color: var(--slate-600); }
   .benefit-grid { grid-template-columns: repeat(3, 1fr); }
   .industry-grid { grid-template-columns: repeat(3, 1fr); }
   .plan-grid { grid-template-columns: repeat(4, 1fr); }
+  .plan-grid.plan-grid-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .generator-shell { grid-template-columns: minmax(33rem, 0.9fr) minmax(0, 1.1fr); gap: 1.5rem; }
   .generator-preview-wrap { position: sticky; top: 5.5rem; }
 }

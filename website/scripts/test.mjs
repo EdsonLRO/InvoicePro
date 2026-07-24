@@ -8,6 +8,7 @@ import { helpArticles, industries, notFoundPage, pages, productScenes } from "..
 import { findHelperAnswer, futurePublicAiAdapter } from "../src/helper-core.mjs";
 import { analyticsConfiguration, createAnalytics, getConsentState, parseCampaignParameters } from "../src/analytics.mjs";
 import { calculateDocument, calculationPolicy, formatMoney, parseMoney, parsePercent, parseQuantity } from "../src/document-calculator.mjs";
+import { commercialOffer, pricingFaqs } from "../src/commercial-offer.mjs";
 
 const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = join(websiteRoot, "dist");
@@ -34,6 +35,17 @@ const seenDescriptions = new Set();
 const schemas = new Map();
 const prohibitedClaims = /100% secure|unhackable|bank-grade|fully GDPR compliant|certified compliant|guaranteed payment|guaranteed email delivery|works fully offline|uptime guarantee/i;
 const fakeProof = /\b(?:trusted by|rated|award-winning|five-star|5-star)\b/i;
+
+assert.equal(commercialOffer.free.price, "£0");
+assert.equal(commercialOffer.pro.monthlyPrice, "£8");
+assert.equal(commercialOffer.pro.annualPrice, "£80");
+assert.match(commercialOffer.pro.annualSaving, /Save £16/);
+assert.match(commercialOffer.pro.audience, /One business · One user/);
+assert.match(commercialOffer.pro.availability, /Subscriptions are being prepared/);
+assert.match(commercialOffer.billing.noTrial, /does not currently offer a full-feature free trial/);
+assert.match(commercialOffer.paymentAvailability, /not included in the launch subscription yet/);
+assert.equal(pricingFaqs.length, 5);
+assert.doesNotMatch(JSON.stringify({ commercialOffer, pricingFaqs }), /two months free|free months|money-back guarantee|lifetime (?:price|access)|risk-free/i);
 
 const hrefsFor = (html) => [...html.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
 const meta = (html, name) => html.match(new RegExp(`<meta name="${name}" content="([^"]+)"`))?.[1];
@@ -117,10 +129,18 @@ for (const page of publishedIndustryPages) {
 assert.ok(industries.length >= publishedIndustryPages.length, "homepage can show broader factual industry examples");
 
 const pricing = read("pricing/index.html");
-assert.match(pricing, /Plans and pricing are being finalised/);
-assert.match(pricing, /Teams workspaces and multi-user access are not currently implemented/);
-assert.doesNotMatch(pricing, /[£$€]\s*\d/);
-assert.doesNotMatch(pricing, /free trial|\d+-day trial/i);
+assert.match(pricing, /Free Invoice Maker/);
+assert.match(pricing, /Tallyo Pro/);
+assert.match(pricing, /£8/);
+assert.match(pricing, /£80/);
+assert.match(pricing, /Save £16/);
+assert.match(pricing, /Approximately £6\.67 per month/);
+assert.match(pricing, /Subscriptions are being prepared/);
+assert.match(pricing, /button[^>]+disabled[^>]*>Subscriptions are being prepared/);
+assert.match(pricing, /does not currently offer a full-feature free trial/);
+assert.match(pricing, /not included in the launch subscription yet/);
+assert.doesNotMatch(pricing, /Essentials|Automate|Teams|two months free|\d+-day trial/i);
+assert.doesNotMatch(pricing, /checkout\.stripe\.com|price_[A-Za-z0-9]+|prod_[A-Za-z0-9]+/);
 
 const helperKnowledge = JSON.parse(readFileSync(join(websiteRoot, "content", "helper-knowledge.json"), "utf8"));
 assert.equal(helperKnowledge.scope, "public-product-guidance-only");
