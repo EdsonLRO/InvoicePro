@@ -48,7 +48,7 @@ Passed locally:
 - focused secret-pattern scan of the new Billing source, migration and harness: no matches
 - `git diff --check`
 
-The local Deno executable is 2.9.1. The required GitHub `verify` job uses the repository's pinned Deno 2.2.15 and frozen locks; that independent check must pass on the pull request before Owner review.
+The local Deno executable is 2.9.1. Draft PR #94's required GitHub `verify` job passed with the repository's pinned Deno 2.2.15 and frozen locks. Both protected Cloudflare preview checks also passed; those builds do not apply the migration or configure/enable Billing.
 
 The migration was intentionally not executed against local or remote PostgreSQL, so no Supabase advisor result is claimed. SQL/RLS validation in this stage is deterministic source inspection only. Migration application, live RLS probes and Supabase advisors belong to the separately approved test-environment stage.
 
