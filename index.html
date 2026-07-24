@@ -374,6 +374,40 @@
                 </div>
 
                 <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+                        <h2 class="text-2xl font-semibold">Customer Card Payments</h2>
+                        <span v-if="stripeConnect.account && stripeConnect.account.onboarding_state === 'active'" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Ready</span>
+                        <span v-else-if="stripeConnect.account" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Setup needed</span>
+                        <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">Not connected</span>
+                    </div>
+                    <p class="text-sm text-slate-600 mb-5">Connect your own Stripe account so customers can pay your invoices by card. Stripe handles the payment, identity checks and payouts directly with your business.</p>
+
+                    <div v-if="!stripeConnect.available" class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-sm text-slate-600">
+                        Stripe connection is being prepared and is not available in this build.
+                    </div>
+                    <div v-else class="space-y-4">
+                        <div v-if="stripeConnect.account" class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                                <p class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Card payments</p>
+                                <p class="font-medium text-slate-800">{{ stripeConnectStatusLabel(stripeConnect.account.card_payments_status) }}</p>
+                            </div>
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                                <p class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Payouts</p>
+                                <p class="font-medium text-slate-800">{{ stripeConnectStatusLabel(stripeConnect.account.payouts_status) }}</p>
+                            </div>
+                        </div>
+                        <p v-if="stripeConnect.error" class="text-sm text-red-600">{{ stripeConnect.error }}</p>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button v-if="!stripeConnect.account" @click="openStripeConnect('onboard')" :disabled="stripeConnect.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ stripeConnect.busy ? 'Opening Stripe...' : 'Connect Stripe' }}</button>
+                            <button v-else-if="stripeConnect.account.onboarding_state !== 'active'" @click="openStripeConnect(stripeConnect.account.onboarding_state === 'pending' ? 'onboard' : 'update')" :disabled="stripeConnect.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ stripeConnect.busy ? 'Opening Stripe...' : 'Finish Stripe Setup' }}</button>
+                            <button v-else @click="openStripeConnect('update')" :disabled="stripeConnect.busy" class="bg-slate-900 text-white px-6 py-2.5 rounded-lg hover:bg-slate-800 font-medium transition disabled:opacity-50">{{ stripeConnect.busy ? 'Opening Stripe...' : 'Manage Stripe Details' }}</button>
+                            <button v-if="stripeConnect.account" @click="refreshStripeConnectStatus" :disabled="stripeConnect.busy" class="bg-white border border-slate-300 text-slate-700 px-6 py-2.5 rounded-lg hover:bg-slate-50 font-medium transition disabled:opacity-50">Refresh Status</button>
+                        </div>
+                        <p class="text-xs text-slate-500">Tallyo does not store your card details, identity documents or bank information.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-2xl font-semibold mb-6 border-b pb-4">Change Password</h2>
                     
                     <div class="bg-amber-50 text-amber-800 text-sm p-4 rounded-lg border border-amber-200 mb-6">
@@ -2049,6 +2083,7 @@
                 pwdRecovery: { busy: false, securityVerified: false, new: '', confirm: '', code: '', error: '', requiresMfa: false, factorId: null, factors: [] },
                 passwordRecoveryStarted: false,
                 accountExportBusy: false,
+                stripeConnect: { available: false, busy: false, account: null, error: '' },
 
                 // App State
                 activeTab: 'dashboard',
@@ -3687,6 +3722,8 @@
                     this.customers = customerRows.map(r => this.rowToCustomer(r));
                     this.savedItems = itemRows.map(r => this.rowToItem(r));
                     this.invoices = invoiceRows.map(r => this.rowToInvoice(r));
+                    await this.loadStripeConnectState();
+                    await this.handleStripeConnectCallback();
                     await this.loadAuditEvents();
                     if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
                     this.draft = this.getEmptyDraft();
@@ -3702,6 +3739,82 @@
                 } finally {
                     if (this.authSessionVersion === loadSessionVersion) this.dataLoading = false;
                 }
+            },
+            async loadStripeConnectState() {
+                if (!this.currentUser) return;
+                const loadUserId = this.currentUser.id;
+                const loadSessionVersion = this.authSessionVersion;
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('stripe_connected_accounts')
+                        .select('onboarding_state, card_payments_status, payouts_status, provider_updated_at')
+                        .maybeSingle();
+                    if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
+                    if (error) {
+                        this.stripeConnect = { available: false, busy: false, account: null, error: '' };
+                        return;
+                    }
+                    this.stripeConnect.available = true;
+                    this.stripeConnect.account = data || null;
+                    this.stripeConnect.error = '';
+                } catch {
+                    if (this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) {
+                        this.stripeConnect = { available: false, busy: false, account: null, error: '' };
+                    }
+                }
+            },
+            stripeConnectStatusLabel(status) {
+                return {
+                    active: 'Ready',
+                    pending: 'Pending',
+                    restricted: 'Action needed',
+                    inactive: 'Not active',
+                    unknown: 'Waiting for Stripe'
+                }[String(status || '').toLowerCase()] || 'Waiting for Stripe';
+            },
+            async invokeStripeConnect(action) {
+                if (!this.stripeConnect.available || this.stripeConnect.busy) return null;
+                this.stripeConnect.busy = true;
+                this.stripeConnect.error = '';
+                try {
+                    const { data, error } = await supabaseClient.functions.invoke('manage-stripe-connect', {
+                        body: { action, requestId: crypto.randomUUID() }
+                    });
+                    if (error) throw error;
+                    if (data && data.error) throw new Error(data.error);
+                    return data || null;
+                } catch (error) {
+                    this.stripeConnect.error = error && error.message ? error.message : 'Stripe connection could not be updated.';
+                    return null;
+                } finally {
+                    this.stripeConnect.busy = false;
+                }
+            },
+            async openStripeConnect(action) {
+                const result = await this.invokeStripeConnect(action);
+                if (!result || !result.url) return;
+                window.location.assign(result.url);
+            },
+            async refreshStripeConnectStatus() {
+                const result = await this.invokeStripeConnect('status');
+                if (!result) return;
+                await this.loadStripeConnectState();
+            },
+            async handleStripeConnectCallback() {
+                if (!this.stripeConnect.available) return;
+                const url = new URL(window.location.href);
+                const callback = url.searchParams.get('stripe_connect');
+                if (!['refresh', 'return'].includes(callback)) return;
+                const requestedAction = url.searchParams.get('stripe_connect_action');
+                const action = requestedAction === 'onboard' ? 'onboard' : 'update';
+                url.searchParams.delete('stripe_connect');
+                url.searchParams.delete('stripe_connect_action');
+                window.history.replaceState({}, '', url.pathname + url.search + url.hash);
+                if (callback === 'refresh') {
+                    await this.openStripeConnect(action);
+                    return;
+                }
+                await this.refreshStripeConnectStatus();
             },
             sessionLoadIsCurrent(userId, sessionVersion) {
                 return !!(

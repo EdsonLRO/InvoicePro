@@ -81,3 +81,9 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/stripe-billing-webhook/deno.json"
 entrypoint = "./functions/stripe-billing-webhook/index.ts"
+
+[functions.manage-stripe-connect]
+enabled = true
+verify_jwt = true
+import_map = "./functions/manage-stripe-connect/deno.json"
+entrypoint = "./functions/manage-stripe-connect/index.ts"

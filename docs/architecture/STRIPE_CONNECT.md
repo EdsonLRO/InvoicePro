@@ -45,6 +45,20 @@ The review considered:
 
 No provider account or configuration is created by this recommendation.
 
+## Repository foundation
+
+The first approved implementation slice is repository-only and remains unapplied, undeployed and disabled:
+
+- `20260724174500_stripe_connect_foundation.sql` creates the tenant-bound connected-account state and private append-only event evidence;
+- authenticated browser access is owner-scoped SELECT only; all provider-derived writes remain service-role-only;
+- database constraints preserve Accounts v2, full Dashboard, Stripe fee collection and Stripe loss responsibility;
+- `manage-stripe-connect` creates or refreshes only the authenticated owner's mapping, requires confirmed Auth and current MFA assurance, and creates Stripe-hosted onboarding/update links;
+- one stable provider idempotency key per Tallyo owner prevents different browser request IDs from creating parallel connected accounts;
+- the Account page shows connection and capability state without exposing a connected-account identifier;
+- the function is gated off by default and contains no Checkout, payment, refund, transfer, application-fee or disconnection operation.
+
+Local PostgreSQL 17 RLS, privilege, constraint, cross-tenant and append-only probes pass. Evidence: `STRIPE_CONNECT_FOUNDATION_EVIDENCE_2026-07-24.md`.
+
 ## Required trusted controls
 
 - authenticated Tallyo account ↔ connected Stripe account mapping with RLS;
@@ -83,4 +97,4 @@ Online card payments for independent business accounts are being prepared and ar
 - approve production webhook/secrets/configuration and any identity or banking steps;
 - approve public payment claims and release.
 
-No Connect activation, live configuration change, migration, secret or payment occurs in the repository-simplification programme.
+No Connect activation, live configuration change, migration, secret or payment occurs in the repository-only implementation stage.

@@ -5,7 +5,7 @@
 > Also read `AUTOMATION_MODEL_ORCHESTRATION.md` for Backend/Supabase ownership, Sol review boundaries, task locks, and handoffs. Supabase changes affecting personal data, retention, deletion, exports, vendors, transfers, incidents, or public launch also require the active review defined in `TALLYO_LEGAL_COMPLIANCE_AGENT.md`. Dashboard inspection or change follows `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
 > The public app brand is now **Tallyo**. The original **InvoicePro** name remains in the repo/URL context and some historical/internal references.
 >
-> Parts of this document were verified against the live database earlier (column list, RLS policies, and cron jobs). Newer email/payment migrations are documented from repo SQL files and should be confirmed against the target Supabase project after they are run.
+> Parts of this document were verified against the live database earlier (column list, RLS policies, and cron jobs). Newer email/payment migrations, including the explicitly labelled Connect candidate, are documented from repo SQL files and should be confirmed against the target Supabase project only after they are separately approved and run.
 
 ---
 
@@ -17,7 +17,7 @@
 - **Front-end connection:** the Vue 3 single-page app (`index.html`) talks directly to Supabase via the Supabase JS client, using the **public/publishable (anon) key**. All data access is scoped per user by RLS.
 - **Server-side:** Edge Functions handle recurring invoice generation, email delivery, overdue reminders, and Stripe Checkout/webhooks using server-side secrets.
 - **Project URL:** `https://cuagwifetheefftleeup.supabase.co` (public base URL; confirmed from the live cron job command). The publishable key and full config live in `config.js` in the repo.
-- **Current boundary:** this handoff describes the current app plus the explicitly labelled, unapplied Stripe Billing repository candidate. Workspaces, teams and RBAC remain deferred. Billing code must not be treated as active or mixed with the deployed customer invoice-payment path.
+- **Current boundary:** this handoff describes the current app plus the explicitly labelled, unapplied Stripe Billing and Stripe Connect repository candidates. Workspaces, teams and RBAC remain deferred. Candidate code must not be treated as active or mixed with the deployed Owner customer invoice-payment path.
 
 ---
 
@@ -79,6 +79,8 @@ All in the `public` schema. All have RLS enabled and are scoped to the owning us
 - `audit_events`
 
 Unapplied Stripe Billing candidate tables: `billing_customers`, `billing_subscriptions`, `billing_checkout_claims`, `billing_events`, and `account_entitlements`. They do not exist in the live project unless migration `20260724111312_stripe_billing_test_foundation.sql` is separately approved and applied. The four user-visible tables grant authenticated users owner-scoped SELECT only; the Checkout-claim table has no browser access. Writes, Checkout claims and atomic entitlement reconciliation remain service-role-only.
+
+Unapplied Stripe Connect candidate tables: `stripe_connected_accounts` and `stripe_connect_events`. They do not exist in the live project unless migration `20260724174500_stripe_connect_foundation.sql` is separately approved and applied. Authenticated users receive owner-scoped SELECT only on their connected-account state. Connect events have no browser policy or grant. All provider-derived writes remain service-role-only.
 
 ---
 
@@ -204,6 +206,12 @@ Repository-only, undeployed Stripe Billing candidates:
 
 These three functions are not deployed and their migration is not applied. Do not add their settings or deploy them without the separate Owner gate recorded in `tasks/ACTIVE.md`.
 
+Repository-only, undeployed Stripe Connect candidate:
+
+- `manage-stripe-connect` - confirmed authenticated owner; requires current AAL2 when MFA is enrolled; creates or refreshes only a server-derived Accounts v2 Merchant mapping; enforces full Dashboard, Stripe fee collection and Stripe loss responsibility; creates Stripe-hosted onboarding/update links; and fails closed unless its kill switch, API version, key mode, application URL and live-release gate agree.
+
+This function contains no Checkout, payment, refund, transfer, application-fee or disconnection operation. It is not deployed and its migration is not applied.
+
 Dependency rule: every function source pins `@supabase/supabase-js` to `2.110.1`, and every function directory carries a Deno v4 lockfile with the matching remote-module digest. Do not replace the exact version with `@2`, `latest`, a caret, or another floating specification. Review and regenerate all locks with the repository's Deno `2.2.15` LTS compatibility line before an intentional dependency deployment. `tests/edge-dependency-pin-harness.cjs` enforces the pin and lock rule; `.github/workflows/security-checks.yml` runs frozen checks for all thirteen repository functions with read-only permissions and no secrets.
 
 Live deployment snapshots: on 2026-07-13 the original nine functions were active; `generate-recurring` was v13 and `resend-webhook` was v11 after the hardening/type-check deployments. On 2026-07-16, JWT-protected `mfa-recovery` version 1 became the tenth active function. JWT verification is enabled for user-authenticated functions and intentionally disabled only for signature-verified provider webhooks or custom-secret scheduled functions.
@@ -295,6 +303,15 @@ Names only — never commit real values.
 - `STRIPE_BILLING_ANNUAL_PRICE_ID`
 
 Do not reuse the invoice-payment Stripe key or webhook secret by assumption. No candidate Billing setting is approved for production or browser exposure.
+
+**Unconfigured candidate Stripe Connect settings (names only):**
+- `STRIPE_CONNECT_ENABLED`
+- `STRIPE_CONNECT_LIVE_MODE`
+- `STRIPE_CONNECT_LIVE_APPROVED`
+- `STRIPE_CONNECT_SECRET_KEY`
+- `STRIPE_CONNECT_API_VERSION`
+
+No Connect setting is approved for production or browser exposure. `APP_BASE_URL` is shared only as an allowlisted server return-URL source.
 
 Provide a `.env.example` with placeholders if env files are introduced; never commit a real `.env`.
 
