@@ -8,6 +8,7 @@ import { helpArticles, industries, notFoundPage, pages, productScenes } from "..
 import { findHelperAnswer, futurePublicAiAdapter } from "../src/helper-core.mjs";
 import { analyticsConfiguration, createAnalytics, getConsentState, parseCampaignParameters } from "../src/analytics.mjs";
 import { calculateDocument, calculationPolicy, formatMoney, parseMoney, parsePercent, parseQuantity } from "../src/document-calculator.mjs";
+import { commercialOffer, pricingFaqs } from "../src/commercial-offer.mjs";
 
 const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = join(websiteRoot, "dist");
@@ -34,6 +35,17 @@ const seenDescriptions = new Set();
 const schemas = new Map();
 const prohibitedClaims = /100% secure|unhackable|bank-grade|fully GDPR compliant|certified compliant|guaranteed payment|guaranteed email delivery|works fully offline|uptime guarantee/i;
 const fakeProof = /\b(?:trusted by|rated|award-winning|five-star|5-star)\b/i;
+
+assert.equal(commercialOffer.free.price, "£0");
+assert.equal(commercialOffer.pro.monthlyPrice, "£8");
+assert.equal(commercialOffer.pro.annualPrice, "£80");
+assert.match(commercialOffer.pro.annualSaving, /Save £16/);
+assert.match(commercialOffer.pro.audience, /One business · One user/);
+assert.match(commercialOffer.pro.availability, /Subscriptions are being prepared/);
+assert.match(commercialOffer.billing.noTrial, /does not currently offer a full-feature free trial/);
+assert.match(commercialOffer.paymentAvailability, /not included in the launch subscription yet/);
+assert.equal(pricingFaqs.length, 5);
+assert.doesNotMatch(JSON.stringify({ commercialOffer, pricingFaqs }), /two months free|free months|money-back guarantee|lifetime (?:price|access)|risk-free/i);
 
 const hrefsFor = (html) => [...html.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
 const meta = (html, name) => html.match(new RegExp(`<meta name="${name}" content="([^"]+)"`))?.[1];
