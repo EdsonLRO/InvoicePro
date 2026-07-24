@@ -6,7 +6,7 @@ future Tallyo subscription journey without making paid provider calls, creating
 live Stripe Billing products, changing production provider configuration,
 publishing the website, or inventing prices.
 Priority: High
-Status: Local rate-limiter routing fix validated — preview redeploy approval required
+Status: Protected AI preview acceptance passed — public activation remains blocked
 Owner role: Master Orchestrator
 Triggered roles: Product, Backend, Security, Documentation, Legal/Privacy, QA,
 Payments for the subscription boundary
@@ -66,12 +66,14 @@ portal/cancellation, isolation and exact unresolved Owner decisions. A build
 with `TALLYO_SUBSCRIPTIONS_ENABLED=true` fails before changing output.
 `git diff --check`, JavaScript syntax checks and the focused secret-pattern scan
 pass.
-Remaining technical gate: Push the validated service-binding dispatch fix,
-allow one protected website-preview rebuild, and confirm that one synthetic
-question passes the private rate limiter and receives a bounded provider answer.
-Next action: Obtain exact Owner approval to commit and push the focused fix to
-the existing draft PR, allow one automatic protected-preview rebuild, and make
-one synthetic paid OpenAI request. Do not merge or release publicly.
+Remaining technical gate: None for the protected AI preview. Public activation
+remains blocked on the recorded privacy/content review and exact Owner approval.
+Subscription pricing, billing configuration and entitlement work remain a
+separate high-risk task.
+Next action: Keep draft PR `#91` unmerged and the AI path preview-only. Continue
+unrelated routine website work at Medium reasoning, or obtain a fresh High-mode
+approval before public AI activation, merge/public release or subscription and
+payment-provider work.
 
 ## Preview compatibility finding
 
@@ -178,3 +180,22 @@ requests, zero tokens and zero spend, so no paid provider request occurred.
 Wrangler live tail was not used because the non-interactive environment would
 require a new Cloudflare API credential. No credential was requested or
 inspected. No merge or public release occurred.
+
+## Protected preview acceptance
+
+Commit `9cb5200` implements the validated service-binding dispatch fix and its
+regression test. GitHub's required `verify` check and both Cloudflare preview
+checks passed. The stable protected website alias was reloaded after the new
+deployment.
+
+One approved synthetic question passed the private rate-limiter Worker. The
+non-persistent Cloudflare live stream recorded outcome `ok`, an HTTP `POST` to
+the private `/limit` route and response status `204`, with no exception. The
+Helper returned a bounded answer about reducing invoicing administration and
+only the reviewed `/features/` and `/product-tour/` links. No secret, account,
+invoice, customer or payment data was supplied.
+
+The OpenAI usage dashboard had not yet reflected the provider request at the
+final refresh, so no retry was made. The single approved provider call is
+treated as consumed. Stored Worker logs and traces remain disabled, the live
+stream was paused, and no merge or public release occurred.
