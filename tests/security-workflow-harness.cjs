@@ -37,6 +37,7 @@ for (const harness of [
   'security-workflow-harness.cjs',
   'session-expiry-harness.cjs',
   'stripe-payment-integrity-harness.cjs',
+  'stripe-connect-foundation-harness.cjs',
   'tenant-isolation-attribution-harness.cjs',
 ]) {
   assert.ok(workflow.includes(`node tests/${harness}`), `${harness} must run in CI`);
