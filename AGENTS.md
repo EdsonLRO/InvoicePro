@@ -1,47 +1,64 @@
-# Tallyo Agent Entry Point
-
-This file is the compact persistent entry point for Codex work in this repository.
+# Tallyo repository working rules
 
 ## Default context
 
-Read by default only:
+Read only:
 
 1. `AGENTS.md`;
 2. `APP_STATUS.md`;
-3. `docs/INDEX.md`;
-4. the active task record, when one exists;
-5. source files directly affected by the task.
+3. `ROADMAP.md`;
+4. `DECISIONS.md`;
+5. `docs/INDEX.md`;
+6. `tasks/ACTIVE.md`;
+7. files directly affected by the task.
 
-Do not read the complete governance, security, legal, payments, release or website-planning documentation set by default.
+Use `docs/INDEX.md` to load specialist policies only when the task triggers them. Do not read `tasks/archive/` or `docs/archive/` by default.
 
-Classify the task first, identify its risk and triggered specialist domains, then use `docs/INDEX.md` to load only the relevant policies and evidence. Read full specialist policies for high-risk work. Avoid archived, superseded and closed-task material unless it is needed to resolve a contradiction, investigate a regression, validate a historical claim or answer an explicit historical question.
+## Safe autonomy
 
-## Permanent safety boundaries
+Codex may inspect, implement, test, document, create branches, commit, push and maintain pull requests within approved scope. Low-risk and qualifying medium-risk work may follow the standing merge policy in `AUTONOMOUS_EXECUTION_PERMISSION.md`.
 
-- Preserve every Owner-approval boundary in `AUTONOMOUS_EXECUTION_PERMISSION.md` and the authoritative orchestration policy.
-- Never expose or commit secrets, tokens, private keys, passwords, MFA seeds, recovery codes, private customer data, bank details or identity documents.
-- Never place service-role credentials in browser code. Public/publishable keys are the only credentials permitted client-side.
-- Do not weaken Auth, MFA, sessions, recovery, RLS, tenant isolation, CSP, SRI, webhook verification, payment integrity or append-only evidence.
-- Stop before live payments, paid services or spending, real-customer communications, public launch, legal publication, identity or banking verification, destructive production operations, secret reveal/rotation requiring the Owner, or irreversible changes.
-- A legal block cannot be silently overridden. Never claim Tallyo is GDPR compliant, fully compliant, certified, fully secure or equivalent.
-- Keep task and file scopes isolated. Do not overwrite another active task's work or edit an overlapping locked scope.
-- Do not rename the repository or live URL without the corresponding approved Auth URL migration.
+Stop before spending, live payments or refunds, paid services, production provider/security changes, secrets, real-customer communications, legal publication, public launch, destructive production actions, identity/banking verification, irreversible changes, or any action reserved for the Owner.
 
-## Risk and review
+Never expose or commit passwords, tokens, private keys, MFA values, recovery codes, customer data, bank details or provider secrets. Only public/publishable keys may appear in browser code.
 
-- **Low:** visual spacing, spelling, static formatting and test naming. Use focused implementation, focused checks and concise evidence.
-- **Medium:** forms, routing, accessibility behaviour, ordinary public components and non-sensitive analytics names. Add QA and only the specialists triggered by scope.
-- **High:** identity, Auth, MFA, sessions, recovery, authorization, RLS, tenant isolation, private data, PII, secrets, money, Stripe, subscriptions, refunds, legal commitments, AI access to private data, production and destructive actions. Load the full relevant specialist policies, use Sol-level analysis, require independent verification where practical, satisfy specialist gates and obtain Owner approval where required.
+Preserve Auth, MFA, sessions, recovery, RLS, tenant isolation, CSP, SRI, webhook verification, financial integrity, one-time recovery semantics and security-notification minimisation.
 
-Do not simulate every specialist role for every task. Use only materially relevant roles; record others as `Not triggered`. The Master Orchestrator owns task classification, role selection, locks, evidence, approvals and closure. Functional roles may be performed sequentially when concurrent agents are unavailable.
+## Risk and model selection
 
-## Working rules
+- Low: spacing, spelling and static formatting.
+- Medium: routine website, content, SEO, accessibility, ordinary UI, tests, documentation, archive work and design-only architecture.
+- High: Auth, MFA, sessions, recovery, authorization, RLS, private data, secrets, Stripe runtime, subscriptions/entitlements, refunds, production, destructive work, public legal commitments and release decisions.
 
-- Inspect affected source before editing and prefer small, reviewable changes.
-- Use deterministic formatting, lint, type, test, link, accessibility and secret-scanning checks where they already exist. Reason about failures instead of rereading every passing file.
-- Update only authoritative documents whose state actually changed. Batch related documentation at task or milestone closure.
-- Preserve historical evidence; do not include it in default context.
-- Keep routine responses concise and use the completion format in `docs/INDEX.md`.
-- A task closes only with focused validation, required independent review, honest evidence, no exposed secrets, a focused diff and released locks.
+Use Sol Medium by default. Ask for Sol High only when a high-risk boundary is reached; continue unrelated Medium work meanwhile.
 
-For task-specific routing, canonical sources and reporting rules, read `docs/INDEX.md`.
+## Workflow
+
+Use one objective → one branch → focused implementation → focused validation → authoritative-document update → one pull request. Do not create duplicate closeout or evidence documents for routine work.
+
+Inspect affected source before editing. Preserve unrelated user changes. Prefer small, reviewable diffs. Update only authoritative documents whose state changed.
+
+Before committing:
+
+- run relevant formatting, lint, type, test, build, link, accessibility and security checks already present;
+- run `git diff --check`;
+- inspect the full diff;
+- verify there are no secrets, private data or unrelated changes.
+
+Use focused tests during implementation. Run the complete relevant suite once at milestone closure. Do not repeat already-passed high-risk regressions without a relevant source change.
+
+## Reporting
+
+Use:
+
+```text
+Completed:
+Files changed:
+Validation:
+Material risks:
+Owner approval required:
+Commit:
+Next action:
+```
+
+The authoritative approval, orchestration, security, legal and release policies remain routed through `docs/INDEX.md`.
