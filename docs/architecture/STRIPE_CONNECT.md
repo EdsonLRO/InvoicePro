@@ -1,6 +1,6 @@
 # Stripe Connect architecture decision record
 
-Status: Preparation only. No connected-account model is selected and no provider configuration changes are authorised.
+Status: Current-source review complete. A launch model is recommended in `STRIPE_CONNECT_DECISION_PACK_2026-07-24.md`, awaiting Owner approval. No provider configuration changes are authorised.
 
 ## Decision boundary
 
@@ -23,9 +23,15 @@ The current live invoice-payment path uses the Owner's Stripe account and is ver
 
 Business subscribes to Tallyo Pro → separately starts Stripe Connect onboarding → Stripe confirms the connected account and required capabilities → Tallyo creates account-bound Checkout → the customer pays on Stripe → signed platform/connected-account webhooks confirm the result → Tallyo records verified invoice status.
 
-## Open architecture decision
+## Recommended architecture awaiting approval
 
-A later High-risk programme must compare current Stripe-supported connected-account models and direct versus destination charge designs using official documentation. The review must determine:
+The COMM-001 review recommends Accounts v2 Merchant connected accounts, direct charges, the connected business as merchant of record, Stripe collection of fees and losses, full Stripe Dashboard access when supported, Stripe-hosted onboarding and no Tallyo application fee.
+
+The recommendation was selected because it keeps each independent business's customer payments, Stripe fees, refunds, disputes and negative-balance responsibility on that connected account instead of making Tallyo an intermediary for customer funds.
+
+The Owner must approve the model before payment-path schema or runtime implementation because Accounts v2 responsibility fields are fixed when the Merchant configuration is added. The full rationale, controls, test matrix and exact approval boundary are in `STRIPE_CONNECT_DECISION_PACK_2026-07-24.md`.
+
+The review considered:
 
 - who is merchant of record and who appears on receipts/statements;
 - platform and connected-account liability;
@@ -37,7 +43,7 @@ A later High-risk programme must compare current Stripe-supported connected-acco
 - data-controller/processor roles and provider data flows;
 - provider fees and failure/rollback behaviour.
 
-No final model is chosen from memory or this preparation record.
+No provider account or configuration is created by this recommendation.
 
 ## Required trusted controls
 

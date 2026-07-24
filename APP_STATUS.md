@@ -9,7 +9,8 @@
 - PR #92 is merged. Repository authority is simplified, the approved commercial offer is prepared, and general card-payment claims are qualified for the future multi-business boundary.
 - PR #94 is merged. The Stripe Billing test foundation is repository-only: its migration remains unapplied, its three Edge Functions remain undeployed, no provider settings exist, and Checkout remains disabled.
 - PR #96 is merged. The Billing migration passed disposable PostgreSQL 17.6 RLS, privilege, ownership, replay, rollback and entitlement probes; its service-role-only RPCs now use caller privileges. This did not apply or deploy Billing.
-- BILL-003 repository preparation adds one service-only Checkout claim per account, current-provider subscription verification, signed lifecycle cleanup, repeatable local claim probes and an isolated test-acceptance runbook. It does not apply or deploy anything, and public Checkout remains disabled.
+- PR #98 merged BILL-003's service-only Checkout claim, current-provider subscription verification, signed lifecycle cleanup, repeatable local claim probes and isolated test-acceptance runbook. It did not apply or deploy anything, and public Checkout remains disabled.
+- COMM-001 is the active commercial-integration programme. The current stage documents the Stripe Connect model and prepares repository-only implementation; no provider or public-release action is authorised.
 
 ## Implemented capabilities
 
@@ -40,7 +41,7 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 ## Immediate launch blockers
 
 - The repository and disposable-local Billing review is complete. Applying the migration, configuring test-mode Stripe, deploying functions and running a controlled test Checkout remain separate High-risk Owner gates.
-- Design, implement and verify Stripe Connect separately before public business payment claims.
+- Approve the reviewed Stripe Connect account, responsibility, onboarding and direct-charge model; then implement and verify it before public business payment claims.
 - Complete domain/DNS, final operational checks, approved legal/privacy publication and production release as separate Owner-gated stages.
 
 No current task authorises public AI activation, provider secret changes, Stripe Billing/Connect activation, DNS cutover, legal publication or public launch.

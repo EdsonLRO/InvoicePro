@@ -1,85 +1,87 @@
-# Active task: BILL-003 Stripe Billing test-acceptance preparation
+# Active programme: COMM-001 commercial launch integration
 
-Task ID: BILL-003
-Title: Prepare the disabled Stripe Billing foundation for an isolated test-mode acceptance stage
+Task ID: COMM-001
+Title: Integrate subscriptions, independent-business customer payments and the public AI Helper for controlled commercial release
 Priority: High
-Status: Implementation Complete; local verification passed and high-risk PR preparation is in progress
-Phase: Repository-only implementation and verification
+Status: Architecture decision and repository implementation preparation in progress
+Phase: Repository-only preparation
 Owner role: Master Orchestrator
-Assigned specialists: Payments, Backend/Supabase, Security and QA; Legal review limited to the subscription trigger
+Assigned specialists: Payments, Backend/Supabase, Security, Website, AI, QA and Release; Legal is triggered only for claims, notices and final publication
 Model/work mode: Sol / High
 Risk level: High
 
-## Scope and locks
+## Objective
 
-Objective: produce a provider-disabled acceptance runbook and deterministic controls for applying the already reviewed Billing foundation in a later, separately approved test environment. Remediate the pre-activation duplicate-Checkout race identified during source review.
+Prepare Tallyo so the public website and authenticated app can offer:
 
-Approved repository scope:
+- Tallyo Pro subscriptions at the approved GBP 8 monthly or GBP 80 annual price;
+- customer card payments received by each independent business through its own connected Stripe account;
+- the already implemented public-information AI Helper;
+- a controlled, reversible public release after separate provider and release approvals.
 
-- preserve the existing test-mode and kill-switch gates;
-- add a service-role-only, per-account Checkout claim so browser-controlled request IDs cannot create parallel subscription sessions;
-- reconcile claims from signed Checkout lifecycle events;
-- verify current-provider state before creating a session;
-- add focused local concurrency, RLS, rollback and source-regression tests;
-- document exact later deployment, rollback and acceptance order without using secret values.
+## Current baseline
 
-Excluded:
+- PR #98 merged the disabled Stripe Billing acceptance preparation into `main`.
+- The Billing migration remains unapplied, the Billing functions remain undeployed and Stripe Billing is not configured.
+- Stripe Connect is not implemented or configured.
+- The AI Helper is merged, privately tested and disabled by default. Its existing encrypted Cloudflare secret is preserved.
+- The website remains privately previewed and is not published on `tallyo.co.uk`.
 
-- Supabase cloud access or mutation;
-- Stripe Dashboard/API access, Product/Price/Portal/webhook configuration or provider requests;
-- secret creation, entry, reveal, rotation or inspection;
-- Edge Function deployment or migration application outside a disposable local database;
-- Checkout, payment, email, customer data, public subscription activation, DNS or production release.
+## Current repository-only scope
 
-Files or paths locked:
+- reconcile the completed BILL-003 record;
+- verify current official Stripe Connect, Stripe Billing, Supabase and OpenAI requirements;
+- record the recommended Connect account, responsibility, onboarding and charge model;
+- design the tenant-bound database, Edge Function, UI, webhook, entitlement and rollback boundaries;
+- identify the smallest independently reviewable implementation stages;
+- prepare focused tests and release evidence;
+- continue non-provider website and AI readiness work that does not activate public services.
+
+## Locks
 
 - `tasks/ACTIVE.md`;
-- `SECURITY_FINDINGS_LEDGER.md`;
-- `supabase/migrations/20260724111312_stripe_billing_test_foundation.sql`;
-- `supabase/functions/create-billing-checkout/`;
-- `supabase/functions/stripe-billing-webhook/`;
-- `tests/stripe-billing-foundation-harness.cjs`;
-- focused BILL-003 test/runbook/evidence files;
-- `docs/architecture/STRIPE_BILLING.md`;
 - `APP_STATUS.md`;
-- `SUPABASE_HANDOFF.md`;
-- `website/content/subscription-readiness.json`.
-
-Local resource released: disposable Docker container `tallyo-billing-claim-pg17-20260724`; it used disabled networking, no published port and temporary-memory PostgreSQL data, and the exact `--rm` container was removed after passing probes.
+- `ROADMAP.md`;
+- `DECISIONS.md`;
+- `docs/architecture/STRIPE_CONNECT.md`;
+- `docs/architecture/STRIPE_BILLING.md`;
+- COMM-001 decision, implementation and evidence files;
+- any new Connect migration, Edge Function, UI and focused test files after Owner scope approval;
+- subscription and AI launch configuration only after its separate approval gate.
 
 Lock acquired: 2026-07-24.
-Release condition: focused runtime and source tests pass, the original race and bypass variants fail closed, legitimate single-session behavior remains, no disposable resource remains, evidence is complete, the diff is clean and the high-risk PR stops for Owner ready/merge approval.
 
-## Security finding
+## Explicit exclusions until separately approved
 
-Finding ID: BILL-003-F1
-Title: Browser-controlled idempotency permits parallel subscription Checkout Sessions
-Classification: Validated — approved to fix under the repository-only BILL-003 scope
-Severity: High before Billing activation; no current runtime exposure because Billing is undeployed and disabled
-Affected components: `create-billing-checkout`, Billing migration, signed Billing webhook and focused tests
-Invariant: one Tallyo account must not be able to create or complete overlapping Tallyo Pro subscription Checkout Sessions
-Evidence: the Checkout idempotency key includes a browser-supplied `requestId`, while the existing subscription lookup is populated only after signed webhook reconciliation. Changing the request ID before the first completion can produce another Stripe request.
-Realistic impact if activated unchanged: duplicate subscriptions and charges, contradictory entitlement state and support/refund burden.
-Narrow fix: atomically claim one active Checkout per account in PostgreSQL, keep claims service-role-only, use same-request idempotency, verify provider subscription state and clear the matching claim only from signed lifecycle handling.
-Required verification: simultaneous different-request rejection, same-request retry safety, expired-claim recovery, existing-subscription rejection, cross-account isolation, anonymous/authenticated denial, signed lifecycle cleanup, rollback and existing Billing regression.
+- no Stripe or Supabase provider configuration;
+- no cloud migration application or Edge Function deployment;
+- no secret reveal, replacement, rotation or new secret entry;
+- no Stripe Product, Price, webhook, Customer Portal or connected-account creation;
+- no test or live payment, refund, dispute or subscription;
+- no unrestricted public AI activation or paid OpenAI request;
+- no DNS cutover, legal publication or public production release;
+- no change to the Owner-account invoice-payment path.
 
-Verification completed: committed deterministic claim probes passed; a real two-connection different-request race serialized and returned `checkout_pending`; all focused Billing, payment-isolation, dependency, workflow, tenant-attribution and Deno checks passed. Evidence: `STRIPE_BILLING_TEST_ACCEPTANCE_PREPARATION_EVIDENCE_2026-07-24.md`.
+## Staged delivery
 
-## Legal review
+1. **Connect decision and implementation boundary** — select the recommended model using current official sources and stop for Owner approval.
+2. **Repository implementation** — add unapplied schema, disabled functions, UI states and focused tests. Stop for high-risk PR approval.
+3. **Isolated test acceptance** — separately approve Supabase test application, Stripe test configuration, synthetic connected accounts and test payments.
+4. **Billing acceptance and entitlement integration** — separately approve test products/prices, deployment and subscription lifecycle tests.
+5. **AI release readiness** — preserve the existing secret and preview; separately approve public notice, budget, rate limits and activation.
+6. **Production release** — separately approve live provider configuration, secrets, payment acceptance, DNS and publication.
 
-Jurisdiction: United Kingdom.
-Affected users/data subjects: synthetic test account only in this repository stage; no customer or payer.
-Feature/data/money flow: internal technical preparation only; no provider object, personal data, card data, charge, renewal or communication.
-Roles: existing controller/processor positions are unchanged.
-Applicable sources: current official Stripe Billing/Checkout/webhook and Supabase migration/RLS/Edge Function guidance; customer-facing subscription law and tax conclusions are expressly deferred.
-Foreseeable failure: duplicate charges if the race were activated, test/live mixing, unclear cancellation/tax presentation or premature public claims.
-Mandatory controls: duplicate-session containment, signed provider-derived state, test-mode enforcement, simple cancellation path, evidence minimisation and continued public disablement.
-User-facing wording: none changed or approved by this task.
-Retention/rights/vendor implications: no new processing in this task; Billing records and Stripe retention remain subject to the later legal review.
-Required evidence: synthetic local tests and provider-disabled repository checks only.
-External-advice trigger: public subscriptions, final cancellation/refund/tax wording and production activation still require the recorded focused UK review.
-Disposition: Approved with conditions for repository-only preparation; Blocked for provider configuration, customer testing, public checkout or production release.
+## First approval boundary
 
-## Approval boundary
+Before writing payment-path schema or runtime code, obtain Owner approval for the documented Connect recommendation:
 
-The Owner authorised continuing repository development but has not authorised any Supabase cloud or Stripe action for BILL-003. Stop before applying the migration remotely, configuring provider objects/settings, entering secrets, deploying functions or making a test Checkout. The high-risk code PR must also stop for explicit Owner ready/merge approval.
+- Stripe Accounts v2 Merchant configuration for new connected businesses;
+- direct charges on each connected account;
+- the connected business is merchant of record;
+- `fees_collector = stripe` and `losses_collector = stripe`;
+- no Tallyo application fee at initial launch;
+- Stripe-hosted onboarding and Stripe-managed requirement collection;
+- full Stripe Dashboard access when the selected configuration supports it;
+- repository-only implementation with all provider operations still disabled.
+
+This approval does not authorise provider configuration, deployment, secrets, payments or public release.

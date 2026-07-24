@@ -19,4 +19,5 @@
 | AI tools and autonomous account actions | Not planned for launch | The public Helper remains informational and bounded. |
 | Stripe Billing and Stripe Connect are separate systems | Approved | Software subscriptions and customer invoice payments have different merchants, data and risks. |
 | No additional Tallyo percentage payment fee at initial Connect launch | Approved direction | Keeps the initial commercial model simple; Stripe processing fees remain separate. |
+| Stripe Connect launch model | Recommended; Owner approval pending | Current-source review recommends Accounts v2 Merchant connected accounts, direct charges, the connected business as merchant of record, Stripe-collected fees and losses, full Dashboard access when supported and Stripe-hosted onboarding. |
 | No full authenticated-app rewrite before launch | Approved | A major rewrite is unnecessary and increases risk before market validation. |
