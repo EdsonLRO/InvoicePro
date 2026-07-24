@@ -7,11 +7,10 @@
 - The separate public website is implemented and privately previewed on Cloudflare Pages, but it is not published on `tallyo.co.uk`.
 - PR #91 is merged. The privately tested public AI Helper remains disabled by default. Production AI activation is a separate decision.
 - PR #92 is merged. Repository authority is simplified, the approved commercial offer is prepared, and general card-payment claims are qualified for the future multi-business boundary.
-- PR #94 is merged. The Stripe Billing test foundation is repository-only: its migration remains unapplied, its three Edge Functions remain undeployed, no provider settings exist, and Checkout remains disabled.
-- PR #96 is merged. The Billing migration passed disposable PostgreSQL 17.6 RLS, privilege, ownership, replay, rollback and entitlement probes; its service-role-only RPCs now use caller privileges. This did not apply or deploy Billing.
-- PR #98 merged BILL-003's service-only Checkout claim, current-provider subscription verification, signed lifecycle cleanup, repeatable local claim probes and isolated test-acceptance runbook. It did not apply or deploy anything, and public Checkout remains disabled.
-- PR #100 merged COMM-001's first Connect slice: an unapplied tenant mapping, disabled Stripe-hosted onboarding/status function, Account-page states and focused local isolation evidence.
-- COMM-001's second repository-only slice now implements disabled direct-charge Checkout, connected refunds, signed connected-account reconciliation, private atomic Checkout claims and legacy Owner-route isolation. Focused source, frozen Deno and disposable PostgreSQL 17.6 checks pass. Nothing is applied, deployed, configured or enabled.
+- PRs #94, #96 and #98 merged the reviewed Stripe Billing foundation and acceptance preparation.
+- PRs #100 and #101 merged the reviewed Stripe Connect onboarding, direct-charge Checkout, connected-refund, signed-webhook and Owner-route-isolation foundations.
+- After a completed 2026-07-24 physical backup and explicit Owner approval, the three additive Billing/Connect migrations were applied and the seven new functions were deployed at version 1. RLS, grants, migration history, JWT settings, disabled endpoint behavior and Supabase security advisors pass.
+- Billing and Connect remain unavailable: no commercial feature gate, provider secret, Stripe Product/Price, event destination, Customer Portal, connected account or live-release gate is configured. Existing live invoice-payment, refund and email functions were not redeployed.
 
 ## Implemented capabilities
 
@@ -35,14 +34,14 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 ## Commercial and payment boundary
 
 - Launch offer: Free Invoice Maker without an account, plus one Tallyo Pro plan at £8 monthly or £80 annually for one business and one user.
-- Subscription checkout is not active. No Stripe Billing product or price exists, and no Billing migration, function or entitlement is active in Supabase.
+- Subscription checkout is not active. The Billing schema and disabled functions now exist in Supabase, but no Stripe Product, Price, Customer Portal, secret, feature gate, subscription or active entitlement exists.
 - The current live Stripe invoice-payment path belongs to the Owner's controlled Tallyo account. It is not a merchant architecture for unrelated businesses and must not be marketed as generally available.
-- Independent-business card payments now have a reviewed repository implementation, but remain unavailable until separate test-provider application, synthetic multi-account acceptance and production release approvals pass.
+- Independent-business card payments now have an applied schema and disabled function foundation, but remain unavailable until separate Stripe sandbox configuration, synthetic multi-account acceptance and production release approvals pass.
 
 ## Immediate launch blockers
 
-- The repository and disposable-local Billing review is complete. Applying the migration, configuring test-mode Stripe, deploying functions and running a controlled test Checkout remain separate High-risk Owner gates.
-- Review and merge the disabled Connect payment/refund/webhook slice, then separately approve test-mode migration application, function deployment, provider configuration and synthetic multi-account acceptance before public business payment claims.
+- The disabled Billing/Connect provider foundation is deployed. Configuring Stripe sandbox Products/Prices, event destinations, secrets and feature gates, then running controlled synthetic subscription and multi-account payment acceptance, is the next High-risk Owner gate.
+- Existing Owner-route source changes remain undeployed until an exact `STRIPE_OWNER_USER_ID` is entered without exposing it and the affected live functions receive a separate deployment approval.
 - Complete domain/DNS, final operational checks, approved legal/privacy publication and production release as separate Owner-gated stages.
 
 No current task authorises public AI activation, provider secret changes, Stripe Billing/Connect activation, DNS cutover, legal publication or public launch.

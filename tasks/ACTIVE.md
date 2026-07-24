@@ -3,8 +3,8 @@
 Task ID: COMM-001
 Title: Integrate subscriptions, independent-business customer payments and the public AI Helper for controlled commercial release
 Priority: High
-Status: Connect onboarding foundation merged; disabled payment/refund/webhook slice implemented and under focused review
-Phase: Repository-only implementation and verification
+Status: Billing and Connect provider foundations deployed but disabled; test-provider configuration pending
+Phase: Controlled provider preparation
 Owner role: Master Orchestrator
 Assigned specialists: Payments, Backend/Supabase, Security, Website, AI, QA and Release; Legal is triggered only for claims, notices and final publication
 Model/work mode: Sol / High
@@ -22,20 +22,20 @@ Prepare Tallyo so the public website and authenticated app can offer:
 ## Current baseline
 
 - PR #98 merged the disabled Stripe Billing acceptance preparation into `main`.
-- The Billing migration remains unapplied, the Billing functions remain undeployed and Stripe Billing is not configured.
-- PR #100 merged the Connect account/onboarding foundation into `main`. Its migration remains unapplied, its function remains undeployed and all provider gates remain disabled.
-- The active branch adds a separate disabled repository-only direct-charge Checkout, connected-refund and signed connected-account webhook slice. It has passed focused source, frozen Deno and disposable PostgreSQL checks but is not deployed or configured.
+- PR #100 merged the Connect account/onboarding foundation into `main`.
+- PR #101 merged the disabled direct-charge Checkout, connected-refund, signed connected-account webhook and Owner-route isolation slice as `a0e87e0`.
+- After a completed 2026-07-24 physical backup, the Owner-approved production-preparation stage applied the Billing and both Connect migrations and deployed the seven new functions at version 1.
+- All Billing and Connect functions remain fail-closed: no commercial feature flag, provider secret, Product, Price, event destination, connected account or live-release gate is configured.
+- No existing Owner invoice-payment, refund or email function was redeployed.
 - The AI Helper is merged, privately tested and disabled by default. Its existing encrypted Cloudflare secret is preserved.
 - The website remains privately previewed and is not published on `tallyo.co.uk`.
 
-## Current repository-only scope
+## Current controlled-provider scope
 
-- reconcile the completed BILL-003 record;
-- verify current official Stripe Connect, Stripe Billing, Supabase and OpenAI requirements;
-- record the recommended Connect account, responsibility, onboarding and charge model;
-- design the tenant-bound database, Edge Function, UI, webhook, entitlement and rollback boundaries;
-- identify the smallest independently reviewable implementation stages;
-- prepare focused tests and release evidence;
+- preserve the applied schema and disabled function boundary;
+- prepare exact Stripe sandbox Products/Prices, event destinations, test key and feature-gate configuration;
+- run synthetic subscription and multi-account Connect acceptance only after another exact Owner approval;
+- keep the existing Owner invoice-payment route isolated and unchanged until its allowlist secret and source redeployment receive separate approval;
 - continue non-provider website and AI readiness work that does not activate public services.
 
 ## Locks
@@ -54,8 +54,8 @@ Lock acquired: 2026-07-24.
 
 ## Explicit exclusions until separately approved
 
-- no Stripe or Supabase provider configuration;
-- no cloud migration application or Edge Function deployment;
+- no further Stripe or Supabase provider configuration;
+- no function redeployment or migration change;
 - no secret reveal, replacement, rotation or new secret entry;
 - no Stripe Product, Price, webhook, Customer Portal or connected-account creation;
 - no test or live payment, refund, dispute or subscription;
@@ -65,12 +65,12 @@ Lock acquired: 2026-07-24.
 
 ## Staged delivery
 
-1. **Connect decision and implementation boundary** — select the recommended model using current official sources and stop for Owner approval.
-2. **Repository implementation** — add unapplied schema, disabled functions, UI states and focused tests. Stop for high-risk PR approval.
-3. **Isolated test acceptance** — separately approve Supabase test application, Stripe test configuration, synthetic connected accounts and test payments.
-4. **Billing acceptance and entitlement integration** — separately approve test products/prices, deployment and subscription lifecycle tests.
-5. **AI release readiness** — preserve the existing secret and preview; separately approve public notice, budget, rate limits and activation.
-6. **Production release** — separately approve live provider configuration, secrets, payment acceptance, DNS and publication.
+1. **Connect decision and implementation boundary** - completed.
+2. **Repository implementation and PR review** - completed through PR #101.
+3. **Disabled provider foundation** - completed: applied the three reviewed additive migrations, deployed seven new functions, verified RLS/grants/advisors/JWT settings and retained absent feature gates.
+4. **Isolated test acceptance** - separately approve Stripe sandbox Products/Prices, event destinations, protected settings, synthetic connected accounts, test subscriptions and test invoice payments/refunds.
+5. **AI release readiness** - preserve the existing secret and preview; separately approve public notice, budget, rate limits and activation.
+6. **Production release** - separately approve live provider configuration, secrets, payment acceptance, DNS and publication.
 
 ## Approved decision
 
@@ -89,8 +89,6 @@ This approval does not authorise provider configuration, deployment, secrets, pa
 
 ## Current approval boundary
 
-The first Connect implementation slice passed its required check and merged as PR #100 after exact Owner approval.
+PR #101 passed its required check and merged after exact Owner approval. The subsequent Owner-approved provider-foundation stage applied the three commercial migrations and deployed only the seven new disabled functions. Evidence: `COMMERCIAL_PROVIDER_FOUNDATION_DEPLOYMENT_EVIDENCE_2026-07-24.md`.
 
-The second slice now adds only an unapplied private Checkout-claim schema, disabled direct-charge Checkout and refund functions, a separate signed connected-account webhook, safe app/email routing and server-side isolation of the legacy Owner payment route. It must stop for explicit Owner approval before its high-risk PR is marked ready or merged.
-
-Applying either Connect migration, deploying any function, entering or changing a setting or secret, configuring Stripe/Supabase, creating a connected account, making a payment/refund or publishing a payment claim requires another exact Owner approval.
+The next gate is Stripe sandbox configuration and synthetic acceptance. Entering any test key or webhook secret, creating Products/Prices or event destinations, enabling a Billing/Connect gate, creating a connected account, or making a test subscription/payment/refund requires another exact Owner approval. Live mode, existing Owner-route redeployment, public claims and release remain later separate gates.

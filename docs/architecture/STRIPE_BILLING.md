@@ -1,6 +1,6 @@
 # Stripe Billing architecture
 
-Status: Repository foundation merged by PR #94 and locally validated/hardened by PR #96. The migration is unapplied, the Edge Functions are undeployed, provider configuration is absent and public subscription checkout remains disabled.
+Status: Repository foundation merged and locally validated. The migration was applied and the three new Edge Functions were deployed at version 1 on 2026-07-24 after explicit Owner approval. Provider configuration is absent and public subscription checkout remains disabled.
 
 ## Boundary
 
@@ -14,11 +14,11 @@ Approved offer:
 - no full-feature trial or permanent free saved account at launch;
 - cancellation stops future renewal and normally preserves access through the paid period.
 
-No product, price, coupon, trial, Checkout Session, Customer Portal session, customer mapping, subscription or entitlement has been created in Stripe or Supabase.
+No Stripe Product, Price, coupon, trial, Checkout Session, Customer Portal session, customer mapping or subscription has been created. The empty Supabase Billing schema exists, but no provider-derived entitlement is active.
 
 ## Repository foundation
 
-The candidate implementation is isolated from customer invoice payments:
+The disabled implementation is isolated from customer invoice payments:
 
 - `20260724111312_stripe_billing_test_foundation.sql` defines owner-scoped read RLS, service-role-only writes, atomic event reconciliation, delayed-event protection and provider-derived entitlements;
 - `create-billing-checkout` maps only `monthly` or `annual` to server-configured Price identifiers and requires confirmed Auth, current MFA assurance when enrolled, an explicit kill switch and a Stripe test-mode key;
@@ -28,7 +28,7 @@ The candidate implementation is isolated from customer invoice payments:
 - `stripe-billing-webhook` verifies the raw-body signature, rejects live events, refreshes current subscription state, checks the server Price allowlist and account mapping, then calls the atomic RPC and clears only the matching Checkout claim for signed completion/expiration events;
 - the existing `stripe-webhook` invoice-payment path does not reference Billing tables or entitlements.
 
-The account entitlement helper is service-role-only. It is not yet attached to the app's write RLS policies, so the repository foundation must not be described as active subscription enforcement. That activation requires the unapplied migration, reviewed policy integration and controlled test-mode acceptance under a separate approval.
+The account entitlement helper is service-role-only. It is not attached to the app's write RLS policies, so the deployed foundation must not be described as active subscription enforcement. That activation requires reviewed policy integration and controlled test-mode acceptance under a separate approval.
 
 ## Trusted flow
 
@@ -45,7 +45,7 @@ The account entitlement helper is service-role-only. It is not yet attached to t
 
 ## Repository data model
 
-The unapplied candidate migration adds:
+The applied migration adds:
 
 - `billing_customers`: immutable Tallyo account owner, unique Stripe Customer identifier, created/updated timestamps;
 - `billing_subscriptions`: internal plan key, billing interval, Stripe Subscription and Price identifiers, verified status, current-period end, cancel-at-period-end flag, provider event time and update timestamp;
@@ -114,4 +114,4 @@ The exact Stripe event names and API version must be verified against current of
 - approve production secrets, webhook destination, Customer Portal and live activation;
 - approve the production release separately.
 
-The repository foundation passed High review and merged in PR #94. Applying it, configuring Stripe test objects/secrets, deploying it, connecting app write policies, making a test Checkout and enabling any public control remain separate Owner-gated actions.
+The foundation passed High review, merged, and was applied/deployed in a later disabled-only stage. Configuring Stripe sandbox objects/secrets, connecting app write policies, making a test Checkout and enabling any public control remain separate Owner-gated actions.

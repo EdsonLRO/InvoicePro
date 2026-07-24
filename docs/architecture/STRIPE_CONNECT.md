@@ -1,6 +1,6 @@
 # Stripe Connect architecture decision record
 
-Status: Launch model approved. The onboarding and payment-path repository foundations are implemented, unapplied, undeployed and disabled. No provider configuration changes are authorised.
+Status: Launch model approved. The onboarding and payment-path foundations are implemented, their migrations are applied, and the four new functions are deployed at version 1 but disabled. No Stripe provider configuration or activation is authorised.
 
 ## Decision boundary
 
@@ -47,7 +47,7 @@ No provider account or configuration is created by this recommendation.
 
 ## Repository foundation
 
-The first approved implementation slice is repository-only and remains unapplied, undeployed and disabled:
+The first approved implementation slice is applied and deployed but remains disabled:
 
 - `20260724174500_stripe_connect_foundation.sql` creates the tenant-bound connected-account state and private append-only event evidence;
 - authenticated browser access is owner-scoped SELECT only; all provider-derived writes remain service-role-only;
@@ -61,7 +61,7 @@ Local PostgreSQL 17 RLS, privilege, constraint, cross-tenant and append-only pro
 
 ## Repository payment path
 
-The second approved repository-only slice remains unapplied, undeployed and disabled:
+The second approved slice is applied and deployed but remains disabled:
 
 - `stripe_connect_checkout_claims` privately binds one active Checkout attempt to one owner, connected account, invoice, amount, currency and mode;
 - service-only RPCs serialize claims, preserve immutable tenant binding and atomically apply signed invoice events with private Connect evidence;
@@ -112,4 +112,4 @@ Online card payments for independent business accounts are being prepared and ar
 - approve production webhook/secrets/configuration and any identity or banking steps;
 - approve public payment claims and release.
 
-No Connect activation, live configuration change, migration, secret or payment occurs in the repository-only implementation stage.
+The disabled foundation deployment applied the reviewed migrations and deployed only the new functions. No Connect activation, Stripe configuration, secret, account or payment occurred.
