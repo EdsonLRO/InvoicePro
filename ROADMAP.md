@@ -3,7 +3,7 @@
 ## Now
 
 - Keep the website private, the merged AI Helper disabled and subscription checkout inactive.
-- Complete High review of the unapplied, disabled Stripe Billing test foundation before changing providers, secrets, DNS or production state.
+- Preserve the verified, unapplied and disabled Stripe Billing foundation until a separately approved test-mode application stage.
 - Resolve tax presentation and final contractual publication wording before subscription checkout or public pricing release.
 - Preserve the documented separation between Tallyo subscriptions and independent-business customer payments.
 
