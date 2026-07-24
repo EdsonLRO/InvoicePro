@@ -5,10 +5,10 @@ Branch: `codex/repository-simplification-commercial-launch`
 Risk: Medium for repository, content, SEO, accessibility and architecture documentation. High-risk runtime/provider actions are excluded.
 Current scope: Compact authoritative documents; archive completed task records; Free Invoice Maker and one Tallyo Pro offer; payment-claim qualification; design-only Stripe Billing and Connect architecture; proportionate launch checklist; disabled analytics measurement plan.
 Completed: PR #91 is merged with the AI Helper disabled by default. This branch is updated from merged `main` and preserves the Helper implementation and gates. Compact authority, task archives, approved commercial decisions, Billing/Connect architecture, the proportionate launch checklist, disabled market-evidence plan and commercial-offer module are prepared. The approved two-offer pricing is wired into the public pages and general card-payment claims are qualified.
-Remaining: Commit and push the reviewed diff, open one reviewable pull request, and hand it to the Owner without merging or publishing.
+Remaining: Draft PR #92 is pushed with all three checks passing. It is waiting for Owner review and exact approval before ready/merge consideration; publishing remains a later, separate gate.
 Validation already completed: Current invoicing app build `2026.07.23.2`; PR #91 focused Helper suite and protected-preview acceptance. On this branch, the 26-route website build, commercial-offer assertions, AI Helper fail-closed/mock-provider suite, pricing-page semantic review, focused contradiction scan and `git diff --check` pass. Unchanged high-risk regressions were not repeated.
 Owner-only actions: Any public AI activation; live Stripe Billing or Connect configuration; provider secrets; DNS; legal publication; production release.
-Next action: Commit, push and open the commercial-launch pull request for Owner review.
+Next action: Owner review of draft PR #92. Do not mark ready, merge or publish without exact approval.
 
 ## Lock
 
