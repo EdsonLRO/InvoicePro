@@ -1,6 +1,6 @@
 # Stripe Billing architecture
 
-Status: Design only. Provider configuration and runtime implementation are disabled.
+Status: Repository foundation implemented for review. The migration is unapplied, the Edge Functions are undeployed, provider configuration is absent and public subscription checkout remains disabled.
 
 ## Boundary
 
@@ -14,7 +14,19 @@ Approved offer:
 - no full-feature trial or permanent free saved account at launch;
 - cancellation stops future renewal and normally preserves access through the paid period.
 
-No product, price, coupon, trial, Checkout Session, Customer Portal session, customer mapping, subscription or entitlement is created by this document.
+No product, price, coupon, trial, Checkout Session, Customer Portal session, customer mapping, subscription or entitlement has been created in Stripe or Supabase.
+
+## Repository foundation
+
+The candidate implementation is isolated from customer invoice payments:
+
+- `20260724111312_stripe_billing_test_foundation.sql` defines owner-scoped read RLS, service-role-only writes, atomic event reconciliation, delayed-event protection and provider-derived entitlements;
+- `create-billing-checkout` maps only `monthly` or `annual` to server-configured Price identifiers and requires confirmed Auth, current MFA assurance when enrolled, an explicit kill switch and a Stripe test-mode key;
+- `create-billing-portal` resolves the Stripe Customer only from the authenticated account mapping and uses the same disabled/test-mode gates;
+- `stripe-billing-webhook` verifies the raw-body signature, rejects live events, refreshes current subscription state, checks the server Price allowlist and account mapping, then calls the atomic RPC;
+- the existing `stripe-webhook` invoice-payment path does not reference Billing tables or entitlements.
+
+The account entitlement helper is service-role-only. It is not yet attached to the app's write RLS policies, so the repository foundation must not be described as active subscription enforcement. That activation requires the unapplied migration, reviewed policy integration and controlled test-mode acceptance under a separate approval.
 
 ## Trusted flow
 
@@ -27,9 +39,9 @@ No product, price, coupon, trial, Checkout Session, Customer Portal session, cus
 7. Server/database boundaries derive entitlements from verified subscription state. A redirect or hidden button never grants access.
 8. The Stripe Customer Portal manages payment method, billing invoices and cancellation after separate approval.
 
-## Proposed data model
+## Repository data model
 
-A later reviewed migration should add:
+The unapplied candidate migration adds:
 
 - `billing_customers`: immutable Tallyo account owner, unique Stripe Customer identifier, created/updated timestamps;
 - `billing_subscriptions`: internal plan key, billing interval, Stripe Subscription and Price identifiers, verified status, current-period end, cancel-at-period-end flag, provider event time and update timestamp;
@@ -65,7 +77,7 @@ The implementation review should select the smallest official event set needed f
 
 The exact Stripe event names and API version must be verified against current official Stripe documentation during the later High-risk implementation. Unknown or unrelated events must be acknowledged without mutating entitlement state.
 
-## Required implementation tests
+## Required acceptance tests
 
 - allowlisted monthly/annual price mapping and rejection of arbitrary identifiers;
 - authenticated account/customer ownership and cross-account isolation;
@@ -96,4 +108,4 @@ The exact Stripe event names and API version must be verified against current of
 - approve production secrets, webhook destination, Customer Portal and live activation;
 - approve the production release separately.
 
-Implementation must begin in Stripe test mode under Sol High review in a separate pull request.
+The repository foundation began under High review in a separate pull request. Applying it, configuring Stripe test objects/secrets, deploying it, connecting app write policies, making a test Checkout and enabling any public control remain separate Owner-gated actions.

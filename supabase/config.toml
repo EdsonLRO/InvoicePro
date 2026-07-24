@@ -63,3 +63,21 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/mfa-recovery/deno.json"
 entrypoint = "./functions/mfa-recovery/index.ts"
+
+[functions.create-billing-checkout]
+enabled = true
+verify_jwt = true
+import_map = "./functions/create-billing-checkout/deno.json"
+entrypoint = "./functions/create-billing-checkout/index.ts"
+
+[functions.create-billing-portal]
+enabled = true
+verify_jwt = true
+import_map = "./functions/create-billing-portal/deno.json"
+entrypoint = "./functions/create-billing-portal/index.ts"
+
+[functions.stripe-billing-webhook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/stripe-billing-webhook/deno.json"
+entrypoint = "./functions/stripe-billing-webhook/index.ts"

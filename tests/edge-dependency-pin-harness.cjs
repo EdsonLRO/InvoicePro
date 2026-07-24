@@ -13,7 +13,7 @@ const functionDirectories = fs.readdirSync(functionsRoot, { withFileTypes: true 
   .map((entry) => entry.name)
   .sort();
 
-assert.equal(functionDirectories.length, 10, 'expected all ten Edge Functions');
+assert.equal(functionDirectories.length, 13, 'expected all thirteen Edge Functions');
 
 for (const functionName of functionDirectories) {
   const indexPath = path.join(functionsRoot, functionName, 'index.ts');

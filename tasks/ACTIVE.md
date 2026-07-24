@@ -1,26 +1,48 @@
-# Active programme
+# Active task: BILL-001 Stripe Billing test foundation
 
-Objective: Simplify repository authority and prepare Tallyo's approved commercial launch direction without activating subscriptions, Stripe Connect, public AI, DNS, legal publication or production release.
-Status: Completed through merged PR #92.
-Branch: `main` at merge commit `bab1245`.
-Risk: Medium for repository, content, SEO, accessibility and architecture documentation. High-risk runtime/provider actions are excluded.
-Current scope: Compact authoritative documents; archive completed task records; Free Invoice Maker and one Tallyo Pro offer; payment-claim qualification; design-only Stripe Billing and Connect architecture; proportionate launch checklist; disabled analytics measurement plan.
-Completed: PR #91 merged the AI Helper while keeping it disabled by default. PR #92 merged compact authority, task archives, approved commercial decisions, Billing/Connect architecture, the proportionate launch checklist, disabled market-evidence plan, the approved two-offer pricing and qualified general card-payment claims.
-Remaining: None within this approved Medium-scope programme. Website publication, AI activation, Stripe Billing/Connect implementation and production release are separate future tasks.
-Validation already completed: Current invoicing app build `2026.07.23.2`; PR #91 focused Helper suite and protected-preview acceptance. On this branch, the 26-route website build, commercial-offer assertions, AI Helper fail-closed/mock-provider suite, pricing-page semantic review, focused contradiction scan and `git diff --check` pass. Unchanged high-risk regressions were not repeated.
-Owner-only actions: Any public AI activation; live Stripe Billing or Connect configuration; provider secrets; DNS; legal publication; production release.
-Next action: Select and approve the next programme. Switch to High before Stripe runtime, provider configuration, secrets, DNS or production release work.
+Objective: Implement a disabled-by-default, test-mode-only Stripe Billing repository foundation for Tallyo Pro without applying a migration, configuring Stripe or Supabase providers, changing secrets, deploying functions, enabling checkout, making a paid request or publishing a release.
+Status: Repository implementation and local High review complete; preparing a draft pull request for independent `verify` and Owner review.
+Branch: `codex/stripe-billing-test-foundation`.
+Risk: High — subscriptions, money, Stripe, entitlements, RLS, service-role writes and an unapplied database migration.
+Current scope: Reviewed billing schema and RLS; atomic webhook reconciliation; server-derived entitlements; authenticated monthly/annual Checkout and Customer Portal endpoints; signed test-mode webhook handling; failure-path and isolation tests; authoritative implementation evidence.
+Excluded: Stripe products or prices; provider dashboard changes; secret creation/reveal/rotation; migration application; function deployment; test or live Checkout; production configuration; public website checkout; Stripe Connect; invoice-payment changes; legal publication; DNS; production release.
+
+## Acceptance gates
+
+1. The browser can select only `monthly` or `annual`; trusted server configuration maps that choice to a Price identifier.
+2. Checkout and Portal creation fail closed unless the Billing kill switch and explicit test-mode guard are both enabled.
+3. Signed, test-mode-only webhook events are allowlisted, idempotent and reconciled atomically; delayed events cannot roll verified state backward.
+4. Entitlements are derived only from verified provider state and are never browser writable.
+5. Every new public table has account-scoped read RLS, explicit grants and service-role-only writes.
+6. Subscription Billing remains isolated from existing customer invoice-payment and refund paths.
+7. Focused dependency, schema, RLS, webhook, ownership, state-machine, failure-path and secret-safety checks pass.
+8. The final diff is focused and contains no provider identifiers, secrets, personal data, runtime dependency changes or unrelated edits.
+
+## Roles and review
+
+- Master Orchestrator: scope, locks, approvals, evidence and closure.
+- Payments specialist: Stripe mode separation, allowlist, webhook, lifecycle, idempotency and rollback review.
+- Supabase/backend specialist: schema, grants, RLS, atomic RPC and Edge Function review.
+- Security/Privacy specialist: ownership, service-role boundary, logging and secret-safety review.
+- QA specialist: focused deterministic harnesses and failure-path review.
+- Legal, Marketing, SEO and Production Release: Not triggered by this repository-only foundation.
 
 ## Lock
 
-- Assigned role: Master Orchestrator, with Documentation, Product, Frontend and QA responsibilities performed sequentially.
-- Files or paths locked: `AGENTS.md`, `APP_STATUS.md`, `ROADMAP.md`, `DECISIONS.md`, `docs/`, `tasks/`, `README.md`, and public website content/configuration/tests excluding the AI Helper implementation owned by PR #91.
+- Assigned role: Master Orchestrator, with Payments, Supabase/backend, Security/Privacy and QA responsibilities performed sequentially.
+- Files or paths locked: `tasks/ACTIVE.md`, `supabase/config.toml`, the new Billing migration, new Billing Edge Function directories, Billing-focused tests, `.github/workflows/security-checks.yml`, `docs/architecture/STRIPE_BILLING.md`, `SUPABASE_HANDOFF.md`, `APP_STATUS.md`, `ROADMAP.md`, and focused Billing evidence.
 - Lock acquired: 2026-07-24.
-- Lock released: 2026-07-24 after PR #92 merged.
+- Lock release condition: focused validation and independent high-risk review complete, evidence recorded, no exposed secrets, draft PR prepared, and work waiting only at the Owner merge/deploy boundary.
 
-## Boundaries
+## Approval boundary
 
-- Security: Preserve Auth, MFA, sessions, recovery, RLS, secrets, CSP, SRI, provider verification and current payment integrity. No authenticated-app runtime or backend change.
-- Privacy/legal: Prepare internal launch conditions and fair explanatory copy only. Do not publish final legal terms or claim compliance.
-- Payments: Pricing and architecture documentation only. No Stripe products, prices, customers, Checkout, Connect accounts, webhooks, migrations, secrets or live-mode changes.
-- Production: No merge, deployment, DNS change or public release.
+Implementation, focused local validation, commit, push and a draft pull request are approved. Stop for exact Owner approval before marking the PR ready or merging it. Separate exact approval remains required before applying the migration, configuring Stripe products/prices/webhooks/Portal or secrets, deploying functions, making a Stripe request, enabling public subscription checkout, or publishing a production release.
+
+## Validation completed
+
+- Billing foundation, existing invoice-payment isolation, dependency-pin, security-workflow and tenant-attribution harnesses pass.
+- All three new functions pass frozen Deno type-check and format checks.
+- The website's 26-route, fail-closed build and disabled AI Helper/mock-provider suite passes after the internal readiness-state update.
+- Focused secret-pattern scan has no matches; `git diff --check` passes.
+- High review found and resolved a missing composite account/customer database foreign key.
+- Full findings, limitations and the next Owner gates are recorded in `STRIPE_BILLING_TEST_FOUNDATION_EVIDENCE_2026-07-24.md`.
