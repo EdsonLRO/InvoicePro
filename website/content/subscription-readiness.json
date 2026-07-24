@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "design-only-provider-disabled",
+  "status": "repository-foundation-unapplied-provider-disabled",
   "publicCheckoutEnabled": false,
   "liveStripeBillingConfigured": false,
   "pricesPublished": false,

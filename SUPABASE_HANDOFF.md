@@ -17,7 +17,7 @@
 - **Front-end connection:** the Vue 3 single-page app (`index.html`) talks directly to Supabase via the Supabase JS client, using the **public/publishable (anon) key**. All data access is scoped per user by RLS.
 - **Server-side:** Edge Functions handle recurring invoice generation, email delivery, overdue reminders, and Stripe Checkout/webhooks using server-side secrets.
 - **Project URL:** `https://cuagwifetheefftleeup.supabase.co` (public base URL; confirmed from the live cron job command). The publishable key and full config live in `config.js` in the repo.
-- **Current boundary:** this handoff describes the current app. Future SaaS subscriptions, workspaces, teams, RBAC, and Tallyo platform billing are deferred and should not be mixed into ordinary app-finishing work.
+- **Current boundary:** this handoff describes the current app plus the explicitly labelled, unapplied Stripe Billing repository candidate. Workspaces, teams and RBAC remain deferred. Billing code must not be treated as active or mixed with the deployed customer invoice-payment path.
 
 ---
 
@@ -77,6 +77,8 @@ All in the `public` schema. All have RLS enabled and are scoped to the owning us
 - `invoices`
 - `recurring_templates`
 - `audit_events`
+
+Unapplied Stripe Billing candidate tables: `billing_customers`, `billing_subscriptions`, `billing_events`, and `account_entitlements`. They do not exist in the live project unless migration `20260724111312_stripe_billing_test_foundation.sql` is separately approved and applied. The candidate grants authenticated users owner-scoped SELECT only; writes and atomic entitlement reconciliation remain service-role-only.
 
 ---
 
@@ -194,7 +196,15 @@ Other current Edge Functions:
 - `stripe-webhook` - verifies Stripe signatures; records Checkout completion only when the Checkout session was created/logged by Tallyo; logs failed-payment/dispute/refund-failure lifecycle events; records successful refunds as locked negative Stripe payment entries.
 - Current sandbox Stripe webhook events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `refund.created`, `refund.updated`, `refund.failed`, `charge.dispute.created`, `charge.dispute.updated`, `charge.dispute.closed`, `charge.dispute.funds_withdrawn`, and `charge.dispute.funds_reinstated`.
 
-Dependency rule: every function source pins `@supabase/supabase-js` to `2.110.1`, and every function directory carries a Deno v4 lockfile with the matching remote-module digest. Do not replace the exact version with `@2`, `latest`, a caret, or another floating specification. Review and regenerate all locks with the repository's Deno `2.2.15` LTS compatibility line before an intentional dependency deployment. `tests/edge-dependency-pin-harness.cjs` enforces the pin and lock rule; `.github/workflows/security-checks.yml` runs frozen checks for all ten repository functions with read-only permissions and no secrets.
+Repository-only, undeployed Stripe Billing candidates:
+
+- `create-billing-checkout` - confirmed authenticated owner; requires current AAL2 when MFA is enrolled; maps only monthly/annual choices to server allowlisted test Prices; fails closed unless the Billing kill switch and explicit test mode are enabled.
+- `create-billing-portal` - confirmed authenticated owner; resolves only that owner's mapped Billing Customer; uses the same kill switch, MFA and test-mode gates.
+- `stripe-billing-webhook` - separate from invoice payments; verifies the raw-body signature, rejects live events, refreshes current Stripe subscription state, checks customer/Price ownership and applies state through the service-role-only atomic RPC.
+
+These three functions are not deployed and their migration is not applied. Do not add their settings or deploy them without the separate Owner gate recorded in `tasks/ACTIVE.md`.
+
+Dependency rule: every function source pins `@supabase/supabase-js` to `2.110.1`, and every function directory carries a Deno v4 lockfile with the matching remote-module digest. Do not replace the exact version with `@2`, `latest`, a caret, or another floating specification. Review and regenerate all locks with the repository's Deno `2.2.15` LTS compatibility line before an intentional dependency deployment. `tests/edge-dependency-pin-harness.cjs` enforces the pin and lock rule; `.github/workflows/security-checks.yml` runs frozen checks for all thirteen repository functions with read-only permissions and no secrets.
 
 Live deployment snapshots: on 2026-07-13 the original nine functions were active; `generate-recurring` was v13 and `resend-webhook` was v11 after the hardening/type-check deployments. On 2026-07-16, JWT-protected `mfa-recovery` version 1 became the tenth active function. JWT verification is enabled for user-authenticated functions and intentionally disabled only for signature-verified provider webhooks or custom-secret scheduled functions.
 
@@ -274,6 +284,17 @@ Names only — never commit real values.
 - `AUTOMATION_SECRET`
 - `APP_BASE_URL`
 - `MFA_RECOVERY_PEPPER` - required by the deployed `mfa-recovery` Edge Function; server-side only, never display, log, or commit its value.
+
+**Unconfigured candidate Stripe Billing settings (names only):**
+- `STRIPE_BILLING_ENABLED`
+- `STRIPE_BILLING_TEST_MODE`
+- `STRIPE_BILLING_SECRET_KEY`
+- `STRIPE_BILLING_WEBHOOK_SECRET`
+- `STRIPE_BILLING_API_VERSION`
+- `STRIPE_BILLING_MONTHLY_PRICE_ID`
+- `STRIPE_BILLING_ANNUAL_PRICE_ID`
+
+Do not reuse the invoice-payment Stripe key or webhook secret by assumption. No candidate Billing setting is approved for production or browser exposure.
 
 Provide a `.env.example` with placeholders if env files are introduced; never commit a real `.env`.
 

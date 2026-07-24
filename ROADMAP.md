@@ -3,14 +3,14 @@
 ## Now
 
 - Keep the website private, the merged AI Helper disabled and subscription checkout inactive.
-- Select the next separately approved launch stage before changing providers, secrets, DNS or production state.
+- Complete High review of the unapplied, disabled Stripe Billing test foundation before changing providers, secrets, DNS or production state.
 - Resolve tax presentation and final contractual publication wording before subscription checkout or public pricing release.
 - Preserve the documented separation between Tallyo subscriptions and independent-business customer payments.
 
 ## Next
 
 - Decide whether and when to activate the public AI Helper, including notice, provider budget, rate limits and production configuration.
-- Implement Stripe Billing in test mode with server-enforced entitlements.
+- With separate Owner approval, apply and deploy the reviewed Stripe Billing foundation in an isolated test-mode acceptance stage, configure allowlisted test products/prices, and verify server-enforced entitlements.
 - Run controlled user onboarding.
 - Design and implement Stripe Connect for independent business payment accounts.
 - Add customer statements, CSV customer import and improved onboarding.

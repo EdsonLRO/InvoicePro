@@ -449,7 +449,7 @@ assert.equal(rateWorkerConfig.ratelimits[0].simple.period, 60);
 assert.equal("routes" in rateWorkerConfig, false);
 
 const subscriptionReadiness = JSON.parse(readFileSync(join(websiteRoot, "content", "subscription-readiness.json"), "utf8"));
-assert.equal(subscriptionReadiness.status, "design-only-provider-disabled");
+assert.equal(subscriptionReadiness.status, "repository-foundation-unapplied-provider-disabled");
 assert.equal(subscriptionReadiness.publicCheckoutEnabled, false);
 assert.equal(subscriptionReadiness.liveStripeBillingConfigured, false);
 assert.equal(subscriptionReadiness.pricesPublished, false);
