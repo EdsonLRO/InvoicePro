@@ -17,6 +17,7 @@ const syntheticEnv = {
   TALLYO_TURNSTILE_ENABLED: 'false',
   TALLYO_TURNSTILE_SITE_KEY: '',
   TALLYO_STRIPE_LIVE_MODE: 'false',
+  TALLYO_BILLING_TEST_ENABLED: 'true',
   TALLYO_PUBLIC_SITE_URL: 'https://website-preview.example.test'
 };
 const failClosedSentinel = path.join(output, 'fail-closed-sentinel.txt');
@@ -40,8 +41,17 @@ const generatedConfig = fs.readFileSync(path.join(output, 'config.js'), 'utf8');
 assert.match(generatedConfig, /sb_publishable_synthetic_preview_key/);
 assert.match(generatedConfig, /window\.TURNSTILE_ENABLED = false/);
 assert.match(generatedConfig, /window\.STRIPE_LIVE_MODE = false/);
+assert.match(generatedConfig, /window\.TALLYO_BILLING_TEST_ENABLED = true/);
 assert.match(generatedConfig, /window\.TALLYO_PUBLIC_SITE_URL = "https:\/\/website-preview\.example\.test"/);
 assert.doesNotMatch(generatedConfig, /service[_-]?role|sb_secret_|private[_-]?key/i);
+
+const rejectedLiveBillingTest = spawnSync(process.execPath, [buildScript], {
+  cwd: root,
+  env: { ...syntheticEnv, TALLYO_STRIPE_LIVE_MODE: 'true' },
+  encoding: 'utf8'
+});
+assert.notEqual(rejectedLiveBillingTest.status, 0, 'Billing sandbox UI must fail closed in Stripe live mode');
+assert.match(rejectedLiveBillingTest.stderr, /cannot be enabled when TALLYO_STRIPE_LIVE_MODE is true/);
 
 const rejectedSecret = spawnSync(process.execPath, [buildScript], {
   cwd: root,
@@ -99,7 +109,7 @@ for (const policy of ["default-src 'self'", "frame-ancestors 'none'", 'X-Content
   assert.ok(headers.includes(policy), `missing app Pages header policy: ${policy}`);
 }
 assert.doesNotMatch(headers, /Strict-Transport-Security/i, 'HSTS must wait for accepted custom-domain HTTPS');
-assert.equal(fs.readFileSync(path.join(output, '_redirects'), 'utf8'), '/* /index.html 200\n');
+assert.equal(fs.readFileSync(path.join(output, '_redirects'), 'utf8').replace(/\r\n/g, '\n'), '/* /index.html 200\n');
 
 const manifest = JSON.parse(fs.readFileSync(path.join(output, 'manifest.json'), 'utf8'));
 assert.equal(manifest.start_url, './');

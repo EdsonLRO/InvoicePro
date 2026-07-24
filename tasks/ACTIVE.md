@@ -3,7 +3,7 @@
 Task ID: COMM-001
 Title: Integrate subscriptions, independent-business customer payments and the public AI Helper for controlled commercial release
 Priority: High
-Status: Billing and Connect provider foundations deployed but disabled; test-provider configuration pending
+Status: Billing sandbox configured but disabled; protected acceptance integration in progress; Connect sandbox configuration pending
 Phase: Controlled provider preparation
 Owner role: Master Orchestrator
 Assigned specialists: Payments, Backend/Supabase, Security, Website, AI, QA and Release; Legal is triggered only for claims, notices and final publication
@@ -24,8 +24,11 @@ Prepare Tallyo so the public website and authenticated app can offer:
 - PR #98 merged the disabled Stripe Billing acceptance preparation into `main`.
 - PR #100 merged the Connect account/onboarding foundation into `main`.
 - PR #101 merged the disabled direct-charge Checkout, connected-refund, signed connected-account webhook and Owner-route isolation slice as `a0e87e0`.
+- PR #102 merged the provider-foundation evidence and controlled sandbox-acceptance preparation.
 - After a completed 2026-07-24 physical backup, the Owner-approved production-preparation stage applied the Billing and both Connect migrations and deployed the seven new functions at version 1.
-- All Billing and Connect functions remain fail-closed: no commercial feature flag, provider secret, Product, Price, event destination, connected account or live-release gate is configured.
+- Stripe Billing sandbox now has the approved GBP 8 monthly and GBP 80 annual Tallyo Pro Prices, a separate signed Billing event destination and a configured Customer Portal.
+- The Owner privately entered the rotated Stripe Billing test key and Billing webhook signing secret in Supabase. Their values were not requested, inspected or stored in the repository.
+- Billing remains fail-closed because `STRIPE_BILLING_ENABLED=false`; there is no subscription or active entitlement. Connect remains fail-closed with no connected account or enabled release gate.
 - No existing Owner invoice-payment, refund or email function was redeployed.
 - The AI Helper is merged, privately tested and disabled by default. Its existing encrypted Cloudflare secret is preserved.
 - The website remains privately previewed and is not published on `tallyo.co.uk`.
@@ -33,8 +36,8 @@ Prepare Tallyo so the public website and authenticated app can offer:
 ## Current controlled-provider scope
 
 - preserve the applied schema and disabled function boundary;
-- prepare exact Stripe sandbox Products/Prices, event destinations, test key and feature-gate configuration;
-- run synthetic subscription and multi-account Connect acceptance only after another exact Owner approval;
+- complete the protected, disabled-by-default Billing acceptance integration and controlled subscription lifecycle probes under the Owner's 2026-07-25 approval;
+- configure and run the approved synthetic multi-account Connect acceptance after Billing acceptance;
 - keep the existing Owner invoice-payment route isolated and unchanged until its allowlist secret and source redeployment receive separate approval;
 - continue non-provider website and AI readiness work that does not activate public services.
 
@@ -54,11 +57,10 @@ Lock acquired: 2026-07-24.
 
 ## Explicit exclusions until separately approved
 
-- no further Stripe or Supabase provider configuration;
-- no function redeployment or migration change;
-- no secret reveal, replacement, rotation or new secret entry;
-- no Stripe Product, Price, webhook, Customer Portal or connected-account creation;
-- no test or live payment, refund, dispute or subscription;
+- no live Stripe Billing or Connect configuration, live Price, live secret, real customer or real-money transaction;
+- no function redeployment or migration change outside the exact approved sandbox-acceptance scope;
+- no secret reveal or repository/browser storage;
+- no existing Owner-route function redeployment without the exact pre-deployment approval;
 - no unrestricted public AI activation or paid OpenAI request;
 - no DNS cutover, legal publication or public production release;
 - no deployment or production-provider change to the Owner-account invoice-payment path.
@@ -68,7 +70,7 @@ Lock acquired: 2026-07-24.
 1. **Connect decision and implementation boundary** - completed.
 2. **Repository implementation and PR review** - completed through PR #101.
 3. **Disabled provider foundation** - completed: applied the three reviewed additive migrations, deployed seven new functions, verified RLS/grants/advisors/JWT settings and retained absent feature gates.
-4. **Isolated test acceptance** - separately approve Stripe sandbox Products/Prices, event destinations, protected settings, synthetic connected accounts, test subscriptions and test invoice payments/refunds.
+4. **Isolated test acceptance** - in progress under the 2026-07-25 Owner approval: Billing sandbox configuration is complete and disabled; protected subscription acceptance integration and lifecycle testing are next, followed by Connect sandbox configuration and synthetic multi-account testing.
 5. **AI release readiness** - preserve the existing secret and preview; separately approve public notice, budget, rate limits and activation.
 6. **Production release** - separately approve live provider configuration, secrets, payment acceptance, DNS and publication.
 
@@ -89,6 +91,6 @@ This approval does not authorise provider configuration, deployment, secrets, pa
 
 ## Current approval boundary
 
-PR #101 passed its required check and merged after exact Owner approval. The subsequent Owner-approved provider-foundation stage applied the three commercial migrations and deployed only the seven new disabled functions. Evidence: `COMMERCIAL_PROVIDER_FOUNDATION_DEPLOYMENT_EVIDENCE_2026-07-24.md`.
+PR #102 passed its required checks and merged after exact Owner approval. The applied three commercial migrations and seven deployed functions were reconciled after merge; RLS, grants, JWT settings, migration history, security advisors and the zero-row commercial-table baseline remained correct. Evidence: `COMMERCIAL_PROVIDER_FOUNDATION_DEPLOYMENT_EVIDENCE_2026-07-24.md`.
 
-The next gate is Stripe sandbox configuration and synthetic acceptance. Entering any test key or webhook secret, creating Products/Prices or event destinations, enabling a Billing/Connect gate, creating a connected account, or making a test subscription/payment/refund requires another exact Owner approval. Live mode, existing Owner-route redeployment, public claims and release remain later separate gates.
+The Owner approved the sandbox-only commercial acceptance stage on 2026-07-25. Billing Products/Prices, the separate Billing event destination, Customer Portal and private Supabase test settings are configured. `STRIPE_BILLING_ENABLED` remains false while the protected acceptance UI is reviewed. The next gate is enabling Billing only in the protected non-live preview and Supabase test configuration for the controlled synthetic subscription lifecycle. Live mode, existing Owner-route redeployment, public claims and release remain later separate gates.

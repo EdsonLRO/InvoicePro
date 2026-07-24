@@ -18,3 +18,4 @@ window.SUPABASE_ANON_KEY = 'sb_publishable_sN8qt13wD8IZcDP222T6tA_ze5fxp-t';
 window.TURNSTILE_ENABLED = true;
 window.TURNSTILE_SITE_KEY = '0x4AAAAAAD3Dby1bdtNSIb94';
 window.STRIPE_LIVE_MODE = true;
+window.TALLYO_BILLING_TEST_ENABLED = false;
