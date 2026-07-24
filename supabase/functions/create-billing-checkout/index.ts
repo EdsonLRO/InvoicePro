@@ -113,6 +113,52 @@ async function stripePost(
   return body;
 }
 
+async function hasBlockingStripeSubscription(
+  customerId: string,
+  config: ReturnType<typeof billingConfig>,
+): Promise<boolean> {
+  let startingAfter = "";
+  for (let page = 0; page < 10; page++) {
+    const params = new URLSearchParams({
+      customer: customerId,
+      status: "all",
+      limit: "100",
+    });
+    if (startingAfter) params.set("starting_after", startingAfter);
+    const response = await fetch(
+      `https://api.stripe.com/v1/subscriptions?${params.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${config.stripeKey}`,
+          "Stripe-Version": config.stripeApiVersion,
+        },
+      },
+    );
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || !Array.isArray(body?.data)) {
+      throw new Error(
+        body?.error?.message || "Stripe subscription verification failed",
+      );
+    }
+    if (
+      body.data.some((subscription: any) =>
+        !["canceled", "incomplete_expired"].includes(
+          String(subscription?.status || ""),
+        )
+      )
+    ) {
+      return true;
+    }
+    if (body.has_more !== true) return false;
+    const lastId = String(body.data.at(-1)?.id || "");
+    if (!/^sub_[A-Za-z0-9]+$/.test(lastId)) {
+      throw new Error("Stripe subscription pagination could not be verified");
+    }
+    startingAfter = lastId;
+  }
+  throw new Error("Stripe subscription verification exceeded its safe limit");
+}
+
 async function requireSensitiveSession(userClient: any) {
   const { data: userData, error: userError } = await userClient.auth.getUser();
   const user = userData?.user;
@@ -218,19 +264,38 @@ Deno.serve(async (req) => {
     );
     const user = await requireSensitiveSession(userClient);
     const customerId = await mappedCustomer(admin, user, config);
-    const { data: current, error: currentError } = await admin
-      .from("billing_subscriptions")
-      .select("provider_status")
-      .eq("user_id", user.id)
-      .maybeSingle();
-    if (currentError) throw new Error("Billing subscription lookup failed");
-    if (
-      current?.provider_status &&
-      !["canceled", "incomplete_expired"].includes(current.provider_status)
-    ) {
+    const { data: claimResult, error: claimError } = await admin.rpc(
+      "claim_stripe_billing_checkout",
+      {
+        p_user_id: user.id,
+        p_stripe_customer_id: customerId,
+        p_request_id: requestId,
+        p_billing_interval: interval,
+      },
+    );
+    if (claimError) throw new Error("Billing Checkout claim failed");
+    if (claimResult === "customer_mismatch") {
+      throw new Error("Billing customer ownership could not be confirmed");
+    }
+    if (claimResult === "subscription_exists") {
       return json({
         error:
           "A subscription already exists. Manage it from Billing settings.",
+      }, 409);
+    }
+    if (claimResult === "checkout_pending") {
+      return json({
+        error:
+          "A Billing Checkout is already in progress. Finish or let it expire before starting another.",
+      }, 409);
+    }
+    if (claimResult !== "claimed") {
+      throw new Error("Billing Checkout claim returned an invalid result");
+    }
+    if (await hasBlockingStripeSubscription(customerId, config)) {
+      return json({
+        error:
+          "A Stripe subscription already exists. Billing must be reconciled before another Checkout.",
       }, 409);
     }
 
@@ -257,6 +322,10 @@ Deno.serve(async (req) => {
       "subscription_data[metadata][billing_interval]",
       interval,
     );
+    params.set(
+      "expires_at",
+      String(Math.floor(Date.now() / 1000) + 30 * 60),
+    );
 
     const session = await stripePost(
       "checkout/sessions",
@@ -272,9 +341,26 @@ Deno.serve(async (req) => {
     );
     if (
       !/^cs_test_[A-Za-z0-9]+$/.test(String(session?.id || "")) ||
-      typeof session?.url !== "string"
+      typeof session?.url !== "string" ||
+      !Number.isFinite(Number(session?.expires_at))
     ) {
       throw new Error("Stripe Checkout returned an incomplete session");
+    }
+    const sessionExpiresAt = new Date(
+      Number(session.expires_at) * 1000,
+    ).toISOString();
+    const { data: claimCompleted, error: claimCompleteError } = await admin.rpc(
+      "complete_stripe_billing_checkout_claim",
+      {
+        p_user_id: user.id,
+        p_stripe_customer_id: customerId,
+        p_request_id: requestId,
+        p_stripe_checkout_session_id: session.id,
+        p_session_expires_at: sessionExpiresAt,
+      },
+    );
+    if (claimCompleteError || claimCompleted !== true) {
+      throw new Error("Billing Checkout claim could not be completed");
     }
     return json({ ok: true, url: session.url, sessionId: session.id });
   } catch (error) {
