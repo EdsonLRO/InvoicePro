@@ -1,6 +1,6 @@
 # Stripe Connect architecture decision record
 
-Status: Current-source review complete. A launch model is recommended in `STRIPE_CONNECT_DECISION_PACK_2026-07-24.md`, awaiting Owner approval. No provider configuration changes are authorised.
+Status: Launch model approved. The onboarding and payment-path repository foundations are implemented, unapplied, undeployed and disabled. No provider configuration changes are authorised.
 
 ## Decision boundary
 
@@ -23,13 +23,13 @@ The current live invoice-payment path uses the Owner's Stripe account and is ver
 
 Business subscribes to Tallyo Pro → separately starts Stripe Connect onboarding → Stripe confirms the connected account and required capabilities → Tallyo creates account-bound Checkout → the customer pays on Stripe → signed platform/connected-account webhooks confirm the result → Tallyo records verified invoice status.
 
-## Recommended architecture awaiting approval
+## Approved architecture
 
-The COMM-001 review recommends Accounts v2 Merchant connected accounts, direct charges, the connected business as merchant of record, Stripe collection of fees and losses, full Stripe Dashboard access when supported, Stripe-hosted onboarding and no Tallyo application fee.
+The Owner approved Accounts v2 Merchant connected accounts, direct charges, the connected business as merchant of record, Stripe collection of fees and losses, full Stripe Dashboard access when supported, Stripe-hosted onboarding and no Tallyo application fee.
 
 The recommendation was selected because it keeps each independent business's customer payments, Stripe fees, refunds, disputes and negative-balance responsibility on that connected account instead of making Tallyo an intermediary for customer funds.
 
-The Owner must approve the model before payment-path schema or runtime implementation because Accounts v2 responsibility fields are fixed when the Merchant configuration is added. The full rationale, controls, test matrix and exact approval boundary are in `STRIPE_CONNECT_DECISION_PACK_2026-07-24.md`.
+Accounts v2 responsibility fields are fixed when the Merchant configuration is added. The full rationale, controls, test matrix and continuing provider approval boundary are in `STRIPE_CONNECT_DECISION_PACK_2026-07-24.md`.
 
 The review considered:
 
@@ -58,6 +58,21 @@ The first approved implementation slice is repository-only and remains unapplied
 - the function is gated off by default and contains no Checkout, payment, refund, transfer, application-fee or disconnection operation.
 
 Local PostgreSQL 17 RLS, privilege, constraint, cross-tenant and append-only probes pass. Evidence: `STRIPE_CONNECT_FOUNDATION_EVIDENCE_2026-07-24.md`.
+
+## Repository payment path
+
+The second approved repository-only slice remains unapplied, undeployed and disabled:
+
+- `stripe_connect_checkout_claims` privately binds one active Checkout attempt to one owner, connected account, invoice, amount, currency and mode;
+- service-only RPCs serialize claims, preserve immutable tenant binding and atomically apply signed invoice events with private Connect evidence;
+- `create-connect-checkout` refreshes provider capabilities, derives invoice and amount server-side, and creates a direct charge only with the mapped connected-account header;
+- `create-connect-refund` re-reads the connected PaymentIntent and Charge, derives the provider/Tallyo refundable balance and creates the refund in that same account context;
+- `stripe-connect-webhook` uses a separate signing secret, requires the event's connected-account context and handles payment, expired Checkout, refund and dispute events idempotently;
+- app and document-email routing select the connected path only from server-derived mapping state;
+- the legacy Owner Checkout, refund and email-link source now requires an exact server-side Owner user allowlist, preventing unrelated accounts from selecting it;
+- no destination, transfer, `on_behalf_of` or application-fee parameter exists in the Connect path.
+
+Local PostgreSQL 17.6 atomic-claim, RLS, privilege, cross-tenant, replay and rebinding probes pass. Evidence: `STRIPE_CONNECT_PAYMENTS_EVIDENCE_2026-07-24.md`.
 
 ## Required trusted controls
 

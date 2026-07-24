@@ -3,7 +3,7 @@
 Task ID: COMM-001
 Title: Integrate subscriptions, independent-business customer payments and the public AI Helper for controlled commercial release
 Priority: High
-Status: First Connect foundation implementation complete; local verification passed and high-risk PR preparation is in progress
+Status: Connect onboarding foundation merged; disabled payment/refund/webhook slice implemented and under focused review
 Phase: Repository-only implementation and verification
 Owner role: Master Orchestrator
 Assigned specialists: Payments, Backend/Supabase, Security, Website, AI, QA and Release; Legal is triggered only for claims, notices and final publication
@@ -23,7 +23,8 @@ Prepare Tallyo so the public website and authenticated app can offer:
 
 - PR #98 merged the disabled Stripe Billing acceptance preparation into `main`.
 - The Billing migration remains unapplied, the Billing functions remain undeployed and Stripe Billing is not configured.
-- The Connect account/onboarding foundation is implemented on the active branch, unapplied, undeployed and provider-disabled. Customer payment, refund and webhook paths are not implemented.
+- PR #100 merged the Connect account/onboarding foundation into `main`. Its migration remains unapplied, its function remains undeployed and all provider gates remain disabled.
+- The active branch adds a separate disabled repository-only direct-charge Checkout, connected-refund and signed connected-account webhook slice. It has passed focused source, frozen Deno and disposable PostgreSQL checks but is not deployed or configured.
 - The AI Helper is merged, privately tested and disabled by default. Its existing encrypted Cloudflare secret is preserved.
 - The website remains privately previewed and is not published on `tallyo.co.uk`.
 
@@ -60,7 +61,7 @@ Lock acquired: 2026-07-24.
 - no test or live payment, refund, dispute or subscription;
 - no unrestricted public AI activation or paid OpenAI request;
 - no DNS cutover, legal publication or public production release;
-- no change to the Owner-account invoice-payment path.
+- no deployment or production-provider change to the Owner-account invoice-payment path.
 
 ## Staged delivery
 
@@ -88,6 +89,8 @@ This approval does not authorise provider configuration, deployment, secrets, pa
 
 ## Current approval boundary
 
-The first implementation slice now adds only the unapplied database foundation, disabled onboarding/status function, Account-page UI state and focused tests. It must stop for explicit Owner approval before the high-risk PR is marked ready or merged.
+The first Connect implementation slice passed its required check and merged as PR #100 after exact Owner approval.
 
-After that merge, a separate repository-only slice may implement direct-charge Checkout, connected refunds and signed connected-account webhooks under the approved model. Applying either migration, deploying any function, configuring Stripe/Supabase, creating a connected account or making a payment requires another exact Owner approval.
+The second slice now adds only an unapplied private Checkout-claim schema, disabled direct-charge Checkout and refund functions, a separate signed connected-account webhook, safe app/email routing and server-side isolation of the legacy Owner payment route. It must stop for explicit Owner approval before its high-risk PR is marked ready or merged.
+
+Applying either Connect migration, deploying any function, entering or changing a setting or secret, configuring Stripe/Supabase, creating a connected account, making a payment/refund or publishing a payment claim requires another exact Owner approval.

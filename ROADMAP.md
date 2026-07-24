@@ -11,7 +11,7 @@
 
 - Decide whether and when to activate the public AI Helper, including notice, provider budget, rate limits and production configuration.
 - With separate Owner approval, apply and deploy the reviewed Stripe Billing foundation in an isolated test-mode acceptance stage, configure allowlisted test products/prices, and verify server-enforced entitlements.
-- Approve the reviewed Stripe Connect direct-charge model, then implement its disabled repository foundation and run separately approved synthetic multi-account acceptance.
+- Merge the verified disabled Stripe Connect payment/refund/webhook slice, then run separately approved test-mode migration, deployment, configuration and synthetic multi-account acceptance.
 - Run controlled user onboarding only after Billing entitlement and Connect isolation acceptance pass.
 - Add customer statements, CSV customer import and improved onboarding.
 - Implement retention, failed-payment and post-cancellation workflows.

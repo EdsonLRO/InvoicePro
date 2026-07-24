@@ -10,7 +10,8 @@
 - PR #94 is merged. The Stripe Billing test foundation is repository-only: its migration remains unapplied, its three Edge Functions remain undeployed, no provider settings exist, and Checkout remains disabled.
 - PR #96 is merged. The Billing migration passed disposable PostgreSQL 17.6 RLS, privilege, ownership, replay, rollback and entitlement probes; its service-role-only RPCs now use caller privileges. This did not apply or deploy Billing.
 - PR #98 merged BILL-003's service-only Checkout claim, current-provider subscription verification, signed lifecycle cleanup, repeatable local claim probes and isolated test-acceptance runbook. It did not apply or deploy anything, and public Checkout remains disabled.
-- COMM-001 is the active commercial-integration programme. Its first Connect slice adds an unapplied tenant mapping, disabled Stripe-hosted onboarding/status function, Account-page states and focused local isolation evidence. It has not configured or deployed a provider or implemented customer payment/refund/webhook paths.
+- PR #100 merged COMM-001's first Connect slice: an unapplied tenant mapping, disabled Stripe-hosted onboarding/status function, Account-page states and focused local isolation evidence.
+- COMM-001's second repository-only slice now implements disabled direct-charge Checkout, connected refunds, signed connected-account reconciliation, private atomic Checkout claims and legacy Owner-route isolation. Focused source, frozen Deno and disposable PostgreSQL 17.6 checks pass. Nothing is applied, deployed, configured or enabled.
 
 ## Implemented capabilities
 
@@ -36,12 +37,12 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 - Launch offer: Free Invoice Maker without an account, plus one Tallyo Pro plan at £8 monthly or £80 annually for one business and one user.
 - Subscription checkout is not active. No Stripe Billing product or price exists, and no Billing migration, function or entitlement is active in Supabase.
 - The current live Stripe invoice-payment path belongs to the Owner's controlled Tallyo account. It is not a merchant architecture for unrelated businesses and must not be marketed as generally available.
-- Independent Tallyo businesses will require a separate Stripe Connect programme before public card-payment links can be offered.
+- Independent-business card payments now have a reviewed repository implementation, but remain unavailable until separate test-provider application, synthetic multi-account acceptance and production release approvals pass.
 
 ## Immediate launch blockers
 
 - The repository and disposable-local Billing review is complete. Applying the migration, configuring test-mode Stripe, deploying functions and running a controlled test Checkout remain separate High-risk Owner gates.
-- Review and merge the disabled Connect account/onboarding foundation, then implement and verify direct-charge Checkout, connected refunds and signed connected-account webhooks before public business payment claims.
+- Review and merge the disabled Connect payment/refund/webhook slice, then separately approve test-mode migration application, function deployment, provider configuration and synthetic multi-account acceptance before public business payment claims.
 - Complete domain/DNS, final operational checks, approved legal/privacy publication and production release as separate Owner-gated stages.
 
 No current task authorises public AI activation, provider secret changes, Stripe Billing/Connect activation, DNS cutover, legal publication or public launch.

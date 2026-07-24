@@ -59,6 +59,7 @@ jobs:
           node tests/session-expiry-harness.cjs
           node tests/stripe-billing-foundation-harness.cjs
           node tests/stripe-connect-foundation-harness.cjs
+          node tests/stripe-connect-payments-harness.cjs
           node tests/stripe-payment-integrity-harness.cjs
           node tests/tenant-isolation-attribution-harness.cjs
 

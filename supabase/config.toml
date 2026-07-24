@@ -87,3 +87,21 @@ enabled = true
 verify_jwt = true
 import_map = "./functions/manage-stripe-connect/deno.json"
 entrypoint = "./functions/manage-stripe-connect/index.ts"
+
+[functions.create-connect-checkout]
+enabled = true
+verify_jwt = true
+import_map = "./functions/create-connect-checkout/deno.json"
+entrypoint = "./functions/create-connect-checkout/index.ts"
+
+[functions.create-connect-refund]
+enabled = true
+verify_jwt = true
+import_map = "./functions/create-connect-refund/deno.json"
+entrypoint = "./functions/create-connect-refund/index.ts"
+
+[functions.stripe-connect-webhook]
+enabled = true
+verify_jwt = false
+import_map = "./functions/stripe-connect-webhook/deno.json"
+entrypoint = "./functions/stripe-connect-webhook/index.ts"

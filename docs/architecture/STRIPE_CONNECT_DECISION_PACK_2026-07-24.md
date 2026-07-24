@@ -1,6 +1,6 @@
 # Stripe Connect launch decision pack
 
-Status: Recommendation awaiting Owner approval. Repository analysis only; no Stripe or Supabase change is authorised by this record.
+Status: Recommendation approved by the Owner on 2026-07-24. The approval covers repository-only implementation; no Stripe or Supabase provider change is authorised by this record.
 
 ## Product boundary
 
@@ -125,7 +125,7 @@ Stripe documents that responsibility fields are selected when the Merchant confi
 
 Reviewed on 2026-07-24. Current provider documentation must be rechecked at test configuration and production activation.
 
-## Exact approval requested
+## Approved repository boundary
 
 Approve the recommended model and a repository-only implementation stage:
 
@@ -139,4 +139,4 @@ Approve the recommended model and a repository-only implementation stage:
 - no Tallyo application fee;
 - unapplied migration, disabled Edge Functions, app UI states and focused tests only.
 
-Approval would not authorise Stripe configuration, Supabase deployment, secret changes, connected-account creation, payments, refunds, public claims or release.
+The Owner approved this model and repository-only implementation boundary on 2026-07-24. The approval does not authorise Stripe configuration, Supabase deployment, secret changes, connected-account creation, payments, refunds, public claims or release.

@@ -4503,8 +4503,19 @@
 
                 this.stripeCheckoutBusyId = target.id;
                 try {
-                    const { data, error } = await supabaseClient.functions.invoke('create-stripe-checkout', {
-                        body: { documentId: target.id }
+                    if (this.stripeConnect.account && this.stripeConnect.account.onboarding_state !== 'active') {
+                        throw new Error('Finish Stripe setup before accepting card payments.');
+                    }
+                    const useConnectedAccount = this.stripeConnect.account &&
+                        this.stripeConnect.account.onboarding_state === 'active' &&
+                        this.stripeConnect.account.card_payments_status === 'active' &&
+                        this.stripeConnect.account.payouts_status === 'active';
+                    const functionName = useConnectedAccount ? 'create-connect-checkout' : 'create-stripe-checkout';
+                    const body = useConnectedAccount
+                        ? { documentId: target.id, requestId: crypto.randomUUID() }
+                        : { documentId: target.id };
+                    const { data, error } = await supabaseClient.functions.invoke(functionName, {
+                        body
                     });
                     if (error) throw error;
                     if (data && data.error) throw new Error(data.error);
@@ -4770,8 +4781,13 @@
                 this.refundModal.submitting = true;
                 this.refundModal.error = '';
                 try {
-                    const { data, error } = await supabaseClient.functions.invoke('create-stripe-refund', {
-                        body: { documentId: this.draft.id, paymentIndex: index, amount }
+                    const useConnectedAccount = payment && payment.providerChannel === 'connect';
+                    const functionName = useConnectedAccount ? 'create-connect-refund' : 'create-stripe-refund';
+                    const body = useConnectedAccount
+                        ? { documentId: this.draft.id, paymentIndex: index, amount, requestId: crypto.randomUUID() }
+                        : { documentId: this.draft.id, paymentIndex: index, amount };
+                    const { data, error } = await supabaseClient.functions.invoke(functionName, {
+                        body
                     });
                     if (error) throw error;
                     if (data && data.error) throw new Error(data.error);

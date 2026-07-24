@@ -9,11 +9,23 @@ const expectedImport = `https://esm.sh/@supabase/supabase-js@${expectedVersion}`
 const expectedLockVersion = '4';
 
 const functionDirectories = fs.readdirSync(functionsRoot, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
+  .filter((entry) =>
+    entry.isDirectory() &&
+    fs.existsSync(path.join(functionsRoot, entry.name, 'index.ts'))
+  )
   .map((entry) => entry.name)
   .sort();
 
-assert.equal(functionDirectories.length, 14, 'expected all fourteen Edge Functions');
+assert.equal(functionDirectories.length, 17, 'expected all seventeen Edge Functions');
+
+const sharedConnectSource = fs.readFileSync(
+  path.join(functionsRoot, '_shared', 'stripe-connect.ts'),
+  'utf8'
+);
+assert.ok(
+  sharedConnectSource.includes(expectedImport),
+  `shared Stripe Connect code must pin supabase-js to ${expectedVersion}`
+);
 
 for (const functionName of functionDirectories) {
   const indexPath = path.join(functionsRoot, functionName, 'index.ts');
@@ -24,9 +36,12 @@ for (const functionName of functionDirectories) {
   const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
   const combined = `${source}\n${denoConfig}`;
 
+  const usesPinnedDirectImport = source.includes(expectedImport);
+  const usesReviewedSharedConnectImport =
+    source.includes('../_shared/stripe-connect.ts');
   assert.ok(
-    source.includes(expectedImport),
-    `${functionName} must pin supabase-js to ${expectedVersion}`
+    usesPinnedDirectImport || usesReviewedSharedConnectImport,
+    `${functionName} must use the pinned supabase-js dependency`
   );
   assert.doesNotMatch(
     combined,
