@@ -82,6 +82,10 @@ assert.match(
   migration,
   /grant execute on function public\.apply_stripe_billing_event[\s\S]*?to service_role/i,
 );
+assert.match(
+  migration,
+  /create or replace function public\.apply_stripe_billing_event[\s\S]*?security invoker/i,
+);
 assert.match(migration, /raise exception 'billing_events are append-only'/i);
 assert.match(migration, /before update on public\.billing_events/i);
 assert.match(migration, /before delete on public\.billing_events/i);
@@ -89,6 +93,11 @@ assert.match(
   migration,
   /revoke all on function public\.account_entitlement_allows_write\(uuid\)[\s\S]*?from public, anon, authenticated/i,
 );
+assert.match(
+  migration,
+  /create or replace function public\.account_entitlement_allows_write[\s\S]*?security invoker/i,
+);
+assert.doesNotMatch(migration, /security definer/i);
 assert.match(migration, /access_state in \('full', 'grace'\)[\s\S]*?effective_until > now\(\)/i);
 
 // Checkout accepts a business choice, never a browser-provided Stripe Price.

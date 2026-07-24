@@ -194,7 +194,7 @@ create or replace function public.apply_stripe_billing_event(
 )
 returns text
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $$
 declare
@@ -395,7 +395,7 @@ create or replace function public.account_entitlement_allows_write(
 )
 returns boolean
 language sql
-security definer
+security invoker
 stable
 set search_path = ''
 as $$
