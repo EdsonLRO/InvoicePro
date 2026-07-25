@@ -195,9 +195,9 @@ async function fetchAccount(
   config: ReturnType<typeof connectConfig>,
 ) {
   const include = new URLSearchParams();
-  include.append("include[]", "configuration.merchant");
-  include.append("include[]", "defaults");
-  include.append("include[]", "requirements");
+  include.append("include[0]", "configuration.merchant");
+  include.append("include[1]", "defaults");
+  include.append("include[2]", "requirements");
   return await stripeV2(
     `accounts/${encodeURIComponent(stripeAccountId)}?${include.toString()}`,
     config,

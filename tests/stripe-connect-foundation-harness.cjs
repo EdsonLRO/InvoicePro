@@ -61,6 +61,10 @@ const createAccountBlock = handler.match(
 assert.match(createAccountBlock, /identity:\s*\{\s*country:\s*"gb"\s*\}/);
 assert.doesNotMatch(createAccountBlock, /entity_type/);
 assert.doesNotMatch(createAccountBlock, /stripe_balance/);
+assert.match(handler, /include\.append\("include\[0\]",\s*"configuration\.merchant"\)/);
+assert.match(handler, /include\.append\("include\[1\]",\s*"defaults"\)/);
+assert.match(handler, /include\.append\("include\[2\]",\s*"requirements"\)/);
+assert.doesNotMatch(handler, /include\.append\("include\[\]"/);
 assert.match(handler, /metadata:\s*\{\s*tallyo_user_id:\s*user\.id\s*\}/);
 assert.match(handler, /String\(account\?\.metadata\?\.tallyo_user_id/);
 assert.match(handler, /tallyo-connect-account-\$\{await sha256\(\[user\.id\]\)\}/);
