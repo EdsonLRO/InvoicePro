@@ -232,7 +232,19 @@ for (const [name, source] of Object.entries({ checkout, portal, webhook })) {
 assert.match(config, /\[functions\.create-billing-checkout\][\s\S]*?verify_jwt = true/);
 assert.match(config, /\[functions\.create-billing-portal\][\s\S]*?verify_jwt = true/);
 assert.match(config, /\[functions\.stripe-billing-webhook\][\s\S]*?verify_jwt = false/);
-assert.match(websiteConfig, /subscriptionCheckoutEnabled: false/);
+assert.match(
+  websiteConfig,
+  /const subscriptionCheckoutRequested = process\.env\.TALLYO_SUBSCRIPTIONS_ENABLED === "true"/,
+);
+assert.match(
+  websiteConfig,
+  /subscriptionCheckoutRequested[\s\S]*?mode !== "production"[\s\S]*?TALLYO_SUBSCRIPTION_PRIVATE_PREVIEW_APPROVED !== "true"/,
+);
+assert.match(
+  websiteConfig,
+  /subscriptionCheckoutRequested[\s\S]*?mode === "production"[\s\S]*?TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED !== "true"/,
+);
+assert.match(websiteConfig, /subscriptionCheckoutEnabled: subscriptionCheckoutRequested/);
 assert.equal(readiness.publicCheckoutEnabled, false);
 assert.equal(readiness.liveStripeBillingConfigured, false);
 assert.match(acceptanceRunbook, /must not touch the production Supabase project/i);

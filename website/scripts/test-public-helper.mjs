@@ -12,6 +12,15 @@ const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = join(websiteRoot, "dist");
 const buildScript = join(websiteRoot, "scripts", "build.mjs");
 const read = (relative) => readFileSync(join(distRoot, relative), "utf8");
+const cleanBuildEnvironment = {
+  ...process.env,
+  TALLYO_SUBSCRIPTIONS_ENABLED: "",
+  TALLYO_SUBSCRIPTION_PRIVATE_PREVIEW_APPROVED: "",
+  TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED: "",
+  TALLYO_PUBLIC_AI_HELPER_ENABLED: "",
+  TALLYO_AI_PRIVATE_PREVIEW_APPROVED: "",
+  TALLYO_AI_PUBLIC_RELEASE_APPROVED: ""
+};
 
 assert.equal(publicHelperPolicy.enabledByDefault, false);
 assert.equal(publicHelperPolicy.store, false);
@@ -27,7 +36,7 @@ assert.match(read("_headers"), /connect-src 'none'/);
 const blockedAiPreviewBuild = spawnSync(process.execPath, [buildScript], {
   encoding: "utf8",
   env: {
-    ...process.env,
+    ...cleanBuildEnvironment,
     CF_PAGES: "",
     TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "",
     TALLYO_SITE_MODE: "preview",
@@ -41,7 +50,7 @@ assert.match(blockedAiPreviewBuild.stderr, /AI Helper build blocked/);
 const blockedAiProductionBuild = spawnSync(process.execPath, [buildScript], {
   encoding: "utf8",
   env: {
-    ...process.env,
+    ...cleanBuildEnvironment,
     CF_PAGES: "",
     TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "",
     TALLYO_SITE_MODE: "production",
@@ -56,7 +65,7 @@ assert.match(blockedAiProductionBuild.stderr, /AI Helper production build blocke
 const blockedSubscriptionBuild = spawnSync(process.execPath, [buildScript], {
   encoding: "utf8",
   env: {
-    ...process.env,
+    ...cleanBuildEnvironment,
     CF_PAGES: "",
     TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "",
     TALLYO_SITE_MODE: "preview",
@@ -64,13 +73,46 @@ const blockedSubscriptionBuild = spawnSync(process.execPath, [buildScript], {
   }
 });
 assert.notEqual(blockedSubscriptionBuild.status, 0);
-assert.match(blockedSubscriptionBuild.stderr, /Subscription checkout is blocked/);
+assert.match(blockedSubscriptionBuild.stderr, /Subscription preview build blocked/);
 assert.match(read("helper/index.html"), /data-ai-enabled="false"/, "blocked subscription build must preserve prior output");
+
+const blockedSubscriptionProductionBuild = spawnSync(process.execPath, [buildScript], {
+  encoding: "utf8",
+  env: {
+    ...cleanBuildEnvironment,
+    CF_PAGES: "",
+    TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "",
+    TALLYO_SITE_MODE: "production",
+    TALLYO_SUBSCRIPTIONS_ENABLED: "true",
+    TALLYO_SUBSCRIPTION_PRIVATE_PREVIEW_APPROVED: "true",
+    TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED: ""
+  }
+});
+assert.notEqual(blockedSubscriptionProductionBuild.status, 0);
+assert.match(blockedSubscriptionProductionBuild.stderr, /Subscription production build blocked/);
 
 execFileSync(process.execPath, [buildScript], {
   stdio: "inherit",
   env: {
-    ...process.env,
+    ...cleanBuildEnvironment,
+    CF_PAGES: "",
+    TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "",
+    TALLYO_SITE_MODE: "preview",
+    TALLYO_SUBSCRIPTIONS_ENABLED: "true",
+    TALLYO_SUBSCRIPTION_PRIVATE_PREVIEW_APPROVED: "true"
+  }
+});
+const enabledSubscriptionPricing = read("pricing/index.html");
+assert.match(enabledSubscriptionPricing, /Choose monthly or annual billing after you create your Tallyo account/);
+assert.match(enabledSubscriptionPricing, /id="cta_pricing_create_account"/);
+assert.match(enabledSubscriptionPricing, />Choose Tallyo Pro<\/a>/);
+assert.doesNotMatch(enabledSubscriptionPricing, /button[^>]+disabled[^>]*>Subscriptions are being prepared/);
+assert.doesNotMatch(enabledSubscriptionPricing, /checkout\.stripe\.com|price_[A-Za-z0-9]+|prod_[A-Za-z0-9]+/);
+
+execFileSync(process.execPath, [buildScript], {
+  stdio: "inherit",
+  env: {
+    ...cleanBuildEnvironment,
     CF_PAGES: "",
     TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "",
     TALLYO_SITE_MODE: "preview",
@@ -87,7 +129,7 @@ assert.match(read("_headers"), /connect-src 'self'/);
 execFileSync(process.execPath, [buildScript], {
   stdio: "inherit",
   env: {
-    ...process.env,
+    ...cleanBuildEnvironment,
     CF_PAGES: "",
     TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "",
     TALLYO_SITE_MODE: "preview",
@@ -449,11 +491,13 @@ assert.equal(rateWorkerConfig.ratelimits[0].simple.period, 60);
 assert.equal("routes" in rateWorkerConfig, false);
 
 const subscriptionReadiness = JSON.parse(readFileSync(join(websiteRoot, "content", "subscription-readiness.json"), "utf8"));
-assert.equal(subscriptionReadiness.status, "repository-foundation-unapplied-provider-disabled");
+assert.equal(subscriptionReadiness.status, "sandbox-billing-accepted-connect-acceptance-in-progress");
 assert.equal(subscriptionReadiness.publicCheckoutEnabled, false);
 assert.equal(subscriptionReadiness.liveStripeBillingConfigured, false);
 assert.equal(subscriptionReadiness.pricesPublished, false);
 assert.equal(subscriptionReadiness.trialPublished, false);
+assert.equal(subscriptionReadiness.sandboxBillingAccepted, true);
+assert.equal(subscriptionReadiness.activationGateImplemented, true);
 assert.equal(subscriptionReadiness.pricingContentApproved, true);
 assert.equal(subscriptionReadiness.planDecision, "approved-free-maker-and-pro");
 assert.equal(subscriptionReadiness.priceDecision, "approved-gbp-8-monthly-80-annual");

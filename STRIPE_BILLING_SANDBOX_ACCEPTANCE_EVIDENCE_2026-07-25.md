@@ -58,11 +58,13 @@ The disposable PostgreSQL 17 container passed all probes and was removed. The mi
 2. Owner approval is required before marking the high-risk PR ready or merging it.
 3. Applying the entitlement migration requires a reviewed deployment plan and rollback.
 4. Redeploying existing live Checkout or email functions requires the exact function list, reason, evidence, rollback and availability confirmation immediately before deployment.
-5. Stripe Connect sandbox configuration and two-account synthetic acceptance remain pending.
+5. Owner-private completion of the first Stripe-hosted Connect onboarding form and two-account synthetic acceptance remain pending.
 6. Live Billing/Connect, public subscription controls, public AI, DNS and public release remain separately gated.
 
 ## Connect onboarding diagnostic addendum
 
 PR #106 merged the indexed Accounts v2 retrieval correction and only `manage-stripe-connect` was redeployed under exact approval. The subsequent protected synthetic request had a valid authenticated session, reached the function, retrieved the existing sandbox connected account and then received a controlled HTTP 502 after Stripe rejected the Account Links v2 request. Stripe's privacy-safe diagnostic stated that `account_update` is not valid for this not-yet-onboarded account and that `account_onboarding` is the accepted flow.
 
-The focused correction derives the Account Link flow from trusted provider state. Non-active accounts use `account_onboarding`, including accounts currently reported as restricted while initial requirements are outstanding; `account_update` is reserved for an account already in the active state. The browser also requests onboarding consistently for every non-active state. Auth, MFA, entitlement, ownership, mode, return-URL and live-approval gates remain unchanged. No onboarding form, connected payment or refund was created during this diagnostic.
+The focused correction derives the Account Link flow from trusted provider state. Non-active accounts use `account_onboarding`, including accounts currently reported as restricted while initial requirements are outstanding; `account_update` is reserved for an account already in the active state. The browser also requests onboarding consistently for every non-active state. Auth, MFA, entitlement, ownership, mode, return-URL and live-approval gates remain unchanged.
+
+PR #107 passed its required checks, merged as `71e92fa` and was reconciled before deployment. Only `manage-stripe-connect` advanced from version 18 to 19, JWT verification remained enabled and all 16 other function versions and JWT settings were unchanged. No migration was applied. The single approved protected retry opened Stripe-hosted sandbox onboarding, and Stripe recorded HTTP 200 for Account Links v2. The Owner-private form fields were not inspected or changed. Onboarding completion, the second isolated account, connected payment/refund and remaining failure/replay acceptance are still pending.

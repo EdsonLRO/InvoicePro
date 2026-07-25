@@ -3,15 +3,15 @@
 ## Now
 
 - Keep the website private, the merged AI Helper disabled and subscription checkout inactive.
-- Preserve the applied but disabled Stripe Billing and Connect foundations until a separately approved sandbox-configuration stage.
+- Keep live Stripe Billing and Connect disabled while completing the approved sandbox Connect acceptance.
 - Resolve tax presentation and final contractual publication wording before subscription checkout or public pricing release.
 - Preserve the documented separation between Tallyo subscriptions and independent-business customer payments.
 
 ## Next
 
 - Decide whether and when to activate the public AI Helper, including notice, provider budget, rate limits and production configuration.
-- With separate Owner approval, configure allowlisted Stripe sandbox Products/Prices, Billing event handling and test gates, then verify subscription lifecycle and server-derived entitlements.
-- With separate Owner approval, configure the Connect sandbox event destination/settings and run synthetic two-account onboarding, direct-charge, refund, replay and isolation acceptance.
+- Complete the Owner-private first Stripe-hosted onboarding form, then run the approved synthetic two-account Connect direct-charge, refund, replay and isolation acceptance.
+- Apply and deploy the reviewed server-side entitlement enforcement only after its exact remaining high-risk approval gates.
 - Run controlled user onboarding only after Billing entitlement and Connect isolation acceptance pass.
 - Add customer statements, CSV customer import and improved onboarding.
 - Implement retention, failed-payment and post-cancellation workflows.
