@@ -178,6 +178,23 @@ export function requireActiveMapping(
   }
 }
 
+export function connectCapabilityStatus(value: unknown): string {
+  const status = String(value || "").toLowerCase();
+  return ["active", "inactive", "pending", "restricted"].includes(status)
+    ? status
+    : "unknown";
+}
+
+export function connectOnboardingState(
+  cardPayments: string,
+  payouts: string,
+): string {
+  if (cardPayments === "active" && payouts === "active") return "active";
+  return [cardPayments, payouts].includes("restricted")
+    ? "restricted"
+    : "pending";
+}
+
 async function stripeJson(
   url: string,
   config: ConnectConfig,
@@ -258,27 +275,28 @@ export async function refreshActiveAccount(
   ) {
     throw new Error("Stripe connection no longer matches Tallyo");
   }
-  const cardPayments = String(
+  const cardPayments = connectCapabilityStatus(
     account?.configuration?.merchant?.capabilities?.card_payments?.status ||
       "",
   );
-  const payouts = String(
+  const payouts = connectCapabilityStatus(
     account?.configuration?.merchant?.capabilities?.stripe_balance?.payouts
       ?.status || "",
   );
-  if (cardPayments !== "active" || payouts !== "active") {
-    throw new Error("Stripe has paused card payments or payouts");
-  }
+  const onboardingState = connectOnboardingState(cardPayments, payouts);
   const { error } = await admin.from("stripe_connected_accounts").update({
-    onboarding_state: "active",
-    card_payments_status: "active",
-    payouts_status: "active",
+    onboarding_state: onboardingState,
+    card_payments_status: cardPayments,
+    payouts_status: payouts,
     provider_updated_at: new Date().toISOString(),
   }).eq("user_id", userId).eq(
     "stripe_account_id",
     mapping.stripe_account_id,
   );
   if (error) throw new Error("Stripe connection state could not be refreshed");
+  if (onboardingState !== "active") {
+    throw new Error("Stripe has paused card payments or payouts");
+  }
 }
 
 export function safeStripeCheckoutUrl(value: unknown): string {
