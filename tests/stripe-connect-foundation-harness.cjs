@@ -55,7 +55,10 @@ assert.match(handler, /dashboard:\s*"full"/);
 assert.match(handler, /fees_collector:\s*"stripe"/);
 assert.match(handler, /losses_collector:\s*"stripe"/);
 assert.match(handler, /card_payments:\s*\{\s*requested:\s*true\s*\}/);
-assert.match(handler, /stripe_balance:\s*\{\s*payouts:\s*\{\s*requested:\s*true\s*\}/);
+const createAccountBlock = handler.match(
+  /async function createAccount[\s\S]*?function stripeLinkUrl/
+)?.[0] || '';
+assert.doesNotMatch(createAccountBlock, /stripe_balance/);
 assert.match(handler, /metadata:\s*\{\s*tallyo_user_id:\s*user\.id\s*\}/);
 assert.match(handler, /String\(account\?\.metadata\?\.tallyo_user_id/);
 assert.match(handler, /tallyo-connect-account-\$\{await sha256\(\[user\.id\]\)\}/);
