@@ -325,13 +325,13 @@ Do not reuse the invoice-payment Stripe key or webhook secret by assumption. Val
 - `STRIPE_CONNECT_WEBHOOK_ENABLED`
 - `STRIPE_CONNECT_APP_BASE_URL`
 
-All eight values above were saved on 2026-07-25 with every feature gate set to `false`, live mode and live approval set to `false`, the approved sandbox API version, and the Access-protected app URL as the Connect-only return URL. No Connect feature is active.
+All eight values above were saved on 2026-07-25. The four sandbox gates are now `true`; live mode and live approval remain `false`. The approved sandbox API version and Access-protected Connect-only return URL remain configured.
 
-**Owner-private Connect settings still pending (names only):**
+**Owner-private Connect settings configured directly by the Owner (names only):**
 - `STRIPE_CONNECT_SECRET_KEY`
 - `STRIPE_CONNECT_WEBHOOK_SECRET`
 
-The Connect-only return URL support is prepared in source but is not deployed. It falls back to the existing `APP_BASE_URL` for compatibility. The protected-sandbox setting keeps the existing Owner-controlled live invoice-payment return route unchanged.
+The Connect-only return URL support is deployed in `manage-stripe-connect` and `create-connect-checkout`. It falls back to the existing `APP_BASE_URL` for compatibility. The protected-sandbox setting keeps the existing Owner-controlled live invoice-payment return route unchanged.
 
 Provide a `.env.example` with placeholders if env files are introduced; never commit a real `.env`.
 
