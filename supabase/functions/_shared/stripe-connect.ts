@@ -85,21 +85,27 @@ export function connectConfig(
     throw new Error("STRIPE_CONNECT_API_VERSION is required");
   }
 
-  const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "").replace(/\/+$/, "");
+  const appBaseUrl = (
+    Deno.env.get("STRIPE_CONNECT_APP_BASE_URL") ||
+    Deno.env.get("APP_BASE_URL") ||
+    ""
+  ).replace(/\/+$/, "");
   if (requireAppBaseUrl) {
     let parsed: URL;
     try {
       parsed = new URL(appBaseUrl);
     } catch {
-      throw new Error("APP_BASE_URL is not configured");
+      throw new Error("STRIPE_CONNECT_APP_BASE_URL is not configured");
     }
     const localTestUrl = !liveMode && parsed.protocol === "http:" &&
       ["127.0.0.1", "localhost"].includes(parsed.hostname);
     if (parsed.protocol !== "https:" && !localTestUrl) {
-      throw new Error("APP_BASE_URL must use HTTPS");
+      throw new Error("STRIPE_CONNECT_APP_BASE_URL must use HTTPS");
     }
     if (parsed.username || parsed.password || parsed.search || parsed.hash) {
-      throw new Error("APP_BASE_URL must be a plain application URL");
+      throw new Error(
+        "STRIPE_CONNECT_APP_BASE_URL must be a plain application URL",
+      );
     }
   }
 

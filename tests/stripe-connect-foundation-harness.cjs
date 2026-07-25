@@ -47,6 +47,8 @@ assert.match(handler, /STRIPE_CONNECT_LIVE_MODE/);
 assert.match(handler, /STRIPE_CONNECT_LIVE_APPROVED/);
 assert.match(handler, /STRIPE_CONNECT_SECRET_KEY/);
 assert.match(handler, /STRIPE_CONNECT_API_VERSION/);
+assert.match(handler, /STRIPE_CONNECT_APP_BASE_URL/);
+assert.match(handler, /Deno\.env\.get\("APP_BASE_URL"\)/);
 assert.match(handler, /Complete two-factor verification first/);
 assert.match(handler, /https:\/\/api\.stripe\.com\/v2\/core\//);
 assert.match(handler, /dashboard:\s*"full"/);

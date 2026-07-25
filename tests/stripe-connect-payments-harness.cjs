@@ -62,6 +62,8 @@ for (const [name, source, gate] of [
 }
 
 assert.match(shared, /"Stripe-Account": options\.stripeAccountId/);
+assert.match(shared, /STRIPE_CONNECT_APP_BASE_URL/);
+assert.match(shared, /Deno\.env\.get\("APP_BASE_URL"\)/);
 assert.match(shared, /fees_collector\?\.fees_collector|fees_collector/);
 assert.match(shared, /losses_collector/);
 assert.match(shared, /account\?\.metadata\?\.tallyo_user_id/);

@@ -63,24 +63,30 @@ function connectConfig() {
     throw new Error("STRIPE_CONNECT_API_VERSION is required");
   }
 
-  const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "").replace(/\/+$/, "");
+  const appBaseUrl = (
+    Deno.env.get("STRIPE_CONNECT_APP_BASE_URL") ||
+    Deno.env.get("APP_BASE_URL") ||
+    ""
+  ).replace(/\/+$/, "");
   let parsedBaseUrl: URL;
   try {
     parsedBaseUrl = new URL(appBaseUrl);
   } catch {
-    throw new Error("APP_BASE_URL is not configured");
+    throw new Error("STRIPE_CONNECT_APP_BASE_URL is not configured");
   }
   const localTestUrl = !liveMode &&
     parsedBaseUrl.protocol === "http:" &&
     ["127.0.0.1", "localhost"].includes(parsedBaseUrl.hostname);
   if (parsedBaseUrl.protocol !== "https:" && !localTestUrl) {
-    throw new Error("APP_BASE_URL must use HTTPS");
+    throw new Error("STRIPE_CONNECT_APP_BASE_URL must use HTTPS");
   }
   if (
     parsedBaseUrl.username || parsedBaseUrl.password ||
     parsedBaseUrl.search || parsedBaseUrl.hash
   ) {
-    throw new Error("APP_BASE_URL must be a plain application URL");
+    throw new Error(
+      "STRIPE_CONNECT_APP_BASE_URL must be a plain application URL",
+    );
   }
 
   return { stripeKey, apiVersion, appBaseUrl, liveMode };

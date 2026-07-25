@@ -315,14 +315,23 @@ Names only — never commit real values.
 
 Do not reuse the invoice-payment Stripe key or webhook secret by assumption. Values remain private server configuration and are not approved for browser exposure. Public/live Billing remains disabled.
 
-**Unconfigured candidate Stripe Connect settings (names only):**
+**Configured fail-closed Stripe Connect sandbox settings (names only):**
 - `STRIPE_CONNECT_ENABLED`
 - `STRIPE_CONNECT_LIVE_MODE`
 - `STRIPE_CONNECT_LIVE_APPROVED`
-- `STRIPE_CONNECT_SECRET_KEY`
 - `STRIPE_CONNECT_API_VERSION`
+- `STRIPE_CONNECT_CHECKOUT_ENABLED`
+- `STRIPE_CONNECT_REFUNDS_ENABLED`
+- `STRIPE_CONNECT_WEBHOOK_ENABLED`
+- `STRIPE_CONNECT_APP_BASE_URL`
 
-No Connect setting is configured or approved for browser exposure. `APP_BASE_URL` is shared only as an allowlisted server return-URL source.
+All eight values above were saved on 2026-07-25 with every feature gate set to `false`, live mode and live approval set to `false`, the approved sandbox API version, and the Access-protected app URL as the Connect-only return URL. No Connect feature is active.
+
+**Owner-private Connect settings still pending (names only):**
+- `STRIPE_CONNECT_SECRET_KEY`
+- `STRIPE_CONNECT_WEBHOOK_SECRET`
+
+The Connect-only return URL support is prepared in source but is not deployed. It falls back to the existing `APP_BASE_URL` for compatibility. The protected-sandbox setting keeps the existing Owner-controlled live invoice-payment return route unchanged.
 
 Provide a `.env.example` with placeholders if env files are introduced; never commit a real `.env`.
 

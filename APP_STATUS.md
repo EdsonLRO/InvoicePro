@@ -11,7 +11,7 @@
 - PRs #100 and #101 merged the reviewed Stripe Connect onboarding, direct-charge Checkout, connected-refund, signed-webhook and Owner-route-isolation foundations.
 - PR #102 merged the commercial provider-foundation evidence and controlled sandbox-acceptance preparation.
 - After a completed 2026-07-24 physical backup and explicit Owner approval, the three additive Billing/Connect migrations were applied and the seven new functions were deployed at version 1. RLS, grants, migration history, JWT settings, disabled endpoint behavior and Supabase security advisors pass.
-- Stripe Billing sandbox has the approved GBP 8 monthly and GBP 80 annual Prices, a separate Billing event destination, a configured Customer Portal and privately entered rotated test credentials. Billing is enabled only for the Access-protected non-live preview. One synthetic monthly subscription, signed entitlement activation, Portal return, cancellation-at-period-end, duplicate and stale-event handling pass; rollback-only probes cover renewal, failed payment, grace, read-only and recovery. Connect remains unavailable and unconfigured. Existing live invoice-payment, refund and email functions were not redeployed.
+- Stripe Billing sandbox has the approved GBP 8 monthly and GBP 80 annual Prices, a separate Billing event destination, a configured Customer Portal and privately entered rotated test credentials. Billing is enabled only for the Access-protected non-live preview. One synthetic monthly subscription, signed entitlement activation, Portal return, cancellation-at-period-end, duplicate and stale-event handling pass; rollback-only probes cover renewal, failed payment, grace, read-only and recovery. Connect remains unavailable: its separate sandbox webhook and fail-closed non-live settings are configured, but all feature gates are `false`, Owner-private Connect secrets are absent, and no connected account or payment exists. Existing live invoice-payment, refund and email functions were not redeployed.
 - The Billing acceptance review found that core app write RLS was still ownership-only. Draft PR #103 contains an unapplied and undeployed entitlement-enforcement migration plus server-side guards; PostgreSQL 17 RLS/privilege probes pass. Evidence: `STRIPE_BILLING_SANDBOX_ACCEPTANCE_EVIDENCE_2026-07-25.md`.
 
 ## Implemented capabilities
@@ -43,7 +43,7 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 ## Immediate launch blockers
 
 - Review, merge, apply and deploy the focused server-side restricted/read-only enforcement only through its remaining high-risk approval gates.
-- Configure and run the approved Stripe Connect sandbox multi-account payment/refund acceptance after Billing acceptance.
+- Complete the Owner-private Connect secret entry, reviewed deployment and approved synthetic multi-account payment/refund acceptance after PR #103's remaining gates.
 - Existing Owner-route source changes remain undeployed until an exact `STRIPE_OWNER_USER_ID` is entered without exposing it and the affected live functions receive a separate deployment approval.
 - Complete domain/DNS, final operational checks, approved legal/privacy publication and production release as separate Owner-gated stages.
 

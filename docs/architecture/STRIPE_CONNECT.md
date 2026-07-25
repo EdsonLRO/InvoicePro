@@ -113,3 +113,5 @@ Online card payments for independent business accounts are being prepared and ar
 - approve public payment claims and release.
 
 The disabled foundation deployment applied the reviewed migrations and deployed only the new functions. No Connect activation, Stripe configuration, secret, account or payment occurred.
+
+The 2026-07-25 sandbox-acceptance preparation created a separate test-mode connected-account webhook destination with the reviewed 12-event allowlist and saved fail-closed non-live Supabase settings. Every Connect feature gate remains `false`; no private Connect key or webhook secret has been entered and no connected account or payment exists. Source now supports a Connect-only `STRIPE_CONNECT_APP_BASE_URL`, falling back to `APP_BASE_URL`, so protected sandbox returns do not require changing the existing live invoice-payment return route.
