@@ -74,6 +74,18 @@ assert.doesNotMatch(
 );
 assert.match(handler, /account_onboarding/);
 assert.match(handler, /account_update/);
+assert.match(
+  handler,
+  /function accountLinkAction\([\s\S]*?onboardingState === "active" \? "update" : "onboard"/
+);
+assert.match(
+  handler,
+  /const linkAction = accountLinkAction\(state\.onboarding_state\)/
+);
+assert.match(
+  handler,
+  /createAccountLink\(\s*stripeAccountId,\s*linkAction,\s*config,\s*requestId/
+);
 assert.match(handler, /future_requirements:\s*"include"/);
 assert.match(handler, /stripe_connect=refresh&stripe_connect_action=\$\{action\}/);
 assert.match(handler, /parsed\.hostname\.endsWith\("\.stripe\.com"\)/);
@@ -95,7 +107,11 @@ assert.match(app, /select\('onboarding_state, card_payments_status, payouts_stat
 assert.match(app, /functions\.invoke\('manage-stripe-connect'/);
 assert.match(app, /body: \{ action, requestId: crypto\.randomUUID\(\) \}/);
 assert.match(app, /window\.location\.assign\(result\.url\)/);
-assert.match(app, /onboarding_state === 'pending' \? 'onboard' : 'update'/);
+assert.match(
+  app,
+  /onboarding_state !== 'active'[\s\S]{0,250}@click="openStripeConnect\('onboard'\)"/
+);
+assert.doesNotMatch(app, /onboarding_state === 'pending' \? 'onboard' : 'update'/);
 assert.match(app, /handleStripeConnectCallback/);
 assert.match(app, /url\.searchParams\.delete\('stripe_connect'\)/);
 assert.match(app, /callback === 'refresh'/);

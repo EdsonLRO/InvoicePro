@@ -288,6 +288,12 @@ function stripeLinkUrl(value: unknown): string {
   return parsed.toString();
 }
 
+function accountLinkAction(
+  onboardingState: string,
+): Exclude<ConnectAction, "status"> {
+  return onboardingState === "active" ? "update" : "onboard";
+}
+
 async function createAccountLink(
   stripeAccountId: string,
   action: Exclude<ConnectAction, "status">,
@@ -405,9 +411,10 @@ Deno.serve(async (req) => {
       });
     }
 
+    const linkAction = accountLinkAction(state.onboarding_state);
     const url = await createAccountLink(
       stripeAccountId,
-      action,
+      linkAction,
       config,
       requestId,
     );
