@@ -1,3 +1,17 @@
+create table private.commercial_feature_flags (
+    feature_key text primary key
+        check (feature_key = 'subscription_write_enforcement'),
+    enabled boolean not null default false,
+    updated_at timestamptz not null default now()
+);
+
+insert into private.commercial_feature_flags (feature_key, enabled)
+values ('subscription_write_enforcement', false);
+
+revoke all on private.commercial_feature_flags
+    from public, anon, authenticated, service_role;
+grant select on private.commercial_feature_flags to service_role;
+
 create or replace function private.current_account_entitlement_allows_write()
 returns boolean
 language sql
@@ -5,22 +19,60 @@ security definer
 stable
 set search_path = ''
 as $$
-    select exists (
-        select 1
-          from public.account_entitlements
-         where user_id = (select auth.uid())
-           and access_state in ('full', 'grace')
-           and (
-               effective_until is null
-               or effective_until > now()
-           )
-    );
+    select
+        not coalesce((
+            select enabled
+              from private.commercial_feature_flags
+             where feature_key = 'subscription_write_enforcement'
+        ), true)
+        or exists (
+            select 1
+              from public.account_entitlements
+             where user_id = (select auth.uid())
+               and access_state in ('full', 'grace')
+               and (
+                   effective_until is null
+                   or effective_until > now()
+               )
+        );
 $$;
 
 revoke all on function private.current_account_entitlement_allows_write()
     from public, anon, authenticated, service_role;
 grant execute on function private.current_account_entitlement_allows_write()
     to authenticated;
+
+create or replace function public.account_entitlement_allows_write(
+    p_user_id uuid
+)
+returns boolean
+language sql
+security invoker
+stable
+set search_path = ''
+as $$
+    select
+        not coalesce((
+            select enabled
+              from private.commercial_feature_flags
+             where feature_key = 'subscription_write_enforcement'
+        ), true)
+        or exists (
+            select 1
+              from public.account_entitlements
+             where user_id = p_user_id
+               and access_state in ('full', 'grace')
+               and (
+                   effective_until is null
+                   or effective_until > now()
+               )
+        );
+$$;
+
+revoke all on function public.account_entitlement_allows_write(uuid)
+    from public, anon, authenticated;
+grant execute on function public.account_entitlement_allows_write(uuid)
+    to service_role;
 
 alter policy "own company_settings - insert" on public.company_settings
     with check (
@@ -123,4 +175,7 @@ alter policy "own recurring - delete" on public.recurring_templates
     );
 
 comment on function private.current_account_entitlement_allows_write() is
-    'Returns whether the authenticated account has a verified full or grace entitlement. Used by core write RLS policies without exposing another account identifier.';
+    'Returns whether subscription enforcement is inactive or the authenticated account has a verified full or grace entitlement. Used by core write RLS policies without exposing another account identifier.';
+
+comment on table private.commercial_feature_flags is
+    'Private server-only commercial rollout gates. Subscription write enforcement defaults off and requires an explicit production activation.';

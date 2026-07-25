@@ -1,4 +1,4 @@
-// Test-mode-only Stripe Customer Portal session for the authenticated owner.
+// Stripe Customer Portal session for the authenticated owner.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
 
@@ -16,12 +16,20 @@ function json(body: Record<string, unknown>, status = 200) {
   });
 }
 
-function testConfig() {
+function billingConfig() {
   if (Deno.env.get("STRIPE_BILLING_ENABLED") !== "true") {
     throw new Error("Billing Portal is disabled");
   }
-  if (Deno.env.get("STRIPE_BILLING_TEST_MODE") !== "true") {
-    throw new Error("Billing Portal requires explicit test mode");
+  const testMode = Deno.env.get("STRIPE_BILLING_TEST_MODE") === "true";
+  const liveMode = Deno.env.get("STRIPE_BILLING_LIVE_MODE") === "true";
+  if (testMode === liveMode) {
+    throw new Error("Billing Portal requires exactly one provider mode");
+  }
+  if (
+    liveMode &&
+    Deno.env.get("STRIPE_BILLING_LIVE_APPROVED") !== "true"
+  ) {
+    throw new Error("Live Billing Portal is not approved");
   }
   const key = Deno.env.get("STRIPE_BILLING_SECRET_KEY") || "";
   const version = Deno.env.get("STRIPE_BILLING_API_VERSION")?.trim() || "";
@@ -30,8 +38,13 @@ function testConfig() {
     Deno.env.get("APP_BASE_URL")?.trim() ||
     ""
   ).replace(/\/+$/, "");
-  if (!/^(?:sk|rk)_test_/.test(key)) {
-    throw new Error("Billing requires a Stripe test-mode key");
+  const expectedKey = liveMode
+    ? /^(?:sk|rk)_live_[A-Za-z0-9]+$/
+    : /^(?:sk|rk)_test_[A-Za-z0-9]+$/;
+  if (!expectedKey.test(key)) {
+    throw new Error(
+      `Billing requires a Stripe ${liveMode ? "live" : "test"}-mode key`,
+    );
   }
   if (!/^\d{4}-\d{2}-\d{2}(?:\.[a-z]+)?$/.test(version)) {
     throw new Error("STRIPE_BILLING_API_VERSION is required");
@@ -46,7 +59,7 @@ function testConfig() {
   }
   if (
     parsed.protocol !== "https:" &&
-    !(parsed.protocol === "http:" &&
+    !(testMode && parsed.protocol === "http:" &&
       ["127.0.0.1", "localhost"].includes(parsed.hostname))
   ) {
     throw new Error("The Billing application URL must use HTTPS");
@@ -54,7 +67,7 @@ function testConfig() {
   if (parsed.username || parsed.password || parsed.search || parsed.hash) {
     throw new Error("The Billing application URL must be a plain URL");
   }
-  return { key, version, baseUrl };
+  return { key, version, baseUrl, liveMode };
 }
 
 Deno.serve(async (req) => {
@@ -68,7 +81,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const config = testConfig();
+    const config = billingConfig();
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const userClient = createClient(
       supabaseUrl,
@@ -138,7 +151,7 @@ Deno.serve(async (req) => {
     const message = error instanceof Error ? error.message : "Portal failed";
     return json(
       { error: message },
-      /disabled|test mode/.test(message) ? 503 : 502,
+      /disabled|provider mode|not approved/.test(message) ? 503 : 502,
     );
   }
 });

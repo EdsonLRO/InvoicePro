@@ -1,4 +1,4 @@
-// Signed, test-mode-only Stripe Billing lifecycle reconciliation.
+// Signed Stripe Billing lifecycle reconciliation for one explicit provider mode.
 // This endpoint is separate from Tallyo's customer invoice-payment webhook.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
@@ -88,17 +88,30 @@ async function verifyStripeSignature(
   return signatures.some((signature) => timingSafeEqual(signature, expected));
 }
 
-function testConfig() {
-  if (Deno.env.get("STRIPE_BILLING_TEST_MODE") !== "true") {
-    throw new Error("Billing webhook requires explicit test mode");
+function billingConfig() {
+  const testMode = Deno.env.get("STRIPE_BILLING_TEST_MODE") === "true";
+  const liveMode = Deno.env.get("STRIPE_BILLING_LIVE_MODE") === "true";
+  if (testMode === liveMode) {
+    throw new Error("Billing webhook requires exactly one provider mode");
+  }
+  if (
+    liveMode &&
+    Deno.env.get("STRIPE_BILLING_LIVE_APPROVED") !== "true"
+  ) {
+    throw new Error("Live Billing webhook is not approved");
   }
   const key = Deno.env.get("STRIPE_BILLING_SECRET_KEY") || "";
   const webhookSecret = Deno.env.get("STRIPE_BILLING_WEBHOOK_SECRET") || "";
   const apiVersion = Deno.env.get("STRIPE_BILLING_API_VERSION")?.trim() || "";
   const monthlyPrice = Deno.env.get("STRIPE_BILLING_MONTHLY_PRICE_ID") || "";
   const annualPrice = Deno.env.get("STRIPE_BILLING_ANNUAL_PRICE_ID") || "";
-  if (!/^(?:sk|rk)_test_/.test(key)) {
-    throw new Error("Billing requires a Stripe test-mode key");
+  const expectedKey = liveMode
+    ? /^(?:sk|rk)_live_[A-Za-z0-9]+$/
+    : /^(?:sk|rk)_test_[A-Za-z0-9]+$/;
+  if (!expectedKey.test(key)) {
+    throw new Error(
+      `Billing requires a Stripe ${liveMode ? "live" : "test"}-mode key`,
+    );
   }
   if (!webhookSecret.startsWith("whsec_")) {
     throw new Error("Billing webhook secret is not configured");
@@ -113,7 +126,14 @@ function testConfig() {
   ) {
     throw new Error("Billing price allowlist is not configured");
   }
-  return { key, webhookSecret, apiVersion, monthlyPrice, annualPrice };
+  return {
+    key,
+    webhookSecret,
+    apiVersion,
+    monthlyPrice,
+    annualPrice,
+    liveMode,
+  };
 }
 
 function subscriptionIdFromEvent(event: any): string {
@@ -136,9 +156,16 @@ function checkoutSessionIdFromEvent(event: any): string {
   return String(event.data?.object?.id || "");
 }
 
-async function clearCheckoutClaim(admin: any, event: any): Promise<void> {
+async function clearCheckoutClaim(
+  admin: any,
+  event: any,
+  config: ReturnType<typeof billingConfig>,
+): Promise<void> {
   const sessionId = checkoutSessionIdFromEvent(event);
-  if (!/^cs_test_[A-Za-z0-9]+$/.test(sessionId)) {
+  if (
+    !(config.liveMode ? /^cs_live_[A-Za-z0-9]+$/ : /^cs_test_[A-Za-z0-9]+$/)
+      .test(sessionId)
+  ) {
     throw new Error("Stripe Checkout Session identity is invalid");
   }
   const { error } = await admin.rpc(
@@ -150,7 +177,7 @@ async function clearCheckoutClaim(admin: any, event: any): Promise<void> {
 
 async function retrieveSubscription(
   subscriptionId: string,
-  config: ReturnType<typeof testConfig>,
+  config: ReturnType<typeof billingConfig>,
 ) {
   const response = await fetch(
     `https://api.stripe.com/v1/subscriptions/${
@@ -201,10 +228,10 @@ function subscriptionPrice(subscription: any): string {
 async function reconcile(
   admin: any,
   event: any,
-  config: ReturnType<typeof testConfig>,
+  config: ReturnType<typeof billingConfig>,
 ) {
   if (event.type === "checkout.session.expired") {
-    await clearCheckoutClaim(admin, event);
+    await clearCheckoutClaim(admin, event, config);
     return { ok: true, ignored: "expired Checkout claim cleared" };
   }
 
@@ -285,7 +312,7 @@ async function reconcile(
     throw new Error("Billing reconciliation returned an invalid result");
   }
   if (event.type === "checkout.session.completed") {
-    await clearCheckoutClaim(admin, event);
+    await clearCheckoutClaim(admin, event, config);
   }
   return {
     ok: true,
@@ -297,9 +324,9 @@ async function reconcile(
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  let config: ReturnType<typeof testConfig>;
+  let config: ReturnType<typeof billingConfig>;
   try {
-    config = testConfig();
+    config = billingConfig();
   } catch (error) {
     return json({
       error: error instanceof Error
@@ -327,10 +354,14 @@ Deno.serve(async (req) => {
   }
   if (
     !/^evt_[A-Za-z0-9]+$/.test(String(event?.id || "")) ||
-    event?.livemode !== false
+    event?.livemode !== config.liveMode
   ) {
     return json(
-      { error: "Only valid Stripe test-mode events are accepted" },
+      {
+        error: `Only valid Stripe ${
+          config.liveMode ? "live" : "test"
+        }-mode events are accepted`,
+      },
       400,
     );
   }

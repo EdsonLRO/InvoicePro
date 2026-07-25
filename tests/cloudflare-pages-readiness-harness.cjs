@@ -18,6 +18,8 @@ const syntheticEnv = {
   TALLYO_TURNSTILE_SITE_KEY: '',
   TALLYO_STRIPE_LIVE_MODE: 'false',
   TALLYO_BILLING_TEST_ENABLED: 'true',
+  TALLYO_BILLING_LIVE_ENABLED: 'false',
+  TALLYO_BILLING_PUBLIC_RELEASE_APPROVED: 'false',
   TALLYO_PUBLIC_SITE_URL: 'https://website-preview.example.test'
 };
 const failClosedSentinel = path.join(output, 'fail-closed-sentinel.txt');
@@ -42,6 +44,7 @@ assert.match(generatedConfig, /sb_publishable_synthetic_preview_key/);
 assert.match(generatedConfig, /window\.TURNSTILE_ENABLED = false/);
 assert.match(generatedConfig, /window\.STRIPE_LIVE_MODE = false/);
 assert.match(generatedConfig, /window\.TALLYO_BILLING_TEST_ENABLED = true/);
+assert.match(generatedConfig, /window\.TALLYO_BILLING_LIVE_ENABLED = false/);
 assert.match(generatedConfig, /window\.TALLYO_PUBLIC_SITE_URL = "https:\/\/website-preview\.example\.test"/);
 assert.doesNotMatch(generatedConfig, /service[_-]?role|sb_secret_|private[_-]?key/i);
 
@@ -52,6 +55,19 @@ const rejectedLiveBillingTest = spawnSync(process.execPath, [buildScript], {
 });
 assert.notEqual(rejectedLiveBillingTest.status, 0, 'Billing sandbox UI must fail closed in Stripe live mode');
 assert.match(rejectedLiveBillingTest.stderr, /cannot be enabled when TALLYO_STRIPE_LIVE_MODE is true/);
+
+const rejectedUnapprovedLiveBilling = spawnSync(process.execPath, [buildScript], {
+  cwd: root,
+  env: {
+    ...syntheticEnv,
+    TALLYO_STRIPE_LIVE_MODE: 'true',
+    TALLYO_BILLING_TEST_ENABLED: 'false',
+    TALLYO_BILLING_LIVE_ENABLED: 'true'
+  },
+  encoding: 'utf8'
+});
+assert.notEqual(rejectedUnapprovedLiveBilling.status, 0, 'live Billing UI must fail closed before public-release approval');
+assert.match(rejectedUnapprovedLiveBilling.stderr, /explicit public-release approval/);
 
 const rejectedSecret = spawnSync(process.execPath, [buildScript], {
   cwd: root,
@@ -123,5 +139,22 @@ for (const boundary of ['Supabase allowed/site URLs', 'MFA recovery origin allow
 }
 assert.match(migrationMap, /High/);
 assert.match(migrationMap, /Keep until Cloudflare production acceptance/);
+
+const approvedLiveBilling = spawnSync(process.execPath, [buildScript], {
+  cwd: root,
+  env: {
+    ...syntheticEnv,
+    TALLYO_STRIPE_LIVE_MODE: 'true',
+    TALLYO_BILLING_TEST_ENABLED: 'false',
+    TALLYO_BILLING_LIVE_ENABLED: 'true',
+    TALLYO_BILLING_PUBLIC_RELEASE_APPROVED: 'true'
+  },
+  encoding: 'utf8'
+});
+assert.equal(approvedLiveBilling.status, 0, approvedLiveBilling.stderr || approvedLiveBilling.stdout);
+const liveConfig = fs.readFileSync(path.join(output, 'config.js'), 'utf8');
+assert.match(liveConfig, /window\.STRIPE_LIVE_MODE = true/);
+assert.match(liveConfig, /window\.TALLYO_BILLING_TEST_ENABLED = false/);
+assert.match(liveConfig, /window\.TALLYO_BILLING_LIVE_ENABLED = true/);
 
 console.log('Cloudflare Pages readiness harness passed.');
