@@ -1,6 +1,6 @@
 # Stripe Billing architecture
 
-Status: The foundation is applied. Stripe sandbox Prices, the signed Billing destination and Customer Portal are configured, and protected synthetic acceptance passed on 2026-07-25. Public subscription checkout and live Billing remain disabled. PR #103 merged server-side entitlement enforcement but it remains unapplied and undeployed. The focused live-Billing release candidate adds explicit live-mode controls and a private rollout gate without changing production.
+Status: The foundation and live-readiness migrations are applied. Stripe sandbox Prices, the signed Billing destination and Customer Portal are configured, and protected synthetic acceptance passed on 2026-07-25. Public subscription checkout and live Billing remain disabled. The private write-enforcement switch remains off while live provider configuration and acceptance are pending.
 
 ## Boundary
 
@@ -28,7 +28,7 @@ The disabled implementation is isolated from customer invoice payments:
 - `stripe-billing-webhook` verifies the raw-body signature, accepts only the configured test/live event mode, refreshes current subscription state, checks the server Price allowlist and account mapping, then calls the atomic RPC and clears only a mode-matching Checkout claim for signed completion/expiration events;
 - the existing `stripe-webhook` invoice-payment path does not reference Billing tables or entitlements.
 
-The deployed account entitlement helper remains service-role-only. PR #103 added a private identity-bound authenticated helper, core write RLS integration and service-side action guards. The current unapplied revision adds one private database-owner-controlled `subscription_write_enforcement` switch. It defaults off so migrations and guarded functions can be deployed without unexpectedly restricting existing accounts; a missing switch fails closed. Browser, authenticated and service roles cannot change it. Refunds and signed provider reconciliation intentionally remain available in restricted mode. The migrations and changed functions are not yet applied or deployed.
+The deployed account entitlement helper remains service-role-only. PR #103 added a private identity-bound authenticated helper, core write RLS integration and service-side action guards. Migration `20260725014434` adds one private database-owner-controlled `subscription_write_enforcement` switch. It defaults off so guarded functions can be deployed without unexpectedly restricting existing accounts; a missing switch fails closed. Browser, authenticated and service roles cannot change it. Refunds and signed provider reconciliation intentionally remain available in restricted mode. The migration and eight approved Billing/entitlement function updates were applied from merge `2c313f0` under exact Owner approval; enforcement remains off.
 
 Read-only aggregate reconciliation found eight accounts with business data, two active full entitlements and six accounts that would become read-only under immediate enforcement. No identity or business record was inspected. The private switch must stay off through controlled live Billing acceptance; enabling it is a separate production decision after the impact is accepted.
 

@@ -29,13 +29,15 @@ Prepare Tallyo so the public website and authenticated app can offer:
 - Stripe Billing sandbox now has the approved GBP 8 monthly and GBP 80 annual Tallyo Pro Prices, a separate signed Billing event destination and a configured Customer Portal.
 - The Owner privately entered the rotated Stripe Billing test key and Billing webhook signing secret in Supabase. Their values were not requested, inspected or stored in the repository.
 - Billing is enabled only for the protected non-live acceptance preview. One synthetic GBP 8 monthly test subscription and its provider-derived full entitlement are active; cancellation-at-period-end, Portal return, duplicate, stale-event, renewal, failed-payment, grace, read-only and recovery handling have been exercised without public release.
-- PR #103 merged the focused, unapplied entitlement RLS migration and server-side guards. Disposable PostgreSQL 17 RLS, privilege, tenant-isolation and service-role reconciliation probes pass; the migration remains unapplied.
+- PRs #103-#112 merged the focused entitlement RLS, server-side guards and live-Billing readiness controls. Disposable PostgreSQL 17 RLS, privilege, tenant-isolation, service-role reconciliation and live-session probes pass.
 - Read-only production reconciliation on 2026-07-25 found eight accounts with business data, two active full entitlements and six accounts that would become read-only if enforcement were activated immediately. No account identifier, email or business record was read. The live-Billing release candidate therefore keeps the server boundary behind one private database-owner-only rollout switch defaulting off; a missing switch fails closed.
 - Under exact Owner approval, the four Connect sandbox gates were enabled while live mode remained disabled. The Owner privately configured the Connect key and webhook signing secret. PRs #104-#110 corrected and validated the Accounts v2 onboarding, Checkout/refund refresh and provider-unavailable paths. Two synthetic owners completed isolated onboarding; one fictional GBP 1 direct charge and full refund reconciled through signed webhooks, and one exact replay caused no duplicate mutation. Only the approved Connect functions were advanced, while existing live Owner-route functions remained unchanged.
-- No existing Owner invoice-payment, refund or email function was redeployed.
+- After exact Owner approval and a current physical backup, migrations `20260725014434` and `20260725160000` were applied. The private write-enforcement switch remains off and cannot be changed by browser or service roles. The eight approved Billing/entitlement functions are active from merge `2c313f0` with JWT settings preserved. The Owner allowlist was transferred privately before guarded Owner Checkout and document-email activation.
 - The AI Helper is merged, privately tested and disabled by default. Its existing encrypted Cloudflare secret is preserved.
 - PR #108 merged the fail-closed website subscription signup CTA gate; subscriptions remain disabled by default.
 - The website remains privately previewed and is not published on `tallyo.co.uk`.
+- Exact local production builds pass with subscriptions, connected payments and the AI Helper enabled. Release candidate build `2026.07.25.1` adds `https://app.tallyo.co.uk` to the MFA recovery origin allowlist while retaining GitHub Pages and both localhost origins. Cloudflare production variables remain fail-closed, both custom-domain lists are empty, Supabase Auth still uses the GitHub Pages site URL, and the final hostname is not yet in the Turnstile allowlist.
+- `SEC-AUTH-006` records that the existing Turnstile server secret was unexpectedly exposed during read-only provider inspection. Its value was not repeated, stored or used. Exact Owner-approved rotation, direct private Supabase entry and final-hostname Auth acceptance are mandatory before public release.
 
 ## Current controlled-provider scope
 
@@ -84,6 +86,18 @@ Current live-Billing readiness edit lock acquired 2026-07-25:
 
 Release condition: explicit mutually exclusive provider-mode gates, live/test key and event matching, fail-closed public build controls, private reversible entitlement rollout, disposable PostgreSQL 17 validation, focused Deno/client/build/security tests and reviewed Owner approval before merge or deployment.
 
+Current app-domain Auth release-candidate lock acquired 2026-07-25:
+
+- `supabase/functions/mfa-recovery/`;
+- `tests/mfa-recovery-harness.cjs`;
+- app build/cache markers and their focused tests;
+- `APP_STATUS.md`;
+- `tasks/ACTIVE.md`;
+- `RELEASE_READINESS.md`;
+- `SECURITY_FINDINGS_LEDGER.md`.
+
+Release condition: retain every existing recovery origin and Auth/MFA invariant, add only `https://app.tallyo.co.uk`, pass focused MFA/PWA/build/security checks, and stop before merge, deployment, Supabase Auth, Turnstile, DNS or public release.
+
 ## Explicit exclusions until separately approved
 
 - no live Stripe Billing or Connect configuration, live Price, live secret, real customer or real-money transaction;
@@ -119,6 +133,8 @@ The Owner approved the following repository-only model on 2026-07-24:
 This approval does not authorise provider configuration, deployment, secrets, payments or public release.
 
 ## Current approval boundary
+
+On 2026-07-25 the Owner approved the repository-only `app.tallyo.co.uk` MFA recovery origin change, focused tests, release build/version update, authoritative status, commit, push and PR creation. Release candidate `2026.07.25.1` contains only the new exact HTTPS origin plus retained GitHub Pages and localhost rollback origins. The MFA recovery harness asserts the complete exact origin set; PWA/public-integration, dependency-pin and frozen-lock Deno checks pass; the exact synthetic production app build reports `2026.07.25.1`. DNS, Supabase Auth settings, Turnstile, secrets, deployment, merge and public release remain excluded.
 
 PR #102 passed its required checks and merged after exact Owner approval. The applied three commercial migrations and seven deployed functions were reconciled after merge; RLS, grants, JWT settings, migration history, security advisors and the zero-row commercial-table baseline remained correct. Evidence: `COMMERCIAL_PROVIDER_FOUNDATION_DEPLOYMENT_EVIDENCE_2026-07-24.md`.
 
