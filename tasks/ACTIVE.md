@@ -3,7 +3,7 @@
 Task ID: COMM-001
 Title: Integrate subscriptions, independent-business customer payments and the public AI Helper for controlled commercial release
 Priority: High
-Status: Billing sandbox configured but disabled; protected acceptance integration in progress; Connect sandbox configuration pending
+Status: Billing sandbox lifecycle accepted; server-side entitlement enforcement gap under review; Connect sandbox configuration pending
 Phase: Controlled provider preparation
 Owner role: Master Orchestrator
 Assigned specialists: Payments, Backend/Supabase, Security, Website, AI, QA and Release; Legal is triggered only for claims, notices and final publication
@@ -28,7 +28,9 @@ Prepare Tallyo so the public website and authenticated app can offer:
 - After a completed 2026-07-24 physical backup, the Owner-approved production-preparation stage applied the Billing and both Connect migrations and deployed the seven new functions at version 1.
 - Stripe Billing sandbox now has the approved GBP 8 monthly and GBP 80 annual Tallyo Pro Prices, a separate signed Billing event destination and a configured Customer Portal.
 - The Owner privately entered the rotated Stripe Billing test key and Billing webhook signing secret in Supabase. Their values were not requested, inspected or stored in the repository.
-- Billing remains fail-closed because `STRIPE_BILLING_ENABLED=false`; there is no subscription or active entitlement. Connect remains fail-closed with no connected account or enabled release gate.
+- Billing is enabled only for the protected non-live acceptance preview. One synthetic GBP 8 monthly test subscription and its provider-derived full entitlement are active; cancellation-at-period-end, Portal return, duplicate, stale-event, renewal, failed-payment, grace, read-only and recovery handling have been exercised without public release.
+- The acceptance review found that the core application write RLS policies still enforce ownership only and do not yet require the verified Billing entitlement. The browser cannot grant entitlement, but restricted/read-only access is not yet a complete server-side application boundary. This finding must be corrected and independently verified before Billing acceptance can close.
+- Connect remains fail-closed with no connected account or enabled release gate.
 - No existing Owner invoice-payment, refund or email function was redeployed.
 - The AI Helper is merged, privately tested and disabled by default. Its existing encrypted Cloudflare secret is preserved.
 - The website remains privately previewed and is not published on `tallyo.co.uk`.
@@ -36,7 +38,7 @@ Prepare Tallyo so the public website and authenticated app can offer:
 ## Current controlled-provider scope
 
 - preserve the applied schema and disabled function boundary;
-- complete the protected, disabled-by-default Billing acceptance integration and controlled subscription lifecycle probes under the Owner's 2026-07-25 approval;
+- complete the protected Billing acceptance integration, controlled subscription lifecycle probes and focused server-side entitlement enforcement under the Owner's 2026-07-25 approval;
 - configure and run the approved synthetic multi-account Connect acceptance after Billing acceptance;
 - keep the existing Owner invoice-payment route isolated and unchanged until its allowlist secret and source redeployment receive separate approval;
 - continue non-provider website and AI readiness work that does not activate public services.
@@ -70,7 +72,7 @@ Lock acquired: 2026-07-24.
 1. **Connect decision and implementation boundary** - completed.
 2. **Repository implementation and PR review** - completed through PR #101.
 3. **Disabled provider foundation** - completed: applied the three reviewed additive migrations, deployed seven new functions, verified RLS/grants/advisors/JWT settings and retained absent feature gates.
-4. **Isolated test acceptance** - in progress under the 2026-07-25 Owner approval: Billing sandbox configuration is complete and disabled; protected subscription acceptance integration and lifecycle testing are next, followed by Connect sandbox configuration and synthetic multi-account testing.
+4. **Isolated test acceptance** - in progress under the 2026-07-25 Owner approval: protected Billing Checkout, Portal, signed reconciliation and lifecycle probes pass. Core write RLS remains ownership-only, so focused server-side entitlement enforcement and independent review are next, followed by Connect sandbox configuration and synthetic multi-account testing.
 5. **AI release readiness** - preserve the existing secret and preview; separately approve public notice, budget, rate limits and activation.
 6. **Production release** - separately approve live provider configuration, secrets, payment acceptance, DNS and publication.
 
@@ -93,4 +95,6 @@ This approval does not authorise provider configuration, deployment, secrets, pa
 
 PR #102 passed its required checks and merged after exact Owner approval. The applied three commercial migrations and seven deployed functions were reconciled after merge; RLS, grants, JWT settings, migration history, security advisors and the zero-row commercial-table baseline remained correct. Evidence: `COMMERCIAL_PROVIDER_FOUNDATION_DEPLOYMENT_EVIDENCE_2026-07-24.md`.
 
-The Owner approved the sandbox-only commercial acceptance stage on 2026-07-25. Billing Products/Prices, the separate Billing event destination, Customer Portal and private Supabase test settings are configured. `STRIPE_BILLING_ENABLED` remains false while the protected acceptance UI is reviewed. The next gate is enabling Billing only in the protected non-live preview and Supabase test configuration for the controlled synthetic subscription lifecycle. Live mode, existing Owner-route redeployment, public claims and release remain later separate gates.
+The Owner approved the sandbox-only commercial acceptance stage on 2026-07-25. Billing Products/Prices, the separate Billing event destination, Customer Portal and private Supabase test settings are configured. Billing is enabled only in the protected non-live preview and Supabase test configuration. One synthetic monthly Checkout, signed entitlement activation, Customer Portal return, cancellation-at-period-end, duplicate replay and stale-event handling pass; rollback-only probes cover renewal, failed payment, seven-day grace, read-only transition and recovery.
+
+The acceptance review recorded a material server-side enforcement gap before repair: the five core application tables still use ownership-only write RLS policies. The next gate is a focused, unapplied migration and supporting tests that preserve owner-scoped reads while requiring verified `full` or `grace` entitlement for authenticated writes. Existing service-role provider reconciliation must remain available, and existing live invoice-payment, refund and email functions must not be redeployed without the exact pre-deployment approval required by this task. Live mode, Connect sandbox activity, public claims and release remain later gates.

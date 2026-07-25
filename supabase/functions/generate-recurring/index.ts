@@ -3,6 +3,7 @@
 // optionally emails generated invoices, advances next_run, and logs history.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { accountAllowsWrite } from "../_shared/account-entitlements.ts";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 
@@ -377,6 +378,8 @@ Deno.serve(async (req) => {
   let generationFailed = 0;
   let duplicatePrevented = 0;
   let historyUpdateFailed = 0;
+  let restrictedSkipped = 0;
+  const entitlementCache = new Map<string, boolean>();
 
   for (const tpl of (due || [])) {
     try {
@@ -384,6 +387,15 @@ Deno.serve(async (req) => {
       if (!userId) {
         console.error("template missing user_id", tpl.id);
         generationFailed++;
+        continue;
+      }
+      let writeAllowed = entitlementCache.get(userId);
+      if (writeAllowed === undefined) {
+        writeAllowed = await accountAllowsWrite(admin, userId);
+        entitlementCache.set(userId, writeAllowed);
+      }
+      if (!writeAllowed) {
+        restrictedSkipped++;
         continue;
       }
 
@@ -660,6 +672,7 @@ Deno.serve(async (req) => {
       metadata: {
         checked: dueByUser.get(userId) || 0,
         failed: failureCount,
+        restricted: entitlementCache.get(userId) === false,
         status: failureCount > 0 ? "attention" : "ok",
       },
     });
@@ -676,6 +689,7 @@ Deno.serve(async (req) => {
     generationFailed,
     duplicatePrevented,
     historyUpdateFailed,
+    restrictedSkipped,
     monitoringFailed,
     checked: (due || []).length,
   }), {

@@ -2,6 +2,7 @@
 // No payment, refund, payout or account disconnection is performed here.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { accountAllowsWrite, readOnlyAccountMessage } from "../_shared/account-entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -358,6 +359,9 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
     const user = await requireSensitiveSession(userClient);
+    if (action !== "status" && !await accountAllowsWrite(admin, user.id)) {
+      return json({ error: readOnlyAccountMessage }, 403);
+    }
 
     const { data: existing, error: lookupError } = await admin
       .from("stripe_connected_accounts")

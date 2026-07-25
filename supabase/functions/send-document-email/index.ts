@@ -3,6 +3,7 @@
 // caller, verifies document ownership, sends the email, and records history.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { accountAllowsWrite, readOnlyAccountMessage } from "../_shared/account-entitlements.ts";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 
@@ -733,6 +734,13 @@ Deno.serve(async (req) => {
 
   const { data: userData, error: userError } = await userClient.auth.getUser();
   if (userError || !userData?.user) return json({ error: "Invalid session" }, 401);
+  try {
+    if (!await accountAllowsWrite(admin, userData.user.id)) {
+      return json({ error: readOnlyAccountMessage }, 403);
+    }
+  } catch {
+    return json({ error: "Account access could not be confirmed" }, 503);
+  }
 
   let body: any;
   try {

@@ -1,6 +1,6 @@
 # Stripe Billing architecture
 
-Status: Repository foundation merged and locally validated. The migration was applied and the three new Edge Functions were deployed at version 1 on 2026-07-24 after explicit Owner approval. Provider configuration is absent and public subscription checkout remains disabled.
+Status: The foundation is applied. Stripe sandbox Prices, the signed Billing destination and Customer Portal are configured, and protected synthetic acceptance passed on 2026-07-25. Public subscription checkout and live Billing remain disabled. Server-side entitlement enforcement is prepared in draft PR #103 but remains unapplied and undeployed.
 
 ## Boundary
 
@@ -14,7 +14,7 @@ Approved offer:
 - no full-feature trial or permanent free saved account at launch;
 - cancellation stops future renewal and normally preserves access through the paid period.
 
-No Stripe Product, Price, coupon, trial, Checkout Session, Customer Portal session, customer mapping or subscription has been created. The empty Supabase Billing schema exists, but no provider-derived entitlement is active.
+The approved sandbox Product and GBP 8 monthly/GBP 80 annual Prices exist. One synthetic monthly subscription produced a signed provider-derived entitlement and is scheduled to cancel at its verified period end. No live Product/Price, coupon, trial, public Checkout or real customer subscription exists.
 
 ## Repository foundation
 
@@ -28,7 +28,13 @@ The disabled implementation is isolated from customer invoice payments:
 - `stripe-billing-webhook` verifies the raw-body signature, rejects live events, refreshes current subscription state, checks the server Price allowlist and account mapping, then calls the atomic RPC and clears only the matching Checkout claim for signed completion/expiration events;
 - the existing `stripe-webhook` invoice-payment path does not reference Billing tables or entitlements.
 
-The account entitlement helper is service-role-only. It is not attached to the app's write RLS policies, so the deployed foundation must not be described as active subscription enforcement. That activation requires reviewed policy integration and controlled test-mode acceptance under a separate approval.
+The deployed account entitlement helper remains service-role-only. Draft PR #103 adds a private identity-bound authenticated helper, core write RLS integration and service-side action guards. Refunds and signed provider reconciliation intentionally remain available in restricted mode. The migration and changed functions are not yet applied or deployed.
+
+## Protected sandbox acceptance
+
+The 2026-07-25 controlled run passed authenticated monthly Checkout, signed activation, Portal ownership/return, period-end cancellation, duplicate replay and older-event rejection. Rollback-only database probes passed renewal, failed payment, seven-day grace, `unpaid` read-only and recovery transitions without changing the accepted subscription's final state.
+
+During cancellation testing, Stripe represented the Portal request with `cancel_at` equal to `current_period_end` while the boolean field was false. Webhook version 9 now reconciles either trusted representation. Full details and residual gates are in `STRIPE_BILLING_SANDBOX_ACCEPTANCE_EVIDENCE_2026-07-25.md`.
 
 ## Trusted flow
 
