@@ -13,19 +13,28 @@ import { commercialOffer, pricingFaqs } from "../src/commercial-offer.mjs";
 const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = join(websiteRoot, "dist");
 const buildScript = join(websiteRoot, "scripts", "build.mjs");
+const cleanBuildEnvironment = {
+  ...process.env,
+  TALLYO_SUBSCRIPTIONS_ENABLED: "",
+  TALLYO_SUBSCRIPTION_PRIVATE_PREVIEW_APPROVED: "",
+  TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED: "",
+  TALLYO_PUBLIC_AI_HELPER_ENABLED: "",
+  TALLYO_AI_PRIVATE_PREVIEW_APPROVED: "",
+  TALLYO_AI_PUBLIC_RELEASE_APPROVED: ""
+};
 const failClosedSentinel = join(distRoot, "fail-closed-sentinel.txt");
 mkdirSync(distRoot, { recursive: true });
 writeFileSync(failClosedSentinel, "preserve", "utf8");
 const blockedCloudflareBuild = spawnSync(process.execPath, [buildScript], {
   encoding: "utf8",
-  env: { ...process.env, CF_PAGES: "1", TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "", TALLYO_SITE_MODE: "preview" }
+  env: { ...cleanBuildEnvironment, CF_PAGES: "1", TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "", TALLYO_SITE_MODE: "preview" }
 });
 assert.notEqual(blockedCloudflareBuild.status, 0, "Cloudflare website build must fail before Access is confirmed");
 assert.match(blockedCloudflareBuild.stderr, /required Access policies are confirmed/);
 assert.ok(existsSync(failClosedSentinel), "blocked Cloudflare website build must not alter existing output");
 execFileSync(process.execPath, [buildScript], {
   stdio: "inherit",
-  env: { ...process.env, CF_PAGES: "", TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "", TALLYO_SITE_MODE: "preview" }
+  env: { ...cleanBuildEnvironment, CF_PAGES: "", TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "", TALLYO_SITE_MODE: "preview" }
 });
 
 const read = (relative) => readFileSync(join(distRoot, relative), "utf8");

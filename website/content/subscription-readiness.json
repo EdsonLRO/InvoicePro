@@ -1,10 +1,12 @@
 {
   "schemaVersion": 1,
-  "status": "repository-foundation-unapplied-provider-disabled",
+  "status": "sandbox-billing-accepted-connect-acceptance-in-progress",
   "publicCheckoutEnabled": false,
   "liveStripeBillingConfigured": false,
   "pricesPublished": false,
   "trialPublished": false,
+  "sandboxBillingAccepted": true,
+  "activationGateImplemented": true,
   "pricingContentApproved": true,
   "planDecision": "approved-free-maker-and-pro",
   "priceDecision": "approved-gbp-8-monthly-80-annual",

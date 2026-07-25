@@ -11,9 +11,16 @@ import {
 } from "./content.mjs";
 import { finalCta, helpArticlePage, industryLandingPage, list, productDemo, workflow } from "./components.mjs";
 import { commercialOffer, pricingFaqs } from "./commercial-offer.mjs";
+import { siteConfig } from "./config.mjs";
 
 const icon = (symbol) => `<span class="feature-icon" aria-hidden="true">${symbol}</span>`;
 const industryHref = (industry) => publishedIndustrySlugs.includes(industry.slug) ? `/industries/${industry.slug}/` : "/features/";
+const subscriptionAvailability = siteConfig.subscriptionCheckoutEnabled
+  ? "Choose monthly or annual billing after you create your Tallyo account."
+  : "Subscriptions are being prepared and checkout is not active yet.";
+const subscriptionCta = siteConfig.subscriptionCheckoutEnabled
+  ? '<a class="button button-primary" id="cta_pricing_create_account" data-signup-link data-analytics-placement="pricing" href="#">Choose Tallyo Pro</a>'
+  : `<button class="button button-primary" type="button" disabled>${commercialOffer.pro.availability}</button>`;
 
 const home = `
   <section class="hero" aria-labelledby="home-title">
@@ -83,7 +90,7 @@ const home = `
 
   <section class="section section-soft split" id="install" aria-labelledby="install-title"><div><p class="eyebrow">Use Tallyo your way</p><h2 id="install-title">In the browser or installed for quick access.</h2><p>Use Tallyo on a supported phone, tablet or computer. An internet connection is required to access and update authenticated business records.</p><a class="button button-secondary" href="/help/install-tallyo/">See installation instructions</a></div><div class="device-stack" aria-hidden="true"><span class="device desktop"></span><span class="device tablet"></span><span class="device phone"></span></div></section>
 
-  <section class="section" aria-labelledby="pricing-preview-title"><div class="section-heading"><p class="eyebrow">Simple pricing</p><h2 id="pricing-preview-title">Make one document free, or keep your invoicing organised with Tallyo Pro.</h2><p>${commercialOffer.pro.monthlyPrice} monthly or ${commercialOffer.pro.annualPrice} annually. Subscriptions are being prepared and checkout is not active yet.</p></div><div class="pricing-preview"><strong>${commercialOffer.free.name}</strong><span>${commercialOffer.free.price} · ${commercialOffer.free.audience}</span><strong>${commercialOffer.pro.name}</strong><span>${commercialOffer.pro.monthlyPrice}/month or ${commercialOffer.pro.annualPrice}/year</span></div><p class="section-link"><a href="/pricing/">See pricing and what is included →</a></p></section>
+  <section class="section" aria-labelledby="pricing-preview-title"><div class="section-heading"><p class="eyebrow">Simple pricing</p><h2 id="pricing-preview-title">Make one document free, or keep your invoicing organised with Tallyo Pro.</h2><p>${commercialOffer.pro.monthlyPrice} monthly or ${commercialOffer.pro.annualPrice} annually. ${subscriptionAvailability}</p></div><div class="pricing-preview"><strong>${commercialOffer.free.name}</strong><span>${commercialOffer.free.price} · ${commercialOffer.free.audience}</span><strong>${commercialOffer.pro.name}</strong><span>${commercialOffer.pro.monthlyPrice}/month or ${commercialOffer.pro.annualPrice}/year</span></div><p class="section-link"><a href="/pricing/">See pricing and what is included →</a></p></section>
 
   <section class="section section-soft" aria-labelledby="faq-preview-title"><div class="section-heading"><p class="eyebrow">Questions, answered</p><h2 id="faq-preview-title">Understand the product before you start.</h2><p>Read factual answers about installation, payment tracking, recurring work, exports and account protection.</p></div><p class="section-link"><a href="/faq/">Browse frequently asked questions →</a></p></section>
 
@@ -103,10 +110,10 @@ const productTour = `
   ${finalCta()}`;
 
 const pricing = `
-  <section class="page-hero"><p class="eyebrow">Simple pricing</p><h1>One free maker. One complete invoicing workspace.</h1><p>Use the browser-only Free Invoice Maker without an account, or choose Tallyo Pro for saved invoicing work. Subscription checkout is not active yet.</p></section>
+  <section class="page-hero"><p class="eyebrow">Simple pricing</p><h1>One free maker. One complete invoicing workspace.</h1><p>Use the browser-only Free Invoice Maker without an account, or choose Tallyo Pro for saved invoicing work. ${subscriptionAvailability}</p></section>
   <section class="section"><div class="plan-grid plan-grid-two">
     <article class="plan-card"><p class="card-label">${commercialOffer.free.audience}</p><h2>${commercialOffer.free.name}</h2><p class="plan-price">${commercialOffer.free.price}</p><p>${commercialOffer.free.privacy}</p>${list(commercialOffer.free.features)}<a class="button button-secondary" href="/free-invoice-generator/">Make a free invoice</a><h3>Not included</h3>${list(commercialOffer.free.exclusions)}</article>
-    <article class="plan-card plan-card-featured"><p class="card-label">${commercialOffer.pro.audience}</p><h2>${commercialOffer.pro.name}</h2><p class="plan-price">${commercialOffer.pro.monthlyPrice}<span> per month</span></p><p class="plan-annual">or ${commercialOffer.pro.annualPrice} per year · ${commercialOffer.pro.annualEquivalent}. ${commercialOffer.pro.annualSaving}</p>${list(commercialOffer.pro.features)}<button class="button button-primary" type="button" disabled>${commercialOffer.pro.availability}</button><p class="plan-note">${commercialOffer.pro.reasonableUse}</p></article>
+    <article class="plan-card plan-card-featured"><p class="card-label">${commercialOffer.pro.audience}</p><h2>${commercialOffer.pro.name}</h2><p class="plan-price">${commercialOffer.pro.monthlyPrice}<span> per month</span></p><p class="plan-annual">or ${commercialOffer.pro.annualPrice} per year · ${commercialOffer.pro.annualEquivalent}. ${commercialOffer.pro.annualSaving}</p>${list(commercialOffer.pro.features)}${subscriptionCta}<p class="plan-note">${commercialOffer.pro.reasonableUse}</p></article>
   </div></section>
   <section class="section section-soft pricing-boundaries" aria-labelledby="pricing-boundaries-title"><div><p class="eyebrow">Before you choose</p><h2 id="pricing-boundaries-title">Straightforward billing, with clear limits.</h2></div>${list([commercialOffer.billing.setupFee, commercialOffer.billing.sameFeatures, commercialOffer.billing.noTrial, commercialOffer.billing.cancellation, commercialOffer.billing.annualRefund, commercialOffer.paymentAvailability])}</section>
   <section class="section faq-list" aria-labelledby="pricing-faq-title"><div class="section-heading"><p class="eyebrow">Pricing questions</p><h2 id="pricing-faq-title">What to expect.</h2></div>${pricingFaqs.map((item) => `<details><summary>${item.question}</summary><p>${item.answer}</p></details>`).join("")}</section>

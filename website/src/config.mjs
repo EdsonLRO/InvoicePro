@@ -6,8 +6,19 @@ const appUrl = trimSlash(process.env.TALLYO_APP_URL || "https://edsonlro.github.
 const subscriptionCheckoutRequested = process.env.TALLYO_SUBSCRIPTIONS_ENABLED === "true";
 const aiHelperRequested = process.env.TALLYO_PUBLIC_AI_HELPER_ENABLED === "true";
 
-if (subscriptionCheckoutRequested) {
-  throw new Error("Subscription checkout is blocked until the approved offer, Stripe Billing backend and server-enforced entitlements exist");
+if (
+  subscriptionCheckoutRequested &&
+  mode !== "production" &&
+  process.env.TALLYO_SUBSCRIPTION_PRIVATE_PREVIEW_APPROVED !== "true"
+) {
+  throw new Error("Subscription preview build blocked until the reviewed private-preview scope is approved");
+}
+if (
+  subscriptionCheckoutRequested &&
+  mode === "production" &&
+  process.env.TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED !== "true"
+) {
+  throw new Error("Subscription production build blocked until public release is approved");
 }
 if (aiHelperRequested && process.env.TALLYO_AI_PRIVATE_PREVIEW_APPROVED !== "true") {
   throw new Error("AI Helper build blocked until the reviewed private-preview scope is approved");
@@ -31,7 +42,7 @@ export const siteConfig = Object.freeze({
   googleSiteVerification: process.env.TALLYO_GOOGLE_SITE_VERIFICATION || "",
   bingSiteVerification: process.env.TALLYO_BING_SITE_VERIFICATION || "",
   aiHelperEnabled: aiHelperRequested,
-  subscriptionCheckoutEnabled: false,
+  subscriptionCheckoutEnabled: subscriptionCheckoutRequested,
   preview: mode !== "production"
 });
 
