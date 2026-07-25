@@ -10,7 +10,7 @@ import {
   workflowSteps
 } from "./content.mjs";
 import { finalCta, helpArticlePage, industryLandingPage, list, productDemo, workflow } from "./components.mjs";
-import { commercialOffer, pricingFaqs } from "./commercial-offer.mjs";
+import { commercialOffer, connectPaymentPlaceholders, pricingFaqs } from "./commercial-offer.mjs";
 import { siteConfig } from "./config.mjs";
 
 const icon = (symbol) => `<span class="feature-icon" aria-hidden="true">${symbol}</span>`;
@@ -19,8 +19,14 @@ const subscriptionAvailability = siteConfig.subscriptionCheckoutEnabled
   ? "Choose monthly or annual billing after you create your Tallyo account."
   : "Subscriptions are being prepared and checkout is not active yet.";
 const subscriptionCta = siteConfig.subscriptionCheckoutEnabled
-  ? '<a class="button button-primary" id="cta_pricing_create_account" data-signup-link data-analytics-placement="pricing" href="#">Choose Tallyo Pro</a>'
+  ? '<a class="button button-primary" id="cta_pricing_create_account" data-analytics-placement="pricing" data-signup-link data-subscription-link href="#">Choose Tallyo Pro</a>'
   : `<button class="button button-primary" type="button" disabled>${commercialOffer.pro.availability}</button>`;
+const helperCardCopy = siteConfig.aiHelperEnabled
+  ? "Ask questions in your own words and get answers grounded in reviewed public Tallyo guidance, without account access."
+  : "Get answers from reviewed public product guidance, without account access.";
+const pricingDescription = siteConfig.subscriptionCheckoutEnabled
+  ? "Use the Free Invoice Maker without an account, or choose Tallyo Pro at £8 monthly or £80 annually."
+  : "Use the Free Invoice Maker without an account, or see Tallyo Pro at £8 monthly or £80 annually. Subscription checkout is not active yet.";
 
 const home = `
   <section class="hero" aria-labelledby="home-title">
@@ -121,7 +127,7 @@ const pricing = `
 
 const security = `
   <section class="page-hero"><p class="eyebrow">Security</p><h1>Practical controls, described honestly.</h1><p>Tallyo combines confirmed accounts, optional MFA, database access rules and server-side sensitive operations. No system can remove every risk, so this page explains both controls and limitations.</p></section>
-  <section class="section"><div class="security-grid"><article><h2>Account access</h2><p>Email confirmation is required. Optional TOTP multi-factor authentication adds an authenticator-app code at sign-in.</p></article><article><h2>Workspace separation</h2><p>Supabase Row Level Security restricts database access so each signed-in account can access its own workspace records.</p></article><article><h2>Payment records</h2><p>Payment amounts, dates and notes remain connected to the relevant invoice and account. Online card payments for independent accounts are not included at launch.</p></article><article><h2>Server-side secrets</h2><p>Private email, payment and service credentials stay in server-side provider environments rather than browser code.</p></article><article><h2>Browser protections</h2><p>The app uses a Content Security Policy, integrity-checked pinned libraries and a self-hosted stylesheet.</p></article><article><h2>Recovery and sessions</h2><p>Tallyo provides device and all-device sign-out controls, optional backup authenticators and one-time recovery-code support.</p></article></div></section>
+  <section class="section"><div class="security-grid"><article><h2>Account access</h2><p>Email confirmation is required. Optional TOTP multi-factor authentication adds an authenticator-app code at sign-in.</p></article><article><h2>Workspace separation</h2><p>Supabase Row Level Security restricts database access so each signed-in account can access its own workspace records.</p></article><article><h2>Payment records</h2><p>Payment amounts, dates and notes remain connected to the relevant invoice and account. ${connectPaymentPlaceholders.availability}</p></article><article><h2>Server-side secrets</h2><p>Private email, payment and service credentials stay in server-side provider environments rather than browser code.</p></article><article><h2>Browser protections</h2><p>The app uses a Content Security Policy, integrity-checked pinned libraries and a self-hosted stylesheet.</p></article><article><h2>Recovery and sessions</h2><p>Tallyo provides device and all-device sign-out controls, optional backup authenticators and one-time recovery-code support.</p></article></div></section>
   <section class="section section-dark" aria-labelledby="limits-security-title"><div><p class="eyebrow">What these controls do not mean</p><h2 id="limits-security-title">Security is an ongoing practice, not a badge.</h2></div><div>${list(["Tallyo does not claim to be fully secure or certified.", "Activity history is useful, but it is not a tamper-proof compliance audit log.", "Authenticated business records require an internet connection.", "Users remain responsible for protecting downloaded files and their devices."])}</div></section>
   <section class="section"><div class="section-heading"><p class="eyebrow">Account guide</p><h2>Set up protection in plain language.</h2><p>Follow the focused guide to authenticator-app MFA, recovery codes and the right sign-out choice.</p></div><p class="section-link"><a href="/help/account-security/">Read the account-security guide →</a></p></section>
   ${finalCta()}`;
@@ -148,7 +154,7 @@ const helper = `
 
 const help = `
   <section class="page-hero"><p class="eyebrow">Help Centre</p><h1>Clear guidance for the work you want to finish.</h1><p>Use focused, step-by-step guides based on the current Tallyo product.</p></section>
-  <section class="section"><div class="help-grid"><a class="helper-help-card" href="/helper/"><span>Ask</span><h2>Use Tallyo Helper</h2><p>Get deterministic answers from reviewed public product guidance, without account access.</p></a>${helpArticles.map((article, index) => `<a href="/help/${article.slug}/"><span>${String(index + 1).padStart(2, "0")}</span><h2>${article.title}</h2><p>${article.description}</p></a>`).join("")}</div></section>
+  <section class="section"><div class="help-grid"><a class="helper-help-card" href="/helper/"><span>Ask</span><h2>Use Tallyo Helper</h2><p>${helperCardCopy}</p></a>${helpArticles.map((article, index) => `<a href="/help/${article.slug}/"><span>${String(index + 1).padStart(2, "0")}</span><h2>${article.title}</h2><p>${article.description}</p></a>`).join("")}</div></section>
   <section class="section section-soft" id="install" aria-labelledby="install-help-title"><div class="section-heading"><p class="eyebrow">Install Tallyo</p><h2 id="install-help-title">Keep Tallyo close on supported devices.</h2><p>Installation adds a convenient app icon. It does not make authenticated business records available offline.</p></div><div class="install-grid">${installationSteps.map(([name, step]) => `<article><h3>${name}</h3><p>${step}</p></article>`).join("")}</div><p class="section-link"><a href="/help/install-tallyo/">Open the complete installation guide →</a></p></section>
   ${finalCta()}`;
 
@@ -221,7 +227,7 @@ const foundationPages = [
   { route: "/", output: "index.html", title: "Professional invoices. Clearer payment tracking. Less admin.", description: "Tallyo helps UK small businesses create professional invoices and quotes, track payments and automate recurring invoicing work.", content: home, schema: "software" },
   { route: "/features/", output: "features/index.html", title: "Invoicing features for small businesses", description: "Explore Tallyo features for invoices, quotes, payment tracking, recurring work, reminders, customers and business records.", content: features, schema: "webpage" },
   { route: "/product-tour/", output: "product-tour/index.html", title: "Tallyo product tour", description: "Tour supported Tallyo workflows for documents, customers, payments, recurring invoices, activity, branding and account protection.", content: productTour, schema: "webpage" },
-  { route: "/pricing/", output: "pricing/index.html", title: "Tallyo pricing — Free Invoice Maker and Tallyo Pro", description: "Use the Free Invoice Maker without an account, or see Tallyo Pro at £8 monthly or £80 annually. Subscription checkout is not active yet.", content: pricing, schema: "webpage" },
+  { route: "/pricing/", output: "pricing/index.html", title: "Tallyo pricing — Free Invoice Maker and Tallyo Pro", description: pricingDescription, content: pricing, schema: "webpage" },
   { route: "/security/", output: "security/index.html", title: "How Tallyo protects account access", description: "Learn about Tallyo account, data-access, payment and browser security controls, with honest limitations.", content: security, schema: "webpage" },
   { route: "/helper/", output: "helper/index.html", title: "Tallyo Helper", description: "Ask Tallyo Helper for reviewed public guidance about current product features, payments, documents, installation and account protection.", content: helper, schema: "webpage", helper: true, scripts: ["/assets/helper.js"] },
   { route: "/help/", output: "help/index.html", title: "Tallyo Help Centre", description: "Find step-by-step guidance for Tallyo documents, payments, recurring work, account protection, delivery and installation.", content: help, schema: "webpage" },

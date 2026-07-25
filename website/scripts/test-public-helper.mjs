@@ -3,8 +3,9 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import knowledge from "../content/helper-knowledge.json" with { type: "json" };
+import rawKnowledge from "../content/helper-knowledge.json" with { type: "json" };
 import { createPublicAiAdapter } from "../src/helper-core.mjs";
+import { applyConnectPaymentCopy, connectPaymentsPublished } from "../src/commercial-offer.mjs";
 import { handlePublicHelperRequest, publicHelperPolicy } from "../functions/lib/public-helper.mjs";
 import { handleRateLimitRequest } from "../../deployment/cloudflare/ai-helper-rate-limiter/src/index.mjs";
 
@@ -12,6 +13,25 @@ const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = join(websiteRoot, "dist");
 const buildScript = join(websiteRoot, "scripts", "build.mjs");
 const read = (relative) => readFileSync(join(distRoot, relative), "utf8");
+const knowledge = JSON.parse(applyConnectPaymentCopy(JSON.stringify(rawKnowledge), false));
+const enabledConnectKnowledge = JSON.parse(applyConnectPaymentCopy(JSON.stringify(rawKnowledge), true));
+assert.match(enabledConnectKnowledge.entries.find((entry) => entry.id === "stripe-payments").answer, /Connect your own Stripe account/);
+assert.doesNotMatch(JSON.stringify(enabledConnectKnowledge), /__TALLYO_CONNECT_PAYMENT_/);
+assert.equal(connectPaymentsPublished({ TALLYO_CONNECT_PAYMENTS_ENABLED: "true" }), false);
+assert.equal(connectPaymentsPublished({
+  TALLYO_CONNECT_PAYMENTS_ENABLED: "true",
+  TALLYO_CONNECT_PRIVATE_PREVIEW_APPROVED: "true"
+}), true);
+assert.equal(connectPaymentsPublished({
+  TALLYO_SITE_MODE: "production",
+  TALLYO_CONNECT_PAYMENTS_ENABLED: "true",
+  TALLYO_CONNECT_PRIVATE_PREVIEW_APPROVED: "true"
+}), false);
+assert.equal(connectPaymentsPublished({
+  TALLYO_SITE_MODE: "production",
+  TALLYO_CONNECT_PAYMENTS_ENABLED: "true",
+  TALLYO_CONNECT_PUBLIC_RELEASE_APPROVED: "true"
+}), true);
 const cleanBuildEnvironment = {
   ...process.env,
   TALLYO_SUBSCRIPTIONS_ENABLED: "",
@@ -19,7 +39,10 @@ const cleanBuildEnvironment = {
   TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED: "",
   TALLYO_PUBLIC_AI_HELPER_ENABLED: "",
   TALLYO_AI_PRIVATE_PREVIEW_APPROVED: "",
-  TALLYO_AI_PUBLIC_RELEASE_APPROVED: ""
+  TALLYO_AI_PUBLIC_RELEASE_APPROVED: "",
+  TALLYO_CONNECT_PAYMENTS_ENABLED: "",
+  TALLYO_CONNECT_PRIVATE_PREVIEW_APPROVED: "",
+  TALLYO_CONNECT_PUBLIC_RELEASE_APPROVED: ""
 };
 
 assert.equal(publicHelperPolicy.enabledByDefault, false);
@@ -106,8 +129,56 @@ const enabledSubscriptionPricing = read("pricing/index.html");
 assert.match(enabledSubscriptionPricing, /Choose monthly or annual billing after you create your Tallyo account/);
 assert.match(enabledSubscriptionPricing, /id="cta_pricing_create_account"/);
 assert.match(enabledSubscriptionPricing, />Choose Tallyo Pro<\/a>/);
+assert.match(enabledSubscriptionPricing, /data-subscription-link[^>]+href="https:\/\/edsonlro\.github\.io\/InvoicePro\/#account"/);
 assert.doesNotMatch(enabledSubscriptionPricing, /button[^>]+disabled[^>]*>Subscriptions are being prepared/);
+assert.doesNotMatch(enabledSubscriptionPricing, /Subscription checkout is not active yet/);
 assert.doesNotMatch(enabledSubscriptionPricing, /checkout\.stripe\.com|price_[A-Za-z0-9]+|prod_[A-Za-z0-9]+/);
+
+const blockedConnectPreviewBuild = spawnSync(process.execPath, [buildScript], {
+  encoding: "utf8",
+  env: {
+    ...cleanBuildEnvironment,
+    CF_PAGES: "",
+    TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "",
+    TALLYO_SITE_MODE: "preview",
+    TALLYO_CONNECT_PAYMENTS_ENABLED: "true"
+  }
+});
+assert.notEqual(blockedConnectPreviewBuild.status, 0);
+assert.match(blockedConnectPreviewBuild.stderr, /card-payment preview build blocked/);
+
+const blockedConnectProductionBuild = spawnSync(process.execPath, [buildScript], {
+  encoding: "utf8",
+  env: {
+    ...cleanBuildEnvironment,
+    CF_PAGES: "",
+    TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "",
+    TALLYO_SITE_MODE: "production",
+    TALLYO_CONNECT_PAYMENTS_ENABLED: "true",
+    TALLYO_CONNECT_PRIVATE_PREVIEW_APPROVED: "true"
+  }
+});
+assert.notEqual(blockedConnectProductionBuild.status, 0);
+assert.match(blockedConnectProductionBuild.stderr, /card-payment production build blocked/);
+
+execFileSync(process.execPath, [buildScript], {
+  stdio: "inherit",
+  env: {
+    ...cleanBuildEnvironment,
+    CF_PAGES: "",
+    TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "",
+    TALLYO_SITE_MODE: "preview",
+    TALLYO_CONNECT_PAYMENTS_ENABLED: "true",
+    TALLYO_CONNECT_PRIVATE_PREVIEW_APPROVED: "true"
+  }
+});
+const enabledConnectPricing = read("pricing/index.html");
+assert.match(enabledConnectPricing, /Customer card payments are available after you connect your own Stripe account/);
+assert.match(enabledConnectPricing, /Optional customer card payments through your connected Stripe account/);
+assert.match(enabledConnectPricing, /Tallyo does not add an application fee/);
+assert.match(read("security/index.html"), /Stripe handles card processing and payouts directly with your business/);
+assert.match(read("helper/index.html"), /Connect your own Stripe account in Account settings/);
+assert.doesNotMatch(enabledConnectPricing, /__TALLYO_CONNECT_PAYMENT_/);
 
 execFileSync(process.execPath, [buildScript], {
   stdio: "inherit",
@@ -124,6 +195,7 @@ const enabledHtml = read("helper/index.html");
 assert.match(enabledHtml, /data-ai-enabled="true"/);
 assert.match(enabledHtml, /sent securely to OpenAI/);
 assert.match(enabledHtml, /has no account access or tools/);
+assert.match(read("help/index.html"), /Ask questions in your own words and get answers grounded in reviewed public Tallyo guidance/);
 assert.match(read("_headers"), /connect-src 'self'/);
 
 execFileSync(process.execPath, [buildScript], {
@@ -393,10 +465,13 @@ assert.deepEqual(await adapter.answer("What is Tallyo?"), {
 });
 
 const functionSource = readFileSync(join(websiteRoot, "functions", "lib", "public-helper.mjs"), "utf8");
+const apiSource = readFileSync(join(websiteRoot, "functions", "api", "helper.js"), "utf8");
 assert.doesNotMatch(functionSource, /\bsk-(?:proj-)?[A-Za-z0-9_-]{16,}\b/);
 assert.doesNotMatch(functionSource, /console\.(?:log|info|warn|error)/);
 assert.match(functionSource, /store: false/);
 assert.doesNotMatch(functionSource, /SUPABASE|STRIPE|RESEND|service_role/i);
+assert.match(apiSource, /applyConnectPaymentCopy/);
+assert.match(apiSource, /connectPaymentsPublished/);
 
 const rateWorkerRoot = resolve(websiteRoot, "..", "deployment", "cloudflare", "ai-helper-rate-limiter");
 const rateWorkerRequest = (bodyValue, options = {}) => new Request(
@@ -491,13 +566,16 @@ assert.equal(rateWorkerConfig.ratelimits[0].simple.period, 60);
 assert.equal("routes" in rateWorkerConfig, false);
 
 const subscriptionReadiness = JSON.parse(readFileSync(join(websiteRoot, "content", "subscription-readiness.json"), "utf8"));
-assert.equal(subscriptionReadiness.status, "sandbox-billing-accepted-connect-acceptance-in-progress");
+assert.equal(subscriptionReadiness.status, "sandbox-billing-and-connect-accepted-public-release-pending");
 assert.equal(subscriptionReadiness.publicCheckoutEnabled, false);
+assert.equal(subscriptionReadiness.publicCustomerPaymentsEnabled, false);
 assert.equal(subscriptionReadiness.liveStripeBillingConfigured, false);
 assert.equal(subscriptionReadiness.pricesPublished, false);
 assert.equal(subscriptionReadiness.trialPublished, false);
 assert.equal(subscriptionReadiness.sandboxBillingAccepted, true);
+assert.equal(subscriptionReadiness.sandboxConnectAccepted, true);
 assert.equal(subscriptionReadiness.activationGateImplemented, true);
+assert.equal(subscriptionReadiness.connectPublicationGateImplemented, true);
 assert.equal(subscriptionReadiness.pricingContentApproved, true);
 assert.equal(subscriptionReadiness.planDecision, "approved-free-maker-and-pro");
 assert.equal(subscriptionReadiness.priceDecision, "approved-gbp-8-monthly-80-annual");

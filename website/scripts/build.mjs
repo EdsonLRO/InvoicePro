@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { notFoundPage, pages } from "../src/pages.mjs";
 import { renderPage } from "../src/layout.mjs";
 import { siteConfig } from "../src/config.mjs";
+import { applyConnectPaymentCopy } from "../src/commercial-offer.mjs";
 import { assertCloudflareAccessConfirmed } from "../../scripts/cloudflare-access-build-guard.mjs";
 
 assertCloudflareAccessConfirmed();
@@ -18,7 +19,10 @@ if (distRoot !== join(websiteRoot, "dist") || !distRoot.startsWith(`${websiteRoo
 await rm(distRoot, { recursive: true, force: true });
 await mkdir(join(distRoot, "assets"), { recursive: true });
 
-const helperKnowledge = JSON.parse(await readFile(join(websiteRoot, "content", "helper-knowledge.json"), "utf8"));
+const helperKnowledge = JSON.parse(applyConnectPaymentCopy(
+  await readFile(join(websiteRoot, "content", "helper-knowledge.json"), "utf8"),
+  siteConfig.connectPaymentsEnabled
+));
 const helperKnowledgeJson = JSON.stringify(helperKnowledge).replaceAll("<", "\\u003c");
 const eventPolicy = JSON.parse(await readFile(join(websiteRoot, "content", "analytics-events.json"), "utf8"));
 
