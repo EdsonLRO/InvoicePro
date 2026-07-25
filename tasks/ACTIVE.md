@@ -30,6 +30,7 @@ Prepare Tallyo so the public website and authenticated app can offer:
 - The Owner privately entered the rotated Stripe Billing test key and Billing webhook signing secret in Supabase. Their values were not requested, inspected or stored in the repository.
 - Billing is enabled only for the protected non-live acceptance preview. One synthetic GBP 8 monthly test subscription and its provider-derived full entitlement are active; cancellation-at-period-end, Portal return, duplicate, stale-event, renewal, failed-payment, grace, read-only and recovery handling have been exercised without public release.
 - PR #103 merged the focused, unapplied entitlement RLS migration and server-side guards. Disposable PostgreSQL 17 RLS, privilege, tenant-isolation and service-role reconciliation probes pass; the migration remains unapplied.
+- Read-only production reconciliation on 2026-07-25 found eight accounts with business data, two active full entitlements and six accounts that would become read-only if enforcement were activated immediately. No account identifier, email or business record was read. The live-Billing release candidate therefore keeps the server boundary behind one private database-owner-only rollout switch defaulting off; a missing switch fails closed.
 - Under exact Owner approval, the four Connect sandbox gates were enabled while live mode remained disabled. The Owner privately configured the Connect key and webhook signing secret. PRs #104-#110 corrected and validated the Accounts v2 onboarding, Checkout/refund refresh and provider-unavailable paths. Two synthetic owners completed isolated onboarding; one fictional GBP 1 direct charge and full refund reconciled through signed webhooks, and one exact replay caused no duplicate mutation. Only the approved Connect functions were advanced, while existing live Owner-route functions remained unchanged.
 - No existing Owner invoice-payment, refund or email function was redeployed.
 - The AI Helper is merged, privately tested and disabled by default. Its existing encrypted Cloudflare secret is preserved.
@@ -69,6 +70,19 @@ Current focused edit lock acquired 2026-07-25:
 - `tasks/ACTIVE.md`.
 
 Release condition: focused website tests, responsive browser QA, reviewed PR and retained disabled-by-default production gates.
+
+Current live-Billing readiness edit lock acquired 2026-07-25:
+
+- `supabase/functions/create-billing-checkout/`;
+- `supabase/functions/create-billing-portal/`;
+- `supabase/functions/stripe-billing-webhook/`;
+- pending Billing/entitlement migrations;
+- Billing client/build gates and focused Billing tests;
+- `docs/architecture/STRIPE_BILLING.md`;
+- `APP_STATUS.md`;
+- `tasks/ACTIVE.md`.
+
+Release condition: explicit mutually exclusive provider-mode gates, live/test key and event matching, fail-closed public build controls, private reversible entitlement rollout, disposable PostgreSQL 17 validation, focused Deno/client/build/security tests and reviewed Owner approval before merge or deployment.
 
 ## Explicit exclusions until separately approved
 

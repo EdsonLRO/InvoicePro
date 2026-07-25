@@ -1,6 +1,6 @@
 # Stripe Billing architecture
 
-Status: The foundation is applied. Stripe sandbox Prices, the signed Billing destination and Customer Portal are configured, and protected synthetic acceptance passed on 2026-07-25. Public subscription checkout and live Billing remain disabled. Server-side entitlement enforcement is prepared in draft PR #103 but remains unapplied and undeployed.
+Status: The foundation is applied. Stripe sandbox Prices, the signed Billing destination and Customer Portal are configured, and protected synthetic acceptance passed on 2026-07-25. Public subscription checkout and live Billing remain disabled. PR #103 merged server-side entitlement enforcement but it remains unapplied and undeployed. The focused live-Billing release candidate adds explicit live-mode controls and a private rollout gate without changing production.
 
 ## Boundary
 
@@ -21,14 +21,16 @@ The approved sandbox Product and GBP 8 monthly/GBP 80 annual Prices exist. One s
 The disabled implementation is isolated from customer invoice payments:
 
 - `20260724111312_stripe_billing_test_foundation.sql` defines owner-scoped read RLS, service-role-only writes, atomic event reconciliation, delayed-event protection and provider-derived entitlements;
-- `create-billing-checkout` maps only `monthly` or `annual` to server-configured Price identifiers and requires confirmed Auth, current MFA assurance when enrolled, an explicit kill switch and a Stripe test-mode key;
+- `create-billing-checkout` maps only `monthly` or `annual` to server-configured Price identifiers and requires confirmed Auth, current MFA assurance when enrolled, an explicit kill switch, exactly one test/live provider mode and a matching Stripe key;
 - a service-role-only per-account Checkout claim serialises different browser request IDs before Stripe is called, while same-request retries retain Stripe idempotency;
-- Checkout also lists the mapped Customer's current sandbox subscriptions and fails closed when any non-terminal subscription exists;
-- `create-billing-portal` resolves the Stripe Customer only from the authenticated account mapping and uses the same disabled/test-mode gates;
-- `stripe-billing-webhook` verifies the raw-body signature, rejects live events, refreshes current subscription state, checks the server Price allowlist and account mapping, then calls the atomic RPC and clears only the matching Checkout claim for signed completion/expiration events;
+- Checkout also lists the mapped Customer's current provider-mode subscriptions and fails closed when any non-terminal subscription exists;
+- `create-billing-portal` resolves the Stripe Customer only from the authenticated account mapping and uses the same disabled and mutually exclusive provider-mode gates;
+- `stripe-billing-webhook` verifies the raw-body signature, accepts only the configured test/live event mode, refreshes current subscription state, checks the server Price allowlist and account mapping, then calls the atomic RPC and clears only a mode-matching Checkout claim for signed completion/expiration events;
 - the existing `stripe-webhook` invoice-payment path does not reference Billing tables or entitlements.
 
-The deployed account entitlement helper remains service-role-only. Draft PR #103 adds a private identity-bound authenticated helper, core write RLS integration and service-side action guards. Refunds and signed provider reconciliation intentionally remain available in restricted mode. The migration and changed functions are not yet applied or deployed.
+The deployed account entitlement helper remains service-role-only. PR #103 added a private identity-bound authenticated helper, core write RLS integration and service-side action guards. The current unapplied revision adds one private database-owner-controlled `subscription_write_enforcement` switch. It defaults off so migrations and guarded functions can be deployed without unexpectedly restricting existing accounts; a missing switch fails closed. Browser, authenticated and service roles cannot change it. Refunds and signed provider reconciliation intentionally remain available in restricted mode. The migrations and changed functions are not yet applied or deployed.
+
+Read-only aggregate reconciliation found eight accounts with business data, two active full entitlements and six accounts that would become read-only under immediate enforcement. No identity or business record was inspected. The private switch must stay off through controlled live Billing acceptance; enabling it is a separate production decision after the impact is accepted.
 
 ## Protected sandbox acceptance
 
@@ -104,12 +106,13 @@ The exact Stripe event names and API version must be verified against current of
 
 ## Rollback and containment
 
-1. Disable creation of new subscription Checkout and Portal sessions.
-2. Continue verified webhook reconciliation for already-created subscriptions when safe.
-3. Preserve subscription and billing-event evidence; do not delete or downgrade records manually.
-4. Place affected accounts in the safest truthful access state supported by verified provider evidence.
-5. Reconcile with Stripe test mode before retrying a failed deployment.
-6. Rotate secrets or change production provider configuration only with exact Owner approval.
+1. If subscription write enforcement is active, have the database owner set the private rollout switch back to `false`; browser and service roles cannot do this.
+2. Disable creation of new subscription Checkout and Portal sessions.
+3. Continue verified webhook reconciliation for already-created subscriptions when safe.
+4. Preserve subscription and billing-event evidence; do not delete or downgrade records manually.
+5. Place affected accounts in the safest truthful access state supported by verified provider evidence.
+6. Reconcile with the configured Stripe provider mode before retrying a failed deployment.
+7. Rotate secrets or change production provider configuration only with exact Owner approval.
 
 ## Later Owner actions
 

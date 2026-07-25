@@ -1,5 +1,5 @@
-// Test-mode-only Tallyo Pro subscription Checkout.
-// Disabled unless both Billing feature gates are explicitly enabled.
+// Tallyo Pro subscription Checkout.
+// Disabled unless Billing and exactly one reviewed provider mode are enabled.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
 
@@ -42,8 +42,16 @@ function billingConfig(interval: string) {
   if (Deno.env.get("STRIPE_BILLING_ENABLED") !== "true") {
     throw new Error("Billing Checkout is disabled");
   }
-  if (Deno.env.get("STRIPE_BILLING_TEST_MODE") !== "true") {
-    throw new Error("Billing Checkout requires explicit test mode");
+  const testMode = Deno.env.get("STRIPE_BILLING_TEST_MODE") === "true";
+  const liveMode = Deno.env.get("STRIPE_BILLING_LIVE_MODE") === "true";
+  if (testMode === liveMode) {
+    throw new Error("Billing Checkout requires exactly one provider mode");
+  }
+  if (
+    liveMode &&
+    Deno.env.get("STRIPE_BILLING_LIVE_APPROVED") !== "true"
+  ) {
+    throw new Error("Live Billing Checkout is not approved");
   }
 
   const stripeKey = Deno.env.get("STRIPE_BILLING_SECRET_KEY") || "";
@@ -60,8 +68,13 @@ function billingConfig(interval: string) {
     ""
   ).replace(/\/+$/, "");
 
-  if (!/^(?:sk|rk)_test_/.test(stripeKey)) {
-    throw new Error("Billing requires a Stripe test-mode key");
+  const expectedKey = liveMode
+    ? /^(?:sk|rk)_live_[A-Za-z0-9]+$/
+    : /^(?:sk|rk)_test_[A-Za-z0-9]+$/;
+  if (!expectedKey.test(stripeKey)) {
+    throw new Error(
+      `Billing requires a Stripe ${liveMode ? "live" : "test"}-mode key`,
+    );
   }
   if (!/^\d{4}-\d{2}-\d{2}(?:\.[a-z]+)?$/.test(stripeApiVersion)) {
     throw new Error("STRIPE_BILLING_API_VERSION is required");
@@ -80,7 +93,7 @@ function billingConfig(interval: string) {
   }
   if (
     parsedBaseUrl.protocol !== "https:" &&
-    !(parsedBaseUrl.protocol === "http:" &&
+    !(testMode && parsedBaseUrl.protocol === "http:" &&
       ["127.0.0.1", "localhost"].includes(parsedBaseUrl.hostname))
   ) {
     throw new Error("The Billing application URL must use HTTPS");
@@ -92,7 +105,7 @@ function billingConfig(interval: string) {
     throw new Error("The Billing application URL must be a plain URL");
   }
 
-  return { stripeKey, stripeApiVersion, priceId, appBaseUrl };
+  return { stripeKey, stripeApiVersion, priceId, appBaseUrl, liveMode };
 }
 
 async function stripePost(
@@ -346,7 +359,10 @@ Deno.serve(async (req) => {
       ])}`,
     );
     if (
-      !/^cs_test_[A-Za-z0-9]+$/.test(String(session?.id || "")) ||
+      !(config.liveMode ? /^cs_live_[A-Za-z0-9]+$/ : /^cs_test_[A-Za-z0-9]+$/)
+        .test(
+          String(session?.id || ""),
+        ) ||
       typeof session?.url !== "string" ||
       !Number.isFinite(Number(session?.expires_at))
     ) {
@@ -371,7 +387,7 @@ Deno.serve(async (req) => {
     return json({ ok: true, url: session.url, sessionId: session.id });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Checkout failed";
-    const disabled = /disabled|test mode/.test(message);
+    const disabled = /disabled|provider mode|not approved/.test(message);
     const unauthorized = [
       "Invalid session",
       "Confirm your email first",

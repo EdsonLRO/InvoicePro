@@ -379,7 +379,7 @@
                         <span v-if="billing.entitlement" :class="billingAccessBadgeClass(billing.entitlement.access_state)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">{{ billingAccessLabel(billing.entitlement.access_state) }}</span>
                         <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">No active plan</span>
                     </div>
-                    <p class="text-sm text-slate-600 mb-5">Choose a Tallyo Pro plan or manage your current subscription. This protected preview uses Stripe test mode, so no real payment is taken.</p>
+                    <p class="text-sm text-slate-600 mb-5">{{ billing.testMode ? 'Choose a Tallyo Pro plan or manage your current subscription. This protected preview uses Stripe test mode, so no real payment is taken.' : 'Choose monthly or annual billing, or manage your current Tallyo Pro subscription securely with Stripe.' }}</p>
 
                     <div v-if="billing.subscription" class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm mb-4">
                         <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
@@ -2121,7 +2121,8 @@
                 accountExportBusy: false,
                 stripeConnect: { available: false, busy: false, account: null, error: '' },
                 billing: {
-                    enabled: window.TALLYO_BILLING_TEST_ENABLED === true && window.STRIPE_LIVE_MODE !== true,
+                    enabled: (window.TALLYO_BILLING_TEST_ENABLED === true && window.STRIPE_LIVE_MODE !== true) || (window.TALLYO_BILLING_LIVE_ENABLED === true && window.STRIPE_LIVE_MODE === true),
+                    testMode: window.TALLYO_BILLING_TEST_ENABLED === true && window.STRIPE_LIVE_MODE !== true,
                     busy: false,
                     subscription: null,
                     entitlement: null,
@@ -3315,7 +3316,8 @@
                 this.stripeCheckoutBusyId = null;
                 this.stripeRefundBusyKey = null;
                 this.billing = {
-                    enabled: window.TALLYO_BILLING_TEST_ENABLED === true && window.STRIPE_LIVE_MODE !== true,
+                    enabled: (window.TALLYO_BILLING_TEST_ENABLED === true && window.STRIPE_LIVE_MODE !== true) || (window.TALLYO_BILLING_LIVE_ENABLED === true && window.STRIPE_LIVE_MODE === true),
+                    testMode: window.TALLYO_BILLING_TEST_ENABLED === true && window.STRIPE_LIVE_MODE !== true,
                     busy: false,
                     subscription: null,
                     entitlement: null,
@@ -3908,8 +3910,12 @@
                 url.searchParams.delete('subscription');
                 window.history.replaceState({}, '', url.pathname + url.search + url.hash);
                 this.billing.notice = callback === 'success'
-                    ? 'Stripe received the test subscription. Refresh the status after the webhook finishes processing.'
-                    : 'Subscription setup was cancelled. No test payment was completed.';
+                    ? (this.billing.testMode
+                        ? 'Stripe received the test subscription. Refresh the status after the webhook finishes processing.'
+                        : 'Your subscription payment was received. Your access will update as soon as Stripe confirms it.')
+                    : (this.billing.testMode
+                        ? 'Subscription setup was cancelled. No test payment was completed.'
+                        : 'Subscription setup was cancelled. No payment was completed.');
                 if (callback === 'success') await this.loadBillingState();
             },
             async loadStripeConnectState() {

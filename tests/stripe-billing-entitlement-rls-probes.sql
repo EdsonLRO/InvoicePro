@@ -59,9 +59,40 @@ begin
     ) then
         raise exception 'service role should bypass RLS rather than execute the authenticated helper';
     end if;
+
+    if has_table_privilege(
+        'service_role',
+        'private.commercial_feature_flags',
+        'UPDATE'
+    ) or has_table_privilege(
+        'authenticated',
+        'private.commercial_feature_flags',
+        'UPDATE'
+    ) then
+        raise exception 'non-owner role can change the commercial rollout gate';
+    end if;
 end;
 $$;
 
+set role authenticated;
+set request.jwt.claim.sub = '11111111-1111-4111-8111-111111111111';
+
+insert into public.customers (id, user_id, value) values (
+    '10000000-0000-4000-8000-000000000011',
+    '11111111-1111-4111-8111-111111111111',
+    'rollout gate open'
+);
+delete from public.customers
+ where id = '10000000-0000-4000-8000-000000000011';
+
+reset role;
+
+update private.commercial_feature_flags
+   set enabled = true,
+       updated_at = now()
+ where feature_key = 'subscription_write_enforcement';
+
+reset role;
 set role authenticated;
 set request.jwt.claim.sub = '11111111-1111-4111-8111-111111111111';
 
@@ -221,11 +252,37 @@ update public.invoices
 
 reset role;
 
+begin;
+delete from private.commercial_feature_flags
+ where feature_key = 'subscription_write_enforcement';
+set local role authenticated;
+select set_config(
+    'request.jwt.claim.sub',
+    '22222222-2222-4222-8222-222222222222',
+    true
+);
+do $$
+begin
+    begin
+        insert into public.customers (id, user_id, value) values (
+            '20000000-0000-4000-8000-000000000013',
+            '22222222-2222-4222-8222-222222222222',
+            'missing rollout gate'
+        );
+        raise exception 'missing rollout gate allowed a write';
+    exception
+        when insufficient_privilege then null;
+    end;
+end;
+$$;
+rollback;
+
 select json_build_object(
     'entitlement_rls_probe', 'passed',
     'authenticated_write_states', array['full', 'grace'],
     'blocked_states', array['missing', 'read_only', 'expired'],
     'owner_reads_preserved', true,
     'cross_tenant_write_blocked', true,
-    'service_role_reconciliation_preserved', true
+    'service_role_reconciliation_preserved', true,
+    'missing_rollout_gate_fails_closed', true
 );

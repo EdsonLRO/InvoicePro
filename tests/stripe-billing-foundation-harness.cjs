@@ -9,6 +9,10 @@ const migrationName = fs.readdirSync(path.join(root, 'supabase', 'migrations'))
 assert.ok(migrationName, 'timestamped Stripe Billing migration must exist');
 
 const migration = read('supabase', 'migrations', migrationName);
+const liveSessionMigrationName = fs.readdirSync(path.join(root, 'supabase', 'migrations'))
+  .find((name) => name.endsWith('_allow_live_billing_checkout_sessions.sql'));
+assert.ok(liveSessionMigrationName, 'live Billing Checkout Session compatibility migration must exist');
+const liveSessionMigration = read('supabase', 'migrations', liveSessionMigrationName);
 const checkout = read('supabase', 'functions', 'create-billing-checkout', 'index.ts');
 const portal = read('supabase', 'functions', 'create-billing-portal', 'index.ts');
 const webhook = read('supabase', 'functions', 'stripe-billing-webhook', 'index.ts');
@@ -19,6 +23,7 @@ const readiness = JSON.parse(read('website', 'content', 'subscription-readiness.
 const acceptanceRunbook = read('STRIPE_BILLING_TEST_ACCEPTANCE_RUNBOOK.md');
 const claimProbes = read('tests', 'stripe-billing-checkout-claim-probes.sql');
 const lifecycleProbes = read('tests', 'stripe-billing-sandbox-lifecycle-probes.sql');
+const liveSessionProbes = read('tests', 'stripe-billing-live-session-probes.sql');
 
 const tables = [
   'billing_customers',
@@ -142,6 +147,11 @@ assert.match(
 );
 assert.doesNotMatch(migration, /security definer/i);
 assert.match(migration, /access_state in \('full', 'grace'\)[\s\S]*?effective_until > now\(\)/i);
+assert.match(
+  liveSessionMigration,
+  /drop constraint billing_checkout_claims_stripe_checkout_session_id_check[\s\S]*?add constraint billing_checkout_claims_stripe_checkout_session_id_check[\s\S]*?\^cs_\(test\|live\)_/i,
+  'Billing claims must accept only test- or live-mode Stripe Checkout Session IDs',
+);
 
 // Checkout accepts a business choice, never a browser-provided Stripe Price.
 assert.match(checkout, /\["monthly", "annual"\]\.includes\(interval\)/);
@@ -153,8 +163,13 @@ assert.match(
 );
 assert.doesNotMatch(checkout, /body\.(?:price|priceId|amount)/);
 assert.match(checkout, /STRIPE_BILLING_ENABLED"\) !== "true"/);
-assert.match(checkout, /STRIPE_BILLING_TEST_MODE"\) !== "true"/);
+assert.match(checkout, /STRIPE_BILLING_TEST_MODE/);
+assert.match(checkout, /STRIPE_BILLING_LIVE_MODE/);
+assert.match(checkout, /STRIPE_BILLING_LIVE_APPROVED/);
 assert.match(checkout, /\^\(\?:sk\|rk\)_test_/);
+assert.match(checkout, /\^\(\?:sk\|rk\)_live_/);
+assert.match(checkout, /\^cs_live_/);
+assert.match(checkout, /\^cs_test_/);
 assert.match(checkout, /params\.set\("mode", "subscription"\)/);
 assert.match(checkout, /subscription_data\[metadata\]\[tallyo_user_id\]/);
 assert.match(checkout, /client_reference_id", user\.id/);
@@ -178,7 +193,9 @@ assert.match(
 
 // Portal ownership is resolved from the authenticated user, not request data.
 assert.match(portal, /STRIPE_BILLING_ENABLED"\) !== "true"/);
-assert.match(portal, /STRIPE_BILLING_TEST_MODE"\) !== "true"/);
+assert.match(portal, /STRIPE_BILLING_TEST_MODE/);
+assert.match(portal, /STRIPE_BILLING_LIVE_MODE/);
+assert.match(portal, /STRIPE_BILLING_LIVE_APPROVED/);
 assert.match(
   portal,
   /STRIPE_BILLING_APP_BASE_URL[\s\S]*?APP_BASE_URL/,
@@ -188,8 +205,9 @@ assert.match(portal, /\.from\("billing_customers"\)[\s\S]*?\.eq\("user_id", user
 assert.doesNotMatch(portal, /req\.json\(/);
 assert.match(portal, /billing_portal\/sessions/);
 
-// The separate Billing endpoint verifies the untouched raw body, rejects live
-// events, refreshes current provider state and resolves ownership from the DB.
+// The separate Billing endpoint verifies the untouched raw body, rejects
+// events from the other provider mode, refreshes current provider state and
+// resolves ownership from the DB.
 assert.match(webhook, /const rawBody = await req\.text\(\)/);
 assert.match(webhook, /verifyStripeSignature\([\s\S]*?rawBody/);
 assert.match(webhook, /event = JSON\.parse\(rawBody\)/);
@@ -197,7 +215,12 @@ assert.ok(
   webhook.indexOf('verifyStripeSignature(') < webhook.indexOf('event = JSON.parse(rawBody)'),
   'signature verification must happen before parsing or mutation',
 );
-assert.match(webhook, /event\?\.livemode !== false/);
+assert.match(webhook, /STRIPE_BILLING_TEST_MODE/);
+assert.match(webhook, /STRIPE_BILLING_LIVE_MODE/);
+assert.match(webhook, /STRIPE_BILLING_LIVE_APPROVED/);
+assert.match(webhook, /event\?\.livemode !== config\.liveMode/);
+assert.match(webhook, /\^cs_live_/);
+assert.match(webhook, /\^cs_test_/);
 assert.match(webhook, /allowedEvents\.has/);
 assert.match(webhook, /retrieveSubscription\(subscriptionId, config\)/);
 assert.match(webhook, /\.from\("billing_customers"\)[\s\S]*?\.eq\("stripe_customer_id", customerId\)/);
@@ -214,11 +237,11 @@ assert.match(webhook, /admin\.rpc\([\s\S]*?"apply_stripe_billing_event"/);
 assert.match(webhook, /admin\.rpc\([\s\S]*?"clear_stripe_billing_checkout_claim"/);
 assert.match(
   webhook,
-  /event\.type === "checkout\.session\.expired"[\s\S]*?clearCheckoutClaim\(admin, event\)/,
+  /event\.type === "checkout\.session\.expired"[\s\S]*?clearCheckoutClaim\(admin, event, config\)/,
 );
 assert.match(
   webhook,
-  /event\.type === "checkout\.session\.completed"[\s\S]*?clearCheckoutClaim\(admin, event\)/,
+  /event\.type === "checkout\.session\.completed"[\s\S]*?clearCheckoutClaim\(admin, event, config\)/,
 );
 assert.doesNotMatch(webhook, /\.from\("invoices"\)/);
 assert.doesNotMatch(invoiceWebhook, /account_entitlements|billing_subscriptions|apply_stripe_billing_event/);
@@ -265,11 +288,14 @@ assert.match(
   /account_entitlement_allows_write\(v_subscription\.user_id\)/i,
 );
 assert.match(lifecycleProbes, /'active'[\s\S]*?payment recovery/i);
+assert.match(liveSessionProbes, /cs_live_TallyoSyntheticSession/);
+assert.match(liveSessionProbes, /when check_violation then null/i);
 for (
   const [name, source] of Object.entries({
     acceptanceRunbook,
     claimProbes,
     lifecycleProbes,
+    liveSessionProbes,
   })
 ) {
   assert.doesNotMatch(source, /sk_(?:live|test)_[A-Za-z0-9]{16,}/, `${name} contains a Stripe key`);
