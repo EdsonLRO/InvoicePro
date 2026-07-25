@@ -2,6 +2,7 @@
 // No payment, refund, payout or account disconnection is performed here.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { accountAllowsWrite, readOnlyAccountMessage } from "../_shared/account-entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -62,24 +63,30 @@ function connectConfig() {
     throw new Error("STRIPE_CONNECT_API_VERSION is required");
   }
 
-  const appBaseUrl = (Deno.env.get("APP_BASE_URL") || "").replace(/\/+$/, "");
+  const appBaseUrl = (
+    Deno.env.get("STRIPE_CONNECT_APP_BASE_URL") ||
+    Deno.env.get("APP_BASE_URL") ||
+    ""
+  ).replace(/\/+$/, "");
   let parsedBaseUrl: URL;
   try {
     parsedBaseUrl = new URL(appBaseUrl);
   } catch {
-    throw new Error("APP_BASE_URL is not configured");
+    throw new Error("STRIPE_CONNECT_APP_BASE_URL is not configured");
   }
   const localTestUrl = !liveMode &&
     parsedBaseUrl.protocol === "http:" &&
     ["127.0.0.1", "localhost"].includes(parsedBaseUrl.hostname);
   if (parsedBaseUrl.protocol !== "https:" && !localTestUrl) {
-    throw new Error("APP_BASE_URL must use HTTPS");
+    throw new Error("STRIPE_CONNECT_APP_BASE_URL must use HTTPS");
   }
   if (
     parsedBaseUrl.username || parsedBaseUrl.password ||
     parsedBaseUrl.search || parsedBaseUrl.hash
   ) {
-    throw new Error("APP_BASE_URL must be a plain application URL");
+    throw new Error(
+      "STRIPE_CONNECT_APP_BASE_URL must be a plain application URL",
+    );
   }
 
   return { stripeKey, apiVersion, appBaseUrl, liveMode };
@@ -358,6 +365,9 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
     const user = await requireSensitiveSession(userClient);
+    if (action !== "status" && !await accountAllowsWrite(admin, user.id)) {
+      return json({ error: readOnlyAccountMessage }, 403);
+    }
 
     const { data: existing, error: lookupError } = await admin
       .from("stripe_connected_accounts")

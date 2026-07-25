@@ -2,6 +2,7 @@
 // Sends overdue payment reminders only for invoices explicitly opted in to automation.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { accountAllowsWrite } from "../_shared/account-entitlements.ts";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 
@@ -236,6 +237,7 @@ Deno.serve(async (req) => {
   };
 
   const activeUsers = new Set<string>();
+  const entitlementCache = new Map<string, boolean>();
 
   for (const inv of invoices || []) {
       checked++;
@@ -246,6 +248,21 @@ Deno.serve(async (req) => {
       }
       activeUsers.add(userId);
       checkedByUser.set(userId, (checkedByUser.get(userId) || 0) + 1);
+      let writeAllowed = entitlementCache.get(userId);
+      try {
+        if (writeAllowed === undefined) {
+          writeAllowed = await accountAllowsWrite(admin, userId);
+          entitlementCache.set(userId, writeAllowed);
+        }
+      } catch {
+        failed++;
+        markFailure(userId);
+        continue;
+      }
+      if (!writeAllowed) {
+        skipped++;
+        continue;
+      }
       const company = settingsByUser.get(userId) || {};
 
       const firstDays = Math.max(1, Number(inv.overdue_first_reminder_days) || Number(company.overdue_first_reminder_days) || 3);
@@ -428,6 +445,7 @@ Deno.serve(async (req) => {
         checked: checkedByUser.get(userId) || 0,
         sent: sentByUser.get(userId) || 0,
         failed: failureCount,
+        restricted: entitlementCache.get(userId) === false,
         status: failureCount > 0 ? "attention" : "ok",
       },
     });

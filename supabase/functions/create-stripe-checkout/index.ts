@@ -3,6 +3,7 @@
 // Payment state is updated only by the signed Stripe webhook.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { accountAllowsWrite, readOnlyAccountMessage } from "../_shared/account-entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -109,6 +110,13 @@ Deno.serve(async (req) => {
     return json({
       error: "Card payments are not configured for this account",
     }, 403);
+  }
+  try {
+    if (!await accountAllowsWrite(admin, userData.user.id)) {
+      return json({ error: readOnlyAccountMessage }, 403);
+    }
+  } catch {
+    return json({ error: "Account access could not be confirmed" }, 503);
   }
 
   let body: any;

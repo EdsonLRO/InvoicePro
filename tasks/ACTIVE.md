@@ -3,7 +3,7 @@
 Task ID: COMM-001
 Title: Integrate subscriptions, independent-business customer payments and the public AI Helper for controlled commercial release
 Priority: High
-Status: Billing and Connect provider foundations deployed but disabled; test-provider configuration pending
+Status: Billing sandbox lifecycle accepted; entitlement enforcement prepared; Connect sandbox configuration awaiting Owner-private secrets
 Phase: Controlled provider preparation
 Owner role: Master Orchestrator
 Assigned specialists: Payments, Backend/Supabase, Security, Website, AI, QA and Release; Legal is triggered only for claims, notices and final publication
@@ -24,8 +24,13 @@ Prepare Tallyo so the public website and authenticated app can offer:
 - PR #98 merged the disabled Stripe Billing acceptance preparation into `main`.
 - PR #100 merged the Connect account/onboarding foundation into `main`.
 - PR #101 merged the disabled direct-charge Checkout, connected-refund, signed connected-account webhook and Owner-route isolation slice as `a0e87e0`.
+- PR #102 merged the provider-foundation evidence and controlled sandbox-acceptance preparation.
 - After a completed 2026-07-24 physical backup, the Owner-approved production-preparation stage applied the Billing and both Connect migrations and deployed the seven new functions at version 1.
-- All Billing and Connect functions remain fail-closed: no commercial feature flag, provider secret, Product, Price, event destination, connected account or live-release gate is configured.
+- Stripe Billing sandbox now has the approved GBP 8 monthly and GBP 80 annual Tallyo Pro Prices, a separate signed Billing event destination and a configured Customer Portal.
+- The Owner privately entered the rotated Stripe Billing test key and Billing webhook signing secret in Supabase. Their values were not requested, inspected or stored in the repository.
+- Billing is enabled only for the protected non-live acceptance preview. One synthetic GBP 8 monthly test subscription and its provider-derived full entitlement are active; cancellation-at-period-end, Portal return, duplicate, stale-event, renewal, failed-payment, grace, read-only and recovery handling have been exercised without public release.
+- Draft PR #103 contains the focused, unapplied entitlement RLS migration and undeployed server-side guards. Disposable PostgreSQL 17 RLS, privilege, tenant-isolation and service-role reconciliation probes pass; required deployment approvals remain open.
+- Connect remains fail-closed with no connected account or enabled release gate. A separate sandbox connected-account webhook destination now has the reviewed 12-event allowlist, and eight non-live Supabase settings are configured with every feature gate disabled. The Owner-private Connect key and webhook signing secret remain absent.
 - No existing Owner invoice-payment, refund or email function was redeployed.
 - The AI Helper is merged, privately tested and disabled by default. Its existing encrypted Cloudflare secret is preserved.
 - The website remains privately previewed and is not published on `tallyo.co.uk`.
@@ -33,8 +38,8 @@ Prepare Tallyo so the public website and authenticated app can offer:
 ## Current controlled-provider scope
 
 - preserve the applied schema and disabled function boundary;
-- prepare exact Stripe sandbox Products/Prices, event destinations, test key and feature-gate configuration;
-- run synthetic subscription and multi-account Connect acceptance only after another exact Owner approval;
+- complete the protected Billing acceptance integration, controlled subscription lifecycle probes and focused server-side entitlement enforcement under the Owner's 2026-07-25 approval;
+- configure and run the approved synthetic multi-account Connect acceptance after Billing acceptance;
 - keep the existing Owner invoice-payment route isolated and unchanged until its allowlist secret and source redeployment receive separate approval;
 - continue non-provider website and AI readiness work that does not activate public services.
 
@@ -54,11 +59,10 @@ Lock acquired: 2026-07-24.
 
 ## Explicit exclusions until separately approved
 
-- no further Stripe or Supabase provider configuration;
-- no function redeployment or migration change;
-- no secret reveal, replacement, rotation or new secret entry;
-- no Stripe Product, Price, webhook, Customer Portal or connected-account creation;
-- no test or live payment, refund, dispute or subscription;
+- no live Stripe Billing or Connect configuration, live Price, live secret, real customer or real-money transaction;
+- no function redeployment or migration change outside the exact approved sandbox-acceptance scope;
+- no secret reveal or repository/browser storage;
+- no existing Owner-route function redeployment without the exact pre-deployment approval;
 - no unrestricted public AI activation or paid OpenAI request;
 - no DNS cutover, legal publication or public production release;
 - no deployment or production-provider change to the Owner-account invoice-payment path.
@@ -68,7 +72,7 @@ Lock acquired: 2026-07-24.
 1. **Connect decision and implementation boundary** - completed.
 2. **Repository implementation and PR review** - completed through PR #101.
 3. **Disabled provider foundation** - completed: applied the three reviewed additive migrations, deployed seven new functions, verified RLS/grants/advisors/JWT settings and retained absent feature gates.
-4. **Isolated test acceptance** - separately approve Stripe sandbox Products/Prices, event destinations, protected settings, synthetic connected accounts, test subscriptions and test invoice payments/refunds.
+4. **Isolated test acceptance** - in progress under the 2026-07-25 Owner approval: protected Billing Checkout, Portal, signed reconciliation and lifecycle probes pass. Draft PR #103 prepares focused server-side entitlement enforcement and has passing local probes. The separate Connect sandbox webhook and fail-closed non-live settings are configured; private secrets, reviewed deployment and synthetic multi-account testing remain.
 5. **AI release readiness** - preserve the existing secret and preview; separately approve public notice, budget, rate limits and activation.
 6. **Production release** - separately approve live provider configuration, secrets, payment acceptance, DNS and publication.
 
@@ -89,6 +93,12 @@ This approval does not authorise provider configuration, deployment, secrets, pa
 
 ## Current approval boundary
 
-PR #101 passed its required check and merged after exact Owner approval. The subsequent Owner-approved provider-foundation stage applied the three commercial migrations and deployed only the seven new disabled functions. Evidence: `COMMERCIAL_PROVIDER_FOUNDATION_DEPLOYMENT_EVIDENCE_2026-07-24.md`.
+PR #102 passed its required checks and merged after exact Owner approval. The applied three commercial migrations and seven deployed functions were reconciled after merge; RLS, grants, JWT settings, migration history, security advisors and the zero-row commercial-table baseline remained correct. Evidence: `COMMERCIAL_PROVIDER_FOUNDATION_DEPLOYMENT_EVIDENCE_2026-07-24.md`.
 
-The next gate is Stripe sandbox configuration and synthetic acceptance. Entering any test key or webhook secret, creating Products/Prices or event destinations, enabling a Billing/Connect gate, creating a connected account, or making a test subscription/payment/refund requires another exact Owner approval. Live mode, existing Owner-route redeployment, public claims and release remain later separate gates.
+The Owner approved the sandbox-only commercial acceptance stage on 2026-07-25. Billing Products/Prices, the separate Billing event destination, Customer Portal and private Supabase test settings are configured. Billing is enabled only in the protected non-live preview and Supabase test configuration. One synthetic monthly Checkout, signed entitlement activation, Customer Portal return, cancellation-at-period-end, duplicate replay and stale-event handling pass; rollback-only probes cover renewal, failed payment, seven-day grace, read-only transition and recovery.
+
+The acceptance review recorded a material server-side enforcement gap before repair: the five core application tables still use ownership-only write RLS policies. Draft PR #103 now prepares the focused, unapplied migration and server guards while preserving owner-scoped reads and service-role provider reconciliation; local PostgreSQL 17 and focused function checks pass.
+
+On 2026-07-25 a separate Stripe sandbox destination was created for connected-account Checkout, refund and dispute events using the reviewed 12-event allowlist. Supabase now holds only the approved non-secret Connect sandbox settings: all feature gates remain `false`, live mode and live approval remain `false`, the sandbox API version is fixed, and the Access-protected app URL is isolated under `STRIPE_CONNECT_APP_BASE_URL`. The Owner-private Connect key and webhook signing secret are not configured. No Connect account, payment or refund has been created.
+
+The next gates are exact Owner approval to mark PR #103 ready and merge it, then a reviewed migration/function deployment plan that does not interrupt the existing Owner-controlled invoice-payment route. Existing live invoice-payment, refund and email functions must not be redeployed without the exact pre-deployment approval required by this task. Live mode, public claims and release remain later gates.

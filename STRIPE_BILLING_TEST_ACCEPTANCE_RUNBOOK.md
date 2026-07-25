@@ -1,12 +1,12 @@
 # Stripe Billing isolated test-acceptance runbook
 
-Status: Repository preparation only. This runbook does not authorise a Supabase or Stripe change, secret entry, deployment, Checkout, payment or public release.
+Status: The 2026-07-25 Owner-approved protected sandbox execution is recorded in `STRIPE_BILLING_SANDBOX_ACCEPTANCE_EVIDENCE_2026-07-25.md`. This runbook does not authorise a later Supabase or Stripe change, secret entry, deployment, Checkout, payment or public release.
 
 ## Purpose and boundary
 
-Use this procedure only after the Owner approves an isolated Stripe sandbox and a non-production Supabase target. It validates Tallyo subscription Billing for a synthetic Tallyo account. It must not touch the production Supabase project, live Stripe mode, existing invoice-payment configuration, real customer data or the public website.
+Use this procedure only after the Owner approves an isolated Stripe sandbox and the exact Supabase/test-app target. It validates Tallyo subscription Billing for a synthetic Tallyo account. It must not touch live Stripe mode, existing invoice-payment configuration, real customer data or the public website.
 
-The production Supabase project reference is `cuagwifetheefftleeup`. If the selected target has that reference, stop. The acceptance target must be a separately approved non-production project or isolated Supabase branch with synthetic data only. Any new paid project, add-on or billable branch requires separate Owner approval before creation.
+The 2026-07-25 execution used the existing Supabase project only because the Owner's exact approval named the protected, non-live feature gates and synthetic acceptance scope. That exception does not authorise reuse for another test. Without an exact recorded exception, the procedure must not touch the production Supabase project. Prefer a separately approved non-production project or isolated Supabase branch with synthetic data only. Any new paid project, add-on or billable branch requires separate Owner approval before creation.
 
 The committed local bootstrap creates synthetic Auth roles/users and is for a disposable local PostgreSQL database only. Never run `tests/stripe-billing-local-bootstrap.sql` against Supabase.
 

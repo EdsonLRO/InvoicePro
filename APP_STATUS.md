@@ -9,8 +9,10 @@
 - PR #92 is merged. Repository authority is simplified, the approved commercial offer is prepared, and general card-payment claims are qualified for the future multi-business boundary.
 - PRs #94, #96 and #98 merged the reviewed Stripe Billing foundation and acceptance preparation.
 - PRs #100 and #101 merged the reviewed Stripe Connect onboarding, direct-charge Checkout, connected-refund, signed-webhook and Owner-route-isolation foundations.
+- PR #102 merged the commercial provider-foundation evidence and controlled sandbox-acceptance preparation.
 - After a completed 2026-07-24 physical backup and explicit Owner approval, the three additive Billing/Connect migrations were applied and the seven new functions were deployed at version 1. RLS, grants, migration history, JWT settings, disabled endpoint behavior and Supabase security advisors pass.
-- Billing and Connect remain unavailable: no commercial feature gate, provider secret, Stripe Product/Price, event destination, Customer Portal, connected account or live-release gate is configured. Existing live invoice-payment, refund and email functions were not redeployed.
+- Stripe Billing sandbox has the approved GBP 8 monthly and GBP 80 annual Prices, a separate Billing event destination, a configured Customer Portal and privately entered rotated test credentials. Billing is enabled only for the Access-protected non-live preview. One synthetic monthly subscription, signed entitlement activation, Portal return, cancellation-at-period-end, duplicate and stale-event handling pass; rollback-only probes cover renewal, failed payment, grace, read-only and recovery. Connect remains unavailable: its separate sandbox webhook and fail-closed non-live settings are configured, but all feature gates are `false`, Owner-private Connect secrets are absent, and no connected account or payment exists. Existing live invoice-payment, refund and email functions were not redeployed.
+- The Billing acceptance review found that core app write RLS was still ownership-only. Draft PR #103 contains an unapplied and undeployed entitlement-enforcement migration plus server-side guards; PostgreSQL 17 RLS/privilege probes pass. Evidence: `STRIPE_BILLING_SANDBOX_ACCEPTANCE_EVIDENCE_2026-07-25.md`.
 
 ## Implemented capabilities
 
@@ -34,14 +36,15 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 ## Commercial and payment boundary
 
 - Launch offer: Free Invoice Maker without an account, plus one Tallyo Pro plan at £8 monthly or £80 annually for one business and one user.
-- Subscription checkout is not active. The Billing schema and disabled functions now exist in Supabase, but no Stripe Product, Price, Customer Portal, secret, feature gate, subscription or active entitlement exists.
+- Subscription checkout is active only in the protected sandbox acceptance preview. It is not available on the public website or in live Stripe mode.
 - The current live Stripe invoice-payment path belongs to the Owner's controlled Tallyo account. It is not a merchant architecture for unrelated businesses and must not be marketed as generally available.
 - Independent-business card payments now have an applied schema and disabled function foundation, but remain unavailable until separate Stripe sandbox configuration, synthetic multi-account acceptance and production release approvals pass.
 
 ## Immediate launch blockers
 
-- The disabled Billing/Connect provider foundation is deployed. Configuring Stripe sandbox Products/Prices, event destinations, secrets and feature gates, then running controlled synthetic subscription and multi-account payment acceptance, is the next High-risk Owner gate.
+- Review, merge, apply and deploy the focused server-side restricted/read-only enforcement only through its remaining high-risk approval gates.
+- Complete the Owner-private Connect secret entry, reviewed deployment and approved synthetic multi-account payment/refund acceptance after PR #103's remaining gates.
 - Existing Owner-route source changes remain undeployed until an exact `STRIPE_OWNER_USER_ID` is entered without exposing it and the affected live functions receive a separate deployment approval.
 - Complete domain/DNS, final operational checks, approved legal/privacy publication and production release as separate Owner-gated stages.
 
-No current task authorises public AI activation, provider secret changes, Stripe Billing/Connect activation, DNS cutover, legal publication or public launch.
+No current task authorises public AI activation, live Stripe Billing/Connect configuration, existing live Owner-route redeployment, DNS cutover, legal publication or public launch.

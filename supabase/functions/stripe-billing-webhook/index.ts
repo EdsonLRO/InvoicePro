@@ -179,6 +179,17 @@ function subscriptionPeriodEnd(subscription: any): string | null {
   return new Date(seconds * 1000).toISOString();
 }
 
+function subscriptionCancelsAtPeriodEnd(subscription: any): boolean {
+  if (subscription?.cancel_at_period_end === true) return true;
+  const itemPeriodEnd = subscription?.items?.data?.[0]?.current_period_end;
+  const periodEnd = Number(subscription?.current_period_end || itemPeriodEnd);
+  const cancelAt = Number(subscription?.cancel_at);
+  return Number.isFinite(periodEnd) &&
+    periodEnd > 0 &&
+    Number.isFinite(cancelAt) &&
+    cancelAt === periodEnd;
+}
+
 function subscriptionPrice(subscription: any): string {
   const items = Array.isArray(subscription?.items?.data)
     ? subscription.items.data
@@ -259,7 +270,7 @@ async function reconcile(
       p_billing_interval: billingInterval,
       p_provider_status: status,
       p_current_period_end: subscriptionPeriodEnd(subscription),
-      p_cancel_at_period_end: subscription?.cancel_at_period_end === true,
+      p_cancel_at_period_end: subscriptionCancelsAtPeriodEnd(subscription),
       p_event_id: event.id,
       p_event_type: event.type,
       p_stripe_object_id: String(event.data?.object?.id || ""),

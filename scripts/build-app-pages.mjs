@@ -49,6 +49,10 @@ if (/secret|private/i.test(turnstileSiteKey)) throw new Error("Only a public Tur
 
 const publicSiteUrl = httpsUrl("TALLYO_PUBLIC_SITE_URL", String(process.env.TALLYO_PUBLIC_SITE_URL || "").trim(), { optional: true });
 const stripeLiveMode = process.env.TALLYO_STRIPE_LIVE_MODE === "true";
+const billingTestEnabled = process.env.TALLYO_BILLING_TEST_ENABLED === "true";
+if (billingTestEnabled && stripeLiveMode) {
+  throw new Error("TALLYO_BILLING_TEST_ENABLED cannot be enabled when TALLYO_STRIPE_LIVE_MODE is true");
+}
 const configuration = [
   "// Generated during the Cloudflare Pages build. Do not commit this file.",
   `window.SUPABASE_URL = ${JSON.stringify(supabaseUrl)};`,
@@ -56,6 +60,7 @@ const configuration = [
   `window.TURNSTILE_ENABLED = ${JSON.stringify(turnstileEnabled)};`,
   `window.TURNSTILE_SITE_KEY = ${JSON.stringify(turnstileSiteKey)};`,
   `window.STRIPE_LIVE_MODE = ${JSON.stringify(stripeLiveMode)};`,
+  `window.TALLYO_BILLING_TEST_ENABLED = ${JSON.stringify(billingTestEnabled)};`,
   `window.TALLYO_PUBLIC_SITE_URL = ${JSON.stringify(publicSiteUrl)};`,
   ""
 ].join("\n");

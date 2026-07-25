@@ -18,6 +18,7 @@ const websiteConfig = read('website', 'src', 'config.mjs');
 const readiness = JSON.parse(read('website', 'content', 'subscription-readiness.json'));
 const acceptanceRunbook = read('STRIPE_BILLING_TEST_ACCEPTANCE_RUNBOOK.md');
 const claimProbes = read('tests', 'stripe-billing-checkout-claim-probes.sql');
+const lifecycleProbes = read('tests', 'stripe-billing-sandbox-lifecycle-probes.sql');
 
 const tables = [
   'billing_customers',
@@ -146,6 +147,10 @@ assert.match(migration, /access_state in \('full', 'grace'\)[\s\S]*?effective_un
 assert.match(checkout, /\["monthly", "annual"\]\.includes\(interval\)/);
 assert.match(checkout, /STRIPE_BILLING_MONTHLY_PRICE_ID/);
 assert.match(checkout, /STRIPE_BILLING_ANNUAL_PRICE_ID/);
+assert.match(
+  checkout,
+  /STRIPE_BILLING_APP_BASE_URL[\s\S]*?APP_BASE_URL/,
+);
 assert.doesNotMatch(checkout, /body\.(?:price|priceId|amount)/);
 assert.match(checkout, /STRIPE_BILLING_ENABLED"\) !== "true"/);
 assert.match(checkout, /STRIPE_BILLING_TEST_MODE"\) !== "true"/);
@@ -174,6 +179,10 @@ assert.match(
 // Portal ownership is resolved from the authenticated user, not request data.
 assert.match(portal, /STRIPE_BILLING_ENABLED"\) !== "true"/);
 assert.match(portal, /STRIPE_BILLING_TEST_MODE"\) !== "true"/);
+assert.match(
+  portal,
+  /STRIPE_BILLING_APP_BASE_URL[\s\S]*?APP_BASE_URL/,
+);
 assert.match(portal, /getAuthenticatorAssuranceLevel/);
 assert.match(portal, /\.from\("billing_customers"\)[\s\S]*?\.eq\("user_id", user\.id\)/);
 assert.doesNotMatch(portal, /req\.json\(/);
@@ -193,6 +202,14 @@ assert.match(webhook, /allowedEvents\.has/);
 assert.match(webhook, /retrieveSubscription\(subscriptionId, config\)/);
 assert.match(webhook, /\.from\("billing_customers"\)[\s\S]*?\.eq\("stripe_customer_id", customerId\)/);
 assert.match(webhook, /priceId === config\.monthlyPrice[\s\S]*?priceId === config\.annualPrice/);
+assert.match(
+  webhook,
+  /function subscriptionCancelsAtPeriodEnd[\s\S]*?cancel_at_period_end === true[\s\S]*?cancelAt === periodEnd/,
+);
+assert.match(
+  webhook,
+  /p_cancel_at_period_end: subscriptionCancelsAtPeriodEnd\(subscription\)/,
+);
 assert.match(webhook, /admin\.rpc\([\s\S]*?"apply_stripe_billing_event"/);
 assert.match(webhook, /admin\.rpc\([\s\S]*?"clear_stripe_billing_checkout_claim"/);
 assert.match(
@@ -226,7 +243,23 @@ assert.match(acceptanceRunbook, /leave the signed Billing webhook available/i);
 assert.match(claimProbes, /different request bypassed the active claim/i);
 assert.match(claimProbes, /expired claim did not recover/i);
 assert.match(claimProbes, /verified subscription did not block new Checkout/i);
-for (const [name, source] of Object.entries({ acceptanceRunbook, claimProbes })) {
+assert.match(lifecycleProbes, /^begin;/i);
+assert.match(lifecycleProbes, /\brollback;/i);
+assert.match(lifecycleProbes, /'past_due'[\s\S]*?'grace'/i);
+assert.match(lifecycleProbes, /interval '7 days 1 second'/i);
+assert.match(lifecycleProbes, /'unpaid'[\s\S]*?'read_only'/i);
+assert.match(
+  lifecycleProbes,
+  /account_entitlement_allows_write\(v_subscription\.user_id\)/i,
+);
+assert.match(lifecycleProbes, /'active'[\s\S]*?payment recovery/i);
+for (
+  const [name, source] of Object.entries({
+    acceptanceRunbook,
+    claimProbes,
+    lifecycleProbes,
+  })
+) {
   assert.doesNotMatch(source, /sk_(?:live|test)_[A-Za-z0-9]{16,}/, `${name} contains a Stripe key`);
   assert.doesNotMatch(source, /whsec_[A-Za-z0-9]{16,}/, `${name} contains a webhook secret`);
 }

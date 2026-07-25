@@ -17,6 +17,7 @@ import {
   supabaseClients,
   validEmail,
 } from "../_shared/stripe-connect.ts";
+import { accountAllowsWrite, readOnlyAccountMessage } from "../_shared/account-entitlements.ts";
 
 function outstandingAmount(invoice: any): number {
   return Math.max(
@@ -90,6 +91,9 @@ Deno.serve(async (req) => {
     const config = connectConfig("STRIPE_CONNECT_CHECKOUT_ENABLED", true);
     const { userClient, admin } = supabaseClients(authHeader);
     const user = await requireSensitiveSession(userClient);
+    if (!await accountAllowsWrite(admin, user.id)) {
+      return json({ error: readOnlyAccountMessage }, 403, true);
+    }
     const mapping = await loadConnectMapping(admin, user.id);
     requireActiveMapping(mapping, config);
     await refreshActiveAccount(admin, user.id, mapping, config);
