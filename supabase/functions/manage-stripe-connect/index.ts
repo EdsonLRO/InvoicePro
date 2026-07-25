@@ -243,6 +243,7 @@ async function createAccount(
     body: {
       contact_email: user.email,
       display_name: safeBusinessName(company?.name),
+      identity: { country: "gb" },
       dashboard: "full",
       defaults: {
         responsibilities: {

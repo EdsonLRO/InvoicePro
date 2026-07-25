@@ -58,6 +58,8 @@ assert.match(handler, /card_payments:\s*\{\s*requested:\s*true\s*\}/);
 const createAccountBlock = handler.match(
   /async function createAccount[\s\S]*?function stripeLinkUrl/
 )?.[0] || '';
+assert.match(createAccountBlock, /identity:\s*\{\s*country:\s*"gb"\s*\}/);
+assert.doesNotMatch(createAccountBlock, /entity_type/);
 assert.doesNotMatch(createAccountBlock, /stripe_balance/);
 assert.match(handler, /metadata:\s*\{\s*tallyo_user_id:\s*user\.id\s*\}/);
 assert.match(handler, /String\(account\?\.metadata\?\.tallyo_user_id/);
