@@ -83,6 +83,15 @@ assert.match(edge, /claim_mfa_recovery_code/);
 assert.match(edge, /complete_mfa_recovery/);
 assert.match(edge, /account_mfa_recovery_started/);
 assert.match(edge, /account_mfa_recovery_completed/);
+const originSet = edge.match(/const APP_ORIGINS = new Set\(\[([\s\S]*?)\]\);/);
+assert(originSet, 'MFA recovery origin allowlist was not found.');
+const configuredOrigins = [...originSet[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]);
+assert.deepEqual(configuredOrigins, [
+  'https://edsonlro.github.io',
+  'https://app.tallyo.co.uk',
+  'http://localhost:8000',
+  'http://127.0.0.1:8000',
+], 'MFA recovery must contain only the exact approved origins.');
 assert.doesNotMatch(edge, /Access-Control-Allow-Origin": "\*"/);
 assert.doesNotMatch(edge, /console\.(?:log|error|warn)\([^\n]*(?:body\.code|normalized|codeHash|hashes|codes)/i);
 

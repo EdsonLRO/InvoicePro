@@ -5,6 +5,7 @@ import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supa
 
 const APP_ORIGINS = new Set([
   "https://edsonlro.github.io",
+  "https://app.tallyo.co.uk",
   "http://localhost:8000",
   "http://127.0.0.1:8000",
 ]);

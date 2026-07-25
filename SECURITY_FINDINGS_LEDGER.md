@@ -295,6 +295,20 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Status:** Resolved in the BILL-003 branch; high-risk PR merge remains Owner-gated.
 - **Residual gate:** Supabase application, Stripe test configuration, deployment, test Checkout and public activation remain separate Owner approvals.
 
+### SEC-AUTH-006 - Turnstile server secret exposed during provider inspection
+
+- **Date:** 2026-07-25
+- **Classification:** production Auth abuse-protection secret exposure
+- **Status:** Validated — rotation and dependent-provider update require exact Owner approval.
+- **Finding:** During read-only inspection of the existing Cloudflare Turnstile widget, the provider interface unexpectedly returned the configured server secret in internal browser-tool output. The value was not requested, repeated, stored, copied, committed or used.
+- **Affected boundary:** The existing Turnstile widget and the Supabase Auth CAPTCHA configuration that validates signup, password sign-in, password reset and sensitive password reauthentication.
+- **Impact:** Anyone retaining the exposed value could attempt to forge server-side Turnstile verification outside Tallyo. Existing Supabase Auth, MFA, AAL and session controls remain active, but the CAPTCHA secret can no longer be treated as confidential.
+- **Existing controls:** Only the public site key is shipped to the browser; password authentication, MFA/AAL2, global sign-out ordering, RLS and Auth throttling remain unchanged. The final `app.tallyo.co.uk` hostname is not yet public or allowlisted.
+- **Narrow remediation:** Rotate the widget's server secret, enter the replacement directly into Supabase Auth without revealing it to Codex, retain managed mode, add only the final app hostname, and verify signup, sign-in, reset and sensitive reauthentication before public release.
+- **Compatibility to preserve:** Keep the current GitHub Pages and Cloudflare Pages hostnames through cutover, preserve fail-closed Turnstile handling, and do not weaken Auth, MFA, session, recovery or throttling behavior.
+- **Verification required:** Confirm the old secret is invalidated without displaying either value; read back configured status only; pass bounded CAPTCHA-required Auth smoke tests on the final hostname; confirm the public site key remains the only browser credential.
+- **Rollback:** Keep the current app behind Cloudflare Access and keep GitHub Pages available until the rotated configuration and final-hostname Auth acceptance pass. Do not restore the exposed secret.
+
 ## Open Follow-Ups
 
 - Keep the verified Supabase Auth policy evidence current after material provider changes: 12-character minimum, leaked-password rejection, one-hour JWT lifetime, refresh rotation, seven-day maximum session age, 24-hour inactivity timeout, custom SMTP, and the initial Auth rate limits.
