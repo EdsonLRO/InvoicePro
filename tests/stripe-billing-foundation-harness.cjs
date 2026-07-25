@@ -146,6 +146,10 @@ assert.match(migration, /access_state in \('full', 'grace'\)[\s\S]*?effective_un
 assert.match(checkout, /\["monthly", "annual"\]\.includes\(interval\)/);
 assert.match(checkout, /STRIPE_BILLING_MONTHLY_PRICE_ID/);
 assert.match(checkout, /STRIPE_BILLING_ANNUAL_PRICE_ID/);
+assert.match(
+  checkout,
+  /STRIPE_BILLING_APP_BASE_URL[\s\S]*?APP_BASE_URL/,
+);
 assert.doesNotMatch(checkout, /body\.(?:price|priceId|amount)/);
 assert.match(checkout, /STRIPE_BILLING_ENABLED"\) !== "true"/);
 assert.match(checkout, /STRIPE_BILLING_TEST_MODE"\) !== "true"/);
@@ -174,6 +178,10 @@ assert.match(
 // Portal ownership is resolved from the authenticated user, not request data.
 assert.match(portal, /STRIPE_BILLING_ENABLED"\) !== "true"/);
 assert.match(portal, /STRIPE_BILLING_TEST_MODE"\) !== "true"/);
+assert.match(
+  portal,
+  /STRIPE_BILLING_APP_BASE_URL[\s\S]*?APP_BASE_URL/,
+);
 assert.match(portal, /getAuthenticatorAssuranceLevel/);
 assert.match(portal, /\.from\("billing_customers"\)[\s\S]*?\.eq\("user_id", user\.id\)/);
 assert.doesNotMatch(portal, /req\.json\(/);

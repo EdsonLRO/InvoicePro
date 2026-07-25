@@ -25,7 +25,11 @@ function testConfig() {
   }
   const key = Deno.env.get("STRIPE_BILLING_SECRET_KEY") || "";
   const version = Deno.env.get("STRIPE_BILLING_API_VERSION")?.trim() || "";
-  const baseUrl = (Deno.env.get("APP_BASE_URL") || "").replace(/\/+$/, "");
+  const baseUrl = (
+    Deno.env.get("STRIPE_BILLING_APP_BASE_URL")?.trim() ||
+    Deno.env.get("APP_BASE_URL")?.trim() ||
+    ""
+  ).replace(/\/+$/, "");
   if (!/^(?:sk|rk)_test_/.test(key)) {
     throw new Error("Billing requires a Stripe test-mode key");
   }
@@ -36,17 +40,19 @@ function testConfig() {
   try {
     parsed = new URL(baseUrl);
   } catch {
-    throw new Error("APP_BASE_URL is not configured");
+    throw new Error(
+      "STRIPE_BILLING_APP_BASE_URL or APP_BASE_URL is not configured",
+    );
   }
   if (
     parsed.protocol !== "https:" &&
     !(parsed.protocol === "http:" &&
       ["127.0.0.1", "localhost"].includes(parsed.hostname))
   ) {
-    throw new Error("APP_BASE_URL must use HTTPS");
+    throw new Error("The Billing application URL must use HTTPS");
   }
   if (parsed.username || parsed.password || parsed.search || parsed.hash) {
-    throw new Error("APP_BASE_URL must be a plain application URL");
+    throw new Error("The Billing application URL must be a plain URL");
   }
   return { key, version, baseUrl };
 }
