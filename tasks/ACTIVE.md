@@ -3,7 +3,7 @@
 Task ID: COMM-001
 Title: Integrate subscriptions, independent-business customer payments and the public AI Helper for controlled commercial release
 Priority: High
-Status: Billing sandbox lifecycle accepted; first Connect account ready, Checkout correction in progress
+Status: Billing and two-account Connect sandbox acceptance in progress; restricted-state persistence correction validated in source
 Phase: Controlled provider preparation
 Owner role: Master Orchestrator
 Assigned specialists: Payments, Backend/Supabase, Security, Website, AI, QA and Release; Legal is triggered only for claims, notices and final publication
@@ -58,6 +58,14 @@ Prepare Tallyo so the public website and authenticated app can offer:
 
 Lock acquired: 2026-07-24.
 
+Current focused edit lock acquired 2026-07-25:
+
+- `supabase/functions/_shared/stripe-connect.ts`;
+- `tests/stripe-connect-payments-harness.cjs`;
+- `tasks/ACTIVE.md`.
+
+Release condition: focused capability-state persistence validation, reviewed commit or rollback.
+
 ## Explicit exclusions until separately approved
 
 - no live Stripe Billing or Connect configuration, live Price, live secret, real customer or real-money transaction;
@@ -73,7 +81,7 @@ Lock acquired: 2026-07-24.
 1. **Connect decision and implementation boundary** - completed.
 2. **Repository implementation and PR review** - completed through PR #101.
 3. **Disabled provider foundation** - completed: applied the three reviewed additive migrations, deployed seven new functions, verified RLS/grants/advisors/JWT settings and retained absent feature gates.
-4. **Isolated test acceptance** - in progress under the 2026-07-25 Owner approval: protected Billing Checkout, Portal, signed reconciliation and lifecycle probes pass. PR #103 merged and only the two approved Connect functions were deployed. Connect sandbox secrets and gates are configured. PRs #104-#107 passed the payout-field, UK-country, indexed-retrieval and trusted Account Link-flow provider gates. The Owner privately completed onboarding and both card payments and payouts report ready. The first fictional GBP 1 Checkout attempt exposed one remaining shared indexed-query correction before synthetic payment/refund testing can continue.
+4. **Isolated test acceptance** - in progress under the 2026-07-25 Owner approval: protected Billing Checkout, Portal, signed reconciliation and lifecycle probes pass. PR #103 merged and only the approved Connect functions were deployed. Connect sandbox secrets and gates are configured. PRs #104-#109 passed the payout-field, UK-country, indexed-retrieval, trusted Account Link-flow and shared Checkout/refund retrieval gates. Two isolated synthetic owners now map to two separate fully ready sandbox connected accounts with zero live-mode rows. The first account's fictional GBP 1 direct charge and full refund reconciled through signed webhooks, and one exact `refund.updated` replay returned HTTP 200 without another Connect event or audit mutation.
 5. **AI release readiness** - preserve the existing secret and preview; separately approve public notice, budget, rate limits and activation.
 6. **Production release** - separately approve live provider configuration, secrets, payment acceptance, DNS and publication.
 
@@ -105,3 +113,19 @@ On 2026-07-25 a separate Stripe sandbox destination was created for connected-ac
 The first onboarding request reached Stripe but failed before account creation because the request explicitly nested `stripe_balance` under Merchant capabilities. PR #104 removed that obsolete field and only `manage-stripe-connect` was redeployed under exact approval. The second request progressed to Stripe's `identity_country_required` validation and still created no account. PR #105 supplied `identity.country = gb`, left legal entity type to Stripe-hosted onboarding and advanced only `manage-stripe-connect` to version 17. The next request created the sandbox account with HTTP 200, then failed on the follow-up GET because Accounts v2 requires indexed `include[0]`, `include[1]` query parameters instead of `include[]`. PR #106 corrected that encoding and only `manage-stripe-connect` was redeployed. The next protected request retrieved the account but requested `account_update`, which Stripe rejected for the not-yet-onboarded account. PR #107 made the server select `account_onboarding` for every non-active account, was merged as `71e92fa`, and only `manage-stripe-connect` advanced from version 18 to 19 with JWT verification retained. The single approved retry opened Stripe-hosted sandbox onboarding and Stripe recorded HTTP 200 for Account Links v2. The entitlement migration and existing live invoice-payment, refund and email functions remain outside any later redeployment. Live mode, public claims and release remain later gates.
 
 After private onboarding completion, the first fictional GBP 1 direct-charge attempt reached deployed `create-connect-checkout` version 15 and returned a controlled HTTP 502 before Stripe Checkout creation. Source reconciliation found that its shared `refreshActiveAccount` helper still sent `include[]` while Accounts v2 requires indexed `include[0]`, `include[1]` and `include[2]`. The focused correction changes only those shared query names and adds a regression assertion. The same shared refresh protects both Connect Checkout and Connect refunds, so redeploying only `create-connect-checkout` and `create-connect-refund` is the exact Owner approval boundary. No payment or refund occurred.
+
+PR #109 merged the indexed shared refresh correction as `c647746`. Only `create-connect-checkout` and `create-connect-refund` were redeployed from that merge; all other function versions and migration state remained unchanged. The fictional GBP 1 direct charge then completed once, the full refund restored the GBP 1 balance and reopened the invoice to Sent, both function invocations returned HTTP 200, and the signed Connect webhook recorded three distinct applied provider events with zero live-mode rows. Replaying the existing `refund.updated` event once returned HTTP 200 while `stripe_connect_events` remained at three and the four expected Connect audit records remained unchanged.
+
+The Owner approved and completed a second synthetic GBP 8 monthly sandbox subscription and a second Stripe-hosted Connect onboarding. Aggregate reconciliation now reports two connected owners, two connected accounts and two fully ready accounts, with zero live-mode connected accounts, Checkout claims or provider events. The second tenant's empty invoice list did not expose the first tenant's invoice or payment history.
+
+### COMM-001-CN-001 finding and remediation evidence
+
+- **Status:** remediated in source; merge and deployment remain separate Owner-approval boundaries.
+- **Severity:** Medium functional/payment-state integrity; payment operations still fail closed.
+- **Affected boundary:** `refreshActiveAccount` in the shared Connect Checkout/refund guard.
+- **Evidence:** when Stripe returns a valid mapped account whose card-payment or payout capability is no longer active, the helper throws before updating the service-owned mapping. Checkout/refund creation is blocked, but the stored account can remain `active` until a separate status refresh.
+- **Invariant:** every server-side provider refresh must persist the normalised provider capability state before allowing or rejecting a new Checkout/refund operation.
+- **Narrow fix:** persist only the mapped account's normalised `active`, `pending`, `restricted`, `inactive` or `unknown` capability state and derived onboarding state before returning success or throwing the existing fail-closed error.
+- **Compatibility:** preserve tenant/account/mode/responsibility checks, active Checkout/refund behaviour, service-role-only writes, existing messages, Auth/MFA/entitlement gates and all live-mode blocks.
+- **Validation:** Connect payment, Connect foundation and payment-integrity harnesses pass; both affected Edge Functions pass frozen-lock Deno checks; formatting, diff hygiene and focused sensitive-value scanning pass. Review confirms normalisation, exact owner/account update binding, persistence before rejection, indexed retrieval, unchanged active behaviour and no disconnected-state mutation.
+- **Excluded:** no migration, provider account deletion, reconnection design, secret/configuration change, function deployment, payment/refund, live mode or public release. Stripe documents that stricter verification tokens cannot safely downgrade these already-completed sandbox accounts and that test mode might not enforce inactive capabilities, so destructive provider-state testing is not used.

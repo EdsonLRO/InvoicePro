@@ -71,6 +71,31 @@ assert.match(shared, /include\.append\("include\[0\]", "configuration\.merchant"
 assert.match(shared, /include\.append\("include\[1\]", "defaults"\)/);
 assert.match(shared, /include\.append\("include\[2\]", "requirements"\)/);
 assert.doesNotMatch(shared, /include\.append\("include\[\]"/);
+assert.match(
+  shared,
+  /export function connectCapabilityStatus[\s\S]*?\["active", "inactive", "pending", "restricted"\][\s\S]*?: "unknown"/
+);
+assert.match(
+  shared,
+  /export function connectOnboardingState[\s\S]*?cardPayments === "active" && payouts === "active"[\s\S]*?includes\("restricted"\)[\s\S]*?\? "restricted"[\s\S]*?: "pending"/
+);
+const refreshAccountBlock = shared.match(
+  /export async function refreshActiveAccount[\s\S]*?export function safeStripeCheckoutUrl/
+)?.[0] || '';
+assert.match(
+  refreshAccountBlock,
+  /onboarding_state: onboardingState,\s*card_payments_status: cardPayments,\s*payouts_status: payouts/
+);
+assert.match(
+  refreshAccountBlock,
+  /\.eq\("user_id", userId\)\.eq\(\s*"stripe_account_id",\s*mapping\.stripe_account_id/
+);
+assert.ok(
+  refreshAccountBlock.indexOf('.from("stripe_connected_accounts").update') <
+    refreshAccountBlock.indexOf('Stripe has paused card payments or payouts'),
+  'provider capability state must persist before Checkout/refund rejection'
+);
+assert.doesNotMatch(refreshAccountBlock, /disconnected_at/);
 assert.match(checkout, /refreshActiveAccount/);
 assert.match(checkout, /claim_stripe_connect_checkout/);
 assert.match(checkout, /complete_stripe_connect_checkout_claim/);
