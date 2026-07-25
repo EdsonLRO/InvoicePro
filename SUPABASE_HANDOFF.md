@@ -333,6 +333,8 @@ All eight values above were saved on 2026-07-25. The four sandbox gates are now 
 
 The Connect-only return URL support is deployed in `manage-stripe-connect` and `create-connect-checkout`. It falls back to the existing `APP_BASE_URL` for compatibility. The protected-sandbox setting keeps the existing Owner-controlled live invoice-payment return route unchanged.
 
+PR #104 removed the obsolete Accounts v2 `stripe_balance` request and only `manage-stripe-connect` was redeployed. The next sandbox request progressed to Stripe's `identity_country_required` validation and created no account. A focused source correction supplies the UK country only; legal entity type remains for Stripe-hosted onboarding. That correction is not deployed until its focused review and exact Owner approval.
+
 Provide a `.env.example` with placeholders if env files are introduced; never commit a real `.env`.
 
 ---
