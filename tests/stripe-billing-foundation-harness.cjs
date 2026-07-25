@@ -201,6 +201,14 @@ assert.match(webhook, /allowedEvents\.has/);
 assert.match(webhook, /retrieveSubscription\(subscriptionId, config\)/);
 assert.match(webhook, /\.from\("billing_customers"\)[\s\S]*?\.eq\("stripe_customer_id", customerId\)/);
 assert.match(webhook, /priceId === config\.monthlyPrice[\s\S]*?priceId === config\.annualPrice/);
+assert.match(
+  webhook,
+  /function subscriptionCancelsAtPeriodEnd[\s\S]*?cancel_at_period_end === true[\s\S]*?cancelAt === periodEnd/,
+);
+assert.match(
+  webhook,
+  /p_cancel_at_period_end: subscriptionCancelsAtPeriodEnd\(subscription\)/,
+);
 assert.match(webhook, /admin\.rpc\([\s\S]*?"apply_stripe_billing_event"/);
 assert.match(webhook, /admin\.rpc\([\s\S]*?"clear_stripe_billing_checkout_claim"/);
 assert.match(
