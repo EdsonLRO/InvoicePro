@@ -1,4 +1,5 @@
 import { footerGroups, navigation, siteConfig } from "./config.mjs";
+import { applyConnectPaymentCopy } from "./commercial-offer.mjs";
 import { faqs } from "./pages.mjs";
 
 const escapeAttribute = (value) => String(value)
@@ -89,6 +90,7 @@ const schemaFor = (page) => {
 export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
   const canonical = absoluteUrl(page.route);
   const title = page.route === "/" ? siteConfig.defaultTitle : `${page.title} | Tallyo`;
+  const description = applyConnectPaymentCopy(page.description, siteConfig.connectPaymentsEnabled);
   const robots = siteConfig.preview ? "noindex, nofollow, noarchive" : "index, follow";
   const socialImage = `${siteConfig.canonicalOrigin}${siteConfig.socialImagePath}`;
   const navMarkup = navigation.map((item) => `<a href="${item.href}"${page.route === item.href ? ' aria-current="page"' : ""}>${item.label}</a>`).join("");
@@ -96,8 +98,9 @@ export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
     siteConfig.googleSiteVerification ? `<meta name="google-site-verification" content="${escapeAttribute(siteConfig.googleSiteVerification)}">` : "",
     siteConfig.bingSiteVerification ? `<meta name="msvalidate.01" content="${escapeAttribute(siteConfig.bingSiteVerification)}">` : ""
   ].filter(Boolean).join("\n  ");
-  const content = page.content
+  const content = applyConnectPaymentCopy(page.content
     .replaceAll('data-signup-link href="#"', `data-signup-link href="${escapeAttribute(siteConfig.signupUrl)}"`)
+    .replaceAll('data-subscription-link href="#"', `data-subscription-link href="${escapeAttribute(siteConfig.subscriptionUrl)}"`)
     .replaceAll('data-login-link href="#"', `data-login-link href="${escapeAttribute(siteConfig.appUrl)}"`)
     .replace("__TALLYO_HELPER_KNOWLEDGE__", helperKnowledgeJson)
     .replaceAll("__TALLYO_AI_HELPER_ENABLED__", String(siteConfig.aiHelperEnabled))
@@ -118,8 +121,11 @@ export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
       siteConfig.aiHelperEnabled
         ? "The AI assistant receives only your current question and reviewed public Tallyo guidance. It has no account access or tools."
         : "It does not retain user-specific memory or send prompts to a third party."
-    );
-  const schema = JSON.stringify(schemaFor(page));
+    ), siteConfig.connectPaymentsEnabled);
+  const schema = applyConnectPaymentCopy(
+    JSON.stringify(schemaFor({ ...page, description })),
+    siteConfig.connectPaymentsEnabled
+  );
   const pageScripts = ["/assets/growth.js", ...(page.scripts || [])].map((src) => `<script type="module" src="${escapeAttribute(src)}"></script>`).join("\n  ");
   const inlineScripts = [schema, ...(page.helper ? [helperKnowledgeJson] : [])];
 
@@ -130,7 +136,7 @@ export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeAttribute(title)}</title>
-  <meta name="description" content="${escapeAttribute(page.description)}">
+  <meta name="description" content="${escapeAttribute(description)}">
   <meta name="robots" content="${robots}">
   <meta name="theme-color" content="${siteConfig.themeColor}">
   <link rel="canonical" href="${canonical}">
@@ -139,7 +145,7 @@ export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
   <meta property="og:site_name" content="Tallyo">
   <meta property="og:locale" content="${siteConfig.locale}">
   <meta property="og:title" content="${escapeAttribute(title)}">
-  <meta property="og:description" content="${escapeAttribute(page.description)}">
+  <meta property="og:description" content="${escapeAttribute(description)}">
   <meta property="og:url" content="${canonical}">
   <meta property="og:image" content="${socialImage}">
   <meta property="og:image:width" content="1200">
@@ -147,7 +153,7 @@ export const renderPage = (page, { helperKnowledgeJson = "" } = {}) => {
   <meta property="og:image:alt" content="Tallyo — Professional invoices. Faster payments. Less admin.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${escapeAttribute(title)}">
-  <meta name="twitter:description" content="${escapeAttribute(page.description)}">
+  <meta name="twitter:description" content="${escapeAttribute(description)}">
   <meta name="twitter:image" content="${socialImage}">
   ${verificationMarkup}
   <link rel="stylesheet" href="/assets/styles.css">

@@ -1,3 +1,5 @@
+import { connectPaymentPlaceholders } from "./commercial-offer.mjs";
+
 export const productFacts = Object.freeze({
   positioning: "Professional invoices. Clearer payment tracking. Less admin.",
   supporting:
@@ -6,7 +8,7 @@ export const productFacts = Object.freeze({
     "An internet connection is required to access and update authenticated business records.",
     "Tallyo is not a full accounting suite and does not prepare tax returns.",
     "Tallyo does not provide legal, tax or accounting advice.",
-    "Online card payments for independent business accounts are being prepared and are not included in the launch subscription yet."
+    connectPaymentPlaceholders.availability
   ]
 });
 
@@ -30,7 +32,7 @@ export const featureGroups = Object.freeze([
     label: "Track payments",
     title: "Keep payment progress with the invoice",
     description: "Record full or partial payments and see the outstanding balance against the right invoice.",
-    items: ["Full and partial payment records", "Outstanding balances", "Payment notes and dates", "Online card payments being prepared"]
+    items: ["Full and partial payment records", "Outstanding balances", "Payment notes and dates", connectPaymentPlaceholders.feature]
   },
   {
     label: "Save time",
@@ -98,14 +100,14 @@ export const helpArticles = Object.freeze([
   {
     slug: "payment-links-and-deposits",
     title: "Online card-payment availability",
-    description: "Understand what is available now and what is still being prepared for independent business accounts.",
+    description: connectPaymentPlaceholders.helpDescription,
     steps: [
       ["Record payments today", "Use the invoice Payments section to record money received through an agreed route."],
       ["Track part-payments", "Add each payment amount and date so the outstanding balance stays clear."],
       ["Keep customer notes", "Use the payment note to identify the route or reference used."],
-      ["Check availability later", "Tallyo will announce online card-payment availability only when independent business accounts are supported."]
+      ["Connect your payment account", connectPaymentPlaceholders.helpStep]
     ],
-    note: "Online card payments are being prepared and are not included in the launch subscription yet."
+    note: connectPaymentPlaceholders.helpNote
   },
   {
     slug: "recurring-invoices",
@@ -202,7 +204,7 @@ export const faqs = Object.freeze([
   { question: "Can I create quotes as well as invoices?", answer: "Yes. You can create quotes and convert a quote into an invoice when the work is agreed." },
   { question: "How do recurring invoices work?", answer: "You choose a schedule for an invoice. Tallyo can create future invoices and, when you enable it for that schedule, email them automatically." },
   { question: "Can Tallyo send overdue reminders?", answer: "Yes. Reminders are opt-in for each invoice, so they are only scheduled when you choose to enable them." },
-  { question: "Can customers pay an invoice by card?", answer: "Not through the launch subscription yet. Online card payments for independent business accounts are being prepared." },
+  { question: "Can customers pay an invoice by card?", answer: connectPaymentPlaceholders.faq },
   { question: "How do I track payments?", answer: "Record full or partial payments against an invoice, including the date and an optional reference, so the remaining balance stays clear." },
   { question: "Is there a free trial?", answer: "No. The Free Invoice Maker can be used without an account, while Tallyo Pro is the paid invoicing workspace." },
   { question: "How much is Tallyo Pro?", answer: "Tallyo Pro is £8 per month or £80 per year. The annual option saves £16 compared with paying monthly for a year." },

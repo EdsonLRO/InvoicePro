@@ -27,6 +27,15 @@ Supported build configuration:
   `https://tallyo.co.uk`.
 - `TALLYO_APP_URL`: Login destination; defaults to the current GitHub Pages app.
 - `TALLYO_SIGNUP_URL`: Create account destination; defaults to `TALLYO_APP_URL`.
+- `TALLYO_SUBSCRIPTION_URL`: Tallyo Pro destination; defaults to the Account page
+  within `TALLYO_APP_URL`.
+- `TALLYO_SUBSCRIPTIONS_ENABLED`: shows the working Tallyo Pro signup action only
+  with the matching private-preview or public-release approval variable.
+- `TALLYO_PUBLIC_AI_HELPER_ENABLED`: enables the OpenAI-backed public Helper only
+  with the matching private-preview or public-release approval variable.
+- `TALLYO_CONNECT_PAYMENTS_ENABLED`: publishes customer card-payment availability
+  only with `TALLYO_CONNECT_PRIVATE_PREVIEW_APPROVED=true` in preview or
+  `TALLYO_CONNECT_PUBLIC_RELEASE_APPROVED=true` in production.
 - `TALLYO_GOOGLE_SITE_VERIFICATION`: optional Google Search Console verification
   value, supplied only through the approved deployment environment.
 - `TALLYO_BING_SITE_VERIFICATION`: optional Bing Webmaster Tools verification

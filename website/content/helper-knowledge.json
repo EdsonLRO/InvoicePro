@@ -20,7 +20,7 @@
       "id": "features",
       "question": "What features are available?",
       "triggers": ["what features are available", "tallyo features", "what can tallyo do"],
-      "answer": "Tallyo supports invoices, quotes, credit notes, customers, saved items, branded PDFs, document email, payment tracking, recurring invoices, opt-in overdue reminders, exports and account-protection controls. Online card payments for independent business accounts are being prepared.",
+      "answer": "Tallyo supports invoices, quotes, credit notes, customers, saved items, branded PDFs, document email, payment tracking, recurring invoices, opt-in overdue reminders, exports and account-protection controls. __TALLYO_CONNECT_PAYMENT_AVAILABILITY__",
       "links": [{ "label": "See all features", "href": "/features/" }, { "label": "Take the product tour", "href": "/product-tour/" }]
     },
     {
@@ -55,28 +55,28 @@
       "id": "stripe-payments",
       "question": "Can customers pay by card?",
       "triggers": ["how do stripe card payments work", "stripe card payment", "pay by card", "card payment link"],
-      "answer": "Online card payments for independent business accounts are being prepared and are not included in the launch subscription yet. You can record payments received through another agreed route.",
+      "answer": "__TALLYO_CONNECT_PAYMENT_FAQ__ You can also record payments received through another agreed route.",
       "links": [{ "label": "Check payment availability", "href": "/help/payment-links-and-deposits/" }]
     },
     {
       "id": "card-storage",
       "question": "Does Tallyo store card details?",
       "triggers": ["does tallyo store card details", "card details stored", "store my card"],
-      "answer": "Tallyo does not currently collect card details for independent business accounts. Any future card-payment path will be introduced only with reviewed provider handling.",
+      "answer": "Tallyo does not store payment-card details. When card payments are available for your account, Stripe hosts checkout and handles the card information.",
       "links": [{ "label": "Read about payment security", "href": "/security/" }]
     },
     {
       "id": "deposits",
       "question": "Can Tallyo process deposits?",
       "triggers": ["can tallyo process deposits", "request a deposit", "invoice deposit"],
-      "answer": "You can record a deposit received through an agreed payment route as a part-payment against the invoice. Online deposit checkout is not included in the launch subscription yet.",
+      "answer": "You can record a deposit as a part-payment against an invoice. When card payments are available for your account, you can create a Stripe card-payment link for an allowed part-payment.",
       "links": [{ "label": "Understand payment tracking", "href": "/help/payment-links-and-deposits/" }]
     },
     {
       "id": "refunds",
       "question": "How do refunds work?",
       "triggers": ["how do refunds work", "refund a payment", "refund invoice"],
-      "answer": "Tallyo payment tracking does not itself move money or issue a bank or card refund. Complete the refund through the route used to receive the money, then keep your invoice records consistent.",
+      "answer": "For a Stripe card payment confirmed in Tallyo, use the invoice refund action; Tallyo asks Stripe to process the refund and updates the invoice after signed confirmation. For payments received another way, refund through that route and keep the invoice record consistent.",
       "links": [{ "label": "Understand payment status", "href": "/help/refunds-and-payment-status/" }]
     },
     {

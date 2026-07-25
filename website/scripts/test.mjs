@@ -8,7 +8,12 @@ import { helpArticles, industries, notFoundPage, pages, productScenes } from "..
 import { findHelperAnswer, futurePublicAiAdapter } from "../src/helper-core.mjs";
 import { analyticsConfiguration, createAnalytics, getConsentState, parseCampaignParameters } from "../src/analytics.mjs";
 import { calculateDocument, calculationPolicy, formatMoney, parseMoney, parsePercent, parseQuantity } from "../src/document-calculator.mjs";
-import { commercialOffer, pricingFaqs } from "../src/commercial-offer.mjs";
+import {
+  applyConnectPaymentCopy,
+  commercialOffer,
+  connectPaymentPlaceholders,
+  pricingFaqs
+} from "../src/commercial-offer.mjs";
 
 const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = join(websiteRoot, "dist");
@@ -20,7 +25,10 @@ const cleanBuildEnvironment = {
   TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED: "",
   TALLYO_PUBLIC_AI_HELPER_ENABLED: "",
   TALLYO_AI_PRIVATE_PREVIEW_APPROVED: "",
-  TALLYO_AI_PUBLIC_RELEASE_APPROVED: ""
+  TALLYO_AI_PUBLIC_RELEASE_APPROVED: "",
+  TALLYO_CONNECT_PAYMENTS_ENABLED: "",
+  TALLYO_CONNECT_PRIVATE_PREVIEW_APPROVED: "",
+  TALLYO_CONNECT_PUBLIC_RELEASE_APPROVED: ""
 };
 const failClosedSentinel = join(distRoot, "fail-closed-sentinel.txt");
 mkdirSync(distRoot, { recursive: true });
@@ -52,7 +60,7 @@ assert.match(commercialOffer.pro.annualSaving, /Save £16/);
 assert.match(commercialOffer.pro.audience, /One business · One user/);
 assert.match(commercialOffer.pro.availability, /Subscriptions are being prepared/);
 assert.match(commercialOffer.billing.noTrial, /does not currently offer a full-feature free trial/);
-assert.match(commercialOffer.paymentAvailability, /not included in the launch subscription yet/);
+assert.equal(commercialOffer.paymentAvailability, connectPaymentPlaceholders.availability);
 assert.equal(pricingFaqs.length, 5);
 assert.doesNotMatch(JSON.stringify({ commercialOffer, pricingFaqs }), /two months free|free months|money-back guarantee|lifetime (?:price|access)|risk-free/i);
 
@@ -83,6 +91,7 @@ for (const page of [...pages, notFoundPage]) {
   assert.match(html, /type="module" src="\/assets\/growth\.js"/, `provider-neutral growth module for ${page.route}`);
   assert.doesNotMatch(html, prohibitedClaims, `prohibited claim on ${page.route}`);
   assert.doesNotMatch(html, fakeProof, `fake proof on ${page.route}`);
+  assert.doesNotMatch(html, /__TALLYO_CONNECT_PAYMENT_/, `resolved customer-payment copy on ${page.route}`);
   assert.doesNotMatch(html, /<script[^>]+src="https?:\/\//, `no external script on ${page.route}`);
   assert.doesNotMatch(html, /data-(?:signup|login)-link[^>]+href="#"/, `configured account links for ${page.route}`);
   assert.doesNotMatch(html, /href="[^"]*utm_(?:source|medium|campaign|content|term)/, `campaign parameters never enter links on ${page.route}`);
@@ -151,7 +160,10 @@ assert.match(pricing, /not included in the launch subscription yet/);
 assert.doesNotMatch(pricing, /Essentials|Automate|Teams|two months free|\d+-day trial/i);
 assert.doesNotMatch(pricing, /checkout\.stripe\.com|price_[A-Za-z0-9]+|prod_[A-Za-z0-9]+/);
 
-const helperKnowledge = JSON.parse(readFileSync(join(websiteRoot, "content", "helper-knowledge.json"), "utf8"));
+const helperKnowledge = JSON.parse(applyConnectPaymentCopy(
+  readFileSync(join(websiteRoot, "content", "helper-knowledge.json"), "utf8"),
+  false
+));
 assert.equal(helperKnowledge.scope, "public-product-guidance-only");
 assert.equal(helperKnowledge.entries.length, 18, "helper covers every required public question");
 assert.equal(new Set(helperKnowledge.entries.map((entry) => entry.id)).size, helperKnowledge.entries.length, "helper knowledge IDs are unique");
@@ -279,6 +291,10 @@ const sitemap = read("sitemap.xml");
 for (const page of pages) assert.match(sitemap, new RegExp(`https://tallyo\\.co\\.uk${page.route.replaceAll("/", "\\/")}`));
 assert.ok(existsSync(join(distRoot, "404.html")));
 assert.match(read("_redirects"), /\/\* \/404\.html 404/);
+const styles = read("assets/styles.css");
+assert.match(styles, /\.section \{ padding: clamp\(2\.5rem, 4\.5vw, 4rem\) 0; \}/, "shared sections retain the compact spacing baseline");
+assert.match(styles, /\.page-hero \+ \.section \{ padding-top: clamp\(0\.5rem, 1vw, 1rem\); \}/, "page headings do not double the next section spacing");
+assert.match(styles, /\.plan-grid \{ align-items: start; \}/, "pricing cards do not stretch and create empty space");
 assert.ok(statSync(join(distRoot, "assets", "styles.css")).size < 60_000, "CSS baseline under 60 KB");
 assert.ok(statSync(join(distRoot, "assets", "site.js")).size < 10_000, "JS baseline under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper.js")).size < 10_000, "helper UI stays under 10 KB");
