@@ -237,9 +237,9 @@ export async function refreshActiveAccount(
   config: ConnectConfig,
 ) {
   const include = new URLSearchParams();
-  include.append("include[]", "configuration.merchant");
-  include.append("include[]", "defaults");
-  include.append("include[]", "requirements");
+  include.append("include[0]", "configuration.merchant");
+  include.append("include[1]", "defaults");
+  include.append("include[2]", "requirements");
   const account = await stripeJson(
     `https://api.stripe.com/v2/core/accounts/${
       encodeURIComponent(mapping.stripe_account_id)

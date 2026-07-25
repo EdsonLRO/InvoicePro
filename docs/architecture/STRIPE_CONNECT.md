@@ -1,6 +1,6 @@
 # Stripe Connect architecture decision record
 
-Status: Launch model approved. The onboarding and payment-path foundations are implemented, their migrations are applied, and the four new functions are deployed at version 1 but disabled. No Stripe provider configuration or activation is authorised.
+Status: Launch model approved. The additive schema and four Connect functions are deployed; sandbox-only onboarding is active under protected gates, while live mode and public release remain disabled.
 
 ## Decision boundary
 
@@ -124,4 +124,6 @@ PR #105 merged the UK-country correction and only `manage-stripe-connect` advanc
 
 The protected retry authenticated successfully, retrieved the connected account and reached Account Links v2. Stripe rejected the requested `account_update` link because the account had not completed onboarding and accepted only `account_onboarding`. PR #107 made the server derive the provider flow from its saved provider state rather than the browser request: every non-active account uses onboarding to collect outstanding requirements, while update is reserved for an active account. The refresh URL carries that effective action so regeneration uses the same reviewed Account Link parameters.
 
-After PR #107 merged as `71e92fa`, only `manage-stripe-connect` advanced from version 18 to 19 and retained JWT verification. The single approved protected retry opened Stripe-hosted sandbox onboarding, and Stripe recorded HTTP 200 for Account Links v2. The Owner must complete the identity, business and payout fields privately. No connected payment or refund has occurred.
+After PR #107 merged as `71e92fa`, only `manage-stripe-connect` advanced from version 18 to 19 and retained JWT verification. The single approved protected retry opened Stripe-hosted sandbox onboarding, and Stripe recorded HTTP 200 for Account Links v2. The Owner completed the synthetic account's identity, business and payout fields privately; Tallyo then reported card payments and payouts ready.
+
+The first fictional GBP 1 direct-charge request reached deployed `create-connect-checkout` version 15 but returned a controlled HTTP 502 before Checkout creation. The function's shared `refreshActiveAccount` helper still used obsolete unindexed `include[]` query names; Accounts v2 requires `include[0]`, `include[1]` and `include[2]`. The focused correction changes only those query names and adds a regression assertion. No connected payment or refund occurred, and deployment remains separately gated.
