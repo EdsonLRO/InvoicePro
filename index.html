@@ -70,8 +70,183 @@
         .invoice-email-status-short { display: none; }
         .no-spin::-webkit-outer-spin-button, .no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .no-spin { -moz-appearance: textfield; }
-        .auth-scroll-shell { min-height: 0; overflow-y: auto; }
-        .auth-scroll-card { margin-top: auto; margin-bottom: auto; }
+        .auth-scroll-shell {
+            min-height: 0;
+            overflow-y: auto;
+            color: #0f172a;
+            background:
+                radial-gradient(circle at 8% 5%, rgb(79 70 229 / 0.09), transparent 26rem),
+                #f8fafc;
+        }
+        .auth-page {
+            display: flex;
+            width: 100%;
+            min-height: 100%;
+            flex-direction: column;
+        }
+        .auth-public-header,
+        .auth-page-main,
+        .auth-page-footer {
+            width: min(74rem, calc(100% - 2rem));
+            margin-right: auto;
+            margin-left: auto;
+        }
+        .auth-public-header {
+            display: flex;
+            min-height: 4.75rem;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .auth-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            color: #111827;
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+        .auth-brand img { width: 2rem; height: 2rem; object-fit: contain; }
+        .auth-website-link {
+            color: #4338ca;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .auth-website-link:hover { text-decoration: underline; }
+        .auth-page-main {
+            display: grid;
+            flex: 1;
+            gap: 1rem;
+            padding: 0.5rem 0 1.5rem;
+        }
+        .auth-intro,
+        .auth-form-panel {
+            border-radius: 1.5rem;
+        }
+        .auth-intro {
+            position: relative;
+            display: flex;
+            min-height: 24rem;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+            padding: clamp(1.5rem, 4vw, 3.75rem);
+            color: #fff;
+            background: linear-gradient(145deg, #303fc9, #6944dc);
+        }
+        .auth-intro::after {
+            position: absolute;
+            right: -7rem;
+            bottom: -9rem;
+            width: 22rem;
+            height: 22rem;
+            border: 1px solid rgb(255 255 255 / 0.16);
+            border-radius: 999px;
+            box-shadow: 0 0 0 4rem rgb(255 255 255 / 0.04);
+            content: "";
+            pointer-events: none;
+        }
+        .auth-eyebrow {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0.75rem;
+            color: #c7f9e9;
+            font-size: 0.76rem;
+            font-weight: 800;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+        }
+        .auth-intro h1 {
+            position: relative;
+            z-index: 1;
+            max-width: 13ch;
+            margin-bottom: 1rem;
+            font-size: clamp(2.25rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.03;
+            letter-spacing: -0.055em;
+        }
+        .auth-intro > p:not(.auth-eyebrow) {
+            position: relative;
+            z-index: 1;
+            max-width: 35rem;
+            color: #e9edff;
+            line-height: 1.55;
+        }
+        .auth-benefit-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            gap: 0.65rem;
+            margin-top: 1.5rem;
+        }
+        .auth-benefit-grid p {
+            display: grid;
+            gap: 0.15rem;
+            margin: 0;
+            padding: 0.85rem;
+            border: 1px solid rgb(255 255 255 / 0.18);
+            border-radius: 0.85rem;
+            background: rgb(15 23 42 / 0.14);
+        }
+        .auth-benefit-grid strong { font-size: 0.92rem; }
+        .auth-benefit-grid span { color: #dce3ff; font-size: 0.8rem; line-height: 1.4; }
+        .auth-form-panel {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(1.25rem, 3vw, 2.5rem);
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            box-shadow: 0 18px 48px rgb(15 23 42 / 0.08);
+        }
+        .auth-scroll-card { width: 100%; max-width: 31rem; margin: 0; }
+        .auth-form-heading {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .auth-form-heading p:first-child {
+            margin-bottom: 0.35rem;
+            color: #4f46e5;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .auth-form-heading p:last-child { color: #64748b; font-size: 0.9rem; }
+        .auth-page-footer {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.25rem 0 1.5rem;
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+        @media (min-width: 56rem) {
+            .auth-page-main { grid-template-columns: minmax(0, 1.06fr) minmax(26rem, 0.94fr); }
+            .auth-intro, .auth-form-panel { min-height: min(42rem, calc(100vh - 8rem)); }
+            .auth-benefit-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        @media (max-width: 55.99rem) {
+            .auth-intro h1 { max-width: 18ch; }
+            .auth-benefit-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        @media (max-width: 39.99rem) {
+            .auth-public-header,
+            .auth-page-main,
+            .auth-page-footer { width: min(100% - 1.25rem, 36rem); }
+            .auth-public-header { min-height: 4.25rem; }
+            .auth-website-link { font-size: 0.8rem; }
+            .auth-intro, .auth-form-panel { border-radius: 1.15rem; }
+            .auth-intro { min-height: 0; padding: 1.2rem 1.1rem; }
+            .auth-intro h1 { max-width: 15ch; font-size: 1.9rem; }
+            .auth-benefit-grid { display: none; }
+            .auth-form-panel { align-items: flex-start; padding: 1.35rem 1.1rem; }
+            .auth-page-footer { flex-direction: column; gap: 0.2rem; padding-bottom: 1rem; }
+        }
         .recovery-codes-overlay { align-items: flex-start; overflow-y: auto; }
         .recovery-codes-dialog { flex-shrink: 0; margin: 0.5rem 0; }
         .primary-navigation {
@@ -136,15 +311,34 @@
 
 <div id="app" v-cloak class="flex flex-col h-screen overflow-hidden">
     
-    <div v-if="!isLoggedIn" class="auth-scroll-shell flex-1 flex justify-center bg-slate-900 p-4 sm:p-6">
-        <div class="auth-scroll-card w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
-            <div class="text-center mb-8">
-                <div class="mb-2 flex items-center justify-center gap-2.5">
-                    <img src="./tallyo-mark.png" alt="" aria-hidden="true" class="h-11 w-11 object-contain">
-                    <h1 class="text-3xl font-bold tracking-tight text-slate-900">Tallyo</h1>
+    <div v-if="!isLoggedIn" class="auth-scroll-shell flex-1">
+        <div class="auth-page">
+            <header class="auth-public-header">
+                <div class="auth-brand">
+                    <img src="./tallyo-mark.png" alt="" aria-hidden="true">
+                    <span>Tallyo</span>
                 </div>
-                <p class="text-sm text-slate-500">Create and manage your invoices</p>
-            </div>
+                <a v-if="publicSiteUrl" :href="publicSiteUrl" class="auth-website-link">Visit the Tallyo website <span aria-hidden="true">→</span></a>
+            </header>
+
+            <main class="auth-page-main">
+                <section class="auth-intro" aria-labelledby="auth-intro-title">
+                    <p class="auth-eyebrow">Your invoicing workspace</p>
+                    <h1 id="auth-intro-title">Professional invoicing, ready when you are.</h1>
+                    <p>Create documents, follow payments and keep repeat work together in one clear workspace.</p>
+                    <div class="auth-benefit-grid" aria-label="Tallyo workspace benefits">
+                        <p><strong>Create clearly</strong><span>Invoices, quotes and credit notes with your business details.</span></p>
+                        <p><strong>Know what is due</strong><span>Payment records, balances and overdue status in one place.</span></p>
+                        <p><strong>Repeat less work</strong><span>Saved customers, services and recurring invoicing tools.</span></p>
+                    </div>
+                </section>
+
+                <section class="auth-form-panel" aria-label="Tallyo account access">
+                    <div class="auth-scroll-card">
+                        <div class="auth-form-heading">
+                            <p>Secure account access</p>
+                            <p>Sign in to your workspace or create your Tallyo account.</p>
+                        </div>
 
             <div v-if="authMode === 'login'" class="space-y-5">
                 <h2 class="text-xl font-semibold">Sign In</h2>
@@ -319,7 +513,15 @@
                 <button @click="completePasswordRecovery" :disabled="pwdRecovery.busy || !pwdRecovery.securityVerified" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ pwdRecovery.busy ? 'Updating...' : 'Update Password' }}</button>
             </div>
 
-            <p class="text-center text-xs text-slate-400 mt-6">Tallyo build {{ appBuild }}</p>
+                        <p class="text-center text-xs text-slate-400 mt-6">Tallyo build {{ appBuild }}</p>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="auth-page-footer">
+                <span>Tallyo · Straightforward invoicing for small businesses</span>
+                <span>Account access uses Tallyo's existing protected sign-in flow.</span>
+            </footer>
         </div>
     </div>
 

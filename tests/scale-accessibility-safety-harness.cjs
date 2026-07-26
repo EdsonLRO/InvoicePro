@@ -109,6 +109,16 @@ const documents = Array.from({ length: 2000 }, (_, index) => ({
   assert.match(app, /bindAccessibleLabels\(\)/);
   assert.match(app, /new MutationObserver\(\(\) => this\.bindAccessibleLabels\(\)\)/);
   assert.match(app, /role="status" aria-live="polite" aria-label="Loading account data"/);
+  assert.match(app, /<main class="auth-page-main">[\s\S]*?<section class="auth-intro" aria-labelledby="auth-intro-title">[\s\S]*?<section class="auth-form-panel" aria-label="Tallyo account access">/,
+    'signed-out account access must use the full-page responsive website layout');
+  assert.match(app, /\.auth-page-main \{[\s\S]*?display: grid;[\s\S]*?flex: 1;/,
+    'the signed-out layout must fill the available page instead of rendering as a floating card');
+  assert.match(app, /<a v-if="publicSiteUrl" :href="publicSiteUrl" class="auth-website-link">/,
+    'the signed-out website link must use the validated public-site configuration');
+  assert.doesNotMatch(app, /auth-scroll-shell flex-1 flex justify-center bg-slate-900/,
+    'the legacy centred-card Auth shell must not return');
+  assert.match(app, /@media \(max-width: 39\.99rem\) \{[\s\S]*?\.auth-benefit-grid \{ display: none; \}/,
+    'the signed-out form must remain the primary action on narrow phones');
   assert.match(app, /class="primary-menu-toggle[^\"]*" aria-label="Menu" aria-controls="primary-navigation" :aria-expanded=/,
     'the menu button must remain available until the full navigation fits');
   assert.match(app, /\.primary-navigation \{[\s\S]*?max-height: calc\(100vh - 4rem\);[\s\S]*?overflow-y: auto;/,

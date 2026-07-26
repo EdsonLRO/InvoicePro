@@ -135,7 +135,7 @@ p { color: var(--slate-600); }
 .phone { width: 24%; height: 57%; right: 36%; bottom: 0; border-radius: 1rem; }
 .pricing-preview { display: grid; grid-template-columns: auto 1fr; gap: 0.7rem 1rem; max-width: 38rem; padding: 1.1rem; border: 1px solid var(--slate-200); border-radius: var(--radius-md); background: var(--white); }
 .pricing-preview span { color: var(--slate-600); }
-.section-cta { display: grid; gap: 1rem; margin-bottom: 2rem; color: var(--white); background: linear-gradient(140deg, var(--blue-600), #7257d8); }
+.section-cta { display: grid; gap: 1rem; margin-top: clamp(0.75rem, 1.4vw, 1.1rem); margin-bottom: 2rem; color: var(--white); background: linear-gradient(140deg, var(--blue-600), #7257d8); }
 .section-cta p { color: #eaedff; }
 .section-cta .eyebrow { color: var(--mint-100); }
 .section-cta h2 { max-width: 24ch; margin-bottom: 0.7rem; font-size: clamp(1.8rem, 3.2vw, 2.4rem); }
@@ -154,6 +154,9 @@ p { color: var(--slate-600); }
 .faq-preview .section-heading { margin-bottom: 0.7rem; }
 .faq-preview h2 { font-size: clamp(1.7rem, 2.6vw, 2.25rem); }
 .faq-preview .section-link { margin: 0; }
+.workflow-outcome .section-heading { max-width: none; }
+.workflow-outcome h2 { max-width: none; }
+.workflow-outcome .section-heading > p:last-child { max-width: 58rem; }
 .feature-detail-list { display: grid; gap: 0.8rem; }
 .feature-detail-list article { display: grid; grid-template-columns: auto 1fr; gap: 1.1rem; padding: 1.1rem 0; border-bottom: 1px solid var(--slate-200); }
 .limitations { display: grid; gap: 1.5rem; }
@@ -167,6 +170,8 @@ p { color: var(--slate-600); }
 .plan-annual, .plan-note { font-size: 0.9rem; }
 .plan-card h3 { margin-top: 1.2rem; font-size: 1rem; }
 .plan-card .button:disabled { color: var(--slate-700); background: var(--slate-200); cursor: not-allowed; opacity: 1; }
+.plan-card .button + .plan-note { margin-top: 0.75rem; }
+.plan-note { margin-bottom: 0; line-height: 1.45; }
 .pricing-boundaries { display: grid; gap: 1.1rem; }
 .plan-status { color: var(--navy-900); font-weight: 750; }
 .plan-card.unavailable { background: var(--slate-100); }
