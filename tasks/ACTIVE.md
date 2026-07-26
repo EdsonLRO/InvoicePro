@@ -36,8 +36,9 @@ Prepare Tallyo so the public website and authenticated app can offer:
 - The AI Helper is merged, privately tested and disabled by default. Its existing encrypted Cloudflare secret is preserved.
 - PR #108 merged the fail-closed website subscription signup CTA gate; subscriptions remain disabled by default.
 - The website remains privately previewed and is not published on `tallyo.co.uk`.
-- Exact local production builds pass with subscriptions, connected payments and the AI Helper enabled. Release candidate build `2026.07.25.1` adds `https://app.tallyo.co.uk` to the MFA recovery origin allowlist while retaining GitHub Pages and both localhost origins. Cloudflare production variables remain fail-closed, both custom-domain lists are empty, Supabase Auth still uses the GitHub Pages site URL, and the final hostname is not yet in the Turnstile allowlist.
-- `SEC-AUTH-006` records that the existing Turnstile server secret was unexpectedly exposed during read-only provider inspection. Its value was not repeated, stored or used. Exact Owner-approved rotation, direct private Supabase entry and final-hostname Auth acceptance are mandatory before public release.
+- Exact local production builds pass with subscriptions, connected payments and the AI Helper enabled. PR #113 merged release build `2026.07.25.1`, and `mfa-recovery` is deployed with `https://app.tallyo.co.uk` plus the retained GitHub Pages and localhost rollback origins. The final hostname is in Supabase Auth redirects and the Turnstile widget; the Supabase Site URL intentionally remains GitHub Pages.
+- `SEC-AUTH-006` is remediated. The Owner rotated the exposed Turnstile server secret and entered its replacement directly into Supabase Auth without Codex inspecting it. CAPTCHA-protected sign-in, custom-domain MFA, exact-origin CORS and lookalike-origin rejection pass.
+- Authoritative DNS now uses Cloudflare with DNSSEC active. All 19 prior Squarespace records were preserved, the Squarespace website and Google Workspace/Resend DNS checks pass, and the four prior Squarespace nameservers are the documented rollback. `app.tallyo.co.uk` was protected by the existing default-deny Access application before it was attached to Pages; Pages reports Active with SSL, while anonymous requests are redirected to Access.
 
 ## Current controlled-provider scope
 
@@ -96,7 +97,7 @@ Current app-domain Auth release-candidate lock acquired 2026-07-25:
 - `RELEASE_READINESS.md`;
 - `SECURITY_FINDINGS_LEDGER.md`.
 
-Release condition: retain every existing recovery origin and Auth/MFA invariant, add only `https://app.tallyo.co.uk`, pass focused MFA/PWA/build/security checks, and stop before merge, deployment, Supabase Auth, Turnstile, DNS or public release.
+Release condition: completed for the protected app-domain stage. Every recovery origin and Auth/MFA invariant was retained; repository, provider, DNSSEC, Access, Pages, CORS and Owner-completed MFA acceptance passed. Access removal, Supabase Site URL cutover and public release remain separate gates.
 
 ## Explicit exclusions until separately approved
 
@@ -105,7 +106,7 @@ Release condition: retain every existing recovery origin and Auth/MFA invariant,
 - no secret reveal or repository/browser storage;
 - no existing Owner-route function redeployment without the exact pre-deployment approval;
 - no unrestricted public AI activation or paid OpenAI request;
-- no DNS cutover, legal publication or public production release;
+- no Access removal, Supabase Site URL cutover, website-domain publication, legal publication or public production release;
 - no deployment or production-provider change to the Owner-account invoice-payment path.
 
 ## Staged delivery
@@ -115,7 +116,7 @@ Release condition: retain every existing recovery origin and Auth/MFA invariant,
 3. **Disabled provider foundation** - completed: applied the three reviewed additive migrations, deployed seven new functions, verified RLS/grants/advisors/JWT settings and retained absent feature gates.
 4. **Isolated test acceptance** - completed for the approved non-destructive sandbox scope: protected Billing Checkout, Portal, signed reconciliation and lifecycle probes pass. Connect sandbox secrets and gates are configured. PRs #104-#110 passed the payout-field, UK-country, indexed-retrieval, trusted Account Link-flow, shared Checkout/refund retrieval and provider-unavailable gates. Two isolated synthetic owners map to two separate fully ready sandbox accounts with zero live-mode rows. The first account's fictional GBP 1 direct charge and full refund reconciled through signed webhooks, and one exact `refund.updated` replay returned HTTP 200 without another Connect event or audit mutation. Destructive provider downgrade was not used because Stripe test-mode capability handling cannot provide a reliable reversible simulation; the server path instead has focused fail-closed source and harness evidence.
 5. **AI release readiness** - preserve the existing secret and preview; separately approve public notice, budget, rate limits and activation.
-6. **Production release** - separately approve live provider configuration, secrets, payment acceptance, DNS and publication.
+6. **Production release** - authoritative DNS and the Access-protected app hostname are prepared; separately approve live provider configuration, secrets, payment acceptance, Access removal, Site URL cutover, website publication and final public release.
 
 ## Approved decision
 
@@ -134,7 +135,9 @@ This approval does not authorise provider configuration, deployment, secrets, pa
 
 ## Current approval boundary
 
-On 2026-07-25 the Owner approved the repository-only `app.tallyo.co.uk` MFA recovery origin change, focused tests, release build/version update, authoritative status, commit, push and PR creation. Release candidate `2026.07.25.1` contains only the new exact HTTPS origin plus retained GitHub Pages and localhost rollback origins. The MFA recovery harness asserts the complete exact origin set; PWA/public-integration, dependency-pin and frozen-lock Deno checks pass; the exact synthetic production app build reports `2026.07.25.1`. DNS, Supabase Auth settings, Turnstile, secrets, deployment, merge and public release remain excluded.
+On 2026-07-25 the Owner approved the repository-only `app.tallyo.co.uk` MFA recovery origin change, focused tests, release build/version update, authoritative status, commit, push and PR creation. Release candidate `2026.07.25.1` contains only the new exact HTTPS origin plus retained GitHub Pages and localhost rollback origins. The MFA recovery harness asserts the complete exact origin set; PWA/public-integration, dependency-pin and frozen-lock Deno checks pass; the exact synthetic production app build reports `2026.07.25.1`. PR #113 later merged under exact Owner approval.
+
+On 2026-07-26 the Owner separately approved the Access-protected app-domain migration. The final hostname was added to Supabase Auth redirects and the Turnstile widget; the exposed Turnstile secret was rotated and its replacement entered privately into Supabase Auth; only `mfa-recovery` was deployed from merge `41a2100` with JWT verification retained. All 19 Squarespace DNS records were copied and verified before the registrar moved from `nsd1`-`nsd4.squarespacedns.com` to `damien.ns.cloudflare.com` and `sureena.ns.cloudflare.com`. The old DS record was removed before cutover, the new Cloudflare DS was registered afterward, and Cloudflare reports DNSSEC protected. Apex and `www` return HTTP 200; Google Workspace and Resend MX, SPF, DKIM and recovery records resolve correctly. The existing default-deny Access application gained `app.tallyo.co.uk` before the hostname was proxied and attached to Pages. Anonymous requests receive the Access redirect; Pages reports Active with SSL. Exact-origin CORS and lookalike-origin rejection pass, and the Owner completed a fresh password-plus-MFA sign-in on the custom domain. No website publication, Access removal, Site URL switch, public AI, live Stripe change, legal publication or public launch occurred.
 
 PR #102 passed its required checks and merged after exact Owner approval. The applied three commercial migrations and seven deployed functions were reconciled after merge; RLS, grants, JWT settings, migration history, security advisors and the zero-row commercial-table baseline remained correct. Evidence: `COMMERCIAL_PROVIDER_FOUNDATION_DEPLOYMENT_EVIDENCE_2026-07-24.md`.
 

@@ -3,8 +3,8 @@
 ## Product and deployment
 
 - The authenticated invoicing app is feature-complete for its current one-business, one-user scope.
-- Public app build `2026.07.23.2` is deployed on GitHub Pages. An Access-protected Cloudflare app preview is also available.
-- Release candidate build `2026.07.25.1` adds only the approved `https://app.tallyo.co.uk` MFA recovery origin while retaining GitHub Pages and both local development origins. Focused MFA, PWA, dependency, Edge Function type and production-build checks pass. It is not merged, deployed or published.
+- Public app build `2026.07.23.2` remains deployed on GitHub Pages as the rollback route.
+- PR #113 merged release build `2026.07.25.1`. The approved `https://app.tallyo.co.uk` recovery origin is deployed in `mfa-recovery` with JWT verification retained; GitHub Pages and both local development origins remain allowlisted. The custom app domain is active on Cloudflare Pages with SSL and remains protected by Cloudflare Access.
 - The separate public website is implemented and privately previewed on Cloudflare Pages, but it is not published on `tallyo.co.uk`.
 - PR #91 is merged. The privately tested public AI Helper remains disabled by default. Production AI activation is a separate decision.
 - PR #108 merged the fail-closed website subscription signup CTA gate. Subscription controls remain disabled by default; the current website-readiness change routes an enabled Tallyo Pro action to Account settings and adds a separate fail-closed customer-payment publication gate.
@@ -16,7 +16,7 @@
 - Stripe Billing sandbox has the approved GBP 8 monthly and GBP 80 annual Prices, a separate Billing event destination, a configured Customer Portal and privately entered rotated test credentials. Billing is enabled only for the Access-protected non-live preview. One synthetic monthly subscription, signed entitlement activation, Portal return, cancellation-at-period-end, duplicate and stale-event handling pass; rollback-only probes cover renewal, failed payment, grace, read-only and recovery.
 - PRs #103-#112 completed the reviewed entitlement, Accounts v2 onboarding, Checkout/refund, provider-unavailable and live-Billing readiness work. Two isolated synthetic owners have separate ready sandbox connected accounts with zero live-mode commercial rows. One fictional GBP 1 direct charge, full refund and exact duplicate-event replay passed with signed reconciliation and no duplicate mutation. Evidence: `STRIPE_BILLING_SANDBOX_ACCEPTANCE_EVIDENCE_2026-07-25.md`.
 - After the completed 2026-07-25 physical backup and exact Owner approval, migrations `20260725014434` and `20260725160000` were applied. The private database-owner-controlled `subscription_write_enforcement` switch exists and remains `false`; authenticated and service roles cannot change it. The eight approved Billing/entitlement functions are active from merge `2c313f0` with their prior JWT settings preserved. The Owner allowlist was entered privately before the guarded Owner Checkout and document-email sources were activated. Migration history is synchronized and the Supabase security advisor reports no warnings.
-- The exact production website and app configurations build successfully with live subscription, connected-payment and AI controls enabled. Cloudflare production remains intentionally unreleased: both projects have no custom domain, the website still builds in preview mode with commercial/AI gates off, and the app still has live Billing UI off.
+- The exact production website and app configurations build successfully with live subscription, connected-payment and AI controls enabled. The website still has no custom domain and builds in preview mode with commercial/AI gates off. The app custom domain is attached only behind Access, and its live Billing UI remains off.
 
 ## Implemented capabilities
 
@@ -28,7 +28,8 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 - Resend: transactional document email and delivery events.
 - Stripe: controlled Owner-account invoice payments and refunds.
 - Cloudflare Turnstile: public Auth abuse protection.
-- GitHub Pages: current public authenticated app.
+- Cloudflare authoritative DNS, DNSSEC, Access and Pages: protected `app.tallyo.co.uk` release candidate.
+- GitHub Pages: current public authenticated app and rollback route.
 
 ## Known limitations
 
@@ -46,10 +47,10 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 
 ## Immediate launch blockers
 
-- Review and merge release candidate `2026.07.25.1`, then complete the separately gated app-domain migration: Cloudflare custom domains, Supabase Auth URLs, MFA function deployment and Turnstile hostname coverage. Keep GitHub Pages as rollback.
+- Keep `app.tallyo.co.uk` behind Access until the separately approved public-app release. Supabase Auth intentionally retains the GitHub Pages Site URL and rollback redirects; any final Site URL switch or Access removal is a new release approval.
 - Complete live Stripe Billing/Connect configuration and controlled live acceptance only through separate exact payment approvals. The live Stripe CLI session currently requires Owner reauthorization.
-- Configure the production AI Helper variables and existing rate-limiter binding, rotate the Turnstile server secret before activating the final app hostname, and run bounded production acceptance.
+- Configure the production AI Helper variables and existing rate-limiter binding only after separate activation approval.
 - Activate the website subscription, customer-payment and AI release gates only after their production provider, budget, notice and release checks are approved.
-- Complete domain/DNS, final operational checks, approved legal/privacy publication and production release as separate Owner-gated stages.
+- Complete final operational checks, approved legal/privacy publication and production release as separate Owner-gated stages.
 
-No current task authorises public AI activation, live Stripe Billing/Connect configuration, existing live Owner-route redeployment, DNS cutover, legal publication or public launch.
+No current task authorises removing Access, switching the Supabase Site URL, publishing the website, public AI activation, live Stripe Billing/Connect configuration, existing live Owner-route redeployment, legal publication or public launch.

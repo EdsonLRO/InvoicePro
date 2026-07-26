@@ -299,15 +299,18 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 
 - **Date:** 2026-07-25
 - **Classification:** production Auth abuse-protection secret exposure
-- **Status:** Validated — rotation and dependent-provider update require exact Owner approval.
+- **Status:** Remediated and verified on the Access-protected final app hostname.
 - **Finding:** During read-only inspection of the existing Cloudflare Turnstile widget, the provider interface unexpectedly returned the configured server secret in internal browser-tool output. The value was not requested, repeated, stored, copied, committed or used.
 - **Affected boundary:** The existing Turnstile widget and the Supabase Auth CAPTCHA configuration that validates signup, password sign-in, password reset and sensitive password reauthentication.
 - **Impact:** Anyone retaining the exposed value could attempt to forge server-side Turnstile verification outside Tallyo. Existing Supabase Auth, MFA, AAL and session controls remain active, but the CAPTCHA secret can no longer be treated as confidential.
-- **Existing controls:** Only the public site key is shipped to the browser; password authentication, MFA/AAL2, global sign-out ordering, RLS and Auth throttling remain unchanged. The final `app.tallyo.co.uk` hostname is not yet public or allowlisted.
+- **Existing controls:** Only the public site key is shipped to the browser; password authentication, MFA/AAL2, global sign-out ordering, RLS and Auth throttling remain unchanged. The final `app.tallyo.co.uk` hostname remains behind Cloudflare Access.
 - **Narrow remediation:** Rotate the widget's server secret, enter the replacement directly into Supabase Auth without revealing it to Codex, retain managed mode, add only the final app hostname, and verify signup, sign-in, reset and sensitive reauthentication before public release.
 - **Compatibility to preserve:** Keep the current GitHub Pages and Cloudflare Pages hostnames through cutover, preserve fail-closed Turnstile handling, and do not weaken Auth, MFA, session, recovery or throttling behavior.
 - **Verification required:** Confirm the old secret is invalidated without displaying either value; read back configured status only; pass bounded CAPTCHA-required Auth smoke tests on the final hostname; confirm the public site key remains the only browser credential.
 - **Rollback:** Keep the current app behind Cloudflare Access and keep GitHub Pages available until the rotated configuration and final-hostname Auth acceptance pass. Do not restore the exposed secret.
+- **Remediation:** The Owner rotated the widget server secret and entered its replacement directly into Supabase Auth without Codex inspecting either value. The final hostname was added to the existing Turnstile widget, while the prior reviewed hostnames remain available for rollback. Supabase Auth reports Turnstile enabled.
+- **Verification:** CAPTCHA-protected sign-in succeeded after rotation; password-reset delivery and the retained sensitive reauthentication path had already passed bounded acceptance. On 2026-07-26 the Access-protected `app.tallyo.co.uk` hostname served the merged app, exact-origin and lookalike-origin CORS probes passed, and the Owner completed a fresh password-plus-MFA sign-in. Anonymous requests remain blocked by Access. No secret value was requested, recorded or committed.
+- **Residual boundary:** Keep Access and the GitHub Pages rollback until separate public-release approval. Any Supabase Site URL switch or Access removal requires a new exact release decision.
 
 ## Open Follow-Ups
 
