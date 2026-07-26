@@ -114,6 +114,19 @@ Repository validation: PostgreSQL 17 reproduced the original constraint failure,
 
 Release condition: additive migration and focused stale-claim recovery evidence; retained service-role-only privileges, RLS, tenant/payment binding and provider-created Session states; reviewed PR. Production migration application, live Checkout, payment, refund, function deployment and public release remain separate exact Owner boundaries.
 
+PR #118 merged the additive repair, and migration `20260726172105` was the only pending migration applied to the linked Supabase project. Migration history, the validated replacement constraint, RLS and service-role-only access were verified afterward. The single approved protected live retry expired the stale pre-session reservation, created a replacement provider Session and persisted its exact `created` claim, but the function returned HTTP 502 before the browser received the URL. No payment, refund, deployment, configuration change or public release occurred.
+
+Current Stripe Connect completion-readback remediation lock acquired 2026-07-26:
+
+- `supabase/functions/create-connect-checkout/index.ts`;
+- `tests/stripe-connect-payments-harness.cjs`;
+- `SECURITY_FINDINGS_LEDGER.md`;
+- `tasks/ACTIVE.md`.
+
+Finding: `SEC-PAY-005`. An ambiguous completion RPC response can make Checkout return an error after the exact provider Session binding has already persisted. The focused source change accepts only an exact owner/request/session/expiry readback; every mismatch still fails closed.
+
+Release condition: focused function, Connect/payment, dependency, workflow, formatting, diff and sensitive-value checks plus independent review. Function deployment, another live retry, payment, refund, configuration change and public release remain separate exact Owner boundaries.
+
 ## Explicit exclusions until separately approved
 
 - no live Stripe subscription, connected-account identity onboarding, payment, refund, real customer or real-money transaction without a separate exact acceptance approval;
