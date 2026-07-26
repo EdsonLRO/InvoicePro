@@ -17,7 +17,10 @@ import {
   supabaseClients,
   validEmail,
 } from "../_shared/stripe-connect.ts";
-import { accountAllowsWrite, readOnlyAccountMessage } from "../_shared/account-entitlements.ts";
+import {
+  accountAllowsWrite,
+  readOnlyAccountMessage,
+} from "../_shared/account-entitlements.ts";
 
 function outstandingAmount(invoice: any): number {
   return Math.max(
@@ -60,6 +63,28 @@ async function existingCheckoutUrl(
     url: safeStripeCheckoutUrl(session?.url),
     sessionId,
   };
+}
+
+async function completedClaimMatchesSession(
+  admin: any,
+  userId: string,
+  requestId: string,
+  sessionId: string,
+  sessionExpiresAt: string,
+) {
+  const { data, error } = await admin.from("stripe_connect_checkout_claims")
+    .select("claim_status,stripe_checkout_session_id,session_expires_at")
+    .eq("user_id", userId)
+    .eq("request_id", requestId)
+    .maybeSingle();
+  if (error || data?.claim_status !== "created") return false;
+
+  const expectedExpiry = new Date(sessionExpiresAt).getTime();
+  const storedExpiry = new Date(data.session_expires_at || "").getTime();
+  return data.stripe_checkout_session_id === sessionId &&
+    Number.isFinite(expectedExpiry) &&
+    storedExpiry === expectedExpiry &&
+    storedExpiry > Date.now();
 }
 
 Deno.serve(async (req) => {
@@ -157,7 +182,11 @@ Deno.serve(async (req) => {
       return json({ error: "Invoice not found" }, 404, true);
     }
     if (claimResult === "request_mismatch") {
-      return json({ error: "Payment request could not be verified" }, 409, true);
+      return json(
+        { error: "Payment request could not be verified" },
+        409,
+        true,
+      );
     }
     if (claimResult === "request_created") {
       const existing = await existingCheckoutUrl(
@@ -263,18 +292,28 @@ Deno.serve(async (req) => {
       throw new Error("Stripe Checkout returned an incomplete session");
     }
     const checkoutUrl = safeStripeCheckoutUrl(session?.url);
+    const sessionExpiresAt = new Date(
+      Number(session.expires_at) * 1000,
+    ).toISOString();
     const { data: completed, error: completionError } = await admin.rpc(
       "complete_stripe_connect_checkout_claim",
       {
         p_user_id: user.id,
         p_request_id: requestId,
         p_stripe_checkout_session_id: session.id,
-        p_session_expires_at: new Date(
-          Number(session.expires_at) * 1000,
-        ).toISOString(),
+        p_session_expires_at: sessionExpiresAt,
       },
     );
-    if (completionError || completed !== true) {
+    const completionConfirmed = !completionError && completed === true
+      ? true
+      : await completedClaimMatchesSession(
+        admin,
+        user.id,
+        requestId,
+        session.id,
+        sessionExpiresAt,
+      );
+    if (!completionConfirmed) {
       throw new Error("Payment attempt could not be completed safely");
     }
 

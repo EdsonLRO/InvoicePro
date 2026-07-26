@@ -116,6 +116,22 @@ assert.doesNotMatch(refreshAccountBlock, /disconnected_at/);
 assert.match(checkout, /refreshActiveAccount/);
 assert.match(checkout, /claim_stripe_connect_checkout/);
 assert.match(checkout, /complete_stripe_connect_checkout_claim/);
+assert.match(checkout, /completedClaimMatchesSession/);
+assert.match(
+  checkout,
+  /\.eq\("user_id", userId\)[\s\S]*?\.eq\("request_id", requestId\)/,
+  "ambiguous claim completion must be read back using the exact owner and request",
+);
+assert.match(
+  checkout,
+  /data\.stripe_checkout_session_id === sessionId[\s\S]*?storedExpiry === expectedExpiry[\s\S]*?storedExpiry > Date\.now\(\)/,
+  "claim readback must match the exact live Session and its unexpired expiry",
+);
+assert.match(
+  checkout,
+  /!completionError && completed === true[\s\S]*?completedClaimMatchesSession/,
+  "only an explicit RPC success or an exact persisted readback may complete Checkout",
+);
 assert.match(checkout, /metadata\[payment_channel\]", "stripe_connect"/);
 assert.match(checkout, /crypto\.randomUUID|requestId/);
 assert.doesNotMatch(checkout, /application_fee|transfer_data|destination|on_behalf_of/);

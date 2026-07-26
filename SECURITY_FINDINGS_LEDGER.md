@@ -310,6 +310,18 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Verification:** A clean isolated PostgreSQL 17 database accepted the foundation, payments and repair migrations; the database probe recovered a stale pre-session claim, reserved a replacement request, rejected a half-bound expired row, and retained RLS and service-role privilege boundaries. The focused Connect foundation/payment, Stripe payment-integrity, financial-audit, tenant-attribution and security workflow harnesses pass. Diff and focused secret scans pass.
 - **Production boundary:** Applying the migration, clearing or expiring the existing live reservation, redeploying functions, creating a new live Checkout Session, payment and refund remain separately Owner-gated.
 
+### SEC-PAY-005 - Persisted Connect Checkout completion can still return an error
+
+- **Date:** 2026-07-26
+- **Classification:** payment availability and provider-session integrity
+- **Status:** Validated; focused source remediation prepared for review.
+- **Finding:** During the single approved live Checkout retry, Stripe created an open Session and the service-role completion RPC persisted the exact Session binding as `created`, but the Edge Function returned HTTP 502 before the browser received the Checkout URL.
+- **Impact:** No payment or refund occurred, and the claim remains bound to the correct owner, invoice, connected account, amount, currency and live mode. The valid Session is unavailable to the browser until a later request safely reuses it, so the customer-payment flow remains unavailable.
+- **Existing controls:** Auth, MFA/AAL, entitlement, tenant and connected-account capability checks passed before provider access. The unique open-invoice claim, immutable binding, provider idempotency, signed webhook reconciliation, RLS and service-role-only access remain active.
+- **Narrow remediation:** If the completion RPC response is ambiguous, read back only the exact owner/request claim and accept completion only when it is `created`, carries the exact provider Session ID, and has the exact still-future provider expiry. Otherwise retain the existing fail-closed error.
+- **Compatibility to preserve:** No new Session creation, browser-controlled provider identifiers, relaxed completion state, broad claim lookup, tenant fallback, payment, refund, webhook or provider-configuration change.
+- **Verification required:** focused Connect/payment harnesses, frozen Deno check, formatting, diff/secret hygiene and independent review. Deployment and another protected live retry remain separate exact Owner boundaries.
+
 ### SEC-AUTH-006 - Turnstile server secret exposed during provider inspection
 
 - **Date:** 2026-07-25
