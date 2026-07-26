@@ -17,6 +17,7 @@
 - PRs #103-#112 completed the reviewed entitlement, Accounts v2 onboarding, Checkout/refund, provider-unavailable and live-Billing readiness work. Two isolated synthetic owners have separate ready sandbox connected accounts with zero live-mode commercial rows. One fictional GBP 1 direct charge, full refund and exact duplicate-event replay passed with signed reconciliation and no duplicate mutation. Evidence: `STRIPE_BILLING_SANDBOX_ACCEPTANCE_EVIDENCE_2026-07-25.md`.
 - After the completed 2026-07-25 physical backup and exact Owner approval, migrations `20260725014434` and `20260725160000` were applied. The private database-owner-controlled `subscription_write_enforcement` switch exists and remains `false`; authenticated and service roles cannot change it. The eight approved Billing/entitlement functions are active from merge `2c313f0` with their prior JWT settings preserved. The Owner allowlist was entered privately before the guarded Owner Checkout and document-email sources were activated. Migration history is synchronized and the Supabase security advisor reports no warnings.
 - The exact production website and app configurations build successfully with live subscription, connected-payment and AI controls enabled. The website still has no custom domain and builds in preview mode with commercial/AI gates off. The app custom domain is attached only behind Access, and its live Billing UI remains off.
+- Under exact Owner approval on 2026-07-26, Stripe live mode now has the approved GBP 8 monthly and GBP 80 annual Tallyo Pro Prices, separate Billing and connected-account webhook destinations, and a configured Customer Portal. The Owner entered the Billing/Connect restricted key and both webhook signing secrets directly into Supabase; their values were not requested, inspected or stored. The five live Billing/Connect server gates are enabled, while the website/app publication gates and `subscription_write_enforcement` remain off. Empty unauthenticated requests to all five protected actions and unsigned requests to both webhook endpoints returned HTTP 401 without creating a Stripe object or transaction.
 
 ## Implemented capabilities
 
@@ -41,16 +42,16 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 ## Commercial and payment boundary
 
 - Launch offer: Free Invoice Maker without an account, plus one Tallyo Pro plan at £8 monthly or £80 annually for one business and one user.
-- Subscription checkout is active only in the protected sandbox acceptance preview. It is not available on the public website or in live Stripe mode.
+- Subscription Checkout is configured server-side for live Stripe mode but remains unavailable to visitors because the app and website publication gates are off and the custom app domain remains behind Access. No live subscription acceptance transaction has run.
 - The current live Stripe invoice-payment path belongs to the Owner's controlled Tallyo account. It is not a merchant architecture for unrelated businesses and must not be marketed as generally available.
-- Independent-business card payments have an applied schema and accepted multi-account sandbox path, but remain publicly unavailable until live Stripe Connect configuration and production release approvals pass.
+- Independent-business card payments have an applied schema, accepted multi-account sandbox path and enabled server-side live configuration, but remain publicly unavailable until controlled live acceptance and production release approvals pass.
 
 ## Immediate launch blockers
 
 - Keep `app.tallyo.co.uk` behind Access until the separately approved public-app release. Supabase Auth intentionally retains the GitHub Pages Site URL and rollback redirects; any final Site URL switch or Access removal is a new release approval.
-- Complete live Stripe Billing/Connect configuration and controlled live acceptance only through separate exact payment approvals. The live Stripe CLI session currently requires Owner reauthorization.
+- Run controlled live Stripe Billing/Connect acceptance only through separate exact payment approvals; configuration alone is complete and has not created a live subscription, connected account, payment or refund.
 - Configure the production AI Helper variables and existing rate-limiter binding only after separate activation approval.
 - Activate the website subscription, customer-payment and AI release gates only after their production provider, budget, notice and release checks are approved.
 - Complete final operational checks, approved legal/privacy publication and production release as separate Owner-gated stages.
 
-No current task authorises removing Access, switching the Supabase Site URL, publishing the website, public AI activation, live Stripe Billing/Connect configuration, existing live Owner-route redeployment, legal publication or public launch.
+No current task authorises removing Access, switching the Supabase Site URL, publishing the website, public AI activation, live Stripe Billing/Connect transactions or connected-account identity onboarding, existing live Owner-route redeployment, legal publication or public launch.
