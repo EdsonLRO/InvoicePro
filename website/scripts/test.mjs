@@ -158,6 +158,7 @@ assert.match(pricing, /Save £16/);
 assert.match(pricing, /Approximately £6\.67 per month/);
 assert.match(pricing, /Subscriptions are being prepared/);
 assert.match(pricing, /button[^>]+disabled[^>]*>Subscriptions are being prepared/);
+assert.match(pricing, /class="plan-note"/, "pricing keeps reasonable-use copy separate from the subscription action");
 assert.match(pricing, /does not currently offer a full-feature free trial/);
 assert.match(pricing, /not included in the launch subscription yet/);
 assert.doesNotMatch(pricing, /Essentials|Automate|Teams|two months free|\d+-day trial/i);
@@ -299,6 +300,9 @@ assert.match(styles, /\.section \{ padding: clamp\(1\.75rem, 3\.2vw, 3rem\) 0; \
 assert.match(styles, /\.section-soft, \.section-dark, \.section-cta \{[^}]*padding: clamp\(1\.5rem, 2\.6vw, 2\.5rem\)/, "large panels retain reduced internal spacing");
 assert.match(styles, /\.home-how \.section-heading \{ margin-bottom: 0\.65rem; \}/, "home workflow heading stays close to its first step");
 assert.match(styles, /\.faq-preview \{ padding-block: clamp\(1\.35rem, 2vw, 1\.8rem\); \}/, "FAQ preview remains compact");
+assert.match(styles, /\.section-cta \{[^}]*margin-top: clamp\(0\.75rem, 1\.4vw, 1\.1rem\)/, "final CTA stays visually separate from the preceding panel");
+assert.match(styles, /\.workflow-outcome \.section-heading \{ max-width: none; \}/, "feature workflow uses the available panel width");
+assert.match(styles, /\.plan-card \.button \+ \.plan-note \{ margin-top: 0\.75rem; \}/, "pricing note cannot collide with the subscription action");
 assert.match(styles, /\.page-hero \+ \.section \{ padding-top: clamp\(0\.4rem, 0\.8vw, 0\.75rem\); \}/, "page headings do not double the next section spacing");
 assert.match(styles, /\.plan-grid \{ align-items: start; \}/, "pricing cards do not stretch and create empty space");
 assert.ok(statSync(join(distRoot, "assets", "styles.css")).size < 60_000, "CSS baseline under 60 KB");
