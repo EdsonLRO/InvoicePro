@@ -295,6 +295,21 @@ Do not store secrets, tokens, customer PII, full exported invoices, or provider 
 - **Status:** Resolved in the BILL-003 branch; high-risk PR merge remains Owner-gated.
 - **Residual gate:** Supabase application, Stripe test configuration, deployment, test Checkout and public activation remain separate Owner approvals.
 
+### SEC-PAY-003 - Pre-session Connect Checkout claims cannot expire
+
+- **Date:** 2026-07-26
+- **Classification:** payment availability and reservation-state integrity
+- **Status:** Resolved in the focused COMM-001 branch; production migration application remains Owner-gated.
+- **Finding:** `claim_stripe_connect_checkout` attempts to change a `claimed` reservation older than five minutes to `expired`, but `stripe_connect_checkout_claim_completion_check` rejects an `expired` row unless it already has a Stripe Checkout Session ID and expiry. A provider request that fails before Session creation therefore leaves the reservation permanently `claimed`.
+- **Affected boundary:** The private, service-role-only Stripe Connect Checkout claim table and claim RPC. RLS, tenant binding, amount/currency binding, signed webhook processing and Stripe permissions are not weakened.
+- **Impact:** After one pre-session provider failure, later card-payment attempts for the same invoice stop before Stripe receives a new Checkout request. No false payment, charge, refund, cross-tenant access or data disclosure occurs; the flow fails closed but remains unavailable.
+- **Evidence:** Controlled live acceptance showed one reservation still `claimed` more than thirty minutes after the five-minute timeout. Each retry refreshed the correct active connected account but produced no new Stripe Checkout request. The invoice type, status, currency and balance checks all passed. PostgreSQL 17 reproduced the exact check-constraint failure before the repair.
+- **Existing controls:** Authenticated owner binding, active subscription entitlement, active connected-account capability checks, private claim-table privileges, immutable tenant/payment binding, provider idempotency and signed webhook reconciliation remain active.
+- **Narrow remediation:** Add one forward migration that permits `expired` and `failed` rows to have either both Session fields or neither, while retaining null-only `claimed` rows and fully bound `created`/`completed` rows. Add a database probe proving that a stale pre-session claim expires and a different request can reserve the same invoice.
+- **Compatibility to preserve:** Existing provider-created Session expiration, completed claims, failure evidence, partial-field rejection, unique open-invoice serialization, tenant isolation, service-role-only access and normal Checkout/refund behaviour.
+- **Verification:** A clean isolated PostgreSQL 17 database accepted the foundation, payments and repair migrations; the database probe recovered a stale pre-session claim, reserved a replacement request, rejected a half-bound expired row, and retained RLS and service-role privilege boundaries. The focused Connect foundation/payment, Stripe payment-integrity, financial-audit, tenant-attribution and security workflow harnesses pass. Diff and focused secret scans pass.
+- **Production boundary:** Applying the migration, clearing or expiring the existing live reservation, redeploying functions, creating a new live Checkout Session, payment and refund remain separately Owner-gated.
+
 ### SEC-AUTH-006 - Turnstile server secret exposed during provider inspection
 
 - **Date:** 2026-07-25

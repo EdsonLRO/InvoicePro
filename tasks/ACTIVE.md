@@ -101,6 +101,19 @@ Current app-domain Auth release-candidate lock acquired 2026-07-25:
 
 Release condition: completed for the protected app-domain stage. Every recovery origin and Auth/MFA invariant was retained; repository, provider, DNSSEC, Access, Pages, CORS and Owner-completed MFA acceptance passed. Access removal, Supabase Site URL cutover and public release remain separate gates.
 
+Current Stripe Connect stale-claim remediation lock acquired 2026-07-26:
+
+- the additive Checkout-claim constraint migration;
+- focused Stripe Connect payment probes and harness;
+- `SECURITY_FINDINGS_LEDGER.md`;
+- `tasks/ACTIVE.md`.
+
+Finding: `SEC-PAY-003`. A pre-session provider failure leaves a `claimed` reservation that the five-minute cleanup cannot mark `expired`, because the original table constraint requires Session fields for that state. Controlled live acceptance remains fail-closed: no new Checkout Session or payment was created.
+
+Repository validation: PostgreSQL 17 reproduced the original constraint failure, then passed stale-claim recovery, replacement reservation, partial-field rejection, RLS and privilege probes after the additive repair. Focused Connect, payment-integrity, financial-audit, tenant-attribution and security workflow harnesses pass.
+
+Release condition: additive migration and focused stale-claim recovery evidence; retained service-role-only privileges, RLS, tenant/payment binding and provider-created Session states; reviewed PR. Production migration application, live Checkout, payment, refund, function deployment and public release remain separate exact Owner boundaries.
+
 ## Explicit exclusions until separately approved
 
 - no live Stripe subscription, connected-account identity onboarding, payment, refund, real customer or real-money transaction without a separate exact acceptance approval;

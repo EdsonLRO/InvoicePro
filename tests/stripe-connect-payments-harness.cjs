@@ -10,6 +10,11 @@ const migration = read(
   'migrations',
   '20260724175920_stripe_connect_payments.sql'
 );
+const expiredClaimFix = read(
+  'supabase',
+  'migrations',
+  '20260726172105_fix_connect_checkout_expired_claim_constraint.sql'
+);
 const shared = read('supabase', 'functions', '_shared', 'stripe-connect.ts');
 const checkout = read('supabase', 'functions', 'create-connect-checkout', 'index.ts');
 const refund = read('supabase', 'functions', 'create-connect-refund', 'index.ts');
@@ -36,6 +41,18 @@ assert.doesNotMatch(
 );
 assert.match(migration, /Stripe Connect Checkout binding is immutable/i);
 assert.match(migration, /create or replace function public\.claim_stripe_connect_checkout/i);
+assert.match(
+  expiredClaimFix,
+  /drop constraint if exists stripe_connect_checkout_claim_completion_check/i
+);
+assert.match(
+  expiredClaimFix,
+  /claim_status in \('expired', 'failed'\)[\s\S]*?stripe_checkout_session_id is null[\s\S]*?session_expires_at is null/i
+);
+assert.match(
+  expiredClaimFix,
+  /claim_status in \('created', 'completed'\)[\s\S]*?stripe_checkout_session_id is not null[\s\S]*?session_expires_at is not null/i
+);
 assert.match(migration, /onboarding_state = 'active'/i);
 assert.match(migration, /card_payments_status = 'active'/i);
 assert.match(migration, /payouts_status = 'active'/i);

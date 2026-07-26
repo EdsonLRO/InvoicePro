@@ -41,6 +41,31 @@ values
         'active'
     );
 
+insert into public.stripe_connect_checkout_claims (
+    request_id,
+    user_id,
+    stripe_account_id,
+    invoice_id,
+    amount_minor,
+    currency,
+    livemode,
+    claim_status,
+    created_at,
+    updated_at
+)
+values (
+    'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb3',
+    '22222222-2222-4222-8222-222222222222',
+    'acct_ConnectTwo',
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+    2000,
+    'GBP',
+    false,
+    'claimed',
+    now() - interval '6 minutes',
+    now() - interval '6 minutes'
+);
+
 do $$
 declare
     v_result text;
@@ -92,6 +117,74 @@ begin
     ) then
         raise exception 'connected Checkout claim was not completed';
     end if;
+end;
+$$;
+
+do $$
+declare
+    v_result text;
+    v_old_status text;
+    v_new_status text;
+begin
+    select public.claim_stripe_connect_checkout(
+        '22222222-2222-4222-8222-222222222222',
+        'acct_ConnectTwo',
+        'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+        'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb4',
+        2000,
+        'GBP',
+        false
+    ) into v_result;
+    if v_result <> 'claimed' then
+        raise exception 'expired connected Checkout claim did not recover: %', v_result;
+    end if;
+
+    select claim_status into v_old_status
+      from public.stripe_connect_checkout_claims
+     where request_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb3';
+    if v_old_status <> 'expired' then
+        raise exception 'stale connected Checkout claim was not expired';
+    end if;
+
+    select claim_status into v_new_status
+      from public.stripe_connect_checkout_claims
+     where request_id = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb4';
+    if v_new_status <> 'claimed' then
+        raise exception 'replacement connected Checkout claim was not reserved';
+    end if;
+end;
+$$;
+
+do $$
+begin
+    begin
+        insert into public.stripe_connect_checkout_claims (
+            request_id,
+            user_id,
+            stripe_account_id,
+            invoice_id,
+            amount_minor,
+            currency,
+            livemode,
+            claim_status,
+            stripe_checkout_session_id
+        )
+        values (
+            'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb5',
+            '22222222-2222-4222-8222-222222222222',
+            'acct_ConnectTwo',
+            'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2',
+            2000,
+            'GBP',
+            false,
+            'expired',
+            'cs_test_HalfBound'
+        );
+        raise exception 'half-bound expired connected Checkout claim was accepted';
+    exception
+        when check_violation then
+            null;
+    end;
 end;
 $$;
 
