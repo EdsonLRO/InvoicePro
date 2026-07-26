@@ -61,7 +61,7 @@ const home = `
     </div>
   </section>
 
-  <section class="section" aria-labelledby="benefits-title">
+  <section class="section home-benefits" aria-labelledby="benefits-title">
     <div class="section-heading"><p class="eyebrow">From quote to paid</p><h2 id="benefits-title">The essentials, connected.</h2><p>Keep the customer, document, payment and follow-up in one place.</p></div>
     <div class="benefit-grid">
       <article>${icon("01")}<h3>Create with confidence</h3><p>Build branded quotes, invoices and credit notes that are clear for your customers.</p></article>
@@ -70,12 +70,12 @@ const home = `
     </div>
   </section>
 
-  <section class="section section-soft" aria-labelledby="how-title">
+  <section class="section section-soft home-how" aria-labelledby="how-title">
     <div class="section-heading"><p class="eyebrow">How it works</p><h2 id="how-title">A simple path through the work.</h2></div>
     ${workflow(workflowSteps)}
   </section>
 
-  <section class="section" aria-labelledby="product-preview-title">
+  <section class="section home-product-tour" aria-labelledby="product-preview-title">
     <div class="section-heading"><p class="eyebrow">See the workflow</p><h2 id="product-preview-title">Familiar screens for the job in front of you.</h2><p>These simplified product views use fictional data and demonstrate supported Tallyo workflows.</p></div>
     <div class="product-tour-preview">${productScenes.slice(0, 3).map(productDemo).join("")}</div>
     <p class="section-link"><a href="/product-tour/">Explore the complete product tour →</a></p>
@@ -98,7 +98,7 @@ const home = `
 
   <section class="section" aria-labelledby="pricing-preview-title"><div class="section-heading"><p class="eyebrow">Simple pricing</p><h2 id="pricing-preview-title">Make one document free, or keep your invoicing organised with Tallyo Pro.</h2><p>${commercialOffer.pro.monthlyPrice} monthly or ${commercialOffer.pro.annualPrice} annually. ${subscriptionAvailability}</p></div><div class="pricing-preview"><strong>${commercialOffer.free.name}</strong><span>${commercialOffer.free.price} · ${commercialOffer.free.audience}</span><strong>${commercialOffer.pro.name}</strong><span>${commercialOffer.pro.monthlyPrice}/month or ${commercialOffer.pro.annualPrice}/year</span></div><p class="section-link"><a href="/pricing/">See pricing and what is included →</a></p></section>
 
-  <section class="section section-soft" aria-labelledby="faq-preview-title"><div class="section-heading"><p class="eyebrow">Questions, answered</p><h2 id="faq-preview-title">Understand the product before you start.</h2><p>Read factual answers about installation, payment tracking, recurring work, exports and account protection.</p></div><p class="section-link"><a href="/faq/">Browse frequently asked questions →</a></p></section>
+  <section class="section section-soft faq-preview" aria-labelledby="faq-preview-title"><div class="section-heading"><p class="eyebrow">Questions, answered</p><h2 id="faq-preview-title">Understand the product before you start.</h2><p>Read factual answers about installation, payment tracking, recurring work, exports and account protection.</p></div><p class="section-link"><a href="/faq/">Browse frequently asked questions →</a></p></section>
 
   ${finalCta()}`;
 

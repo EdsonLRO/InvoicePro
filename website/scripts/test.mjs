@@ -116,6 +116,9 @@ assert.match(home, /Northstar Home Services/);
 assert.match(home, /Willow &amp; Pine Studio/);
 assert.equal((home.match(/class="product-demo /g) || []).length, 3, "home shows three product-tour previews");
 assert.match(home, /Set up your business[\s\S]*Automate recurring work/, "home shows the complete six-step workflow");
+for (const densityHook of ["home-benefits", "home-how", "home-product-tour", "faq-preview"]) {
+  assert.match(home, new RegExp(`class="[^"]*${densityHook}[^"]*"`), `home retains ${densityHook} density hook`);
+}
 
 const productTour = read("product-tour/index.html");
 assert.equal((productTour.match(/class="product-demo /g) || []).length, productScenes.length, "product tour covers every supported scene");
@@ -292,8 +295,11 @@ for (const page of pages) assert.match(sitemap, new RegExp(`https://tallyo\\.co\
 assert.ok(existsSync(join(distRoot, "404.html")));
 assert.match(read("_redirects"), /\/\* \/404\.html 404/);
 const styles = read("assets/styles.css");
-assert.match(styles, /\.section \{ padding: clamp\(2\.5rem, 4\.5vw, 4rem\) 0; \}/, "shared sections retain the compact spacing baseline");
-assert.match(styles, /\.page-hero \+ \.section \{ padding-top: clamp\(0\.5rem, 1vw, 1rem\); \}/, "page headings do not double the next section spacing");
+assert.match(styles, /\.section \{ padding: clamp\(1\.75rem, 3\.2vw, 3rem\) 0; \}/, "shared sections retain the reduced spacing baseline");
+assert.match(styles, /\.section-soft, \.section-dark, \.section-cta \{[^}]*padding: clamp\(1\.5rem, 2\.6vw, 2\.5rem\)/, "large panels retain reduced internal spacing");
+assert.match(styles, /\.home-how \.section-heading \{ margin-bottom: 0\.65rem; \}/, "home workflow heading stays close to its first step");
+assert.match(styles, /\.faq-preview \{ padding-block: clamp\(1\.35rem, 2vw, 1\.8rem\); \}/, "FAQ preview remains compact");
+assert.match(styles, /\.page-hero \+ \.section \{ padding-top: clamp\(0\.4rem, 0\.8vw, 0\.75rem\); \}/, "page headings do not double the next section spacing");
 assert.match(styles, /\.plan-grid \{ align-items: start; \}/, "pricing cards do not stretch and create empty space");
 assert.ok(statSync(join(distRoot, "assets", "styles.css")).size < 60_000, "CSS baseline under 60 KB");
 assert.ok(statSync(join(distRoot, "assets", "site.js")).size < 10_000, "JS baseline under 10 KB");
