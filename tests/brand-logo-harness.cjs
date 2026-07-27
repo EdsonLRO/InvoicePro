@@ -31,8 +31,8 @@ assert.match(app, /<img src="\.\/tallyo-mark\.png" alt="" aria-hidden="true"[^>]
 assert.match(app, /<img src="\.\/tallyo-wordmark-white\.png" alt="Tallyo"[^>]*>/, 'signed-in header must expose the full wordmark with an accessible name');
 
 const websiteLayout = read('website/src/layout.mjs');
-assert.match(websiteLayout, /class="brand-mark" src="\/assets\/tallyo-mark\.png" alt="" aria-hidden="true"/, 'website header must use the brand mark without duplicating the live name');
-assert.match(websiteLayout, /class="brand-wordmark" src="\/assets\/tallyo-wordmark-white\.png" alt="" aria-hidden="true"/, 'website footer must use the white wordmark');
+assert.match(websiteLayout, /class="brand-mark" src="\$\{assetUrl\("\/assets\/tallyo-mark\.png"\)\}" alt="" aria-hidden="true"/, 'website header must use the versioned brand mark without duplicating the live name');
+assert.match(websiteLayout, /class="brand-wordmark" src="\$\{assetUrl\("\/assets\/tallyo-wordmark-white\.png"\)\}" alt="" aria-hidden="true"/, 'website footer must use the versioned white wordmark');
 
 const manifest = JSON.parse(read('manifest.json'));
 assert.deepEqual(manifest.icons.map(({ src, sizes }) => [src, sizes]), [['./icon-192.png', '192x192'], ['./icon-512.png', '512x512']]);
