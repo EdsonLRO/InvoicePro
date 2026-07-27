@@ -50,11 +50,10 @@ export const productDemo = (scene, index) => `
       <h2>${escapeHtml(scene.title)}</h2>
       <p>${escapeHtml(scene.caption)}</p>
     </div>
-    <div class="demo-window" role="img" aria-label="Fictional-data illustration of Tallyo ${escapeHtml(scene.label.toLowerCase())}">
-      <div class="demo-window-bar"><i></i><i></i><i></i><strong>Tallyo</strong><span>Fictional demonstration</span></div>
-      <div class="demo-window-body">${demoContents[scene.variant]}</div>
-    </div>
-    <figcaption>Illustrated product view using fictional data. The layout is simplified for this tour.</figcaption>
+    ${scene.image
+      ? `<div class="demo-window demo-window-capture"><img class="demo-window-screenshot" src="${escapeHtml(scene.image)}?v=__TALLYO_ASSET_REVISION__" alt="${escapeHtml(scene.imageAlt)}" loading="lazy" decoding="async"></div>`
+      : `<div class="demo-window" role="img" aria-label="Fictional-data illustration of Tallyo ${escapeHtml(scene.label.toLowerCase())}"><div class="demo-window-bar"><i></i><i></i><i></i><strong>Tallyo</strong><span>Fictional demonstration</span></div><div class="demo-window-body">${demoContents[scene.variant]}</div></div>`}
+    <figcaption>${scene.image ? "Product screenshot using fictional demonstration data." : "Illustrated product view using fictional data. The layout is simplified for this tour."}</figcaption>
   </figure>`;
 
 export const helpArticlePage = (article) => `
