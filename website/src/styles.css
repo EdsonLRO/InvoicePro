@@ -218,7 +218,8 @@ p { color: var(--slate-600); }
 .demo-window-bar span { margin-left: auto; color: var(--slate-500); font-size: 0.64rem; }
 .demo-window-body { min-height: 10.5rem; padding: clamp(0.6rem, 1.4vw, 0.9rem); background: linear-gradient(145deg, #fff, #f5f7fb); font-size: 0.9rem; }
 .demo-window-screenshot { display: block; width: 100%; height: auto; border-radius: inherit; background: var(--slate-100); }
-.product-demo-mobile .demo-window-capture { width: min(100%, 20rem); justify-self: center; }
+.product-demo-mobile .demo-window-capture { width: min(100%, 20rem); aspect-ratio: 390 / 779; justify-self: center; }
+.product-demo-mobile .demo-window-screenshot { transform: translateY(-7.59%); }
 .demo-metrics, .demo-form, .demo-schedule { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem; }
 .demo-metrics p, .demo-form p, .demo-schedule p { display: grid; gap: 0.12rem; margin: 0; padding: 0.55rem; border: 1px solid var(--slate-200); border-radius: 0.65rem; background: var(--white); }
 .demo-metrics span, .demo-form span, .demo-schedule span, .demo-total span, .demo-balance span { color: var(--slate-500); font-size: 0.7rem; }
