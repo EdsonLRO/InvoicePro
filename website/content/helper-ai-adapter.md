@@ -3,13 +3,18 @@
 ## Current state
 
 The Tallyo Helper has a same-origin Cloudflare Pages Function and browser
-adapter, but both are disabled by default. The public website continues to use
-the deterministic, browser-local knowledge matcher unless a separately reviewed
-build explicitly enables the AI adapter.
+adapter. Source remains disabled by default, but the Access-protected production
+website explicitly enables the reviewed AI path through Cloudflare production
+configuration. The deterministic browser-local matcher remains first in the
+request path and continues to answer exact reviewed questions without an AI
+request.
 
-No live OpenAI request was made while implementing or testing this boundary.
-Tests use a local mock transport. The repository does not contain the API key,
-and generated browser files do not receive it.
+On 27 July 2026, one Owner-approved synthetic question was sent from the
+canonical Access-protected website to OpenAI. The Helper returned a bounded
+Tallyo-specific answer from the reviewed public guidance, and the OpenAI usage
+dashboard attributed exactly one Responses request for that UTC date. The
+repository does not contain the API key, generated browser files do not receive
+it, and application code uses `store: false`.
 
 ## Request boundary
 
@@ -62,22 +67,22 @@ That visitor notice is implementation copy, not final legal publication. The
 provider terms, retention position, final public wording and external review
 remain release gates.
 
-## Activation remains blocked
+## Public activation remains blocked
 
-Do not activate or publish the AI path until all of the following are separately
-reviewed and approved:
+The protected acceptance stage has completed the encrypted secret, rate-limiter
+binding, exact canonical Pages origin, production build gates and one synthetic
+paid-request check. Do not remove Access or publish the AI path for unrestricted
+visitors until the remaining items below are separately reviewed and approved:
 
-1. OpenAI project budget and hard usage alerts/limits.
-2. Cloudflare encrypted secret entry.
-3. Exact production and preview origin allowlists.
-4. A tested `AI_HELPER_RATE_LIMITER` binding and abuse threshold.
-5. Representative factuality, refusal, injection and unavailable-provider
+1. Final OpenAI project budget and usage-alert/limit disposition for unrestricted
+   traffic.
+2. The final public custom-domain origin in the server allowlist.
+3. Representative factuality, refusal, injection and unavailable-provider
    evaluations.
-6. Final visitor notice, privacy data flow, retention position and provider
+4. Final visitor notice, privacy data flow, retention position and provider
    evidence.
-7. Private preview acceptance with synthetic, non-sensitive questions.
-8. Owner approval for the paid API call, provider configuration, merge and
-   public activation.
+5. Owner approval for Access removal, the final provider configuration and
+   unrestricted public activation.
 
 The build also fails closed unless `TALLYO_AI_PRIVATE_PREVIEW_APPROVED=true`
 accompanies an enabled preview. An enabled production build additionally
