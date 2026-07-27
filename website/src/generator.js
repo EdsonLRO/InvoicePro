@@ -1,4 +1,4 @@
-import { calculateDocument, formatMoney } from "./document-calculator.mjs";
+import { calculateDocument, formatMoney } from "./document-calculator.mjs?v=__TALLYO_ASSET_REVISION__";
 
 const roots = document.querySelectorAll("[data-generator]");
 

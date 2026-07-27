@@ -1,5 +1,5 @@
-import { createPublicAiAdapter, findHelperAnswer } from "/assets/helper-core.mjs";
-import { trackEvent } from "/assets/growth.js";
+import { createPublicAiAdapter, findHelperAnswer } from "/assets/helper-core.mjs?v=__TALLYO_ASSET_REVISION__";
+import { trackEvent } from "/assets/growth.js?v=__TALLYO_ASSET_REVISION__";
 
 const root = document.querySelector("[data-helper]");
 const knowledgeElement = document.getElementById("helper-knowledge");

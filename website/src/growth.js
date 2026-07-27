@@ -1,5 +1,5 @@
-import { analyticsConfiguration, createAnalytics, parseCampaignParameters } from "/assets/analytics.mjs";
-import { eventPolicy } from "/assets/analytics-policy.mjs";
+import { analyticsConfiguration, createAnalytics, parseCampaignParameters } from "/assets/analytics.mjs?v=__TALLYO_ASSET_REVISION__";
+import { eventPolicy } from "/assets/analytics-policy.mjs?v=__TALLYO_ASSET_REVISION__";
 
 const analytics = createAnalytics({
   policy: eventPolicy,

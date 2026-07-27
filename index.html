@@ -101,13 +101,24 @@
         .auth-brand {
             display: inline-flex;
             align-items: center;
-            gap: 0.7rem;
-            color: #111827;
-            font-size: 1.45rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
         }
-        .auth-brand img { width: 2rem; height: 2rem; object-fit: contain; }
+        .auth-brand-wordmark {
+            position: relative;
+            display: inline-block;
+            width: 7.4rem;
+            aspect-ratio: 512 / 218;
+            line-height: 0;
+        }
+        .auth-brand-wordmark img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: auto;
+        }
+        .auth-brand-wordmark-base {
+            filter: brightness(0) saturate(100%) invert(8%) sepia(29%) saturate(1602%) hue-rotate(198deg) brightness(87%) contrast(100%);
+        }
+        .auth-brand-wordmark-colour { clip-path: inset(0 70% 0 0); }
         .auth-website-link {
             color: #4338ca;
             font-size: 0.9rem;
@@ -314,9 +325,11 @@
     <div v-if="!isLoggedIn" class="auth-scroll-shell flex-1">
         <div class="auth-page">
             <header class="auth-public-header">
-                <div class="auth-brand">
-                    <img src="./tallyo-mark.png" alt="" aria-hidden="true">
-                    <span>Tallyo</span>
+                <div class="auth-brand" aria-label="Tallyo">
+                    <span class="auth-brand-wordmark" aria-hidden="true">
+                        <img class="auth-brand-wordmark-base" src="./tallyo-wordmark-white.png" alt="">
+                        <img class="auth-brand-wordmark-colour" src="./tallyo-wordmark-white.png" alt="">
+                    </span>
                 </div>
                 <a v-if="publicSiteUrl" :href="publicSiteUrl" class="auth-website-link">Visit the Tallyo website <span aria-hidden="true">→</span></a>
             </header>
@@ -546,6 +559,7 @@
                         <button @click="navigateTo('recurring')" :class="{'bg-slate-800 text-white': activeTab === 'recurring', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'recurring'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Recurring<span v-if="dueTemplates.length" class="ml-1.5 inline-flex items-center justify-center bg-amber-500 text-white text-[10px] font-bold rounded-full h-4 min-w-4 px-1">{{ dueTemplates.length }}</span></button>
                         <button @click="navigateTo('settings')" :class="{'bg-slate-800 text-white': activeTab === 'settings', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'settings'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Company Settings</button>
                         <button @click="navigateTo('account')" :class="{'bg-slate-800 text-white': activeTab === 'account', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'account'}" class="primary-navigation-item primary-navigation-account mt-1 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap border border-slate-700">Account</button>
+                        <button ref="helpPanelTrigger" type="button" @click.stop="openHelpPanel" class="primary-navigation-item primary-navigation-account mt-1 py-2 rounded-lg border border-slate-700 text-sm font-medium text-slate-300 transition-colors whitespace-nowrap hover:bg-slate-800 hover:text-white">Help &amp; install</button>
                     </nav>
                 </div>
             </div>
@@ -2164,10 +2178,6 @@
                 </div>
             </div>
         </main>
-
-        <button ref="helpPanelTrigger" type="button" @click="openHelpPanel" class="fixed bottom-4 right-4 z-30 rounded-full bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-            Help &amp; install
-        </button>
 
         <div v-if="helpPanelOpen" class="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 p-0 sm:items-center sm:p-4" @click.self="closeHelpPanel">
             <section ref="helpPanel" role="dialog" aria-modal="true" aria-labelledby="help-panel-title" tabindex="-1" @keydown.esc.stop="closeHelpPanel" class="max-h-[90vh] w-full overflow-y-auto rounded-t-2xl bg-white p-5 shadow-2xl sm:max-w-lg sm:rounded-2xl sm:p-7">

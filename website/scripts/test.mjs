@@ -50,6 +50,7 @@ const routeOutput = new Map([...pages, notFoundPage].map((page) => [page.route, 
 const seenTitles = new Set();
 const seenDescriptions = new Set();
 const schemas = new Map();
+const seenAssetRevisions = new Set();
 const prohibitedClaims = /100% secure|unhackable|bank-grade|fully GDPR compliant|certified compliant|guaranteed payment|guaranteed email delivery|works fully offline|uptime guarantee/i;
 const fakeProof = /\b(?:trusted by|rated|award-winning|five-star|5-star)\b/i;
 
@@ -86,9 +87,14 @@ for (const page of [...pages, notFoundPage]) {
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(ids).size, ids.length, `unique element IDs for ${page.route}`);
   assert.match(html, /property="og:title"/, `Open Graph title for ${page.route}`);
-  assert.match(html, /property="og:image" content="https:\/\/tallyo\.co\.uk\/assets\/tallyo-social-card\.webp"/, `Open Graph image for ${page.route}`);
+  assert.match(html, /property="og:image" content="https:\/\/tallyo\.co\.uk\/assets\/tallyo-social-card\.webp\?v=[a-f0-9]{12}"/, `Open Graph image for ${page.route}`);
   assert.match(html, /name="twitter:card" content="summary_large_image"/, `large social card for ${page.route}`);
-  assert.match(html, /type="module" src="\/assets\/growth\.js"/, `provider-neutral growth module for ${page.route}`);
+  assert.match(html, /type="module" src="\/assets\/growth\.js\?v=[a-f0-9]{12}"/, `provider-neutral growth module for ${page.route}`);
+  for (const assetName of ["styles.css", "site.js", "growth.js"]) {
+    const revision = html.match(new RegExp(`/assets/${assetName.replace(".", "\\.")}\\?v=([a-f0-9]{12})`))?.[1];
+    assert.ok(revision, `versioned ${assetName} for ${page.route}`);
+    seenAssetRevisions.add(revision);
+  }
   assert.doesNotMatch(html, prohibitedClaims, `prohibited claim on ${page.route}`);
   assert.doesNotMatch(html, fakeProof, `fake proof on ${page.route}`);
   assert.doesNotMatch(html, /__TALLYO_CONNECT_PAYMENT_/, `resolved customer-payment copy on ${page.route}`);
@@ -102,13 +108,16 @@ for (const page of [...pages, notFoundPage]) {
 
   for (const href of hrefsFor(html)) {
     if (!href.startsWith("/") || href.startsWith("//")) continue;
-    const route = href.split("#")[0] || "/";
+    const route = href.split(/[?#]/)[0] || "/";
     const staticFile = join(distRoot, route.replace(/^\//, ""));
     assert.ok(routeOutput.has(route) || existsSync(staticFile), `broken internal link ${href} on ${page.route}`);
   }
 }
 
 const home = read("index.html");
+assert.equal(seenAssetRevisions.size, 1, "all rendered pages and core assets share one content revision");
+const assetRevision = [...seenAssetRevisions][0];
+assert.doesNotMatch(home, /(?:href|src)="\/assets\/(?:styles\.css|site\.js|growth\.js)"/, "core assets are never referenced without a revision");
 for (const id of ["cta_header_create_account", "cta_hero_create_account", "cta_hero_free_invoice", "cta_footer_create_account", "cta_login"]) {
   assert.match(home, new RegExp(`id="${id}"`), `missing CTA id ${id}`);
 }
@@ -125,8 +134,19 @@ assert.equal((productTour.match(/class="product-demo /g) || []).length, productS
 for (const scene of productScenes) {
   assert.match(productTour, new RegExp(`id="${scene.id}"`), `product scene ${scene.id}`);
 }
-assert.equal((productTour.match(/Fictional demonstration<\/span>/g) || []).length, productScenes.length, "every product view is visibly fictional");
+assert.equal((productTour.match(/Product screenshot using fictional demonstration data\./g) || []).length, productScenes.length, "every product screenshot is visibly identified as fictional");
+assert.equal((productTour.match(/class="demo-window-screenshot"/g) || []).length, productScenes.length, "every product view uses an authentic fictional-data screenshot");
+assert.doesNotMatch(productTour, /demo-window-capture"[^>]*>[\s\S]{0,200}demo-window-bar/, "authentic screenshots replace the illustrated window instead of nesting inside it");
+for (const screenshotName of ["tallyo-dashboard.jpg", "tallyo-invoice-editor.jpg", "tallyo-quote-editor.jpg", "tallyo-customers.jpg", "tallyo-recurring.jpg", "tallyo-overdue.jpg", "tallyo-payments.jpg", "tallyo-activity.jpg", "tallyo-branding.jpg", "tallyo-security.jpg", "tallyo-mobile-quote.jpg"]) {
+  assert.match(productTour, new RegExp(`/assets/product/${screenshotName.replace(".", "\\.")}\\?v=[a-f0-9]{12}`), `product tour includes versioned ${screenshotName}`);
+  assert.deepEqual([...readFileSync(join(distRoot, "assets", "product", screenshotName)).subarray(0, 3)], [255, 216, 255], `${screenshotName} is encoded as JPEG`);
+}
 assert.doesNotMatch(productTour, /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|acct_|cs_(?:test|live)_|eyJ[A-Za-z0-9_-]{10,}/, "product tour has no emails, provider IDs or JWT-like data");
+
+const generatorPageHtml = read("free-invoice-generator/index.html");
+assert.match(generatorPageHtml, /role="region" aria-label="Scrollable live document preview" tabindex="0"/, "mobile document preview is keyboard reachable");
+assert.match(generatorPageHtml, /Swipe sideways to view the full document\./, "mobile document preview explains horizontal navigation");
+assert.match(read("assets/styles.css"), /\.generator-preview-wrap \{ overflow-x: auto;/, "mobile document preview scrolls inside its own region");
 
 for (const article of helpArticles) {
   const route = `/help/${article.slug}/`;
@@ -189,7 +209,7 @@ await assert.rejects(() => futurePublicAiAdapter.answer(), /disabled/);
 const helper = read("helper/index.html");
 assert.match(helper, /Tallyo Helper provides general product guidance and cannot see your account or business records/);
 assert.match(helper, /id="helper-knowledge"/);
-assert.match(helper, /type="module" src="\/assets\/helper\.js"/);
+assert.match(helper, /type="module" src="\/assets\/helper\.js\?v=[a-f0-9]{12}"/);
 assert.doesNotMatch(helper, /https?:\/\/(?!tallyo\.co\.uk|schema\.org|edsonlro\.github\.io)/, "helper page has no unapproved external destination");
 const embeddedKnowledge = helper.match(/<script type="application\/json" id="helper-knowledge">([^<]+)<\/script>/)?.[1];
 assert.deepEqual(JSON.parse(embeddedKnowledge), helperKnowledge, "embedded helper knowledge matches reviewed source");
@@ -199,7 +219,7 @@ const generator = read("free-invoice-generator/index.html");
 const quoteGenerator = read("free-quote-generator/index.html");
 for (const html of [generator, quoteGenerator]) {
   assert.match(html, /data-generator/);
-  assert.match(html, /type="module" src="\/assets\/generator\.js"/);
+  assert.match(html, /type="module" src="\/assets\/generator\.js\?v=[a-f0-9]{12}"/);
   assert.match(html, /does not save this document automatically/);
   assert.match(html, /does not provide tax, legal or accounting advice/);
   assert.match(html, /https:\/\/www\.gov\.uk\/invoicing-and-taking-payment-from-customers\/invoices-what-they-must-include/);
@@ -326,6 +346,11 @@ for (const helperAsset of ["helper.js", "helper-core.mjs"]) {
   assert.doesNotMatch(source, /fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage|indexedDB/, `${helperAsset} remains browser-local without persistence or network calls`);
   assert.doesNotMatch(source, /https?:\/\//, `${helperAsset} has no provider endpoint`);
 }
+for (const moduleAsset of ["helper.js", "generator.js", "growth.js"]) {
+  const source = read(`assets/${moduleAsset}`);
+  assert.doesNotMatch(source, /__TALLYO_ASSET_REVISION__/, `${moduleAsset} resolves the asset revision`);
+  assert.match(source, new RegExp(`\\\\?v=${assetRevision}`), `${moduleAsset} imports the same asset revision`);
+}
 for (const generatorAsset of ["generator.js", "document-calculator.mjs"]) {
   const source = read(`assets/${generatorAsset}`);
   assert.doesNotMatch(source, /fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|document\.cookie|localStorage|sessionStorage|indexedDB/, `${generatorAsset} remains browser-local without persistence, tracking or network calls`);
@@ -347,5 +372,6 @@ const report = JSON.parse(read("build-report.json"));
 assert.equal(report.mode, "preview");
 assert.equal(report.externalOrigins, 0);
 assert.equal(report.routes, pages.length);
+assert.equal(report.assetRevision, assetRevision);
 
 console.log(`Website checks passed for ${pages.length} routes plus 404.`);
