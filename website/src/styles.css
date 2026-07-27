@@ -424,7 +424,8 @@ p { color: var(--slate-600); }
   .helper-shell { grid-template-columns: minmax(13rem, 0.7fr) minmax(0, 1.5fr); }
   .helper-suggestions { max-height: 38rem; }
   .helper-form > div { grid-template-columns: minmax(0, 1fr) auto; }
-  .product-demo { grid-template-columns: minmax(15rem, 0.72fr) minmax(0, 1.28fr); gap: clamp(1.5rem, 3.5vw, 3rem); }
+  .product-demo { grid-template-columns: minmax(15rem, 0.78fr) minmax(0, 1.22fr); gap: clamp(1.5rem, 3.5vw, 3rem); }
+  .product-demo-reverse { grid-template-columns: minmax(0, 1.22fr) minmax(15rem, 0.78fr); }
   .product-demo-reverse .demo-copy { grid-column: 2; grid-row: 1; }
   .product-demo-reverse .demo-window { grid-column: 1; grid-row: 1; }
   .demo-list p { grid-template-columns: 0.9fr 1.4fr auto; align-items: center; }
