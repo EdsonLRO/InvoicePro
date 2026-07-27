@@ -172,7 +172,7 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
   ${siteConfig.preview ? '<div class="preview-banner" role="status">Private preview build — not for public indexing</div>' : ""}
   <header class="site-header" data-header>
     <div class="header-inner">
-      <a class="brand" href="/" aria-label="Tallyo home"><img class="brand-mark" src="${assetUrl("/assets/tallyo-mark.png")}" alt="" aria-hidden="true"><span>Tallyo</span></a>
+      <a class="brand" href="/" aria-label="Tallyo home"><span class="brand-wordmark-dark" aria-hidden="true"><img class="brand-wordmark-dark-base" src="${assetUrl("/assets/tallyo-wordmark-white.png")}" alt=""><img class="brand-wordmark-dark-colour" src="${assetUrl("/assets/tallyo-wordmark-white.png")}" alt=""></span></a>
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-button><span class="sr-only">Open main menu</span><i></i><i></i><i></i></button>
       <nav class="primary-nav" id="primary-navigation" aria-label="Main navigation" data-navigation>
         <div class="nav-links">${navMarkup}</div>

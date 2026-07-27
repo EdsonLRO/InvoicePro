@@ -134,9 +134,10 @@ assert.equal((productTour.match(/class="product-demo /g) || []).length, productS
 for (const scene of productScenes) {
   assert.match(productTour, new RegExp(`id="${scene.id}"`), `product scene ${scene.id}`);
 }
-assert.equal((productTour.match(/Fictional demonstration<\/span>/g) || []).length, productScenes.length, "every product view is visibly fictional");
-assert.equal((productTour.match(/class="demo-window-screenshot"/g) || []).length, 5, "core product views use authentic fictional-data screenshots");
-for (const screenshotName of ["tallyo-dashboard.png", "tallyo-invoice-editor.png", "tallyo-quote-editor.png", "tallyo-recurring.png", "tallyo-mobile-quote.png"]) {
+assert.equal((productTour.match(/Product screenshot using fictional demonstration data\./g) || []).length, productScenes.length, "every product screenshot is visibly identified as fictional");
+assert.equal((productTour.match(/class="demo-window-screenshot"/g) || []).length, productScenes.length, "every product view uses an authentic fictional-data screenshot");
+assert.doesNotMatch(productTour, /demo-window-capture"[^>]*>[\s\S]{0,200}demo-window-bar/, "authentic screenshots replace the illustrated window instead of nesting inside it");
+for (const screenshotName of ["tallyo-dashboard.png", "tallyo-invoice-editor.png", "tallyo-quote-editor.png", "tallyo-customers.png", "tallyo-recurring.png", "tallyo-overdue.png", "tallyo-payments.png", "tallyo-activity.png", "tallyo-branding.png", "tallyo-security.png", "tallyo-mobile-quote.png"]) {
   assert.match(productTour, new RegExp(`/assets/product/${screenshotName.replace(".", "\\.")}\\?v=[a-f0-9]{12}`), `product tour includes versioned ${screenshotName}`);
 }
 assert.doesNotMatch(productTour, /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|acct_|cs_(?:test|live)_|eyJ[A-Za-z0-9_-]{10,}/, "product tour has no emails, provider IDs or JWT-like data");
