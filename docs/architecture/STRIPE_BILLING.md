@@ -1,6 +1,6 @@
 # Stripe Billing architecture
 
-Status: The foundation and live-readiness migrations are applied. Stripe sandbox Prices, the signed Billing destination and Customer Portal are configured, and protected synthetic acceptance passed on 2026-07-25. Public subscription checkout and live Billing remain disabled. The private write-enforcement switch remains off while live provider configuration and acceptance are pending.
+Status: The foundation and live-readiness migrations are applied. Stripe sandbox and live Prices, signed Billing destinations and Customer Portal are configured. Protected synthetic acceptance and one bounded live monthly subscription acceptance passed. Public subscription controls and the private write-enforcement switch remain off pending the final release decision.
 
 ## Boundary
 
@@ -14,7 +14,7 @@ Approved offer:
 - no full-feature trial or permanent free saved account at launch;
 - cancellation stops future renewal and normally preserves access through the paid period.
 
-The approved sandbox Product and GBP 8 monthly/GBP 80 annual Prices exist. One synthetic monthly subscription produced a signed provider-derived entitlement and is scheduled to cancel at its verified period end. No live Product/Price, coupon, trial, public Checkout or real customer subscription exists.
+The approved sandbox and live Products with GBP 8 monthly/GBP 80 annual Prices exist. One synthetic sandbox monthly subscription and one bounded live monthly subscription produced signed provider-derived full entitlements. No coupon, trial, public Checkout or real customer subscription exists.
 
 ## Repository foundation
 
@@ -37,6 +37,10 @@ Read-only aggregate reconciliation found eight accounts with business data, two 
 The 2026-07-25 controlled run passed authenticated monthly Checkout, signed activation, Portal ownership/return, period-end cancellation, duplicate replay and older-event rejection. Rollback-only database probes passed renewal, failed payment, seven-day grace, `unpaid` read-only and recovery transitions without changing the accepted subscription's final state.
 
 During cancellation testing, Stripe represented the Portal request with `cancel_at` equal to `current_period_end` while the boolean field was false. Webhook version 9 now reconciles either trusted representation. Full details and residual gates are in `STRIPE_BILLING_SANDBOX_ACCEPTANCE_EVIDENCE_2026-07-25.md`.
+
+## Bounded live acceptance
+
+Under exact Owner approval, one synthetic live monthly Checkout completed. Privacy-safe provider-derived reconciliation shows an active monthly subscription with full access, two applied Billing events, one correctly ignored stale event and no period-end cancellation. The public app and website Billing controls remain fail closed until their explicit production gates are enabled, and `subscription_write_enforcement` remains `false` pending the final existing-account impact decision.
 
 ## Trusted flow
 

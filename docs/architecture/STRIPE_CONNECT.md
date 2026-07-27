@@ -1,6 +1,6 @@
 # Stripe Connect architecture decision record
 
-Status: Launch model approved. The additive schema and four Connect functions are deployed; sandbox-only onboarding is active under protected gates, while live mode and public release remain disabled.
+Status: Launch model approved. The additive schema and four Connect functions are deployed. Multi-account sandbox acceptance and bounded live onboarding, direct-charge Checkout and full-refund acceptance passed. Public release remains disabled.
 
 ## Decision boundary
 
@@ -127,3 +127,7 @@ The protected retry authenticated successfully, retrieved the connected account 
 After PR #107 merged as `71e92fa`, only `manage-stripe-connect` advanced from version 18 to 19 and retained JWT verification. The single approved protected retry opened Stripe-hosted sandbox onboarding, and Stripe recorded HTTP 200 for Account Links v2. The Owner completed the synthetic account's identity, business and payout fields privately; Tallyo then reported card payments and payouts ready.
 
 The first fictional GBP 1 direct-charge request reached deployed `create-connect-checkout` version 15 but returned a controlled HTTP 502 before Checkout creation. The function's shared `refreshActiveAccount` helper still used obsolete unindexed `include[]` query names; Accounts v2 requires `include[0]`, `include[1]` and `include[2]`. The focused correction changes only those query names and adds a regression assertion. No connected payment or refund occurred, and deployment remains separately gated.
+
+## Bounded live acceptance
+
+Under separate exact approvals, one isolated synthetic live business completed Stripe-hosted onboarding and reported ready card-payment and payout capabilities. PRs #118 and #119 repaired the stale Checkout-claim and completion-readback paths without changing the approved direct-charge model. One GBP 1 Checkout payment reconciled through the signed connected-account destination, and one separately approved full refund reconciled exactly once. Invoice #0002 returned to Sent with GBP 1 outstanding; aggregate evidence shows one connected payment, one connected refund, zero net paid, one refund request audit and one refund success audit. No private identity, bank, card, secret or provider identifier was recorded in repository evidence.
