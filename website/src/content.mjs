@@ -55,17 +55,17 @@ export const featureGroups = Object.freeze([
 ]);
 
 export const productScenes = Object.freeze([
-  { id: "dashboard", label: "Dashboard", title: "See what needs attention", caption: "Outstanding, paid and overdue work is brought together for a quick start to the day.", variant: "dashboard" },
-  { id: "invoice-editor", label: "Invoice editor", title: "Build a clear customer invoice", caption: "Add the customer, dates, line items and payment details in one focused editor.", variant: "document" },
-  { id: "quote", label: "Quotes", title: "Start with an agreed quote", caption: "Prepare a quote, keep its status visible and convert it to an invoice when the work is agreed.", variant: "quote" },
+  { id: "dashboard", label: "Dashboard", title: "See what needs attention", caption: "Outstanding, paid and overdue work is brought together for a quick start to the day.", variant: "dashboard", image: "/assets/product/tallyo-dashboard.png", imageAlt: "Tallyo dashboard showing fictional outstanding, overdue, paid and draft totals" },
+  { id: "invoice-editor", label: "Invoice editor", title: "Build a clear customer invoice", caption: "Add the customer, dates, line items and payment details in one focused editor.", variant: "document", image: "/assets/product/tallyo-invoice-editor.png", imageAlt: "Tallyo invoice editor filled with fictional Willow and Pine Studio invoice details" },
+  { id: "quote", label: "Quotes", title: "Start with an agreed quote", caption: "Prepare a quote, keep its status visible and convert it to an invoice when the work is agreed.", variant: "quote", image: "/assets/product/tallyo-quote-editor.png", imageAlt: "Tallyo quote editor filled with fictional Willow and Pine Studio quote details" },
   { id: "customers", label: "Customers and saved items", title: "Reuse the details you need", caption: "Keep repeat customers and commonly used products or services ready for the next document.", variant: "customers" },
-  { id: "recurring", label: "Recurring invoices", title: "Plan repeat invoicing", caption: "Choose the next run and decide whether a saved schedule should email each generated invoice.", variant: "recurring" },
+  { id: "recurring", label: "Recurring invoices", title: "Plan repeat invoicing", caption: "Choose the next run and decide whether a saved schedule should email each generated invoice.", variant: "recurring", image: "/assets/product/tallyo-recurring.png", imageAlt: "Tallyo recurring invoices page showing a fictional monthly schedule" },
   { id: "overdue", label: "Overdue work", title: "Follow up by choice", caption: "Review overdue balances and enable reminders only for the invoices you want Tallyo to follow up.", variant: "overdue" },
   { id: "payments", label: "Payments", title: "Keep payment status with the invoice", caption: "See recorded payments and the remaining balance together with the relevant invoice.", variant: "payments" },
   { id: "activity", label: "Activity history", title: "Understand what happened", caption: "Document, email, payment and refund activity stays attached to the relevant record.", variant: "activity" },
   { id: "branding", label: "Branding", title: "Make documents recognisably yours", caption: "Add business details, a logo and document styling that carry through to customer PDFs.", variant: "branding" },
   { id: "security", label: "Account security", title: "Choose stronger sign-in protection", caption: "Manage authenticator-app MFA, recovery codes and sign-out controls from Account Security.", variant: "security" },
-  { id: "mobile", label: "Mobile", title: "Work from a supported phone", caption: "The core document and account flows adapt to smaller screens and can be installed for quick access.", variant: "mobile" }
+  { id: "mobile", label: "Mobile", title: "Work from a supported phone", caption: "The core document and account flows adapt to smaller screens and can be installed for quick access.", variant: "mobile", image: "/assets/product/tallyo-mobile-quote.png", imageAlt: "Tallyo quote editor on a mobile screen using fictional customer details" }
 ]);
 
 export const industries = Object.freeze([

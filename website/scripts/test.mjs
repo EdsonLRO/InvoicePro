@@ -135,7 +135,16 @@ for (const scene of productScenes) {
   assert.match(productTour, new RegExp(`id="${scene.id}"`), `product scene ${scene.id}`);
 }
 assert.equal((productTour.match(/Fictional demonstration<\/span>/g) || []).length, productScenes.length, "every product view is visibly fictional");
+assert.equal((productTour.match(/class="demo-window-screenshot"/g) || []).length, 5, "core product views use authentic fictional-data screenshots");
+for (const screenshotName of ["tallyo-dashboard.png", "tallyo-invoice-editor.png", "tallyo-quote-editor.png", "tallyo-recurring.png", "tallyo-mobile-quote.png"]) {
+  assert.match(productTour, new RegExp(`/assets/product/${screenshotName.replace(".", "\\.")}\\?v=[a-f0-9]{12}`), `product tour includes versioned ${screenshotName}`);
+}
 assert.doesNotMatch(productTour, /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|acct_|cs_(?:test|live)_|eyJ[A-Za-z0-9_-]{10,}/, "product tour has no emails, provider IDs or JWT-like data");
+
+const generatorPageHtml = read("free-invoice-generator/index.html");
+assert.match(generatorPageHtml, /role="region" aria-label="Scrollable live document preview" tabindex="0"/, "mobile document preview is keyboard reachable");
+assert.match(generatorPageHtml, /Swipe sideways to view the full document\./, "mobile document preview explains horizontal navigation");
+assert.match(read("assets/styles.css"), /\.generator-preview-wrap \{ overflow-x: auto;/, "mobile document preview scrolls inside its own region");
 
 for (const article of helpArticles) {
   const route = `/help/${article.slug}/`;

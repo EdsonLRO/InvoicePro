@@ -107,6 +107,7 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
     .replaceAll('data-signup-link href="#"', `data-signup-link href="${escapeAttribute(siteConfig.signupUrl)}"`)
     .replaceAll('data-subscription-link href="#"', `data-subscription-link href="${escapeAttribute(siteConfig.subscriptionUrl)}"`)
     .replaceAll('data-login-link href="#"', `data-login-link href="${escapeAttribute(siteConfig.appUrl)}"`)
+    .replaceAll("__TALLYO_ASSET_REVISION__", assetRevision)
     .replace("__TALLYO_HELPER_KNOWLEDGE__", helperKnowledgeJson)
     .replaceAll("__TALLYO_AI_HELPER_ENABLED__", String(siteConfig.aiHelperEnabled))
     .replaceAll(
