@@ -54,14 +54,14 @@ Prepare Tallyo so the public website and authenticated app can offer:
 
 ## Focused task: COMM-001-AN-001 GA4 consent controls
 
-Status: Source implementation and evidence complete; awaiting Owner review
+Status: Completed and activated under exact Owner approval
 Priority: High
 Assigned roles: Website, QA, Security, Legal/Privacy and Documentation
 Model/work mode: Sol High for Auth/subscription hooks, CSP, legal wording and final review; Medium for routine website UI and tests
 Risk level: High because the scope adds production tracking, touches Auth/subscription lifecycle events, changes CSP and updates public legal commitments
 Jurisdiction: United Kingdom
 Affected people: public visitors and Tallyo business-account users
-Legal disposition: Approved with conditions for source implementation and non-networked testing; deployment/activation blocked
+Legal disposition: Approved for the deployed consent-controlled scope
 Review: `docs/legal/GA4_CONSENT_REVIEW.md`
 
 Approved source scope:
@@ -89,7 +89,7 @@ Files locked:
 
 Lock acquired: 28 July 2026.
 
-Release condition:
+Release acceptance:
 
 - source remains disabled by default and requires an exact production release gate;
 - no static Google tag exists in rendered HTML;
@@ -100,10 +100,14 @@ Release condition:
   Stripe, Auth, free-text and internal-ID data;
 - notices match the implemented choice, cookie duration and provider role;
 - Google property settings and processor/transfer evidence are verified;
-- final diff and evidence receive Owner approval before any deployment.
+- PR #134 merged at `331ace9` after the required checks passed;
+- production website and app deployments succeeded on 28 July 2026;
+- live reject, accept and withdrawal checks passed;
+- GA4 Realtime received `view_pricing` without event properties;
+- no approved Tallyo event is marked as a key event.
 
 Branch: `codex/ga4-consent-controls`
-Deployment: Not authorised.
+Deployment: Active under exact Owner approval.
 
 ## Locks
 
