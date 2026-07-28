@@ -210,7 +210,7 @@ export const faqs = Object.freeze([
   { question: "How much is Tallyo Pro?", answer: "Tallyo Pro is £8 per month or £80 per year. The annual option saves £16 compared with paying monthly for a year." },
   { question: "Can I use Tallyo on my phone?", answer: "Yes. The interface adapts to supported phone browsers and can be installed for quick access." },
   { question: "Can I export my records?", answer: "Yes. Tallyo can create a structured account export and offers Excel export for document lists." },
-  { question: "How do I get support?", answer: "Use the reviewed Help Centre guidance for common tasks. A public support contact will be added only after the business contact is approved." },
+  { question: "How do I get support?", answer: "Use the Help Centre for common tasks or email main@tallyo.co.uk for help with your Tallyo account or service." },
   { question: "Does Tallyo replace accounting software?", answer: "No. Tallyo helps with invoicing and business records, but it is not a full accounting suite and does not prepare tax returns." }
 ]);
 

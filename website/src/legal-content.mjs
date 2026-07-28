@@ -47,7 +47,7 @@ export const privacyNotice = `
       <p>Tallyo does not currently use advertising cookies, behavioural advertising or production analytics. If this changes, we will update this notice and provide any consent choices required by law before activating the processing.</p>
 
       <h3>AI Helper</h3>
-      <p>The public AI Helper is currently disabled. If it is enabled, it answers questions about public Tallyo product information. It sends the visitor's short question and reviewed public Tallyo information to OpenAI. It is not designed to access account records or private business/customer data, and visitors must not enter that information.</p>
+      <p>The public AI Helper answers questions about public Tallyo product information. When a visitor submits a question that the reviewed browser guidance cannot answer directly, Tallyo sends the short question and reviewed public Tallyo information to OpenAI. The Helper is not designed to access account records or private business/customer data, and visitors must not enter that information.</p>
       <p>Tallyo does not intentionally store a Helper conversation history. OpenAI's standard API abuse-monitoring logs may retain prompt and response content for up to 30 days unless a separately approved reduced-retention control applies. Cloudflare uses a short-lived, protected network-derived key to enforce the Helper rate limit.</p>
     </section>
 

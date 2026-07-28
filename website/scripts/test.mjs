@@ -232,6 +232,7 @@ assert.match(quoteGenerator, /data-default-type="Quote"/);
 
 const privacy = read("privacy/index.html");
 const dataProcessingTerms = read("data-processing-terms/index.html");
+const terms = read("terms/index.html");
 for (const [name, html] of [["Privacy Notice", privacy], ["Data Processing Terms", dataProcessingTerms]]) {
   assert.doesNotMatch(html, /do not publish|owner-approved draft|publication approval|required account evidence|provider evidence register structure|focused provider verification/i, `${name} contains no internal or draft wording`);
   assert.match(html, /87 Coles Green Road, NW2 7JH, London, UK/, `${name} has the approved service address`);
@@ -239,14 +240,25 @@ for (const [name, html] of [["Privacy Notice", privacy], ["Data Processing Terms
 }
 assert.match(privacy, /Effective 28 July 2026/);
 assert.match(privacy, /main@tallyo\.co\.uk/);
-assert.match(privacy, /The public AI Helper is currently disabled/);
+assert.match(privacy, /The public AI Helper answers questions about public Tallyo product information/);
 assert.match(privacy, /We do not promise a fixed closed-account deletion deadline/);
 assert.match(privacy, /href="\/data-processing-terms\/">Data Processing Terms<\/a>/);
 assert.match(dataProcessingTerms, /These terms form part of the Tallyo account agreement for business users/);
 assert.match(dataProcessingTerms, /href="\/privacy\/">Tallyo Privacy Notice<\/a>/);
 assert.match(dataProcessingTerms, /role="region" aria-label="Data processing schedule" tabindex="0"/);
 assert.match(dataProcessingTerms, /role="region" aria-label="Tallyo subprocessors" tabindex="0"/);
-assert.match(home, /<h2>Legal<\/h2>\s*<a href="\/privacy\/">Privacy Notice<\/a><a href="\/data-processing-terms\/">Data Processing Terms<\/a>/, "footer publishes both legal links");
+assert.doesNotMatch(terms, /do not publish|owner-approved draft|publication approval|internal evidence/i, "Terms contain no internal or draft wording");
+assert.match(terms, /Tallyo Terms of Service/);
+assert.match(terms, /87 Coles Green Road, NW2 7JH, London, UK/);
+assert.match(terms, /Tallyo Pro costs £8 per month or £80 per year/);
+assert.match(terms, /seven-day grace period/);
+assert.match(terms, /merchant of record/);
+assert.match(terms, /href="\/privacy\/">Tallyo Privacy Notice<\/a>/);
+assert.match(terms, /href="\/data-processing-terms\/">Tallyo Business-User Data Processing Terms<\/a>/);
+assert.match(home, /<h2>Legal<\/h2>\s*<a href="\/terms\/">Terms of Service<\/a><a href="\/privacy\/">Privacy Notice<\/a><a href="\/data-processing-terms\/">Data Processing Terms<\/a>/, "footer publishes all legal links");
+assert.match(read("pricing/index.html"), /By choosing Tallyo Pro, you agree to the <a href="\/terms\/">Terms of Service<\/a>/);
+assert.match(read("help/index.html"), /mailto:main@tallyo\.co\.uk/);
+assert.match(read("faq/index.html"), /email main@tallyo\.co\.uk for help/);
 
 assert.equal(parseMoney("12.34"), 1234n);
 assert.equal(parseMoney("00012.34"), 1234n);
