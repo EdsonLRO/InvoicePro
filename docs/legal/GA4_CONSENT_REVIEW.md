@@ -137,6 +137,31 @@ The Owner must verify directly in the GA4 property that:
 - the shortest suitable event-data retention is selected;
 - the applicable Google Analytics terms and data-processing terms are recorded.
 
+## Account-specific dashboard evidence
+
+Verified in the live Tallyo GA4 property on 28 July 2026 under exact Owner
+approval:
+
+- the Tallyo web stream uses `https://tallyo.co.uk` and measurement ID
+  `G-PZFZKCWZ7M`;
+- Enhanced Measurement is off;
+- Google Signals is off;
+- user-provided data collection is off;
+- ads personalisation is allowed in 0 of 307 regions;
+- Google Ads links reports zero completed links;
+- event-data and user-data retention are both set to the shortest available
+  option, 2 months;
+- `Reset on new user activity` is off;
+- owner-editable key events `close_convert_lead` and `qualify_lead` were
+  unmarked;
+- GA4 retains its provider-controlled `purchase` key event with the unmark
+  control disabled and no stream data detected. No Tallyo allowlisted event is
+  marked as a key event or conversion.
+
+No screenshot, Google account identifier, billing detail, private account
+information or secret was retained. No Analytics event was sent, no Google Ads
+link was created, and the repository production gate remains disabled.
+
 ## Disposition
 
 **Approved with conditions for implementation and non-networked testing.**
