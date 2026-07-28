@@ -38,12 +38,15 @@ assert.match(indexSource, /window\.addEventListener\('beforeinstallprompt'/, 'in
 assert.match(indexSource, /window\.addEventListener\('appinstalled'/, 'successful app installation must update the UI');
 assert.match(indexSource, /<button v-if="installPromptEvent"[^>]+@click="requestInstall"/, 'installation must require an explicit user click');
 assert.match(indexSource, /<nav v-if="publicSiteUrl"/, 'public links must stay hidden until a valid website URL is configured');
+assert.match(indexSource, /publicSiteLink\('privacy\/'\)/, 'registration and auth footer must link to the published Privacy Notice');
+assert.match(indexSource, /publicSiteLink\('data-processing-terms\/'\)/, 'registration and auth footer must link to the published Data Processing Terms');
+assert.match(indexSource, /By creating an account, you agree that the[\s\S]*form part of your account agreement/, 'registration must incorporate the Data Processing Terms into the account agreement');
 assert.doesNotMatch(indexSource, /TALLYO_PUBLIC_SITE_URL\s*=|https:\/\/tallyo\.co\.uk/, 'this change must not hard-code or mutate production website configuration');
 
 for (const forbidden of ['fetch(', 'XMLHttpRequest', 'localStorage', 'sessionStorage', 'indexedDB', 'document.cookie']) {
   assert.equal(integrationSource.includes(forbidden), false, `integration helper must not use ${forbidden}`);
 }
 assert.match(workerSource, /'\.\/app-help-install\.js'/, 'integration helper must be part of the offline app shell');
-assert.match(workerSource, /tallyo-shell-2026-07-27-1/, 'service-worker cache marker must match this build');
+assert.match(workerSource, /tallyo-shell-2026-07-28-1/, 'service-worker cache marker must match this build');
 
 console.log('App public integration harness passed.');

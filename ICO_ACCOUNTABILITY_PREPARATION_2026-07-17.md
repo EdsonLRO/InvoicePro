@@ -1,6 +1,6 @@
 # Tallyo ICO And Accountability Preparation - 2026-07-17
 
-Internal working record for `LEGAL-OPS-001`. It is not legal advice, a completed ICO registration, a final DPIA, or evidence of compliance. It uses no real customer or private Owner data. All conclusions remain provisional until the real sole-trader facts, final provider configuration, qualified review, and Owner approval are recorded through appropriate secure routes.
+Internal working record for `LEGAL-OPS-001`. It is not legal advice, a completed ICO registration, a final DPIA, or evidence of compliance. It uses no real customer data. The Owner approved the document content, elected to proceed without professional legal review at this stage and separately approved the clean customer-facing privacy publication on 28 July 2026. Focused launch-scope account-specific provider verification is complete; unrestricted public release remains separately gated.
 
 ## Official Basis Checked
 
@@ -34,7 +34,7 @@ Do not complete private answers in Git. The Owner should use the official fee ch
 
 ### Scope and purpose
 
-The assessment covers the initial UK business-only, single-user-per-account Tallyo invoicing application: account/Auth and MFA recovery; business profiles and workspace records; customer/invoice content; requested email/reminders; Stripe-hosted invoice payments/refunds/disputes in the future live configuration; support, privacy requests and incidents; audit events; backups; and current static hosting. It excludes future consumer/non-UK use, team workspaces, advertising analytics, AI access to private data, subscription billing, special-category workflows, and dormant Turnstile activation.
+The assessment covers the initial UK business-only, single-user-per-account Tallyo invoicing application: account/Auth and MFA recovery; business profiles and workspace records; customer/invoice content; requested email/reminders; Tallyo subscription Billing; Stripe Connect onboarding and customer payments/refunds/disputes; support, privacy requests and incidents; audit events; backups; and Cloudflare Pages hosting. It excludes future consumer/non-UK use, team workspaces, advertising analytics, AI access to private data, special-category workflows and unrestricted public AI.
 
 ### Screening conclusion
 
@@ -51,10 +51,10 @@ No large-scale special-category processing, profiling, significant automated dec
 | Customer/invoice workspace | Core requested function; business user chooses content and purpose | Final controller/processor terms, recipient transparency and sensitive-data prohibition |
 | Transactional email/reminders | Needed only when a user requests sending or opts into reminders | No marketing reuse; minimise provider/content retention and provide recipient notice route |
 | Stripe payments | Optional user-requested feature; hosted card entry avoids Tallyo card storage | Live activation, provider contract, roles, customer wording and retention remain blocked |
-| Audit/security events | Needed in limited categories for abuse investigation and accountability | Approved LIA, event fields, 12/24-month categories and automated deletion |
-| Backups | Needed for resilience; seven-day technical window is proportionate if deletion reconciliation works | Pass deleted-data expiry/reappearance exercise |
-| Support/rights/incidents | Needed for service, legal and accountability duties | Restricted case system, synthetic acceptance, complaint timing, minimised case schedule |
-| Static hosting | Necessary to serve the browser application | Resolve GitHub Pages production contract/privacy suitability or change host |
+| Audit/security events | Needed in limited categories for abuse investigation and accountability | Approved LIA, minimised event fields, 12/24-month criteria and documented manual review |
+| Backups | Needed for resilience; the documented seven-day Supabase Pro window is proportionate when manual deletion and post-restore reconciliation are followed | Confirm the actual account setting and record provider-cycle limits in each deletion case |
+| Support/rights/incidents | Needed for service, legal and accountability duties | Verified privacy/support mailboxes, primary and backup monitor, synthetic manual-request acceptance and minimised case schedule |
+| Static hosting | Necessary to serve the browser application | Confirm Cloudflare account DPA, products, log settings and publication configuration |
 
 ### Risks and measures
 
@@ -66,13 +66,13 @@ Scale: likelihood and severity are qualitative until production volumes and cont
 | Account takeover or recovery abuse | High | Email confirmation, session controls, optional TOTP, AAL enforcement, one-time recovery, throttling, global sign-out, forced re-enrolment, minimised notifications | Maintain tested controls; approve retention and incident response |
 | Invoice recipient lacks transparency or cannot find controller | Medium/High | Draft notice, business-user terms and routing model prepared | Finalise who delivers notice, exceptions, document/email layering and rights routing |
 | Unexpected sensitive/free-text content | High | Initial scope prohibition and minimisation wording | Add final onboarding/in-product warning; define restricted handling/deletion/escalation |
-| Excessive or indefinite retention | High | Privacy-lean provisional category schedule, export, seven-day backups | Qualified approval, implement deletion, provider actions, legal holds and synthetic tests |
+| Excessive or indefinite retention | High | Privacy-lean category schedule, manual deletion/anonymisation process, export and documented provider cycles | Owner approval, dated manual reviews, provider actions, legal holds and fictional acceptance test |
 | Provider/subprocessor or international-transfer exposure | High | Dated official evidence collected for current providers | Accept exact contracts/accounts, complete transfer assessment and supplementary measures |
 | Email sent to wrong recipient | Medium/High | User-initiated send, visible recipient, transactional scope | Final confirmation UX/process, correction/incident procedure and minimised logs |
-| Incorrect payment/refund/dispute status | High | Hosted Checkout, trusted object binding, signed webhook verification, replay controls, pending refund state | Keep live mode blocked until wording, operating process and exact provider account pass |
-| Lost access to privacy/incident cases | High | Owner-led runbook and candidate case-system plan | Choose/configure system, recovery/absence exercise; optional alternate if risk changes |
-| Privacy case evidence leaks through Git/chat/email | High | Permanent prohibition and restricted-case templates | Enforce approved case system before real cases; staff/alternate training if added |
-| Deleted data reappears after backup restore | Medium/High | Seven-day backup window and isolated restore evidence | Implement deletion ledger/reconciliation and pass synthetic restore/expiry test |
+| Incorrect payment/refund/dispute status | High | Hosted Checkout, trusted object binding, signed webhook verification, replay controls and protected live acceptance | Public payment availability remains a separate release decision; preserve reconciliation and incident procedures |
+| Lost access to privacy/incident cases | High | Owner-led runbook and proposed monitored mailboxes | Verify the primary and backup monitor and complete an absence/read-back exercise |
+| Privacy case evidence leaks through Git/chat/email | High | Permanent prohibition and minimised case procedure | Use only the confirmed operational mailbox/record system; train any future alternate before access |
+| Deleted data reappears after backup restore | Medium/High | Documented provider backup cycle and manual deletion record | Reapply the deletion decision after any restore made within the provider cycle and record completion |
 | Service outage or provider closure causes loss | Medium/High | Export, managed backups, recovery evidence | Final continuity/closure wording; user export warning; no unapproved uptime guarantee |
 | Complaint or rights deadline missed | High | Owner authority, templates, complaint process draft | Controlled monitored route, deadline system, synthetic test and absence handling |
 
@@ -85,11 +85,11 @@ Scale: likelihood and severity are qualitative until production volumes and cont
 
 ### Provisional conclusion
 
-Residual risk is not accepted for real customers. The current controls support internal/sandbox testing only. Before launch: close the actions in `LEGAL_OWNER_ACTIONS_BEFORE_LAUNCH_2026-07-17.md`, resolve qualified-review findings, implement and test retention/case operations, and record a final DPIA decision and Owner approval. Consult the ICO before processing only if the final DPIA identifies unmitigated high risk and applicable law requires prior consultation.
+Focused launch-scope provider facts are verified and the approved manual retention/case procedure has passed its non-personal rehearsal. The Privacy Notice and Business-User Data Processing Terms are approved for focused customer-facing publication; unrestricted public release remains separately gated. The Owner elected to proceed without professional legal review at this stage; that decision does not establish compliance. Consult the ICO before processing only if the final DPIA identifies unmitigated high risk and applicable law requires prior consultation.
 
-## Provisional Legitimate-Interests Assessments
+## Focused Legitimate-Interests Assessments
 
-Each LIA is a working option, not a selected final lawful basis.
+Updated 27 July 2026 for the minimum manual-launch scope. These are completed working assessments for Owner and qualified review; they do not authorise publication or override the business-user controller/Tallyo processor split.
 
 ### LIA-01 - proportionate account and service security
 
@@ -99,7 +99,8 @@ Each LIA is a working option, not a selected final lawful basis.
 - **Alternatives:** shorter/no logs reduce investigation ability; contractual basis may cover essential login but not every defensive investigation; consent would be inappropriate and withdrawable.
 - **Expectations and impact:** business users reasonably expect proportionate security. Network/device and account-event data can still be intrusive or misinterpreted.
 - **Safeguards:** minimised event schema; role-limited access; RLS; 12-month routine and 24-month narrowly material proposals; no advertising reuse; objection/complaint handling; legal hold only when documented; dormant Turnstile separately assessed.
-- **Provisional outcome:** potentially supportable, subject to exact fields, retention implementation, transparency, necessity review and qualified approval.
+- **Objection handling:** record and assess an objection; restrict non-essential investigation processing where appropriate while preserving processing required for account security or legal claims.
+- **Working conclusion:** supportable for the stated launch purpose because the data and use are limited, security benefits are substantial and less intrusive alternatives do not provide equivalent protection. Adopt only with the stated minimisation, manual retention review, transparency and Owner approval.
 
 ### LIA-02 - operational audit and fraud/dispute defence
 
@@ -107,15 +108,25 @@ Each LIA is a working option, not a selected final lawful basis.
 - **Necessity:** a minimal event trail is needed because interface state or an assertion alone cannot prove a money/security event. Full payloads or indefinite histories are unnecessary.
 - **Expectations and impact:** business users and payers expect payment integrity but may not expect extensive profiling. Incorrect evidence can affect money or access.
 - **Safeguards:** signed webhook verification; trusted object binding; provider IDs and limited metadata; append-only protection; restricted access; category-specific retention; dispute/legal-hold review; no card data or raw provider payload in routine audit.
-- **Provisional outcome:** potentially supportable for narrowly defined evidence. Six-year payment/dispute and longer incident periods require qualified justification and field-level minimisation.
+- **Objection handling:** assess objections against the need to preserve payment integrity, prevent replay and defend an active dispute; remove or anonymise evidence when that need ends.
+- **Working conclusion:** supportable for narrowly defined event and idempotency evidence. It does not justify full provider payloads, card/bank/identity data, general behavioural profiling or a blanket six-year period for all activity events.
 
 ### LIA-03 - transactional email delivery and service support
 
-- **Purpose:** deliver a business user's requested document/reminder or Tallyo's necessary service/security message, prove delivery state, and resolve support issues.
-- **Necessity:** recipient address/content must pass through an email provider; limited delivery metadata helps diagnose failure. Marketing or indefinite message-body retention is not necessary.
+- **Purpose:** deliver Tallyo's necessary account/security message, operate support and diagnose delivery failures. A business user's customer document/reminder is processed on that business user's instruction rather than under Tallyo's own legitimate interest.
+- **Necessity:** recipient address/content must pass through an email provider for the requested transmission; limited delivery metadata helps diagnose failure. Marketing or indefinite message-body retention is unnecessary.
 - **Expectations and impact:** recipients may expect an invoice from the business user but may not know Tallyo or Resend. Wrong-address delivery can expose financial/contact data.
 - **Safeguards:** user-selected recipient; transactional-only use; opt-in overdue reminders; visible privacy route; provider 30-day content position; minimal Tallyo event history; correction/incident process; no advertising use.
-- **Provisional outcome:** role and basis may depend on whether Tallyo acts on business-user instruction or for its own service message. Qualified review and recipient-transparency design are required.
+- **Objection handling:** stop optional follow-up and review the support record where an objection applies; necessary security notices and legal-claim records may still be retained under the documented basis.
+- **Working conclusion:** supportable for Tallyo's own necessary service/security delivery and proportionate operational support. Customer documents/reminders remain processor activity governed by the business user's instructions and Article 28 terms.
+
+### LIA adoption conditions
+
+- Owner confirms the purposes and adopts the working conclusions.
+- The Privacy Notice identifies the interests and objection route.
+- The manual retention schedule and quarterly review are operated.
+- No marketing, advertising analytics, private-data AI access or unrelated profiling is added under these LIAs.
+- Reassess after a new purpose, provider, data category, user group, material complaint or security incident.
 
 ## Accountability Review Calendar
 

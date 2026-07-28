@@ -1,6 +1,6 @@
 # Tallyo Privacy Operations Runbook
 
-Internal operating requirements for `LEGAL-OPS-001`. This runbook must be validated with synthetic data in an approved restricted case system before real-customer processing. It is not legal advice and does not authorize live cases.
+Manual launch procedure for privacy requests, account-closure/deletion requests and personal-data incidents. It is not legal advice and does not authorize publication, provider changes or production deletion.
 
 ## Non-Negotiable Handling Rules
 
@@ -13,7 +13,7 @@ Internal operating requirements for `LEGAL-OPS-001`. This runbook must be valida
 
 ## Required Roles
 
-The Owner must assign each role before launch. In the initial sole-trader model, the Owner may hold the routine roles; an alternate operator is optional unless a later risk or availability review requires one:
+The Owner must assign each role before launch. In the initial sole-trader model, the Owner may hold the routine roles. A backup mailbox monitor is required so requests are not missed during absence:
 
 | Role | Minimum authority |
 |---|---|
@@ -27,6 +27,25 @@ The Owner must assign each role before launch. In the initial sole-trader model,
 | Owner escalation | Approve material legal risk, public/customer communications, spend, and production-impacting action |
 
 One person may hold several roles in a small operation. Straightforward cases require a recorded Owner checklist and read-back; obtain qualified review or advice when a high-risk, disputed, legally complex, or uncertain trigger applies.
+
+**Launch mailbox assignment confirmed 28 July 2026:** Edson Oliveira, Owner, is the primary monitor; Claudia Duarte is the backup monitor; `main@tallyo.co.uk` and `privacy@tallyo.co.uk` are reviewed every business day. The Owner reports that send, receive and reply tests passed for both mailboxes. No mailbox content was copied into this record.
+
+## Manual Launch Workflow
+
+1. Receive requests at `privacy@tallyo.co.uk`; recognise a request received through `main@tallyo.co.uk` or another channel and route it promptly.
+2. Create a non-identifying case reference in the restricted Google Workspace case area, which the Owner confirmed as Tallyo's official support/privacy record system on 28 July 2026.
+3. Record received date/time, request type, Tallyo role, response deadline, case owner and backup monitor. Do not copy unnecessary message content.
+4. Verify identity proportionately. An authenticated account session or low-risk corroboration may be enough; do not request identity documents by default.
+5. Decide whether Tallyo is controller or is assisting a business user as processor.
+6. Search only the systems relevant to the request: Supabase/Auth, tenant tables, audit evidence, Resend, Stripe, Cloudflare logs and support email.
+7. Record counts, dates and provider references rather than copying raw payloads.
+8. For correction, export, deletion or anonymisation, prepare an exact tenant/system manifest and obtain Owner approval before any production change.
+9. Preserve only records still needed for tax, accounting, fraud prevention, payment disputes, regulatory duties, security incidents or legal claims. Record the reason and next review date.
+10. Record provider and backup limitations. Do not promise immediate provider or backup erasure.
+11. Send the response through a verified secure route and record delivery.
+12. Close the case with outcome, remaining limitations and the case-record deletion review date.
+
+No fixed closed-account deletion deadline is promised. No self-service closure, 30-day read-only period, automated purge or scheduled retention deletion is required for launch.
 
 ## Rights Request Procedure
 
@@ -68,33 +87,19 @@ Account deletion, project deletion, bulk deletion, provider-account closure, sec
 7. **Recover and verify:** remediate, repeat relevant isolation/security checks, monitor, and ensure restored backups do not silently reintroduce deleted or exposed state.
 8. **Close:** approve lessons, control changes, notice/register updates, follow-up owners, evidence retention, and review date.
 
-## Restricted Case-System Acceptance Gate
+## Launch Acceptance Check
 
-Before approval, demonstrate with fictional data only:
+Before public launch:
 
-- role-based access, MFA, tested Owner recovery, an absence/monitoring rule, and immediate access revocation; test alternate-operator access if one is appointed;
-- immutable or reviewable audit history for view/export/change/delete events;
-- deadline calculation, reminders, escalation, and out-of-hours routing;
-- secure evidence upload/download and malware-safe handling where applicable;
-- restricted search, export, correction, deletion, legal hold, and retention controls;
-- provider reference logging without raw payload copying;
-- encrypted backup/restore and verified case deletion/expiry;
-- secure response delivery without a public link;
-- an emergency-access path with after-the-fact review; and
-- a data export suitable for adviser/regulator review without unrelated cases.
+1. prove `main@tallyo.co.uk` and `privacy@tallyo.co.uk` can receive and send — **Owner-reported pass 28 July 2026**;
+2. record the primary and backup monitor and absence cover — **Edson Oliveira, Owner / Claudia Duarte; every business day**;
+3. complete one fictional access/deletion case from receipt to secure response;
+4. verify controller/processor routing and the system-search checklist;
+5. prepare a fictional deletion manifest and read-back record without changing production data;
+6. record Supabase, Resend, Stripe, Cloudflare and support-email retention limitations; and
+7. confirm no secret, customer content or private mailbox material entered Git or ordinary chat.
 
-Provider selection, account creation, paid plan, production configuration, and real-person testing require separate Owner approval.
-
-## Synthetic Acceptance Exercises
-
-Run all four before real-customer processing:
-
-1. non-account invoice recipient access/correction request requiring controller/processor routing;
-2. account-holder deletion request spanning active records, Auth, email, payment references, audit exceptions, and seven-day backup limitations;
-3. provider-assistance request to Supabase, Resend, and Stripe using synthetic provider records only;
-4. fictional cross-tenant exposure with a timed breach assessment and notification-decision record.
-
-Pass requires: complete deadline and authority records; no secret or personal data outside the restricted test system; correct tenant/provider scoping; secure delivery; explicit limitations; recorded Owner review and read-back; qualified review where a simulated escalation trigger applies; and retained synthetic evidence. A tabletop alone does not satisfy this gate.
+Provider selection, paid-plan changes, production deletion and real-person testing remain separately approval-gated.
 
 ## Review Triggers
 
