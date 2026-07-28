@@ -132,6 +132,24 @@ async function stripePost(
   return body;
 }
 
+async function stripeGet(
+  path: string,
+  key: string,
+  apiVersion: string,
+) {
+  const response = await fetch(`https://api.stripe.com/v1/${path}`, {
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Stripe-Version": apiVersion,
+    },
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(body?.error?.message || "Stripe request failed");
+  }
+  return body;
+}
+
 async function hasBlockingStripeSubscription(
   customerId: string,
   config: ReturnType<typeof billingConfig>,
@@ -243,6 +261,134 @@ async function mappedCustomer(
   return String(raced.stripe_customer_id);
 }
 
+async function claimBillingCheckout(
+  admin: any,
+  userId: string,
+  customerId: string,
+  requestId: string,
+  interval: string,
+): Promise<string> {
+  const { data, error } = await admin.rpc(
+    "claim_stripe_billing_checkout",
+    {
+      p_user_id: userId,
+      p_stripe_customer_id: customerId,
+      p_request_id: requestId,
+      p_billing_interval: interval,
+    },
+  );
+  if (error) throw new Error("Billing Checkout claim failed");
+  return String(data || "");
+}
+
+type PendingCheckoutResolution =
+  | { kind: "resume"; url: string; sessionId: string }
+  | { kind: "retry" }
+  | { kind: "blocked"; message: string };
+
+async function resolvePendingBillingCheckout(
+  admin: any,
+  userId: string,
+  customerId: string,
+  interval: string,
+  config: ReturnType<typeof billingConfig>,
+): Promise<PendingCheckoutResolution> {
+  const { data: claim, error: claimError } = await admin
+    .from("billing_checkout_claims")
+    .select(
+      "billing_interval, stripe_checkout_session_id, session_expires_at",
+    )
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (claimError) throw new Error("Billing Checkout lookup failed");
+
+  const sessionId = String(claim?.stripe_checkout_session_id || "");
+  if (!sessionId || !claim?.session_expires_at) {
+    return {
+      kind: "blocked",
+      message:
+        "A Billing Checkout is still being prepared. Try again in a few minutes.",
+    };
+  }
+
+  if (String(claim.billing_interval || "") !== interval) {
+    const activePlan = claim.billing_interval === "annual"
+      ? "Annual"
+      : "Monthly";
+    return {
+      kind: "blocked",
+      message:
+        `An unfinished ${activePlan} Checkout is still open. Choose ${activePlan} to resume it, or let it expire before choosing another plan.`,
+    };
+  }
+
+  const expectedSessionId = config.liveMode
+    ? /^cs_live_[A-Za-z0-9]+$/
+    : /^cs_test_[A-Za-z0-9]+$/;
+  if (!expectedSessionId.test(sessionId)) {
+    throw new Error("Billing Checkout mode could not be confirmed");
+  }
+
+  const session = await stripeGet(
+    `checkout/sessions/${sessionId}`,
+    config.stripeKey,
+    config.stripeApiVersion,
+  );
+  const sessionCustomerId = typeof session?.customer === "string"
+    ? session.customer
+    : String(session?.customer?.id || "");
+  if (
+    String(session?.id || "") !== sessionId ||
+    sessionCustomerId !== customerId ||
+    String(session?.client_reference_id || "") !== userId ||
+    String(session?.metadata?.tallyo_user_id || "") !== userId ||
+    String(session?.metadata?.plan_key || "") !== "tallyo_pro" ||
+    String(session?.metadata?.billing_interval || "") !== interval ||
+    String(session?.mode || "") !== "subscription" ||
+    session?.livemode !== config.liveMode
+  ) {
+    throw new Error("Billing Checkout ownership could not be confirmed");
+  }
+
+  const status = String(session?.status || "");
+  if (status === "open") {
+    let checkoutUrl: URL;
+    try {
+      checkoutUrl = new URL(String(session?.url || ""));
+    } catch {
+      throw new Error("Stripe Checkout returned an invalid resume URL");
+    }
+    if (
+      checkoutUrl.protocol !== "https:" ||
+      checkoutUrl.hostname !== "checkout.stripe.com"
+    ) {
+      throw new Error("Stripe Checkout returned an invalid resume URL");
+    }
+    return { kind: "resume", url: checkoutUrl.href, sessionId };
+  }
+
+  if (status === "expired") {
+    const { data: cleared, error: clearError } = await admin.rpc(
+      "clear_stripe_billing_checkout_claim",
+      { p_stripe_checkout_session_id: sessionId },
+    );
+    if (clearError || cleared !== true) {
+      throw new Error("Expired Billing Checkout could not be cleared");
+    }
+    return { kind: "retry" };
+  }
+
+  if (status === "complete") {
+    return {
+      kind: "blocked",
+      message:
+        "Your previous Checkout completed and is being confirmed. Refresh Status in a moment.",
+    };
+  }
+
+  throw new Error("Stripe Checkout returned an invalid status");
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -283,16 +429,13 @@ Deno.serve(async (req) => {
     );
     const user = await requireSensitiveSession(userClient);
     const customerId = await mappedCustomer(admin, user, config);
-    const { data: claimResult, error: claimError } = await admin.rpc(
-      "claim_stripe_billing_checkout",
-      {
-        p_user_id: user.id,
-        p_stripe_customer_id: customerId,
-        p_request_id: requestId,
-        p_billing_interval: interval,
-      },
+    let claimResult = await claimBillingCheckout(
+      admin,
+      user.id,
+      customerId,
+      requestId,
+      interval,
     );
-    if (claimError) throw new Error("Billing Checkout claim failed");
     if (claimResult === "customer_mismatch") {
       throw new Error("Billing customer ownership could not be confirmed");
     }
@@ -303,10 +446,52 @@ Deno.serve(async (req) => {
       }, 409);
     }
     if (claimResult === "checkout_pending") {
-      return json({
-        error:
-          "A Billing Checkout is already in progress. Finish or let it expire before starting another.",
-      }, 409);
+      if (await hasBlockingStripeSubscription(customerId, config)) {
+        return json({
+          error:
+            "A Stripe subscription already exists. Billing must be reconciled before another Checkout.",
+        }, 409);
+      }
+      const pending = await resolvePendingBillingCheckout(
+        admin,
+        user.id,
+        customerId,
+        interval,
+        config,
+      );
+      if (pending.kind === "resume") {
+        return json({
+          ok: true,
+          url: pending.url,
+          sessionId: pending.sessionId,
+          resumed: true,
+        });
+      }
+      if (pending.kind === "blocked") {
+        return json({ error: pending.message }, 409);
+      }
+      claimResult = await claimBillingCheckout(
+        admin,
+        user.id,
+        customerId,
+        requestId,
+        interval,
+      );
+      if (claimResult === "customer_mismatch") {
+        throw new Error("Billing customer ownership could not be confirmed");
+      }
+      if (claimResult === "subscription_exists") {
+        return json({
+          error:
+            "A subscription already exists. Manage it from Billing settings.",
+        }, 409);
+      }
+      if (claimResult === "checkout_pending") {
+        return json({
+          error:
+            "Billing Checkout state changed while it was being refreshed. Try again.",
+        }, 409);
+      }
     }
     if (claimResult !== "claimed") {
       throw new Error("Billing Checkout claim returned an invalid result");

@@ -4184,7 +4184,10 @@
                     if (data && data.error) throw new Error(data.error);
                     return data || null;
                 } catch (error) {
-                    this.stripeConnect.error = error && error.message ? error.message : 'Stripe connection could not be updated.';
+                    const message = await this.billingFunctionError(error, 'Stripe connection could not be updated.');
+                    this.stripeConnect.error = message === 'Your Tallyo account is read-only. Update your subscription to continue.'
+                        ? 'Customer card payments require an active Tallyo Pro subscription. Choose a plan above to activate this feature.'
+                        : message;
                     return null;
                 } finally {
                     this.stripeConnect.busy = false;

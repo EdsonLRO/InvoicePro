@@ -183,6 +183,36 @@ assert.match(
   /admin\.rpc\([\s\S]*?"claim_stripe_billing_checkout"/,
 );
 assert.match(checkout, /claimResult === "checkout_pending"/);
+assert.match(
+  checkout,
+  /\.from\("billing_checkout_claims"\)[\s\S]*?\.select\([\s\S]*?billing_interval, stripe_checkout_session_id, session_expires_at[\s\S]*?\.eq\("user_id", userId\)/,
+  'pending Checkout recovery must load only the authenticated owner claim',
+);
+assert.match(
+  checkout,
+  /stripeGet\([\s\S]*?`checkout\/sessions\/\$\{sessionId\}`/,
+  'pending Checkout recovery must retrieve the provider Session',
+);
+assert.match(
+  checkout,
+  /sessionCustomerId !== customerId[\s\S]*?client_reference_id[\s\S]*?tallyo_user_id[\s\S]*?billing_interval[\s\S]*?session\?\.livemode !== config\.liveMode/,
+  'a resumed Checkout must preserve customer, owner, plan and provider-mode binding',
+);
+assert.match(
+  checkout,
+  /status === "open"[\s\S]*?checkoutUrl\.hostname !== "checkout\.stripe\.com"[\s\S]*?kind: "resume"/,
+  'only an open Stripe-hosted Checkout URL may be resumed',
+);
+assert.match(
+  checkout,
+  /status === "expired"[\s\S]*?"clear_stripe_billing_checkout_claim"[\s\S]*?kind: "retry"/,
+  'only an authoritative expired Session may clear and replace the claim',
+);
+assert.match(
+  checkout,
+  /pending\.kind === "resume"[\s\S]*?resumed: true/,
+  'a repeated same-plan request must return its verified existing Checkout',
+);
 assert.match(checkout, /hasBlockingStripeSubscription\(customerId, config\)/);
 assert.match(checkout, /status: "all"[\s\S]*?limit: "100"/);
 assert.match(checkout, /params\.set\([\s\S]*?"expires_at"/);

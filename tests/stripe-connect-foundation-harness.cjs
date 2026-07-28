@@ -102,6 +102,16 @@ assert.match(app, /\.from\('stripe_connected_accounts'\)/);
 assert.match(app, /select\('onboarding_state, card_payments_status, payouts_status, provider_updated_at'\)/);
 assert.match(app, /functions\.invoke\('manage-stripe-connect'/);
 assert.match(app, /body: \{ action, requestId: crypto\.randomUUID\(\) \}/);
+assert.match(
+  app,
+  /await this\.billingFunctionError\(error, 'Stripe connection could not be updated\.'\)/,
+  'Connect errors must preserve the reviewed server response instead of the generic Edge Function message',
+);
+assert.match(
+  app,
+  /message === 'Your Tallyo account is read-only\. Update your subscription to continue\.'[\s\S]*?'Customer card payments require an active Tallyo Pro subscription\. Choose a plan above to activate this feature\.'/,
+  'the exact read-only entitlement response must become a clear subscription call to action',
+);
 assert.match(app, /window\.location\.assign\(result\.url\)/);
 assert.match(
   app,

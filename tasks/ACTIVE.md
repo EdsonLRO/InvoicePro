@@ -143,6 +143,16 @@ Repository validation: the Connect foundation, Connect payments and Stripe payme
 
 Release condition: focused Connect foundation and frozen-lock Deno checks, formatting, diff and sensitive-value review, plus a reviewed PR. Deployment of `manage-stripe-connect`, provider configuration, secrets, payment, refund or another public release remains a separate exact Owner boundary.
 
+### COMM-001-BL-002 Billing Checkout recovery and entitlement copy
+
+Finding: closing or losing an open Stripe Billing Checkout removes the browser's only copy of its hosted URL, while the existing one-session claim correctly prevents a second live subscription Checkout until the provider session expires. A repeated plan click therefore reported an active Checkout without giving the owner a way to resume it. Separately, a Connect onboarding attempt from an account without write entitlement surfaced the Supabase client's generic non-success text instead of the reviewed server subscription restriction.
+
+Narrow remediation: on a repeated same-plan request, retrieve the exact claimed Stripe Checkout Session server-side and resume it only when its customer, Tallyo owner, plan, billing interval, subscription mode, live/test mode and Stripe-hosted URL all match. Clear and replace the claim only when Stripe authoritatively reports that exact Session as expired; completed, mismatched, cross-plan and unknown states remain fail closed. Preserve the existing subscription-existence check before both resume and replacement. In the browser, extract the reviewed function response and translate only the exact read-only entitlement message into a clear Tallyo Pro activation instruction; unrelated Connect failures retain their real response.
+
+Repository validation: the Billing foundation, Billing client, server-entitlement, Connect foundation and payment-integrity harnesses pass; all repository harnesses except the unchanged Cloudflare Pages readiness harness pass locally. That unrelated harness and the website suite stop in their pre-existing Windows/Node 24 child-process assertion because `spawnSync` returns no stderr; neither failing test file is changed by this work. The affected Billing function passes formatting and frozen-lock Deno type-checking. Diff hygiene, full-diff review and focused sensitive-value review pass.
+
+Release condition: reviewed focused PR and green required remote checks. Deploying `create-billing-checkout`, publishing the browser wording, retrying live Checkout, creating a subscription, changing Stripe/Supabase configuration or any other production action remains a separate exact Owner boundary.
+
 ## Explicit exclusions until separately approved
 
 - no live Stripe subscription, connected-account identity onboarding, payment, refund, real customer or real-money transaction without a separate exact acceptance approval;
