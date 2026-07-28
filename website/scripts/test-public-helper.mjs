@@ -561,6 +561,10 @@ const rateWorkerConfig = JSON.parse(readFileSync(join(rateWorkerRoot, "wrangler.
 assert.equal(rateWorkerConfig.name, "tallyo-ai-helper-rate-limiter");
 assert.equal(rateWorkerConfig.workers_dev, false);
 assert.equal(rateWorkerConfig.preview_urls, false);
+
+assert.match(JSON.stringify(knowledge), /You can choose a monthly or annual subscription from Tallyo/);
+assert.match(JSON.stringify(knowledge), /main@tallyo\.co\.uk/);
+assert.doesNotMatch(JSON.stringify(knowledge), /Subscription checkout is still being prepared|support contact will be added/i);
 assert.equal(rateWorkerConfig.observability.enabled, false);
 assert.equal(rateWorkerConfig.ratelimits[0].name, "RATE_LIMITER");
 assert.equal(rateWorkerConfig.ratelimits[0].simple.limit, 3);

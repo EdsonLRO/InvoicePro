@@ -111,14 +111,14 @@
       "id": "pricing",
       "question": "Where can I find pricing?",
       "triggers": ["where can i find pricing", "tallyo pricing", "how much is tallyo", "tallyo plans"],
-      "answer": "The Free Invoice Maker costs £0 and requires no account. Tallyo Pro is £8 per month or £80 per year for one business and one user. Subscription checkout is still being prepared.",
+      "answer": "The Free Invoice Maker costs £0 and requires no account. Tallyo Pro is £8 per month or £80 per year for one business and one user. You can choose a monthly or annual subscription from Tallyo.",
       "links": [{ "label": "View pricing", "href": "/pricing/" }]
     },
     {
       "id": "support",
       "question": "How do I get support?",
       "triggers": ["how do i get support", "contact support", "help with tallyo", "tallyo support"],
-      "answer": "Start with the reviewed Help Centre guides and common questions. A public business support contact will be added only after it is approved.",
+      "answer": "Start with the reviewed Help Centre guides and common questions. If you still need help, email main@tallyo.co.uk and never include passwords, authenticator codes, recovery codes, card details or bank details.",
       "links": [{ "label": "Open the Help Centre", "href": "/help/" }, { "label": "Read common questions", "href": "/faq/" }]
     },
     {
