@@ -259,6 +259,7 @@ assert.match(home, /<h2>Legal<\/h2>\s*<a href="\/terms\/">Terms of Service<\/a><
 assert.match(read("pricing/index.html"), /By choosing Tallyo Pro, you agree to the <a href="\/terms\/">Terms of Service<\/a>/);
 assert.match(read("help/index.html"), /mailto:main@tallyo\.co\.uk/);
 assert.match(read("faq/index.html"), /email main@tallyo\.co\.uk for help/);
+assert.doesNotMatch(home, /Product preview\./, "production-ready footer must not describe the website as a preview");
 
 assert.equal(parseMoney("12.34"), 1234n);
 assert.equal(parseMoney("00012.34"), 1234n);

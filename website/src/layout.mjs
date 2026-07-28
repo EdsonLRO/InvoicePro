@@ -187,7 +187,7 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
       ${footerMarkup}
       <div class="footer-group"><h2>Account</h2><a data-login-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/#install">Install Tallyo</a></div>
     </div>
-    <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo. Product preview.</p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
+    <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo.</p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
   </footer>
 </body>
 </html>`,
