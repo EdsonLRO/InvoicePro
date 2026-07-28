@@ -2,17 +2,15 @@
 
 ## Now
 
-- Keep the website private, the merged AI Helper disabled and subscription checkout inactive.
-- Keep live Stripe Billing and Connect disabled while completing the approved sandbox Connect acceptance.
-- Resolve tax presentation and final contractual publication wording before subscription checkout or public pricing release.
+- Monitor the approved initial UK-business public release across the website, app, Auth, bounded AI Helper, Billing interface and connected-payment interface.
+- Keep preview deployments protected by the retained wildcard Cloudflare Access applications.
+- Preserve the verified production gates, server-side subscription enforcement and documented rollback routes.
 - Preserve the documented separation between Tallyo subscriptions and independent-business customer payments.
 
 ## Next
 
-- Decide whether and when to activate the public AI Helper, including notice, provider budget, rate limits and production configuration.
-- Complete the Owner-private first Stripe-hosted onboarding form, then run the approved synthetic two-account Connect direct-charge, refund, replay and isolation acceptance.
-- Apply and deploy the reviewed server-side entitlement enforcement only after its exact remaining high-risk approval gates.
-- Run controlled user onboarding only after Billing entitlement and Connect isolation acceptance pass.
+- Review bounded launch monitoring and support evidence without inspecting customer data.
+- Evaluate early UK-business onboarding feedback before expanding product scope.
 - Add customer statements, CSV customer import and improved onboarding.
 - Implement retention, failed-payment and post-cancellation workflows.
 
