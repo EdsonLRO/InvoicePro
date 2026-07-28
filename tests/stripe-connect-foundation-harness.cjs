@@ -73,18 +73,14 @@ assert.doesNotMatch(
   /tallyo-connect-account-\$\{await sha256\(\[\s*user\.id,\s*requestId/
 );
 assert.match(handler, /account_onboarding/);
-assert.match(handler, /account_update/);
+assert.doesNotMatch(handler, /account_update/);
 assert.match(
   handler,
-  /function accountLinkAction\([\s\S]*?onboardingState === "active" \? "update" : "onboard"/
+  /const useCaseType = "account_onboarding"/
 );
 assert.match(
   handler,
-  /const linkAction = accountLinkAction\(state\.onboarding_state\)/
-);
-assert.match(
-  handler,
-  /createAccountLink\(\s*stripeAccountId,\s*linkAction,\s*config,\s*requestId/
+  /createAccountLink\(\s*stripeAccountId,\s*action,\s*config,\s*requestId/
 );
 assert.match(handler, /future_requirements:\s*"include"/);
 assert.match(handler, /stripe_connect=refresh&stripe_connect_action=\$\{action\}/);
