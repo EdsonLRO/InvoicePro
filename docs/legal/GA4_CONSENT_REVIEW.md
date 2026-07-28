@@ -1,10 +1,10 @@
 # GA4 consent implementation review
 
-Status: Approved with conditions for source implementation only
+Status: Approved, deployed and production-verified
 Task: COMM-001-AN-001
 Reviewed: 28 July 2026
 Jurisdiction: United Kingdom
-Release boundary: No deployment or Google Analytics activation without separate Owner approval
+Release boundary: Production activation completed under separate exact Owner approval
 
 ## Scope and affected people
 
@@ -159,14 +159,27 @@ approval:
   marked as a key event or conversion.
 
 No screenshot, Google account identifier, billing detail, private account
-information or secret was retained. No Analytics event was sent, no Google Ads
-link was created, and the repository production gate remains disabled.
+information or secret was retained. No Google Ads link was created.
+
+## Production activation evidence
+
+Under exact Owner approval on 28 July 2026:
+
+- PR #134 merged at `331ace9`;
+- production website deployment `cf088733-0b7f-4f21-a18a-d69f4cfe31ba`
+  and app deployment `a3c3cd0c-a020-47c0-9482-8c8c77307039` succeeded;
+- before consent and after rejection, no Google tag was present;
+- acceptance loaded exactly one tag for `G-PZFZKCWZ7M`;
+- withdrawal prevented the tag from loading on later navigation;
+- GA4 Realtime showed live consented users and received the property-free
+  `view_pricing` event;
+- no approved Tallyo event was marked as a key event.
 
 ## Disposition
 
-**Approved with conditions for implementation and non-networked testing.**
+**Approved, deployed and production-verified within the reviewed scope.**
 
-Deployment and Analytics activation are blocked until the source diff, automated
-evidence, notice wording, provider-setting checklist and CSP changes receive final
-Sol-level legal/security review and separate Owner approval. This review is legal
-risk-management evidence, not a claim of compliance or professional legal advice.
+Any expansion of the event allowlist, advertising integration, user-provided data,
+Google Signals or other Analytics purpose requires a new focused review and exact
+Owner approval. This review is legal risk-management evidence, not a claim of
+compliance or professional legal advice.
