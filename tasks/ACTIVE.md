@@ -3,8 +3,8 @@
 Task ID: COMM-001
 Title: Integrate subscriptions, independent-business customer payments and the public AI Helper for controlled commercial release
 Priority: High
-Status: Protected commercial release candidate active; final public-release gates remain
-Phase: Controlled public release preparation
+Status: Approved initial UK-business public release active
+Phase: Post-release verification and monitoring
 Owner role: Master Orchestrator
 Assigned specialists: Payments, Backend/Supabase, Security, Website, AI, QA and Release; Legal is triggered only for claims, notices and final publication
 Model/work mode: Sol / High
@@ -35,22 +35,22 @@ Prepare Tallyo so the public website and authenticated app can offer:
 - After exact Owner approval and a current physical backup, migrations `20260725014434` and `20260725160000` were applied. The private write-enforcement switch was initially left off and cannot be changed by browser or service roles. The eight approved Billing/entitlement functions are active from merge `2c313f0` with JWT settings preserved. The Owner allowlist was transferred privately before guarded Owner Checkout and document-email activation.
 - The AI Helper is merged and disabled by default in source. Under exact Owner approval, the existing encrypted OpenAI secret, production Helper gates and Cloudflare rate-limiter service binding were configured on the Access-protected website. One synthetic question on the canonical protected hostname returned a bounded Tallyo-specific answer, and OpenAI attributed exactly one Responses request for 27 July UTC.
 - PR #108 merged the fail-closed website subscription signup CTA gate.
-- The website remains protected by Access and is not published on `tallyo.co.uk`.
+- The production website is public at `https://tallyo.co.uk` and `https://www.tallyo.co.uk`; the Pages rollback hostname remains available.
 - Under exact Owner approval on 2026-07-26, Stripe live mode now has the approved GBP 8 monthly and GBP 80 annual Tallyo Pro Prices, separate Billing and connected-account webhook destinations, and a configured Customer Portal returning to `https://app.tallyo.co.uk/#account`. The Owner privately entered the restricted Billing/Connect key and both webhook signing secrets in Supabase; their values were not requested, inspected or stored.
 - Supabase has the approved live mode/approval settings, exact Price allowlist, app base URLs and five enabled Billing/Connect server gates. Empty unauthenticated requests to the five protected commercial actions and unsigned requests to both webhook functions returned HTTP 401 without creating a live provider object or transaction; focused Billing, Connect, entitlement and payment-integrity harnesses pass.
-- Exact local production build permutations pass for subscriptions, connected payments and the separately gated AI Helper. PR #113 merged release build `2026.07.25.1`, and `mfa-recovery` is deployed with `https://app.tallyo.co.uk` plus the retained GitHub Pages and localhost rollback origins. The final hostname is in Supabase Auth redirects and the Turnstile widget; the Supabase Site URL intentionally remains GitHub Pages.
+- Exact local production build permutations pass for subscriptions, connected payments and the AI Helper. PR #113 merged the app-hostname recovery origin, and `mfa-recovery` remains deployed with `https://app.tallyo.co.uk` plus the retained GitHub Pages and localhost rollback origins. The final hostname remains in Supabase Auth redirects and the Turnstile widget; the Supabase Site URL is now `https://app.tallyo.co.uk/`.
 - `SEC-AUTH-006` is remediated. The Owner rotated the exposed Turnstile server secret and entered its replacement directly into Supabase Auth without Codex inspecting it. CAPTCHA-protected sign-in, custom-domain MFA, exact-origin CORS and lookalike-origin rejection pass.
 - Authoritative DNS now uses Cloudflare with DNSSEC active. All 19 prior Squarespace records were preserved, the Squarespace website and Google Workspace/Resend DNS checks pass, and the four prior Squarespace nameservers are the documented rollback. `app.tallyo.co.uk` was protected by the existing default-deny Access application before it was attached to Pages; Pages reports Active with SSL, while anonymous requests are redirected to Access.
 - Under exact Owner approval on 2026-07-27, the database-owner-only `subscription_write_enforcement` switch was enabled. Privacy-safe reconciliation found nine accounts with business data: three full/grace accounts remain write-enabled, six are read-only and an unknown account cannot write. Authenticated and service roles cannot change the switch, and the Supabase security advisor remains clear.
-- The approved non-secret production variables were entered directly into Cloudflare Pages and the app and website were each rebuilt once from merge `f34a8ae`. Build `2026.07.27.1` is active at the Access-protected app domain with live Billing UI enabled. The Access-protected website builds in production mode with subscription and connected-payment navigation enabled and correct `app.tallyo.co.uk` links. A later approved rebuild from merge `0865c5f` enabled the bounded OpenAI Helper behind the same Access protection. Anonymous requests to both endpoints still redirect to Access; the Supabase Auth Site URL remains unchanged and no DNS/publication cutover occurred.
+- The approved non-secret production variables are active in Cloudflare Pages. App build `2026.07.28.1` is public at `https://app.tallyo.co.uk` with the approved Billing and Connect interfaces. The production website contains merged PR #127, routes to the custom app domain and is public at the apex and `www` hostnames. The bounded AI Helper has the exact public-domain allowlist, rate-limiter binding and hard provider budget.
 
 ## Current controlled-provider scope
 
 - preserve the applied schema and verified server-side function boundaries;
 - preserve the verified Billing, Connect, entitlement and Owner-payment boundaries;
-- complete final protected smoke testing for the public-release candidate;
-- preserve the verified protected AI Helper configuration and rate limit; complete the final public-domain allowlist, budget/usage-alert and notice/provider-evidence gates before unrestricted activation;
-- stop before Access removal, Supabase Auth Site URL cutover, website-domain publication or final public release.
+- monitor the public website, app, Auth and bounded AI Helper without inspecting private data;
+- keep preview deployments protected by the retained wildcard Access applications;
+- stop before any new live payment/refund, customer communication, analytics/marketing activation, secret change, destructive action or unrelated provider change.
 
 ## Locks
 
@@ -101,7 +101,7 @@ Current app-domain Auth release-candidate lock acquired 2026-07-25:
 - `RELEASE_READINESS.md`;
 - `SECURITY_FINDINGS_LEDGER.md`.
 
-Release condition: completed for the protected app-domain stage. Every recovery origin and Auth/MFA invariant was retained; repository, provider, DNSSEC, Access, Pages, CORS and Owner-completed MFA acceptance passed. Access removal, Supabase Site URL cutover and public release remain separate gates.
+Release condition: completed for the protected app-domain stage. Every recovery origin and Auth/MFA invariant was retained; repository, provider, DNSSEC, Access, Pages, CORS and Owner-completed MFA acceptance passed. The later Access-removal, Supabase Site URL and public-release gates completed under the separate final-cutover approval recorded below.
 
 Current Stripe Connect stale-claim remediation lock acquired 2026-07-26:
 
@@ -135,8 +135,8 @@ Release condition: focused function, Connect/payment, dependency, workflow, form
 - no function redeployment or migration change outside the exact approved sandbox-acceptance scope;
 - no secret reveal or repository/browser storage;
 - no existing Owner-route function redeployment without the exact pre-deployment approval;
-- no additional paid OpenAI request or unrestricted public AI activation;
-- no Access removal, Supabase Site URL cutover, website-domain publication, legal publication or public production release;
+- no additional paid OpenAI request or expansion beyond the bounded public-guidance Helper;
+- no analytics or marketing activation, customer communication or expansion beyond the approved UK-business release;
 - no deployment or production-provider change to the Owner-account invoice-payment path.
 
 ## Staged delivery
@@ -145,8 +145,8 @@ Release condition: focused function, Connect/payment, dependency, workflow, form
 2. **Repository implementation and PR review** - completed through PR #101.
 3. **Disabled provider foundation** - completed: applied the three reviewed additive migrations, deployed seven new functions, verified RLS/grants/advisors/JWT settings and retained absent feature gates.
 4. **Isolated test acceptance** - completed for the approved non-destructive sandbox scope: protected Billing Checkout, Portal, signed reconciliation and lifecycle probes pass. Connect sandbox secrets and gates are configured. PRs #104-#110 passed the payout-field, UK-country, indexed-retrieval, trusted Account Link-flow, shared Checkout/refund retrieval and provider-unavailable gates. Two isolated synthetic owners map to two separate fully ready sandbox accounts with zero live-mode rows. The first account's fictional GBP 1 direct charge and full refund reconciled through signed webhooks, and one exact `refund.updated` replay returned HTTP 200 without another Connect event or audit mutation. Destructive provider downgrade was not used because Stripe test-mode capability handling cannot provide a reliable reversible simulation; the server path instead has focused fail-closed source and harness evidence.
-5. **AI release readiness** - protected production configuration, rate limiting and one paid synthetic request are verified; final public-domain allowlisting, budget/usage-alert disposition, notice/provider evidence, Access removal and unrestricted activation remain separately gated.
-6. **Production release** - authoritative DNS, the Access-protected app hostname, live Billing/Connect provider configuration and bounded live acceptance are complete. Subscription write enforcement, final app/website flags, Access removal, Site URL cutover, website publication and final public release remain separately approved gates.
+5. **AI release readiness** - completed: public-domain allowlisting, rate limiting, provider budget and alerts, public notice/provider evidence and one paid synthetic request are verified.
+6. **Production release** - completed for the approved initial UK-business scope: authoritative DNS, SSL, public app and website domains, Site URL, subscription enforcement, commercial interfaces, bounded AI Helper and final smoke checks are active. Preview wildcard Access protection and rollback routes remain.
 
 ## Approved decision
 
@@ -195,6 +195,8 @@ Privacy-publication lock acquired 2026-07-28:
 The Owner explicitly approved publication of the reconciled Privacy Notice and Business-User Data Processing Terms, removal of draft/internal markings from public versions, clear privacy links at registration and genuine public personal-data forms, focused validation, commit and deployment. Public AI activation, marketing/analytics, unrelated application/database/Billing/Connect/provider work, deletion automation and other infrastructure changes remain excluded. Release condition: public pages contain only approved customer-facing content; the service address and mailboxes match the approved record; Data Processing Terms are incorporated into the applicable account agreement; desktop/mobile/keyboard/link checks pass; final diff is privacy-only; deployment succeeds; and final URLs, commit and smoke evidence are recorded.
 
 Privacy-publication implementation lock released 2026-07-28 after the production-mode website/app builds, focused automated checks, desktop and keyboard browser checks, 320/390/768/1024/1440 responsive checks, mobile table-region checks and registration/form link checks passed without page-level overflow. The focused release remains covered by the Owner's exact publication/deployment approval; Access removal, unrestricted public launch and all excluded product/provider work remain out of scope.
+
+Final public-cutover lock released 2026-07-28 after exact Owner approval. The existing website production Access application first gained `tallyo.co.uk` and `www.tallyo.co.uk`; cookie-free requests confirmed default-deny redirects before Pages attachment. Pages replaced only the four Squarespace apex A routes and the Squarespace `www` CNAME, then reported both website domains Active with SSL. Google Workspace and the retained public provider DNS records continued to resolve. The production Helper allowlist now contains the Pages rollback hostname, apex and `www`; the production website was built and deployed once from merged PR #127. One paid synthetic Helper request returned a bounded answer from reviewed public guidance, while the hard provider budget and 50%, 80% and 100% alerts remained active. The Supabase Site URL changed to `https://app.tallyo.co.uk/` with all five rollback redirect URLs retained. Only the website and app production Access applications were removed; both wildcard preview applications remain. Cookie-free requests then returned HTTP 200 for the website, `www` and app. Public legal routes, canonical metadata, registration/legal links, password-recovery UI, CAPTCHA script, retained MFA controls, Billing/Connect interface presence and keyboard skip-link behaviour passed bounded smoke checks. The previously accepted 320/390/768/1024/1440 responsive evidence remains current for the exact merged source. No Stripe transaction/refund, customer communication, analytics/marketing change, secret inspection or unrelated provider change occurred.
 
 PR #102 passed its required checks and merged after exact Owner approval. The applied three commercial migrations and seven deployed functions were reconciled after merge; RLS, grants, JWT settings, migration history, security advisors and the zero-row commercial-table baseline remained correct. Evidence: `COMMERCIAL_PROVIDER_FOUNDATION_DEPLOYMENT_EVIDENCE_2026-07-24.md`.
 
