@@ -345,7 +345,18 @@ assert.deepEqual(JSON.parse(generatedPolicyJson), eventPolicy, "generated browse
 
 assert.equal(read("robots.txt"), "User-agent: *\nDisallow: /\n");
 const sitemap = read("sitemap.xml");
-for (const page of pages) assert.match(sitemap, new RegExp(`https://tallyo\\.co\\.uk${page.route.replaceAll("/", "\\/")}`));
+const expectedSitemapUrls = pages.map((page) => `https://tallyo.co.uk${page.route}`);
+const expectedSitemapEntries = expectedSitemapUrls.map((url) => `  <url><loc>${url}</loc></url>`).join("\n");
+assert.equal(
+  sitemap,
+  `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/css" href="/sitemap.css"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${expectedSitemapEntries}\n</urlset>\n`,
+  "sitemap is one canonical XML document without a text prefix"
+);
+assert.equal(new Set(expectedSitemapUrls).size, expectedSitemapUrls.length, "sitemap URLs are unique");
+assert.ok(expectedSitemapUrls.every((url) => url.startsWith("https://tallyo.co.uk/")), "sitemap contains only the canonical public origin");
+assert.ok(expectedSitemapUrls.every((url) => !url.includes(".pages.dev") && !url.includes("app.tallyo.co.uk") && !url.endsWith("/404/")), "sitemap excludes previews, private app routes and the 404 page");
+assert.match(read("_headers"), /\/sitemap\.xml\s+Content-Type: application\/xml; charset=utf-8/, "sitemap declares an XML UTF-8 response type");
+assert.match(read("sitemap.css"), /urlset \{ display: block;/, "sitemap has a same-origin stylesheet for browser rendering");
 assert.ok(existsSync(join(distRoot, "404.html")));
 assert.match(read("_redirects"), /\/\* \/404\.html 404/);
 const styles = read("assets/styles.css");
