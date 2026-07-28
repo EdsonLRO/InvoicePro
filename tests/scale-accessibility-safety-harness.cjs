@@ -69,8 +69,8 @@ const documents = Array.from({ length: 2000 }, (_, index) => ({
   assert.equal((await fetchAllOwnedRows('saved_items', 'name')).length, 1000, 'all 1,000 synthetic saved items must load');
   assert.deepEqual(ranges.customers, [[0, 999], [1000, 1999]]);
   assert.deepEqual(ranges.saved_items, [[0, 999], [1000, 1999]]);
-  assert.match(app, /if \(orderColumn !== 'id'\) query = query\.order\('id', \{ ascending: true \}\)/,
-    'pagination must use an id tie-breaker for stable page boundaries');
+  assert.match(app, /if \(tieBreakerColumn && orderColumn !== tieBreakerColumn\)[\s\S]*query = query\.order\(tieBreakerColumn, \{ ascending: true \}\)/,
+    'pagination must use a configurable tie-breaker for stable page boundaries');
 
   for (const call of [
     "fetchAllOwnedRows('customers', 'name')",
