@@ -103,13 +103,8 @@ const headers = headerTemplate
 await writeFile(join(distRoot, "_headers"), headers, "utf8");
 
 const sitemapEntries = pages.map((page) => `  <url><loc>${siteConfig.canonicalOrigin}${page.route}</loc></url>`).join("\n");
-const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<?xml-stylesheet type="text/css" href="/sitemap.css"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}\n</urlset>\n`;
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}\n</urlset>\n`;
 await writeFile(join(distRoot, "sitemap.xml"), sitemap, "utf8");
-await writeFile(
-  join(distRoot, "sitemap.css"),
-  "urlset { display: block; margin: 2rem; font-family: system-ui, sans-serif; }\nurl { display: block; margin-block: 0.5rem; }\nloc { display: block; overflow-wrap: anywhere; }\n",
-  "utf8"
-);
 
 const robots = siteConfig.preview
   ? "User-agent: *\nDisallow: /\n"
