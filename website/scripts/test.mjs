@@ -356,7 +356,7 @@ assert.equal(new Set(expectedSitemapUrls).size, expectedSitemapUrls.length, "sit
 assert.ok(expectedSitemapUrls.every((url) => url.startsWith("https://tallyo.co.uk/")), "sitemap contains only the canonical public origin");
 assert.ok(expectedSitemapUrls.every((url) => !url.includes(".pages.dev") && !url.includes("app.tallyo.co.uk") && !url.endsWith("/404/")), "sitemap excludes previews, private app routes and the 404 page");
 assert.match(read("_headers"), /\/sitemap\.xml\s+! Content-Security-Policy/, "sitemap detaches the broad page CSP for native XML rendering");
-assert.match(read("_headers"), /\/sitemap\.xml\s+Content-Type: application\/xml; charset=utf-8/, "sitemap declares an XML UTF-8 response type");
+assert.match(read("_headers"), /\/sitemap\.xml\s+! Content-Security-Policy\s+Content-Type: application\/xml; charset=utf-8/, "sitemap declares an XML UTF-8 response type");
 assert.ok(existsSync(join(distRoot, "404.html")));
 assert.match(read("_redirects"), /\/\* \/404\.html 404/);
 const styles = read("assets/styles.css");
