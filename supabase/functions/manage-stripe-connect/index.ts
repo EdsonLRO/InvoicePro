@@ -2,7 +2,10 @@
 // No payment, refund, payout or account disconnection is performed here.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
-import { accountAllowsWrite, readOnlyAccountMessage } from "../_shared/account-entitlements.ts";
+import {
+  accountAllowsWrite,
+  readOnlyAccountMessage,
+} from "../_shared/account-entitlements.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -51,9 +54,7 @@ function connectConfig() {
   }
 
   const stripeKey = Deno.env.get("STRIPE_CONNECT_SECRET_KEY") || "";
-  const expectedKeyPattern = liveMode
-    ? /^(?:sk|rk)_live_/
-    : /^(?:sk|rk)_test_/;
+  const expectedKeyPattern = liveMode ? /^(?:sk|rk)_live_/ : /^(?:sk|rk)_test_/;
   if (!expectedKeyPattern.test(stripeKey)) {
     throw new Error("Stripe Connect key mode does not match configuration");
   }
@@ -150,8 +151,10 @@ function accountState(account: any) {
   if (!/^acct_[A-Za-z0-9]+$/.test(accountId)) {
     throw new Error("Stripe returned an invalid connected account");
   }
-  if (!Array.isArray(account?.applied_configurations) ||
-    !account.applied_configurations.includes("merchant")) {
+  if (
+    !Array.isArray(account?.applied_configurations) ||
+    !account.applied_configurations.includes("merchant")
+  ) {
     throw new Error("Stripe Merchant configuration is missing");
   }
   if (
@@ -288,27 +291,21 @@ function stripeLinkUrl(value: unknown): string {
   return parsed.toString();
 }
 
-function accountLinkAction(
-  onboardingState: string,
-): Exclude<ConnectAction, "status"> {
-  return onboardingState === "active" ? "update" : "onboard";
-}
-
 async function createAccountLink(
   stripeAccountId: string,
   action: Exclude<ConnectAction, "status">,
   config: ReturnType<typeof connectConfig>,
   requestId: string,
 ) {
-  const useCaseType = action === "update"
-    ? "account_update"
-    : "account_onboarding";
+  // Accounts v2 Merchant accounts with full Dashboard access can restrict
+  // Account Links to account_onboarding even after their capabilities are
+  // active. That hosted flow also collects later requirement updates.
+  const useCaseType = "account_onboarding";
   const linkOptions = {
     configurations: ["merchant"],
     refresh_url:
       `${config.appBaseUrl}/?stripe_connect=refresh&stripe_connect_action=${action}#account`,
-    return_url:
-      `${config.appBaseUrl}/?stripe_connect=return#account`,
+    return_url: `${config.appBaseUrl}/?stripe_connect=return#account`,
     collection_options: {
       fields: "eventually_due",
       future_requirements: "include",
@@ -411,10 +408,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const linkAction = accountLinkAction(state.onboarding_state);
     const url = await createAccountLink(
       stripeAccountId,
-      linkAction,
+      action,
       config,
       requestId,
     );

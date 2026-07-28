@@ -129,6 +129,20 @@ Finding: `SEC-PAY-005`. An ambiguous completion RPC response can make Checkout r
 
 Release condition: focused function, Connect/payment, dependency, workflow, formatting, diff and sensitive-value checks plus independent review. Function deployment, another live retry, payment, refund, configuration change and public release remain separate exact Owner boundaries.
 
+Current Stripe Connect manage-details remediation lock acquired 2026-07-28:
+
+- `supabase/functions/manage-stripe-connect/index.ts`;
+- `tests/stripe-connect-foundation-harness.cjs`;
+- `tasks/ACTIVE.md`.
+
+Finding: `COMM-001-CN-002`. The public Account page correctly reports the live connected business as ready, but the Manage Stripe Details action asks Accounts v2 for an `account_update` Account Link. Stripe rejects that request for this approved full-Dashboard Merchant account and explicitly permits only `account_onboarding`, so Supabase returns HTTP 502 and the browser shows a generic non-success message. The request does not create a payment, refund or account and does not indicate an Auth, MFA, entitlement, CORS or secret-key failure.
+
+Narrow remediation: retain the browser's onboard/update intent for return-flow and idempotency binding, while always requesting Stripe's supported `account_onboarding` hosted flow for this Accounts v2 Merchant model. Preserve account ownership, mode, responsibility, capability, entitlement, Auth/MFA, trusted-link and return-origin checks.
+
+Repository validation: the Connect foundation, Connect payments and Stripe payment-integrity harnesses pass; the changed function passes formatting and frozen-lock Deno type-checking; diff hygiene and focused sensitive-value review pass. The original production failure cannot be retested until the corrected function is separately approved for deployment.
+
+Release condition: focused Connect foundation and frozen-lock Deno checks, formatting, diff and sensitive-value review, plus a reviewed PR. Deployment of `manage-stripe-connect`, provider configuration, secrets, payment, refund or another public release remains a separate exact Owner boundary.
+
 ## Explicit exclusions until separately approved
 
 - no live Stripe subscription, connected-account identity onboarding, payment, refund, real customer or real-money transaction without a separate exact acceptance approval;
