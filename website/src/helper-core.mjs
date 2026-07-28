@@ -27,7 +27,7 @@ export const boundaryRules = Object.freeze([
   },
   {
     reason: "internal",
-    pattern: /\b(system prompt|hidden prompt|developer message|internal document|reveal (?:your|the) prompt)\b/i,
+    pattern: /\b(system prompt|hidden prompt|developer message|internal document|reveal (?:your|the) prompt|ignore (?:all |the )?(?:previous|prior|above) instructions?|prompt injection|jailbreak)\b/i,
     answer: "I can help only with reviewed public Tallyo product information. I cannot provide internal instructions or documents.",
     links: [{ label: "Browse public Tallyo guidance", href: "/help/" }]
   }

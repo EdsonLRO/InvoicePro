@@ -38,9 +38,10 @@ assert.match(indexSource, /window\.addEventListener\('beforeinstallprompt'/, 'in
 assert.match(indexSource, /window\.addEventListener\('appinstalled'/, 'successful app installation must update the UI');
 assert.match(indexSource, /<button v-if="installPromptEvent"[^>]+@click="requestInstall"/, 'installation must require an explicit user click');
 assert.match(indexSource, /<nav v-if="publicSiteUrl"/, 'public links must stay hidden until a valid website URL is configured');
+assert.match(indexSource, /publicSiteLink\('terms\/'\)/, 'registration and auth footer must link to the Terms of Service');
 assert.match(indexSource, /publicSiteLink\('privacy\/'\)/, 'registration and auth footer must link to the published Privacy Notice');
 assert.match(indexSource, /publicSiteLink\('data-processing-terms\/'\)/, 'registration and auth footer must link to the published Data Processing Terms');
-assert.match(indexSource, /By creating an account, you agree that the[\s\S]*form part of your account agreement/, 'registration must incorporate the Data Processing Terms into the account agreement');
+assert.match(indexSource, /By creating an account, you agree to the[\s\S]*Terms of Service[\s\S]*Data Processing Terms/, 'registration must incorporate the Terms of Service and Data Processing Terms into the account agreement');
 assert.doesNotMatch(indexSource, /TALLYO_PUBLIC_SITE_URL\s*=|https:\/\/tallyo\.co\.uk/, 'this change must not hard-code or mutate production website configuration');
 
 for (const forbidden of ['fetch(', 'XMLHttpRequest', 'localStorage', 'sessionStorage', 'indexedDB', 'document.cookie']) {

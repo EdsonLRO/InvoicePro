@@ -96,6 +96,7 @@ export const footerGroups = Object.freeze([
   {
     title: "Legal",
     links: [
+      { label: "Terms of Service", href: "/terms/" },
       { label: "Privacy Notice", href: "/privacy/" },
       { label: "Data Processing Terms", href: "/data-processing-terms/" }
     ]
