@@ -2296,7 +2296,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.28.1';
+    const APP_BUILD = '2026.07.28.2';
     const { createApp } = Vue;
 
     createApp({
@@ -4564,7 +4564,7 @@
                     console.warn('Audit event skipped:', eventType, e && (e.message || e));
                 }
             },
-            async fetchAllOwnedRows(table, orderColumn, pageSize = 1000, ascending = true) {
+            async fetchAllOwnedRows(table, orderColumn, pageSize = 1000, ascending = true, tieBreakerColumn = 'id') {
                 const rows = [];
                 let from = 0;
                 while (true) {
@@ -4572,7 +4572,9 @@
                         .from(table)
                         .select('*')
                         .order(orderColumn, { ascending });
-                    if (orderColumn !== 'id') query = query.order('id', { ascending: true });
+                    if (tieBreakerColumn && orderColumn !== tieBreakerColumn) {
+                        query = query.order(tieBreakerColumn, { ascending: true });
+                    }
                     const { data, error } = await query.range(from, from + pageSize - 1);
                     if (error) throw new Error(`Could not export ${table}.`);
                     const page = data || [];
@@ -4596,16 +4598,22 @@
                     }
 
                     const tableSpecs = [
-                        ['company_settings', 'user_id'],
+                        ['company_settings', 'user_id', null],
                         ['customers', 'id'],
                         ['saved_items', 'id'],
                         ['invoices', 'id'],
                         ['recurring_templates', 'id'],
                         ['audit_events', 'id']
                     ];
-                    const datasets = await Promise.all(tableSpecs.map(([table, orderColumn]) =>
-                        this.fetchAllOwnedRows(table, orderColumn)
-                    ));
+                    let datasets;
+                    try {
+                        datasets = await Promise.all(tableSpecs.map(([table, orderColumn, tieBreakerColumn = 'id']) =>
+                            this.fetchAllOwnedRows(table, orderColumn, 1000, true, tieBreakerColumn)
+                        ));
+                    } catch (queryError) {
+                        console.error('Account export dataset query failed:', queryError);
+                        throw new Error('Could not prepare your account data. Please try again.');
+                    }
                     if (!this.sessionLoadIsCurrent(exportUserId, exportSessionVersion)) {
                         throw new Error('Your session changed while the export was being prepared.');
                     }

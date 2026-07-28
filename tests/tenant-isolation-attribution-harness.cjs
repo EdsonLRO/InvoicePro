@@ -51,8 +51,10 @@ assert.doesNotMatch(stripeWebhook, /service_role[^\n]*(?:return|json|Response)/i
   'service-role material must never be returned');
 
 assert.match(app, /\['audit_events', 'id'\]/);
-assert.match(app, /tableSpecs\.map\(\(\[table, orderColumn\]\) =>\s*this\.fetchAllOwnedRows\(table, orderColumn\)/,
+assert.match(app, /tableSpecs\.map\(\(\[table, orderColumn, tieBreakerColumn = 'id'\]\) =>\s*this\.fetchAllOwnedRows\(table, orderColumn, 1000, true, tieBreakerColumn\)/,
   'account export must query every tenant table through the authenticated public client');
+assert.match(app, /\['company_settings', 'user_id', null\]/,
+  'the singleton company settings export must not reference a nonexistent id column');
 assert.doesNotMatch(app, /SUPABASE_SERVICE_ROLE_KEY|service_role/i,
   'browser source must not contain service-role credentials or references');
 

@@ -21,6 +21,7 @@ async function run() {
     const alerts = [];
     const auditCalls = [];
     const ranges = {};
+    const orderColumns = {};
     let forcedErrorTable = null;
     const tableData = {
         company_settings: [{ user_id: 'user-a', name: 'Private Co' }],
@@ -34,7 +35,11 @@ async function run() {
     function queryBuilder(table) {
         return {
             select() { return this; },
-            order() { return this; },
+            order(column) {
+                orderColumns[table] = orderColumns[table] || [];
+                orderColumns[table].push(column);
+                return this;
+            },
             range(from, to) {
                 ranges[table] = ranges[table] || [];
                 ranges[table].push([from, to]);
@@ -165,6 +170,12 @@ async function run() {
     assert.equal(payload.account.identities, undefined);
     assert.equal(payload.data.customers.length, 1001);
     assert.deepEqual(ranges.customers, [[0, 999], [1000, 1999]]);
+    assert.deepEqual(orderColumns.company_settings, ['user_id'],
+        'company settings must not be ordered by a nonexistent id column');
+    for (const table of ['customers', 'saved_items', 'invoices', 'recurring_templates', 'audit_events']) {
+        assert.ok(orderColumns[table].length > 0 && orderColumns[table].every(column => column === 'id'),
+            `${table} must retain deterministic id ordering`);
+    }
     assert.deepEqual(Object.keys(payload.data), [
         'company_settings', 'customers', 'saved_items', 'invoices', 'recurring_templates', 'audit_events'
     ]);
@@ -188,7 +199,7 @@ async function run() {
     assert.equal(downloadedLink, undefined, 'A failed dataset query must not create a partial download.');
     assert.equal(downloadedBlob, undefined, 'A failed dataset query must not create a partial export blob.');
     assert.equal(auditCalls.length, 0, 'A failed export must not be logged as completed.');
-    assert.deepEqual(alerts, ['Could not export invoices.']);
+    assert.deepEqual(alerts, ['Could not prepare your account data. Please try again.']);
     assert.equal(app.accountExportBusy, false);
 
     console.log('Account data export harness passed.');

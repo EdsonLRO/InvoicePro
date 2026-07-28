@@ -42,7 +42,7 @@ Prepare Tallyo so the public website and authenticated app can offer:
 - `SEC-AUTH-006` is remediated. The Owner rotated the exposed Turnstile server secret and entered its replacement directly into Supabase Auth without Codex inspecting it. CAPTCHA-protected sign-in, custom-domain MFA, exact-origin CORS and lookalike-origin rejection pass.
 - Authoritative DNS now uses Cloudflare with DNSSEC active. All 19 prior Squarespace records were preserved, the Squarespace website and Google Workspace/Resend DNS checks pass, and the four prior Squarespace nameservers are the documented rollback. `app.tallyo.co.uk` was protected by the existing default-deny Access application before it was attached to Pages; Pages reports Active with SSL, while anonymous requests are redirected to Access.
 - Under exact Owner approval on 2026-07-27, the database-owner-only `subscription_write_enforcement` switch was enabled. Privacy-safe reconciliation found nine accounts with business data: three full/grace accounts remain write-enabled, six are read-only and an unknown account cannot write. Authenticated and service roles cannot change the switch, and the Supabase security advisor remains clear.
-- The approved non-secret production variables are active in Cloudflare Pages. App build `2026.07.28.1` is public at `https://app.tallyo.co.uk` with the approved Billing and Connect interfaces. The production website contains merged PR #127, routes to the custom app domain and is public at the apex and `www` hostnames. The bounded AI Helper has the exact public-domain allowlist, rate-limiter binding and hard provider budget.
+- The approved non-secret production variables are active in Cloudflare Pages. App build `2026.07.28.2` is public at `https://app.tallyo.co.uk` with the approved Billing and Connect interfaces and the corrected account-data export ordering. The production website contains merged PR #127, routes to the custom app domain and is public at the apex and `www` hostnames. The bounded AI Helper has the exact public-domain allowlist, rate-limiter binding and hard provider budget.
 
 ## Current controlled-provider scope
 
@@ -152,6 +152,16 @@ Narrow remediation: on a repeated same-plan request, retrieve the exact claimed 
 Repository validation: the Billing foundation, Billing client, server-entitlement, Connect foundation and payment-integrity harnesses pass; all repository harnesses except the unchanged Cloudflare Pages readiness harness pass locally. That unrelated harness and the website suite stop in their pre-existing Windows/Node 24 child-process assertion because `spawnSync` returns no stderr; neither failing test file is changed by this work. The affected Billing function passes formatting and frozen-lock Deno type-checking. Diff hygiene, full-diff review and focused sensitive-value review pass.
 
 Release condition: reviewed focused PR and green required remote checks. Deploying `create-billing-checkout`, publishing the browser wording, retrying live Checkout, creating a subscription, changing Stripe/Supabase configuration or any other production action remains a separate exact Owner boundary.
+
+### COMM-001-DATA-001 Account-data export ordering
+
+Finding: the export paginator treated every non-`id` sort as requiring an `id` tie-breaker. The singleton `company_settings` table is keyed by `user_id` and has no `id` column, so the first export query failed before any file was created.
+
+Narrow remediation: allow the paginator's tie-breaker to be disabled only for the singleton company-settings dataset. All datasets continue to use the signed-in Supabase client and existing owner-scoped RLS; account identity is revalidated before querying, session-change rejection remains in place, partial files remain prohibited and successful exports retain their audit event. Dataset failures now show customer-facing wording instead of a database table name.
+
+Repository validation: the focused account-export harness proves company settings is ordered only by `user_id`, large multi-row datasets remain deterministically paginated, sensitive Auth metadata stays excluded, query failure creates no partial file or success audit, and the busy state resets. PWA build/cache validation and the complete relevant app harness suite pass.
+
+Release condition: reviewed focused PR and green required remote checks. Publishing build `2026.07.28.2` and one bounded owner-confirmed download retest remain separate exact Owner boundaries; no export contents may be opened or inspected.
 
 ## Explicit exclusions until separately approved
 
