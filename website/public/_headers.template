@@ -9,6 +9,7 @@
   {{ROBOTS_HEADER}}
 
 /sitemap.xml
+  ! Content-Security-Policy
   Content-Type: application/xml; charset=utf-8
 
 /assets/*
