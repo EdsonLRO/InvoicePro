@@ -52,6 +52,59 @@ Prepare Tallyo so the public website and authenticated app can offer:
 - keep preview deployments protected by the retained wildcard Access applications;
 - stop before any new live payment/refund, customer communication, analytics/marketing activation, secret change, destructive action or unrelated provider change.
 
+## Focused task: COMM-001-AN-001 GA4 consent controls
+
+Status: Source implementation and evidence complete; awaiting Owner review
+Priority: High
+Assigned roles: Website, QA, Security, Legal/Privacy and Documentation
+Model/work mode: Sol High for Auth/subscription hooks, CSP, legal wording and final review; Medium for routine website UI and tests
+Risk level: High because the scope adds production tracking, touches Auth/subscription lifecycle events, changes CSP and updates public legal commitments
+Jurisdiction: United Kingdom
+Affected people: public visitors and Tallyo business-account users
+Legal disposition: Approved with conditions for source implementation and non-networked testing; deployment/activation blocked
+Review: `docs/legal/GA4_CONSENT_REVIEW.md`
+
+Approved source scope:
+
+- GA4 stream `G-PZFZKCWZ7M`;
+- Basic Consent Mode with no Google load or transmission before affirmative consent;
+- equally prominent accept, reject and manage controls plus persistent withdrawal;
+- one preference-only consent record, separate from necessary service storage;
+- eight property-free allowlisted events;
+- Privacy Notice, Cookie Notice, storage inventory and provider-setting checklist;
+- automated fail-closed, payload-minimisation, keyboard and responsive checks.
+
+Files locked:
+
+- `website/src/`;
+- `website/content/analytics-events.json`;
+- `website/content/storage-inventory.md`;
+- `website/public/_headers.template`;
+- `website/scripts/`;
+- `website/README.md`;
+- `docs/legal/GA4_CONSENT_REVIEW.md`;
+- focused app Analytics source and its build/cache/tests;
+- `index.html`;
+- `tasks/ACTIVE.md`.
+
+Lock acquired: 28 July 2026.
+
+Release condition:
+
+- source remains disabled by default and requires an exact production release gate;
+- no static Google tag exists in rendered HTML;
+- no Google script, cookie or event before consent or after rejection;
+- withdrawal updates Consent Mode v2 and blocks future events;
+- tag insertion is idempotent;
+- event allowlist and payload tests reject personal, business, document, payment,
+  Stripe, Auth, free-text and internal-ID data;
+- notices match the implemented choice, cookie duration and provider role;
+- Google property settings and processor/transfer evidence are verified;
+- final diff and evidence receive Owner approval before any deployment.
+
+Branch: `codex/ga4-consent-controls`
+Deployment: Not authorised.
+
 ## Locks
 
 - `tasks/ACTIVE.md`;

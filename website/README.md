@@ -2,7 +2,8 @@
 
 This directory is the independently deployable, static Tallyo marketing website.
 It does not import the authenticated application, Supabase configuration, customer
-data, analytics providers or private credentials.
+data or private credentials. Its optional GA4 integration is fail-closed and
+consent-controlled.
 
 ## Local build
 
@@ -36,6 +37,12 @@ Supported build configuration:
 - `TALLYO_CONNECT_PAYMENTS_ENABLED`: publishes customer card-payment availability
   only with `TALLYO_CONNECT_PRIVATE_PREVIEW_APPROVED=true` in preview or
   `TALLYO_CONNECT_PUBLIC_RELEASE_APPROVED=true` in production.
+- `TALLYO_GA4_ENABLED`: enables the reviewed GA4 consent controls and conditional
+  provider CSP only with the matching preview or public-release approval.
+- `TALLYO_GA4_MEASUREMENT_ID`: must exactly equal `G-PZFZKCWZ7M` when Analytics is
+  enabled.
+- `TALLYO_GA4_PRIVATE_PREVIEW_APPROVED` and
+  `TALLYO_GA4_PUBLIC_RELEASE_APPROVED`: explicit fail-closed release gates.
 - `TALLYO_GOOGLE_SITE_VERIFICATION`: optional Google Search Console verification
   value, supplied only through the approved deployment environment.
 - `TALLYO_BING_SITE_VERIFICATION`: optional Bing Webmaster Tools verification
@@ -65,15 +72,19 @@ The planning-only content map in `content/seo-content-map.json` does not authori
 publishing a route. Each topic still needs useful original content, factual review
 and the applicable release approval.
 
-## Inactive growth foundation
+## Consent-controlled Analytics candidate
 
 `content/analytics-events.json` is the authoritative event dictionary. The public
-scripts call a provider-neutral API that is disabled by default, has no provider
-and permits only enumerated properties and values. Current consent is necessary
-only; analytics, advertising and preferences are denied.
+website and app scripts permit only eight property-free events. GA4 is disabled by
+default. A production build can include its CSP origins only after the exact
+release gate is present.
 
-No website code loads GA4, GTM, Google Ads or another analytics provider, and it
-does not set cookies, use browser storage or send analytics requests. Recognised
-UTM fields remain in page memory only and are not added to account, Auth, invoice,
-payment, support or redirect links. See `content/growth-readiness.md` and
-`content/storage-inventory.md` before proposing any activation.
+The Google tag is inserted dynamically only after affirmative Analytics consent.
+Before consent or after rejection there is no Google tag, Analytics cookie or
+Analytics request. The only preference record is a six-month first-party cookie
+whose value is `granted` or `denied`. Withdrawal updates Consent Mode, disables
+future sends and removes readable GA cookies. Advertising storage, Google Signals,
+advertising personalisation, enhanced conversions, user-provided data collection
+and Enhanced Measurement remain disabled. See `content/growth-readiness.md`,
+`content/storage-inventory.md` and `../docs/legal/GA4_CONSENT_REVIEW.md` before
+any activation.

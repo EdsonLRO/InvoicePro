@@ -20,6 +20,36 @@ const footerMarkup = footerGroups.map((group) => `
     ${group.links.map((link) => `<a href="${link.href}">${link.label}</a>`).join("")}
   </div>`).join("");
 
+const cookieConsentMarkup = `
+  <section class="cookie-banner" data-cookie-banner hidden aria-labelledby="cookie-banner-title">
+    <h2 id="cookie-banner-title">Optional analytics</h2>
+    <p>With your permission, Tallyo uses Google Analytics to understand a small set of product and website actions. Analytics stays off until you accept. Read the <a href="/cookies/">Cookie Notice</a>.</p>
+    <div class="cookie-actions">
+      <button class="cookie-choice" type="button" data-cookie-accept>Accept analytics</button>
+      <button class="cookie-choice" type="button" data-cookie-reject>Reject analytics</button>
+      <button class="cookie-choice" type="button" data-cookie-settings>Manage preferences</button>
+    </div>
+  </section>
+  <dialog class="cookie-dialog" data-cookie-dialog aria-labelledby="cookie-dialog-title">
+    <div class="cookie-dialog-inner">
+      <h2 id="cookie-dialog-title">Cookie preferences</h2>
+      <p>Choose whether Tallyo may use optional Analytics. You can change this choice later.</p>
+      <div class="cookie-category">
+        <span><strong>Necessary</strong>Used for the consent choice and essential service or security features. Always on.</span>
+        <input type="checkbox" checked disabled aria-label="Necessary storage is always on">
+      </div>
+      <label class="cookie-category">
+        <span><strong>Analytics</strong>Allows the consent-controlled Google tag and the limited events described in the Cookie Notice.</span>
+        <input type="checkbox" data-cookie-analytics aria-label="Allow Analytics">
+      </label>
+      <div class="cookie-actions">
+        <button class="cookie-choice" type="button" data-cookie-save>Save preferences</button>
+        <button class="cookie-choice" type="button" data-cookie-reject>Reject analytics</button>
+        <button class="cookie-choice" type="button" data-cookie-cancel>Cancel</button>
+      </div>
+    </div>
+  </dialog>`;
+
 const schemaFor = (page) => {
   const base = {
     "@context": "https://schema.org",
@@ -163,6 +193,7 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
   <meta name="twitter:image" content="${socialImage}">
   ${verificationMarkup}
   <link rel="stylesheet" href="${assetUrl("/assets/styles.css")}">
+  <link rel="stylesheet" href="${assetUrl("/assets/analytics-consent.css")}">
   <script type="application/ld+json">${schema}</script>
   <script src="${assetUrl("/assets/site.js")}" defer></script>
   ${pageScripts}
@@ -187,8 +218,9 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
       ${footerMarkup}
       <div class="footer-group"><h2>Account</h2><a data-login-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/#install">Install Tallyo</a></div>
     </div>
-    <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo.</p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
+    <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo. <button class="cookie-settings-control" type="button" data-cookie-settings hidden>Cookie settings</button></p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
   </footer>
+  ${cookieConsentMarkup}
 </body>
 </html>`,
     schema,
