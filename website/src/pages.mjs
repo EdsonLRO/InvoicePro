@@ -12,6 +12,7 @@ import {
 import { finalCta, helpArticlePage, industryLandingPage, list, productDemo, workflow } from "./components.mjs";
 import { commercialOffer, connectPaymentPlaceholders, pricingFaqs } from "./commercial-offer.mjs";
 import { siteConfig } from "./config.mjs";
+import { dataProcessingTerms, privacyNotice } from "./legal-content.mjs";
 
 const icon = (symbol) => `<span class="feature-icon" aria-hidden="true">${symbol}</span>`;
 const industryHref = (industry) => publishedIndustrySlugs.includes(industry.slug) ? `/industries/${industry.slug}/` : "/features/";
@@ -143,7 +144,7 @@ const helper = `
       <form class="helper-form" data-helper-form>
         <label for="helper-question">Ask a general question about Tallyo</label>
         <div><input id="helper-question" data-helper-input name="question" type="text" maxlength="240" autocomplete="off" spellcheck="true" required><button class="button button-primary" type="submit">Ask Tallyo Helper</button></div>
-        <p>Do not enter passwords, authenticator codes, recovery codes, card information, bank details, secrets or private business information.</p>
+        <p>Do not enter passwords, authenticator codes, recovery codes, card information, bank details, secrets or private business information. Read the <a href="/privacy/">Privacy Notice</a>.</p>
       </form>
       <p class="sr-only" data-helper-status role="status" aria-live="polite"></p>
     </div>
@@ -175,7 +176,7 @@ const generatorPage = (defaultType) => {
   <section class="page-hero generator-hero"><p class="eyebrow">Free ${defaultType} Maker</p><h1>Create a professional ${lowerType}, free.</h1><p>No account needed. While you work, this page keeps your document details and selected logo in your browser and does not send them to Tallyo, analytics or another service.</p></section>
   <section class="generator-shell" data-generator data-default-type="${defaultType}">
     <div class="generator-editor">
-      <div class="privacy-note" role="note"><strong>Private by default</strong><span>Tallyo does not save this document automatically. Refreshing the page clears the document draft.</span></div>
+      <div class="privacy-note" role="note"><strong>Private by default</strong><span>Tallyo does not save this document automatically. Refreshing the page clears the document draft. Read the <a href="/privacy/">Privacy Notice</a>.</span></div>
       <form data-generator-form novalidate>
         <fieldset><legend>Document details</legend><div class="generator-fields generator-fields-three">
           <label>Document type<select name="documentType"><option>Invoice</option><option>Quote</option><option>Estimate</option></select></label>
@@ -233,6 +234,8 @@ const foundationPages = [
   { route: "/help/", output: "help/index.html", title: "Tallyo Help Centre", description: "Find step-by-step guidance for Tallyo documents, payments, recurring work, account protection, delivery and installation.", content: help, schema: "webpage" },
   { route: "/faq/", output: "faq/index.html", title: "Tallyo frequently asked questions", description: "Answers about Tallyo invoices, quotes, recurring work, payment tracking, pricing, security, installation and internet access.", content: faq, schema: "faq" },
   { route: "/about/", output: "about/index.html", title: "About Tallyo", description: "Learn why Tallyo is building a straightforward invoicing and business-records workspace for UK small businesses.", content: about, schema: "webpage" },
+  { route: "/privacy/", output: "privacy/index.html", title: "Tallyo Privacy Notice", description: "Read how Tallyo uses, shares, protects and retains personal information and how to exercise your data-protection rights.", content: privacyNotice, schema: "webpage" },
+  { route: "/data-processing-terms/", output: "data-processing-terms/index.html", title: "Tallyo Business-User Data Processing Terms", description: "Read the data-processing terms that form part of the Tallyo account agreement for UK business users.", content: dataProcessingTerms, schema: "webpage" },
   { route: "/free-invoice-generator/", output: "free-invoice-generator/index.html", title: "Free invoice maker — Tallyo", description: "Create and print a privacy-first, browser-local invoice for your UK small business without making an account.", content: generatorPage("Invoice"), schema: "webpage", scripts: ["/assets/generator.js"] },
   { route: "/free-quote-generator/", output: "free-quote-generator/index.html", title: "Free quote maker — Tallyo", description: "Create and print a privacy-first, browser-local quote for your UK small business without making an account.", content: generatorPage("Quote"), schema: "webpage", scripts: ["/assets/generator.js"] }
 ];

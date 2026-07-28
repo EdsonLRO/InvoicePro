@@ -228,6 +228,14 @@
             text-transform: uppercase;
         }
         .auth-form-heading p:last-child { color: #64748b; font-size: 0.9rem; }
+        .auth-legal-copy {
+            margin-top: 0.9rem;
+            color: #64748b;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            text-align: center;
+        }
+        .auth-legal-copy a, .auth-page-footer a { color: #4338ca; font-weight: 700; }
         .auth-page-footer {
             display: flex;
             justify-content: space-between;
@@ -401,6 +409,7 @@
                     <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" role="alert">{{ turnstile.error }} <button type="button" @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry security check</button></p>
                 </div>
                 <button @click="register" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Creating account...' : 'Create Account' }}</button>
+                <p v-if="publicSiteUrl" class="auth-legal-copy">By creating an account, you agree that the <a :href="publicSiteLink('data-processing-terms/')" target="_blank" rel="noopener">Tallyo Business-User Data Processing Terms</a> form part of your account agreement and acknowledge the <a :href="publicSiteLink('privacy/')" target="_blank" rel="noopener">Privacy Notice</a>.</p>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     Already registered? <button @click="authMode = 'login'" class="text-indigo-600 hover:underline font-medium">Sign in</button>
                 </div>
@@ -533,7 +542,8 @@
 
             <footer class="auth-page-footer">
                 <span>Tallyo · Straightforward invoicing for small businesses</span>
-                <span>Account access uses Tallyo's existing protected sign-in flow.</span>
+                <span v-if="publicSiteUrl"><a :href="publicSiteLink('privacy/')" target="_blank" rel="noopener">Privacy Notice</a> · <a :href="publicSiteLink('data-processing-terms/')" target="_blank" rel="noopener">Data Processing Terms</a></span>
+                <span v-else>Account access uses Tallyo's existing protected sign-in flow.</span>
             </footer>
         </div>
     </div>
@@ -2286,7 +2296,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.27.1';
+    const APP_BUILD = '2026.07.28.1';
     const { createApp } = Vue;
 
     createApp({

@@ -92,5 +92,12 @@ export const footerGroups = Object.freeze([
       { label: "About Tallyo", href: "/about/" },
       { label: "Install Tallyo", href: "/help/#install" }
     ]
+  },
+  {
+    title: "Legal",
+    links: [
+      { label: "Privacy Notice", href: "/privacy/" },
+      { label: "Data Processing Terms", href: "/data-processing-terms/" }
+    ]
   }
 ]);

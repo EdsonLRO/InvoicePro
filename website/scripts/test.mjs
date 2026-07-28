@@ -146,6 +146,7 @@ assert.doesNotMatch(productTour, /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|acct_|cs_(?:tes
 const generatorPageHtml = read("free-invoice-generator/index.html");
 assert.match(generatorPageHtml, /role="region" aria-label="Scrollable live document preview" tabindex="0"/, "mobile document preview is keyboard reachable");
 assert.match(generatorPageHtml, /Swipe sideways to view the full document\./, "mobile document preview explains horizontal navigation");
+assert.match(generatorPageHtml, /href="\/privacy\/">Privacy Notice<\/a>/, "free document form clearly links the Privacy Notice");
 assert.match(read("assets/styles.css"), /\.generator-preview-wrap \{ overflow-x: auto;/, "mobile document preview scrolls inside its own region");
 
 for (const article of helpArticles) {
@@ -208,6 +209,7 @@ await assert.rejects(() => futurePublicAiAdapter.answer(), /disabled/);
 
 const helper = read("helper/index.html");
 assert.match(helper, /Tallyo Helper provides general product guidance and cannot see your account or business records/);
+assert.match(helper, /href="\/privacy\/">Privacy Notice<\/a>/, "Helper input clearly links the Privacy Notice");
 assert.match(helper, /id="helper-knowledge"/);
 assert.match(helper, /type="module" src="\/assets\/helper\.js\?v=[a-f0-9]{12}"/);
 assert.doesNotMatch(helper, /https?:\/\/(?!tallyo\.co\.uk|schema\.org|edsonlro\.github\.io)/, "helper page has no unapproved external destination");
@@ -227,6 +229,24 @@ for (const html of [generator, quoteGenerator]) {
 }
 assert.match(generator, /data-default-type="Invoice"/);
 assert.match(quoteGenerator, /data-default-type="Quote"/);
+
+const privacy = read("privacy/index.html");
+const dataProcessingTerms = read("data-processing-terms/index.html");
+for (const [name, html] of [["Privacy Notice", privacy], ["Data Processing Terms", dataProcessingTerms]]) {
+  assert.doesNotMatch(html, /do not publish|owner-approved draft|publication approval|required account evidence|provider evidence register structure|focused provider verification/i, `${name} contains no internal or draft wording`);
+  assert.match(html, /87 Coles Green Road, NW2 7JH, London, UK/, `${name} has the approved service address`);
+  assert.match(html, /privacy@tallyo\.co\.uk/, `${name} has the approved privacy mailbox`);
+}
+assert.match(privacy, /Effective 28 July 2026/);
+assert.match(privacy, /main@tallyo\.co\.uk/);
+assert.match(privacy, /The public AI Helper is currently disabled/);
+assert.match(privacy, /We do not promise a fixed closed-account deletion deadline/);
+assert.match(privacy, /href="\/data-processing-terms\/">Data Processing Terms<\/a>/);
+assert.match(dataProcessingTerms, /These terms form part of the Tallyo account agreement for business users/);
+assert.match(dataProcessingTerms, /href="\/privacy\/">Tallyo Privacy Notice<\/a>/);
+assert.match(dataProcessingTerms, /role="region" aria-label="Data processing schedule" tabindex="0"/);
+assert.match(dataProcessingTerms, /role="region" aria-label="Tallyo subprocessors" tabindex="0"/);
+assert.match(home, /<h2>Legal<\/h2>\s*<a href="\/privacy\/">Privacy Notice<\/a><a href="\/data-processing-terms\/">Data Processing Terms<\/a>/, "footer publishes both legal links");
 
 assert.equal(parseMoney("12.34"), 1234n);
 assert.equal(parseMoney("00012.34"), 1234n);
