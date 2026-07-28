@@ -6,6 +6,8 @@ const appUrl = trimSlash(process.env.TALLYO_APP_URL || "https://edsonlro.github.
 const subscriptionCheckoutRequested = process.env.TALLYO_SUBSCRIPTIONS_ENABLED === "true";
 const aiHelperRequested = process.env.TALLYO_PUBLIC_AI_HELPER_ENABLED === "true";
 const connectPaymentsRequested = process.env.TALLYO_CONNECT_PAYMENTS_ENABLED === "true";
+const analyticsRequested = process.env.TALLYO_GA4_ENABLED === "true";
+const ga4MeasurementId = String(process.env.TALLYO_GA4_MEASUREMENT_ID || "").trim();
 
 if (
   subscriptionCheckoutRequested &&
@@ -41,6 +43,23 @@ if (
 ) {
   throw new Error("Customer card-payment production build blocked until public release is approved");
 }
+if (analyticsRequested && ga4MeasurementId !== "G-PZFZKCWZ7M") {
+  throw new Error("The reviewed Tallyo GA4 Measurement ID is required when Analytics is enabled");
+}
+if (
+  analyticsRequested &&
+  mode !== "production" &&
+  process.env.TALLYO_GA4_PRIVATE_PREVIEW_APPROVED !== "true"
+) {
+  throw new Error("Analytics preview build blocked until the reviewed private-preview scope is approved");
+}
+if (
+  analyticsRequested &&
+  mode === "production" &&
+  process.env.TALLYO_GA4_PUBLIC_RELEASE_APPROVED !== "true"
+) {
+  throw new Error("Analytics production build blocked until public release is approved");
+}
 
 export const siteConfig = Object.freeze({
   name: "Tallyo",
@@ -60,6 +79,8 @@ export const siteConfig = Object.freeze({
   aiHelperEnabled: aiHelperRequested,
   subscriptionCheckoutEnabled: subscriptionCheckoutRequested,
   connectPaymentsEnabled: connectPaymentsRequested,
+  analyticsEnabled: analyticsRequested,
+  ga4MeasurementId: analyticsRequested ? ga4MeasurementId : "",
   preview: mode !== "production"
 });
 
@@ -98,6 +119,7 @@ export const footerGroups = Object.freeze([
     links: [
       { label: "Terms of Service", href: "/terms/" },
       { label: "Privacy Notice", href: "/privacy/" },
+      { label: "Cookie Notice", href: "/cookies/" },
       { label: "Data Processing Terms", href: "/data-processing-terms/" }
     ]
   }

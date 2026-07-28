@@ -1,6 +1,7 @@
 import { calculateDocument, formatMoney } from "./document-calculator.mjs?v=__TALLYO_ASSET_REVISION__";
 
 const roots = document.querySelectorAll("[data-generator]");
+const emitAnalyticsEvent = (name) => window.dispatchEvent(new CustomEvent("tallyo:analytics", { detail: { name } }));
 
 const isoDate = (date) => {
   const local = new Date(date.getTime() - (date.getTimezoneOffset() * 60_000));
@@ -46,6 +47,7 @@ for (const root of roots) {
   const logoPreview = preview.querySelector("[data-preview-logo]");
   const removeLogo = root.querySelector("[data-remove-logo]");
   let logoUrl = "";
+  let makerUseTracked = false;
 
   const rows = () => [...itemsRoot.querySelectorAll("[data-item]")];
   const renumber = () => {
@@ -134,8 +136,15 @@ for (const root of roots) {
     renumber();
     update();
   });
-  form.addEventListener("input", update);
-  form.addEventListener("change", update);
+  const updateFromUser = () => {
+    if (!makerUseTracked && root.dataset.defaultType === "Invoice") {
+      makerUseTracked = true;
+      emitAnalyticsEvent("use_invoice_maker");
+    }
+    update();
+  };
+  form.addEventListener("input", updateFromUser);
+  form.addEventListener("change", updateFromUser);
   form.addEventListener("reset", () => {
     if (logoUrl) URL.revokeObjectURL(logoUrl);
     logoUrl = "";
@@ -189,6 +198,7 @@ for (const root of roots) {
       return;
     }
     document.querySelector("[data-generator-conversion]").hidden = false;
+    if (root.dataset.defaultType === "Invoice") emitAnalyticsEvent("download_invoice");
     window.print();
     status.textContent = "Print dialog opened. Choose ‘Save as PDF’ to download a PDF copy.";
   });

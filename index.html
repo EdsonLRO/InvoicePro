@@ -24,6 +24,7 @@
 
     <!-- Self-hosted, pre-built stylesheet (replaces the dev-mode Tailwind CDN) -->
     <link rel="stylesheet" href="./tailwind.css">
+    <link rel="stylesheet" href="./analytics-consent.css">
 
     <!-- Third-party libraries: pinned to exact versions and verified with
          Subresource Integrity (SRI). The browser refuses to run a file whose
@@ -36,6 +37,7 @@
 
     <!-- Your project settings (uploaded once, never overwritten when index.html changes) -->
     <script src="./config.js"></script>
+    <script type="module" src="./analytics-app.js"></script>
 
     <style>
         ::-webkit-scrollbar { width: 8px; }
@@ -409,7 +411,7 @@
                     <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" role="alert">{{ turnstile.error }} <button type="button" @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry security check</button></p>
                 </div>
                 <button @click="register" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Creating account...' : 'Create Account' }}</button>
-                <p v-if="publicSiteUrl" class="auth-legal-copy">By creating an account, you agree to the <a :href="publicSiteLink('terms/')" target="_blank" rel="noopener">Tallyo Terms of Service</a>, including the <a :href="publicSiteLink('data-processing-terms/')" target="_blank" rel="noopener">Business-User Data Processing Terms</a>, and acknowledge the <a :href="publicSiteLink('privacy/')" target="_blank" rel="noopener">Privacy Notice</a>.</p>
+                <p v-if="publicSiteUrl" class="auth-legal-copy">By creating an account, you agree to the <a :href="publicSiteLink('terms/')" target="_blank" rel="noopener">Tallyo Terms of Service</a>, including the <a :href="publicSiteLink('data-processing-terms/')" target="_blank" rel="noopener">Business-User Data Processing Terms</a>, and acknowledge the <a :href="publicSiteLink('privacy/')" target="_blank" rel="noopener">Privacy Notice</a> and <a :href="publicSiteLink('cookies/')" target="_blank" rel="noopener">Cookie Notice</a>.</p>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     Already registered? <button @click="authMode = 'login'" class="text-indigo-600 hover:underline font-medium">Sign in</button>
                 </div>
@@ -542,7 +544,7 @@
 
             <footer class="auth-page-footer">
                 <span>Tallyo · Straightforward invoicing for small businesses</span>
-                <span v-if="publicSiteUrl"><a :href="publicSiteLink('terms/')" target="_blank" rel="noopener">Terms of Service</a> · <a :href="publicSiteLink('privacy/')" target="_blank" rel="noopener">Privacy Notice</a> · <a :href="publicSiteLink('data-processing-terms/')" target="_blank" rel="noopener">Data Processing Terms</a></span>
+                <span v-if="publicSiteUrl"><a :href="publicSiteLink('terms/')" target="_blank" rel="noopener">Terms of Service</a> · <a :href="publicSiteLink('privacy/')" target="_blank" rel="noopener">Privacy Notice</a> · <a :href="publicSiteLink('cookies/')" target="_blank" rel="noopener">Cookie Notice</a> · <a :href="publicSiteLink('data-processing-terms/')" target="_blank" rel="noopener">Data Processing Terms</a></span>
                 <span v-else>Account access uses Tallyo's existing protected sign-in flow.</span>
             </footer>
         </div>
@@ -2296,7 +2298,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.28.2';
+    const APP_BUILD = '2026.07.28.3';
     const { createApp } = Vue;
 
     createApp({
@@ -2349,7 +2351,8 @@
                     subscription: null,
                     entitlement: null,
                     error: '',
-                    notice: ''
+                    notice: '',
+                    activationTrackingPending: false
                 },
 
                 // App State
@@ -3062,6 +3065,7 @@
                 this.authBusy = true;
                 const options = { emailRedirectTo: window.location.origin + window.location.pathname };
                 if (captchaToken) options.captchaToken = captchaToken;
+                window.TallyoAnalytics?.trackEvent('start_registration');
                 let error = null;
                 try {
                     ({ error } = await supabaseClient.auth.signUp({
@@ -3076,6 +3080,7 @@
                     this.resetTurnstileChallenge();
                 }
                 if(error) return alert("Registration failed: " + error.message);
+                window.TallyoAnalytics?.trackEvent('complete_registration');
                 this.pendingEmail = email;
                 this.authMode = 'verify';
             },
@@ -4042,6 +4047,14 @@
                     if (entitlementResult.error) throw entitlementResult.error;
                     this.billing.subscription = subscriptionResult.data || null;
                     this.billing.entitlement = entitlementResult.data || null;
+                    if (
+                        this.billing.activationTrackingPending &&
+                        String(this.billing.subscription?.provider_status || '').toLowerCase() === 'active' &&
+                        String(this.billing.entitlement?.access_state || '').toLowerCase() === 'full'
+                    ) {
+                        window.TallyoAnalytics?.trackEvent('subscription_activated');
+                        this.billing.activationTrackingPending = false;
+                    }
                 } catch (error) {
                     if (this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) {
                         this.billing.error = error && error.message ? error.message : 'Subscription status could not be loaded.';
@@ -4094,6 +4107,7 @@
             },
             async openBillingCheckout(interval) {
                 if (!this.billing.enabled || this.billing.busy || !['monthly', 'annual'].includes(interval)) return;
+                window.TallyoAnalytics?.trackEvent('start_checkout');
                 this.billing.busy = true;
                 this.billing.error = '';
                 this.billing.notice = '';
@@ -4138,7 +4152,10 @@
                     : (this.billing.testMode
                         ? 'Subscription setup was cancelled. No test payment was completed.'
                         : 'Subscription setup was cancelled. No payment was completed.');
-                if (callback === 'success') await this.loadBillingState();
+                if (callback === 'success') {
+                    this.billing.activationTrackingPending = true;
+                    await this.loadBillingState();
+                }
             },
             async loadStripeConnectState() {
                 if (!this.currentUser) return;
@@ -6147,5 +6164,34 @@
         }
     }).mount('#app');
 </script>
+<button class="cookie-settings-control app-cookie-settings" type="button" data-cookie-settings hidden>Cookie settings</button>
+<section class="cookie-banner" data-cookie-banner hidden aria-labelledby="cookie-banner-title">
+    <h2 id="cookie-banner-title">Optional analytics</h2>
+    <p>With your permission, Tallyo uses Google Analytics to understand a small set of website and product actions. Analytics stays off until you accept. <a href="#" data-cookie-notice-link hidden target="_blank" rel="noopener">Read the Cookie Notice</a>.</p>
+    <div class="cookie-actions">
+        <button class="cookie-choice" type="button" data-cookie-accept>Accept analytics</button>
+        <button class="cookie-choice" type="button" data-cookie-reject>Reject analytics</button>
+        <button class="cookie-choice" type="button" data-cookie-settings>Manage preferences</button>
+    </div>
+</section>
+<dialog class="cookie-dialog" data-cookie-dialog aria-labelledby="cookie-dialog-title">
+    <div class="cookie-dialog-inner">
+        <h2 id="cookie-dialog-title">Cookie preferences</h2>
+        <p>Choose whether Tallyo may use optional Analytics. You can change this choice later.</p>
+        <div class="cookie-category">
+            <span><strong>Necessary</strong>Used for the consent choice and essential service or security features. Always on.</span>
+            <input type="checkbox" checked disabled aria-label="Necessary storage is always on">
+        </div>
+        <label class="cookie-category">
+            <span><strong>Analytics</strong>Allows the consent-controlled Google tag and the limited events described in the Cookie Notice.</span>
+            <input type="checkbox" data-cookie-analytics aria-label="Allow Analytics">
+        </label>
+        <div class="cookie-actions">
+            <button class="cookie-choice" type="button" data-cookie-save>Save preferences</button>
+            <button class="cookie-choice" type="button" data-cookie-reject>Reject analytics</button>
+            <button class="cookie-choice" type="button" data-cookie-cancel>Cancel</button>
+        </div>
+    </div>
+</dialog>
 </body>
 </html>

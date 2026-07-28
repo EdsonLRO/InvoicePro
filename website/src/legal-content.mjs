@@ -44,7 +44,8 @@ export const privacyNotice = `
 
       <h3>Website, service and security information</h3>
       <p>Our infrastructure providers may process request metadata such as IP address, approximate country, browser or device information, timestamps and request identifiers to deliver and protect the service, enforce access controls, diagnose errors and prevent abuse.</p>
-      <p>Tallyo does not currently use advertising cookies, behavioural advertising or production analytics. If this changes, we will update this notice and provide any consent choices required by law before activating the processing.</p>
+      <p>If you choose <strong>Accept analytics</strong>, Tallyo uses Google Analytics 4 to understand how people use the public website and selected account journeys. Google may process an analytics cookie identifier, a query-free page address, approximate location derived from the connection, browser/device information and the limited events listed in our <a href="/cookies/">Cookie Notice</a>. We do not send names, email addresses, company details, customer records, invoice or quote contents, payment information, Stripe identifiers, free-text entries or internal user identifiers to Google Analytics.</p>
+      <p>Analytics is off unless you affirmatively accept it. Tallyo uses Google's basic consent approach, so the Google tag is not loaded and no analytics request is sent before acceptance. You can reject Analytics and still use Tallyo, or withdraw later using the persistent <strong>Cookie settings</strong> control. Tallyo does not enable Google Signals, advertising personalisation, enhanced conversions, user-provided data collection or advertising cookies.</p>
 
       <h3>AI Helper</h3>
       <p>The public AI Helper answers questions about public Tallyo product information. When a visitor submits a question that the reviewed browser guidance cannot answer directly, Tallyo sends the short question and reviewed public Tallyo information to OpenAI. The Helper is not designed to access account records or private business/customer data, and visitors must not enter that information.</p>
@@ -58,7 +59,7 @@ export const privacyNotice = `
         <li><strong>Contract:</strong> to create and operate a user's Tallyo account, provide subscribed features, manage the subscription, deliver requested support, and take requested steps before a contract.</li>
         <li><strong>Legal obligation:</strong> to keep Tallyo's own tax/accounting records, respond to binding legal requirements, and meet other specific duties that apply to us.</li>
         <li><strong>Legitimate interests:</strong> to secure the service, prevent fraud and abuse, diagnose faults, provide operational support, maintain limited audit and payment-integrity evidence, and establish, exercise or defend legal claims. We use this basis only after considering necessity, the effect on people and appropriate safeguards.</li>
-        <li><strong>Consent:</strong> only for an optional activity where consent is appropriate. Tallyo does not currently run marketing email or consent-based analytics.</li>
+        <li><strong>Consent:</strong> for optional Google Analytics measurement after you choose <strong>Accept analytics</strong>, and for another optional activity only where consent is appropriate. You can withdraw consent for future Analytics processing at any time using <strong>Cookie settings</strong>. Tallyo does not currently run marketing email.</li>
       </ul>
       <p>Business users are responsible for identifying their lawful basis for the customer and document information they enter. We process that information under their instructions and the applicable <a href="/data-processing-terms/">Data Processing Terms</a>.</p>
     </section>
@@ -72,6 +73,7 @@ export const privacyNotice = `
         <li><strong>Cloudflare:</strong> website/app delivery, access protection, Turnstile, request security and the AI rate limiter.</li>
         <li><strong>Stripe:</strong> Tallyo subscription Billing, connected-account onboarding and customer payments, payment/refund/dispute processing, fraud prevention and regulatory compliance. Stripe's role depends on the activity.</li>
         <li><strong>OpenAI:</strong> public product-question processing only if the AI Helper is enabled.</li>
+        <li><strong>Google Analytics:</strong> optional website and selected account-journey measurement only after affirmative Analytics consent. Advertising features and user-provided data collection are disabled.</li>
         <li><strong>Google Workspace:</strong> Tallyo's official system for business, support and privacy email and restricted privacy-request records.</li>
         <li><strong>GitHub:</strong> source-code administration and limited rollback hosting; it is not the primary store for Tallyo customer workspaces.</li>
       </ul>
@@ -100,6 +102,7 @@ export const privacyNotice = `
       <p>To close an account or request deletion, email <a href="mailto:privacy@tallyo.co.uk">privacy@tallyo.co.uk</a>. We verify and review each request manually. We delete or anonymise information when it is no longer necessary, but may retain limited records where required for tax, accounting, fraud prevention, payment disputes, regulatory duties or legal claims. We do not promise a fixed closed-account deletion deadline.</p>
       <p>Deleted active-database information may remain temporarily in Supabase daily backups for up to seven days under the current Pro-plan cycle. Other providers retain information under their documented cycles and legal obligations.</p>
       <p>We keep Tallyo's own subscription and tax/accounting records for the period required by UK tax law. Routine operational records are kept for shorter periods based on their security, support or payment-integrity purpose. Ordinary support records are normally reviewed for deletion two years after closure, privacy-request records three years after closure, and material claims when the claim and any necessary legal-retention period end.</p>
+      <p>Your Analytics consent preference is stored for up to six months so the website can respect your choice. If you accept, Tallyo configures Google Analytics cookies with a maximum age of six months. Withdrawing consent stops future Analytics events from Tallyo and removes the Analytics cookies that Tallyo can identify on this domain. Google may retain previously received Analytics event data under the retention settings and legal obligations that apply to its service.</p>
       <p>Tallyo does not intentionally retain AI Helper conversations. If the Helper is enabled, standard OpenAI API abuse-monitoring logs may retain content for up to 30 days. Stripe keeps information it controls for its legal, regulatory, fraud and financial obligations.</p>
       <p>We review retention manually at launch and record any exception or legal hold. More information about the retention criteria is available on request.</p>
     </section>
@@ -144,7 +147,59 @@ export const privacyNotice = `
         <li><a href="https://www.cloudflare.com/en-gb/cloudflare-customer-dpa/">Cloudflare privacy and DPA</a></li>
         <li><a href="https://openai.com/en-GB/policies/data-processing-addendum/">OpenAI privacy and DPA</a></li>
         <li><a href="https://workspace.google.com/terms/dpa_terms.html">Google Workspace data-processing terms</a></li>
+        <li><a href="https://business.safety.google/adsprocessorterms/">Google Ads Data Processing Terms, including Google Analytics processor terms</a></li>
       </ul>
+    </section>
+  </article>`;
+
+export const cookieNotice = `
+  <section class="page-hero legal-hero">
+    <p class="eyebrow">Legal</p>
+    <h1>Tallyo Cookie Notice</h1>
+    <p>Effective ${effectiveDate}. This notice explains the necessary and optional storage used by Tallyo.</p>
+  </section>
+  <article class="legal-document">
+    <section>
+      <h2>Your choice</h2>
+      <p>Tallyo keeps necessary storage separate from optional Analytics. Google Analytics is off unless you choose <strong>Accept analytics</strong>. Rejecting Analytics does not prevent you from using the website or app.</p>
+      <p>You can change your choice at any time using the persistent <strong>Cookie settings</strong> control. Withdrawing consent stops future Analytics events from Tallyo, updates Google's consent state to denied and removes the Analytics cookies that Tallyo can identify on this domain.</p>
+    </section>
+
+    <section>
+      <h2>Necessary storage</h2>
+      <p>Necessary storage supports security, sign-in, service delivery and your privacy choices. It does not depend on Analytics consent.</p>
+      <div class="legal-table-wrap" role="region" aria-label="Necessary storage" tabindex="0">
+        <table>
+          <thead><tr><th scope="col">Name or purpose</th><th scope="col">What it does</th><th scope="col">Duration</th></tr></thead>
+          <tbody>
+            <tr><td><code>tallyo_analytics_consent</code></td><td>Stores only <code>granted</code> or <code>denied</code> so Tallyo can respect your Analytics choice. It does not store your identity.</td><td>Up to six months</td></tr>
+            <tr><td>Account and security storage</td><td>Supports requested sign-in, session security, fraud/abuse protection and service delivery when you use the Tallyo app. Providers may set necessary storage for these purposes.</td><td>For the session or the provider's necessary security cycle</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Optional Google Analytics</h2>
+      <p>After you accept, Tallyo loads Google Analytics 4 using measurement ID <code>G-PZFZKCWZ7M</code>. Tallyo uses basic consent mode: before acceptance, the Google tag is not loaded, Analytics cookies are not set and Analytics requests are not sent.</p>
+      <p>Google Analytics may set <code>_ga</code> and a measurement-specific <code>_ga_*</code> cookie. Tallyo limits their configured lifetime to six months. We send a query-free Tallyo page address, the fixed page title “Tallyo”, and only these reviewed events:</p>
+      <ul>
+        <li><code>view_pricing</code>;</li>
+        <li><code>start_registration</code>;</li>
+        <li><code>complete_registration</code>;</li>
+        <li><code>start_checkout</code>;</li>
+        <li><code>subscription_activated</code>;</li>
+        <li><code>use_invoice_maker</code>;</li>
+        <li><code>download_invoice</code>; and</li>
+        <li><code>contact_support</code>.</li>
+      </ul>
+      <p>These events have no custom properties. Tallyo does not send names, email addresses, company details, customer data, invoice or quote contents, payment information, Stripe identifiers, free text or internal user IDs. Enhanced Measurement is disabled, and no event is marked as an advertising conversion.</p>
+      <p>Google Signals, advertising personalisation, enhanced conversions and user-provided data collection are disabled. Tallyo does not use the Analytics choice for advertising.</p>
+    </section>
+
+    <section>
+      <h2>Contact and more information</h2>
+      <p>See the <a href="/privacy/">Tallyo Privacy Notice</a> for controller details, lawful basis, recipients, international transfers, retention and your rights. Send privacy questions to <a href="mailto:privacy@tallyo.co.uk">privacy@tallyo.co.uk</a>.</p>
     </section>
   </article>`;
 

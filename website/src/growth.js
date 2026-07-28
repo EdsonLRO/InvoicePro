@@ -1,43 +1,32 @@
-import { analyticsConfiguration, createAnalytics, parseCampaignParameters } from "/assets/analytics.mjs?v=__TALLYO_ASSET_REVISION__";
-import { eventPolicy } from "/assets/analytics-policy.mjs?v=__TALLYO_ASSET_REVISION__";
+import { bindAnalyticsConsentUi, createGa4ConsentClient } from "/assets/analytics-consent.mjs?v=__TALLYO_ASSET_REVISION__";
+import { analyticsConfiguration } from "/assets/analytics-config.mjs?v=__TALLYO_ASSET_REVISION__";
 
-const analytics = createAnalytics({
-  policy: eventPolicy,
+const analytics = createGa4ConsentClient({
   enabled: analyticsConfiguration.enabled,
-  environment: document.documentElement.dataset.siteMode || "preview",
-  provider: analyticsConfiguration.provider
+  environment: analyticsConfiguration.environment,
+  measurementId: analyticsConfiguration.measurementId
 });
 
 export const trackEvent = analytics.trackEvent;
-export const campaignParameters = parseCampaignParameters(window.location.href);
+window.TallyoAnalytics = analytics;
 
 const route = window.location.pathname.replace(/\/+$/, "/") || "/";
-const pageEvent = (() => {
-  if (route === "/") return ["view_home", {}];
-  if (route === "/features/") return ["view_features", {}];
-  if (route === "/pricing/") return ["view_pricing", {}];
-  if (route === "/security/") return ["view_security", {}];
-  if (route === "/helper/") return ["open_tallyo_helper", {}];
-  if (route.startsWith("/help/") && route !== "/help/") return ["view_help_article", { content_key: route.split("/")[2] }];
-  if (route.startsWith("/industries/")) return ["view_industry_page", { content_key: route.split("/")[2] }];
-  return null;
-})();
-
-if (pageEvent) trackEvent(...pageEvent);
-if (route === "/help/install-tallyo/") trackEvent("view_install_instructions", { placement: "guide" });
-
-const createAccountPlacement = Object.freeze({
-  cta_header_create_account: "header",
-  cta_hero_create_account: "hero",
-  cta_pricing_create_account: "pricing",
-  cta_generator_create_account: "generator",
-  cta_footer_create_account: "footer"
+bindAnalyticsConsentUi({
+  client: analytics,
+  onConsentChange(choice) {
+    if (choice === "granted" && route === "/pricing/") trackEvent("view_pricing");
+  }
 });
+if (route === "/pricing/") trackEvent("view_pricing");
 
 document.addEventListener("click", (event) => {
   const link = event.target?.closest?.("a");
   if (!link) return;
-  const createPlacement = link.dataset.analyticsPlacement || createAccountPlacement[link.id];
-  if (link.matches("[data-signup-link]") && createPlacement) trackEvent("click_create_account", { placement: createPlacement });
-  if (link.matches("[data-login-link]") && createPlacement) trackEvent("click_login", { placement: createPlacement });
+  if (link.href === "mailto:main@tallyo.co.uk" || link.getAttribute("href") === "mailto:main@tallyo.co.uk") {
+    trackEvent("contact_support");
+  }
+});
+
+window.addEventListener("tallyo:analytics", (event) => {
+  if (typeof event.detail?.name === "string") trackEvent(event.detail.name);
 });

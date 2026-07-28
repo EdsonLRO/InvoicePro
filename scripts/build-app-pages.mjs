@@ -51,6 +51,8 @@ const publicSiteUrl = httpsUrl("TALLYO_PUBLIC_SITE_URL", String(process.env.TALL
 const stripeLiveMode = process.env.TALLYO_STRIPE_LIVE_MODE === "true";
 const billingTestEnabled = process.env.TALLYO_BILLING_TEST_ENABLED === "true";
 const billingLiveEnabled = process.env.TALLYO_BILLING_LIVE_ENABLED === "true";
+const analyticsRequested = process.env.TALLYO_GA4_ENABLED === "true";
+const ga4MeasurementId = String(process.env.TALLYO_GA4_MEASUREMENT_ID || "").trim();
 if (billingTestEnabled && billingLiveEnabled) {
   throw new Error("Only one Tallyo Billing browser mode may be enabled");
 }
@@ -63,6 +65,12 @@ if (billingLiveEnabled && !stripeLiveMode) {
 if (billingLiveEnabled && process.env.TALLYO_BILLING_PUBLIC_RELEASE_APPROVED !== "true") {
   throw new Error("Live Billing browser controls require explicit public-release approval");
 }
+if (analyticsRequested && ga4MeasurementId !== "G-PZFZKCWZ7M") {
+  throw new Error("The reviewed Tallyo GA4 Measurement ID is required when Analytics is enabled");
+}
+if (analyticsRequested && process.env.TALLYO_GA4_PUBLIC_RELEASE_APPROVED !== "true") {
+  throw new Error("Analytics app controls require explicit public-release approval");
+}
 const configuration = [
   "// Generated during the Cloudflare Pages build. Do not commit this file.",
   `window.SUPABASE_URL = ${JSON.stringify(supabaseUrl)};`,
@@ -73,11 +81,12 @@ const configuration = [
   `window.TALLYO_BILLING_TEST_ENABLED = ${JSON.stringify(billingTestEnabled)};`,
   `window.TALLYO_BILLING_LIVE_ENABLED = ${JSON.stringify(billingLiveEnabled)};`,
   `window.TALLYO_PUBLIC_SITE_URL = ${JSON.stringify(publicSiteUrl)};`,
+  `window.TALLYO_GA4_ENABLED = ${JSON.stringify(analyticsRequested)};`,
+  `window.TALLYO_GA4_MEASUREMENT_ID = ${JSON.stringify(analyticsRequested ? ga4MeasurementId : "")};`,
   ""
 ].join("\n");
 
 const appAssets = [
-  "index.html",
   "tailwind.css",
   "app-help-install.js",
   "manifest.json",
@@ -91,12 +100,32 @@ const appAssets = [
 await rm(outputRoot, { recursive: true, force: true });
 await mkdir(outputRoot, { recursive: true });
 for (const asset of appAssets) await copyFile(join(repositoryRoot, asset), join(outputRoot, asset));
-await copyFile(join(repositoryRoot, "deployment", "cloudflare", "app", "_headers"), join(outputRoot, "_headers"));
+for (const sharedAsset of ["analytics-consent.css", "analytics-consent.mjs", "analytics-app.js"]) {
+  await copyFile(join(repositoryRoot, sharedAsset), join(outputRoot, sharedAsset));
+}
+const appIndexSource = await readFile(join(repositoryRoot, "index.html"), "utf8");
+const builtIndex = analyticsRequested
+  ? appIndexSource
+      .replace(
+        "https://challenges.cloudflare.com; style-src",
+        "https://challenges.cloudflare.com https://www.googletagmanager.com; style-src"
+      )
+      .replace(
+        "https://cdn.jsdelivr.net; frame-src",
+        "https://cdn.jsdelivr.net https://www.google-analytics.com https://region1.google-analytics.com; frame-src"
+      )
+  : appIndexSource;
+await writeFile(join(outputRoot, "index.html"), builtIndex, "utf8");
+const headerTemplate = await readFile(join(repositoryRoot, "deployment", "cloudflare", "app", "_headers"), "utf8");
+const headers = headerTemplate
+  .replace("{{ANALYTICS_SCRIPT_SRC}}", analyticsRequested ? " https://www.googletagmanager.com" : "")
+  .replace("{{ANALYTICS_CONNECT_SRC}}", analyticsRequested ? " https://www.google-analytics.com https://region1.google-analytics.com" : "");
+await writeFile(join(outputRoot, "_headers"), headers, "utf8");
 await copyFile(join(repositoryRoot, "deployment", "cloudflare", "app", "_redirects"), join(outputRoot, "_redirects"));
 await writeFile(join(outputRoot, "config.js"), configuration, "utf8");
 
 const assetBytes = {};
-for (const asset of [...appAssets, "config.js", "_headers", "_redirects"]) {
+for (const asset of ["index.html", ...appAssets, "analytics-consent.css", "analytics-consent.mjs", "analytics-app.js", "config.js", "_headers", "_redirects"]) {
   assetBytes[asset] = (await stat(join(outputRoot, asset))).size;
 }
 const indexHtml = await readFile(join(outputRoot, "index.html"), "utf8");

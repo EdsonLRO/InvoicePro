@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node scripts/test.mjs && node scripts/test-public-helper.mjs"
+    "test": "node scripts/test.mjs && node scripts/test-public-helper.mjs && node scripts/test-analytics-consent.mjs"
   },
   "engines": {
     "node": ">=20"

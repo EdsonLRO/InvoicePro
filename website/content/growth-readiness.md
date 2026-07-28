@@ -1,19 +1,14 @@
-# Growth readiness — inactive foundation
+# Growth readiness — consent-controlled GA4 candidate
 
 This document prepares future work. It does not authorise tracking, advertising,
 spend, price publication, public launch or provider configuration.
 
 ## Funnel and stable conversions
 
-The intended funnel is acquisition → useful public content or free tool → account
-CTA → signup → verified first use → first customer/document → repeat active use.
-The authoritative event names, exact triggers, allowed properties and future
-review status are in `analytics-events.json`.
-
-Primary public conversions are a completed free document, print/PDF action and
-Create account selection. Login, guide engagement, helper use and installation
-guidance are secondary or diagnostic. Private application activation events stay
-future-only until the relevant Auth, private-data, financial or payment review.
+The approved measurement scope is limited to the eight property-free events in
+`analytics-events.json`. It measures pricing, registration, subscription
+Checkout/activation, use/download of the public invoice maker and support-contact
+selection. No event is an advertising conversion.
 
 ## Future search campaign structure
 
@@ -37,18 +32,12 @@ page must be distinct, accurate, useful without registration and mapped to one
 main intent. It must not invent comparisons, customers, ratings, prices, trials or
 availability.
 
-## UTM convention and attribution boundary
+## Attribution boundary
 
-Recognised names are `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`
-and `utm_term`. Suggested values are lowercase, hyphenated and contain no personal
-or customer information. Example structure:
-
-`?utm_source=google&utm_medium=cpc&utm_campaign=uk-invoicing&utm_content=sole-trader`
-
-The current parser keeps recognised values in page memory only. It does not store,
-transmit or append them to account, Auth, invoice, payment, support or redirect
-URLs. Canonicals exclude query parameters. A future proportionate attribution
-window and deletion behaviour require privacy and provider review before use.
+Campaign/query parameters are not collected. The Analytics client strips query
+strings and fragments from the page location and sends no referrer or custom
+properties. Attribution, campaign storage, advertising audiences and remarketing
+remain outside the approved scope.
 
 ## Future experiment process
 
