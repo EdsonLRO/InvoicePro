@@ -111,7 +111,7 @@ Deployment: Active under exact Owner approval.
 
 ## Focused task: COMM-001-PAY-002 Optional invoice-email payments
 
-Status: Owner review pending; source-only change is not deployed
+Status: Owner-approved release candidate; production acceptance pending
 Priority: High
 Assigned roles: Payments, Backend/Supabase, UI, QA and Security
 Risk level: High because the change controls when invoice email sends create
@@ -128,8 +128,10 @@ Approved source scope:
 - prove that opting out never calls the Checkout creator.
 
 Branch: `codex/optional-invoice-email-payments`
-Release boundary: no deployment, provider configuration or live transaction is
-approved by this source task.
+Release boundary: the Owner approved build `2026.07.29.1`, merge and deployment
+of only `create-connect-checkout` and `send-document-email` with JWT
+verification retained. No email, Checkout object, payment, refund, secret,
+configuration, migration or unrelated deployment is approved.
 
 ## Locks
 
