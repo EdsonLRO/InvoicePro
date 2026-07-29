@@ -50,6 +50,6 @@ for (const forbidden of ['fetch(', 'XMLHttpRequest', 'localStorage', 'sessionSto
 }
 assert.match(workerSource, /'\.\/app-help-install\.js'/, 'integration helper must be part of the offline app shell');
 assert.match(workerSource, /'\.\/analytics-app\.js'/, 'consent-controlled Analytics bridge must be part of the offline app shell');
-assert.match(workerSource, /tallyo-shell-2026-07-28-3/, 'service-worker cache marker must match this build');
+assert.match(workerSource, /tallyo-shell-2026-07-29-1/, 'service-worker cache marker must match this build');
 
 console.log('App public integration harness passed.');

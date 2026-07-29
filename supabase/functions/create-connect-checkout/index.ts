@@ -2,7 +2,6 @@
 // business with an active, tenant-bound Stripe connected account.
 
 import {
-  amountPaid,
   connectConfig,
   connectCorsHeaders,
   isUuid,
@@ -17,17 +16,11 @@ import {
   supabaseClients,
   validEmail,
 } from "../_shared/stripe-connect.ts";
+import { resolveInvoicePaymentSelection } from "../_shared/invoice-payment-options.mjs";
 import {
   accountAllowsWrite,
   readOnlyAccountMessage,
 } from "../_shared/account-entitlements.ts";
-
-function outstandingAmount(invoice: any): number {
-  return Math.max(
-    0,
-    (Number(invoice.grand_total) || 0) - amountPaid(invoice.payments),
-  );
-}
 
 async function existingCheckoutUrl(
   admin: any,
@@ -35,6 +28,9 @@ async function existingCheckoutUrl(
   requestId: string,
   stripeAccountId: string,
   config: ReturnType<typeof connectConfig>,
+  amountMinor: number,
+  currency: string,
+  paymentKind: "full_balance" | "deposit",
 ) {
   let query = admin.from("stripe_connect_checkout_claims")
     .select("stripe_checkout_session_id")
@@ -55,6 +51,9 @@ async function existingCheckoutUrl(
   if (
     String(session?.id || "") !== sessionId ||
     session?.status !== "open" ||
+    Number(session?.amount_total) !== amountMinor ||
+    String(session?.currency || "").toUpperCase() !== currency ||
+    String(session?.metadata?.payment_kind || "") !== paymentKind ||
     Number(session?.expires_at || 0) <= Math.floor(Date.now() / 1000)
   ) {
     return null;
@@ -108,8 +107,19 @@ Deno.serve(async (req) => {
   }
   const documentId = String(body.documentId || "");
   const requestId = String(body.requestId || "");
+  const suppliedPaymentKind = body.paymentKind;
+  const paymentKind = suppliedPaymentKind === undefined
+    ? "full_balance"
+    : String(suppliedPaymentKind);
   if (!isUuid(documentId) || !isUuid(requestId)) {
     return json({ error: "Invalid payment request" }, 400, true);
+  }
+  if (!["full_balance", "deposit"].includes(paymentKind)) {
+    return json(
+      { error: "Choose either the full balance or the saved deposit" },
+      400,
+      true,
+    );
   }
 
   try {
@@ -130,22 +140,22 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (invoiceError) throw new Error("Invoice could not be loaded");
     if (!invoice) return json({ error: "Invoice not found" }, 404, true);
-    if (invoice.doc_type !== "invoice") {
-      return json({ error: "Only invoices can be paid online" }, 400, true);
-    }
-    if (invoice.status === "Cancelled") {
-      return json(
-        { error: "Cancelled invoices cannot be paid online" },
-        400,
-        true,
-      );
+    let selection: {
+      kind: "full_balance" | "deposit";
+      amount: number;
+      outstanding: number;
+      remainingBalance: number;
+    };
+    try {
+      selection = resolveInvoicePaymentSelection(invoice, paymentKind);
+    } catch (error) {
+      const message = error instanceof Error
+        ? error.message
+        : "This invoice cannot be paid online";
+      return json({ error: message }, 400, true);
     }
 
-    const outstanding = outstandingAmount(invoice);
-    if (outstanding <= 0.001 || invoice.status === "Paid") {
-      return json({ error: "This invoice is already paid" }, 400, true);
-    }
-    const amountMinor = Math.round(outstanding * 100);
+    const amountMinor = Math.round(selection.amount * 100);
     if (!Number.isFinite(amountMinor) || amountMinor < 1) {
       return json(
         { error: "Invoice balance is too small to pay online" },
@@ -195,6 +205,9 @@ Deno.serve(async (req) => {
         requestId,
         mapping.stripe_account_id,
         config,
+        amountMinor,
+        currency,
+        selection.kind,
       );
       if (existing) return json({ ok: true, ...existing }, 200, true);
     }
@@ -205,6 +218,9 @@ Deno.serve(async (req) => {
         "",
         mapping.stripe_account_id,
         config,
+        amountMinor,
+        currency,
+        selection.kind,
       );
       if (existing) return json({ ok: true, ...existing }, 200, true);
       return json(
@@ -250,12 +266,16 @@ Deno.serve(async (req) => {
     params.set("metadata[invoice_id]", documentId);
     params.set("metadata[user_id]", user.id);
     params.set("metadata[payment_channel]", "stripe_connect");
-    params.set("metadata[payment_kind]", "full_balance");
+    params.set("metadata[payment_kind]", selection.kind);
     params.set("payment_intent_data[metadata][invoice_id]", documentId);
     params.set("payment_intent_data[metadata][user_id]", user.id);
     params.set(
       "payment_intent_data[metadata][payment_channel]",
       "stripe_connect",
+    );
+    params.set(
+      "payment_intent_data[metadata][payment_kind]",
+      selection.kind,
     );
     params.set(
       "expires_at",
@@ -279,6 +299,7 @@ Deno.serve(async (req) => {
           requestId,
           currency,
           String(amountMinor),
+          selection.kind,
           String(invoice.stripe_event_version || 0),
         ])}`,
       },
