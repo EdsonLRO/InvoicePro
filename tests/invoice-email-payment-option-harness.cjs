@@ -123,6 +123,10 @@ async function main() {
   assert.match(app, /canOfferOnlinePayment\(documentEmailModal\.inv\)/);
   assert.match(app, /body: \{ documentId: inv\.id, to, includeOnlinePayment: false \}/);
   assert.match(app, /The customer will be asked to pay/);
+  assert.match(app, /Return to the invoice and enter a deposit greater than zero in the Online payment amount box\./);
+  assert.match(app, /role="status" aria-live="polite" aria-atomic="true"/);
+  assert.match(app, /showAppNotice\('Email is on its way'/);
+  assert.doesNotMatch(app, /alert\('Email accepted for delivery/);
 
   assert.match(email, /body\.includeOnlinePayment === true/);
   assert.match(email, /typeof body\.includeOnlinePayment !== "boolean"/);
