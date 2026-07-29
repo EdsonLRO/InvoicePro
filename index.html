@@ -1332,24 +1332,24 @@
                         <button @click="recordPayment" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors w-full">Record Payment</button>
                     </div>
 
-                    <div v-if="draft.docType === 'invoice'" class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    <div v-if="canOfferOnlinePayment(draft)" class="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
                         <div class="flex flex-col sm:flex-row sm:items-end gap-3">
                             <div class="w-full min-w-0 sm:flex-1 sm:min-w-[360px]">
-                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email payment option</label>
+                                <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Online payment amount</label>
                                 <select v-model="draft.onlinePaymentMode" class="border rounded-lg px-3 py-2 text-sm w-full bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
-                                    <option value="full">Full balance only</option>
-                                    <option value="deposit">Allow seller-approved deposit</option>
+                                    <option value="full">Full outstanding balance</option>
+                                    <option value="deposit">Predefined deposit</option>
                                 </select>
                             </div>
                             <div v-if="draft.onlinePaymentMode === 'deposit'" class="w-full min-w-0 sm:w-[180px] sm:flex-none">
                                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Deposit amount</label>
                                 <div class="flex items-center gap-1">
                                     <span class="text-sm text-slate-500">{{ getCurrencySymbol(draft.currency) }}</span>
-                                    <input type="number" min="0" :max="Math.max(0, draftBalance).toFixed(2)" step="0.01" v-model.number="draft.depositAmount" @blur="normalizeDeposit" class="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <input type="number" min="0.01" :max="Math.max(0, draftBalance).toFixed(2)" step="0.01" v-model.number="draft.depositAmount" @blur="normalizeDeposit" class="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-indigo-500 outline-none">
                                 </div>
                             </div>
                         </div>
-                        <p class="text-xs text-slate-500 mt-2">{{ draft.onlinePaymentMode === 'deposit' ? 'Invoice emails can offer this deposit and the full balance. The customer cannot choose an arbitrary amount.' : 'Invoice emails collect the current outstanding balance.' }}</p>
+                        <p class="text-xs text-slate-500 mt-2">Used only when you turn on <strong>Include online payment option</strong> before sending the invoice. Stripe processing fees may apply.</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-[1fr_10rem] items-center gap-3 mt-5 pt-4 border-t border-slate-100 text-sm">
@@ -1390,6 +1390,54 @@
                     <div class="flex gap-2 pt-4 border-t border-slate-100">
                         <input type="text" v-model="activityNote" @keyup.enter="addActivityNote" placeholder="Add a note (e.g. client requested changes)" class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                         <button @click="addActivityNote" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 font-medium text-sm shadow-sm transition">Add Note</button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="documentEmailModal.open" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" role="dialog" aria-modal="true" aria-labelledby="document-email-title">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[calc(100vh-2rem)] overflow-y-auto p-6 sm:p-8">
+                    <div class="flex justify-between items-start gap-4 mb-6">
+                        <div>
+                            <h3 id="document-email-title" class="text-xl font-semibold">Email {{ docTypeNoun(documentEmailModal.inv && documentEmailModal.inv.docType) }}</h3>
+                            <p class="text-sm text-slate-500 mt-1">Review the recipient and choose whether to offer online card payment.</p>
+                        </div>
+                        <button @click="closeDocumentEmailModal" :disabled="documentEmailModal.sending" aria-label="Close email window" class="text-slate-400 hover:text-slate-700 text-2xl leading-none disabled:opacity-50">&times;</button>
+                    </div>
+
+                    <div class="space-y-5">
+                        <div>
+                            <label for="document-email-recipient" class="block text-sm font-semibold text-slate-700 mb-1">Recipient email</label>
+                            <input id="document-email-recipient" type="email" v-model.trim="documentEmailModal.to" autocomplete="email" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+
+                        <div v-if="canOfferOnlinePayment(documentEmailModal.inv)" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" v-model="documentEmailModal.includeOnlinePayment" class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                <span>
+                                    <span class="block font-semibold text-slate-800">Include online payment option</span>
+                                    <span class="block text-sm text-slate-500 mt-1">Adds one secure Pay now button to the email. Stripe processing fees may apply.</span>
+                                </span>
+                            </label>
+
+                            <div v-if="documentEmailModal.includeOnlinePayment" class="mt-4 pt-4 border-t border-slate-200 space-y-3">
+                                <div>
+                                    <label for="document-email-payment-kind" class="block text-sm font-semibold text-slate-700 mb-1">Amount to request</label>
+                                    <select id="document-email-payment-kind" v-model="documentEmailModal.paymentKind" class="w-full border rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                                        <option value="full_balance">Full outstanding balance — {{ getCurrencySymbol((documentEmailModal.inv && documentEmailModal.inv.currency) || 'GBP') }}{{ invoiceOutstandingBalance(documentEmailModal.inv).toFixed(2) }}</option>
+                                        <option value="deposit">Predefined deposit — {{ getCurrencySymbol((documentEmailModal.inv && documentEmailModal.inv.currency) || 'GBP') }}{{ documentEmailDepositAmount.toFixed(2) }}</option>
+                                    </select>
+                                </div>
+                                <p v-if="documentEmailPaymentSelectionError" class="text-sm text-red-600">{{ documentEmailPaymentSelectionError }}</p>
+                                <p v-else class="text-sm font-medium text-slate-700">The customer will be asked to pay {{ getCurrencySymbol((documentEmailModal.inv && documentEmailModal.inv.currency) || 'GBP') }}{{ documentEmailRequestedAmount.toFixed(2) }}.</p>
+                            </div>
+                        </div>
+
+                        <p v-if="documentEmailModal.error" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{{ documentEmailModal.error }}</p>
+                    </div>
+
+                    <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 mt-7">
+                        <button @click="closeDocumentEmailModal" :disabled="documentEmailModal.sending" class="border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium disabled:opacity-50">Cancel</button>
+                        <button @click="confirmDocumentEmail" :disabled="documentEmailModal.sending || !documentEmailModal.to || !!documentEmailPaymentSelectionError" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium shadow-sm disabled:opacity-50">{{ documentEmailModal.sending ? 'Sending...' : 'Send ' + docTypeNoun(documentEmailModal.inv && documentEmailModal.inv.docType) }}</button>
                     </div>
                 </div>
             </div>
@@ -2382,6 +2430,15 @@
                 invoiceBulkBusy: false,
                 emailSendingId: null,
                 emailSendingStage: null,
+                documentEmailModal: {
+                    open: false,
+                    inv: null,
+                    to: '',
+                    includeOnlinePayment: false,
+                    paymentKind: 'full_balance',
+                    sending: false,
+                    error: ''
+                },
                 stripeCheckoutBusyId: null,
                 stripeLiveMode: window.STRIPE_LIVE_MODE === true,
                 stripeRefundBusyKey: null,
@@ -2489,6 +2546,27 @@
                 return (this.draft.items || []).some(it => it.showSuggestions && it.name);
             },
             draftBalance() { return this.totals.grandTotal - this.draftPaid; },
+            documentEmailDepositAmount() {
+                const inv = this.documentEmailModal && this.documentEmailModal.inv;
+                return Math.round(((Number(inv && inv.depositAmount) || 0) + Number.EPSILON) * 100) / 100;
+            },
+            documentEmailRequestedAmount() {
+                if (!this.documentEmailModal || !this.documentEmailModal.includeOnlinePayment) return 0;
+                return this.documentEmailModal.paymentKind === 'deposit'
+                    ? this.documentEmailDepositAmount
+                    : this.invoiceOutstandingBalance(this.documentEmailModal.inv);
+            },
+            documentEmailPaymentSelectionError() {
+                const modal = this.documentEmailModal;
+                if (!modal || !modal.includeOnlinePayment) return '';
+                if (!this.canOfferOnlinePayment(modal.inv)) return 'Online payment is not available for this invoice.';
+                if (modal.paymentKind !== 'deposit') return '';
+                const deposit = this.documentEmailDepositAmount;
+                const outstanding = this.invoiceOutstandingBalance(modal.inv);
+                if (!Number.isFinite(deposit) || deposit <= 0.001) return 'Set a deposit greater than zero on the invoice before sending.';
+                if (deposit > outstanding + 0.001) return 'The predefined deposit cannot exceed the outstanding balance.';
+                return '';
+            },
             draftDisputeState() { return this.disputeStateFor(this.draft && this.draft.id); },
             disputeDashboardUrl() { return this.stripeLiveMode ? 'https://dashboard.stripe.com/disputes' : 'https://dashboard.stripe.com/test/disputes'; },
             refundPreview() {
@@ -3540,6 +3618,7 @@
                 this.invoiceBulkBusy = false;
                 this.emailSendingId = null;
                 this.emailSendingStage = null;
+                this.documentEmailModal = { open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance', sending: false, error: '' };
                 this.stripeCheckoutBusyId = null;
                 this.stripeRefundBusyKey = null;
                 this.billing = {
@@ -3970,7 +4049,7 @@
                     customer_snapshot: inv.customer || null,
                     items: cleanItems, payments: inv.payments || [], history: inv.history || [],
                     online_payment_mode: inv.onlinePaymentMode === 'deposit' ? 'deposit' : 'full',
-                    deposit_amount: Math.min(Math.max(Number(inv.depositAmount) || 0, 0), Math.max(this.balanceDue(inv), 0)),
+                    deposit_amount: Math.round(((Number(inv.depositAmount) || 0) + Number.EPSILON) * 100) / 100,
                     overdue_reminders_enabled: inv.overdueRemindersEnabled === true,
                     overdue_first_reminder_days: Math.min(Math.max(Number(inv.overdueFirstReminderDays) || Number(this.company.overdueFirstReminderDays) || 3, 1), 365),
                     overdue_repeat_reminder_days: Math.min(Math.max(Number(inv.overdueRepeatReminderDays) || Number(this.company.overdueRepeatReminderDays) || 7, 1), 365),
@@ -4558,6 +4637,13 @@
                 if (!Number.isFinite(shipping) || shipping < 0) return 'Shipping cannot be negative.';
                 const grandTotal = Number(this.calcTotals(src).grandTotal);
                 if (!Number.isFinite(grandTotal) || grandTotal <= 0) return 'Document total must be greater than zero.';
+                const configuredDeposit = Number((src && src.depositAmount) || 0);
+                if (!Number.isFinite(configuredDeposit) || configuredDeposit < 0) return 'Deposit amount cannot be negative.';
+                if (src.docType === 'invoice' && src.onlinePaymentMode === 'deposit') {
+                    const outstanding = this.invoiceOutstandingBalance(src);
+                    if (configuredDeposit <= 0.001) return 'Deposit amount must be greater than zero.';
+                    if (configuredDeposit > outstanding + 0.001) return 'Deposit amount cannot exceed the outstanding balance.';
+                }
                 return '';
             },
             docTypeNoun(t) {
@@ -4858,23 +4944,85 @@
                 if (error) throw error;
                 return data ? this.applyInvoiceRow(data) : null;
             },
-            async sendDocumentEmail(inv) {
+            sendDocumentEmail(inv) {
                 if (!inv) return;
-                if (inv.status === 'Cancelled') return alert('Cancelled documents cannot be emailed.');
-                const defaultEmail = inv.customer && inv.customer.email ? inv.customer.email : '';
-                const to = (prompt('Send ' + this.docTypeNoun(inv.docType) + ' #' + (inv.number || '') + ' to:', defaultEmail) || '').trim();
-                if (!to) return;
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return alert('Enter a valid email address.');
+                if (this.normalizedStatus(inv) === 'Cancelled') return alert('Cancelled documents cannot be emailed.');
+                const defaultEmail = inv.customer && inv.customer.email ? String(inv.customer.email).trim() : '';
+                this.documentEmailModal = {
+                    open: true,
+                    inv,
+                    to: defaultEmail,
+                    includeOnlinePayment: false,
+                    paymentKind: inv.onlinePaymentMode === 'deposit' ? 'deposit' : 'full_balance',
+                    sending: false,
+                    error: ''
+                };
+            },
+            closeDocumentEmailModal() {
+                if (this.documentEmailModal.sending) return;
+                this.documentEmailModal = { open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance', sending: false, error: '' };
+            },
+            stripeConnectReady() {
+                const account = this.stripeConnect && this.stripeConnect.account;
+                return !!(
+                    this.stripeConnect &&
+                    this.stripeConnect.available &&
+                    account &&
+                    account.onboarding_state === 'active' &&
+                    account.card_payments_status === 'active' &&
+                    account.payouts_status === 'active'
+                );
+            },
+            invoiceOutstandingBalance(inv) {
+                if (!inv) return 0;
+                const totals = inv.totals && Number.isFinite(Number(inv.totals.grandTotal))
+                    ? inv.totals
+                    : this.calcTotals(inv);
+                const total = Number(totals.grandTotal) || 0;
+                const paid = (inv.payments || []).reduce((sum, payment) => sum + (Number(payment && payment.amount) || 0), 0);
+                return Math.max(0, Math.round((total - paid + Number.EPSILON) * 100) / 100);
+            },
+            canOfferOnlinePayment(inv) {
+                if (!inv || (inv.docType || 'invoice') !== 'invoice') return false;
+                const status = String(this.normalizedStatus(inv) || '').toLowerCase();
+                if (['paid', 'cancelled', 'canceled', 'void', 'voided'].includes(status)) return false;
+                return this.invoiceOutstandingBalance(inv) > 0.001 && this.stripeConnectReady();
+            },
+            async confirmDocumentEmail() {
+                const modal = this.documentEmailModal;
+                if (!modal.open || modal.sending || !modal.inv) return;
+                const to = String(modal.to || '').trim();
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+                    modal.error = 'Enter a valid email address.';
+                    return;
+                }
+                if (modal.includeOnlinePayment && !this.canOfferOnlinePayment(modal.inv)) {
+                    modal.error = 'Online payment is not available for this invoice.';
+                    return;
+                }
+                if (this.documentEmailPaymentSelectionError) {
+                    modal.error = this.documentEmailPaymentSelectionError;
+                    return;
+                }
 
-                this.emailSendingId = this.isUuid(inv.id) ? inv.id : 'draft';
+                modal.sending = true;
+                modal.error = '';
+                const includeOnlinePayment = modal.includeOnlinePayment === true;
+                const paymentKind = modal.paymentKind;
+                this.emailSendingId = this.isUuid(modal.inv.id) ? modal.inv.id : 'draft';
                 this.emailSendingStage = 'prepared';
-                let target = inv;
-                const isCurrentDraft = this.draft && inv.id === this.draft.id;
-                if (!this.isUuid(inv.id) || isCurrentDraft) {
+                let target = modal.inv;
+                const isCurrentDraft = this.draft && modal.inv.id === this.draft.id;
+                if (!this.isUuid(modal.inv.id) || isCurrentDraft) {
                     const repeat = this.draft.repeat ? JSON.parse(JSON.stringify(this.draft.repeat)) : null;
                     const invSnapshot = JSON.parse(JSON.stringify(this.draft));
                     const ok = await this.persistDraft();
-                    if (!ok) { this.emailSendingId = null; this.emailSendingStage = null; return; }
+                    if (!ok) {
+                        this.emailSendingId = null;
+                        this.emailSendingStage = null;
+                        modal.sending = false;
+                        return;
+                    }
                     if (repeat && repeat.enabled && !repeat._created) {
                         try { await this.createScheduleFromInvoice(invSnapshot, repeat); if (this.draft.repeat) this.draft.repeat._created = true; }
                         catch (e) { console.error('Schedule create failed:', e); alert('Document saved and email will continue, but the recurring schedule could not be created: ' + (e.message || e)); }
@@ -4884,23 +5032,34 @@
                 if (!this.isUuid(target.id)) {
                     this.emailSendingId = null;
                     this.emailSendingStage = null;
-                    return alert('Save this document before emailing it.');
+                    modal.sending = false;
+                    modal.error = 'Save this document before emailing it.';
+                    return;
+                }
+                if (includeOnlinePayment && !this.canOfferOnlinePayment(target)) {
+                    this.emailSendingId = null;
+                    this.emailSendingStage = null;
+                    modal.sending = false;
+                    modal.error = 'Online payment is no longer available for this invoice.';
+                    return;
                 }
 
                 this.emailSendingId = target.id;
                 this.emailSendingStage = 'queued';
                 try {
-                    const { data, error } = await supabaseClient.functions.invoke('send-document-email', {
-                        body: { documentId: target.id, to }
-                    });
+                    const body = { documentId: target.id, to, includeOnlinePayment };
+                    if (includeOnlinePayment) body.paymentKind = paymentKind;
+                    const { data, error } = await supabaseClient.functions.invoke('send-document-email', { body });
                     if (error) throw error;
                     if (data && data.error) throw new Error(data.error);
                     if (data && data.invoice) this.applyInvoiceRow(data.invoice);
                     await this.loadAuditEvents();
+                    this.documentEmailModal = { open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance', sending: false, error: '' };
                     alert('Email accepted for delivery to ' + to + '. You can follow its status in Activity History.');
                 } catch (e) {
                     console.error('Email send failed:', e);
-                    alert('Could not send email: ' + (e.message || e));
+                    modal.error = 'Could not send email: ' + (e.message || e);
+                    modal.sending = false;
                 } finally {
                     this.emailSendingId = null;
                     this.emailSendingStage = null;
@@ -5001,7 +5160,7 @@
                         if (inv.status === 'Cancelled' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) { skipped++; continue; }
                         try {
                             const { data, error } = await supabaseClient.functions.invoke('send-document-email', {
-                                body: { documentId: inv.id, to }
+                                body: { documentId: inv.id, to, includeOnlinePayment: false }
                             });
                             if (error) throw error;
                             if (data && data.error) throw new Error(data.error);
@@ -5235,13 +5394,9 @@
             },
             normalizeDeposit() {
                 if (!this.draft) return;
-                if (this.draft.onlinePaymentMode !== 'deposit') {
-                    this.draft.depositAmount = 0;
-                    return;
-                }
-                const max = Math.max(this.draftBalance, 0);
-                const amount = Math.max(Number(this.draft.depositAmount) || 0, 0);
-                this.draft.depositAmount = Math.min(amount, max);
+                const amount = Number(this.draft.depositAmount);
+                if (!Number.isFinite(amount)) return;
+                this.draft.depositAmount = Math.round((amount + Number.EPSILON) * 100) / 100;
             },
             normalizeReminderSchedule() {
                 if (!this.draft) return;

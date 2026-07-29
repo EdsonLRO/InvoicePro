@@ -4,6 +4,10 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
 import { accountAllowsWrite, readOnlyAccountMessage } from "../_shared/account-entitlements.ts";
+import {
+  createOptionalInvoicePaymentLinks,
+  stripeConnectReady,
+} from "../_shared/invoice-payment-options.mjs";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 
@@ -641,18 +645,20 @@ async function createConnectedPaymentLink(
   userId: string,
   authHeader: string,
   admin: any,
-  outstanding: number,
-): Promise<PaymentLink[] | null> {
+  selection: {
+    amount: number;
+    kind: "full_balance" | "deposit";
+  },
+): Promise<PaymentLink> {
   const { data: mapping, error: mappingError } = await admin
     .from("stripe_connected_accounts")
-    .select("onboarding_state")
+    .select("onboarding_state,card_payments_status,payouts_status")
     .eq("user_id", userId)
     .maybeSingle();
   if (mappingError) {
     throw new Error("Stripe connection lookup failed");
   }
-  if (!mapping) return null;
-  if (mapping.onboarding_state !== "active") {
+  if (!stripeConnectReady(mapping)) {
     throw new Error("Finish Stripe setup before emailing a card payment link");
   }
 
@@ -668,6 +674,7 @@ async function createConnectedPaymentLink(
       body: JSON.stringify({
         documentId: inv.id,
         requestId: crypto.randomUUID(),
+        paymentKind: selection.kind,
       }),
     },
   );
@@ -679,41 +686,47 @@ async function createConnectedPaymentLink(
         : "Connected card payment link could not be created",
     );
   }
-  return [{
-    label: `Pay full balance ${
-      formatMoney(inv.currency || "GBP", outstanding)
-    } now`,
+  return {
+    label: selection.kind === "deposit"
+      ? `Pay deposit ${
+        formatMoney(inv.currency || "GBP", selection.amount)
+      } now`
+      : `Pay full balance ${
+        formatMoney(inv.currency || "GBP", selection.amount)
+      } now`,
     url: body.url,
-    amount: outstanding,
-    kind: "full_balance",
-  }];
+    amount: selection.amount,
+    kind: selection.kind,
+  };
 }
 
-async function createPaymentLinks(inv: any, userId: string, to: string, admin: any, authHeader: string): Promise<PaymentLink[]> {
-  const outstanding = outstandingAmount(inv);
-  if (outstanding <= 0.001) return [];
-
-  const connectedLinks = await createConnectedPaymentLink(
-    inv,
-    userId,
-    authHeader,
-    admin,
-    outstanding,
-  );
-  if (connectedLinks) return connectedLinks;
-
-  const links: PaymentLink[] = [];
-  const mode = String(inv.online_payment_mode || "full");
-  const deposit = Math.min(Math.max(Number(inv.deposit_amount) || 0, 0), outstanding);
-
-  if (mode === "deposit" && deposit > 0.001 && deposit < outstanding - 0.001) {
-    const depositUrl = await createStripeCheckoutUrl(inv, userId, to, admin, deposit, "deposit");
-    if (depositUrl) links.push({ label: `Pay deposit ${formatMoney(inv.currency || "GBP", deposit)} now`, url: depositUrl, amount: deposit, kind: "deposit" });
-  }
-
-  const fullUrl = await createStripeCheckoutUrl(inv, userId, to, admin, outstanding, "full_balance");
-  if (fullUrl) links.push({ label: `Pay full balance ${formatMoney(inv.currency || "GBP", outstanding)} now`, url: fullUrl, amount: outstanding, kind: "full_balance" });
-  return links;
+async function createPaymentLinks(
+  inv: any,
+  userId: string,
+  admin: any,
+  authHeader: string,
+  includeOnlinePayment: boolean,
+  paymentKind: string,
+): Promise<PaymentLink[]> {
+  return await createOptionalInvoicePaymentLinks({
+    includeOnlinePayment,
+    invoice: inv,
+    paymentKind,
+    createLink: async (
+      selection: {
+        amount: number;
+        kind: "full_balance" | "deposit";
+      },
+    ) => {
+      return await createConnectedPaymentLink(
+        inv,
+        userId,
+        authHeader,
+        admin,
+        selection,
+      );
+    },
+  });
 }
 
 Deno.serve(async (req) => {
@@ -751,10 +764,27 @@ Deno.serve(async (req) => {
 
   const documentId = String(body.documentId || "");
   const to = String(body.to || "").trim();
+  if (
+    body.includeOnlinePayment !== undefined &&
+    typeof body.includeOnlinePayment !== "boolean"
+  ) {
+    return json({ error: "Online payment selection must be true or false" }, 400);
+  }
+  const includeOnlinePayment = body.includeOnlinePayment === true;
+  const paymentKind = includeOnlinePayment ? String(body.paymentKind || "") : "";
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(documentId)) {
     return json({ error: "Invalid document ID" }, 400);
   }
   if (!validEmail(to)) return json({ error: "Enter a valid recipient email address" }, 400);
+  if (
+    includeOnlinePayment &&
+    !["full_balance", "deposit"].includes(paymentKind)
+  ) {
+    return json(
+      { error: "Choose either the full balance or the saved deposit" },
+      400,
+    );
+  }
 
   const { data: inv, error: invError } = await admin.from("invoices").select("*").eq("id", documentId).maybeSingle();
   if (invError) return json({ error: invError.message }, 500);
@@ -765,9 +795,10 @@ Deno.serve(async (req) => {
   const paymentLinks = await createPaymentLinks(
     inv,
     userData.user.id,
-    to,
     admin,
     authHeader,
+    includeOnlinePayment,
+    paymentKind,
   );
   const email = buildEmail(inv, company || {}, paymentLinks);
   const filenameNumber = String(inv.number || "invoice").replace(/[^a-z0-9_-]+/gi, "-");
@@ -795,6 +826,9 @@ Deno.serve(async (req) => {
     userData.user.id,
     to.toLowerCase(),
     String(inv.updated_at || inv.created_at || ""),
+    paymentLinks.length
+      ? paymentLinks.map((link) => `${link.kind}:${link.amount}`).join(",")
+      : "no_online_payment",
   ]);
   let resendResponse: Response;
   try {

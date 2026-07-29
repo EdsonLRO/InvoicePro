@@ -109,6 +109,28 @@ Release acceptance:
 Branch: `codex/ga4-consent-controls`
 Deployment: Active under exact Owner approval.
 
+## Focused task: COMM-001-PAY-002 Optional invoice-email payments
+
+Status: Owner review pending; source-only change is not deployed
+Priority: High
+Assigned roles: Payments, Backend/Supabase, UI, QA and Security
+Risk level: High because the change controls when invoice email sends create
+connected-account Checkout Sessions
+
+Approved source scope:
+
+- default invoice email sends to no online payment option;
+- allow one explicit full-outstanding or saved-deposit option only when Stripe
+  Connect and the invoice are eligible;
+- validate the exact requested amount on the client and server without fallback;
+- preserve direct charges, connected-business merchant-of-record behaviour,
+  webhook reconciliation, refunds, disputes and bank-transfer instructions;
+- prove that opting out never calls the Checkout creator.
+
+Branch: `codex/optional-invoice-email-payments`
+Release boundary: no deployment, provider configuration or live transaction is
+approved by this source task.
+
 ## Locks
 
 - `tasks/ACTIVE.md`;
