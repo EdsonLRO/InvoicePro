@@ -111,7 +111,7 @@ Deployment: Active under exact Owner approval.
 
 ## Focused task: COMM-001-PAY-002 Optional invoice-email payments
 
-Status: Owner-approved release candidate; production acceptance pending
+Status: Completed in production on build `2026.07.29.1`
 Priority: High
 Assigned roles: Payments, Backend/Supabase, UI, QA and Security
 Risk level: High because the change controls when invoice email sends create
@@ -132,6 +132,31 @@ Release boundary: the Owner approved build `2026.07.29.1`, merge and deployment
 of only `create-connect-checkout` and `send-document-email` with JWT
 verification retained. No email, Checkout object, payment, refund, secret,
 configuration, migration or unrelated deployment is approved.
+
+## Focused task: COMM-001-UX-003 Invoice email feedback
+
+Status: Owner Approval Required
+Priority: Medium
+Assigned roles: Frontend and QA
+Model/work mode: Sol / Medium
+Risk level: Medium; presentation and wording only, with no email, payment,
+provider or data-state change
+Affected files: `index.html`, app build/cache markers, focused frontend tests
+and this active-task record
+Acceptance criteria: hide provider-acceptance badges from the invoice table
+while retaining delivery outcomes and Activity History; provide clearer
+zero-deposit guidance; replace the native single/bulk email-success alert with
+an accessible Tallyo notification
+Approval boundary: repository implementation, validation, commit, push and
+draft PR are authorised; merge and public app deployment remain Owner-gated
+Lock state: `index.html`, focused tests, app build/cache markers and this task
+record are locked to `codex/email-send-feedback-ux`
+Branch: `codex/email-send-feedback-ux`
+Validation: focused email-status, invoice-email payment-option, accessibility,
+app-integration, PWA update, core document-lifecycle and dispute-visibility
+harnesses pass; `git diff --check` passes
+Next action: Owner review of the focused draft PR before merge and publication
+of app build `2026.07.29.2`
 
 ## Locks
 

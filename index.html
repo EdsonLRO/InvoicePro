@@ -322,9 +322,39 @@
                 min-width: 980px;
             }
         }
+        .app-notice {
+            position: fixed;
+            z-index: 70;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            width: min(calc(100% - 2rem), 26rem);
+            align-items: flex-start;
+            gap: 0.75rem;
+            border: 1px solid #a7f3d0;
+            border-radius: 0.75rem;
+            background: #ecfdf5;
+            padding: 1rem;
+            box-shadow: 0 20px 25px -5px rgb(15 23 42 / 0.14), 0 8px 10px -6px rgb(15 23 42 / 0.1);
+            color: #064e3b;
+        }
+        .app-notice-icon {
+            display: inline-flex;
+            width: 1.75rem;
+            height: 1.75rem;
+            flex: 0 0 auto;
+            align-items: center;
+            justify-content: center;
+            border-radius: 9999px;
+            background: #d1fae5;
+            font-weight: 700;
+        }
         @media (max-width: 639px) {
-            .invoice-email-status-full { display: none; }
-            .invoice-email-status-short { display: inline; }
+            .app-notice {
+                top: 0.75rem;
+                right: 0.75rem;
+                width: calc(100% - 1.5rem);
+            }
         }
     </style>
 </head>
@@ -1589,9 +1619,8 @@
                                     <span v-else class="inline-block px-2 py-1 rounded text-xs font-bold uppercase text-center" style="min-width: 64px; white-space: nowrap;" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
                                 </td>
                                 <td class="p-4 whitespace-nowrap text-center">
-                                    <span v-if="emailStatusFor(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium" style="white-space: nowrap;" :class="emailStatusClass(emailStatusFor(inv.id).state)">
-                                        <span class="invoice-email-status-full">{{ emailStatusFor(inv.id).label }}</span>
-                                        <span class="invoice-email-status-short">{{ compactEmailStatusLabel(emailStatusFor(inv.id).label) }}</span>
+                                    <span v-if="invoiceListEmailStatus(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium" style="white-space: nowrap;" :class="emailStatusClass(invoiceListEmailStatus(inv.id).state)">
+                                        {{ invoiceListEmailStatus(inv.id).label }}
                                     </span>
                                 </td>
                                 <td class="p-4 text-right whitespace-nowrap">
@@ -2269,6 +2298,15 @@
             </section>
         </div>
     </template>
+
+    <section v-if="appNotice.visible" class="app-notice" role="status" aria-live="polite" aria-atomic="true">
+        <span class="app-notice-icon" aria-hidden="true">✓</span>
+        <div class="min-w-0 flex-1">
+            <p class="font-semibold">{{ appNotice.title }}</p>
+            <p class="mt-1 text-sm">{{ appNotice.message }}</p>
+        </div>
+        <button type="button" @click="closeAppNotice" class="text-xl leading-none text-emerald-800 hover:text-slate-900" aria-label="Dismiss notification">&times;</button>
+    </section>
 </div>
 
 <script src="./app-help-install.js"></script>
@@ -2346,7 +2384,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.29.1';
+    const APP_BUILD = '2026.07.29.2';
     const { createApp } = Vue;
 
     createApp({
@@ -2363,6 +2401,8 @@
                 authSignOutRequested: false,
                 authSessionVersion: 0,
                 dataLoading: false,
+                appNotice: { visible: false, title: '', message: '' },
+                appNoticeTimer: null,
                 documentSaveBusy: false,
                 quickCustomerSaveBusy: false,
                 customerSaveBusy: false,
@@ -2563,7 +2603,7 @@
                 if (modal.paymentKind !== 'deposit') return '';
                 const deposit = this.documentEmailDepositAmount;
                 const outstanding = this.invoiceOutstandingBalance(modal.inv);
-                if (!Number.isFinite(deposit) || deposit <= 0.001) return 'Set a deposit greater than zero on the invoice before sending.';
+                if (!Number.isFinite(deposit) || deposit <= 0.001) return 'Return to the invoice and enter a deposit greater than zero in the Online payment amount box.';
                 if (deposit > outstanding + 0.001) return 'The predefined deposit cannot exceed the outstanding balance.';
                 return '';
             },
@@ -2744,6 +2784,22 @@
             }
         },
         methods: {
+            showAppNotice(title, message, duration = 7000) {
+                if (this.appNoticeTimer) window.clearTimeout(this.appNoticeTimer);
+                this.appNotice = {
+                    visible: true,
+                    title: String(title || ''),
+                    message: String(message || '')
+                };
+                if (duration > 0) {
+                    this.appNoticeTimer = window.setTimeout(() => this.closeAppNotice(), duration);
+                }
+            },
+            closeAppNotice() {
+                if (this.appNoticeTimer) window.clearTimeout(this.appNoticeTimer);
+                this.appNoticeTimer = null;
+                this.appNotice.visible = false;
+            },
             publicSiteLink(path) {
                 if (!this.publicSiteUrl) return '';
                 return new URL(String(path || '').replace(/^\/+/, ''), this.publicSiteUrl).href;
@@ -4850,8 +4906,11 @@
                 const detail = label + (best.created_at ? (' on ' + this.formatHistoryTime(best.created_at)) : '');
                 return { state, label, detail, event: best };
             },
-            compactEmailStatusLabel(label) {
-                return label === 'Accepted for delivery' ? 'Accepted' : label;
+            invoiceListEmailStatus(id) {
+                const status = this.emailStatusFor(id);
+                if (!status) return null;
+                const providerAcceptedStates = new Set(['email_sent', 'document_email_sent', 'payment_reminder_email_sent']);
+                return providerAcceptedStates.has(status.state) ? null : status;
             },
             emailStatusClass(state) {
                 if (state === 'email_delivered') return 'bg-green-100 text-green-700';
@@ -5055,7 +5114,7 @@
                     if (data && data.invoice) this.applyInvoiceRow(data.invoice);
                     await this.loadAuditEvents();
                     this.documentEmailModal = { open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance', sending: false, error: '' };
-                    alert('Email accepted for delivery to ' + to + '. You can follow its status in Activity History.');
+                    this.showAppNotice('Email is on its way', 'You can check its delivery status in Activity History.');
                 } catch (e) {
                     console.error('Email send failed:', e);
                     modal.error = 'Could not send email: ' + (e.message || e);
@@ -5173,7 +5232,10 @@
                     }
                     await this.loadAuditEvents();
                     this.selectedInvoices = [];
-                    alert('Emails processed. Accepted for delivery: ' + sent + '. Skipped: ' + skipped + '. Failed: ' + failed + '. Follow delivery in Activity History.');
+                    this.showAppNotice(
+                        'Emails processed',
+                        'Sent for delivery: ' + sent + '. Skipped: ' + skipped + '. Failed: ' + failed + '. Check Activity History for delivery updates.'
+                    );
                 } finally {
                     this.invoiceBulkBusy = false;
                 }
@@ -6316,6 +6378,7 @@
             if (this.beforeInstallPromptHandler) window.removeEventListener('beforeinstallprompt', this.beforeInstallPromptHandler);
             if (this.appInstalledHandler) window.removeEventListener('appinstalled', this.appInstalledHandler);
             if (this.accessibleLabelObserver) this.accessibleLabelObserver.disconnect();
+            if (this.appNoticeTimer) window.clearTimeout(this.appNoticeTimer);
         }
     }).mount('#app');
 </script>

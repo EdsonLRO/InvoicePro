@@ -26,6 +26,7 @@ function methodBody(source, signature) {
 }
 
 const emailStatusFor = new Function('id', methodBody(app, 'emailStatusFor(id)'));
+const invoiceListEmailStatus = new Function('id', methodBody(app, 'invoiceListEmailStatus(id)'));
 const invoiceId = '11111111-1111-4111-8111-111111111111';
 
 function status(events, extra = {}) {
@@ -81,6 +82,22 @@ assert.equal(status([{
   metadata: {}
 }]).label, 'Accepted for delivery');
 
+function listStatus(events, extra = {}) {
+  return invoiceListEmailStatus.call({
+    emailStatusFor() { return status(events, extra); }
+  }, invoiceId);
+}
+
+assert.equal(listStatus([accepted]), null, 'provider acceptance must stay in Activity History rather than crowding the invoice table');
+assert.equal(listStatus([
+  { event_type: 'email_delivered', created_at: '2026-07-18T12:01:00Z', metadata: { resend_email_id: 'email-new' } },
+  accepted
+]).label, 'Delivered', 'confirmed delivery must remain visible in the invoice table');
+assert.equal(listStatus([
+  { event_type: 'email_bounced', created_at: '2026-07-18T12:01:00Z', metadata: { resend_email_id: 'email-new' } },
+  accepted
+]).label, 'Bounced', 'delivery failures must remain visible in the invoice table');
+
 for (const source of [documentEmail, reminderEmail, overdueEmail, recurringEmail]) {
   assert.match(source, /"Idempotency-Key": resendRequestKey/);
   assert.match(source, /AbortSignal\.timeout\(15_000\)/);
@@ -94,8 +111,11 @@ assert.match(resendWebhook, /req\.headers\.get\("svix-id"\)/);
 assert.match(resendWebhook, /"email\.sent": `Email sent to provider/);
 assert.doesNotMatch(resendWebhook, /raw:\s*payload/);
 assert.match(app, /'payment_reminder_email_sent', 'email_send_failed'/);
-assert.match(app, /You can follow its status in Activity History/);
-assert.match(app, /Emails processed\. Accepted for delivery:/);
+assert.match(app, /Email is on its way/);
+assert.match(app, /You can check its delivery status in Activity History/);
+assert.match(app, /Sent for delivery: ' \+ sent/);
+assert.doesNotMatch(app, /alert\('Email accepted for delivery/);
+assert.doesNotMatch(app, /alert\('Emails processed\. Accepted for delivery:/);
 assert.doesNotMatch(app, /Provider submission complete|Delivery status will update when the provider reports it/);
 
 console.log('Email status accuracy harness passed.');

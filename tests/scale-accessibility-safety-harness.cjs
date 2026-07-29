@@ -129,10 +129,10 @@ const documents = Array.from({ length: 2000 }, (_, index) => ({
     'compact navigation visibility must follow the menu state');
   assert.match(app, /inline-flex min-w-16 items-center justify-center rounded px-2 py-1 text-center text-xs font-medium leading-tight/,
     'document type badges must remain centred when labels wrap');
-  assert.match(app, /@media \(max-width: 639px\) \{[\s\S]*?\.invoice-email-status-full \{ display: none; \}[\s\S]*?\.invoice-email-status-short \{ display: inline; \}/,
-    'mobile invoice rows must use the compact Email status label');
-  assert.match(app, /compactEmailStatusLabel\(label\) \{[\s\S]*?label === 'Accepted for delivery' \? 'Accepted' : label;/,
-    'the compact Email status must preserve provider-acceptance meaning');
+  assert.match(app, /invoiceListEmailStatus\(id\) \{[\s\S]*?providerAcceptedStates[\s\S]*?return providerAcceptedStates\.has\(status\.state\) \? null : status;/,
+    'invoice rows must omit transient provider-acceptance badges while preserving delivery outcomes');
+  assert.match(app, /class="app-notice" role="status" aria-live="polite" aria-atomic="true"/,
+    'email success feedback must use an accessible in-app notification');
   assert.match(app, /v-show="activeTab === 'create' \|\| activeTab === 'edit' \|\| isExportingPDF"[\s\S]*?'pdf-export-surface': isExportingPDF && activeTab !== 'create' && activeTab !== 'edit'/,
     'invoice export must use the off-screen surface without changing the visible route');
 
