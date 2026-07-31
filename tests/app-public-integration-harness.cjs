@@ -7,6 +7,7 @@ const root = path.resolve(__dirname, '..');
 const integrationSource = fs.readFileSync(path.join(root, 'app-help-install.js'), 'utf8');
 const indexSource = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const workerSource = fs.readFileSync(path.join(root, 'service-worker.js'), 'utf8');
+const appBuildSource = fs.readFileSync(path.join(root, 'scripts', 'build-app-pages.mjs'), 'utf8');
 
 const window = {};
 vm.runInNewContext(integrationSource, { window, URL }, { filename: 'app-help-install.js' });
@@ -51,6 +52,7 @@ for (const forbidden of ['fetch(', 'XMLHttpRequest', 'localStorage', 'sessionSto
 assert.match(workerSource, /'\.\/app-help-install\.js'/, 'integration helper must be part of the offline app shell');
 assert.match(workerSource, /'\.\/analytics-app\.js'/, 'consent-controlled Analytics bridge must be part of the offline app shell');
 assert.match(workerSource, /'\.\/app-user-messages\.js'/, 'customer-facing message helper must be part of the offline app shell');
+assert.match(appBuildSource, /"app-user-messages\.js"/, 'Cloudflare Pages must publish the customer-facing message helper');
 assert.match(workerSource, /tallyo-shell-2026-07-31-1/, 'service-worker cache marker must match this build');
 
 console.log('App public integration harness passed.');

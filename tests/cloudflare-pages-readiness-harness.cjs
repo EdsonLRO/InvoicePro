@@ -40,7 +40,7 @@ const build = spawnSync(process.execPath, [buildScript], { cwd: root, env: synth
 assert.equal(build.status, 0, build.stderr || build.stdout);
 assert.doesNotMatch(build.stdout, /synthetic_preview_key|public-preview\.example/, 'build output must never log public configuration values');
 
-const expectedAssets = ['_headers', '_redirects', 'analytics-app.js', 'analytics-consent.css', 'analytics-consent.mjs', 'app-help-install.js', 'build-report.json', 'config.js', 'icon-192.png', 'icon-512.png', 'index.html', 'manifest.json', 'service-worker.js', 'tailwind.css', 'tallyo-mark.png', 'tallyo-wordmark-white.png'];
+const expectedAssets = ['_headers', '_redirects', 'analytics-app.js', 'analytics-consent.css', 'analytics-consent.mjs', 'app-help-install.js', 'app-user-messages.js', 'build-report.json', 'config.js', 'icon-192.png', 'icon-512.png', 'index.html', 'manifest.json', 'service-worker.js', 'tailwind.css', 'tallyo-mark.png', 'tallyo-wordmark-white.png'];
 assert.deepEqual(fs.readdirSync(output).sort(), expectedAssets, 'app Pages output must use a strict public-file allowlist');
 const generatedConfig = fs.readFileSync(path.join(output, 'config.js'), 'utf8');
 assert.match(generatedConfig, /sb_publishable_synthetic_preview_key/);
