@@ -186,7 +186,7 @@ execution now pass on public app build `2026.07.31.1`.
 
 ## Focused task: COMM-001-UX-005 First-sign-in subscription guidance
 
-Status: Owner Approval Required
+Status: Completed in production on build `2026.07.31.2`
 Priority: High
 Assigned roles: Frontend, QA and Security
 Model/work mode: Sol / High for subscription-entitlement presentation review
@@ -205,8 +205,41 @@ Approval boundary: repository implementation, validation, commit, push and a
 focused draft PR are authorised; merge and public app deployment remain
 Owner-gated
 Branch: `codex/first-signin-subscription-guidance`
-Next action: obtain one reviewed merge and publication approval for app build
-`2026.07.31.2`
+Completion: PR #140 merged after exact Owner approval and app build
+`2026.07.31.2` was published. No entitlement enforcement, Stripe Checkout,
+payment, refund, Auth, RLS, database, Edge Function, provider configuration,
+secret, migration, email or unrelated deployment changed.
+
+## Focused task: GROWTH-001 Free-generator conversion panel
+
+Status: Implementation complete — source merge approved; activation remains blocked
+Priority: High
+Assigned roles: Website, Backend/Supabase, Privacy/Legal, Security and QA
+Model/work mode: Sol / High for the consent, personal-data and server-email
+boundary; routine presentation remains focused
+Risk level: High because an optional public form can collect an email address
+and request one promotional communication
+Affected scope: the free invoice generator, one disabled-by-default public Edge
+Function, one unapplied consent-record migration, the public Privacy Notice,
+focused website/server tests and this active-task record
+Acceptance criteria: prepare and validate the current print-ready invoice before
+the panel; preserve a clear no-account download on continue, close or Escape;
+open registration separately without clearing the completed invoice; never reuse
+invoice addresses; require the exact unticked consent; permit at most one
+overview per normalised address; retain minimised consent/send/withdrawal
+evidence; rate-limit by a protected network fingerprint; include Tallyo identity,
+Privacy Notice and unsubscribe; send no personal data to GA4
+Legal disposition: Approved with conditions for repository preparation. UK
+electronic-mail marketing consent must remain separate, specific, informed and
+affirmative; withdrawal must be recorded and easy; the Privacy Notice update
+must be separately approved before publication.
+Branch: `codex/free-generator-conversion-panel`
+Approval boundary: repository implementation, focused validation, commit, push,
+PR creation and merge are authorised when all required checks pass. The
+migration remains unapplied; the function and website remain undeployed; the
+marketing gate remains disabled; no email may be sent. Migration application,
+secret/configuration entry, function deployment, Privacy Notice publication and
+website release require a separate exact Owner approval after review.
 
 ## Locks
 

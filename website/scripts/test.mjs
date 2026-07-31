@@ -32,7 +32,11 @@ const cleanBuildEnvironment = {
   TALLYO_GA4_ENABLED: "",
   TALLYO_GA4_MEASUREMENT_ID: "",
   TALLYO_GA4_PRIVATE_PREVIEW_APPROVED: "",
-  TALLYO_GA4_PUBLIC_RELEASE_APPROVED: ""
+  TALLYO_GA4_PUBLIC_RELEASE_APPROVED: "",
+  TALLYO_MARKETING_OVERVIEW_ENABLED: "",
+  TALLYO_MARKETING_OVERVIEW_ENDPOINT: "",
+  TALLYO_MARKETING_OVERVIEW_PRIVATE_PREVIEW_APPROVED: "",
+  TALLYO_MARKETING_OVERVIEW_PUBLIC_RELEASE_APPROVED: ""
 };
 const failClosedSentinel = join(distRoot, "fail-closed-sentinel.txt");
 mkdirSync(distRoot, { recursive: true });
@@ -151,6 +155,9 @@ const generatorPageHtml = read("free-invoice-generator/index.html");
 assert.match(generatorPageHtml, /role="region" aria-label="Scrollable live document preview" tabindex="0"/, "mobile document preview is keyboard reachable");
 assert.match(generatorPageHtml, /Swipe sideways to view the full document\./, "mobile document preview explains horizontal navigation");
 assert.match(generatorPageHtml, /href="\/privacy\/">Privacy Notice<\/a>/, "free document form clearly links the Privacy Notice");
+assert.match(generatorPageHtml, /data-generator-conversion/, "invoice maker includes the pre-download conversion dialog");
+assert.match(generatorPageHtml, /Continue download/, "invoice maker keeps a clear download action");
+assert.doesNotMatch(read("free-quote-generator/index.html"), /data-generator-conversion/, "quote maker keeps its existing direct PDF flow");
 assert.match(read("assets/styles.css"), /\.generator-preview-wrap \{ overflow-x: auto;/, "mobile document preview scrolls inside its own region");
 
 for (const article of helpArticles) {
@@ -243,7 +250,7 @@ for (const [name, html] of [["Privacy Notice", privacy], ["Data Processing Terms
   assert.match(html, /87 Coles Green Road, NW2 7JH, London, UK/, `${name} has the approved service address`);
   assert.match(html, /privacy@tallyo\.co\.uk/, `${name} has the approved privacy mailbox`);
 }
-assert.match(privacy, /Effective 28 July 2026/);
+assert.match(privacy, /Effective 31 July 2026/);
 assert.match(privacy, /main@tallyo\.co\.uk/);
 assert.match(privacy, /The public AI Helper answers questions about public Tallyo product information/);
 assert.match(privacy, /We do not promise a fixed closed-account deletion deadline/);
@@ -343,7 +350,7 @@ assert.doesNotMatch(home, /<script[^>]+src="https:\/\/www\.googletagmanager\.com
 
 assert.equal(read("robots.txt"), "User-agent: *\nDisallow: /\n");
 const sitemap = read("sitemap.xml");
-const expectedSitemapUrls = pages.map((page) => `https://tallyo.co.uk${page.route}`);
+const expectedSitemapUrls = pages.filter((page) => !page.noindex).map((page) => `https://tallyo.co.uk${page.route}`);
 const expectedSitemapEntries = expectedSitemapUrls.map((url) => `  <url><loc>${url}</loc></url>`).join("\n");
 assert.equal(
   sitemap,
@@ -353,6 +360,7 @@ assert.equal(
 assert.equal(new Set(expectedSitemapUrls).size, expectedSitemapUrls.length, "sitemap URLs are unique");
 assert.ok(expectedSitemapUrls.every((url) => url.startsWith("https://tallyo.co.uk/")), "sitemap contains only the canonical public origin");
 assert.ok(expectedSitemapUrls.every((url) => !url.includes(".pages.dev") && !url.includes("app.tallyo.co.uk") && !url.endsWith("/404/")), "sitemap excludes previews, private app routes and the 404 page");
+assert.ok(!expectedSitemapUrls.includes("https://tallyo.co.uk/email-preferences/"), "the noindex unsubscribe confirmation is excluded from the sitemap");
 assert.match(read("_headers"), /\/sitemap\.xml\s+! Content-Security-Policy/, "sitemap detaches the broad page CSP for native XML rendering");
 assert.match(read("_headers"), /\/sitemap\.xml\s+! Content-Security-Policy\s+Content-Type: application\/xml; charset=utf-8/, "sitemap declares an XML UTF-8 response type");
 assert.ok(existsSync(join(distRoot, "404.html")));
@@ -393,11 +401,12 @@ for (const moduleAsset of ["helper.js", "generator.js", "growth.js"]) {
   assert.doesNotMatch(source, /__TALLYO_ASSET_REVISION__/, `${moduleAsset} resolves the asset revision`);
   assert.match(source, new RegExp(`\\\\?v=${assetRevision}`), `${moduleAsset} imports the same asset revision`);
 }
-for (const generatorAsset of ["generator.js", "document-calculator.mjs"]) {
-  const source = read(`assets/${generatorAsset}`);
-  assert.doesNotMatch(source, /fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|document\.cookie|localStorage|sessionStorage|indexedDB/, `${generatorAsset} remains browser-local without persistence, tracking or network calls`);
-  assert.doesNotMatch(source, /https?:\/\//, `${generatorAsset} has no provider endpoint`);
-}
+const generatorSource = read("assets/generator.js");
+assert.doesNotMatch(generatorSource, /XMLHttpRequest|WebSocket|EventSource|sendBeacon|document\.cookie|localStorage|sessionStorage|indexedDB/, "generator keeps no browser persistence or hidden transport");
+assert.doesNotMatch(generatorSource, /https?:\/\//, "generator receives only the reviewed build-time overview endpoint");
+assert.match(generatorSource, /fetch\(endpoint,[\s\S]+body: JSON\.stringify\(request\.body\)/, "only the separate consent request is sent to the overview endpoint");
+const calculatorSource = read("assets/document-calculator.mjs");
+assert.doesNotMatch(calculatorSource, /fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|sendBeacon|document\.cookie|localStorage|sessionStorage|indexedDB|https?:\/\//, "document calculation remains wholly browser-local");
 const analyticsSource = read("assets/analytics-consent.mjs");
 assert.doesNotMatch(analyticsSource, /localStorage|sessionStorage|indexedDB|sendBeacon|XMLHttpRequest|fetch\s*\(/, "Analytics uses no hidden persistence or direct transport");
 assert.equal((analyticsSource.match(/googletagmanager\.com\/gtag\/js/g) || []).length, 1, "the Google tag loader has one implementation");

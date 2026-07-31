@@ -8,6 +8,8 @@ const aiHelperRequested = process.env.TALLYO_PUBLIC_AI_HELPER_ENABLED === "true"
 const connectPaymentsRequested = process.env.TALLYO_CONNECT_PAYMENTS_ENABLED === "true";
 const analyticsRequested = process.env.TALLYO_GA4_ENABLED === "true";
 const ga4MeasurementId = String(process.env.TALLYO_GA4_MEASUREMENT_ID || "").trim();
+const marketingOverviewRequested = process.env.TALLYO_MARKETING_OVERVIEW_ENABLED === "true";
+const marketingOverviewEndpoint = String(process.env.TALLYO_MARKETING_OVERVIEW_ENDPOINT || "").trim();
 
 if (
   subscriptionCheckoutRequested &&
@@ -60,6 +62,23 @@ if (
 ) {
   throw new Error("Analytics production build blocked until public release is approved");
 }
+if (marketingOverviewRequested) {
+  let endpoint;
+  try {
+    endpoint = new URL(marketingOverviewEndpoint);
+  } catch {
+    throw new Error("A valid marketing overview endpoint is required when the feature is enabled");
+  }
+  if (endpoint.protocol !== "https:") {
+    throw new Error("The marketing overview endpoint must use HTTPS");
+  }
+  if (mode !== "production" && process.env.TALLYO_MARKETING_OVERVIEW_PRIVATE_PREVIEW_APPROVED !== "true") {
+    throw new Error("Marketing overview preview build blocked until the reviewed private-preview scope is approved");
+  }
+  if (mode === "production" && process.env.TALLYO_MARKETING_OVERVIEW_PUBLIC_RELEASE_APPROVED !== "true") {
+    throw new Error("Marketing overview production build blocked until public release is approved");
+  }
+}
 
 export const siteConfig = Object.freeze({
   name: "Tallyo",
@@ -81,6 +100,9 @@ export const siteConfig = Object.freeze({
   connectPaymentsEnabled: connectPaymentsRequested,
   analyticsEnabled: analyticsRequested,
   ga4MeasurementId: analyticsRequested ? ga4MeasurementId : "",
+  marketingOverviewEnabled: marketingOverviewRequested,
+  marketingOverviewEndpoint: marketingOverviewRequested ? marketingOverviewEndpoint : "",
+  marketingOverviewOrigin: marketingOverviewRequested ? new URL(marketingOverviewEndpoint).origin : "",
   preview: mode !== "production"
 });
 

@@ -105,3 +105,9 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/stripe-connect-webhook/deno.json"
 entrypoint = "./functions/stripe-connect-webhook/index.ts"
+
+[functions.send-marketing-overview]
+enabled = true
+verify_jwt = false
+import_map = "./functions/send-marketing-overview/deno.json"
+entrypoint = "./functions/send-marketing-overview/index.ts"

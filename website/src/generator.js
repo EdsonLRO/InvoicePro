@@ -1,4 +1,5 @@
 import { calculateDocument, formatMoney } from "./document-calculator.mjs?v=__TALLYO_ASSET_REVISION__";
+import { buildOverviewRequest, createPreparedDownloadController } from "./marketing-overview.mjs?v=__TALLYO_ASSET_REVISION__";
 
 const roots = document.querySelectorAll("[data-generator]");
 const emitAnalyticsEvent = (name) => window.dispatchEvent(new CustomEvent("tallyo:analytics", { detail: { name } }));
@@ -46,6 +47,8 @@ for (const root of roots) {
   const logoInput = form.elements.logo;
   const logoPreview = preview.querySelector("[data-preview-logo]");
   const removeLogo = root.querySelector("[data-remove-logo]");
+  const conversionDialog = document.querySelector("[data-generator-conversion]");
+  const overviewForm = conversionDialog?.querySelector("[data-overview-form]");
   let logoUrl = "";
   let makerUseTracked = false;
 
@@ -177,7 +180,7 @@ for (const root of roots) {
     removeLogo.hidden = true;
     status.textContent = "Logo removed.";
   });
-  root.querySelector("[data-print]").addEventListener("click", () => {
+  const prepareDocument = () => {
     update();
     const required = [
       [form.elements.reference, "reference number"], [form.elements.issueDate, "issue date"],
@@ -190,17 +193,94 @@ for (const root of roots) {
     if (form.elements.documentType.value === "Invoice" && form.elements.vatNumber.value.trim() && form.elements.currency.value !== "GBP") {
       status.textContent = "This free maker cannot produce a foreign-currency VAT invoice because the VAT totals must also be shown in sterling. Choose GBP or use suitable accounting software.";
       status.scrollIntoView({ block: "center" });
-      return;
+      return false;
     }
     if (missing.length || status.textContent) {
       status.textContent = missing.length ? `Add ${missing.join(", ")} before printing.` : status.textContent;
       status.scrollIntoView({ block: "center" });
+      return false;
+    }
+    return true;
+  };
+
+  const performDownload = () => {
+    conversionDialog?.close();
+    try {
+      if (root.dataset.defaultType === "Invoice") emitAnalyticsEvent("download_invoice");
+      window.print();
+      status.textContent = "Your browser's PDF save window opened. Choose ‘Save as PDF’ to finish the download.";
+    } catch {
+      status.textContent = "The PDF save window could not open. Try Continue download again.";
+    }
+  };
+
+  const downloadController = createPreparedDownloadController({
+    prepare: prepareDocument,
+    showPanel: () => {
+      if (conversionDialog?.showModal) {
+        conversionDialog.showModal();
+        conversionDialog.querySelector("[data-conversion-continue]")?.focus();
+        return true;
+      }
+      return false;
+    },
+    download: performDownload
+  });
+
+  root.querySelector("[data-print]").addEventListener("click", () => {
+    downloadController.begin();
+  });
+
+  conversionDialog?.querySelector("[data-conversion-continue]")?.addEventListener("click", () => downloadController.complete());
+  conversionDialog?.querySelector("[data-conversion-dismiss]")?.addEventListener("click", () => downloadController.complete());
+  conversionDialog?.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    downloadController.complete();
+  });
+  conversionDialog?.querySelector("[data-conversion-register]")?.addEventListener("click", () => {
+    emitAnalyticsEvent("start_registration");
+  });
+
+  overviewForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = overviewForm.querySelector("[data-overview-email]");
+    const consent = overviewForm.querySelector("[data-overview-consent]");
+    const submit = overviewForm.querySelector("[data-overview-submit]");
+    const overviewStatus = overviewForm.querySelector("[data-overview-status]");
+    const request = buildOverviewRequest({ email: email.value, consent: consent.checked });
+    if (!request.ok) {
+      overviewStatus.textContent = request.message;
       return;
     }
-    document.querySelector("[data-generator-conversion]").hidden = false;
-    if (root.dataset.defaultType === "Invoice") emitAnalyticsEvent("download_invoice");
-    window.print();
-    status.textContent = "Print dialog opened. Choose ‘Save as PDF’ to download a PDF copy.";
+    const endpoint = conversionDialog.dataset.overviewEndpoint;
+    if (!endpoint) {
+      overviewStatus.textContent = "The email overview is temporarily unavailable. You can still continue your download.";
+      return;
+    }
+    submit.disabled = true;
+    overviewStatus.textContent = "Requesting your one overview email…";
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "omit",
+        referrerPolicy: "strict-origin-when-cross-origin",
+        body: JSON.stringify(request.body)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "request_failed");
+      overviewStatus.textContent = result.status === "already_requested"
+        ? "That address has already requested the one overview email. You can continue your download."
+        : "Your one Tallyo overview email has been requested. You can continue your download.";
+      email.value = "";
+      consent.checked = false;
+    } catch (error) {
+      overviewStatus.textContent = error.message === "rate_limited"
+        ? "Too many requests were made from this connection. Please try again later or continue your download."
+        : "The overview email could not be requested right now. You can still continue your download.";
+    } finally {
+      submit.disabled = false;
+    }
   });
   window.addEventListener("beforeunload", () => { if (logoUrl) URL.revokeObjectURL(logoUrl); });
   initialise();
