@@ -89,6 +89,7 @@ const configuration = [
 const appAssets = [
   "tailwind.css",
   "app-help-install.js",
+  "app-user-messages.js",
   "manifest.json",
   "service-worker.js",
   "tallyo-mark.png",
