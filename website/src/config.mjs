@@ -8,8 +8,24 @@ const aiHelperRequested = process.env.TALLYO_PUBLIC_AI_HELPER_ENABLED === "true"
 const connectPaymentsRequested = process.env.TALLYO_CONNECT_PAYMENTS_ENABLED === "true";
 const analyticsRequested = process.env.TALLYO_GA4_ENABLED === "true";
 const ga4MeasurementId = String(process.env.TALLYO_GA4_MEASUREMENT_ID || "").trim();
-const marketingOverviewRequested = process.env.TALLYO_MARKETING_OVERVIEW_ENABLED === "true";
-const marketingOverviewEndpoint = String(process.env.TALLYO_MARKETING_OVERVIEW_ENDPOINT || "").trim();
+// Public production activation was approved on 31 July 2026. Preview builds
+// remain opt-in, while an explicit false value is the production off-switch.
+const marketingOverviewProductionReleased = true;
+const marketingOverviewEnabledSetting = String(process.env.TALLYO_MARKETING_OVERVIEW_ENABLED || "").trim();
+const marketingOverviewRequested = marketingOverviewEnabledSetting === "true" || (
+  mode === "production" &&
+  marketingOverviewProductionReleased &&
+  marketingOverviewEnabledSetting !== "false"
+);
+const marketingOverviewEndpoint = String(
+  process.env.TALLYO_MARKETING_OVERVIEW_ENDPOINT ||
+    (mode === "production" && marketingOverviewProductionReleased
+      ? "https://cuagwifetheefftleeup.supabase.co/functions/v1/send-marketing-overview"
+      : "")
+).trim();
+const marketingOverviewPublicApprovalSetting = String(
+  process.env.TALLYO_MARKETING_OVERVIEW_PUBLIC_RELEASE_APPROVED || ""
+).trim();
 
 if (
   subscriptionCheckoutRequested &&
@@ -75,7 +91,11 @@ if (marketingOverviewRequested) {
   if (mode !== "production" && process.env.TALLYO_MARKETING_OVERVIEW_PRIVATE_PREVIEW_APPROVED !== "true") {
     throw new Error("Marketing overview preview build blocked until the reviewed private-preview scope is approved");
   }
-  if (mode === "production" && process.env.TALLYO_MARKETING_OVERVIEW_PUBLIC_RELEASE_APPROVED !== "true") {
+  if (
+    mode === "production" &&
+    marketingOverviewPublicApprovalSetting !== "true" &&
+    (!marketingOverviewProductionReleased || marketingOverviewPublicApprovalSetting === "false")
+  ) {
     throw new Error("Marketing overview production build blocked until public release is approved");
   }
 }
