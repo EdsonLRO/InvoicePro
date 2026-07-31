@@ -42,10 +42,23 @@ assert.match(missingApproval.stderr, /preview build blocked/);
 const missingProductionApproval = configProbe({
   ...cleanMarketingEnv,
   TALLYO_SITE_MODE: "production",
-  TALLYO_MARKETING_OVERVIEW_ENDPOINT: "https://example.supabase.co/functions/v1/send-marketing-overview"
+  TALLYO_MARKETING_OVERVIEW_ENDPOINT: "https://example.supabase.co/functions/v1/send-marketing-overview",
+  TALLYO_MARKETING_OVERVIEW_PUBLIC_RELEASE_APPROVED: "false"
 });
 assert.notEqual(missingProductionApproval.status, 0);
 assert.match(missingProductionApproval.stderr, /production build blocked/);
+const releasedProductionMarkup = configProbe(
+  {
+    ...cleanMarketingEnv,
+    TALLYO_SITE_MODE: "production",
+    TALLYO_MARKETING_OVERVIEW_ENABLED: "",
+    TALLYO_MARKETING_OVERVIEW_ENDPOINT: "",
+    TALLYO_MARKETING_OVERVIEW_PUBLIC_RELEASE_APPROVED: ""
+  },
+  `const { pages } = await import(${JSON.stringify(`${pagesUrl}?production-release-test`)}); const page = pages.find((item) => item.route === "/free-invoice-generator/"); console.log(page.content.includes("data-overview-form"));`
+);
+assert.equal(releasedProductionMarkup.status, 0);
+assert.equal(releasedProductionMarkup.stdout.trim(), "true", "approved production release includes the one-email form");
 const enabledMarkup = configProbe(
   {
     ...cleanMarketingEnv,
