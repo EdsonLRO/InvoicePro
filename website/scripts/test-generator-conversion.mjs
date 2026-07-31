@@ -112,6 +112,7 @@ const styles = read("website/src/styles.css");
 const server = read("supabase/functions/send-marketing-overview/index.ts");
 const serverPolicy = read("supabase/functions/_shared/marketing-overview.mjs");
 const migration = read("supabase/migrations/20260731152423_add_marketing_overview_requests.sql");
+const grantMigration = read("supabase/migrations/20260731155610_narrow_marketing_overview_service_grants.sql");
 const privacy = read("website/src/legal-content.mjs");
 
 for (const copy of [
@@ -152,6 +153,8 @@ assert.match(migration, /revoke all on table public\.marketing_overview_requests
 assert.match(migration, /email_hash text not null unique/);
 assert.match(migration, /consent_wording text not null/);
 assert.match(migration, /withdrawn_at timestamptz/);
+assert.match(grantMigration, /revoke delete, truncate, references, trigger/);
+assert.match(grantMigration, /from service_role/);
 assert.match(privacy, /single introductory overview/);
 assert.match(privacy, /We do not copy the invoice sender or recipient address/);
 
