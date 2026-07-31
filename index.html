@@ -37,6 +37,7 @@
 
     <!-- Your project settings (uploaded once, never overwritten when index.html changes) -->
     <script src="./config.js"></script>
+    <script src="./app-user-messages.js"></script>
     <script type="module" src="./analytics-app.js"></script>
 
     <style>
@@ -338,6 +339,16 @@
             box-shadow: 0 20px 25px -5px rgb(15 23 42 / 0.14), 0 8px 10px -6px rgb(15 23 42 / 0.1);
             color: #064e3b;
         }
+        .app-notice[data-tone="warning"] {
+            border-color: #fcd34d;
+            background: #fffbeb;
+            color: #78350f;
+        }
+        .app-notice[data-tone="error"] {
+            border-color: #fca5a5;
+            background: #fef2f2;
+            color: #7f1d1d;
+        }
         .app-notice-icon {
             display: inline-flex;
             width: 1.75rem;
@@ -349,6 +360,8 @@
             background: #d1fae5;
             font-weight: 700;
         }
+        .app-notice[data-tone="warning"] .app-notice-icon { background: #fef3c7; }
+        .app-notice[data-tone="error"] .app-notice-icon { background: #fee2e2; }
         @media (max-width: 639px) {
             .app-notice {
                 top: 0.75rem;
@@ -2299,13 +2312,13 @@
         </div>
     </template>
 
-    <section v-if="appNotice.visible" class="app-notice" role="status" aria-live="polite" aria-atomic="true">
-        <span class="app-notice-icon" aria-hidden="true">✓</span>
+    <section v-if="appNotice.visible" class="app-notice" role="status" aria-live="polite" aria-atomic="true" :data-tone="appNotice.tone">
+        <span class="app-notice-icon" aria-hidden="true">{{ appNotice.tone === 'success' ? '✓' : appNotice.tone === 'warning' ? '!' : '×' }}</span>
         <div class="min-w-0 flex-1">
             <p class="font-semibold">{{ appNotice.title }}</p>
             <p class="mt-1 text-sm">{{ appNotice.message }}</p>
         </div>
-        <button type="button" @click="closeAppNotice" class="text-xl leading-none text-emerald-800 hover:text-slate-900" aria-label="Dismiss notification">&times;</button>
+        <button type="button" @click="closeAppNotice" class="text-xl leading-none hover:text-slate-900" aria-label="Dismiss notification">&times;</button>
     </section>
 </div>
 
@@ -2384,10 +2397,10 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.29.2';
+    const APP_BUILD = '2026.07.31.1';
     const { createApp } = Vue;
 
-    createApp({
+    const tallyoApp = createApp({
         data() {
             return {
                 appBuild: APP_BUILD,
@@ -2401,7 +2414,7 @@
                 authSignOutRequested: false,
                 authSessionVersion: 0,
                 dataLoading: false,
-                appNotice: { visible: false, title: '', message: '' },
+                appNotice: { visible: false, title: '', message: '', tone: 'success' },
                 appNoticeTimer: null,
                 documentSaveBusy: false,
                 quickCustomerSaveBusy: false,
@@ -2784,16 +2797,33 @@
             }
         },
         methods: {
-            showAppNotice(title, message, duration = 7000) {
+            showAppNotice(title, message, duration = 7000, tone = 'success') {
                 if (this.appNoticeTimer) window.clearTimeout(this.appNoticeTimer);
                 this.appNotice = {
                     visible: true,
                     title: String(title || ''),
-                    message: String(message || '')
+                    message: String(message || ''),
+                    tone: ['success', 'warning', 'error'].includes(tone) ? tone : 'success'
                 };
                 if (duration > 0) {
                     this.appNoticeTimer = window.setTimeout(() => this.closeAppNotice(), duration);
                 }
+            },
+            showUserMessage(message) {
+                const normalise = window.TallyoUserMessages && window.TallyoUserMessages.normalise;
+                if (typeof normalise !== 'function') {
+                    this.showAppNotice(
+                        'Tallyo couldn\'t complete that action',
+                        'Refresh the page and try again. If the problem continues, contact Tallyo support.',
+                        0,
+                        'error'
+                    );
+                    return;
+                }
+                const details = normalise(message, {
+                    accessState: this.billing && this.billing.entitlement && this.billing.entitlement.access_state
+                });
+                this.showAppNotice(details.title, details.message, details.duration, details.tone);
             },
             closeAppNotice() {
                 if (this.appNoticeTimer) window.clearTimeout(this.appNoticeTimer);
@@ -6381,6 +6411,11 @@
             if (this.appNoticeTimer) window.clearTimeout(this.appNoticeTimer);
         }
     }).mount('#app');
+
+    // Native browser alerts expose the hostname as their title and can leak raw
+    // provider/database wording. Route existing notification call sites through
+    // the branded, context-aware Tallyo notice instead.
+    window.alert = (message) => tallyoApp.showUserMessage(message);
 </script>
 <button class="cookie-settings-control app-cookie-settings" type="button" data-cookie-settings hidden>Cookie settings</button>
 <section class="cookie-banner" data-cookie-banner hidden aria-labelledby="cookie-banner-title">

@@ -135,7 +135,7 @@ configuration, migration or unrelated deployment is approved.
 
 ## Focused task: COMM-001-UX-003 Invoice email feedback
 
-Status: Owner Approval Required
+Status: Completed in production on build `2026.07.29.2`
 Priority: Medium
 Assigned roles: Frontend and QA
 Model/work mode: Sol / Medium
@@ -155,8 +155,31 @@ Branch: `codex/email-send-feedback-ux`
 Validation: focused email-status, invoice-email payment-option, accessibility,
 app-integration, PWA update, core document-lifecycle and dispute-visibility
 harnesses pass; `git diff --check` passes
-Next action: Owner review of the focused draft PR before merge and publication
-of app build `2026.07.29.2`
+Completion: PR #137 merged after exact Owner approval and app build
+`2026.07.29.2` was published. No Edge Function, email, Checkout, payment,
+refund, secret, configuration, migration or unrelated deployment changed.
+
+## Focused task: COMM-001-UX-004 Customer-facing notices
+
+Status: Owner Approval Required
+Priority: High
+Assigned roles: Frontend, QA and Security
+Model/work mode: Sol / High for the authorization-error mapping review
+Risk level: High only because server authorization failures are translated for
+the user; RLS, entitlements, Auth, provider calls and data permissions are not
+changed
+Affected files: `index.html`, `app-user-messages.js`, app build/cache markers,
+focused frontend tests and this active-task record
+Acceptance criteria: replace native alert presentation with branded Tallyo
+notices; give every notice a plain-language title and next action; prevent raw
+database, RLS, Edge Function, JWT or provider wording reaching the user; retain
+the exact existing authorization and subscription enforcement
+Approval boundary: repository implementation, validation, commit, push and a
+focused draft PR are authorised; merge and public app deployment remain
+Owner-gated
+Branch: `codex/user-friendly-alerts`
+Next action: finish focused validation and present the reviewed PR for Owner
+merge and publication approval of app build `2026.07.31.1`
 
 ## Locks
 
