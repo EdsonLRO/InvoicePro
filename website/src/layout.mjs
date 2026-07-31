@@ -126,7 +126,7 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
   const canonical = absoluteUrl(page.route);
   const title = page.route === "/" ? siteConfig.defaultTitle : `${page.title} | Tallyo`;
   const description = applyConnectPaymentCopy(page.description, siteConfig.connectPaymentsEnabled);
-  const robots = siteConfig.preview ? "noindex, nofollow, noarchive" : "index, follow";
+  const robots = siteConfig.preview || page.noindex ? "noindex, nofollow, noarchive" : "index, follow";
   const socialImage = `${siteConfig.canonicalOrigin}${assetUrl(siteConfig.socialImagePath)}`;
   const navMarkup = navigation.map((item) => `<a href="${item.href}"${page.route === item.href ? ' aria-current="page"' : ""}>${item.label}</a>`).join("");
   const verificationMarkup = [
@@ -138,6 +138,7 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
     .replaceAll('data-subscription-link href="#"', `data-subscription-link href="${escapeAttribute(siteConfig.subscriptionUrl)}"`)
     .replaceAll('data-login-link href="#"', `data-login-link href="${escapeAttribute(siteConfig.appUrl)}"`)
     .replaceAll("__TALLYO_ASSET_REVISION__", assetRevision)
+    .replaceAll("__TALLYO_MARKETING_OVERVIEW_ENDPOINT__", escapeAttribute(siteConfig.marketingOverviewEndpoint))
     .replace("__TALLYO_HELPER_KNOWLEDGE__", helperKnowledgeJson)
     .replaceAll("__TALLYO_AI_HELPER_ENABLED__", String(siteConfig.aiHelperEnabled))
     .replaceAll(

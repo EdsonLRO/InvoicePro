@@ -1,4 +1,4 @@
-const effectiveDate = "28 July 2026";
+const effectiveDate = "31 July 2026";
 
 export const privacyNotice = `
   <section class="page-hero legal-hero">
@@ -41,6 +41,7 @@ export const privacyNotice = `
 
       <h3>Communications and support</h3>
       <p>We use the information in support questions, complaints, privacy requests and related correspondence. Document email and reminder delivery can include the recipient's email address, the document PDF, business/customer details and delivery status.</p>
+      <p>If you separately enter an email address in the free invoice generator and tick the optional consent box, Tallyo uses that address to send the single introductory overview you requested. We do not copy the invoice sender or recipient address into this field. We record the consent wording and version, time, source, one-way address and connection fingerprints, send state and any withdrawal so we can honour the one-email limit and demonstrate your choice.</p>
 
       <h3>Website, service and security information</h3>
       <p>Our infrastructure providers may process request metadata such as IP address, approximate country, browser or device information, timestamps and request identifiers to deliver and protect the service, enforce access controls, diagnose errors and prevent abuse.</p>
@@ -59,7 +60,7 @@ export const privacyNotice = `
         <li><strong>Contract:</strong> to create and operate a user's Tallyo account, provide subscribed features, manage the subscription, deliver requested support, and take requested steps before a contract.</li>
         <li><strong>Legal obligation:</strong> to keep Tallyo's own tax/accounting records, respond to binding legal requirements, and meet other specific duties that apply to us.</li>
         <li><strong>Legitimate interests:</strong> to secure the service, prevent fraud and abuse, diagnose faults, provide operational support, maintain limited audit and payment-integrity evidence, and establish, exercise or defend legal claims. We use this basis only after considering necessity, the effect on people and appropriate safeguards.</li>
-        <li><strong>Consent:</strong> for optional Google Analytics measurement after you choose <strong>Accept analytics</strong>, and for another optional activity only where consent is appropriate. You can withdraw consent for future Analytics processing at any time using <strong>Cookie settings</strong>. Tallyo does not currently run marketing email.</li>
+        <li><strong>Consent:</strong> for optional Google Analytics measurement after you choose <strong>Accept analytics</strong>, and for the single introductory Tallyo overview email only when you enter an address and tick its separate consent box. You can withdraw Analytics consent using <strong>Cookie settings</strong> and withdraw the overview-email consent using the unsubscribe link in that email.</li>
       </ul>
       <p>Business users are responsible for identifying their lawful basis for the customer and document information they enter. We process that information under their instructions and the applicable <a href="/data-processing-terms/">Data Processing Terms</a>.</p>
     </section>
@@ -69,7 +70,7 @@ export const privacyNotice = `
       <p>We use providers only for genuine service purposes:</p>
       <ul>
         <li><strong>Supabase:</strong> database, authentication and server functions.</li>
-        <li><strong>Resend:</strong> service, document, reminder and security email delivery.</li>
+        <li><strong>Resend:</strong> service, document, reminder, security and separately requested one-time overview email delivery.</li>
         <li><strong>Cloudflare:</strong> website/app delivery, access protection, Turnstile, request security and the AI rate limiter.</li>
         <li><strong>Stripe:</strong> Tallyo subscription Billing, connected-account onboarding and customer payments, payment/refund/dispute processing, fraud prevention and regulatory compliance. Stripe's role depends on the activity.</li>
         <li><strong>OpenAI:</strong> public product-question processing only if the AI Helper is enabled.</li>
@@ -103,6 +104,7 @@ export const privacyNotice = `
       <p>Deleted active-database information may remain temporarily in Supabase daily backups for up to seven days under the current Pro-plan cycle. Other providers retain information under their documented cycles and legal obligations.</p>
       <p>We keep Tallyo's own subscription and tax/accounting records for the period required by UK tax law. Routine operational records are kept for shorter periods based on their security, support or payment-integrity purpose. Ordinary support records are normally reviewed for deletion two years after closure, privacy-request records three years after closure, and material claims when the claim and any necessary legal-retention period end.</p>
       <p>Your Analytics consent preference is stored for up to six months so the website can respect your choice. If you accept, Tallyo configures Google Analytics cookies with a maximum age of six months. Withdrawing consent stops future Analytics events from Tallyo and removes the Analytics cookies that Tallyo can identify on this domain. Google may retain previously received Analytics event data under the retention settings and legal obligations that apply to its service.</p>
+      <p>For the optional one-time overview email, Tallyo removes the plain email address from its request record after the send attempt. We keep the minimised consent, one-way address fingerprint, send and withdrawal evidence only while reasonably needed to demonstrate the request, prevent a duplicate overview and respect a withdrawal. We review that evidence at least annually and delete or anonymise it when it is no longer needed.</p>
       <p>Tallyo does not intentionally retain AI Helper conversations. If the Helper is enabled, standard OpenAI API abuse-monitoring logs may retain content for up to 30 days. Stripe keeps information it controls for its legal, regulatory, fraud and financial obligations.</p>
       <p>We review retention manually at launch and record any exception or legal hold. More information about the retention criteria is available on request.</p>
     </section>

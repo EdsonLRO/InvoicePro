@@ -172,6 +172,43 @@ const about = `
   <section class="section section-soft" aria-labelledby="audience-title"><div class="section-heading"><p class="eyebrow">Who it serves</p><h2 id="audience-title">Built broadly for UK small businesses.</h2><p>Freelancers, sole traders, consultants, tradespeople and independent service companies can adapt the same core workflow to their work.</p></div></section>
   ${finalCta()}`;
 
+const marketingOverviewForm = siteConfig.marketingOverviewEnabled ? `
+  <form class="generator-overview-form" data-overview-form novalidate>
+    <p><strong>Not ready to sign up?</strong> Get one email introducing Tallyo's invoicing features.</p>
+    <label>Email address <span>(optional)</span><input name="overviewEmail" type="email" maxlength="254" autocomplete="email" inputmode="email" data-overview-email></label>
+    <label class="generator-consent"><input name="overviewConsent" type="checkbox" data-overview-consent><span>Yes, Tallyo may send me one promotional email about its invoicing features. This does not create an account or subscription.</span></label>
+    <button class="button button-secondary" type="submit" data-overview-submit>Send me the overview</button>
+    <p class="generator-overview-status" role="status" aria-live="polite" data-overview-status></p>
+    <p class="generator-overview-privacy">Tallyo uses this address only for the one email you request. Read the <a href="/privacy/">Privacy Notice</a>.</p>
+  </form>` : "";
+
+const invoiceConversionDialog = `
+  <dialog class="generator-conversion-dialog" data-generator-conversion data-overview-endpoint="__TALLYO_MARKETING_OVERVIEW_ENDPOINT__" aria-labelledby="generator-conversion-title">
+    <button class="generator-dialog-close" type="button" data-conversion-dismiss aria-label="Close and continue download">&times;</button>
+    <div class="generator-conversion-heading">
+      <p class="eyebrow">Your invoice is ready</p>
+      <h2 id="generator-conversion-title">Save time on the next one with Tallyo Pro.</h2>
+      <p>Keep invoicing work together without blocking this free PDF.</p>
+    </div>
+    <ul class="generator-conversion-features">
+      <li>Saved customers and items</li>
+      <li>Recurring invoices</li>
+      <li>Automatic overdue reminders</li>
+      <li>Invoice and payment-status tracking</li>
+      <li>Online payments through your connected Stripe account</li>
+    </ul>
+    <p class="generator-conversion-price"><strong>&pound;8 monthly</strong><span>or &pound;80 annually</span></p>
+    <a class="button button-primary" id="cta_generator_create_account" data-analytics-placement="generator" data-conversion-register data-signup-link href="#" target="_blank" rel="noopener">Create a free Tallyo account</a>
+    ${marketingOverviewForm}
+    <div class="generator-conversion-download">
+      <button class="button button-secondary" type="button" data-conversion-continue>Continue download</button>
+      <p>No account, email address, marketing consent, subscription or payment card is required.</p>
+    </div>
+  </dialog>`;
+
+const emailPreferenceConfirmation = `
+  <section class="page-hero"><p class="eyebrow">Email preferences</p><h1>Your email preference is saved.</h1><p>If you reached this page through the unsubscribe link in a Tallyo overview email, your preference has been recorded and Tallyo will not send another introductory overview to that address. If you need help, contact <a href="mailto:privacy@tallyo.co.uk">privacy@tallyo.co.uk</a>.</p><p><a class="button button-primary" href="/">Return to Tallyo</a></p></section>`;
+
 const generatorPage = (defaultType) => {
   const lowerType = defaultType.toLowerCase();
   return `
@@ -209,7 +246,7 @@ const generatorPage = (defaultType) => {
           <label class="wide">Notes<textarea name="notes" rows="3" maxlength="500"></textarea></label>
           <label class="wide">Payment instructions<textarea name="paymentInstructions" rows="3" maxlength="500"></textarea></label>
         </div></fieldset>
-        <div class="generator-actions"><button class="button button-primary" type="button" data-print>Print or save PDF</button><button class="button button-secondary" type="reset">Clear everything</button></div>
+        <div class="generator-actions"><button class="button button-primary" type="button" data-print>Download PDF</button><button class="button button-secondary" type="reset">Clear everything</button></div>
         <p class="generator-status" data-generator-status role="status" aria-live="polite"></p>
       </form>
       <aside class="generator-guidance" aria-labelledby="generator-guidance-title"><h2 id="generator-guidance-title">Before you send it</h2><p>Prices are treated as excluding tax. Tax is rounded to the nearest penny for each line after its discount. Check that the document suits your business and tax position.</p><p>VAT-registered businesses may need extra invoice information. This free maker does not produce the required sterling VAT totals for foreign-currency VAT invoices.</p><p><a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">Read the current GOV.UK invoice requirements</a>. Tallyo does not provide tax, legal or accounting advice.</p></aside>
@@ -223,7 +260,7 @@ const generatorPage = (defaultType) => {
       <footer>Created with Tallyo</footer>
     </article></div>
   </section>
-  <section class="section section-cta generator-conversion" data-generator-conversion hidden><div><p class="eyebrow">Need to do more?</p><h2>Keep customers, track payments and repeat less admin.</h2><p>Create a Tallyo account when you want saved customers and services, payment tracking, recurring invoices and reminders.</p></div><a class="button button-light" id="cta_generator_create_account" data-analytics-placement="generator" data-signup-link href="#">Create account</a></section>`;
+  ${defaultType === "Invoice" ? invoiceConversionDialog : ""}`;
 };
 
 const foundationPages = [
@@ -240,6 +277,7 @@ const foundationPages = [
   { route: "/cookies/", output: "cookies/index.html", title: "Tallyo Cookie Notice", description: "Read about Tallyo's necessary storage, optional Google Analytics and how to change your Analytics choice.", content: cookieNotice, schema: "webpage" },
   { route: "/data-processing-terms/", output: "data-processing-terms/index.html", title: "Tallyo Business-User Data Processing Terms", description: "Read the data-processing terms that form part of the Tallyo account agreement for UK business users.", content: dataProcessingTerms, schema: "webpage" },
   { route: "/terms/", output: "terms/index.html", title: "Tallyo Terms of Service", description: "Read the terms for Tallyo accounts, subscriptions and connected customer card payments for UK business users.", content: serviceTerms, schema: "webpage" },
+  { route: "/email-preferences/", output: "email-preferences/index.html", title: "Tallyo email preferences", description: "Confirmation that an introductory Tallyo email preference has been recorded.", content: emailPreferenceConfirmation, schema: "webpage", noindex: true },
   { route: "/free-invoice-generator/", output: "free-invoice-generator/index.html", title: "Free invoice maker — Tallyo", description: "Create and print a privacy-first, browser-local invoice for your UK small business without making an account.", content: generatorPage("Invoice"), schema: "webpage", scripts: ["/assets/generator.js"] },
   { route: "/free-quote-generator/", output: "free-quote-generator/index.html", title: "Free quote maker — Tallyo", description: "Create and print a privacy-first, browser-local quote for your UK small business without making an account.", content: generatorPage("Quote"), schema: "webpage", scripts: ["/assets/generator.js"] }
 ];

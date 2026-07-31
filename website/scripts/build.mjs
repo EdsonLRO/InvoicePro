@@ -32,6 +32,7 @@ const assetSourcePaths = [
   ["src", "helper-core.mjs"],
   ["src", "generator.js"],
   ["src", "document-calculator.mjs"],
+  ["src", "marketing-overview.mjs"],
   ["src", "growth.js"],
   ["public", "assets", "icon-192.png"],
   ["public", "assets", "tallyo-mark.png"],
@@ -74,6 +75,7 @@ await copyFile(join(websiteRoot, "src", "styles.css"), join(distRoot, "assets", 
 await copyFile(join(websiteRoot, "src", "site.js"), join(distRoot, "assets", "site.js"));
 await copyFile(join(websiteRoot, "src", "helper-core.mjs"), join(distRoot, "assets", "helper-core.mjs"));
 await copyFile(join(websiteRoot, "src", "document-calculator.mjs"), join(distRoot, "assets", "document-calculator.mjs"));
+await copyFile(join(websiteRoot, "src", "marketing-overview.mjs"), join(distRoot, "assets", "marketing-overview.mjs"));
 await copyFile(join(websiteRoot, "..", "analytics-consent.mjs"), join(distRoot, "assets", "analytics-consent.mjs"));
 await copyFile(join(websiteRoot, "..", "analytics-consent.css"), join(distRoot, "assets", "analytics-consent.css"));
 for (const moduleName of ["helper.js", "generator.js", "growth.js"]) {
@@ -110,7 +112,8 @@ const hashes = [...new Set(rendered.flatMap(({ inlineScripts }) => inlineScripts
 const headerTemplate = await readFile(join(websiteRoot, "public", "_headers.template"), "utf8");
 const connectSources = [
   siteConfig.aiHelperEnabled ? "'self'" : "",
-  siteConfig.analyticsEnabled ? "https://www.google-analytics.com https://region1.google-analytics.com" : ""
+  siteConfig.analyticsEnabled ? "https://www.google-analytics.com https://region1.google-analytics.com" : "",
+  siteConfig.marketingOverviewEnabled ? siteConfig.marketingOverviewOrigin : ""
 ].filter(Boolean).join(" ") || "'none'";
 const headers = headerTemplate
   .replace("{{SCRIPT_HASHES}}", hashes)
@@ -119,7 +122,7 @@ const headers = headerTemplate
   .replace("{{ROBOTS_HEADER}}", siteConfig.preview ? "X-Robots-Tag: noindex, nofollow, noarchive" : "");
 await writeFile(join(distRoot, "_headers"), headers, "utf8");
 
-const sitemapEntries = pages.map((page) => `  <url><loc>${siteConfig.canonicalOrigin}${page.route}</loc></url>`).join("\n");
+const sitemapEntries = pages.filter((page) => !page.noindex).map((page) => `  <url><loc>${siteConfig.canonicalOrigin}${page.route}</loc></url>`).join("\n");
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries}\n</urlset>\n`;
 await writeFile(join(distRoot, "sitemap.xml"), sitemap, "utf8");
 
@@ -128,9 +131,9 @@ const robots = siteConfig.preview
   : `User-agent: *\nAllow: /\nSitemap: ${siteConfig.canonicalOrigin}/sitemap.xml\n`;
 await writeFile(join(distRoot, "robots.txt"), robots, "utf8");
 
-const assetFiles = ["assets/styles.css", "assets/analytics-consent.css", "assets/site.js", "assets/helper.js", "assets/helper-core.mjs", "assets/generator.js", "assets/document-calculator.mjs", "assets/analytics-consent.mjs", "assets/analytics-config.mjs", "assets/growth.js", "assets/icon-192.png", "assets/tallyo-mark.png", "assets/tallyo-wordmark-white.png", "assets/tallyo-social-card.webp", "assets/product/tallyo-dashboard.jpg", "assets/product/tallyo-invoice-editor.jpg", "assets/product/tallyo-quote-editor.jpg", "assets/product/tallyo-customers.jpg", "assets/product/tallyo-recurring.jpg", "assets/product/tallyo-overdue.jpg", "assets/product/tallyo-payments.jpg", "assets/product/tallyo-activity.jpg", "assets/product/tallyo-branding.jpg", "assets/product/tallyo-security.jpg", "assets/product/tallyo-mobile-quote.jpg"];
+const assetFiles = ["assets/styles.css", "assets/analytics-consent.css", "assets/site.js", "assets/helper.js", "assets/helper-core.mjs", "assets/generator.js", "assets/document-calculator.mjs", "assets/marketing-overview.mjs", "assets/analytics-consent.mjs", "assets/analytics-config.mjs", "assets/growth.js", "assets/icon-192.png", "assets/tallyo-mark.png", "assets/tallyo-wordmark-white.png", "assets/tallyo-social-card.webp", "assets/product/tallyo-dashboard.jpg", "assets/product/tallyo-invoice-editor.jpg", "assets/product/tallyo-quote-editor.jpg", "assets/product/tallyo-customers.jpg", "assets/product/tallyo-recurring.jpg", "assets/product/tallyo-overdue.jpg", "assets/product/tallyo-payments.jpg", "assets/product/tallyo-activity.jpg", "assets/product/tallyo-branding.jpg", "assets/product/tallyo-security.jpg", "assets/product/tallyo-mobile-quote.jpg"];
 const assetBytes = {};
 for (const file of assetFiles) assetBytes[file] = (await stat(join(distRoot, file))).size;
-await writeFile(join(distRoot, "build-report.json"), `${JSON.stringify({ mode: siteConfig.mode, routes: pages.length, externalOrigins: siteConfig.analyticsEnabled ? 3 : 0, assetRevision, assetBytes }, null, 2)}\n`, "utf8");
+await writeFile(join(distRoot, "build-report.json"), `${JSON.stringify({ mode: siteConfig.mode, routes: pages.length, externalOrigins: (siteConfig.analyticsEnabled ? 3 : 0) + (siteConfig.marketingOverviewEnabled ? 1 : 0), assetRevision, assetBytes }, null, 2)}\n`, "utf8");
 
 console.log(`Built ${pages.length} routes plus 404 in ${siteConfig.mode} mode.`);
