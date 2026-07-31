@@ -124,6 +124,7 @@ for (const { src, alt } of OVERVIEW_EMAIL_IMAGES) {
   const asset = join(root, "website/public", new URL(src).pathname);
   const bytes = statSync(asset).size;
   assert.ok(bytes > 10_000 && bytes < 100_000, `${src} is compressed for email (${bytes} bytes)`);
+  assert.equal(statSync(join(root, "website/dist", new URL(src).pathname)).size, bytes, `${src} is copied into the deployable website build`);
 }
 assert.doesNotMatch(overviewEmail.html, /qa-live-acceptance|tallyo-test|new@gmail|customer data|invoice contents/i, "email screenshots and copy expose no acceptance-test identity");
 assert.match(overviewEmail.html, /<table role="presentation"/, "email uses an email-safe table layout");

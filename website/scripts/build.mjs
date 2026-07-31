@@ -25,6 +25,12 @@ const helperKnowledge = JSON.parse(applyConnectPaymentCopy(
 ));
 const helperKnowledgeJson = JSON.stringify(helperKnowledge).replaceAll("<", "\\u003c");
 const eventPolicy = JSON.parse(await readFile(join(websiteRoot, "content", "analytics-events.json"), "utf8"));
+const emailImageNames = [
+  "overview-create-invoice.jpg",
+  "overview-saved-items.jpg",
+  "overview-recurring-reminders.jpg",
+  "overview-stripe-payments.jpg"
+];
 const assetSourcePaths = [
   ["src", "styles.css"],
   ["src", "site.js"],
@@ -48,7 +54,8 @@ const assetSourcePaths = [
   ["public", "assets", "product", "tallyo-activity.jpg"],
   ["public", "assets", "product", "tallyo-branding.jpg"],
   ["public", "assets", "product", "tallyo-security.jpg"],
-  ["public", "assets", "product", "tallyo-mobile-quote.jpg"]
+  ["public", "assets", "product", "tallyo-mobile-quote.jpg"],
+  ...emailImageNames.map((imageName) => ["public", "assets", "email", imageName])
 ];
 const assetRevisionHash = createHash("sha256");
 for (const pathParts of assetSourcePaths) {
@@ -102,6 +109,10 @@ await copyFile(join(websiteRoot, "public", "assets", "tallyo-social-card.webp"),
 await mkdir(join(distRoot, "assets", "product"), { recursive: true });
 for (const imageName of ["tallyo-dashboard.jpg", "tallyo-invoice-editor.jpg", "tallyo-quote-editor.jpg", "tallyo-customers.jpg", "tallyo-recurring.jpg", "tallyo-overdue.jpg", "tallyo-payments.jpg", "tallyo-activity.jpg", "tallyo-branding.jpg", "tallyo-security.jpg", "tallyo-mobile-quote.jpg"]) {
   await copyFile(join(websiteRoot, "public", "assets", "product", imageName), join(distRoot, "assets", "product", imageName));
+}
+await mkdir(join(distRoot, "assets", "email"), { recursive: true });
+for (const imageName of emailImageNames) {
+  await copyFile(join(websiteRoot, "public", "assets", "email", imageName), join(distRoot, "assets", "email", imageName));
 }
 await copyFile(join(websiteRoot, "public", "_redirects"), join(distRoot, "_redirects"));
 
