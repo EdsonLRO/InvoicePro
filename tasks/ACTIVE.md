@@ -246,6 +246,28 @@ smoke tests returned 204 for approved preflight, 403 for an unapproved origin
 and 400 for an invalid payload. No promotional email was sent and no consent
 row was created during activation.
 
+## Focused task: GROWTH-002 One-off introductory email design
+
+Status: Source complete — awaiting Owner review before deployment or live send
+Priority: High
+Assigned roles: Growth, Backend/Supabase, Privacy/Legal and QA
+Model/work mode: Sol / High for the consent and server-email boundary; visual
+layout and screenshot preparation are routine
+Risk level: High because the template is used by the public consent-gated
+server email flow, although this task makes no provider or production change
+Affected scope: the shared one-off email builder, four privacy-safe compressed
+product screenshots and the focused consent/send test harness
+Acceptance criteria: exact approved subject and preheader; responsive
+table-based HTML and plain text; no more than four real fictional-data product
+screenshots; HTML buttons independent of images; accurate pricing, Stripe-fee
+wording, identity, Privacy Notice and HTTPS unsubscribe route; no account,
+newsletter or repeated-send implication; preserve affirmative versioned
+consent, unique-address enforcement, provider idempotency and rate limiting
+Branch: `codex/one-off-overview-email-design`
+Release boundary: source, review artifacts, validation, commit, push and a
+focused draft PR only. Do not merge, deploy the function or website assets, or
+send any email without separate exact Owner approval.
+
 ## Locks
 
 - `tasks/ACTIVE.md`;
