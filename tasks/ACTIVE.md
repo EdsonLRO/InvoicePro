@@ -161,7 +161,7 @@ refund, secret, configuration, migration or unrelated deployment changed.
 
 ## Focused task: COMM-001-UX-004 Customer-facing notices
 
-Status: Owner Approval Required
+Status: Completed in production on build `2026.07.31.1`
 Priority: High
 Assigned roles: Frontend, QA and Security
 Model/work mode: Sol / High for the authorization-error mapping review
@@ -178,8 +178,35 @@ Approval boundary: repository implementation, validation, commit, push and a
 focused draft PR are authorised; merge and public app deployment remain
 Owner-gated
 Branch: `codex/user-friendly-alerts`
-Next action: finish focused validation and present the reviewed PR for Owner
-merge and publication approval of app build `2026.07.31.1`
+Completion: PR #138 merged as `4d86c13`. Its first automatic Pages build
+omitted the new helper from the strict public-file package, so PR #139 added the
+asset and regression allowlist before the release was accepted. Merge
+`cbb2a96`, required main checks, HTTP 200 JavaScript readback and helper
+execution now pass on public app build `2026.07.31.1`.
+
+## Focused task: COMM-001-UX-005 First-sign-in subscription guidance
+
+Status: Owner Approval Required
+Priority: High
+Assigned roles: Frontend, QA and Security
+Model/work mode: Sol / High for subscription-entitlement presentation review
+Risk level: High only because the message depends on owner-scoped Billing
+readback; entitlement enforcement, Stripe Checkout and payment logic are not
+changed
+Affected files: `index.html`, app build/cache markers, focused frontend tests,
+CI coverage, current status and this active-task record
+Acceptance criteria: after successful Billing readback, show a clear accessible
+welcome dialog once per signed-in session only when no subscription and no
+entitlement exist; explain that Tallyo Pro is required; show the approved GBP 8
+monthly and GBP 80 annual choices; link directly to the Account subscription
+section without starting Checkout; never show on readback failure, an existing
+subscription, an entitlement or a Billing callback notice
+Approval boundary: repository implementation, validation, commit, push and a
+focused draft PR are authorised; merge and public app deployment remain
+Owner-gated
+Branch: `codex/first-signin-subscription-guidance`
+Next action: obtain one reviewed merge and publication approval for app build
+`2026.07.31.2`
 
 ## Locks
 

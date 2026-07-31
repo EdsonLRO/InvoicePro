@@ -624,6 +624,21 @@
             <div class="rounded-xl bg-white px-6 py-4 shadow-xl text-sm font-semibold text-slate-700">Loading your Tallyo data…</div>
         </div>
 
+        <div v-if="subscriptionWelcomeOpen && !dataLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4" role="dialog" aria-modal="true" aria-labelledby="subscription-welcome-title" @keydown.esc.stop="dismissSubscriptionWelcome">
+            <div class="w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl">
+                <p class="text-sm font-bold uppercase tracking-wider text-indigo-600 mb-2">Your account is ready</p>
+                <h2 id="subscription-welcome-title" class="text-2xl sm:text-3xl font-semibold text-slate-900 mb-3">Choose a plan to start using Tallyo</h2>
+                <p class="text-slate-600 mb-4">An active Tallyo Pro subscription is required to create and manage invoices, customers and payments.</p>
+                <div class="rounded-xl border border-indigo-100 bg-indigo-50 p-4 mb-5 text-sm text-slate-700">
+                    Choose <strong>£8 monthly</strong> or <strong>£80 annually</strong>. You can review both options before Stripe asks you to complete payment.
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="button" @click="openSubscriptionOptions" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 font-semibold shadow-sm transition">View subscription options</button>
+                    <button type="button" @click="dismissSubscriptionWelcome" class="bg-white border border-slate-300 text-slate-700 px-6 py-3 rounded-lg hover:bg-slate-50 font-medium transition">Not now</button>
+                </div>
+            </div>
+        </div>
+
         <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto">
             
             <div v-show="activeTab === 'account'" class="max-w-3xl mx-auto space-y-8">
@@ -644,7 +659,7 @@
                     </div>
                 </div>
 
-                <div v-if="billing.enabled" class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
+                <div v-if="billing.enabled" ref="billingSection" tabindex="-1" class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                     <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
                         <h2 class="text-2xl font-semibold">Tallyo Subscription</h2>
                         <span v-if="billing.entitlement" :class="billingAccessBadgeClass(billing.entitlement.access_state)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">{{ billingAccessLabel(billing.entitlement.access_state) }}</span>
@@ -2397,7 +2412,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.31.1';
+    const APP_BUILD = '2026.07.31.2';
     const { createApp } = Vue;
 
     const tallyoApp = createApp({
@@ -2451,6 +2466,7 @@
                     busy: false,
                     subscription: null,
                     entitlement: null,
+                    loaded: false,
                     error: '',
                     notice: '',
                     activationTrackingPending: false
@@ -2459,6 +2475,8 @@
                 // App State
                 activeTab: 'dashboard',
                 mobileMenuOpen: false,
+                subscriptionWelcomeOpen: false,
+                subscriptionWelcomeShown: false,
                 publicSiteUrl: window.TallyoPublicIntegration ? window.TallyoPublicIntegration.normalisePublicSiteUrl(window.TALLYO_PUBLIC_SITE_URL) : '',
                 helpPanelOpen: false,
                 installPromptEvent: null,
@@ -3671,6 +3689,7 @@
                 await this.loadMfaStatus();
                 if (!this.sessionLoadIsCurrent(user.id, signInSessionVersion)) return;
                 this.navigateTo(this.tabFromHash(), { replace: !window.location.hash });
+                this.maybeShowSubscriptionWelcome();
             },
             clearSignedOutState() {
                 const pendingReauthReject = this.rejectReauthChallenge;
@@ -3688,6 +3707,8 @@
                 this.authMode = 'login';
                 this.activeTab = 'dashboard';
                 this.mobileMenuOpen = false;
+                this.subscriptionWelcomeOpen = false;
+                this.subscriptionWelcomeShown = false;
                 window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
                 this.editingExisting = false;
                 this.isExportingPDF = false;
@@ -3713,6 +3734,7 @@
                     busy: false,
                     subscription: null,
                     entitlement: null,
+                    loaded: false,
                     error: '',
                     notice: ''
                 };
@@ -4193,6 +4215,7 @@
                 const loadUserId = this.currentUser.id;
                 const loadSessionVersion = this.authSessionVersion;
                 this.billing.busy = true;
+                this.billing.loaded = false;
                 this.billing.error = '';
                 try {
                     const [subscriptionResult, entitlementResult] = await Promise.all([
@@ -4212,6 +4235,7 @@
                     if (entitlementResult.error) throw entitlementResult.error;
                     this.billing.subscription = subscriptionResult.data || null;
                     this.billing.entitlement = entitlementResult.data || null;
+                    this.billing.loaded = true;
                     if (
                         this.billing.activationTrackingPending &&
                         String(this.billing.subscription?.provider_status || '').toLowerCase() === 'active' &&
@@ -4222,11 +4246,38 @@
                     }
                 } catch (error) {
                     if (this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) {
+                        this.billing.loaded = false;
                         this.billing.error = error && error.message ? error.message : 'Subscription status could not be loaded.';
                     }
                 } finally {
                     if (this.authSessionVersion === loadSessionVersion) this.billing.busy = false;
                 }
+            },
+            maybeShowSubscriptionWelcome() {
+                if (
+                    this.subscriptionWelcomeShown ||
+                    !this.billing.enabled ||
+                    !this.billing.loaded ||
+                    this.billing.error ||
+                    this.billing.notice ||
+                    this.billing.subscription ||
+                    this.billing.entitlement
+                ) return;
+                this.subscriptionWelcomeShown = true;
+                this.subscriptionWelcomeOpen = true;
+            },
+            dismissSubscriptionWelcome() {
+                this.subscriptionWelcomeOpen = false;
+            },
+            openSubscriptionOptions() {
+                this.subscriptionWelcomeOpen = false;
+                this.navigateTo('account');
+                this.$nextTick(() => {
+                    if (this.$refs.billingSection) {
+                        this.$refs.billingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        this.$refs.billingSection.focus({ preventScroll: true });
+                    }
+                });
             },
             billingSubscriptionLabel(status) {
                 return {
