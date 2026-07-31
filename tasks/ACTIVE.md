@@ -212,15 +212,15 @@ secret, migration, email or unrelated deployment changed.
 
 ## Focused task: GROWTH-001 Free-generator conversion panel
 
-Status: Implementation complete — source merge approved; activation remains blocked
+Status: Complete — production activation approved and validated
 Priority: High
 Assigned roles: Website, Backend/Supabase, Privacy/Legal, Security and QA
 Model/work mode: Sol / High for the consent, personal-data and server-email
 boundary; routine presentation remains focused
 Risk level: High because an optional public form can collect an email address
 and request one promotional communication
-Affected scope: the free invoice generator, one disabled-by-default public Edge
-Function, one unapplied consent-record migration, the public Privacy Notice,
+Affected scope: the free invoice generator, one public consent-gated Edge
+Function, two applied consent-table/grant migrations, the public Privacy Notice,
 focused website/server tests and this active-task record
 Acceptance criteria: prepare and validate the current print-ready invoice before
 the panel; preserve a clear no-account download on continue, close or Escape;
@@ -233,13 +233,18 @@ Legal disposition: Approved with conditions for repository preparation. UK
 electronic-mail marketing consent must remain separate, specific, informed and
 affirmative; withdrawal must be recorded and easy; the Privacy Notice update
 must be separately approved before publication.
-Branch: `codex/free-generator-conversion-panel`
-Approval boundary: repository implementation, focused validation, commit, push,
-PR creation and merge are authorised when all required checks pass. The
-migration remains unapplied; the function and website remain undeployed; the
-marketing gate remains disabled; no email may be sent. Migration application,
-secret/configuration entry, function deployment, Privacy Notice publication and
-website release require a separate exact Owner approval after review.
+Activation branch: `codex/activate-generator-overview-email`
+Completion: exact Owner approval covered the migrations, protected settings,
+function deployment, Privacy Notice publication and website release. Migrations
+`20260731152423` and `20260731155610` are applied. The consent table has forced
+RLS, no browser policy, zero activation rows and only service-role
+read/insert/update privileges. `send-marketing-overview` version 1 is active
+with JWT verification disabled by design because it is a public consent form;
+the function enforces exact origins, versioned affirmative consent,
+idempotency and rate limits. Production website gates are configured. Safe
+smoke tests returned 204 for approved preflight, 403 for an unapproved origin
+and 400 for an invalid payload. No promotional email was sent and no consent
+row was created during activation.
 
 ## Locks
 
