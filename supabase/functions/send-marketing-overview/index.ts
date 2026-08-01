@@ -217,19 +217,38 @@ Deno.serve(async (request) => {
       .eq("email_hash", emailHash)
       .maybeSingle();
     if (existing?.status === "failed") {
-      return json(
-        { message: "The overview email is temporarily unavailable." },
-        503,
-        origin,
-      );
-    }
-    const retryBefore = new Date(
-      Date.now() - STALE_PENDING_AFTER_MS,
-    ).toISOString();
-    if (
+      const { data: claimed, error: claimError } = await supabase
+        .from("marketing_overview_requests")
+        .update({
+          email: validated.email,
+          status: "pending",
+          unsubscribe_token_hash: unsubscribeTokenHash,
+          sent_at: null,
+        })
+        .eq("id", existing.id)
+        .eq("status", "failed")
+        .eq("unsubscribe_token_hash", existing.unsubscribe_token_hash)
+        .select("id")
+        .maybeSingle();
+      if (claimError) {
+        return json(
+          { message: "The overview email is temporarily unavailable." },
+          503,
+          origin,
+        );
+      }
+      if (!claimed) {
+        return json({ status: "already_requested" }, 200, origin);
+      }
+      requestRecord = claimed;
+    } else if (
       existing?.status === "pending" &&
-      existing.created_at <= retryBefore
+      existing.created_at <=
+        new Date(Date.now() - STALE_PENDING_AFTER_MS).toISOString()
     ) {
+      const retryBefore = new Date(
+        Date.now() - STALE_PENDING_AFTER_MS,
+      ).toISOString();
       const { data: claimed, error: claimError } = await supabase
         .from("marketing_overview_requests")
         .update({ unsubscribe_token_hash: unsubscribeTokenHash })
