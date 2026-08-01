@@ -281,7 +281,8 @@ Deno.serve(async (request) => {
       },
       body: JSON.stringify({
         from: Deno.env.get("MARKETING_OVERVIEW_FROM_EMAIL") ||
-          "Tallyo <main@tallyo.co.uk>",
+          Deno.env.get("FROM_EMAIL") ||
+          "Tallyo <invoices@mail.tallyo.co.uk>",
         to: [validated.email],
         subject: email.subject,
         text: email.text,
