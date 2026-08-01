@@ -130,6 +130,10 @@ assert.doesNotMatch(overviewEmail.html, /qa-live-acceptance|tallyo-test|new@gmai
 assert.match(overviewEmail.html, /<table role="presentation"/, "email uses an email-safe table layout");
 assert.match(overviewEmail.html, /@media only screen and \(max-width:620px\)/, "email includes a focused mobile layout");
 assert.match(overviewEmail.html, /main@tallyo\.co\.uk/);
+assert.match(
+  read("supabase/functions/send-marketing-overview/index.ts"),
+  /Deno\.env\.get\("FROM_EMAIL"\)[\s\S]*Tallyo <invoices@mail\.tallyo\.co\.uk>/,
+);
 assert.throws(() => buildOverviewEmail({ unsubscribeUrl: "http://example.invalid/unsubscribe" }), /must use HTTPS/);
 
 let prepares = 0;
