@@ -12,6 +12,7 @@ import {
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const RATE_LIMIT_PER_HOUR = 3;
+const STALE_PENDING_AFTER_MS = 5 * 60 * 1000;
 
 const requiredEnv = (name: string) => {
   const value = String(Deno.env.get(name) || "").trim();
@@ -85,10 +86,11 @@ Deno.serve(async (request) => {
   }
 
   let supabase;
+  let supabaseUrl;
   let hashSecret;
   let publicSiteUrl;
   try {
-    const supabaseUrl = requiredEnv("SUPABASE_URL");
+    supabaseUrl = requiredEnv("SUPABASE_URL");
     supabase = createClient(
       supabaseUrl,
       requiredEnv("SUPABASE_SERVICE_ROLE_KEY"),
@@ -207,10 +209,11 @@ Deno.serve(async (request) => {
     .select("id")
     .single();
 
+  let requestRecord = inserted;
   if (insertError?.code === "23505") {
     const { data: existing } = await supabase
       .from("marketing_overview_requests")
-      .select("status")
+      .select("id, status, created_at, unsubscribe_token_hash")
       .eq("email_hash", emailHash)
       .maybeSingle();
     if (existing?.status === "failed") {
@@ -220,9 +223,38 @@ Deno.serve(async (request) => {
         origin,
       );
     }
-    return json({ status: "already_requested" }, 200, origin);
+    const retryBefore = new Date(
+      Date.now() - STALE_PENDING_AFTER_MS,
+    ).toISOString();
+    if (
+      existing?.status === "pending" &&
+      existing.created_at <= retryBefore
+    ) {
+      const { data: claimed, error: claimError } = await supabase
+        .from("marketing_overview_requests")
+        .update({ unsubscribe_token_hash: unsubscribeTokenHash })
+        .eq("id", existing.id)
+        .eq("status", "pending")
+        .eq("unsubscribe_token_hash", existing.unsubscribe_token_hash)
+        .lt("created_at", retryBefore)
+        .select("id")
+        .maybeSingle();
+      if (claimError) {
+        return json(
+          { message: "The overview email is temporarily unavailable." },
+          503,
+          origin,
+        );
+      }
+      if (!claimed) {
+        return json({ status: "already_requested" }, 200, origin);
+      }
+      requestRecord = claimed;
+    } else {
+      return json({ status: "already_requested" }, 200, origin);
+    }
   }
-  if (insertError || !inserted) {
+  if ((insertError && insertError.code !== "23505") || !requestRecord) {
     return json(
       { message: "The overview email is temporarily unavailable." },
       503,
@@ -230,8 +262,10 @@ Deno.serve(async (request) => {
     );
   }
 
-  const unsubscribeUrl = new URL(request.url);
-  unsubscribeUrl.search = "";
+  const unsubscribeUrl = new URL(
+    "/functions/v1/send-marketing-overview",
+    supabaseUrl,
+  );
   unsubscribeUrl.searchParams.set("unsubscribe", unsubscribeToken);
   const email = buildOverviewEmail({
     unsubscribeUrl: unsubscribeUrl.toString(),
@@ -243,7 +277,7 @@ Deno.serve(async (request) => {
       headers: {
         "Authorization": `Bearer ${requiredEnv("RESEND_API_KEY")}`,
         "Content-Type": "application/json",
-        "Idempotency-Key": `tallyo-overview-${inserted.id}`,
+        "Idempotency-Key": `tallyo-overview-${requestRecord.id}`,
       },
       body: JSON.stringify({
         from: Deno.env.get("MARKETING_OVERVIEW_FROM_EMAIL") ||
@@ -271,7 +305,7 @@ Deno.serve(async (request) => {
       status: providerAccepted ? "sent" : "failed",
       sent_at: providerAccepted ? completedAt : null,
     })
-    .eq("id", inserted.id);
+    .eq("id", requestRecord.id);
   if (updateError || !providerAccepted) {
     return json(
       { message: "The overview email is temporarily unavailable." },
