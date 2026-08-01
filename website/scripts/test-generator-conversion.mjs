@@ -198,6 +198,9 @@ assert.match(serverPolicy, /CONSENT_WORDING =\s*"Yes, Tallyo may send me one pro
 assert.match(server, /RATE_LIMIT_PER_HOUR = 3/);
 assert.match(server, /Idempotency-Key/);
 assert.match(server, /insertError\?\.code === "23505"/, "duplicate address requests cannot create another send");
+assert.match(server, /STALE_PENDING_AFTER_MS = 5 \* 60 \* 1000/, "an interrupted request becomes safely retryable after five minutes");
+assert.match(server, /\.eq\("unsubscribe_token_hash", existing\.unsubscribe_token_hash\)/, "only one retry can claim an interrupted request");
+assert.match(server, /new URL\([\s\S]+\/functions\/v1\/send-marketing-overview[\s\S]+supabaseUrl/, "unsubscribe links use the public HTTPS function origin");
 assert.match(server, /return json\(\{ status: "already_requested" \}, 200, origin\)/, "a duplicate consent request exits without a second provider call");
 assert.match(server, /MARKETING_OVERVIEW_ALLOWED_ORIGINS/);
 assert.match(server, /List-Unsubscribe/);
