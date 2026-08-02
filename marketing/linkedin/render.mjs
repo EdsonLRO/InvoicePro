@@ -4,7 +4,12 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
-const { chromium } = require("playwright");
+let chromium;
+try {
+  ({ chromium } = require("playwright"));
+} catch {
+  ({ chromium } = require("playwright-core"));
+}
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../..");
@@ -228,6 +233,54 @@ const campaigns = [
     screenshot: "Screenshot 2026-08-01 132337.png",
     fit: "landscape",
   },
+  {
+    slug: "27-invoice-without-the-admin-session",
+    eyebrow: "WHEN THE WORK IS ALREADY DONE",
+    headline: "The invoice should not be the difficult part",
+    supporting: "Bring the customer, line items, tax and total together before you send.",
+    screenshot: "New Invoice Card.png",
+    fit: "tall",
+  },
+  {
+    slug: "28-repeat-customer-less-retyping",
+    eyebrow: "FOR THE CUSTOMERS WHO COME BACK",
+    headline: "The next invoice can start with what you already know",
+    supporting: "Keep familiar customer details ready instead of typing them again.",
+    screenshot: "Manage Customers Card.png",
+    fit: "wide",
+  },
+  {
+    slug: "29-let-the-schedule-remember",
+    eyebrow: "WHEN THE WORK REPEATS",
+    headline: "Put the next invoice on the schedule",
+    supporting: "Set the timing once, then review, change or pause it whenever needed.",
+    screenshot: "Recurring Invoices Card.png",
+    fit: "wide",
+  },
+  {
+    slug: "30-overdue-with-context",
+    eyebrow: "WHEN PAYMENT IS LATE",
+    headline: "Follow up without rebuilding the context",
+    supporting: "Choose if and when reminders are sent, while the invoice history stays together.",
+    screenshot: "Automatic Reminders Card.png",
+    fit: "wide",
+  },
+  {
+    slug: "31-deposit-and-balance",
+    eyebrow: "WHEN A JOB NEEDS A DEPOSIT",
+    headline: "Ask for a deposit without losing sight of the balance",
+    supporting: "Set the amount before sending and keep the remaining balance visible.",
+    screenshot: "Payment Card Deposit.png",
+    fit: "tall",
+  },
+  {
+    slug: "32-after-the-invoice-is-sent",
+    eyebrow: "AFTER THE INVOICE IS SENT",
+    headline: "Keep the invoice story in one place",
+    supporting: "Email, payment, refund and document activity stays with the relevant record.",
+    screenshot: "Activity History Card.png",
+    fit: "wide",
+  },
 ];
 
 function dataUrl(filePath) {
@@ -355,7 +408,7 @@ try {
     await page.screenshot({
       path: path.join(libraryOutputDir, `${campaign.slug}.png`),
       type: "png",
-      fullPage: true,
+      clip: { x: 0, y: 0, width: 1200, height: 1200 },
     });
     if (campaign.curatedSlug) {
       fs.copyFileSync(

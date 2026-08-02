@@ -127,3 +127,123 @@ The six curated launch images are written to `marketing/linkedin/assets`. The
 complete library is written beside the source screenshots in
 `website/public/assets/App Screenshots/LinkedIn Promos`. Source screenshots are
 never overwritten.
+
+## Practical invoice campaign
+
+These six follow-on posts are designed to read like useful observations from
+someone who understands day-to-day invoicing, rather than conventional ads.
+
+### 27 — The invoice should not be the difficult part
+
+**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/27-invoice-without-the-admin-session.png`
+
+Some invoices take longer to prepare than the work they describe.
+
+Tallyo keeps the customer, line items, tax choices and total together so you
+can review the document clearly before sending it.
+
+The aim is simple: less time assembling the invoice, and more confidence that
+the details are right.
+
+See the invoice workflow: https://tallyo.co.uk/product-tour/
+
+#Invoicing #SmallBusinessUK #Freelancers
+
+**Alt text:** Tallyo invoice editor showing a professional invoice with
+fictional customer details, line items and a clear total.
+
+### 28 — Repeat customer, less retyping
+
+**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/28-repeat-customer-less-retyping.png`
+
+A repeat customer should not mean repeating the same typing.
+
+Save the details you use regularly, then start the next invoice with the
+familiar information already to hand. You can still review and update it before
+anything is sent.
+
+It is a small change that makes routine invoicing feel much lighter.
+
+Explore the practical features: https://tallyo.co.uk/features/
+
+#InvoiceSoftware #SmallBusinessTools #Productivity
+
+**Alt text:** Tallyo customer-management screen showing fictional customer
+records ready to reuse on future documents.
+
+### 29 — Let the schedule remember
+
+**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/29-let-the-schedule-remember.png`
+
+The monthly job may be familiar. The admin still turns up every month.
+
+For work that genuinely repeats, Tallyo can create the next invoice from a
+schedule and, if you choose, email it automatically. The schedule can still be
+reviewed, changed or paused.
+
+Automation is most useful when you remain in control of it.
+
+Recurring invoice guidance: https://tallyo.co.uk/help/recurring-invoices/
+
+#RecurringInvoices #SmallBusinessUK #Invoicing
+
+**Alt text:** Tallyo recurring-invoice screen showing a fictional monthly
+schedule, its next invoice date and status.
+
+### 30 — Follow up with the context intact
+
+**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/30-overdue-with-context.png`
+
+No one enjoys deciding when to chase an overdue invoice.
+
+Tallyo lets you turn reminders on for the invoices that need them and choose
+when they start, how often they repeat and when they stop. Sent reminders stay
+with the invoice activity.
+
+The follow-up is planned, but it is still your choice.
+
+How reminders work: https://tallyo.co.uk/help/overdue-reminders/
+
+#OverdueInvoices #CashFlow #Freelancers
+
+**Alt text:** Tallyo automatic-reminder settings showing fictional timing and
+maximum-reminder choices for an overdue invoice.
+
+### 31 — A deposit without losing sight of the balance
+
+**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/31-deposit-and-balance.png`
+
+A deposit can make the start of a job simpler for both sides.
+
+When online payment is appropriate, Tallyo lets the business choose a full
+balance or a predefined deposit before sending the invoice. The remaining
+balance continues to sit with the same record.
+
+Online payment stays optional. Stripe processing fees may apply.
+
+See how payment options work: https://tallyo.co.uk/features/
+
+#Deposits #OnlinePayments #Invoicing
+
+**Alt text:** Tallyo payment area showing a fictional deposit amount, recorded
+payment and remaining invoice balance.
+
+### 32 — What happened after the invoice was sent?
+
+**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/32-after-the-invoice-is-sent.png`
+
+Once an invoice has been sent, the useful question is usually: what happened
+next?
+
+Email, payment, refund and document activity stays attached to the relevant
+record in Tallyo. That gives you one place to check before replying to a
+customer or following up.
+
+It is an activity history for everyday clarity, not a tamper-proof audit log.
+
+See the product tour: https://tallyo.co.uk/product-tour/
+
+#InvoiceManagement #PaymentTracking #SmallBusinessUK
+
+**Alt text:** Tallyo activity history showing fictional payment and document
+events attached to one invoice.
