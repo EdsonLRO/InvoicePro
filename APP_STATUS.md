@@ -54,6 +54,8 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 
 No technical blocker remains for the approved initial UK-business public release. Post-release work is limited to routine monitoring and evidence review unless the Owner approves a new scope.
 
+A focused repository candidate adds owner-managed complimentary access for an existing confirmed account selected by email. It is not active in production: migration `20260909115547` and app build `2026.09.09.1` still require exact Owner approval after PR review. The design adds no voucher UI, Stripe object, subscription, payment, Edge Function, secret or copied email field.
+
 The free-generator conversion panel and optional one-time overview email are activated under exact Owner approval. Migrations `20260731152423` and `20260731155610` are applied; the consent table has forced RLS, no browser policies, zero activation rows and only the required service-role read/insert/update privileges. `send-marketing-overview` version 1 is active with its exact-origin, consent-version, idempotency and rate-limit checks, and the production website gates publish the approved Privacy Notice and optional one-email form. Activation smoke tests exercised only preflight, rejected-origin and invalid-payload paths; no promotional email was sent and no consent row was created.
 
 No current task authorises another live Stripe transaction or refund, customer communication, analytics or marketing activation, secret inspection, unrelated provider changes, destructive operations or expansion beyond the approved launch scope.

@@ -662,10 +662,12 @@
                 <div v-if="billing.enabled" ref="billingSection" tabindex="-1" class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                     <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
                         <h2 class="text-2xl font-semibold">Tallyo Subscription</h2>
-                        <span v-if="billing.entitlement" :class="billingAccessBadgeClass(billing.entitlement.access_state)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">{{ billingAccessLabel(billing.entitlement.access_state) }}</span>
+                        <span v-if="billing.complimentaryAccess" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Complimentary access</span>
+                        <span v-else-if="billing.entitlement" :class="billingAccessBadgeClass(billing.entitlement.access_state)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">{{ billingAccessLabel(billing.entitlement.access_state) }}</span>
                         <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">No active plan</span>
                     </div>
-                    <p class="text-sm text-slate-600 mb-5">{{ billing.testMode ? 'Choose a Tallyo Pro plan or manage your current subscription. This protected preview uses Stripe test mode, so no real payment is taken.' : 'Choose monthly or annual billing, or manage your current Tallyo Pro subscription securely with Stripe.' }}</p>
+                    <p v-if="billing.complimentaryAccess" class="text-sm text-slate-600 mb-5">Your account has complimentary full access. No subscription payment is required while this access remains active.</p>
+                    <p v-else class="text-sm text-slate-600 mb-5">{{ billing.testMode ? 'Choose a Tallyo Pro plan or manage your current subscription. This protected preview uses Stripe test mode, so no real payment is taken.' : 'Choose monthly or annual billing, or manage your current Tallyo Pro subscription securely with Stripe.' }}</p>
 
                     <div v-if="billing.subscription" class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm mb-4">
                         <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
@@ -686,7 +688,7 @@
                     <p v-if="billing.error" class="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3 mb-4" role="alert">{{ billing.error }}</p>
 
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <template v-if="!billing.subscription || ['canceled', 'incomplete_expired'].includes(billing.subscription.provider_status)">
+                        <template v-if="!billing.complimentaryAccess && (!billing.subscription || ['canceled', 'incomplete_expired'].includes(billing.subscription.provider_status))">
                             <button @click="openBillingCheckout('monthly')" :disabled="billing.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-medium shadow-sm transition disabled:opacity-50">{{ billing.busy ? 'Opening Stripe...' : 'Choose Monthly · £8' }}</button>
                             <button @click="openBillingCheckout('annual')" :disabled="billing.busy" class="bg-white border border-indigo-300 text-indigo-700 px-6 py-2.5 rounded-lg hover:bg-indigo-50 font-medium transition disabled:opacity-50">{{ billing.busy ? 'Opening Stripe...' : 'Choose Annual · £80' }}</button>
                         </template>
@@ -2412,7 +2414,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.07.31.2';
+    const APP_BUILD = '2026.09.09.1';
     const { createApp } = Vue;
 
     const tallyoApp = createApp({
@@ -2466,6 +2468,7 @@
                     busy: false,
                     subscription: null,
                     entitlement: null,
+                    complimentaryAccess: false,
                     loaded: false,
                     error: '',
                     notice: '',
@@ -3734,6 +3737,7 @@
                     busy: false,
                     subscription: null,
                     entitlement: null,
+                    complimentaryAccess: false,
                     loaded: false,
                     error: '',
                     notice: ''
@@ -4218,7 +4222,7 @@
                 this.billing.loaded = false;
                 this.billing.error = '';
                 try {
-                    const [subscriptionResult, entitlementResult] = await Promise.all([
+                    const [subscriptionResult, entitlementResult, complimentaryAccessResult] = await Promise.all([
                         supabaseClient
                             .from('billing_subscriptions')
                             .select('plan_key,billing_interval,provider_status,current_period_end,cancel_at_period_end,updated_at')
@@ -4228,13 +4232,16 @@
                         supabaseClient
                             .from('account_entitlements')
                             .select('plan_key,access_state,effective_until,updated_at')
-                            .maybeSingle()
+                            .maybeSingle(),
+                        supabaseClient.rpc('current_account_has_complimentary_access')
                     ]);
                     if (!this.sessionLoadIsCurrent(loadUserId, loadSessionVersion)) return;
                     if (subscriptionResult.error) throw subscriptionResult.error;
                     if (entitlementResult.error) throw entitlementResult.error;
+                    if (complimentaryAccessResult.error) throw complimentaryAccessResult.error;
                     this.billing.subscription = subscriptionResult.data || null;
                     this.billing.entitlement = entitlementResult.data || null;
+                    this.billing.complimentaryAccess = complimentaryAccessResult.data === true;
                     this.billing.loaded = true;
                     if (
                         this.billing.activationTrackingPending &&
@@ -4261,7 +4268,8 @@
                     this.billing.error ||
                     this.billing.notice ||
                     this.billing.subscription ||
-                    this.billing.entitlement
+                    this.billing.entitlement ||
+                    this.billing.complimentaryAccess
                 ) return;
                 this.subscriptionWelcomeShown = true;
                 this.subscriptionWelcomeOpen = true;

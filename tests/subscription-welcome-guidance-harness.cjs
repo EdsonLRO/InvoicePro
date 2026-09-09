@@ -21,6 +21,7 @@ assert.match(guidanceMethod, /this\.billing\.error/);
 assert.match(guidanceMethod, /this\.billing\.notice/);
 assert.match(guidanceMethod, /this\.billing\.subscription/);
 assert.match(guidanceMethod, /this\.billing\.entitlement/);
+assert.match(guidanceMethod, /this\.billing\.complimentaryAccess/);
 assert.match(guidanceMethod, /this\.subscriptionWelcomeOpen = true/);
 assert.doesNotMatch(guidanceMethod, /openBillingCheckout|functions\.invoke|window\.location/);
 

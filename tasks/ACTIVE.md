@@ -268,6 +268,19 @@ Release boundary: source, review artifacts, validation, commit, push and a
 focused draft PR only. Do not merge, deploy the function or website assets, or
 send any email without separate exact Owner approval.
 
+## Focused task: COMM-001-ENT-003 Complimentary access by email
+
+Status: Implementation complete — awaiting high-risk PR review and exact Owner production approval
+Priority: Medium
+Assigned roles: Backend/Supabase, Security, Frontend and QA
+Model/work mode: Sol / High for Auth, RLS and entitlement changes
+Risk level: High because the migration changes the server and database authority used to permit authenticated writes
+Affected scope: one additive private grant table, owner-only grant/revoke functions, the two existing entitlement helpers, one identity-bound authenticated status function, Account-page presentation, app build markers, focused tests and authoritative documentation
+Acceptance criteria: grant only an existing confirmed Auth account selected by email; store no duplicate email; prevent browser and service-role grant/revoke; preserve tenant isolation, owner-scoped reads, expiry, revocation and provider reconciliation; create no Stripe object or public voucher; show truthful complimentary-access status; suppress subscription prompts and Checkout choices for the granted account
+Branch: `codex/complimentary-access-by-email`
+Release boundary: commit, push and focused draft PR only. Applying migration `20260909115547`, publishing app build `2026.09.09.1`, granting or revoking any account and merging the high-risk PR require exact Owner approval.
+Validation: the focused source harnesses and a disposable, network-isolated PostgreSQL 17.6 run pass owner-only function privileges, confirmed-account lookup, no copied email field, identity-bound status, tenant isolation, authenticated and server entitlement helpers, immediate revocation and expiry.
+
 ## Locks
 
 - `tasks/ACTIVE.md`;
@@ -279,6 +292,7 @@ send any email without separate exact Owner approval.
 - COMM-001 decision, implementation and evidence files;
 - any new Connect migration, Edge Function, UI and focused test files after Owner scope approval;
 - subscription and AI launch configuration only after its separate approval gate.
+- complimentary-access migration, app UI, tests and authoritative records until PR handoff.
 
 Lock acquired: 2026-07-24.
 

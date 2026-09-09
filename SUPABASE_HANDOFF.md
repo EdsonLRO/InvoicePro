@@ -84,6 +84,16 @@ Draft PR #103 adds migration `20260725014434_enforce_subscription_write_entitlem
 
 Applied Stripe Connect foundation tables: `stripe_connected_accounts`, `stripe_connect_events`, and private `stripe_connect_checkout_claims`. Migrations `20260724174500_stripe_connect_foundation.sql` and `20260724175920_stripe_connect_payments.sql` were applied on 2026-07-24. Authenticated users receive owner-scoped SELECT only on their connected-account state. Connect events and Checkout claims have no browser policy or grant. All provider-derived writes remain service-role-only.
 
+Candidate migration `20260909115547_complimentary_access_by_email.sql` adds occasional complimentary full access without changing Stripe. After the migration is separately approved and applied, run the following only as the database owner in the Supabase SQL Editor:
+
+```sql
+select private.grant_complimentary_access_by_email('confirmed-account@example.com');
+select private.grant_complimentary_access_by_email('confirmed-account@example.com', now() + interval '30 days');
+select private.revoke_complimentary_access_by_email('confirmed-account@example.com');
+```
+
+The address must already belong to a confirmed Auth account. The private grant table stores the Auth `user_id`, timestamps and optional expiry, not a duplicate email. Browser roles and the service role cannot grant or revoke. No Edge Function, secret or Stripe configuration is involved.
+
 ---
 
 ## 7. Per-table details

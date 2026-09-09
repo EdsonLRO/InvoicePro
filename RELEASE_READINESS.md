@@ -8,6 +8,8 @@ Statuses: Planned, In Progress, Implemented, Verified, Blocked, Deferred, Not Ap
 
 **Status:** Verified for the approved initial UK-business public release.
 
+The separate complimentary-access candidate is not yet part of the production verdict. Migration `20260909115547` and app build `2026.09.09.1` remain unapplied/undeployed pending high-risk review and exact Owner approval.
+
 Tallyo's current invoicing-app scope is feature-complete and regression-verified. Controlled live Stripe invoice-payment, Tallyo Pro Billing, connected-account onboarding, one GBP 1 direct connected payment and one full refund completed bounded acceptance before launch. Build `2026.07.23.2` remains on GitHub Pages as the app rollback route. Release build `2026.07.28.2` is public at `https://app.tallyo.co.uk`; it corrects account-data export ordering for the singleton company-settings record while retaining authenticated RLS reads. The production website is public at `https://tallyo.co.uk` and `https://www.tallyo.co.uk`. The approved legal pages, subscription and connected-payment interfaces and bounded AI Helper are available. Final DNS, Auth Site URL, Access-removal and public smoke gates completed on 2026-07-28 without a Stripe transaction or customer communication.
 
 ## Release Gates

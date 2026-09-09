@@ -68,6 +68,12 @@ The applied migration adds:
 
 RLS must keep every mapping account-scoped. Stripe identifiers must never substitute for the Tallyo ownership check. Service-role writes must use reviewed functions and grants.
 
+## Complimentary access
+
+Migration `20260909115547_complimentary_access_by_email.sql` is a focused, unapplied candidate for occasional Owner-granted access. A database-owner-only command resolves an existing confirmed Supabase Auth account by normalised email, then stores only its `user_id`, grant time, optional expiry and revocation time in `private.complimentary_access_grants`. Authenticated and service roles cannot grant or revoke access. The account can read only its own active yes/no result through an identity-bound function; existing RLS and server entitlement helpers accept that active grant in addition to provider-derived `full` or `grace` access.
+
+This path does not create or modify a Stripe Customer, subscription, Checkout Session, payment, coupon or entitlement row. It is not a public voucher, free tier or browser-admin feature. Revocation or expiry stops future writes under the existing enforcement boundary while preserving owner-scoped reads and export.
+
 ## State machine
 
 | State | Access |
