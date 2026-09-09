@@ -8,6 +8,7 @@
 | Annual price is £80 | Approved | Saves £16 versus twelve monthly payments without “free month” language. |
 | No full-feature free trial | Approved | Reduces repeated-email trial abuse; the free maker and monthly plan provide evaluation routes. |
 | No permanent free saved account at launch | Approved | Keeps ongoing storage, automation and support within the paid product. |
+| Owner-granted complimentary access | Approved for occasional accounts | The Owner may grant or revoke full app access for an existing confirmed account by email without creating a Stripe subscription, voucher system or permanent public free tier. |
 | No lifetime deal | Approved | Infrastructure and support costs continue. |
 | One business and one user | Approved | Matches the current verified implementation. |
 | Teams are deferred | Approved | Multi-user workspace and role isolation are not implemented. |
