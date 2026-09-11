@@ -2,19 +2,20 @@
 
 This checklist tracks whether the current app is ready for real customer use. It is not a public-launch checklist for the future SaaS website.
 
-## Owner Console release candidate — 2026-09-11
+## Owner Console release verified — 2026-09-11
 
-The focused Owner Console is not deployed. Release requires exact Owner approval because it changes Auth recovery, privileged service-role functions, protected configuration, a production migration and the public app.
+The focused Owner Console was deployed under exact Owner approval. PR #152 merged at `0e98392033895523eb4fb4e8fe85bab73a989211`. Deployment source was verified identical to the tested branch for the migration, both functions and app release files.
 
-- Reconcile the existing complimentary-access migration ledger timestamp (`20260909122037` remote versus `20260909115547` in source) without rerunning its schema change.
-- Apply only additive migration `20260911170410_owner_console.sql`.
-- Configure only protected `TALLYO_OWNER_USER_ID`; do not expose its value.
-- Deploy only `mfa-recovery` and `owner-account-admin` with JWT verification retained.
-- Verify missing JWT, wrong origin, non-Owner and Owner-below-AAL2 requests fail closed; verify no reset link or internal user UUID reaches the browser.
-- Publish only app build `2026.09.11.1` after backend acceptance.
-- Do not grant/revoke real complimentary access, send a real password reset, approve a real MFA reset, inspect business records or change Stripe during deployment smoke checks.
+- Compared the existing complimentary-access migration SQL, then repaired its ledger timestamp from `20260909122037` to `20260909115547` without rerunning schema changes. Dry run showed only the approved new migration pending.
+- Applied only additive migration `20260911170410_owner_console.sql`. Catalog checks confirmed recovery-table RLS, no direct table privileges for browser/service roles, and seven RPCs executable only by service role rather than anon/authenticated.
+- Configured only protected `TALLYO_OWNER_USER_ID` for the confirmed, MFA-enabled Owner account; its value is not included in evidence.
+- Deployed `mfa-recovery` v33 and `owner-account-admin` v1, both active with JWT verification retained. Both reject live requests without a JWT with HTTP 401.
+- Published app build `2026.09.11.1`; live app returned HTTP 200. Cloudflare app deployment `9ee7120d-122b-44e8-8c43-0077feed8e39` completed successfully from the merge commit. Live AAL2 Owner access and exact-email lookup passed, including correct inactive complimentary-access status and disabled MFA approval without a confirmed request.
+- Six mocked-runtime tests passed locally and in CI: missing JWT/wrong origin, non-Owner/below-AAL2 denials, lookup minimisation, unconfirmed/self-reset rejection, recovery lock before factor deletion, and server-only reset links/hostile-link rejection. Deno checks, formatting and the relevant repository/browser harnesses passed before release. No high-risk tests were repeated after documentation-only edits.
+- Main-branch [Security checks](https://github.com/EdsonLRO/InvoicePro/actions/runs/34630339619) and [Pages build/deployment](https://github.com/EdsonLRO/InvoicePro/actions/runs/34630339319) passed. No unexpected new security advisor warning; the private recovery table's no-policy information is intentional deny-by-default.
+- No real complimentary grant/revocation, password-reset email, MFA reset, business-record inspection or Stripe change was performed. Non-Owner/AAL1 and mutation behaviour were mocked tests, not live two-account acceptance.
 
-Rollback: keep the additive table dormant, remove or disable the protected Owner identity setting/new function, restore the previous `mfa-recovery` function version, and restore app build `2026.09.09.1`. A controlled two-account recovery test requires its own explicit Owner approval because it revokes factors and sessions and sends security email.
+Rollback if required: keep the additive table dormant, remove or disable the protected Owner identity setting/new function, restore `mfa-recovery` v32, and restore app build `2026.09.09.1` (Cloudflare deployment `03a9cd73-85d7-4ae0-a16f-ff27bf0a9ab7`). No rollback was needed. A controlled two-account recovery test still requires its own explicit Owner approval because it revokes factors and sessions and sends security email.
 
 Statuses: Planned, In Progress, Implemented, Verified, Blocked, Deferred, Not Applicable.
 

@@ -1,12 +1,12 @@
 # Active programme: COMM-001 commercial launch integration
 
-## AUTH-003 — Minimal Owner Console candidate
+## AUTH-003 — Minimal Owner Console
 
-Status: repository implementation and focused validation complete; production not approved.
+Status: approved production release complete on 2026-09-11; live Owner AAL2 access and read-only lookup verified. PR #152 merge: `0e98392033895523eb4fb4e8fe85bab73a989211`. No real user mutation or recovery email was exercised.
 
 Scope: exact-email account lookup, existing complimentary-access grant/revoke, registered-email password reset, account-holder-confirmed MFA recovery approval, forced new-authenticator enrolment and minimal action history. The console is restricted to the configured Owner user at AAL2 and excludes impersonation, bulk account browsing and all invoice/customer/payment/business-record access.
 
-Release boundary: reconcile the pre-existing complimentary-access migration-history timestamp, apply only `20260911170410`, configure protected `TALLYO_OWNER_USER_ID`, deploy only `mfa-recovery` and `owner-account-admin` with JWT verification, and publish only build `2026.09.11.1`. Each production step, any real email, any real grant/revocation and any factor/session reset require exact Owner approval.
+Release boundary completed under exact Owner approval: history-only migration reconciliation, migration `20260911170410`, protected `TALLYO_OWNER_USER_ID`, `mfa-recovery` v33 and `owner-account-admin` v1 with JWT verification, and app build `2026.09.11.1`. Real email, grant/revocation and factor/session-reset testing remain excluded. Release evidence and rollback are in `RELEASE_READINESS.md`.
 
 Task ID: COMM-001
 Title: Integrate subscriptions, independent-business customer payments and the public AI Helper for controlled commercial release
