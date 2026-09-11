@@ -122,6 +122,8 @@ Document and test signup/login/reset throttling, password strength, bot controls
 **Status:** Partially implemented; operational support decision remains.
 Tallyo supports a second verified TOTP authenticator, MFA-gated password recovery, fresh-code checks for factor removal/disablement, and allowlisted recovery/factor audit events. Supabase does not provide native recovery codes. AUTH-002 therefore implements server-managed one-time codes with HMAC-only storage, throttling, global factor/session cleanup, restrictive RLS, security notices, and forced re-enrolment. The interim deny-by-default response remains active until the candidate passes production deployment and live acceptance. See `MFA_RECOVERY_RUNBOOK.md`.
 
+The Owner Console candidate adds a second, deliberately narrow all-factors-lost path. It requires a valid password session, a short-lived HMAC-only token confirmed through the account's registered email, and a separate AAL2 Owner approval. Approval removes the target's factors and sessions through the Admin API while the existing recovery-state RLS lock prevents business-data access until a new authenticator reaches AAL2. Exact-email lookup returns only account/security/entitlement status; it does not expose business records or support impersonation. Production remains on the deny-by-default process until the migration, protected Owner identity, two functions and app build are separately approved and accepted.
+
 ### SEC-011 — Backup and restoration are not proven
 
 **Status:** Launch blocker.

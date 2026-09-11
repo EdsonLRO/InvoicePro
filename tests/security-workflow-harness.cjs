@@ -31,6 +31,7 @@ for (const harness of [
   'financial-action-audit-harness.cjs',
   'mfa-recovery-harness.cjs',
   'operational-health-harness.cjs',
+  'owner-console-harness.cjs',
   'refund-consequence-preview-harness.cjs',
   'recurring-calendar-reliability-harness.cjs',
   'scale-accessibility-safety-harness.cjs',

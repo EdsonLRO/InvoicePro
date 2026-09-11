@@ -2,6 +2,20 @@
 
 This checklist tracks whether the current app is ready for real customer use. It is not a public-launch checklist for the future SaaS website.
 
+## Owner Console release candidate — 2026-09-11
+
+The focused Owner Console is not deployed. Release requires exact Owner approval because it changes Auth recovery, privileged service-role functions, protected configuration, a production migration and the public app.
+
+- Reconcile the existing complimentary-access migration ledger timestamp (`20260909122037` remote versus `20260909115547` in source) without rerunning its schema change.
+- Apply only additive migration `20260911170410_owner_console.sql`.
+- Configure only protected `TALLYO_OWNER_USER_ID`; do not expose its value.
+- Deploy only `mfa-recovery` and `owner-account-admin` with JWT verification retained.
+- Verify missing JWT, wrong origin, non-Owner and Owner-below-AAL2 requests fail closed; verify no reset link or internal user UUID reaches the browser.
+- Publish only app build `2026.09.11.1` after backend acceptance.
+- Do not grant/revoke real complimentary access, send a real password reset, approve a real MFA reset, inspect business records or change Stripe during deployment smoke checks.
+
+Rollback: keep the additive table dormant, remove or disable the protected Owner identity setting/new function, restore the previous `mfa-recovery` function version, and restore app build `2026.09.09.1`. A controlled two-account recovery test requires its own explicit Owner approval because it revokes factors and sessions and sends security email.
+
 Statuses: Planned, In Progress, Implemented, Verified, Blocked, Deferred, Not Applicable.
 
 ## Current Verdict
