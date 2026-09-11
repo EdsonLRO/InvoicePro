@@ -2,7 +2,7 @@
 
 ## AUTH-004 — Recovery email canonical destination
 
-Status: Implementation Complete; merge and production deployment require Owner approval.
+Status: Verified under exact Owner approval; PR #154 merged as `bd8b754c75517a8c64655221fbf00a7423c2c6b8` and only the two approved functions were deployed. Active versions are `mfa-recovery` v35 and `owner-account-admin` v3; live source equals the merge, JWT gates return 401 without authorization, and main checks passed. No live email or account mutation was tested.
 Owner: Backend/Supabase, with sequential QA/security review by the same Codex process. Risk: High (recovery runtime); no change to authentication or authorization rules. Branch: `codex/recovery-link-origin-fix`.
 Finding: validated functional recovery failure. The deployed confirmation-link builder reads legacy shared `APP_BASE_URL` and returns only its origin, sending the user to the obsolete GitHub root (404). Owner password-reset/ready-email links use the same pattern. No account takeover or token disclosure is established by this report.
 Fix: pin only these recovery destinations to the existing public `https://app.tallyo.co.uk` origin, leaving shared environment settings, Stripe, JWT/AAL gates, tokens, expiry, rate limits and recovery approval unchanged. No new data, provider, email wording, legal commitment or public notice change.

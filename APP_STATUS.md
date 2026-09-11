@@ -52,9 +52,9 @@ Invoices, quotes, credit notes, customers, saved items, branded multi-page PDFs,
 
 ## Immediate launch blockers
 
-Owner-assisted recovery link defect reported 2026-09-11: the confirmation email can lead to the old GitHub root and a 404. The same legacy-base pattern affects Owner password-reset/ready-email destinations. A focused fix on `codex/recovery-link-origin-fix` pins these destinations to the canonical app and passes local mocked regressions; it is not deployed. Existing mailed links are not rewritten. See `tasks/ACTIVE.md` and `RELEASE_READINESS.md`.
+Owner-assisted recovery link defect corrected under exact approval on 2026-09-11: PR #154 merged as `bd8b754c75517a8c64655221fbf00a7423c2c6b8`; `mfa-recovery` v35 and `owner-account-admin` v3 now pin confirmation, password-reset and ready-email destinations to the canonical app. Live source matches the merge, JWT verification remains enabled, both functions reject missing JWTs, and main CI passed. Existing mailed links are not rewritten; request a fresh email. No live email or account mutation was performed during validation. See `RELEASE_READINESS.md`.
 
-The initial UK-business public release remains active; the newly reported Owner-assisted recovery defect above needs its focused correction. Other post-release work stays within separately approved scope.
+The initial UK-business public release remains active. Other post-release work stays within separately approved scope.
 
 PR #151 merged owner-managed complimentary access for an existing confirmed account selected by email. On 2026-09-11 the identical production migration was reconciled from ledger timestamp `20260909122037` to source timestamp `20260909115547` without rerunning its schema change. The design adds no voucher UI, Stripe object, subscription, payment or copied email field.
 
