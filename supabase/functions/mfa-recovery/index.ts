@@ -14,7 +14,7 @@ const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const CODE_COUNT = 10;
 const CODE_LENGTH = 20;
 
-type Action = "generate" | "recover" | "complete";
+type Action = "generate" | "recover" | "complete" | "request-owner" | "confirm-owner";
 type AuditMetadata = Record<string, string | number | boolean | null>;
 type Database = {
   public: {
@@ -61,6 +61,18 @@ type Database = {
         Returns: string;
       };
       complete_mfa_recovery: { Args: { p_user_id: string }; Returns: undefined };
+      create_owner_mfa_recovery_request: {
+        Args: { p_user_id: string; p_token_hash: string; p_expires_at: string };
+        Returns: string;
+      };
+      cancel_owner_mfa_recovery_request: {
+        Args: { p_user_id: string; p_request_id: string };
+        Returns: undefined;
+      };
+      confirm_owner_mfa_recovery_request: {
+        Args: { p_user_id: string; p_token_hash: string };
+        Returns: string;
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
@@ -116,7 +128,7 @@ async function hmacCode(pepper: string, code: string): Promise<string> {
   return toHex(await crypto.subtle.sign("HMAC", key, encoder.encode(code)));
 }
 
-function securityEmail(action: Action): { subject: string; html: string; text: string } {
+function securityEmail(action: "generate" | "recover" | "complete"): { subject: string; html: string; text: string } {
   const details = action === "generate"
     ? {
       subject: "Your Tallyo recovery codes were replaced",
@@ -143,7 +155,7 @@ function securityEmail(action: Action): { subject: string; html: string; text: s
   };
 }
 
-async function sendSecurityNotice(resendKey: string, to: string, action: Action): Promise<boolean> {
+async function sendSecurityNotice(resendKey: string, to: string, action: "generate" | "recover" | "complete"): Promise<boolean> {
   const email = securityEmail(action);
   try {
     const response = await fetch("https://api.resend.com/emails", {
@@ -155,6 +167,63 @@ async function sendSecurityNotice(resendKey: string, to: string, action: Action)
   } catch {
     return false;
   }
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>'"]/g, (char) =>
+    ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "'": "&#39;",
+      '"': "&quot;",
+    })[char] || char);
+}
+
+async function sendOwnerRecoveryConfirmation(
+  resendKey: string,
+  to: string,
+  confirmationUrl: string,
+): Promise<boolean> {
+  const safeUrl = escapeHtml(confirmationUrl);
+  const message = "Confirm that you asked the Tallyo Owner to reset your lost authenticator. This link expires in 30 minutes and does not unlock the account by itself.";
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: [to],
+        subject: "Confirm your Tallyo authenticator recovery request",
+        text: `Confirm your recovery request\n\n${message}\n\nConfirm recovery request: ${confirmationUrl}\n\nIf you did not request this, do not open the link. Your account remains protected.`,
+        html:
+          `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#1e293b;line-height:1.55"><div style="max-width:600px;margin:0 auto;padding:24px"><h1 style="font-size:22px">Confirm your recovery request</h1><p>${message}</p><p style="margin:24px 0"><a href="${safeUrl}" style="display:inline-block;background:#4f46e5;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:700">Confirm recovery request</a></p><p style="padding:14px;background:#fff7ed;border:1px solid #fed7aa"><strong>If you did not request this, do not open the link. Your account remains protected.</strong></p></div></body></html>`,
+      }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+function ownerRecoveryBaseUrl(): string {
+  const value = String(Deno.env.get("APP_BASE_URL") || "").replace(/\/+$/, "");
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error("Recovery service is unavailable");
+  }
+  if (
+    !APP_ORIGINS.has(parsed.origin) || parsed.username || parsed.password ||
+    parsed.search || parsed.hash
+  ) {
+    throw new Error("Recovery service is unavailable");
+  }
+  return parsed.origin;
 }
 
 async function writeAudit(
@@ -222,12 +291,106 @@ Deno.serve(async (req) => {
     return json(req, { error: "Invalid JSON body" }, 400);
   }
   const action = body.action as Action;
-  if (!(["generate", "recover", "complete"] as Action[]).includes(action)) {
+  if (!(["generate", "recover", "complete", "request-owner", "confirm-owner"] as Action[]).includes(action)) {
     return json(req, { error: "Unsupported action" }, 400);
   }
 
   const { data: aal, error: aalError } = await userClient.auth.mfa.getAuthenticatorAssuranceLevel(jwt);
   if (aalError || !aal?.currentLevel) return json(req, { error: "Account assurance could not be verified" }, 403);
+
+  if (action === "request-owner") {
+    if (aal.currentLevel !== "aal1" || aal.nextLevel !== "aal2") {
+      return json(req, {
+        error: "Owner-assisted recovery is only available at the authenticator step",
+      }, 409);
+    }
+    const factors = await verifiedFactors(admin, userId);
+    if (!factors.length) {
+      return json(req, {
+        error: "Owner-assisted recovery is not required for this account",
+      }, 409);
+    }
+    const recoveryBaseUrl = ownerRecoveryBaseUrl();
+
+    const token = `${crypto.randomUUID().replaceAll("-", "")}${crypto.randomUUID().replaceAll("-", "")}`;
+    const tokenHash = await hmacCode(pepper, token);
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    const { data: requestId, error: requestError } = await admin.rpc(
+      "create_owner_mfa_recovery_request",
+      {
+        p_user_id: userId,
+        p_token_hash: tokenHash,
+        p_expires_at: expiresAt,
+      },
+    );
+    if (requestError || !requestId) {
+      const message = String(requestError?.message || "");
+      return json(req, {
+        error: message.includes("wait 15 minutes") ? "Please wait 15 minutes before requesting another confirmation email." : "Recovery confirmation could not be prepared.",
+      }, message.includes("wait 15 minutes") ? 429 : 500);
+    }
+
+    const confirmationUrl = `${recoveryBaseUrl}/#mfa-recovery-confirm?token=${token}`;
+    if (
+      !(await sendOwnerRecoveryConfirmation(
+        resendKey,
+        userEmail,
+        confirmationUrl,
+      ))
+    ) {
+      await admin.rpc("cancel_owner_mfa_recovery_request", {
+        p_user_id: userId,
+        p_request_id: String(requestId),
+      });
+      await writeAudit(
+        admin,
+        userId,
+        "account_mfa_owner_recovery_request_failed",
+        { phase: "notification" },
+      );
+      return json(req, {
+        error: "The confirmation email could not be sent. Try again.",
+      }, 502);
+    }
+    await writeAudit(admin, userId, "account_mfa_owner_recovery_requested", {
+      expires_minutes: 30,
+    });
+    return json(req, { sent: true });
+  }
+
+  if (action === "confirm-owner") {
+    const isMfaChallenge = aal.currentLevel === "aal1" &&
+      aal.nextLevel === "aal2";
+    if (!isMfaChallenge && aal.currentLevel !== "aal2") {
+      return json(req, {
+        error: "This recovery confirmation is not required for the current session",
+      }, 409);
+    }
+    const token = String(body.token || "").trim().toLowerCase();
+    if (!/^[0-9a-f]{64}$/.test(token)) {
+      return json(req, { error: "This recovery link is invalid." }, 400);
+    }
+    const tokenHash = await hmacCode(pepper, token);
+    const { data: result, error: confirmError } = await admin.rpc(
+      "confirm_owner_mfa_recovery_request",
+      {
+        p_user_id: userId,
+        p_token_hash: tokenHash,
+      },
+    );
+    if (confirmError) {
+      return json(req, {
+        error: "Recovery confirmation could not be completed.",
+      }, 500);
+    }
+    if (result !== "confirmed") {
+      return json(req, {
+        error: result === "expired" ? "This recovery link has expired. Request a new confirmation email." : "This recovery link is invalid or has already been used.",
+      }, 400);
+    }
+    await writeAudit(admin, userId, "account_mfa_owner_recovery_confirmed", {});
+    return json(req, { confirmed: true });
+  }
 
   if (action === "generate") {
     if (aal.currentLevel !== "aal2") return json(req, { error: "Two-factor verification is required" }, 403);

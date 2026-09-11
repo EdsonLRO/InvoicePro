@@ -408,6 +408,9 @@
 
             <div v-if="authMode === 'login'" class="space-y-5">
                 <h2 class="text-xl font-semibold">Sign In</h2>
+                <div v-if="ownerMfaRecovery.token" class="bg-blue-50 text-blue-800 text-sm p-4 rounded-lg border border-blue-100" role="status">
+                    Sign in with the account email and password to confirm the authenticator recovery request.
+                </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Email Address</label>
                     <input type="email" v-model="auth.username" @keyup.enter="login" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -486,6 +489,12 @@
                 </div>
                 <button @click="verifyMfaLogin" :disabled="authBusy" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Verifying...' : 'Verify & Sign In' }}</button>
                 <button @click="startRecoveryCodeLogin" :disabled="authBusy" class="w-full border border-indigo-200 text-indigo-700 py-2.5 rounded-lg hover:bg-indigo-50 font-medium transition disabled:opacity-50">Use a recovery code</button>
+                <div class="pt-3 border-t border-slate-200">
+                    <p class="text-sm text-slate-600 mb-3">Lost access to every authenticator and your recovery codes?</p>
+                    <p v-if="ownerMfaRecovery.requestSent" class="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3 mb-3" role="status">Confirmation email sent. Open it within 30 minutes, sign in again if asked, and confirm your request.</p>
+                    <p v-if="ownerMfaRecovery.error" class="text-sm text-red-600 mb-3" role="alert">{{ ownerMfaRecovery.error }}</p>
+                    <button @click="requestOwnerMfaRecovery" :disabled="ownerMfaRecovery.busy || ownerMfaRecovery.requestSent" class="w-full border border-slate-300 text-slate-700 py-2.5 rounded-lg hover:bg-slate-50 font-medium transition disabled:opacity-50">{{ ownerMfaRecovery.busy ? 'Sending confirmation...' : 'Email me a recovery confirmation' }}</button>
+                </div>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     <button @click="authMode = 'login'" class="text-indigo-600 hover:underline font-medium">Cancel</button>
                 </div>
@@ -505,6 +514,15 @@
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     <button @click="returnToMfaChallenge" class="text-indigo-600 hover:underline font-medium">Use an authenticator instead</button>
                 </div>
+            </div>
+
+            <div v-if="authMode === 'mfa-owner-recovery-waiting'" class="space-y-5">
+                <h2 class="text-xl font-semibold">Recovery request confirmed</h2>
+                <div class="bg-green-50 text-green-800 text-sm p-4 rounded-lg border border-green-200" role="status">
+                    Your registered email has been confirmed. The Tallyo Owner can now review the request. Your account remains protected until the reset is approved.
+                </div>
+                <p class="text-sm text-slate-600">After approval, sign in with your email and password. Tallyo will ask you to connect and verify a new authenticator before restoring access to your business data.</p>
+                <button @click="finishOwnerMfaRecoveryConfirmation" class="w-full bg-slate-900 text-white py-2.5 rounded-lg hover:bg-slate-800 font-medium transition shadow-sm">Return to sign in</button>
             </div>
 
             <div v-if="authMode === 'mfa-recovery-enroll'" class="space-y-5">
@@ -614,6 +632,7 @@
                         <button @click="navigateTo('recurring')" :class="{'bg-slate-800 text-white': activeTab === 'recurring', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'recurring'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Recurring<span v-if="dueTemplates.length" class="ml-1.5 inline-flex items-center justify-center bg-amber-500 text-white text-[10px] font-bold rounded-full h-4 min-w-4 px-1">{{ dueTemplates.length }}</span></button>
                         <button @click="navigateTo('settings')" :class="{'bg-slate-800 text-white': activeTab === 'settings', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'settings'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Company Settings</button>
                         <button @click="navigateTo('account')" :class="{'bg-slate-800 text-white': activeTab === 'account', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'account'}" class="primary-navigation-item primary-navigation-account mt-1 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap border border-slate-700">Account</button>
+                        <button v-if="ownerConsole.available" @click="navigateTo('owner')" :class="{'bg-slate-800 text-white': activeTab === 'owner', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'owner'}" class="primary-navigation-item primary-navigation-account mt-1 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap border border-slate-700">Owner Console</button>
                         <button ref="helpPanelTrigger" type="button" @click.stop="openHelpPanel" class="primary-navigation-item primary-navigation-account mt-1 py-2 rounded-lg border border-slate-700 text-sm font-medium text-slate-300 transition-colors whitespace-nowrap hover:bg-slate-800 hover:text-white">Help &amp; install</button>
                     </nav>
                 </div>
@@ -855,6 +874,94 @@
 
                 <p class="text-center text-xs text-slate-400">Tallyo build {{ appBuild }}</p>
 
+            </div>
+
+            <div v-show="activeTab === 'owner' && ownerConsole.available" class="max-w-3xl mx-auto space-y-6">
+                <div>
+                    <p class="text-sm font-bold uppercase tracking-wider text-indigo-600 mb-1">Owner only</p>
+                    <h2 class="text-3xl font-semibold mb-2">Tallyo Owner Console</h2>
+                    <p class="text-slate-600">Use an exact account email to manage access or help with account recovery. This console cannot open invoices, customer records or sign in as another user.</p>
+                </div>
+
+                <div class="bg-white p-5 sm:p-7 rounded-xl shadow-sm border border-slate-200">
+                    <label class="block text-sm font-bold text-slate-700 mb-2" for="owner-account-email">Account email</label>
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <input id="owner-account-email" type="email" v-model="ownerConsole.email" @keyup.enter="ownerLookupAccount" autocomplete="off" class="flex-1 border rounded-lg px-3 py-3 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="person@example.com">
+                        <button @click="ownerLookupAccount" :disabled="ownerConsole.busy" class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 font-semibold shadow-sm transition disabled:opacity-50">{{ ownerConsole.busy ? 'Checking...' : 'Find account' }}</button>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Only an exact email match is returned. No business records are shown.</p>
+                    <p v-if="ownerConsole.error" class="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg p-3 mt-4" role="alert">{{ ownerConsole.error }}</p>
+                    <p v-if="ownerConsole.notice" class="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg p-3 mt-4" role="status">{{ ownerConsole.notice }}</p>
+                </div>
+
+                <template v-if="ownerConsole.account">
+                    <div class="bg-white p-5 sm:p-7 rounded-xl shadow-sm border border-slate-200">
+                        <div class="flex items-start justify-between gap-4 flex-wrap mb-5">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Account</p>
+                                <p class="text-lg font-semibold text-slate-900 break-all">{{ ownerConsole.account.account_email }}</p>
+                                <p class="text-sm text-slate-500 mt-1">Created {{ formatDateTime(ownerConsole.account.account_created_at) }}</p>
+                            </div>
+                            <span :class="ownerConsole.account.email_confirmed ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium">{{ ownerConsole.account.email_confirmed ? 'Email confirmed' : 'Email not confirmed' }}</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                                <p class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Complimentary access</p>
+                                <p class="font-medium text-slate-800">{{ ownerConsole.account.complimentary_access_active ? 'Active' : 'Not active' }}</p>
+                                <p v-if="ownerConsole.account.complimentary_access_expires_at" class="text-xs text-slate-500 mt-1">Until {{ formatDateTime(ownerConsole.account.complimentary_access_expires_at) }}</p>
+                            </div>
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                                <p class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Subscription access</p>
+                                <p class="font-medium text-slate-800">{{ ownerConsole.account.subscription_access_state || 'None' }}</p>
+                            </div>
+                            <div class="rounded-lg bg-slate-50 border border-slate-200 p-3">
+                                <p class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Authenticators</p>
+                                <p class="font-medium text-slate-800">{{ ownerConsole.account.verified_mfa_factors }} verified</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 sm:p-7 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="text-xl font-semibold mb-2">Complimentary full access</h3>
+                        <p class="text-sm text-slate-600 mb-5">Grant full Tallyo access without creating or changing a Stripe subscription.</p>
+                        <label class="block text-sm font-bold text-slate-700 mb-2" for="owner-access-duration">Access duration</label>
+                        <select id="owner-access-duration" v-model="ownerConsole.accessDays" class="w-full sm:w-64 border rounded-lg px-3 py-3 mb-4 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="permanent">No expiry</option>
+                            <option value="30">30 days</option>
+                            <option value="90">90 days</option>
+                            <option value="365">One year</option>
+                        </select>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button @click="ownerGrantComplimentaryAccess" :disabled="ownerConsole.busy" class="bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 font-semibold transition disabled:opacity-50">Grant or update access</button>
+                            <button @click="ownerRevokeComplimentaryAccess" :disabled="ownerConsole.busy || !ownerConsole.account.complimentary_access_active" class="bg-white border border-red-300 text-red-700 px-6 py-2.5 rounded-lg hover:bg-red-50 font-medium transition disabled:opacity-50">Revoke complimentary access</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 sm:p-7 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="text-xl font-semibold mb-2">Account recovery</h3>
+                        <p class="text-sm text-slate-600 mb-5">Password recovery does not remove two-factor authentication. An MFA reset becomes available only after the account holder confirms the link sent to their registered email.</p>
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 mb-4">
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">MFA recovery request</p>
+                            <p class="font-medium text-slate-800">{{ ownerRecoveryStatusLabel(ownerConsole.account.recovery_request_status) }}</p>
+                            <p v-if="ownerConsole.account.recovery_requested_at" class="text-xs text-slate-500 mt-1">Requested {{ formatDateTime(ownerConsole.account.recovery_requested_at) }}</p>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button @click="ownerSendPasswordReset" :disabled="ownerConsole.busy || !ownerConsole.account.email_confirmed" class="bg-white border border-slate-300 text-slate-700 px-6 py-2.5 rounded-lg hover:bg-slate-50 font-medium transition disabled:opacity-50">Send password-reset email</button>
+                            <button @click="ownerApproveMfaReset" :disabled="ownerConsole.busy || !['confirmed', 'approved'].includes(ownerConsole.account.recovery_request_status)" class="bg-red-600 text-white px-6 py-2.5 rounded-lg hover:bg-red-700 font-semibold transition disabled:opacity-50">{{ ownerConsole.account.recovery_request_status === 'approved' ? 'Retry authenticator removal' : 'Approve confirmed MFA reset' }}</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 sm:p-7 rounded-xl shadow-sm border border-slate-200">
+                        <h3 class="text-xl font-semibold mb-4">Recent owner actions</h3>
+                        <p v-if="!ownerConsole.account.recent_owner_actions.length" class="text-sm text-slate-500">No owner action has been recorded for this account.</p>
+                        <ul v-else class="divide-y divide-slate-100">
+                            <li v-for="action in ownerConsole.account.recent_owner_actions" :key="action.event_type + action.created_at" class="py-3 flex flex-col sm:flex-row sm:justify-between gap-1 text-sm">
+                                <span class="font-medium text-slate-800">{{ ownerActionLabel(action.event_type) }}</span>
+                                <span class="text-slate-500">{{ formatDateTime(action.created_at) }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </template>
             </div>
 
             <div v-if="sessionConfirm.visible" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4">
@@ -2414,7 +2521,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.09.09.1';
+    const APP_BUILD = '2026.09.11.1';
     const { createApp } = Vue;
 
     const tallyoApp = createApp({
@@ -2449,6 +2556,7 @@
                 },
                 mfa: { enabled: false, busy: false, step: 'idle', loginFactorId: null, loginFactors: [], verifiedFactorId: null, verifiedFactors: [], enrollFactorId: null, enrollKind: 'primary', qr: '', secret: '', code: '' },
                 mfaRecovery: { busy: false, pending: false, enrollmentVerified: false, code: '', error: '', codes: [], codesGeneratedAt: null },
+                ownerMfaRecovery: { token: '', busy: false, requestSent: false, confirmed: false, error: '' },
                 mfaPasswordConfirm: { visible: false, busy: false, code: '', error: '', title: 'Confirm with authenticator', message: 'Enter the 6-digit code from your authenticator app.' },
                 sessionConfirm: { visible: false, busy: false, password: '', error: '' },
                 reauthChallenge: { visible: false, loading: false, widgetId: null, token: '', error: '', context: '', title: 'Security verification', message: 'Complete the security check to continue.' },
@@ -2473,6 +2581,15 @@
                     error: '',
                     notice: '',
                     activationTrackingPending: false
+                },
+                ownerConsole: {
+                    available: false,
+                    busy: false,
+                    email: '',
+                    accessDays: 'permanent',
+                    account: null,
+                    error: '',
+                    notice: ''
                 },
 
                 // App State
@@ -2942,7 +3059,9 @@
                 this.togglePageSelection(this.paginatedRecurringTemplates, 'selectedRecurring', checked);
             },
             routeTabs() {
-                return ['dashboard', 'create', 'edit', 'invoices', 'customers', 'items', 'branding', 'recurring', 'settings', 'account'];
+                const tabs = ['dashboard', 'create', 'edit', 'invoices', 'customers', 'items', 'branding', 'recurring', 'settings', 'account'];
+                if (this.ownerConsole.available) tabs.push('owner');
+                return tabs;
             },
             routeKeyFromHash() {
                 const key = (window.location.hash || '').replace(/^#\/?/, '').split(/[/?&]/)[0];
@@ -2998,6 +3117,13 @@
                 if (!this.isLoggedIn) return;
                 const routeKey = this.routeKeyFromHash();
                 this.applyRoute(this.tabFromRouteKey(routeKey), routeKey);
+            },
+            ownerRecoveryTokenFromHash() {
+                const hash = String(window.location.hash || '');
+                const match = hash.match(/^#mfa-recovery-confirm\?(.+)$/);
+                if (!match) return '';
+                const token = String(new URLSearchParams(match[1]).get('token') || '').trim().toLowerCase();
+                return /^[0-9a-f]{64}$/.test(token) ? token : '';
             },
             // ================= AUTHENTICATION (Supabase Auth) =================
             isTurnstileAuthMode(mode = this.authMode) {
@@ -3315,6 +3441,160 @@
                 }
                 return data || {};
             },
+            async requestOwnerMfaRecovery() {
+                this.ownerMfaRecovery.busy = true;
+                this.ownerMfaRecovery.error = '';
+                try {
+                    await this.invokeMfaRecovery('request-owner');
+                    this.ownerMfaRecovery.requestSent = true;
+                } catch (error) {
+                    this.ownerMfaRecovery.error = error.message || 'The confirmation email could not be sent. Try again.';
+                } finally {
+                    this.ownerMfaRecovery.busy = false;
+                }
+            },
+            async confirmOwnerMfaRecoveryIntent() {
+                const token = this.ownerMfaRecovery.token;
+                if (!token) return false;
+                try {
+                    await this.invokeMfaRecovery('confirm-owner', { token });
+                    this.ownerMfaRecovery.confirmed = true;
+                    this.ownerMfaRecovery.token = '';
+                    this.ownerMfaRecovery.error = '';
+                    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+                    this.authMode = 'mfa-owner-recovery-waiting';
+                    return true;
+                } catch (error) {
+                    this.ownerMfaRecovery.error = error.message || 'Recovery confirmation could not be completed.';
+                    this.ownerMfaRecovery.token = '';
+                    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+                    return false;
+                }
+            },
+            async finishOwnerMfaRecoveryConfirmation() {
+                this.authSignOutRequested = true;
+                try { await supabaseClient.auth.signOut({ scope: 'local' }); } catch (_) { /* clear local state below */ }
+                this.clearSignedOutState();
+            },
+            async invokeOwnerConsole(action, payload = {}) {
+                const { data, error } = await supabaseClient.functions.invoke('owner-account-admin', {
+                    body: { action, ...payload }
+                });
+                if (data && data.error) throw new Error(data.error);
+                if (error) {
+                    let message = error.message || 'Owner action failed.';
+                    try {
+                        if (error.context && typeof error.context.clone === 'function') {
+                            const detail = await error.context.clone().json();
+                            if (detail && detail.error) message = detail.error;
+                        }
+                    } catch (_) { /* retain safe fallback */ }
+                    throw new Error(message);
+                }
+                return data || {};
+            },
+            async loadOwnerConsoleAccess() {
+                this.ownerConsole.available = false;
+                try {
+                    const result = await this.invokeOwnerConsole('status');
+                    this.ownerConsole.available = result.owner === true;
+                } catch (_) {
+                    this.ownerConsole.available = false;
+                }
+            },
+            ownerRecoveryStatusLabel(status) {
+                return ({
+                    none: 'No request',
+                    awaiting_confirmation: 'Waiting for email confirmation',
+                    confirmed: 'Confirmed — ready for Owner approval',
+                    approved: 'Approved — new authenticator required',
+                    replaced: 'Replaced by a newer request',
+                    delivery_failed: 'Confirmation email was not delivered',
+                    expired: 'Expired'
+                })[status] || 'No request';
+            },
+            ownerActionLabel(eventType) {
+                return ({
+                    owner_complimentary_access_granted: 'Complimentary access granted or updated',
+                    owner_complimentary_access_revoked: 'Complimentary access revoked',
+                    owner_password_reset_sent: 'Password-reset email sent',
+                    owner_mfa_recovery_approved: 'MFA reset approved',
+                    owner_mfa_recovery_ready: 'Old authenticators removed'
+                })[eventType] || 'Owner account action';
+            },
+            async ownerLookupAccount(options = {}) {
+                const email = String(this.ownerConsole.email || '').trim().toLowerCase();
+                if (!email) {
+                    this.ownerConsole.error = 'Enter the exact account email.';
+                    return;
+                }
+                this.ownerConsole.busy = true;
+                this.ownerConsole.error = '';
+                if (!options.keepNotice) this.ownerConsole.notice = '';
+                try {
+                    const result = await this.invokeOwnerConsole('lookup', { email });
+                    this.ownerConsole.email = email;
+                    this.ownerConsole.account = result.account || null;
+                } catch (error) {
+                    this.ownerConsole.account = null;
+                    this.ownerConsole.error = error.message || 'Account lookup could not be completed.';
+                } finally {
+                    this.ownerConsole.busy = false;
+                }
+            },
+            ownerComplimentaryExpiry() {
+                if (this.ownerConsole.accessDays === 'permanent') return null;
+                const days = Number(this.ownerConsole.accessDays);
+                if (![30, 90, 365].includes(days)) throw new Error('Choose a valid access duration.');
+                return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+            },
+            async ownerRunAccountAction(action, successMessage, payload = {}) {
+                if (!this.ownerConsole.account) return;
+                this.ownerConsole.busy = true;
+                this.ownerConsole.error = '';
+                this.ownerConsole.notice = '';
+                try {
+                    const result = await this.invokeOwnerConsole(action, {
+                        email: this.ownerConsole.account.account_email,
+                        ...payload
+                    });
+                    if (result.account) this.ownerConsole.account = result.account;
+                    this.ownerConsole.notice = successMessage;
+                    return result;
+                } catch (error) {
+                    this.ownerConsole.error = error.message || 'The owner action could not be completed.';
+                    return null;
+                } finally {
+                    this.ownerConsole.busy = false;
+                }
+            },
+            async ownerGrantComplimentaryAccess() {
+                if (!this.ownerConsole.account) return;
+                const duration = this.ownerConsole.accessDays === 'permanent' ? 'without an expiry' : `for ${this.ownerConsole.accessDays} days`;
+                if (!confirm(`Grant full complimentary Tallyo access to ${this.ownerConsole.account.account_email} ${duration}? No Stripe subscription or payment will be created.`)) return;
+                let expiresAt;
+                try { expiresAt = this.ownerComplimentaryExpiry(); }
+                catch (error) { this.ownerConsole.error = error.message; return; }
+                await this.ownerRunAccountAction('grant-complimentary', 'Complimentary access has been granted.', { expiresAt });
+            },
+            async ownerRevokeComplimentaryAccess() {
+                if (!this.ownerConsole.account || !this.ownerConsole.account.complimentary_access_active) return;
+                if (!confirm(`Revoke complimentary access for ${this.ownerConsole.account.account_email}? Their account and data will remain, but access will depend on their subscription status.`)) return;
+                await this.ownerRunAccountAction('revoke-complimentary', 'Complimentary access has been revoked.');
+            },
+            async ownerSendPasswordReset() {
+                if (!this.ownerConsole.account) return;
+                if (!confirm(`Send a password-reset email to ${this.ownerConsole.account.account_email}? This will not remove two-factor authentication.`)) return;
+                await this.ownerRunAccountAction('send-password-reset', 'Password-reset email sent to the registered address.');
+            },
+            async ownerApproveMfaReset() {
+                if (!this.ownerConsole.account || !['confirmed', 'approved'].includes(this.ownerConsole.account.recovery_request_status)) return;
+                if (!confirm(`Approve the confirmed MFA reset for ${this.ownerConsole.account.account_email}? Existing authenticators and sessions will be removed, and the user must connect a new authenticator before accessing business data.`)) return;
+                const result = await this.ownerRunAccountAction('approve-mfa-reset', 'MFA reset approved. The user must now sign in and connect a new authenticator.');
+                if (result && result.notificationSent === false) {
+                    this.ownerConsole.notice = 'MFA reset completed, but the security email could not be delivered. Tell the user to sign in and connect a new authenticator.';
+                }
+            },
             async fetchMfaRecoveryState(userId) {
                 const { data, error } = await supabaseClient
                     .from('mfa_recovery_state')
@@ -3337,6 +3617,9 @@
                 try {
                     const { data: aal, error: aalError } = await supabaseClient.auth.mfa.getAuthenticatorAssuranceLevel();
                     if (aalError || !aal) throw aalError || new Error('Assurance level unavailable');
+                    if (this.ownerMfaRecovery.token && (aal.currentLevel === 'aal2' || (aal.currentLevel === 'aal1' && aal.nextLevel === 'aal2'))) {
+                        if (await this.confirmOwnerMfaRecoveryIntent()) return;
+                    }
                     const recoveryState = await this.fetchMfaRecoveryState(user.id);
                     if (recoveryState.recovery_required) {
                         const { data: factors, error: factorsError } = await supabaseClient.auth.mfa.listFactors();
@@ -3691,6 +3974,8 @@
                 if (!this.sessionLoadIsCurrent(user.id, signInSessionVersion)) return;
                 await this.loadMfaStatus();
                 if (!this.sessionLoadIsCurrent(user.id, signInSessionVersion)) return;
+                await this.loadOwnerConsoleAccess();
+                if (!this.sessionLoadIsCurrent(user.id, signInSessionVersion)) return;
                 this.navigateTo(this.tabFromHash(), { replace: !window.location.hash });
                 this.maybeShowSubscriptionWelcome();
             },
@@ -3772,6 +4057,8 @@
                 this.lastTaxMode = 'exclusive';
                 this.mfa = { enabled: false, busy: false, step: 'idle', loginFactorId: null, loginFactors: [], verifiedFactorId: null, verifiedFactors: [], enrollFactorId: null, enrollKind: 'primary', qr: '', secret: '', code: '' };
                 this.mfaRecovery = { busy: false, pending: false, enrollmentVerified: false, code: '', error: '', codes: [], codesGeneratedAt: null };
+                this.ownerMfaRecovery = { token: '', busy: false, requestSent: false, confirmed: false, error: '' };
+                this.ownerConsole = { available: false, busy: false, email: '', accessDays: 'permanent', account: null, error: '', notice: '' };
                 this.pwdChange = { old: '', new: '', confirm: '' };
                 this.pwdRecovery = { busy: false, securityVerified: false, new: '', confirm: '', code: '', error: '', requiresMfa: false, factorId: null, factors: [] };
                 this.passwordRecoveryStarted = false;
@@ -6411,6 +6698,7 @@
         },
         async mounted() {
             window.addEventListener('hashchange', this.handleHashChange);
+            this.ownerMfaRecovery.token = this.ownerRecoveryTokenFromHash();
             this.beforeInstallPromptHandler = (event) => {
                 event.preventDefault();
                 this.installPromptEvent = event;

@@ -1,5 +1,7 @@
 ﻿# SUPABASE_HANDOFF.md — Tallyo (code name: InvoicePro)
 
+> Owner Console candidate (2026-09-11): `20260911170410_owner_console.sql`, `owner-account-admin`, the extended `mfa-recovery` function and app build `2026.09.11.1` are repository-only and not deployed. The protected `TALLYO_OWNER_USER_ID` setting must contain the existing Owner Auth UUID and must never be committed or shown in evidence. Production migration history currently records the already-active complimentary-access schema as `20260909122037`, while source names it `20260909115547`; repair that ledger mismatch before applying another migration.
+>
 > How Supabase is used in this app. For another developer or AI coding agent.
 > Read before touching auth, the database, RLS, the Edge Function, or the scheduler.
 > Also read `AUTOMATION_MODEL_ORCHESTRATION.md` for Backend/Supabase ownership, Sol review boundaries, task locks, and handoffs. Supabase changes affecting personal data, retention, deletion, exports, vendors, transfers, incidents, or public launch also require the active review defined in `TALLYO_LEGAL_COMPLIANCE_AGENT.md`. Dashboard inspection or change follows `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
@@ -48,7 +50,7 @@
 - The app also has an in-app **"Change Password"** feature for a signed-in user. Its box asks for the user's **Current Password**, with the note *"Please enter your current password to confirm it's you."* — keep this wording consistent with the field.
 - When MFA is enabled, Change Password prompts for and verifies a fresh TOTP code after the current-password reauth. Supabase requires an AAL2 session before password updates on MFA accounts.
 - The logged-out reset flow is wired in `index.html` with masked new-password and confirmation fields. It must successfully list verified factors before enabling the update and requires a selected TOTP factor when MFA exists.
-- Email recovery is not an MFA bypass. If factor discovery fails, the app stops recovery. If every authenticator is lost, there is no self-service shortcut; see `MFA_RECOVERY_RUNBOOK.md`.
+- Email recovery is not an MFA bypass. If factor discovery fails, the app stops recovery. Current production remains deny-by-default when every authenticator and saved recovery code is lost. The Owner Console repository candidate adds a separately gated password-session plus registered-email confirmation and AAL2 Owner-approval path; see `MFA_RECOVERY_RUNBOOK.md`.
 
 ---
 
@@ -312,6 +314,7 @@ Names only — never commit real values.
 - `AUTOMATION_SECRET`
 - `APP_BASE_URL`
 - `MFA_RECOVERY_PEPPER` - required by the deployed `mfa-recovery` Edge Function; server-side only, never display, log, or commit its value.
+- `TALLYO_OWNER_USER_ID` - required only by the Owner Console candidate; protected server-side identifier for the one authorised Owner Auth user, never browser-side or recorded with its value.
 
 **Configured protected-sandbox Stripe Billing settings (names only):**
 - `STRIPE_BILLING_ENABLED`

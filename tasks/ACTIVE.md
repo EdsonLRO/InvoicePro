@@ -1,5 +1,13 @@
 # Active programme: COMM-001 commercial launch integration
 
+## AUTH-003 — Minimal Owner Console candidate
+
+Status: repository implementation and focused validation complete; production not approved.
+
+Scope: exact-email account lookup, existing complimentary-access grant/revoke, registered-email password reset, account-holder-confirmed MFA recovery approval, forced new-authenticator enrolment and minimal action history. The console is restricted to the configured Owner user at AAL2 and excludes impersonation, bulk account browsing and all invoice/customer/payment/business-record access.
+
+Release boundary: reconcile the pre-existing complimentary-access migration-history timestamp, apply only `20260911170410`, configure protected `TALLYO_OWNER_USER_ID`, deploy only `mfa-recovery` and `owner-account-admin` with JWT verification, and publish only build `2026.09.11.1`. Each production step, any real email, any real grant/revocation and any factor/session reset require exact Owner approval.
+
 Task ID: COMM-001
 Title: Integrate subscriptions, independent-business customer payments and the public AI Helper for controlled commercial release
 Priority: High

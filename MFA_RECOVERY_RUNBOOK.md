@@ -36,6 +36,19 @@ The password-reset email proves access to the registered mailbox, but it does no
 - If factor discovery or assurance verification fails, recovery stops and asks the user to reopen the reset link.
 - Successful recovery writes an allowlisted `account_password_recovered` audit event without storing the password, email address, TOTP code, or recovery token.
 
+## Owner-Assisted Recovery Candidate
+
+The repository candidate adds a deliberately narrow fallback for an account holder who knows the account password but has lost every authenticator and saved recovery code. It is not active in production until separately approved and deployed.
+
+1. The account holder signs in with the existing email and password and reaches the authenticator challenge.
+2. The account holder requests recovery. Tallyo stores only an HMAC-SHA256 token value, rate-limits repeat requests to one per 15 minutes, and emails a 30-minute confirmation link to the registered and already-confirmed account address.
+3. Opening the link is not enough by itself: the account holder must also have the password-authenticated session and must affirm the request through the app.
+4. The Owner signs in to the normal Tallyo app with AAL2, looks up the one exact registered email, and can approve only a currently confirmed request. The console cannot reset the Owner's own MFA.
+5. Approval invalidates saved recovery codes, enables the existing database recovery lock, removes the target account's verified factors and revokes its active sessions through Supabase Auth.
+6. The account holder signs in again and must enrol and verify a new authenticator before RLS permits access to business data.
+
+The Owner never sees the password, recovery link, token, authenticator secret, factor identifier, customer records, invoices, payment information or other business data. There is no impersonation or general user browser. A failed factor-cleanup attempt can be retried for one hour without accepting a stale historical approval.
+
 ## Lost-Factor Scenarios
 
 | Situation | Supported action |
@@ -44,9 +57,9 @@ The password-reset email proves access to the registered mailbox, but it does no
 | Backup authenticator unavailable, primary available | Use the primary authenticator and remove/re-enrol the backup. |
 | Password forgotten, at least one authenticator available | Use the password-reset email and complete the TOTP challenge. |
 | All authenticators lost, saved code available | Use the password plus one saved one-time recovery code, then enrol a new authenticator before business data is unlocked. |
-| All authenticators and saved codes lost | Use the deny-by-default support process below; no email-only, support, or administrator bypass exists. |
+| All authenticators and saved codes lost | Current production: use the deny-by-default support process below. Candidate after separate release approval: password-authenticated request, registered-email confirmation, AAL2 Owner approval and forced new-authenticator enrolment. |
 
-## All Factors Lost
+## All Factors Lost — Current Production
 
 The Owner accepted the following deny-by-default fallback on 2026-07-14 for a user who has neither an available authenticator nor a valid saved recovery code:
 
@@ -89,6 +102,13 @@ For each release that changes Auth or MFA:
 16. Confirm audit events contain only the allowlisted event type and minimal phase/count/notice status.
 17. Repeat the isolation probes with two accounts and confirm neither can see or change the other's state or data.
 18. Replace the recovery-code set and confirm every code from the previous generation is invalid.
+19. Confirm a non-Owner cannot discover or call Owner Console actions and an Owner session below AAL2 is rejected.
+20. Confirm exact-email lookup returns only account, entitlement, MFA-request and minimal action-history fields, with no internal user identifier or business record.
+21. Confirm an owner-assisted request requires an existing verified factor, a confirmed account email and an AAL1 authenticator challenge; enforce the 15-minute request limit and 30-minute confirmation expiry.
+22. Confirm the database stores only the 64-character HMAC token value and that a wrong, expired, replaced or already-resolved token cannot confirm recovery.
+23. Confirm the Owner cannot reset their own MFA and cannot approve an unconfirmed request.
+24. Confirm approved recovery removes every target factor/session, invalidates saved codes, activates the recovery RLS lock, and remains safely retryable after partial factor-cleanup failure.
+25. Confirm the target must verify a new authenticator at AAL2 before tenant data is available again, and that security notices and audit metadata contain no credential or token value.
 
 ## Current Evidence And Limits
 
@@ -120,3 +140,14 @@ Do not merge or publish the frontend before its backend dependencies exist. The 
 6. **Completed 2026-07-17:** post-merge security and Pages workflows passed. The focused public-shell smoke check confirmed HTTPS load, the new recovery-modal mobile-scroll CSS, no horizontal overflow, and no browser warning/error.
 
 If any backend step fails, leave the current deny-by-default production UI in place and do not publish the recovery-code frontend.
+
+### Owner Console candidate order
+
+1. Reconcile the existing complimentary-access migration ledger timestamp without changing its already-active schema.
+2. Apply only `20260911170410_owner_console.sql`.
+3. Configure the protected `TALLYO_OWNER_USER_ID` value without displaying or committing it.
+4. Deploy only `mfa-recovery` and new `owner-account-admin`, retaining JWT verification for both.
+5. Verify unauthenticated, wrong-origin, non-Owner and below-AAL2 denials before publishing the frontend.
+6. Publish only app build `2026.09.11.1`, then complete one controlled two-account recovery acceptance without opening business records.
+
+If any step fails, do not publish the Owner Console frontend. The migration is additive and may remain dormant; remove the protected Owner setting or undeploy `owner-account-admin`, restore the prior `mfa-recovery` version, and roll the app back to build `2026.09.09.1`.

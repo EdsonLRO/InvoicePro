@@ -64,6 +64,12 @@ verify_jwt = true
 import_map = "./functions/mfa-recovery/deno.json"
 entrypoint = "./functions/mfa-recovery/index.ts"
 
+[functions.owner-account-admin]
+enabled = true
+verify_jwt = true
+import_map = "./functions/owner-account-admin/deno.json"
+entrypoint = "./functions/owner-account-admin/index.ts"
+
 [functions.create-billing-checkout]
 enabled = true
 verify_jwt = true

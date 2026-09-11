@@ -9,6 +9,7 @@
 | No full-feature free trial | Approved | Reduces repeated-email trial abuse; the free maker and monthly plan provide evaluation routes. |
 | No permanent free saved account at launch | Approved | Keeps ongoing storage, automation and support within the paid product. |
 | Owner-granted complimentary access | Approved for occasional accounts | The Owner may grant or revoke full app access for an existing confirmed account by email without creating a Stripe subscription, voucher system or permanent public free tier. |
+| Minimal Owner Console | Approved for focused implementation; production pending | The Owner may search one exact registered email, grant or revoke complimentary access, send a password-reset email, and approve an MFA reset only after the account holder signs in with the password and confirms a short-lived link sent to the registered mailbox. No impersonation, bulk administration or business-record access is included. |
 | No lifetime deal | Approved | Infrastructure and support costs continue. |
 | One business and one user | Approved | Matches the current verified implementation. |
 | Teams are deferred | Approved | Multi-user workspace and role isolation are not implemented. |

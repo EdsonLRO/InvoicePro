@@ -9,6 +9,7 @@
 
 ## Next
 
+- Review and, only after exact Owner approval, release the minimal Owner Console for occasional complimentary-access and account-recovery support.
 - Review bounded launch monitoring and support evidence without inspecting customer data.
 - Evaluate early UK-business onboarding feedback before expanding product scope.
 - Add customer statements, CSV customer import and improved onboarding.
