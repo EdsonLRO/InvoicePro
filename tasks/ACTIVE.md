@@ -1,5 +1,14 @@
 # Active programme: COMM-001 commercial launch integration
 
+## AUTH-004 — Recovery email canonical destination
+
+Status: Implementation Complete; merge and production deployment require Owner approval.
+Owner: Backend/Supabase, with sequential QA/security review by the same Codex process. Risk: High (recovery runtime); no change to authentication or authorization rules. Branch: `codex/recovery-link-origin-fix`.
+Finding: validated functional recovery failure. The deployed confirmation-link builder reads legacy shared `APP_BASE_URL` and returns only its origin, sending the user to the obsolete GitHub root (404). Owner password-reset/ready-email links use the same pattern. No account takeover or token disclosure is established by this report.
+Fix: pin only these recovery destinations to the existing public `https://app.tallyo.co.uk` origin, leaving shared environment settings, Stripe, JWT/AAL gates, tokens, expiry, rate limits and recovery approval unchanged. No new data, provider, email wording, legal commitment or public notice change.
+Locked scope: the two recovery functions, existing Owner runtime tests, and current status/release documentation; acquired 2026-09-11, released with the focused commit. No other agent edits this scope.
+Evidence: two new actual-handler tests failed on the old GitHub origin before repair; all eight runtime tests now pass. Six base-setting variants cover legacy/current/empty/untrusted/localhost/lookalike values. HTML/text confirmation, reset redirect and ready-email links point only to the canonical app; tokens remain fragment-only and HMAC-only in storage. Owner/MFA security harnesses and both frozen Deno checks pass. QA/security review is sequential, not an independent-agent claim. No changes to Auth/Owner gates, token verification, SQL, shared payment settings or dependencies. No live email or user mutation. See `RELEASE_READINESS.md` for the exact approval/rollback boundary.
+
 ## AUTH-003 — Minimal Owner Console
 
 Status: approved production release complete on 2026-09-11; live Owner AAL2 access and read-only lookup verified. PR #152 merge: `0e98392033895523eb4fb4e8fe85bab73a989211`. No real user mutation or recovery email was exercised.
