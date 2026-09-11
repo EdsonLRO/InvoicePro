@@ -210,20 +210,9 @@ async function sendOwnerRecoveryConfirmation(
 }
 
 function ownerRecoveryBaseUrl(): string {
-  const value = String(Deno.env.get("APP_BASE_URL") || "").replace(/\/+$/, "");
-  let parsed: URL;
-  try {
-    parsed = new URL(value);
-  } catch {
-    throw new Error("Recovery service is unavailable");
-  }
-  if (
-    !APP_ORIGINS.has(parsed.origin) || parsed.username || parsed.password ||
-    parsed.search || parsed.hash
-  ) {
-    throw new Error("Recovery service is unavailable");
-  }
-  return parsed.origin;
+  // Recovery links must reach the public app, not legacy payment/rollback URLs.
+  // Do not derive this destination from request input or shared APP_BASE_URL.
+  return "https://app.tallyo.co.uk";
 }
 
 async function writeAudit(

@@ -87,21 +87,10 @@ function configuredOwnerId(): string {
   return ownerId;
 }
 
-function configuredAppBaseUrl(): string {
-  const value = String(Deno.env.get("APP_BASE_URL") || "").replace(/\/+$/, "");
-  let parsed: URL;
-  try {
-    parsed = new URL(value);
-  } catch {
-    throw new Error("Owner Console is unavailable.");
-  }
-  if (
-    !APP_ORIGINS.has(parsed.origin) || parsed.username || parsed.password ||
-    parsed.search || parsed.hash
-  ) {
-    throw new Error("Owner Console is unavailable.");
-  }
-  return parsed.origin;
+function recoveryAppBaseUrl(): string {
+  // Recovery links must reach the public app, not legacy payment/rollback URLs.
+  // Do not derive this destination from request input or shared APP_BASE_URL.
+  return "https://app.tallyo.co.uk";
 }
 
 function isExpectedAuthActionLink(
@@ -380,7 +369,7 @@ Deno.serve(async (req) => {
         }, 429);
       }
 
-      const appBaseUrl = configuredAppBaseUrl();
+      const appBaseUrl = recoveryAppBaseUrl();
       const { data: linkData, error: linkError } = await admin.auth.admin
         .generateLink({
           type: "recovery",
@@ -473,7 +462,7 @@ Deno.serve(async (req) => {
           "Set up a new authenticator",
           "Your confirmed recovery request was approved. Sign in with your existing email and password, then follow the instructions to connect a new authenticator before your business data is unlocked.",
           "Return to Tallyo",
-          `${configuredAppBaseUrl()}/`,
+          `${recoveryAppBaseUrl()}/`,
         );
         await writeAudit(
           admin,
