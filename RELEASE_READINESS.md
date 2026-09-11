@@ -2,7 +2,7 @@
 
 This checklist tracks whether the current app is ready for real customer use. It is not a public-launch checklist for the future SaaS website.
 
-## Recovery link correction — awaiting approval, 2026-09-11
+## Recovery link correction — deployed and verified, 2026-09-11
 
 The Owner reported a GitHub 404 from the confirmation email after PR #152. Its release smoke test did not exercise actual emailed destinations. Local tests reproduced the old-origin failure in the confirmation link and Owner password-reset redirect before the fix.
 
@@ -10,7 +10,9 @@ The focused correction pins only Owner-assisted confirmation, password-reset ret
 
 Validation: eight mocked runtime tests pass, including two new tests across six legacy/current/missing/untrusted/local/lookalike base settings. Tests inspect the actual generated HTML/text confirmation link, password-reset `redirectTo`, and ready-email link. Existing Owner Console and MFA-recovery security harnesses pass; frozen Deno type checks pass for both functions. Test runtime has no network or environment permission. Public app GET returned HTTP 200 with both recovery routes present; no token URL was opened. No real email, confirmation token, account grant or factor/session reset was used. Supabase's [redirect guidance](https://supabase.com/docs/guides/auth/redirect-urls) was reviewed; no redirect-allowlist or Site URL change is included.
 
-Approval scope: merge the focused PR and deploy only `mfa-recovery` and `owner-account-admin` from that merge, retaining JWT verification. Roll back to function versions 33 and 1 respectively if validation fails. No app publication, migration, shared configuration or payment change. A real email/recovery retest is not included without separate explicit approval. Already-issued links will still be wrong; request a fresh confirmation after deployment, respecting the existing 15-minute request limit and 30-minute expiry.
+The Owner approved release. PR #154 merged as `bd8b754c75517a8c64655221fbf00a7423c2c6b8`. Only `mfa-recovery` (now v35) and `owner-account-admin` (now v3) were deployed; the before/after function inventory confirms no other function version or JWT setting changed. Both are Active with JWT verification, their retrieved source exactly matches the merge and no longer reads shared `APP_BASE_URL`, and missing-JWT requests return HTTP 401. [Main security checks](https://github.com/EdsonLRO/InvoicePro/actions/runs/34632760142) and [Pages checks](https://github.com/EdsonLRO/InvoicePro/actions/runs/34632759112) passed. No app source/build marker, migration, shared configuration or payment change was made; normal main-branch publication checks ran automatically.
+
+Rollback was not needed. Approved rollback sources remain function versions 33 and 1 respectively; pre-deploy metadata reported v34/v2 with source verified unchanged from those earlier release sources, and both source snapshots were retained. No real email/recovery retest was performed or authorised. Already-issued links will still be wrong; request a fresh confirmation, respecting the existing 15-minute request limit and 30-minute expiry.
 
 ## Owner Console original release — 2026-09-11
 
