@@ -44,6 +44,7 @@ assert.match(migration, /resolution is distinct from 'approved' or \(confirmed_a
 assert.match(migration, /email_confirmed_at is not null/i);
 assert.match(migration, /from auth\.mfa_factors[\s\S]*status = 'verified'/i);
 assert.match(migration, /where lower\(u\.email\) = lower\(btrim\(coalesce\(p_email, ''\)\)\)/i);
+assert.match(migration, /g\.user_id is not null and g\.revoked_at is null and \(g\.expires_at is null or g\.expires_at > now\(\)\)/i);
 assert.match(migration, /delete from public\.mfa_recovery_codes[\s\S]*where user_id = p_user_id/i);
 assert.match(migration, /recovery_required = true/i);
 assert.match(migration, /resolution = 'approved'[\s\S]*resolved_at > now\(\) - interval '1 hour'/i);

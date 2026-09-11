@@ -201,7 +201,7 @@ as $$
              where f.user_id = u.id
                and f.status = 'verified'
         ),
-        coalesce(g.revoked_at is null and (g.expires_at is null or g.expires_at > now()), false),
+        g.user_id is not null and g.revoked_at is null and (g.expires_at is null or g.expires_at > now()),
         g.expires_at,
         (
             select e.access_state::text

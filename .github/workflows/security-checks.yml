@@ -53,6 +53,7 @@ jobs:
           node tests/mfa-recovery-harness.cjs
           node tests/operational-health-harness.cjs
           node tests/owner-console-harness.cjs
+          deno test --allow-read tests/owner-console-runtime-test.ts
           node tests/pwa-update-harness.cjs
           node tests/preview-acceptance-readiness-harness.cjs
           node tests/refund-consequence-preview-harness.cjs
