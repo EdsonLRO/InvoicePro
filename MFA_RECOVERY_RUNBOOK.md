@@ -36,9 +36,9 @@ The password-reset email proves access to the registered mailbox, but it does no
 - If factor discovery or assurance verification fails, recovery stops and asks the user to reopen the reset link.
 - Successful recovery writes an allowlisted `account_password_recovered` audit event without storing the password, email address, TOTP code, or recovery token.
 
-## Owner-Assisted Recovery Candidate
+## Owner-Assisted Recovery
 
-The repository candidate adds a deliberately narrow fallback for an account holder who knows the account password but has lost every authenticator and saved recovery code. It is not active in production until separately approved and deployed.
+The Owner Console adds a deliberately narrow fallback for an account holder who knows the account password but has lost every authenticator and saved recovery code. It was approved and deployed on 2026-09-11 through PR #152. Live Owner access and lookup were verified; a controlled factor/session-reset and security-email test remains separately approval-gated.
 
 1. The account holder signs in with the existing email and password and reaches the authenticator challenge.
 2. The account holder requests recovery. Tallyo stores only an HMAC-SHA256 token value, rate-limits repeat requests to one per 15 minutes, and emails a 30-minute confirmation link to the registered and already-confirmed account address.
@@ -141,13 +141,13 @@ Do not merge or publish the frontend before its backend dependencies exist. The 
 
 If any backend step fails, leave the current deny-by-default production UI in place and do not publish the recovery-code frontend.
 
-### Owner Console candidate order
+### Owner Console release order (completed 2026-09-11)
 
 1. Reconcile the existing complimentary-access migration ledger timestamp without changing its already-active schema.
 2. Apply only `20260911170410_owner_console.sql`.
 3. Configure the protected `TALLYO_OWNER_USER_ID` value without displaying or committing it.
 4. Deploy only `mfa-recovery` and new `owner-account-admin`, retaining JWT verification for both.
 5. Verify unauthenticated, wrong-origin, non-Owner and below-AAL2 denials before publishing the frontend.
-6. Publish only app build `2026.09.11.1`, then complete one controlled two-account recovery acceptance without opening business records.
+6. Publish only app build `2026.09.11.1`, then verify Owner AAL2 access and read-only lookup. A controlled two-account recovery acceptance requires separate approval and was not performed during this release.
 
 If any step fails, do not publish the Owner Console frontend. The migration is additive and may remain dormant; remove the protected Owner setting or undeploy `owner-account-admin`, restore the prior `mfa-recovery` version, and roll the app back to build `2026.09.09.1`.
