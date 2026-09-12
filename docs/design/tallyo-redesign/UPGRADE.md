@@ -1,11 +1,11 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Steps 1–3 approved and merged only into the non-production integration branch. [PR #158](https://github.com/EdsonLRO/InvoicePro/pull/158) merged as `c756f24` after the Owner requested Step 4. Step 4 editor presentation is implemented and locally verified in [draft PR #159](https://github.com/EdsonLRO/InvoicePro/pull/159). Current-head hosted checks belong to that PR. STOP before integration, Step 5 or main merge.
+Status: Steps 1–4 approved and merged only into the non-production integration branch. [PR #159](https://github.com/EdsonLRO/InvoicePro/pull/159) merged as `da529c7` after the Owner approved the final refinements and requested the next action. Step 5 customer/remaining-screen presentation is implemented and locally verified, awaiting Owner review. STOP before Step 5 integration, Step 6 or main merge.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
-Risk: Medium frontend editor presentation on an isolated branch; no financial helper, backend, Auth or provider change.
-Branch: `codex/tallyo-redesign-editor`, targeting `codex/tallyo-redesign`, from Step 3 merge `c756f24`.
-Authority: the Owner explicitly requested “move to step 4” on 12 September 2026. Later stages and production release remain separate approvals.
+Risk: Medium frontend presentation and read-only customer summaries on an isolated branch; no financial helper, backend, Auth or provider change.
+Branch: `codex/tallyo-redesign-customers`, targeting `codex/tallyo-redesign`, from Step 4 merge `da529c7`.
+Authority: the Owner confirmed “perfect all good now move to next action” on 12 September 2026. Step 4 checks passed at `da87646` in both hosted runs (`34697242162`, `34697239462`); no review objections were present. Later stages and production release remain separate approvals.
 
 Step 2 approval: the Owner replied “Reviewed and approved” after reviewing the symmetric Overview refinement. Both hosted verification runs passed at `933a3c8`: [push](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692038558), [PR](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692039918). This closes the Step 2 review gate, not the separately scoped Step 3 implementation or production release gates.
 
@@ -255,6 +255,18 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 **Documents menu review refinement:** More uses a centred 10px decorative chevron and a floating actions dropdown without expanding the row/card. Only one document menu opens at a time; the final row opens upward to keep actions accessible near the bottom navigation. Existing action handlers and Escape/focus behaviour remain unchanged. Focused tests check stable row heights, single-line labels, arrow alignment, unclipped actions and viewport bounds at 320–1440px, plus the existing Documents regressions. Local preview only.
 
 **Overview scroll-boundary refinement:** continued wheel scrolling at either end of an attention/activity panel now passes naturally to the surrounding page. Internal scrolling, panel heights and keyboard access are retained. Browser tests verify upward and downward wheel chaining for both panels at desktop and phone widths.
+
+### Step 5 — customer context and remaining screens
+
+**Implemented:** Customers now opens a compact contact detail view with existing contact information, currency-separated invoice summaries, linked documents, linked recurring schedules and the latest six supported document/delivery events. Customer and recurring lists use phone-friendly records without wide-table scrolling; page selection remains available on mobile. Recurring state, next run and delivery mode are explicit, with the existing edit/pause/resume/delete controls retained. Business settings uses the navigation's terminology and explicit-save guidance; Account identity wraps safely on phones. Existing Branding, Reminders shortcut, Help/install and conditional Owner Console remain integrated without new behaviour.
+
+**Definitions:** customer links use the saved snapshot's existing customer ID, not name/email matching; records without that ID remain available in Documents but are omitted from the customer summary. Renaming contacts never rewrites saved snapshots. Outstanding uses the existing invoiceOutstanding helper for non-draft, non-cancelled invoices in the chosen currency. Payments recorded sums existing signed payment records (including recorded negative refunds), without inventing a payment from a legacy Paid status; quotes/credits are excluded from money summaries. Document count spans all currencies/types. Activity uses known history/delivery types only, with no fabricated accepted-quote events or filtering after the global Overview limit. No extra query, storage, Analytics event, scheduler, financial helper or backend change.
+
+**Intentional limits:** the detail view is a local Customers subview with an explicit All customers button, not a new shareable/customer-access URL. Leaving Customers clears the selection; refresh returns to its list. Open document editor deliberately resumes the existing editor flow without overwriting an unsaved draft or silently replacing its customer; select the required customer there. Existing customer fields and form save/cancel behaviour remain. This is invoicing context, not a CRM. No quote acceptance or automatic conversion workflow is introduced.
+
+**Validation:** all 36 Node CI harnesses passed locally at milestone closure. Existing full methods/startup and printable-canvas hash guards remain unchanged and pass. All five isolated browser suites pass: new customer/remaining-screen checks plus editor, Documents/catalogue, Overview/navigation and preview A-B-A restoration. New checks cover ID-only associations, missing IDs, same-name contacts, renamed contacts and immutable snapshots, currencies, refunds and legacy Paid records, empty states, customer-to-document/schedule navigation, actual in-memory customer/schedule edit and pause/resume, mobile page selection, keyboard focus, 320–1440px layouts, Help dialog and unavailable Owner route. All outside traffic is blocked; no real email/account/scheduler/payment action. Hosted CI results are recorded on the review PR, not inferred from local tests. Browser QA is Chromium, not a screen-reader or live Auth/RLS certification.
+
+**Review:** refresh `http://127.0.0.1:4173/#customers`, select Willow & Pine Studio, then review Recurring and Business settings, including a phone-sized window. Local ignored evidence: `tmp/redesign-evidence/step5-customer-1440.png`, `step5-customer-390.png`, `step5-recurring-390.png`; desktop/mobile renderings were visually inspected. Frozen mockup files and official assets remain unchanged. Stop for Owner review before integrating Step 5 or starting Step 6 acceptance. Production stays untouched.
 
 ### Later, separately scoped releases
 

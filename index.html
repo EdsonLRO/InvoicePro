@@ -524,6 +524,72 @@
             .catalogue-page { position: relative; }
             .catalogue-page .catalogue-search { width: 100%; max-width: none; }
         }
+        /* Step 5: customer context and remaining screen presentation only. */
+        .customers-page, .recurring-page { max-width:1400px; margin:auto; min-width:0; }
+        .customer-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap; margin:18px 0 24px; }
+        .customer-heading h2 { font-size:28px; font-weight:650; line-height:1.3; }
+        .customer-heading p { color:#64748b; font-size:14px; margin-top:8px; white-space:pre-line; overflow-wrap:anywhere; }
+        .customer-heading > div { min-width:0; }
+        .customer-heading-actions { display:flex; flex-wrap:wrap; gap:10px; }
+        .customer-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin:16px 0 24px; }
+        .customer-summary > div { padding:20px; background:#fff; border:1px solid #dce4ef; border-radius:12px; }
+        .customer-summary dt { color:#64748b; font-size:13px; }
+        .customer-summary dd { font-size:26px; font-weight:650; margin-top:6px; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+        .customer-context-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:20px; align-items:stretch; }
+        .customer-context-grid > section { min-width:0; padding:22px; border:1px solid #dce4ef; border-radius:12px; background:#fff; }
+        .customer-context-grid h3 { font-size:17px; font-weight:650; margin-bottom:12px; }
+        .customer-context-grid > section:last-child { grid-column:1/-1; }
+        .customer-context-note { font-size:12px; color:#64748b; line-height:1.6; margin:10px 0; }
+        .customer-context-list { max-height:280px; overflow:auto; scrollbar-gutter:stable; }
+        .customer-context-list li { border-top:1px solid #edf1f6; }
+        .customer-document { display:flex; width:100%; min-height:64px; padding:12px 2px; align-items:center; justify-content:space-between; gap:14px; text-align:left; font-size:14px; }
+        .customer-document > span { min-width:0; overflow-wrap:anywhere; }
+        .customer-document small { display:block; font-size:12px; color:#64748b; margin-top:4px; }
+        .customer-document:focus-visible { outline:2px solid #818cf8; outline-offset:-2px; }
+        .customer-schedule { padding:14px 0; border-top:1px solid #edf1f6; }
+        .customer-schedule p { font-size:13px; color:#64748b; margin:6px 0; }
+        .customer-table, .schedule-table { width:100%; table-layout:fixed; text-align:left; }
+        .customer-table td, .schedule-table td { vertical-align:middle; overflow-wrap:anywhere; }
+        .customer-table th:first-child { width:64px; }
+        .customer-table th:last-child { width:150px; }
+        .customer-table button, .schedule-table button, .remaining-screen button, .recurring-page input:not([type=checkbox]), .recurring-page select { min-height:44px; }
+        .customer-table .customer-name { text-align:left; color:#4338ca; font-weight:600; }
+        .remaining-screen { min-width:0; }
+        .remaining-screen input, .remaining-screen textarea, .remaining-screen select { min-width:0; }
+        .remaining-screen .account-identity { flex-wrap:wrap; }
+        .remaining-screen .account-identity > div:last-child { min-width:0; overflow-wrap:anywhere; }
+        .schedule-table th { padding:14px 10px; font-size:12px; }
+        .schedule-table td { padding:12px 10px; font-size:14px; }
+        .schedule-table th:first-child { width:54px; }
+        .schedule-table th:last-child { width:124px; }
+        .schedule-table td:nth-child(7) button { min-width:76px; border-radius:8px; }
+        @media(max-width:1099px) {
+            .recurring-table-frame .schedule-table, .schedule-table tbody { display:block; min-width:0; }
+            .schedule-table thead { display:none; }
+            .schedule-table .schedule-record { display:grid; grid-template-columns:44px minmax(0,1fr) minmax(0,1fr); padding:14px; gap:6px; }
+            .schedule-record td:first-child { grid-column:1; grid-row:1/5; padding:0; }
+            .schedule-table .schedule-record td { padding:6px; }
+            .schedule-record td:nth-child(2), .schedule-record td:nth-child(3), .schedule-record td:last-child { grid-column:2/4; }
+            .schedule-record td:nth-child(4), .schedule-record td:nth-child(6) { grid-column:2; }
+            .schedule-record td:nth-child(5), .schedule-record td:nth-child(7) { grid-column:3; }
+            .schedule-record td[data-label]::before { content:attr(data-label); display:block; color:#64748b; font-size:12px; margin-bottom:4px; }
+            .schedule-record td:last-child { text-align:left; white-space:normal; }
+        }
+        @media(max-width:699px) {
+            .customer-summary, .customer-context-grid { grid-template-columns:minmax(0,1fr); gap:12px; }
+            .customer-summary > div { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px; }
+            .customer-summary dd { font-size:23px; margin:0; }
+            .customer-heading { gap:14px; }
+            .customer-heading h2 { font-size:25px; }
+            .customer-context-grid > section { padding:18px; }
+            .customer-table, .customer-table tbody { display:block; }
+            .customer-table thead { display:none; }
+            .customer-table .customer-record { display:grid; grid-template-columns:44px minmax(0,1fr); padding:12px; }
+            .customer-table .customer-record td { padding:6px; }
+            .customer-record td:first-child { grid-row:1/4; }
+            .customer-record td:not(:first-child) { grid-column:2; text-align:left; }
+            .remaining-screen .flex.gap-3 { flex-wrap:wrap; }
+        }
         .app-notice {
             position: fixed;
             z-index: 70;
@@ -976,11 +1042,11 @@
 
         <main class="shell-main flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto" id="main-content">
             
-            <div v-show="activeTab === 'account'" class="max-w-3xl mx-auto space-y-8">
+            <div v-show="activeTab === 'account'" class="remaining-screen account-page max-w-3xl mx-auto space-y-8">
                 
                 <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-2xl font-semibold mb-6 border-b pb-4">User Profile</h2>
-                    <div class="flex items-center gap-6">
+                    <div class="account-identity flex items-center gap-6">
                         <div class="h-20 w-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl font-bold uppercase">
                             {{ userProfileEmail.charAt(0) }}
                         </div>
@@ -2248,16 +2314,46 @@
                 </div>
             </div>
 
-            <div v-show="activeTab === 'customers'">
+            <div v-show="activeTab === 'customers'" class="customers-page">
 
-                <div v-if="customerView === 'list'">
+                <div v-if="customerView === 'list' && customerContext" class="customer-detail">
+                    <button class="overview-button" @click="customerContextId = ''; $nextTick(() => $refs.customerListHeading.focus())">← All customers</button>
+                    <div class="customer-heading">
+                        <div><h2 ref="customerContextHeading" tabindex="-1">{{ customerContext.name }}</h2><p v-if="customerContext.email">{{ customerContext.email }}</p><p v-if="customerContext.phone || customerContext.mobile">{{ customerContext.phone }} {{ customerContext.mobile }}</p><p v-if="customerContext.address">{{ customerContext.address }}</p></div>
+                        <div class="customer-heading-actions"><button class="overview-button" @click="editCustomer(customerContext)">Edit customer</button><button class="overview-button primary" @click="goToCreate">Open document editor</button></div>
+                    </div>
+                    <label v-if="customerContextCurrencies.length > 1" class="overview-currency">Figures in <select v-model="customerContextCurrency" aria-label="Customer summary currency"><option v-for="currency in customerContextCurrencies" :key="currency" :value="currency">{{ currency }}</option></select></label>
+                    <dl class="customer-summary">
+                        <div><dt>Outstanding · {{ customerContextCurrency }}</dt><dd>{{ overviewMoney(customerContextSummary.outstanding, customerContextCurrency) }}</dd></div>
+                        <div><dt>Payments recorded · {{ customerContextCurrency }}</dt><dd>{{ overviewMoney(customerContextSummary.paid, customerContextCurrency) }}</dd></div>
+                        <div><dt>Documents · all currencies</dt><dd>{{ customerContextDocuments.length }}</dd></div>
+                    </dl>
+                    <p class="customer-context-note">Invoice figures only, excluding quotes and credit notes. Payments include recorded refunds.</p>
+                    <div class="customer-context-grid">
+                        <section aria-labelledby="customer-documents-title"><h3 id="customer-documents-title">Recent documents</h3>
+                            <p v-if="!customerContextDocuments.length" class="customer-context-note">No linked documents yet.</p>
+                            <ul v-else class="customer-context-list" tabindex="0" aria-label="Customer documents"><li v-for="inv in customerContextDocuments" :key="inv.id"><button class="customer-document" @click="loadInvoice(inv)"><span><strong>{{ inv.number }}</strong><small>{{ docTypeNoun(inv.docType) }} · {{ inv.date }}</small></span><span>{{ overviewMoney(inv.totals.grandTotal, inv.currency) }} {{ inv.currency || 'GBP' }}<small>{{ effectiveStatus(inv) }}</small></span></button></li></ul>
+                            <p class="customer-context-note">Documents keep their original customer details. Older, unlinked records can still be found in Documents.</p>
+                        </section>
+                        <section aria-labelledby="customer-recurring-title"><h3 id="customer-recurring-title">Recurring schedules</h3><p v-if="!customerContextSchedules.length" class="customer-context-note">No linked recurring schedules.</p>
+                            <div v-for="schedule in customerContextSchedules" :key="schedule.id" class="customer-schedule"><strong>{{ schedule.name || 'Recurring invoice' }}</strong><p>{{ recurFrequencyLabel(schedule) }} · {{ schedule.active ? 'Active' : 'Paused' }}<br>Next: {{ schedule.nextRun || 'Not scheduled' }} · Auto-email {{ schedule.emailEnabled ? 'on' : 'off' }}</p><button class="overview-button" @click="navigateTo('recurring'); editTemplate(schedule)">View schedule</button></div>
+                        </section>
+                        <section aria-labelledby="customer-activity-title"><h3 id="customer-activity-title">Recent activity</h3><p v-if="!customerContextActivity.length" class="customer-context-note">No recent activity on linked documents.</p>
+                            <ul v-else class="customer-context-list" tabindex="0" aria-label="Customer recent activity"><li v-for="event in customerContextActivity" :key="event.key"><button class="customer-document" @click="loadInvoice(event.invoice)"><span><strong>{{ event.label }}</strong><small>{{ event.invoice.number }} · {{ formatDateTime(event.ts) }}</small></span><span aria-hidden="true">→</span></button></li></ul>
+                            <p class="customer-context-note">Latest six supported events from this customer's loaded documents.</p>
+                        </section>
+                    </div>
+                </div>
+
+                <div v-else-if="customerView === 'list'">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-3xl font-semibold">Manage Customers</h2>
+                        <h2 ref="customerListHeading" tabindex="-1" class="text-3xl font-semibold">Customers</h2>
                         <button @click="newCustomer" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">+ New Customer</button>
                     </div>
 
                     <div class="mb-5 flex items-center gap-3 flex-wrap">
                         <input type="text" v-model="customerSearch" @input="resetCustomerListState" placeholder="Search customers by name, email, phone..." class="w-full max-w-md border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                        <label class="list-select-page"><input type="checkbox" aria-label="Select customers on page" :checked="currentCustomerPageSelected" @change="toggleCustomerPageSelection($event.target.checked)">Select page</label>
                         <div v-if="selectedCustomers.length" class="flex items-center gap-2 flex-wrap bg-indigo-50 border border-slate-200 rounded-lg px-3 py-2">
                             <span class="text-sm font-semibold text-indigo-600">{{ selectedCustomers.length }} selected</span>
                             <button @click="bulkDeleteCustomers" :disabled="customerBulkBusy" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Delete</button>
@@ -2270,10 +2366,10 @@
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                        <table class="w-full text-left min-w-[760px]">
+                        <table class="customer-table" aria-label="Saved customers">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th class="p-4 w-10"><input type="checkbox" :checked="currentCustomerPageSelected" @change="toggleCustomerPageSelection($event.target.checked)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
+                                    <th class="p-4 w-10">Select</th>
                                     <th class="p-4 font-medium text-slate-500">Name</th>
                                     <th class="p-4 font-medium text-slate-500">Contact Info</th>
                                     <th class="p-4 font-medium text-slate-500 text-right">Actions</th>
@@ -2282,10 +2378,10 @@
                             <tbody class="divide-y divide-slate-100">
                                 <tr v-if="customers.length === 0"><td colspan="4" class="p-8 text-center text-slate-400">No customers saved yet.</td></tr>
                                 <tr v-else-if="filteredCustomers.length === 0"><td colspan="4" class="p-8 text-center text-slate-400">No customers match your search.</td></tr>
-                                <tr v-for="(customer, idx) in paginatedCustomers" :key="customer.id || idx" class="hover:bg-slate-50">
-                                    <td class="p-4 align-top"><input type="checkbox" :value="customer.id" v-model="selectedCustomers" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></td>
+                                <tr v-for="(customer, idx) in paginatedCustomers" :key="customer.id || idx" class="customer-record hover:bg-slate-50">
+                                    <td class="p-4 align-top"><label class="record-select-control"><input type="checkbox" :aria-label="'Select ' + customer.name" :value="customer.id" v-model="selectedCustomers" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></label></td>
                                     <td class="p-4 align-top">
-                                        <div class="font-medium text-slate-800">{{ customer.name }}</div>
+                                        <button class="customer-name" @click="customerContextId = customer.id; $nextTick(() => $refs.customerContextHeading.focus())">{{ customer.name }}</button>
                                         <div v-if="customer.taxId" class="text-xs text-slate-400 mt-1">Tax ID: {{ customer.taxId }}</div>
                                     </td>
                                     <td class="p-4 text-sm text-slate-600 align-top">
@@ -2481,7 +2577,7 @@
                 </div>
             </div>
 
-            <div v-show="activeTab === 'recurring'">
+            <div v-show="activeTab === 'recurring'" class="recurring-page">
                 <!-- LIST VIEW -->
                 <div v-if="recurringView === 'list'">
                     <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
@@ -2500,6 +2596,7 @@
                     </div>
 
                     <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                        <label class="list-select-page"><input type="checkbox" aria-label="Select schedules on page" :checked="currentRecurringPageSelected" @change="toggleRecurringPageSelection($event.target.checked)">Select page</label>
                         <div v-if="selectedRecurring.length" class="flex items-center gap-2 flex-wrap bg-indigo-50 border border-slate-200 rounded-lg px-3 py-2">
                             <span class="text-sm font-semibold text-indigo-600">{{ selectedRecurring.length }} selected</span>
                             <button @click="bulkDeleteRecurring" :disabled="recurringBulkBusy" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Delete</button>
@@ -2512,10 +2609,10 @@
                     </div>
 
                     <div class="recurring-table-frame bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                        <table class="w-full text-left min-w-[760px]">
+                        <table class="schedule-table" aria-label="Recurring schedules">
                             <thead class="bg-slate-50 border-b border-slate-200 text-sm text-slate-500">
                                 <tr>
-                                    <th class="p-4 font-semibold w-10"><input type="checkbox" :checked="currentRecurringPageSelected" @change="toggleRecurringPageSelection($event.target.checked)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
+                                    <th class="p-4 font-semibold w-10">Select</th>
                                     <th class="p-4 font-semibold">Name</th>
                                     <th class="p-4 font-semibold">Customer</th>
                                     <th class="p-4 font-semibold">Frequency</th>
@@ -2529,17 +2626,17 @@
                                 <tr v-if="recurringTemplates.length === 0">
                                     <td colspan="8" class="p-8 text-center text-slate-400">No recurring schedules yet. Create one from an invoice with "🔁 Repeat this invoice".</td>
                                 </tr>
-                                <tr v-for="t in paginatedRecurringTemplates" :key="t.id" class="hover:bg-slate-50">
-                                    <td class="p-4"><input type="checkbox" :value="t.id" v-model="selectedRecurring" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></td>
+                                <tr v-for="t in paginatedRecurringTemplates" :key="t.id" class="schedule-record hover:bg-slate-50">
+                                    <td class="p-4"><label class="record-select-control"><input type="checkbox" :aria-label="'Select schedule ' + t.name" :value="t.id" v-model="selectedRecurring" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></label></td>
                                     <td class="p-4 font-medium text-slate-800">{{ t.name || '(untitled)' }}</td>
                                     <td class="p-4 text-slate-600">{{ t.customer ? t.customer.name : '—' }}</td>
-                                    <td class="p-4 text-slate-600">{{ recurFrequencyLabel(t) }}</td>
-                                    <td class="p-4"><span :class="isTemplateDue(t) ? 'text-red-600 font-semibold' : 'text-slate-600'">{{ t.nextRun }}</span></td>
-                                    <td class="p-4">
+                                    <td data-label="Frequency" class="p-4 text-slate-600">{{ recurFrequencyLabel(t) }}</td>
+                                    <td data-label="Next invoice" class="p-4"><span :class="isTemplateDue(t) ? 'text-red-600 font-semibold' : 'text-slate-600'">{{ t.nextRun }}</span></td>
+                                    <td data-label="Delivery" class="p-4">
                                         <span :class="t.emailEnabled ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'" class="px-3 py-1 rounded-full text-xs font-semibold">{{ t.emailEnabled ? 'Auto-email' : 'Manual' }}</span>
                                     </td>
-                                    <td class="p-4">
-                                        <button @click="toggleTemplateActive(t)" :class="t.active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'" class="px-3 py-1 rounded-full text-xs font-semibold transition-colors">{{ t.active ? 'Active' : 'Paused' }}</button>
+                                    <td data-label="Schedule" class="p-4">
+                                        <button @click="toggleTemplateActive(t)" :aria-label="(t.active ? 'Pause ' : 'Resume ') + t.name" :class="t.active ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'" class="px-3 py-1 rounded-full text-xs font-semibold transition-colors">{{ t.active ? 'Active' : 'Paused' }}</button>
                                     </td>
                                     <td class="p-4 text-right space-x-3 whitespace-nowrap">
                                         <button @click="editTemplate(t)" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">Edit</button>
@@ -2618,7 +2715,7 @@
                             <label class="block text-sm font-bold text-slate-600 mb-2">Line items</label>
                             <div v-for="(it, i) in recurringForm.items" :key="i" class="flex gap-2 mb-2 flex-wrap items-center">
                                 <div class="relative flex-1 min-w-[140px]">
-                                    <input v-model="it.name" @focus="it.showSuggestions = true" @blur="hideTemplateSuggestions(i)" placeholder="Description" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <input v-model="it.name" :aria-label="'Item ' + (i + 1) + ' description'" @focus="it.showSuggestions = true" @blur="hideTemplateSuggestions(i)" placeholder="Description" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                                     <div v-if="it.showSuggestions && it.name && getMatches(it.name).length" class="absolute z-50 left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-48 overflow-y-auto">
                                         <ul class="py-1">
                                             <li v-for="match in getMatches(it.name)" @mousedown.prevent="selectTemplateMatch(i, match)" class="px-4 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0">
@@ -2628,11 +2725,11 @@
                                         </ul>
                                     </div>
                                 </div>
-                                <input type="number" v-model.number="it.qty" placeholder="Qty" class="w-16 border rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-indigo-500 outline-none no-spin">
-                                <input type="text" v-model="it.unit" placeholder="unit" class="w-16 border rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-indigo-500 outline-none">
-                                <input type="number" v-model.number="it.price" placeholder="Price" class="w-24 border rounded-lg px-2 py-2 text-sm text-right focus:ring-2 focus:ring-indigo-500 outline-none no-spin">
-                                <input type="number" v-model.number="it.tax" placeholder="Tax%" class="w-16 border rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-indigo-500 outline-none no-spin">
-                                <button @click="removeTemplateItem(i)" class="text-red-500 hover:text-red-700 px-1 font-bold">✕</button>
+                                <input type="number" v-model.number="it.qty" :aria-label="'Item ' + (i + 1) + ' quantity'" placeholder="Qty" class="w-16 border rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-indigo-500 outline-none no-spin">
+                                <input type="text" v-model="it.unit" :aria-label="'Item ' + (i + 1) + ' unit'" placeholder="unit" class="w-16 border rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <input type="number" v-model.number="it.price" :aria-label="'Item ' + (i + 1) + ' price'" placeholder="Price" class="w-24 border rounded-lg px-2 py-2 text-sm text-right focus:ring-2 focus:ring-indigo-500 outline-none no-spin">
+                                <input type="number" v-model.number="it.tax" :aria-label="'Item ' + (i + 1) + ' tax percent'" placeholder="Tax%" class="w-16 border rounded-lg px-2 py-2 text-sm text-center focus:ring-2 focus:ring-indigo-500 outline-none no-spin">
+                                <button @click="removeTemplateItem(i)" :aria-label="'Remove item ' + (i + 1)" class="text-red-500 hover:text-red-700 px-1 font-bold">✕</button>
                             </div>
                             <button @click="addTemplateItem" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium mt-1">+ Add item</button>
                         </div>
@@ -2670,8 +2767,8 @@
                 </div>
             </div>
 
-            <div v-show="activeTab === 'settings'" class="max-w-3xl mx-auto">
-                <h2 class="text-3xl font-semibold mb-6">Company Settings</h2>
+            <div v-show="activeTab === 'settings'" class="remaining-screen business-settings-page max-w-3xl mx-auto">
+                <h2 class="text-3xl font-semibold mb-2">Business settings</h2><p class="text-sm text-slate-500 mb-6">Your business details, branding assets and defaults for new documents. Select Save All Settings to save changes.</p>
                 <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200 space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div class="sm:col-span-2">
@@ -3043,6 +3140,8 @@
                 recurringForm: null,
                 customerForm: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' },
                 customerView: 'list',
+                customerContextId: '',
+                customerContextCurrencyChoice: '',
                 customerPage: 1,
                 selectedCustomers: [],
                 customerBulkBusy: false,
@@ -3078,6 +3177,38 @@
             };
         },
         computed: {
+            customerContext() { return this.customers.find(customer => customer.id && customer.id === this.customerContextId) || null; },
+            customerContextDocuments() {
+                if (!this.customerContext) return [];
+                return this.invoices.filter(inv => inv.customer?.id === this.customerContext.id)
+                    .slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.number).localeCompare(String(a.number)));
+            },
+            customerContextCurrencies() { return [...new Set([this.company.defaultCurrency || 'GBP', ...this.customerContextDocuments.map(inv => inv.currency || 'GBP')])].sort(); },
+            customerContextCurrency: {
+                get() { return this.customerContextCurrencies.includes(this.customerContextCurrencyChoice) ? this.customerContextCurrencyChoice : (this.company.defaultCurrency || 'GBP'); },
+                set(value) { this.customerContextCurrencyChoice = value; }
+            },
+            customerContextSummary() {
+                return this.customerContextDocuments.reduce((sum, inv) => {
+                    if ((inv.docType || 'invoice') !== 'invoice' || (inv.currency || 'GBP') !== this.customerContextCurrency) return sum;
+                    if (!['Draft', 'Cancelled'].includes(this.normalizedStatus(inv))) sum.outstanding += this.invoiceOutstanding(inv);
+                    sum.paid += (inv.payments || []).reduce((paid, payment) => paid + (Number(payment.amount) || 0), 0);
+                    return sum;
+                }, { outstanding: 0, paid: 0 });
+            },
+            customerContextSchedules() { return this.customerContext ? this.recurringTemplates.filter(schedule => schedule.customer?.id === this.customerContext.id) : []; },
+            customerContextActivity() {
+                const entries = [], docs = new Map(this.customerContextDocuments.map(inv => [inv.id, inv]));
+                const labels = { created: 'Document created', sent: 'Document marked sent', payment: 'Payment recorded', refund: 'Refund update recorded', recurring: 'Recurring invoice created', reminder: 'Reminder recorded' };
+                for (const inv of docs.values()) (inv.history || []).forEach((event, index) => {
+                    if (labels[event.type] && Number.isFinite(Date.parse(event.ts))) entries.push({ key: inv.id + '-history-' + index, invoice: inv, label: labels[event.type], ts: event.ts });
+                });
+                const delivery = { email_delivered: 'Email delivered', email_bounced: 'Email bounced', email_failed: 'Email delivery failed', email_delivery_delayed: 'Email delivery delayed' };
+                this.auditEvents.forEach((event, index) => {
+                    if (docs.has(event.object_id) && delivery[event.event_type] && Number.isFinite(Date.parse(event.created_at))) entries.push({ key: 'audit-' + index, invoice: docs.get(event.object_id), label: delivery[event.event_type], ts: event.created_at });
+                });
+                return entries.sort((a, b) => Date.parse(b.ts) - Date.parse(a.ts)).slice(0, 6);
+            },
             overviewNavigation() {
                 return [
                     { label: 'SALES', items: [
@@ -3444,7 +3575,7 @@
             }
         },
         watch: {
-            activeTab() { this.editorPreview = false; },
+            activeTab() { this.editorPreview = false; this.customerContextId = ''; },
             authMode(nextMode, previousMode) {
                 if (!this.turnstile.enabled || nextMode === previousMode) return;
                 this.removeTurnstileWidget();
