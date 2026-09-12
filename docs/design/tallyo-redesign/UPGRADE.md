@@ -1,11 +1,11 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Steps 1 and 2 approved and merged into the non-production integration branch. [PR #157](https://github.com/EdsonLRO/InvoicePro/pull/157) merged as `8df885a`. Step 3 Documents/catalogue is implemented and locally verified for Owner review in [draft PR #158](https://github.com/EdsonLRO/InvoicePro/pull/158). STOP before Step 4 or main merge.
+Status: Steps 1–3 approved and merged only into the non-production integration branch. [PR #158](https://github.com/EdsonLRO/InvoicePro/pull/158) merged as `c756f24` after the Owner requested Step 4. Step 4 editor presentation is implemented and locally verified; preparing the focused draft PR for review. STOP before integration, Step 5 or main merge.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
-Risk: Medium frontend Documents/catalogue work on an isolated branch; no financial helper, backend, Auth or provider change.
-Branch: `codex/tallyo-redesign-documents`, targeting `codex/tallyo-redesign`, from Step 2 merge `8df885a`.
-Authority: the Owner explicitly requested “Move to step 3” on 12 September 2026. Later stages and production release remain separate approvals.
+Risk: Medium frontend editor presentation on an isolated branch; no financial helper, backend, Auth or provider change.
+Branch: `codex/tallyo-redesign-editor`, targeting `codex/tallyo-redesign`, from Step 3 merge `c756f24`.
+Authority: the Owner explicitly requested “move to step 4” on 12 September 2026. Later stages and production release remain separate approvals.
 
 Step 2 approval: the Owner replied “Reviewed and approved” after reviewing the symmetric Overview refinement. Both hosted verification runs passed at `933a3c8`: [push](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692038558), [PR](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692039918). This closes the Step 2 review gate, not the separately scoped Step 3 implementation or production release gates.
 
@@ -231,6 +231,20 @@ The existing Node CI harness suite passed locally, including the app's synthetic
 **Review:** open `http://127.0.0.1:4173/#invoices` or `/#items` while the preview server runs. Refreshed ignored evidence: `tmp/redesign-evidence/step3-desktop-documents.png`, `step3-mobile-documents.png`, `step3-mobile-document-card.png`, `step3-desktop-catalogue.png`, `step3-mobile-catalogue.png`. Desktop and phone renders were visually inspected. Frozen design references remain untouched.
 
 **Limits/next gate:** no production, Auth, database, provider, Analytics, email, payment or migration change. The fixture does not certify live backend behaviour. This is Chromium keyboard/geometry coverage, not full screen-reader or browser-matrix certification. Existing catalogue currencies, status semantics and editor behaviour remain; editor refinements belong to Step 4. Stop for Owner review before integration or Step 4.
+
+### Step 4 review — invoice editor
+
+**Implementation:** desktop editing now uses Customer, Document details, Items, Payment terms and Notes sections beside a summary/options rail. Mobile starts with compact native disclosures, with two-column item fields instead of a horizontal table. Existing products/services can be selected with a keyboard-accessible dropdown; manual descriptions and saving new presets remain. Done editing items closes that section and returns keyboard focus. The header exposes Preview, More and **Review & send**; Save is available in More and at the end of the form. The email action deliberately describes its actual existing review step rather than promising an immediate send or bypassing it. No autosave or invented last-saved timestamp.
+
+**Preservation:** every calculation, validation, persistence, payment, refund/dispute, recurring, reminder, email and PDF method is unchanged. A focused CI hash guard verifies the entire existing methods/startup tail against integration `c756f24`. The original printable canvas content is also hash-identical and remains the single PDF export surface. Editing controls bind to the same draft; the existing printable template is kept separately offscreen/inert until preview/export, with no new rendering library. This modest template duplication is intentional to protect PDF layout; future field changes must keep both views consistent. Preview is read-only and does not persist or regenerate a PDF.
+
+All document types/currencies/status choices, numbering/dates/reference, customer snapshot fields, time/custom units, per-line and document discounts, inclusive/exclusive tax, shipping, notes/terms/bank instructions remain. Existing manual Paid selection is deliberately retained pending the separate status release. Recurring and reminder settings are opt-in disclosures with explicit state and labelled switches; opening them changes nothing. Existing payment records/actions, full/deposit setup and activity remain in expandable rail panels; payment-attention/dispute cases open automatically. No payment option is enabled by the editor; the unchanged send review starts it Off. Saving and sending retain their existing separate recurring-schedule behaviour.
+
+**Validation:** all 34 pre-existing Node CI harnesses passed locally, including lifecycle/calculation, optional payment, financial integrity, Auth/session/tenant/PWA and synthetic app-build checks. The new editor contract/hash harness also passes and runs in CI. Fresh isolated Chromium checks cover actual customer and document fields, catalogue reuse, hours/minutes and custom units, both tax modes, line/document discounts, shipping, notes/terms, validation failure without losing the draft, actual fixture save/reopen, preview/draft retention, email review/cancel with default-off payment, automation opt-in/custom frequency, keyboard disclosures/More/Done focus return, touch targets, expanded payment-panel geometry, 320–1440px widths and a real multi-page local PDF download with restored editor state. All provider traffic is blocked; no payment or send action is invoked. Documents/catalogue, Overview/navigation and preview A-B-A browser suites pass as well. Hosted current-head results belong to the review PR; do not equate local browser checks with production acceptance.
+
+**Review:** `http://127.0.0.1:4173/#create`, or open an existing document from `/#invoices` to inspect payment/activity sections. Ignored local screenshots: `tmp/redesign-evidence/step4-desktop-editor.png`, `step4-mobile-editor.png`, `step4-mobile-items.png`. Desktop and actual 390px renders were visually inspected; frozen design-reference files are unchanged. The local server must be running and refreshed to the current source snapshot.
+
+**Limits / next gate:** template duplication needs care in later field changes; printable preview can scroll horizontally on a phone, but editing never uses a horizontal table. Keyboard/geometry tests do not certify all screen readers or browsers. This stage does not change the legacy save/send/schedule semantics or certify live Auth/RLS/provider behaviour. No production release/build marker, database, provider, legal, Analytics or real communication change. Stop for Owner review before integration or Step 5.
 
 ### Later, separately scoped releases
 
