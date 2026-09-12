@@ -462,6 +462,13 @@
         .record-menu button:hover { background: #eef2ff; }
         .record-menu button:disabled { opacity: .5; }
         .record-danger { color: #b91c1c; }
+        .documents-page .record-menu { position: relative; }
+        .documents-page .record-menu summary { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 6px; white-space: nowrap; }
+        .documents-page .record-menu summary svg { width: 10px; height: 10px; flex: none; }
+        .documents-page .record-menu > div { position: absolute; top: 100%; right: 0; z-index: 20; width: 176px; padding: 6px; background: #fff; border: 1px solid #dce4ef; border-radius: 8px; box-shadow: 0 8px 24px #0f172a1f; }
+        .documents-page .record-menu button { padding: 10px 12px; min-height: 44px; font-size: 14px; text-align: left; }
+        .documents-page .document-record:last-child .record-menu > div { top: auto; bottom: calc(100% + 6px); margin-top: 0; }
+        .documents-page .record-actions:has(.record-menu[open]) { position: relative; z-index: 20; }
         .list-empty td { padding: 40px 24px; text-align: center; color: #64748b; }
         .catalogue-table { width: 100%; text-align: left; table-layout: fixed; }
         .catalogue-table th:first-child { width: 64px; }
@@ -2146,8 +2153,8 @@
                                     <span v-else class="record-muted">No delivery update</span>
                                 </td>
                                 <td class="record-actions" role="cell">
-                                    <details class="record-menu" @keydown.esc="$event.currentTarget.open = false; $event.currentTarget.querySelector('summary').focus()">
-                                        <summary :aria-label="'Actions for ' + inv.number">More <span aria-hidden="true">⌄</span></summary>
+                                    <details class="record-menu" name="document-actions" @keydown.esc="$event.currentTarget.open = false; $event.currentTarget.querySelector('summary').focus()">
+                                        <summary :aria-label="'Actions for ' + inv.number"><span>More</span><svg aria-hidden="true" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m2 4 4 4 4-4" /></svg></summary>
                                         <div>
                                             <button @click="duplicateInvoice(inv)">Duplicate</button>
                                             <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id">{{ emailSendingId === inv.id ? (emailSendingStage === 'prepared' ? 'Preparing...' : 'Sending...') : 'Email' }}</button>

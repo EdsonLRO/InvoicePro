@@ -252,6 +252,8 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 **Overview review refinement:** the Owner requested internal scrolling instead of expansion controls in Needs your attention and Recent activity. Both lists now scroll within a 320px maximum height, retaining symmetric desktop cards and natural stacked mobile layout. Scroll regions are labelled, keyboard-focusable and support wheel/touch scrolling; no event is hidden behind View more. Existing bounds remain 50 attention items and 20 recent loaded activity events, with explanatory footnotes and unchanged actions/data selectors. Focused busy-state tests cover keyboard/wheel scrolling, last-action reachability, matching heights and empty states.
 
+**Documents menu review refinement:** More uses a centred 10px decorative chevron and a floating actions dropdown without expanding the row/card. Only one document menu opens at a time; the final row opens upward to keep actions accessible near the bottom navigation. Existing action handlers and Escape/focus behaviour remain unchanged. Focused tests check stable row heights, single-line labels, arrow alignment, unclipped actions and viewport bounds at 320–1440px, plus the existing Documents regressions. Local preview only.
+
 ### Later, separately scoped releases
 
 1. Status rules: invoice/quote/credit semantics, manual payment retention, historical Paid compatibility, refunds/partial payments and overdue rules. Decide before migrating anything.
