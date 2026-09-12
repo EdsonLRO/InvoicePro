@@ -465,7 +465,7 @@
         .catalogue-table td:first-child { padding: 7px 4px; }
         .catalogue-table th:nth-child(3) { width: 18%; }
         .catalogue-table th:last-child { width: 150px; }
-        .catalogue-table td { overflow-wrap: anywhere; }
+        .catalogue-table td { overflow-wrap: anywhere; vertical-align: middle; }
         .catalogue-page button, .documents-page > div > div > button { min-height: 44px; }
         @media (max-width: 899px), (min-width: 1100px) and (max-width: 1240px) {
             .documents-table, .documents-table tbody { display: block; }
@@ -506,7 +506,7 @@
             .documents-overdue summary span { margin-left: 8px; font-size: 12px; }
             .catalogue-table, .catalogue-table tbody { display: block; }
             .catalogue-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-            .catalogue-table tr { display: grid; grid-template-columns: 40px minmax(0, 1fr); padding: 14px; }
+            .catalogue-table tr { display: grid; grid-template-columns: 40px minmax(0, 1fr); align-items: center; padding: 14px; }
             .catalogue-table td { padding: 6px; }
             .catalogue-table td:nth-child(n+3) { grid-column: 2; text-align: left; }
             .catalogue-table td:nth-child(3)::before { content: 'Default price: '; color: #64748b; font-weight: 400; }

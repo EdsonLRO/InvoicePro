@@ -248,6 +248,8 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 **Owner review refinement:** recurring and overdue-reminder switches use a 56×28px pill track inside a 56×44px touch target, with a 20px thumb. This replaces the nearly circular stretched track without changing state or handlers. Focused browser checks cover both states and retained touch-target size.
 
+**Catalogue review refinement:** at the Owner's request, Products & services cells now align vertically to the row centre, including the checkbox and price; mobile card selection centres beside the name block. Focused browser geometry checks cover rows with and without descriptions at 320–1440px. No catalogue data or action changes.
+
 ### Later, separately scoped releases
 
 1. Status rules: invoice/quote/credit semantics, manual payment retention, historical Paid compatibility, refunds/partial payments and overdue rules. Decide before migrating anything.

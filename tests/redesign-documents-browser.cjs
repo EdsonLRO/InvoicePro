@@ -151,9 +151,27 @@ const path = require('node:path');
     await catalogue.getByRole('searchbox').fill('');
     await page.locator('.shell-main').evaluate(el => { el.scrollTop = 0; });
     await page.screenshot({ path: path.join(root, 'tmp/redesign-evidence/step3-mobile-catalogue.png') });
+    await page.evaluate(() => {
+      const vm = document.querySelector('#app').__vue_app__._container._vnode.component.proxy;
+      vm.savedItems.find(item => item.name === 'Website maintenance').description = '';
+    }); // Exercise single-line and description-bearing rows together.
     for (const width of [320, 390, 768, 1100, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       assert.ok(await catalogue.evaluate(el => el.scrollWidth <= el.clientWidth), 'catalogue has no horizontal scrolling at ' + width);
+      const alignment = await catalogue.locator('tbody tr').evaluateAll(rows => rows.map(row => {
+        const cells = row.querySelectorAll('td');
+        const center = el => { const b = el.getBoundingClientRect(); return b.y + b.height / 2; };
+        const range = document.createRange(); range.selectNodeContents(cells[2]);
+        const price = range.getBoundingClientRect();
+        return { desktop: getComputedStyle(row).display !== 'grid', row: center(row), checkbox: center(cells[0].querySelector('input')), name: center(cells[1]), price: price.y + price.height / 2, actions: center(cells[3].querySelector('button')) };
+      }));
+      for (const row of alignment) {
+        assert.ok(Math.abs(row.checkbox - row.name) <= 1, 'catalogue checkbox centres with name at ' + width);
+        if (row.desktop) {
+          assert.ok(Math.abs(row.price - row.row) <= 3, 'catalogue price centres in row at ' + width);
+          assert.ok(Math.abs(row.actions - row.row) <= 1, 'catalogue actions centre in row at ' + width);
+        }
+      }
     }
     await page.screenshot({ path: path.join(root, 'tmp/redesign-evidence/step3-desktop-catalogue.png') });
     assert.deepEqual(errors, []); assert.deepEqual(outside, []);
