@@ -1,11 +1,13 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Step 1 approved and merged into the non-production integration branch. Step 2 implemented and locally verified in [draft PR #157](https://github.com/EdsonLRO/InvoicePro/pull/157). STOP before Step 3 or main merge.
+Status: Step 1 approved and merged into the non-production integration branch. Step 2 reviewed and approved by the Owner on 12 September 2026, including the equal-height card refinement at `933a3c8`. [PR #157](https://github.com/EdsonLRO/InvoicePro/pull/157) may integrate only into `codex/tallyo-redesign` after final checks; the PR records merge completion. STOP before Step 3 or main merge.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
 Risk: Medium frontend navigation/Overview work on an isolated branch; no financial helper, backend, Auth or provider change.
 Branch: `codex/tallyo-redesign-overview`, targeting `codex/tallyo-redesign`, from Step 1 merge `b9532bd`.
 Authority: the Owner approved Step 1 and explicitly authorised Step 2 on 12 September 2026. Later stages and production release remain separate approvals.
+
+Step 2 approval: the Owner replied “Reviewed and approved” after reviewing the symmetric Overview refinement. Both hosted verification runs passed at `933a3c8`: [push](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692038558), [PR](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692039918). This closes the Step 2 review gate, not the separately scoped Step 3 implementation or production release gates.
 
 ## 1. Scope and stop rules
 

@@ -2,7 +2,7 @@
 
 ## UX-REDESIGN-001 — Controlled redesign, Step 2
 
-Status: Owner approved Step 1 and authorised Step 2 on 12 September 2026. PR #156 merged only into `codex/tallyo-redesign` as `b9532bd`. Step 2 navigation/Overview is ready for review in draft PR #157; local unit, browser/isolation and all 33 Node harnesses passed. Both hosted workflows passed at `aa8f7c5`; final head checks remain authoritative on the PR. Stop before Step 3 or main merge.
+Status: Owner reviewed and approved Step 2 on 12 September 2026 after the equal-height card refinement. PR #156 merged only into `codex/tallyo-redesign` as `b9532bd`. Step 2 PR #157 is approved for integration into that same non-production branch only; its current PR state is authoritative for merge completion. Local unit, browser/isolation and all 33 Node harnesses passed; both hosted workflows passed at reviewed code `933a3c8`. Final head checks remain required. Stop before Step 3 or main merge.
 Owner: Codex, sequential implementation/QA. Risk: Medium dev-only work; provider changes require separate approval.
 Branch: `codex/tallyo-redesign-overview`, targeting `codex/tallyo-redesign`, from Step 1 merge `b9532bd`.
 Scope/lock: index.html navigation/Overview presentation and read-only selectors, dev fixture, focused tests/CI, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer. Existing financial helpers, routes, security, backend, provider settings and unrelated working files preserved.
