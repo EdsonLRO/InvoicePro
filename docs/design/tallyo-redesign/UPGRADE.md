@@ -1,11 +1,11 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Step 1 approved and merged into the non-production integration branch. Step 2 reviewed and approved by the Owner on 12 September 2026, including the equal-height card refinement at `933a3c8`. [PR #157](https://github.com/EdsonLRO/InvoicePro/pull/157) may integrate only into `codex/tallyo-redesign` after final checks; the PR records merge completion. STOP before Step 3 or main merge.
+Status: Steps 1 and 2 approved and merged into the non-production integration branch. [PR #157](https://github.com/EdsonLRO/InvoicePro/pull/157) merged as `8df885a`. Step 3 Documents/catalogue is implemented and locally verified for Owner review in [draft PR #158](https://github.com/EdsonLRO/InvoicePro/pull/158). STOP before Step 4 or main merge.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
-Risk: Medium frontend navigation/Overview work on an isolated branch; no financial helper, backend, Auth or provider change.
-Branch: `codex/tallyo-redesign-overview`, targeting `codex/tallyo-redesign`, from Step 1 merge `b9532bd`.
-Authority: the Owner approved Step 1 and explicitly authorised Step 2 on 12 September 2026. Later stages and production release remain separate approvals.
+Risk: Medium frontend Documents/catalogue work on an isolated branch; no financial helper, backend, Auth or provider change.
+Branch: `codex/tallyo-redesign-documents`, targeting `codex/tallyo-redesign`, from Step 2 merge `8df885a`.
+Authority: the Owner explicitly requested “Move to step 3” on 12 September 2026. Later stages and production release remain separate approvals.
 
 Step 2 approval: the Owner replied “Reviewed and approved” after reviewing the symmetric Overview refinement. Both hosted verification runs passed at `933a3c8`: [push](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692038558), [PR](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692039918). This closes the Step 2 review gate, not the separately scoped Step 3 implementation or production release gates.
 
@@ -219,6 +219,18 @@ The existing Node CI harness suite passed locally, including the app's synthetic
 **Owner review refinement:** paired Overview cards now stretch to equal row heights (attention/activity and balance-age/setup), without fixed heights or changing the stacked mobile layout. The browser regression checks matching top edges and heights at 768–1440px and non-overlapping stacked cards at 320/390px. Focused browser and accessibility checks pass; desktop evidence refreshed. This is a preview-only visual adjustment in the same draft PR.
 
 **Limits:** this is a fictional UI preview, not a live Auth/RLS/provider or email-delivery acceptance test. Automated keyboard/responsive checks are not full screen-reader/browser-matrix certification. Other screens remain the existing UI inside the new shell; their redesign is explicitly deferred. No main merge, public preview, app release marker change or deployment is authorised by this step. Stop for Owner review before Step 3.
+
+### Step 3 review — Documents and catalogue
+
+**Implementation:** the existing document list now groups type/number and issue/due dates into eight columns. A single set of row controls becomes touch-friendly cards at narrow content widths; no cloned mobile action handlers or horizontal table scrolling. The document number and mobile card surface open the existing editor. Native More disclosures expose Duplicate, Email, Download PDF and Delete; Escape closes them and returns focus. Selection controls have 44px touch labels, pagination has explicit names, and empty/filter-empty states explain the next step. The overdue reminder list is a compact expandable summary; individual existing reminder actions remain. The old aggregate amount is omitted because it could combine different currencies; document totals retain their individual currency labels and existing calculations.
+
+**Preserved:** all type/status/search/sort options, twenty-record pagination, page selection and bulk Duplicate/Email/PDF/Delete remain bound to their original state and handlers. XLSX still exports all saved documents, not the filtered subset (button tooltip explains this). Existing email review and default-off payment choice, issued-document deletion guards, PDF rendering and restored editor state remain unchanged. No new quote-acceptance status or conversion behaviour. Catalogue storage is still `saved_items`; only presentation uses Products & services. Existing name/description/default price, edit/save, search, pagination, batch-price/delete and document reuse remain. No unit/tax defaults or schema fields added.
+
+**Validation:** all 34 Node CI harnesses passed locally. The Pages build harness initially could not spawn in the restricted shell; it passed unchanged when permitted to start its local synthetic build. `redesign-documents-browser.cjs` exercised actual app filters/status/sort, page selection and 21-record pagination, blocked issued-document deletion, cancelled catalogue deletion/bulk-price prompt, keyboard More/Escape, email review without sending, local PDF/XLSX downloads, mobile card opening, catalogue create/update/search/reuse and unchanged existing document snapshots. Width checks cover Documents at 320/390/768/900/1024/1100/1240/1280/1440px and catalogue at 320/390/768/1100/1440px. Step 2 Overview/navigation and preview A-B-A rollback browser suites also passed. All three used fresh profiles, fictional records, zero external requests and zero uncaught browser errors. A new focused document contract/filter harness runs in the existing CI alongside every retained check. Current-head hosted results belong to the draft PR.
+
+**Review:** open `http://127.0.0.1:4173/#invoices` or `/#items` while the preview server runs. Refreshed ignored evidence: `tmp/redesign-evidence/step3-desktop-documents.png`, `step3-mobile-documents.png`, `step3-mobile-document-card.png`, `step3-desktop-catalogue.png`, `step3-mobile-catalogue.png`. Desktop and phone renders were visually inspected. Frozen design references remain untouched.
+
+**Limits/next gate:** no production, Auth, database, provider, Analytics, email, payment or migration change. The fixture does not certify live backend behaviour. This is Chromium keyboard/geometry coverage, not full screen-reader or browser-matrix certification. Existing catalogue currencies, status semantics and editor behaviour remain; editor refinements belong to Step 4. Stop for Owner review before integration or Step 4.
 
 ### Later, separately scoped releases
 

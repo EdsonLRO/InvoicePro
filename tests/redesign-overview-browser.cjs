@@ -94,7 +94,7 @@ const path = require('node:path');
     await mobile.getByRole('button', { name: 'New', exact: true }).click();
     await create.getByRole('button', { name: /Product or service/ }).click();
     await page.waitForURL('**/#items-form');
-    assert.ok(await page.getByRole('button', { name: 'Save Item', exact: true }).isVisible());
+    assert.ok(await page.getByRole('button', { name: 'Save product or service', exact: true }).isVisible());
     await mobile.getByRole('button', { name: 'New', exact: true }).click();
     await create.getByRole('button', { name: /Invoice or quote/ }).click();
     await page.waitForURL('**/#create');
