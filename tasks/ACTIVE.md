@@ -2,7 +2,7 @@
 
 ## UX-REDESIGN-001 — Controlled redesign, Step 4
 
-Status: Owner moved to Step 4 after reviewing Step 3. PR #158 merged only into `codex/tallyo-redesign` as `c756f24`. The editor presentation is implemented and locally verified; preparing the focused draft PR for Owner review. Stop before integration, Step 5 or main merge.
+Status: Owner moved to Step 4 after reviewing Step 3. PR #158 merged only into `codex/tallyo-redesign` as `c756f24`. The editor presentation is implemented and locally verified in draft PR #159 targeting the integration branch; current-head hosted checks are authoritative on that PR. Stop before integration, Step 5 or main merge.
 Owner: Codex, sequential implementation/QA. Risk: Medium presentation-only work; existing methods and printable template are hash-checked against the approved baseline.
 Branch: `codex/tallyo-redesign-editor`, targeting `codex/tallyo-redesign`, from Step 3 merge `c756f24`.
 Scope/lock: index.html editor presentation and local disclosure/preview state, focused tests/CI, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer. Calculations, persistence, PDF export method, status/payment/refund/dispute/email/automation handlers, backend and provider settings are unchanged. No dependency or data model added.
