@@ -4,9 +4,12 @@ on:
   pull_request:
     branches:
       - main
+      - codex/tallyo-redesign
   push:
     branches:
       - main
+      - codex/tallyo-redesign
+      - codex/tallyo-redesign-*
   workflow_dispatch:
 
 permissions:
@@ -36,6 +39,7 @@ jobs:
 
       - name: Run focused security harnesses
         run: |
+          node tests/redesign-preview-harness.mjs
           node tests/account-data-export-harness.cjs
           node tests/analytics-consent-harness.cjs
           node tests/app-public-integration-harness.cjs
