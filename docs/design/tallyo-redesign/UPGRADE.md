@@ -1,6 +1,6 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Steps 1–4 approved and merged only into the non-production integration branch. [PR #159](https://github.com/EdsonLRO/InvoicePro/pull/159) merged as `da529c7` after the Owner approved the final refinements and requested the next action. Step 5 customer/remaining-screen presentation is implemented and locally verified, awaiting Owner review. STOP before Step 5 integration, Step 6 or main merge.
+Status: Steps 1–4 approved and merged only into the non-production integration branch. [PR #159](https://github.com/EdsonLRO/InvoicePro/pull/159) merged as `da529c7` after the Owner approved the final refinements and requested the next action. Step 5 customer/remaining-screen presentation is implemented and locally verified in [draft PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160), awaiting Owner review. Current-head hosted checks belong to that PR. STOP before Step 5 integration, Step 6 or main merge.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
 Risk: Medium frontend presentation and read-only customer summaries on an isolated branch; no financial helper, backend, Auth or provider change.

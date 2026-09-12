@@ -2,7 +2,7 @@
 
 ## UX-REDESIGN-001 — Controlled redesign, Step 5
 
-Status: Owner approved the final Step 4 refinements and requested the next action. PR #159 merged only into `codex/tallyo-redesign` as `da529c7`, with both latest hosted checks passing. Step 5 is implemented and locally verified (36 Node harnesses and five isolated browser suites), awaiting review. Stop before Step 5 integration, Step 6 or main merge.
+Status: Owner approved the final Step 4 refinements and requested the next action. PR #159 merged only into `codex/tallyo-redesign` as `da529c7`, with both latest hosted checks passing. Step 5 is implemented and locally verified (36 Node harnesses and five isolated browser suites) in draft PR #160, awaiting review. Current-head hosted checks are authoritative on that PR. Stop before Step 5 integration, Step 6 or main merge.
 Owner: Codex, sequential implementation/QA. Risk: Medium presentation/read-only-summary work; existing methods and printable template remain hash-checked against the approved baseline.
 Branch: `codex/tallyo-redesign-customers`, targeting `codex/tallyo-redesign`, from Step 4 merge `da529c7`.
 Scope/lock: index.html customer context, remaining-screen presentation and local view state, focused tests/CI, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer. Existing calculations, persistence, PDF export, status/payment/refund/dispute/email/automation handlers, backend and provider settings remain unchanged. No dependency or data model added.
