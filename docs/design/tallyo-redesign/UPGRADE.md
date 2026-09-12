@@ -1,6 +1,6 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Step 1 in progress; local fixture preview verified, remote push awaiting branch-exclusion approval.
+Status: Step 1 in progress; local fixture preview verified and approved Pages branch exclusions saved; remote checks next.
 Recorded: 12 September 2026.
 Owner: Codex, sequential repository/read-only verification and documentation.
 Risk: Medium development-only foundation; provider changes remain approval-gated. No production runtime or security change.
@@ -154,7 +154,9 @@ The current GitHub security workflow runs for main pushes and PRs targeting main
 
 The Helper rate-limiter Worker has production branch `main` and non-production builds unchecked. Its build command separately checks out `codex/website-ai-subscription-readiness` before deploying. Thus the Worker source must not be assumed equal to the triggering main commit. This pre-existing configuration was not changed and is outside the visual upgrade. Do not merge the redesign to main under preview authority.
 
-**Recommended, not yet approved or applied:** exclude only `codex/tallyo-redesign*` from automatic preview builds in the two Pages projects. Retain main, other preview branches, Access and runtime configuration. Previous value is All non-production branches; restoring that selection reverses this restriction. Owner was asked for this narrow change and requested a recommendation; that is not approval. No branches have been pushed.
+**Approved and applied:** the Owner accepted the recommendation on 12 September 2026. Only the two Pages preview branch controls changed from All non-production branches to Custom, include `*`, exclude `codex/tallyo-redesign*`. Each was saved once and reopened: both retain production branch `main`, automatic production deployments checked, include `*` and the exact single exclusion. Access, build commands, runtime values, watch paths and the Worker were not changed. No secrets were revealed. Rollback: restore All non-production branches in each project. This is a reversible preview-only configuration restriction, not a production release or access-policy change. [Cloudflare branch-control documentation](https://developers.cloudflare.com/pages/configuration/branch-build-controls/) confirms excludes take precedence over includes.
+
+GitHub Pages is independently configured as legacy publishing from `main` at `/`; the only other repository workflow is Security checks. The active main ruleset remains unchanged. Redesign integration/step branches had no existing remote counterparts at the pre-push check.
 
 **Local implementation:** `dev/redesign/preview.mjs` serves an immutable in-memory snapshot of the existing app and official assets on loopback HTTP only. It never reads real `config.js` or environment secrets. Four existing pinned CDN libraries are cached under ignored `tmp/redesign-vendor/` and checked against the app's SHA-384 values on preparation and startup. No new production dependency or app source change.
 
@@ -175,7 +177,7 @@ Open `http://127.0.0.1:4173`. Preparation downloads only the four already-pinned
 
 The CI diff preserves main triggers and every existing check, adds PRs targeting `codex/tallyo-redesign` and pushes on the integration/step branches, and includes the offline preview harness. Remote CI has not run; browser acceptance is a local test, not currently a hosted CI job. No claim is made that all production regressions were rerun for this dev-only checkpoint.
 
-**Remaining Step 1 gates:** Owner decision on the two branch exclusions, readback before pushing, integration-target PR and successful remote checks, provider artifact-retention/rollback availability confirmation. Keep Step 2 and production deployment paused. A future UI step may add only the fixture cases it needs; do not build a duplicate backend framework.
+**Remaining Step 1 gates:** integration-target PR and successful remote checks, confirmation that excluded pushes do not publish previews, and provider artifact-retention/rollback availability confirmation. Keep Step 2 and production deployment paused. A future UI step may add only the fixture cases it needs; do not build a duplicate backend framework.
 
 Historical preview configuration says browser configuration mirrored production. Access protection and a Stripe test flag are NOT backend isolation. Prefer existing free/local test facilities, mocked outbound delivery and fictional records. Obtain approval before any new paid service or sensitive provider setting. Do not copy production datasets or active scheduled jobs into an unattended preview.
 

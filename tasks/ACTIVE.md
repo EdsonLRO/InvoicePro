@@ -2,13 +2,13 @@
 
 ## UX-REDESIGN-001 — Controlled redesign, Step 1
 
-Status: Local isolated fixture preview and focused checks pass. Remote push awaits Owner approval of two narrow Pages branch exclusions; Step 1 is not closed.
+Status: Local isolated fixture preview and focused checks pass. Owner-approved Pages branch exclusions saved and reopened successfully; remote checks next. Step 1 is not closed.
 Owner: Codex, sequential implementation/QA. Risk: Medium dev-only work; provider changes require separate approval.
 Branch: `codex/tallyo-redesign-preview`, targeting `codex/tallyo-redesign`, both including baseline `baa12d0` from main `7429b2b`.
 Scope/lock: `dev/redesign/`, preview tests, CI targeting, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer; unrelated working files preserved.
 Single working checklist: [Controlled upgrade](../docs/design/tallyo-redesign/UPGRADE.md).
-Authority: Step 1 only. No redesigned screens, main merge, public deployment, migration, secret change, real email, account mutation or payment. Owner request for a recommendation is not approval to change provider settings.
-Both Pages projects currently build all non-production branches. Proposed exclusion: `codex/tallyo-redesign*` only. No setting changed or push performed. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate Auth/RLS/backend behaviour. Frozen references remain unchanged. Stop before Step 2.
+Authority: Step 1 only, plus exact Owner approval of the two Pages preview branch exclusions on 12 September 2026. No redesigned screens, main merge, public deployment, migration, secret change, real email, account mutation or payment.
+Both Pages projects now include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate Auth/RLS/backend behaviour. Frozen references remain unchanged. Stop before Step 2.
 
 ## AUTH-004 — Recovery email canonical destination
 
