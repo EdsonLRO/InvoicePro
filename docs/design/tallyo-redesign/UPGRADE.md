@@ -1,11 +1,11 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Step 1 prepared and verified for Owner review in draft PR #156; STOP before Step 2 or main merge.
+Status: Step 1 approved and merged into the non-production integration branch. Step 2 implemented and locally verified; preparing its review PR. STOP before Step 3 or main merge.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
-Risk: Medium development-only foundation; provider changes remain approval-gated. No production runtime or security change.
-Branch: `codex/tallyo-redesign-preview`, targeting local integration branch `codex/tallyo-redesign`; both include baseline `baa12d0`.
-Authority: the Owner approved Step 1 only, following the staged plan in this task. Step 2 remains unstarted.
+Risk: Medium frontend navigation/Overview work on an isolated branch; no financial helper, backend, Auth or provider change.
+Branch: `codex/tallyo-redesign-overview`, targeting `codex/tallyo-redesign`, from Step 1 merge `b9532bd`.
+Authority: the Owner approved Step 1 and explicitly authorised Step 2 on 12 September 2026. Later stages and production release remain separate approvals.
 
 ## 1. Scope and stop rules
 
@@ -186,6 +186,33 @@ The CI diff preserves main triggers and every existing check, adds PRs targeting
 Historical preview configuration says browser configuration mirrored production. Access protection and a Stripe test flag are NOT backend isolation. Prefer existing free/local test facilities, mocked outbound delivery and fictional records. Obtain approval before any new paid service or sensitive provider setting. Do not copy production datasets or active scheduled jobs into an unattended preview.
 
 Use focused tests during each change and the full relevant suite at the release milestone. A screenshot or source-pattern harness does not replace a complete interactive fixture-based workflow. No production writes, real emails, recovery actions or transactions are needed to establish this baseline.
+
+### Step 2 — navigation and Overview
+
+**Scope:** the existing Vue app now has the approved sidebar/mobile bottom-navigation structure, a global New menu, and an action-oriented Overview. The same official wordmark, navy/slate/indigo palette and existing asset pipeline are retained. No new runtime dependency, build gate, service, query, provider call, Analytics event, payment calculation or schema.
+
+**Navigation decisions:** existing hash routes and conditional Owner visibility remain intact. Reminders is a shortcut to the current overdue-invoice list, not a new scheduler. Branding remains directly accessible under Settings. Products & services is the navigation label; the catalogue screen's remaining terminology/layout belongs to Step 3. New opens the existing invoice/quote draft workflow or existing customer/item forms. Unsaved new-invoice state survives a visit to Overview and return; the existing editor's New Invoice control still starts another. Menus support Escape, contained Tab navigation and return focus; mobile Help returns focus to More. The existing persistent cookie control is positioned above the new mobile navigation, without changing consent behaviour.
+
+**Overview definitions and constraints:**
+
+- The existing `dashboardStats`, `amountPaid`, `invoiceOutstanding`, status helpers and dispute-state resolver are unchanged. Monetary figures select one currency; attention/activity show document-specific currencies and span all currencies.
+- Outstanding/aging retain invoice total minus recorded-payment semantics, excluding Draft, Cancelled, quotes and credits. **Known legacy behaviour is deliberately preserved:** a historical invoice marked Paid without matching payment records can still contribute to the old dashboard balance, while the existing effective-status helper excludes it from overdue attention. Resolve that compatibility question in the separately scoped status release, not silently here.
+- Paid this month is the UTC-month sum of dated invoice payment records, including negative refund entries. A manually selected Paid status alone does not fabricate a payment. Recorded payments on subsequently cancelled invoices retain the existing reporting treatment.
+- Recurring this week means **active schedules whose next run is Monday–Sunday UTC**, including still-due runs earlier in that week. It is neither a generated-invoice count nor an expansion of every future occurrence. The label's detail and “How these figures work” explain this.
+- Attention: actionable current disputes; existing eligible overdue invoices with positive balances; active recurring schedules due by tomorrow; quotes Sent/marked Sent at least five days ago using their latest sending evidence. Issue date alone does not imply an email was sent. Reminder actions open the existing review dialog, never send immediately. Closed/won disputes and paid/zero-balance invoices do not create those respective attention prompts.
+- Recent activity is derived from saved document history plus the already-loaded delivery audit records, matched by document ID. It shows deterministic labels, not copied note/provider metadata. Three items initially, up to twenty on expansion; no new fetch or claim of a complete system audit. Quote acceptance and accepted-quote automatic invoices are **not invented**.
+- Setup reflects existing business details/logo/customers/invoices and delivery evidence. A manual Sent status alone does not complete “Send your first invoice.” The optional card leads for an empty account, disappears when complete and adds no stored onboarding flags. Empty accounts do not display an empty aging chart.
+- Figures describe currently loaded records, not live bank/scheduler state. Refresh uses the existing app lifecycle. Greeting uses a supplied profile first name when available, never an email-derived name.
+
+**Local validation:** `node tests/redesign-overview-harness.cjs` covers empty state, currency separation, unchanged legacy financial treatment, net payments, UTC week boundaries, active/paused schedules, latest quote-sending evidence, unresolved/resolved disputes, setup evidence, bounded activity and review-only actions. It executes the actual Vue selectors/methods, not a duplicate calculation model.
+
+`node tests/redesign-overview-browser.cjs` passed in fresh Chrome with blocked non-loopback requests: actual desktop/mobile route actions, hash fallback and back/forward, existing reminder/quote/schedule review, New forms, unsaved new-invoice retention, keyboard focus containment/Escape/return, mobile Help, currency selector, empty-account state and widths 320/390/768/1099/1100/1280/1440 without Overview horizontal overflow. Cookie-settings geometry clears the bottom navigation. Zero uncaught errors or external requests. `redesign-preview-browser.cjs` also passed actual app mount, customer CRUD/reset, blocked providers and A→B→A artifact restoration. No real email, payment or account action was exercised.
+
+The existing Node CI harness suite passed locally, including the app's synthetic-config build, lifecycle/calculations, email/payment-option, navigation/accessibility, Auth/MFA/Owner, session, tenant and PWA checks. Four old horizontal-menu source assertions were replaced by equivalent bottom-navigation/scrollable-dialog/focus-containment checks, backed by browser interactions; no security assertion or workflow protection was removed. The new Overview unit harness runs in the existing CI. Browser checks remain local. Hosted CI will additionally run the existing website tests, Owner runtime tests and frozen function checks; final results belong to the review PR.
+
+**Review images:** generated, ignored local evidence under `tmp/redesign-evidence/`: `step2-desktop-overview.png`, `step2-mobile-overview.png`, `step2-mobile-activity.png`, `step2-empty-overview.png`. The desktop, actual 390px phone composition and empty state were visually checked. Original frozen reference files remain unchanged. Open `http://127.0.0.1:4173` while the local server is running to review the interactive result.
+
+**Limits:** this is a fictional UI preview, not a live Auth/RLS/provider or email-delivery acceptance test. Automated keyboard/responsive checks are not full screen-reader/browser-matrix certification. Other screens remain the existing UI inside the new shell; their redesign is explicitly deferred. No main merge, public preview, app release marker change or deployment is authorised by this step. Stop for Owner review before Step 3.
 
 ### Later, separately scoped releases
 

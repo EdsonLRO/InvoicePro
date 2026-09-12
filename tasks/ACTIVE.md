@@ -1,14 +1,14 @@
 # Active programme: COMM-001 commercial launch integration
 
-## UX-REDESIGN-001 — Controlled redesign, Step 1
+## UX-REDESIGN-001 — Controlled redesign, Step 2
 
-Status: Step 1 prepared for Owner review in draft PR #156 (base: `codex/tallyo-redesign`). Local browser/isolation/rollback checks and both remote verification runs passed. Both Pages projects visibly skipped the redesign pushes; production is unchanged. Stop before Step 2 or main merge.
+Status: Owner approved Step 1 and authorised Step 2 on 12 September 2026. PR #156 merged only into `codex/tallyo-redesign` as `b9532bd`. Step 2 navigation/Overview implemented; local unit, browser/isolation and existing Node regression checks pass. Preparing review PR; stop before Step 3 or main merge.
 Owner: Codex, sequential implementation/QA. Risk: Medium dev-only work; provider changes require separate approval.
-Branch: `codex/tallyo-redesign-preview`, targeting `codex/tallyo-redesign`, both including baseline `baa12d0` from main `7429b2b`.
-Scope/lock: `dev/redesign/`, preview tests, CI targeting, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer; unrelated working files preserved.
+Branch: `codex/tallyo-redesign-overview`, targeting `codex/tallyo-redesign`, from Step 1 merge `b9532bd`.
+Scope/lock: index.html navigation/Overview presentation and read-only selectors, dev fixture, focused tests/CI, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer. Existing financial helpers, routes, security, backend, provider settings and unrelated working files preserved.
 Single working checklist: [Controlled upgrade](../docs/design/tallyo-redesign/UPGRADE.md).
-Authority: Step 1 only, plus exact Owner approval of the two Pages preview branch exclusions on 12 September 2026. No redesigned screens, main merge, public deployment, migration, secret change, real email, account mutation or payment.
-Both Pages projects now include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate Auth/RLS/backend behaviour. Frozen references remain unchanged. Stop before Step 2.
+Authority: Step 2 navigation/Overview only. No main merge, public deployment, migration, secret change, real email, account mutation or payment.
+Both Pages projects include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate Auth/RLS/backend behaviour. Frozen references remain unchanged. Stop before Step 3.
 
 ## AUTH-004 — Recovery email canonical destination
 

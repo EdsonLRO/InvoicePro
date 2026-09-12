@@ -34,7 +34,7 @@ const path = require('node:path');
           continue;
         }
         assert.equal(await page.title(), 'Tallyo');
-        await page.getByText('Customers', { exact: true }).click();
+        await page.locator('#primary-navigation').getByRole('button', { name: 'Customers', exact: true }).click();
         await page.getByRole('button', { name: '+ New Customer', exact: true }).click();
         await page.locator('input').filter({ visible: true }).first().fill('Preview test customer');
         await page.getByRole('button', { name: 'Save Customer', exact: true }).click();
@@ -52,7 +52,7 @@ const path = require('node:path');
           return result;
         });
         assert.deepEqual(blocked, [true, true, true, true]);
-        await page.getByText('Dashboard', { exact: true }).first().click();
+        await page.locator('#primary-navigation').getByRole('button', { name: 'Overview', exact: true }).click();
         await mkdir(path.join(root, 'tmp/redesign-evidence'), { recursive: true });
         await page.screenshot({ path: path.join(root, 'tmp/redesign-evidence/desktop-baseline.png'), fullPage: true });
         await page.setViewportSize({ width: 390, height: 844 });
