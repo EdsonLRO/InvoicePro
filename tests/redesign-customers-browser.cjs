@@ -6,7 +6,7 @@ const path = require('node:path');
   const { artifact, serve, root } = await import('../dev/redesign/preview.mjs');
   const server = await serve(await artifact(), 0);
   const origin = 'http://127.0.0.1:' + server.address().port;
-  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const browser = await chromium.launch({ channel: 'chrome', headless: true, ignoreDefaultArgs: ['--hide-scrollbars'] });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, serviceWorkers: 'block' });
   const outside = [], errors = [];
   await context.route('**/*', route => {
@@ -31,6 +31,13 @@ const path = require('node:path');
     for (const width of [320, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       assert.ok(await customers.evaluate(el => el.scrollWidth <= el.clientWidth), 'customer detail no horizontal scrolling ' + width);
+      for (const list of await detail.locator('.customer-context-list').all()) {
+        assert.ok(await list.evaluate(el => {
+          const scrollbarEdge = el.getBoundingClientRect().left + el.clientLeft + el.clientWidth;
+          return [...el.querySelectorAll('.customer-document > span:last-child')].every(span =>
+            scrollbarEdge - span.getBoundingClientRect().right >= 12);
+        }), 'amounts and arrows have at least 12px clearance from scrollbar at ' + width);
+      }
       if ([390, 1440].includes(width)) {
         await page.locator('#main-content').evaluate(el => { el.scrollTop = 0; });
         await page.screenshot({ path: path.join(root, `tmp/redesign-evidence/step5-customer-${width}.png`) });

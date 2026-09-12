@@ -268,6 +268,8 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 **Review:** refresh `http://127.0.0.1:4173/#customers`, select Willow & Pine Studio, then review Recurring and Business settings, including a phone-sized window. Local ignored evidence: `tmp/redesign-evidence/step5-customer-1440.png`, `step5-customer-390.png`, `step5-recurring-390.png`; desktop/mobile renderings were visually inspected. Frozen mockup files and official assets remain unchanged. Stop for Owner review before integrating Step 5 or starting Step 6 acceptance. Production stays untouched.
 
+**Customer scrollbar review refinement:** added 12px internal right padding to the document/activity lists so amounts and arrows do not sit against the scrollbar. Focused browser geometry checks cover both lists at 320–1440px; scrolling and actions are unchanged.
+
 ### Later, separately scoped releases
 
 1. Status rules: invoice/quote/credit semantics, manual payment retention, historical Paid compatibility, refunds/partial payments and overdue rules. Decide before migrating anything.
