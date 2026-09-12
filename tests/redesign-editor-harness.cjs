@@ -1,0 +1,27 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { createHash } = require('node:crypto');
+const app = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
+const hash = source => createHash('sha256').update(source.replace(/\r\n/g, '\n').trim()).digest('hex');
+
+// Step 4 is presentation-only. These baseline hashes (integration c756f24)
+// deliberately fail if handlers or printable content change. A later approved
+// behaviour change must review and replace this guard, not silently update it.
+assert.equal(hash(app.slice(app.indexOf('        methods: {'))), '99862950887320c853dc07cf5fbe80de330361e8af1dcc94787bf65e67ef564e', 'existing methods/startup must remain unchanged');
+const canvasStart = app.indexOf('\n', app.indexOf('<div id="invoice-canvas"'));
+const canvasEnd = app.indexOf('\n                </div>', app.indexOf('company.invoiceFooter', canvasStart)) + 23;
+assert.equal(hash(app.slice(canvasStart, canvasEnd)), 'd478ee1f800c304a181747174eeb2ee4c8fa37a4ab0c294eaf8ac18eaa9187d6', 'printable document content must remain unchanged');
+assert.equal((app.match(/id="invoice-canvas"/g) || []).length, 1);
+assert.match(app, /@click="exportPDF\(draft\)"/);
+assert.match(app, /@click="sendDocumentEmail\(draft\)"[^>]*>Review &amp; send/);
+assert.match(app, /Changes are saved when you select Save/);
+assert.doesNotMatch(app, /Last saved just now/);
+const editor = app.slice(app.indexOf('<div class="editor-layout"'), app.indexOf('<div class="editor-preview-surface"'));
+for (const binding of ['draft.customer', 'draft.docType', 'draft.number', 'draft.currency', 'draft.date', 'draft.dueDate', 'draft.poNumber', 'item.name', 'item.qty', 'item.unit', 'item._h', 'item._m', 'item.price', 'item.discount', 'item.tax', 'draft.globalDiscount', 'draft.shippingCost', 'draft.terms', 'draft.notes', 'draft.onlinePaymentMode', 'draft.depositAmount', 'draft.repeat.frequency', 'draft.repeat.emailEnabled', 'draft.overdueFirstReminderDays', 'draft.overdueRepeatReminderDays', 'draft.overdueMaxReminders']) assert.ok(editor.includes(binding), binding + ' remains editable');
+for (const handler of ['changeStatus', 'onCustomerSelect', 'onDocTypeChange', 'onUnitSelect', 'applyTime', 'selectMatch', 'saveAsNewPreset', 'setTaxMode', 'toggleRepeat', 'toggleOverdueReminders', 'recordPayment', 'openStripeCheckout', 'openStripeRefundModal', 'removePayment', 'addActivityNote']) assert.ok(editor.includes(handler + '(') || editor.includes('"' + handler + '"'), handler + ' remains bound');
+assert.match(editor, /company\.paymentDetails/);
+assert.match(editor, /role="switch" aria-label="Recurring invoice"/);
+assert.match(editor, /role="switch" aria-label="Overdue reminders"/);
+assert.match(editor, /Done editing items/);
+console.log('Step 4 contracts passed: unchanged handler/startup and printable-template hashes, one PDF canvas, complete editor bindings, explicit save/review, accessible automation controls.');

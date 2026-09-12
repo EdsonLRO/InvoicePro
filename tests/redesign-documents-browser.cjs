@@ -86,6 +86,40 @@ const path = require('node:path');
       await page.setViewportSize({ width, height: 1000 });
       assert.ok(await docs.evaluate(el => el.scrollWidth <= el.clientWidth), 'Documents has no horizontal scrolling at ' + width);
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no outer overflow at ' + width);
+      for (const record of [records.first(), records.last()]) {
+        const before = await record.boundingBox();
+        await record.locator('summary').click();
+        const after = await record.boundingBox();
+        assert.equal(after.height, before.height, 'More does not expand row/card at ' + width);
+        const geometry = await record.locator('.record-menu').evaluate(el => {
+          const summary = el.querySelector('summary').getBoundingClientRect();
+          const label = el.querySelector('summary span').getBoundingClientRect();
+          const arrow = el.querySelector('svg').getBoundingClientRect();
+          const menu = el.querySelector('div').getBoundingClientRect();
+          return { gap: menu.top >= summary.bottom ? menu.top - summary.bottom : summary.top - menu.bottom, left: menu.left, right: menu.right,
+            arrowWidth: arrow.width, arrowHeight: arrow.height, labelHeight: label.height,
+            centreOffset: Math.abs(label.top + label.height / 2 - arrow.top - arrow.height / 2) };
+        });
+        assert.ok(geometry.gap >= 5 && geometry.gap <= 7);
+        assert.ok(geometry.left >= 0 && geometry.right <= width, 'dropdown stays within viewport');
+        assert.equal(geometry.arrowWidth, 10); assert.equal(geometry.arrowHeight, 10);
+        assert.ok(geometry.labelHeight <= 24, 'More stays on one line');
+        assert.ok(geometry.centreOffset < 1, 'chevron vertically centred with More');
+        // Every action remains reachable above subsequent rows/cards, including the last row.
+        for (const button of await record.locator('.record-menu button').all()) {
+          await button.evaluate(el => el.scrollIntoView({ block: 'center' }));
+          const hit = await button.evaluate(el => {
+            const r = el.getBoundingClientRect();
+            const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+            return { reachable: el.contains(top), covering: top?.outerHTML.slice(0, 250), y: r.y, label: el.textContent };
+          });
+          assert.ok(hit.reachable, 'dropdown action is not clipped or covered at ' + width + ': ' + JSON.stringify(hit));
+        }
+        if ([390, 1440].includes(width) && await record.locator('.record-open').innerText() === await records.first().locator('.record-open').innerText()) {
+          await page.screenshot({ path: path.join(root, `tmp/redesign-evidence/step3-more-menu-${width}.png`) });
+        }
+        await record.locator('summary').focus(); await page.keyboard.press('Escape');
+      }
     }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('.shell-main').evaluate(el => { el.scrollTop = 0; });
@@ -151,9 +185,27 @@ const path = require('node:path');
     await catalogue.getByRole('searchbox').fill('');
     await page.locator('.shell-main').evaluate(el => { el.scrollTop = 0; });
     await page.screenshot({ path: path.join(root, 'tmp/redesign-evidence/step3-mobile-catalogue.png') });
+    await page.evaluate(() => {
+      const vm = document.querySelector('#app').__vue_app__._container._vnode.component.proxy;
+      vm.savedItems.find(item => item.name === 'Website maintenance').description = '';
+    }); // Exercise single-line and description-bearing rows together.
     for (const width of [320, 390, 768, 1100, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       assert.ok(await catalogue.evaluate(el => el.scrollWidth <= el.clientWidth), 'catalogue has no horizontal scrolling at ' + width);
+      const alignment = await catalogue.locator('tbody tr').evaluateAll(rows => rows.map(row => {
+        const cells = row.querySelectorAll('td');
+        const center = el => { const b = el.getBoundingClientRect(); return b.y + b.height / 2; };
+        const range = document.createRange(); range.selectNodeContents(cells[2]);
+        const price = range.getBoundingClientRect();
+        return { desktop: getComputedStyle(row).display !== 'grid', row: center(row), checkbox: center(cells[0].querySelector('input')), name: center(cells[1]), price: price.y + price.height / 2, actions: center(cells[3].querySelector('button')) };
+      }));
+      for (const row of alignment) {
+        assert.ok(Math.abs(row.checkbox - row.name) <= 1, 'catalogue checkbox centres with name at ' + width);
+        if (row.desktop) {
+          assert.ok(Math.abs(row.price - row.row) <= 3, 'catalogue price centres in row at ' + width);
+          assert.ok(Math.abs(row.actions - row.row) <= 1, 'catalogue actions centre in row at ' + width);
+        }
+      }
     }
     await page.screenshot({ path: path.join(root, 'tmp/redesign-evidence/step3-desktop-catalogue.png') });
     assert.deepEqual(errors, []); assert.deepEqual(outside, []);

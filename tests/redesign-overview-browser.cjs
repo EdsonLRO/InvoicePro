@@ -7,7 +7,7 @@ const path = require('node:path');
   const { artifact, serve, root } = await import('../dev/redesign/preview.mjs');
   const server = await serve(await artifact(), 0);
   const origin = 'http://127.0.0.1:' + server.address().port;
-  const browser = await chromium.launch({ channel: 'chrome', headless: true });
+  const browser = await chromium.launch({ channel: 'chrome', headless: true, ignoreDefaultArgs: ['--hide-scrollbars'] });
   const context = await browser.newContext({ viewport: { width: 1440, height: 1200 }, serviceWorkers: 'block' });
   const errors = [], outside = [];
   await context.route('**/*', route => {
@@ -25,10 +25,8 @@ const path = require('node:path');
     const money = await overview.locator('.overview-kpi dd').allTextContents();
     assert.deepEqual(money, ['£6,840.00', '£1,840.00', '£4,320.00', '1']);
     assert.equal(await overview.locator('.overview-attention li').count(), 4);
-    assert.equal(await overview.locator('.overview-activity li').count(), 3);
-    await overview.getByRole('button', { name: /View more/ }).click();
     assert.ok(await overview.locator('.overview-activity li').count() > 3);
-    await overview.getByRole('button', { name: /Show less/ }).click();
+    assert.equal(await overview.getByRole('button', { name: /View more|Show less|Show more|Show fewer/ }).count(), 0);
     // A reminder action opens the existing review, never the send function.
     await overview.getByRole('button', { name: /Send reminder/ }).first().click();
     await page.getByRole('button', { name: 'Close reminder dialog' }).waitFor();
@@ -131,6 +129,57 @@ const path = require('node:path');
         }
       } else {
         for (let i = 1; i < cards.length; i++) assert.ok(cards[i].top >= cards[i - 1].bottom, 'mobile cards remain stacked at ' + width);
+      }
+    }
+    // Busy panels scroll independently; their existing 50/20-entry bounds remain.
+    await page.evaluate(() => {
+      const vm = document.querySelector('#app').__vue_app__._container._vnode.component.proxy;
+      const base = vm.invoices[0];
+      vm.invoices = Array.from({ length: 60 }, (_, i) => ({ ...base, id: 'fictional-scroll-' + i, number: 'DEMO-' + i, docType: 'invoice', status: 'Sent', dueDate: '2026-09-01', payments: [], totals: { grandTotal: 240 }, history: [{ type: 'created', ts: new Date(Date.UTC(2026, 8, 12, 9, i)).toISOString() }] }));
+    });
+    assert.equal(await overview.locator('.overview-attention li').count(), 50);
+    assert.equal(await overview.locator('.overview-activity li').count(), 20);
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 1000 });
+      for (const list of await overview.locator('.overview-scroll').all()) {
+        assert.ok(await list.evaluate(el => el.scrollHeight > el.clientHeight && el.clientHeight <= 320));
+        await list.focus(); await page.keyboard.press('End'); await page.waitForTimeout(250);
+        assert.ok(await list.evaluate(el => el.scrollTop > 0), 'keyboard scrolls panel at ' + width);
+        await list.getByRole('button').last().focus();
+        assert.ok(await list.getByRole('button').last().evaluate(el => {
+          const item = el.getBoundingClientRect(), panel = el.closest('ul').getBoundingClientRect();
+          return item.top >= panel.top - 1 && item.bottom <= panel.bottom + 1;
+        }), 'last action is reachable within panel');
+        await list.hover(); await page.mouse.wheel(0, -250); await page.waitForTimeout(250);
+        assert.ok(await list.evaluate(el => el.scrollTop < el.scrollHeight - el.clientHeight), 'wheel scrolls back up');
+      }
+      if (width === 1440) {
+        const heights = await overview.locator('.overview-grid > .overview-card').evaluateAll(cards => cards.slice(0, 2).map(el => el.getBoundingClientRect().height));
+        assert.ok(Math.abs(heights[0] - heights[1]) < 1, 'busy panels retain matching heights');
+      }
+      await page.locator('#main-content').evaluate(el => { el.scrollTop = 0; });
+      await page.screenshot({ path: path.join(root, 'tmp/redesign-evidence/step2-scroll-panels-' + width + '.png') });
+    }
+    // Wheel input chains to the page only after reaching a panel boundary.
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 700 });
+      for (const list of await overview.locator('.overview-scroll').all()) {
+        for (const direction of [-1, 1]) {
+          await list.evaluate((el, direction) => {
+            el.scrollIntoView({ block: 'center' });
+            if (direction < 0) document.querySelector('#main-content').scrollTop += 80;
+            el.scrollTop = direction < 0 ? 0 : el.scrollHeight;
+          }, direction);
+          await page.waitForTimeout(350);
+          const panel = await list.boundingBox();
+          await page.mouse.move(panel.x + panel.width / 2, panel.y + panel.height / 2);
+          const before = await page.locator('#main-content').evaluate(el => el.scrollTop);
+          await page.mouse.wheel(0, direction * 180);
+          await page.waitForTimeout(350);
+          const after = await page.locator('#main-content').evaluate(el => el.scrollTop);
+          assert.ok(direction < 0 ? after < before : after > before,
+            `wheel chains ${direction < 0 ? 'up' : 'down'} to page at ${width}px`);
+        }
       }
     }
     // Empty/new account and mixed-currency state without touching real data.

@@ -1,14 +1,14 @@
 # Active programme: COMM-001 commercial launch integration
 
-## UX-REDESIGN-001 — Controlled redesign, Step 3
+## UX-REDESIGN-001 — Controlled redesign, Step 4
 
-Status: Owner approved Step 2; PR #157 merged only into `codex/tallyo-redesign` as `8df885a`. Owner then explicitly authorised Step 3. Documents/catalogue is ready for review in draft PR #158 targeting the integration branch; all 34 Node harnesses and three isolated browser suites pass. Current-head hosted checks are authoritative on the PR. Stop before Step 4 or main merge.
-Owner: Codex, sequential implementation/QA. Risk: Medium dev-only work; provider changes require separate approval.
-Branch: `codex/tallyo-redesign-documents`, targeting `codex/tallyo-redesign`, from Step 2 merge `8df885a`.
-Scope/lock: index.html Documents/catalogue presentation and catalogue terminology, focused tests/CI, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer. Existing filters, pagination, exports, mutation/payment/security handlers, routes, backend, provider settings and unrelated working files preserved. No new dependency or data model.
+Status: Owner moved to Step 4 after reviewing Step 3. PR #158 merged only into `codex/tallyo-redesign` as `c756f24`. The editor presentation is implemented and locally verified in draft PR #159 targeting the integration branch; current-head hosted checks are authoritative on that PR. Stop before integration, Step 5 or main merge.
+Owner: Codex, sequential implementation/QA. Risk: Medium presentation-only work; existing methods and printable template are hash-checked against the approved baseline.
+Branch: `codex/tallyo-redesign-editor`, targeting `codex/tallyo-redesign`, from Step 3 merge `c756f24`.
+Scope/lock: index.html editor presentation and local disclosure/preview state, focused tests/CI, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer. Calculations, persistence, PDF export method, status/payment/refund/dispute/email/automation handlers, backend and provider settings are unchanged. No dependency or data model added.
 Single working checklist: [Controlled upgrade](../docs/design/tallyo-redesign/UPGRADE.md).
-Authority: Step 3 Documents/catalogue only. No main merge, public deployment, migration, secret change, real email, account mutation or payment.
-Both Pages projects include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate Auth/RLS/backend behaviour. Frozen references remain unchanged. Stop before Step 4.
+Authority: Step 4 editor only. No main merge, public deployment, migration, secret change, real email, account mutation or payment.
+Both Pages projects include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate Auth/RLS/backend behaviour. Frozen references remain unchanged. Stop for Owner review before Step 5.
 
 ## AUTH-004 — Recovery email canonical destination
 
