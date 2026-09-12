@@ -1,6 +1,6 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Step 1 approved and merged into the non-production integration branch. Step 2 implemented and locally verified; preparing its review PR. STOP before Step 3 or main merge.
+Status: Step 1 approved and merged into the non-production integration branch. Step 2 implemented and locally verified in [draft PR #157](https://github.com/EdsonLRO/InvoicePro/pull/157). STOP before Step 3 or main merge.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
 Risk: Medium frontend navigation/Overview work on an isolated branch; no financial helper, backend, Auth or provider change.
@@ -211,6 +211,8 @@ Use focused tests during each change and the full relevant suite at the release 
 The existing Node CI harness suite passed locally, including the app's synthetic-config build, lifecycle/calculations, email/payment-option, navigation/accessibility, Auth/MFA/Owner, session, tenant and PWA checks. Four old horizontal-menu source assertions were replaced by equivalent bottom-navigation/scrollable-dialog/focus-containment checks, backed by browser interactions; no security assertion or workflow protection was removed. The new Overview unit harness runs in the existing CI. Browser checks remain local. Hosted CI will additionally run the existing website tests, Owner runtime tests and frozen function checks; final results belong to the review PR.
 
 **Review images:** generated, ignored local evidence under `tmp/redesign-evidence/`: `step2-desktop-overview.png`, `step2-mobile-overview.png`, `step2-mobile-activity.png`, `step2-empty-overview.png`. The desktop, actual 390px phone composition and empty state were visually checked. Original frozen reference files remain unchanged. Open `http://127.0.0.1:4173` while the local server is running to review the interactive result.
+
+**Review closeout:** [PR #157](https://github.com/EdsonLRO/InvoicePro/pull/157) is draft and targets only `codex/tallyo-redesign`. Both hosted verification runs passed at `aa8f7c5`: [push](https://github.com/EdsonLRO/InvoicePro/actions/runs/34691410395), [PR](https://github.com/EdsonLRO/InvoicePro/actions/runs/34691412452), including the website suite, Owner runtime tests and frozen function checks. GitHub returned zero deployment records for that commit. Final visual inspection caught outer-page scrolling caused by absolute screen-reader labels; containing those labels and scrolling only the main content corrected it. The browser regression now asserts no outer-page scroll or height overflow after the activity shortcut; focused browser/unit/accessibility checks pass after that correction. The final small follow-up must also pass the PR's existing checks; use the PR's current head as the authoritative CI result. No production action.
 
 **Limits:** this is a fictional UI preview, not a live Auth/RLS/provider or email-delivery acceptance test. Automated keyboard/responsive checks are not full screen-reader/browser-matrix certification. Other screens remain the existing UI inside the new shell; their redesign is explicitly deferred. No main merge, public preview, app release marker change or deployment is authorised by this step. Stop for Owner review before Step 3.
 

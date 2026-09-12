@@ -302,7 +302,7 @@
         .shell-sheet h2 { font-size: 20px; font-weight: 650; }
         .shell-sheet .primary-navigation-item:hover { background: #f1f5f9; color: #1e293b; }
         .shell-close { min-width: 44px; min-height: 44px; border-radius: 8px; }
-        .overview { max-width: 1400px; margin: auto; }
+        .overview { position: relative; max-width: 1400px; margin: auto; }
         .overview .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
         .overview-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
         .overview-eyebrow { color: #64748b; font-size: 11px; font-weight: 700; letter-spacing: .12em; margin-bottom: 8px; }
@@ -3245,7 +3245,11 @@
             },
             overviewOpenActivity() {
                 this.navigateTo('dashboard');
-                this.$nextTick(() => document.getElementById('overview-activity-title')?.scrollIntoView({ block: 'start' }));
+                this.$nextTick(() => {
+                    const main = document.getElementById('main-content');
+                    const heading = document.getElementById('overview-activity-title');
+                    if (main && heading) main.scrollTop += heading.getBoundingClientRect().top - main.getBoundingClientRect().top - 16;
+                });
             },
             showAppNotice(title, message, duration = 7000, tone = 'success') {
                 if (this.appNoticeTimer) window.clearTimeout(this.appNoticeTimer);

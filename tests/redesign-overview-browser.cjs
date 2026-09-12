@@ -109,6 +109,8 @@ const path = require('node:path');
     await page.locator('.shell-main').evaluate(el => { el.scrollTop = 0; });
     await page.screenshot({ path: path.join(root, 'tmp/redesign-evidence/step2-mobile-overview.png'), fullPage: true });
     await page.getByRole('button', { name: 'Recent activity', exact: true }).click();
+    assert.equal(await page.evaluate(() => scrollY), 0, 'activity shortcut must scroll only the app content');
+    assert.ok(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1), 'screen-reader labels must not create outer-page overflow');
     await page.screenshot({ path: path.join(root, 'tmp/redesign-evidence/step2-mobile-activity.png'), fullPage: true });
     // Cookie settings remain reachable without covering the bottom navigation.
     await page.locator('.app-cookie-settings').evaluate(el => { el.hidden = false; });
