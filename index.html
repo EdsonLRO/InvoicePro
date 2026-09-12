@@ -405,16 +405,113 @@
         .pdf-mode tbody td { vertical-align: middle !important; padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; }
         #invoice-canvas .font-bold.text-slate-400 { color: var(--brand) !important; }
         @media (max-width: 1024px) {
-            .invoice-table-frame {
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch;
-            }
-            .invoice-table-frame table {
-                min-width: 1120px;
-            }
             .recurring-table-frame table {
                 min-width: 980px;
             }
+        }
+        /* Step 3: one set of document controls, table on desktop / records on phones. */
+        .documents-page, .catalogue-page { position: relative; max-width: 1400px; margin: auto; min-width: 0; }
+        .list-select-page { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; color: #475569; font-size: 14px; cursor: pointer; }
+        .list-select-page input { width: 18px; height: 18px; accent-color: #4f46e5; }
+        .record-select-control { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; cursor: pointer; }
+        .documents-page .sr-only, .catalogue-page .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+        .overview-button { min-height: 44px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 16px; background: #fff; color: #334155; font-weight: 600; font-size: 14px; }
+        .overview-button.primary { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+        .overview-button:hover { filter: brightness(.97); }
+        .list-short-new { display: none; }
+        .list-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+        .list-heading h2 { font-size: 30px; font-weight: 700; letter-spacing: -.035em; }
+        .list-heading p { color: #64748b; margin-top: 6px; font-size: 14px; }
+        .documents-overdue { border: 1px solid #efd5c5; background: #fff9f5; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; }
+        .documents-overdue summary { cursor: pointer; color: #9a4527; font-weight: 600; padding: 6px 0; min-height: 32px; }
+        .documents-overdue summary span { font-size: 13px; font-weight: 400; margin-left: 12px; }
+        .documents-overdue[open] summary { margin-bottom: 14px; }
+        .documents-filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+        .documents-filters input, .documents-filters select, .catalogue-search { min-height: 44px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; background: #fff; font-size: 14px; min-width: 0; }
+        .documents-search { flex: 1; min-width: 220px !important; }
+        .documents-frame { background: #fff; border: 1px solid #dce4ef; border-radius: 12px; }
+        .documents-table { width: 100%; table-layout: fixed; font-size: 14px; text-align: left; }
+        .documents-table th { background: #f8fafc; color: #64748b; font-weight: 500; font-size: 12px; }
+        .documents-table th, .documents-table td { padding: 16px 10px; overflow-wrap: anywhere; vertical-align: top; }
+        .documents-table th:first-child { width: 54px; border-radius: 12px 0 0 0; }
+        .documents-table td.record-select { padding: 7px 4px; }
+        .documents-table th:nth-child(2) { width: 15%; }
+        .documents-table th:nth-child(3) { width: 19%; }
+        .documents-table th:nth-child(4) { width: 15%; }
+        .documents-table th:last-child { width: 84px; border-radius: 0 12px 0 0; }
+        .document-record { border-top: 1px solid #edf1f6; }
+        .document-record:hover { background: #fafbff; }
+        .documents-table input[type=checkbox], .catalogue-table input[type=checkbox] { width: 18px; height: 18px; accent-color: #4f46e5; cursor: pointer; }
+        .record-identity > span { margin-top: 8px; }
+        .record-open { display: block; font-weight: 650; color: #4338ca; text-align: left; overflow-wrap: anywhere; }
+        .record-dates span, .record-total small, .record-status small { display: block; font-size: 12px; color: #64748b; margin-top: 4px; }
+        .record-dates span:first-child { margin-top: 0; }
+        .record-currency { display: block; font-size: 11px; color: #64748b; margin-top: 3px; }
+        .record-total strong { font-variant-numeric: tabular-nums; }
+        .record-badge { display: inline-block; border-radius: 6px; padding: 4px 7px; font-size: 12px; line-height: 1.4; font-weight: 600; }
+        .record-muted { color: #64748b; font-size: 12px; }
+        .record-menu summary { list-style: none; cursor: pointer; border: 1px solid #dce4ef; border-radius: 8px; padding: 8px; min-height: 40px; font-size: 13px; text-align: center; }
+        .record-menu summary::-webkit-details-marker { display: none; }
+        .record-menu[open] summary { background: #eef2ff; color: #4338ca; }
+        .record-menu > div { display: grid; gap: 3px; margin-top: 6px; }
+        .record-menu button { padding: 9px 3px; min-height: 40px; font-size: 12px; border-radius: 6px; }
+        .record-menu button:hover { background: #eef2ff; }
+        .record-menu button:disabled { opacity: .5; }
+        .record-danger { color: #b91c1c; }
+        .list-empty td { padding: 40px 24px; text-align: center; color: #64748b; }
+        .catalogue-table { width: 100%; text-align: left; table-layout: fixed; }
+        .catalogue-table th:first-child { width: 64px; }
+        .catalogue-table td:first-child { padding: 7px 4px; }
+        .catalogue-table th:nth-child(3) { width: 18%; }
+        .catalogue-table th:last-child { width: 150px; }
+        .catalogue-table td { overflow-wrap: anywhere; }
+        .catalogue-page button, .documents-page > div > div > button { min-height: 44px; }
+        @media (max-width: 899px), (min-width: 1100px) and (max-width: 1240px) {
+            .documents-table, .documents-table tbody { display: block; }
+            .documents-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+            .documents-frame { position: relative; border: 0; background: transparent; }
+            .document-record { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px; grid-template-areas: 'identity identity select' 'customer customer customer' 'total status status' 'dates dates dates' 'email actions actions'; gap: 8px 12px; padding: 18px; border: 1px solid #dce4ef; border-radius: 12px; background: #fff; margin-bottom: 14px; }
+            .documents-table .document-record td { padding: 0; }
+            .record-select { grid-area: select; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; min-height: 44px; }
+            .record-identity { grid-area: identity; align-self: center; }
+            .record-identity > span { margin: 5px 0 0; }
+            .record-open { font-size: 17px; }
+            .record-open::after { content: ''; position: absolute; inset: 0; border-radius: 12px; }
+            .record-open:focus-visible::after { outline: 3px solid #4f46e5; outline-offset: 2px; }
+            .record-customer { grid-area: customer; color: #475569; font-size: 15px; }
+            .record-total { grid-area: total; margin-top: 5px; }
+            .record-total strong { font-size: 22px; }
+            .record-currency { display: inline; margin-left: 5px; }
+            .record-status { grid-area: status; text-align: right; align-self: center; }
+            .record-dates { grid-area: dates; display: flex; flex-wrap: wrap; gap: 5px 14px; }
+            .record-dates span, .record-dates span:first-child { margin: 0; font-size: 13px; }
+            .record-email { grid-area: email; align-self: center; }
+            .record-actions { grid-area: actions; position: relative; z-index: 1; justify-self: end; width: 100%; max-width: 160px; }
+            .record-menu summary, .record-menu button { min-height: 44px; font-size: 14px; }
+            .record-menu > div { background: #f8fafc; border-radius: 8px; }
+            .documents-table .list-empty { display: block; border: 1px solid #dce4ef; border-radius: 12px; background: #fff; }
+            .documents-table .list-empty td { display: block; }
+        }
+        @media (max-width: 699px) {
+            .list-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+            .list-heading h2 { font-size: 28px; }
+            .documents-page .list-heading { flex-direction: row; align-items: center; }
+            .documents-page .list-heading p, .list-long-new { display: none; }
+            .list-short-new { display: inline; }
+            .documents-filters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+            .documents-search { grid-column: 1 / -1; width: 100%; min-width: 0 !important; }
+            .documents-filters select { width: 100%; }
+            .documents-overdue { padding: 10px 12px; }
+            .documents-overdue summary span { margin-left: 8px; font-size: 12px; }
+            .catalogue-table, .catalogue-table tbody { display: block; }
+            .catalogue-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+            .catalogue-table tr { display: grid; grid-template-columns: 40px minmax(0, 1fr); padding: 14px; }
+            .catalogue-table td { padding: 6px; }
+            .catalogue-table td:nth-child(n+3) { grid-column: 2; text-align: left; }
+            .catalogue-table td:nth-child(3)::before { content: 'Default price: '; color: #64748b; font-weight: 400; }
+            .catalogue-table .catalogue-empty td { grid-column: 1 / -1; }
+            .catalogue-page { position: relative; }
+            .catalogue-page .catalogue-search { width: 100%; max-width: none; }
         }
         .app-notice {
             position: fixed;
@@ -1747,13 +1844,16 @@
                 </div>
             </div>
 
-            <div v-show="activeTab === 'invoices'">
-                <h2 class="text-3xl font-semibold mb-6">My Invoices</h2>
+            <div v-show="activeTab === 'invoices'" class="documents-page" aria-labelledby="documents-title">
+                <div class="list-heading">
+                    <div><h2 id="documents-title">Documents</h2><p>Invoices, quotes and credit notes, all in one place.</p></div>
+                    <button @click="newInvoice" aria-label="New document" class="overview-button primary"><span class="list-long-new">+ New document</span><span class="list-short-new" aria-hidden="true">+ New</span></button>
+                </div>
 
-                <div v-if="overdueInvoices.length" class="bg-red-50 border border-red-200 rounded-xl p-5 mb-6">
+                <details v-if="overdueInvoices.length" class="documents-overdue">
+                    <summary>{{ overdueInvoices.length }} overdue invoice{{ overdueInvoices.length > 1 ? 's' : '' }} <span>Review reminders</span></summary>
                     <div class="flex items-center justify-between flex-wrap gap-3 mb-3">
                         <div>
-                            <h3 class="font-semibold text-red-800">{{ overdueInvoices.length }} overdue invoice{{ overdueInvoices.length > 1 ? 's' : '' }} — {{ getCurrencySymbol(overdueInvoices[0].currency) }}{{ overdueOutstanding.toFixed(2) }} outstanding</h3>
                             <p v-if="overdueAutomaticCount === overdueInvoices.length" class="text-sm text-red-700 mt-0.5">Automatic reminders are enabled for these invoices.</p>
                             <p v-else-if="overdueAutomaticCount" class="text-sm text-red-700 mt-0.5">Automatic reminders are enabled where marked. Send manual reminders for the rest.</p>
                             <p v-else class="text-sm text-red-700 mt-0.5">Past their due date and not fully paid. Send a reminder below.</p>
@@ -1773,17 +1873,17 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </details>
 
-                <div class="flex flex-wrap items-center gap-3 mb-5">
-                    <input type="text" v-model="invoiceSearch" @input="resetInvoiceListState" placeholder="Search by # or customer..." class="flex-1 min-w-[200px] border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
-                    <select v-model="invoiceTypeFilter" @change="resetInvoiceListState" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                <div class="documents-filters">
+                    <input type="search" aria-label="Search documents" v-model="invoiceSearch" @input="resetInvoiceListState" placeholder="Search number or customer" class="documents-search">
+                    <select aria-label="Document type" v-model="invoiceTypeFilter" @change="resetInvoiceListState">
                         <option value="All">All types</option>
                         <option value="invoice">Invoices</option>
                         <option value="quote">Quotes</option>
                         <option value="credit">Credit Notes</option>
                     </select>
-                    <select v-model="invoiceStatusFilter" @change="resetInvoiceListState" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                    <select aria-label="Document status" v-model="invoiceStatusFilter" @change="resetInvoiceListState">
                         <option value="All">All statuses</option>
                         <option value="Draft">Draft</option>
                         <option value="Sent">Sent</option>
@@ -1792,7 +1892,7 @@
                         <option value="Paid">Paid</option>
                         <option value="Cancelled">Cancelled</option>
                     </select>
-                    <select v-model="invoiceSort" @change="resetInvoiceListState" class="border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                    <select aria-label="Sort documents" v-model="invoiceSort" @change="resetInvoiceListState">
                         <option value="date_desc">Newest first</option>
                         <option value="date_asc">Oldest first</option>
                         <option value="amount_desc">Amount: high to low</option>
@@ -1800,11 +1900,11 @@
                         <option value="number_desc">Invoice # (desc)</option>
                         <option value="number_asc">Invoice # (asc)</option>
                     </select>
-                    <button @click="exportExcel" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors">Export XLSX</button>
-                    <button @click="newInvoice" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition-colors">+ New Invoice</button>
+                    <button @click="exportExcel" title="Export all saved documents, regardless of filters" class="overview-button">Export XLSX</button>
                 </div>
 
                 <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+                    <label class="list-select-page"><input type="checkbox" :checked="currentInvoicePageSelected" :disabled="!paginatedInvoices.length" @change="toggleInvoicePageSelection($event.target.checked)"> Select page</label>
                     <div v-if="selectedInvoices.length" class="flex items-center gap-2 flex-wrap bg-indigo-50 border border-slate-200 rounded-lg px-3 py-2">
                         <span class="text-sm font-semibold text-indigo-600">{{ selectedInvoices.length }} selected</span>
                         <button @click="bulkDuplicateInvoices" :disabled="invoiceBulkBusy" class="bg-white border border-slate-300 text-indigo-600 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Duplicate</button>
@@ -1813,82 +1913,61 @@
                         <button @click="bulkDeleteInvoices" :disabled="invoiceBulkBusy" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Delete</button>
                     </div>
                     <div class="flex items-center gap-2 ml-auto">
-                        <button @click="changePage('invoice', -1)" :disabled="invoicePage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                        <button aria-label="Previous documents page" @click="changePage('invoice', -1)" :disabled="invoicePage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
                         <span class="text-sm text-slate-500">{{ pageInfo(invoiceTotalPages, invoicePage) }}</span>
-                        <button @click="changePage('invoice', 1)" :disabled="invoicePage >= invoiceTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
+                        <button aria-label="Next documents page" @click="changePage('invoice', 1)" :disabled="invoicePage >= invoiceTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
                     </div>
                 </div>
 
-                    <div class="invoice-table-frame bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                    <table class="w-full text-left" style="table-layout: fixed;">
-                        <colgroup>
-                            <col style="width: 3%;">
-                            <col style="width: 6%;">
-                            <col style="width: 9%;">
-                            <col style="width: 8%;">
-                            <col style="width: 10%;">
-                            <col style="width: 16%;">
-                            <col style="width: 10%;">
-                            <col style="width: 8.5%;">
-                            <col style="width: 10.5%;">
-                            <col style="width: 19%;">
-                        </colgroup>
-                        <thead class="bg-slate-50 border-b border-slate-200">
-                            <tr>
-                                <th class="p-4 font-medium text-slate-500 w-10"><input type="checkbox" :checked="currentInvoicePageSelected" @change="toggleInvoicePageSelection($event.target.checked)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
-                                <th class="p-4 font-medium text-slate-500">Type</th>
-                                <th class="p-4 font-medium text-slate-500">Number</th>
-                                <th class="p-4 font-medium text-slate-500">Date</th>
-                                <th class="p-4 font-medium text-slate-500 whitespace-nowrap">Due Date</th>
-                                <th class="p-4 font-medium text-slate-500">Customer</th>
-                                <th class="p-4 font-medium text-slate-500 text-center">Total</th>
-                                <th class="p-4 font-medium text-slate-500 text-center">Status</th>
-                                <th class="p-4 font-medium text-slate-500 text-center">Email</th>
-                                <th class="p-4 font-medium text-slate-500 text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            <tr v-if="invoices.length === 0"><td colspan="10" class="p-8 text-center text-slate-400">No documents saved yet.</td></tr>
-                            <tr v-else-if="filteredInvoices.length === 0"><td colspan="10" class="p-8 text-center text-slate-400">No documents match your filters.</td></tr>
-                            <tr v-for="inv in paginatedInvoices" :key="inv.id" class="hover:bg-slate-50">
-                                <td class="p-4"><input type="checkbox" :value="inv.id" v-model="selectedInvoices" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></td>
-                                <td class="p-4">
+                <div class="invoice-table-frame documents-frame">
+                    <table class="documents-table" aria-label="Saved documents" role="table">
+                        <thead><tr role="row">
+                            <th scope="col"><span class="sr-only">Selection</span></th>
+                            <th scope="col">Document</th><th scope="col">Customer</th><th scope="col">Dates</th>
+                            <th scope="col">Amount</th><th scope="col">Status</th><th scope="col">Email</th><th scope="col">Actions</th>
+                        </tr></thead>
+                        <tbody role="rowgroup">
+                            <tr v-if="invoices.length === 0" class="list-empty"><td colspan="8">No documents saved yet. Create your first invoice or quote to get started.</td></tr>
+                            <tr v-else-if="filteredInvoices.length === 0" class="list-empty"><td colspan="8">No documents match your filters. Try another search or choose All types and All statuses.</td></tr>
+                            <tr v-for="inv in paginatedInvoices" :key="inv.id" class="document-record" role="row">
+                                <td class="record-select" role="cell"><label class="record-select-control"><input type="checkbox" :aria-label="'Select ' + inv.number" :value="inv.id" v-model="selectedInvoices"></label></td>
+                                <td class="record-identity" role="cell">
+                                    <button @click="loadInvoice(inv)" class="record-open" :aria-label="'Open ' + docTypeNoun(inv.docType) + ' ' + inv.number">{{ inv.number }}</button>
                                     <span class="inline-flex min-w-16 items-center justify-center rounded px-2 py-1 text-center text-xs font-medium leading-tight" :class="(inv.docType||'invoice')==='invoice' ? 'bg-indigo-50 text-indigo-600' : (inv.docType==='quote' ? 'bg-purple-50 text-purple-600' : 'bg-teal-50 text-teal-600')">{{ docTypeNoun(inv.docType) }}</span>
                                 </td>
-                                <td class="p-4 font-medium whitespace-nowrap"><button @click="loadInvoice(inv)" class="text-indigo-600 hover:text-indigo-800 hover:underline transition-colors whitespace-nowrap">#{{ inv.number }}</button></td>
-                                <td class="p-4 text-slate-600 whitespace-nowrap">{{ inv.date }}</td>
-                                <td class="p-4 text-slate-600 whitespace-nowrap">{{ inv.dueDate }}</td>
-                                <td class="p-4 text-slate-600" style="white-space: normal; word-break: break-word;">{{ inv.customer ? inv.customer.name : 'Unknown' }}</td>
-                                <td class="p-4 font-medium whitespace-nowrap text-center">
-                                    {{ getCurrencySymbol(inv.currency) }}{{ inv.totals.grandTotal.toFixed(2) }}
-                                    <div v-if="amountPaid(inv) > 0 && balanceDue(inv) > 0.001" class="text-xs text-red-500 font-normal">Bal: {{ getCurrencySymbol(inv.currency) }}{{ balanceDue(inv).toFixed(2) }}</div>
+                                <td class="record-customer" role="cell">{{ inv.customer ? inv.customer.name : 'Unknown customer' }}</td>
+                                <td class="record-dates" role="cell"><span>Issued {{ inv.date }}</span><span>Due {{ inv.dueDate || '—' }}</span></td>
+                                <td class="record-total" role="cell">
+                                    <strong>{{ getCurrencySymbol(inv.currency) }}{{ inv.totals.grandTotal.toFixed(2) }}</strong><span class="record-currency">{{ inv.currency || 'GBP' }}</span>
+                                    <small v-if="amountPaid(inv) > 0 && balanceDue(inv) > 0.001">Balance {{ getCurrencySymbol(inv.currency) }}{{ balanceDue(inv).toFixed(2) }}</small>
                                 </td>
-                                <td class="p-4 whitespace-nowrap text-center">
-                                    <span v-if="effectiveStatus(inv) === 'Partially Paid'" class="inline-block px-2 py-1 rounded text-xs font-bold uppercase leading-tight text-center" style="min-width: 74px;" :class="statusBadgeClass(effectiveStatus(inv))">PARTIALLY<br>PAID</span>
-                                    <span v-else class="inline-block px-2 py-1 rounded text-xs font-bold uppercase text-center" style="min-width: 64px; white-space: nowrap;" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
+                                <td class="record-status" role="cell">
+                                    <span class="record-badge" :class="statusBadgeClass(effectiveStatus(inv))">{{ effectiveStatus(inv) }}</span>
+                                    <small v-if="effectiveStatus(inv) === 'Overdue'">{{ daysOverdue(inv) }} days overdue</small>
                                 </td>
-                                <td class="p-4 whitespace-nowrap text-center">
-                                    <span v-if="invoiceListEmailStatus(inv.id)" class="px-2 py-0.5 rounded-full text-xs font-medium" style="white-space: nowrap;" :class="emailStatusClass(invoiceListEmailStatus(inv.id).state)">
-                                        {{ invoiceListEmailStatus(inv.id).label }}
-                                    </span>
+                                <td class="record-email" role="cell">
+                                    <span v-if="invoiceListEmailStatus(inv.id)" class="record-badge" :class="emailStatusClass(invoiceListEmailStatus(inv.id).state)">Email: {{ invoiceListEmailStatus(inv.id).label }}</span>
+                                    <span v-else class="record-muted">No delivery update</span>
                                 </td>
-                                <td class="p-4 text-right whitespace-nowrap">
-                                    <div class="flex justify-end items-center space-x-3">
-                                        <button @click="duplicateInvoice(inv)" class="text-slate-500 hover:text-slate-800 text-sm font-medium">Duplicate</button>
-                                        <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id" class="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50">{{ emailSendingId === inv.id ? (emailSendingStage === 'prepared' ? 'Preparing...' : 'Sending...') : 'Email' }}</button>
-                                        <button @click="exportPDF(inv)" class="text-emerald-600 hover:text-emerald-800 text-sm font-medium">PDF</button>
-                                        <span class="text-slate-300">|</span>
-                                        <button @click="deleteInvoice(inv)" class="text-red-500 hover:text-red-700 text-sm font-medium">Delete</button>
-                                    </div>
+                                <td class="record-actions" role="cell">
+                                    <details class="record-menu" @keydown.esc="$event.currentTarget.open = false; $event.currentTarget.querySelector('summary').focus()">
+                                        <summary :aria-label="'Actions for ' + inv.number">More <span aria-hidden="true">⌄</span></summary>
+                                        <div>
+                                            <button @click="duplicateInvoice(inv)">Duplicate</button>
+                                            <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id">{{ emailSendingId === inv.id ? (emailSendingStage === 'prepared' ? 'Preparing...' : 'Sending...') : 'Email' }}</button>
+                                            <button @click="exportPDF(inv)">Download PDF</button>
+                                            <button @click="deleteInvoice(inv)" class="record-danger">Delete</button>
+                                        </div>
+                                    </details>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="flex items-center justify-end gap-2 mt-3">
-                    <button @click="changePage('invoice', -1)" :disabled="invoicePage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                    <button aria-label="Previous documents page" @click="changePage('invoice', -1)" :disabled="invoicePage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
                     <span class="text-sm text-slate-500">{{ pageInfo(invoiceTotalPages, invoicePage) }}</span>
-                    <button @click="changePage('invoice', 1)" :disabled="invoicePage >= invoiceTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
+                    <button aria-label="Next documents page" @click="changePage('invoice', 1)" :disabled="invoicePage >= invoiceTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
                 </div>
             </div>
 
@@ -2054,45 +2133,46 @@
                 </div>
             </div>
 
-            <div v-show="activeTab === 'items'">
+            <div v-show="activeTab === 'items'" class="catalogue-page" aria-label="Products and services catalogue">
 
                 <div v-if="itemView === 'list'">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-3xl font-semibold">Manage Saved Items</h2>
-                        <button @click="newItem" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">+ New Item</button>
+                    <div class="list-heading">
+                        <div><h2>Products &amp; services</h2><p>Reuse descriptions and prices on your next document.</p></div>
+                        <button @click="newItem" class="overview-button primary">+ New product or service</button>
                     </div>
 
                     <div class="mb-5 flex items-center gap-3 flex-wrap">
-                        <input type="text" v-model="itemSearch" @input="resetItemListState" placeholder="Search saved items by name..." class="w-full max-w-md border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none bg-white shadow-sm">
+                        <input type="search" aria-label="Search products and services" v-model="itemSearch" @input="resetItemListState" placeholder="Search name or description" class="catalogue-search">
+                        <label class="list-select-page"><input type="checkbox" :checked="currentItemPageSelected" :disabled="!paginatedItems.length" @change="toggleItemPageSelection($event.target.checked)"> Select page</label>
                         <div v-if="selectedItems.length" class="flex items-center gap-2 flex-wrap bg-indigo-50 border border-slate-200 rounded-lg px-3 py-2">
                             <span class="text-sm font-semibold text-indigo-600">{{ selectedItems.length }} selected</span>
                             <button @click="bulkChangeItemPrice" :disabled="itemBulkBusy" class="bg-white border border-slate-300 text-indigo-600 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Change price</button>
                             <button @click="bulkDeleteItems" :disabled="itemBulkBusy" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Delete</button>
                         </div>
                         <div class="flex items-center gap-2 ml-auto">
-                            <button @click="changePage('item', -1)" :disabled="itemPage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                            <button aria-label="Previous products and services page" @click="changePage('item', -1)" :disabled="itemPage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
                             <span class="text-sm text-slate-500">{{ pageInfo(itemTotalPages, itemPage) }}</span>
-                            <button @click="changePage('item', 1)" :disabled="itemPage >= itemTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
+                            <button aria-label="Next products and services page" @click="changePage('item', 1)" :disabled="itemPage >= itemTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
-                        <table class="w-full text-left min-w-[580px]">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+                        <table class="catalogue-table" role="table" aria-label="Products and services">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
-                                    <th class="p-4 font-medium text-slate-500 w-10"><input type="checkbox" :checked="currentItemPageSelected" @change="toggleItemPageSelection($event.target.checked)" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></th>
+                                    <th class="p-4 font-medium text-slate-500 w-10"><span class="sr-only">Selection</span></th>
                                     <th class="p-4 font-medium text-slate-500">Name</th>
                                     <th class="p-4 font-medium text-slate-500 text-right">Default Price</th>
                                     <th class="p-4 font-medium text-slate-500 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
-                                <tr v-if="savedItems.length === 0"><td colspan="4" class="p-8 text-center text-slate-400">No saved items yet. Click &ldquo;+ New Item&rdquo; to add one.</td></tr>
-                                <tr v-else-if="filteredItems.length === 0"><td colspan="4" class="p-8 text-center text-slate-400">No items match your search.</td></tr>
+                                <tr v-if="savedItems.length === 0" class="catalogue-empty"><td colspan="4" class="p-8 text-center text-slate-400">No products or services yet. Add one to reuse it on your invoices and quotes.</td></tr>
+                                <tr v-else-if="filteredItems.length === 0" class="catalogue-empty"><td colspan="4" class="p-8 text-center text-slate-400">No products or services match your search.</td></tr>
                                 <tr v-for="item in paginatedItems" :key="item.id" class="hover:bg-slate-50">
-                                    <td class="p-4 align-top"><input type="checkbox" :value="item.id" v-model="selectedItems" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></td>
+                                    <td class="p-4 align-top"><label class="record-select-control"><input type="checkbox" :aria-label="'Select ' + item.name" :value="item.id" v-model="selectedItems" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></label></td>
                                     <td class="p-4 align-top">
-                                        <div class="font-medium text-slate-800">{{ item.name }}</div>
+                                        <button @click="editSavedItem(item)" class="font-medium text-indigo-700 text-left" :aria-label="'Edit ' + item.name">{{ item.name }}</button>
                                         <div v-if="item.description" class="text-xs text-slate-500 mt-1 whitespace-pre-line">{{ item.description }}</div>
                                     </td>
                                     <td class="p-4 align-top text-right font-medium text-slate-700">{{ getCurrencySymbol(company.defaultCurrency || 'GBP') }}{{ (Number(item.price) || 0).toFixed(2) }}</td>
@@ -2105,24 +2185,24 @@
                         </table>
                     </div>
                     <div class="flex items-center justify-end gap-2 mt-3">
-                        <button @click="changePage('item', -1)" :disabled="itemPage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
+                        <button aria-label="Previous products and services page" @click="changePage('item', -1)" :disabled="itemPage <= 1" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&larr;</button>
                         <span class="text-sm text-slate-500">{{ pageInfo(itemTotalPages, itemPage) }}</span>
-                        <button @click="changePage('item', 1)" :disabled="itemPage >= itemTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
+                        <button aria-label="Next products and services page" @click="changePage('item', 1)" :disabled="itemPage >= itemTotalPages" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">&rarr;</button>
                     </div>
                 </div>
 
                 <div v-else class="max-w-2xl mx-auto">
                     <div class="flex items-center gap-4 mb-6">
-                        <h2 class="text-3xl font-semibold">{{ editingItem !== null ? 'Edit Item' : 'New Item' }}</h2>
+                        <h2 class="text-3xl font-semibold">{{ editingItem !== null ? 'Edit product or service' : 'New product or service' }}</h2>
                     </div>
 
                     <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200">
                         <div class="space-y-5">
-                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Item Name *</label><input type="text" v-model="itemForm.name" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
+                            <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Product or service name *</label><input type="text" v-model="itemForm.name" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Description (Optional)</label><textarea v-model="itemForm.description" rows="3" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Default Price</label><input type="number" min="0" step="0.01" v-model.number="itemForm.price" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
                             <div class="pt-2 flex gap-3">
-                                <button @click="saveSavedItem" :disabled="itemSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ itemSaveBusy ? 'Saving…' : 'Save Item' }}</button>
+                                <button @click="saveSavedItem" :disabled="itemSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ itemSaveBusy ? 'Saving…' : 'Save product or service' }}</button>
                                 <button @click="backToItems" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
                             </div>
                         </div>
@@ -4719,7 +4799,7 @@
                 return { id: r.id, name: r.name, description: r.description || '', price: Number(r.price) || 0 };
             },
             validateSavedItemForSave(item) {
-                if (!String(item && item.name || '').trim()) return 'Item Name is required';
+                if (!String(item && item.name || '').trim()) return 'Product or service name is required';
                 const price = Number(item && item.price);
                 if (!Number.isFinite(price) || price < 0) return 'Enter a valid non-negative default price.';
                 return '';
@@ -6939,7 +7019,7 @@
                 this.setRouteKey('items-form');
             },
             async deleteSavedItem(item) {
-                if(!confirm('Delete this saved item from the catalogue? Existing document line items are unchanged. This cannot be undone.')) return;
+                if(!confirm('Delete this product or service from the catalogue? Existing document line items are unchanged. This cannot be undone.')) return;
                 const { error } = await supabaseClient.from('saved_items').delete().eq('id', item.id);
                 if (error) return alert("Could not delete item: " + error.message);
                 const i = this.savedItems.indexOf(item);
@@ -6950,7 +7030,7 @@
             async bulkDeleteItems() {
                 const rows = this.selectedItemRows;
                 if (!rows.length) return;
-                if (!confirm('Delete ' + rows.length + ' selected saved item' + (rows.length === 1 ? '' : 's') + ' from the catalogue? Existing document line items are unchanged. This cannot be undone.')) return;
+                if (!confirm('Delete ' + rows.length + ' selected catalogue entr' + (rows.length === 1 ? 'y' : 'ies') + '? Existing document line items are unchanged. This cannot be undone.')) return;
                 this.itemBulkBusy = true;
                 try {
                     const ids = rows.map(item => item.id);
@@ -6986,7 +7066,7 @@
                         count: ids.length,
                         price
                     });
-                    alert('Updated ' + rows.length + ' saved item price' + (rows.length === 1 ? '' : 's') + '.');
+                    alert('Updated ' + rows.length + ' catalogue price' + (rows.length === 1 ? '' : 's') + '.');
                 } catch (e) {
                     alert('Could not update selected item prices: ' + (e.message || e));
                 } finally {

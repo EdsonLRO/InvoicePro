@@ -1,14 +1,14 @@
 # Active programme: COMM-001 commercial launch integration
 
-## UX-REDESIGN-001 — Controlled redesign, Step 2
+## UX-REDESIGN-001 — Controlled redesign, Step 3
 
-Status: Owner reviewed and approved Step 2 on 12 September 2026 after the equal-height card refinement. PR #156 merged only into `codex/tallyo-redesign` as `b9532bd`. Step 2 PR #157 is approved for integration into that same non-production branch only; its current PR state is authoritative for merge completion. Local unit, browser/isolation and all 33 Node harnesses passed; both hosted workflows passed at reviewed code `933a3c8`. Final head checks remain required. Stop before Step 3 or main merge.
+Status: Owner approved Step 2; PR #157 merged only into `codex/tallyo-redesign` as `8df885a`. Owner then explicitly authorised Step 3. Documents/catalogue is implemented for local review; all 34 Node harnesses and three isolated browser suites pass. Prepare one draft PR targeting the integration branch; current-head hosted checks remain required. Stop before Step 4 or main merge.
 Owner: Codex, sequential implementation/QA. Risk: Medium dev-only work; provider changes require separate approval.
-Branch: `codex/tallyo-redesign-overview`, targeting `codex/tallyo-redesign`, from Step 1 merge `b9532bd`.
-Scope/lock: index.html navigation/Overview presentation and read-only selectors, dev fixture, focused tests/CI, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer. Existing financial helpers, routes, security, backend, provider settings and unrelated working files preserved.
+Branch: `codex/tallyo-redesign-documents`, targeting `codex/tallyo-redesign`, from Step 2 merge `8df885a`.
+Scope/lock: index.html Documents/catalogue presentation and catalogue terminology, focused tests/CI, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer. Existing filters, pagination, exports, mutation/payment/security handlers, routes, backend, provider settings and unrelated working files preserved. No new dependency or data model.
 Single working checklist: [Controlled upgrade](../docs/design/tallyo-redesign/UPGRADE.md).
-Authority: Step 2 navigation/Overview only. No main merge, public deployment, migration, secret change, real email, account mutation or payment.
-Both Pages projects include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate Auth/RLS/backend behaviour. Frozen references remain unchanged. Stop before Step 3.
+Authority: Step 3 Documents/catalogue only. No main merge, public deployment, migration, secret change, real email, account mutation or payment.
+Both Pages projects include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate Auth/RLS/backend behaviour. Frozen references remain unchanged. Stop before Step 4.
 
 ## AUTH-004 — Recovery email canonical destination
 
