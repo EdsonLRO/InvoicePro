@@ -2,7 +2,7 @@
 
 ## UX-REDESIGN-001 — Controlled redesign, Step 1
 
-Status: Local isolated fixture preview and focused checks pass. Owner-approved Pages branch exclusions saved and reopened successfully; remote checks next. Step 1 is not closed.
+Status: Step 1 prepared for Owner review in draft PR #156 (base: `codex/tallyo-redesign`). Local browser/isolation/rollback checks and both remote verification runs passed. Both Pages projects visibly skipped the redesign pushes; production is unchanged. Stop before Step 2 or main merge.
 Owner: Codex, sequential implementation/QA. Risk: Medium dev-only work; provider changes require separate approval.
 Branch: `codex/tallyo-redesign-preview`, targeting `codex/tallyo-redesign`, both including baseline `baa12d0` from main `7429b2b`.
 Scope/lock: `dev/redesign/`, preview tests, CI targeting, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer; unrelated working files preserved.
