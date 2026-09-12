@@ -77,17 +77,30 @@ const path = require('node:path');
     await item.getByLabel('Quantity').fill('1.5');
     await vmRead('vm.closeAppNotice()');
     // Automation remains opt-in; opening configuration does not turn it on.
+    const assertPill = async control => {
+      const shape = await control.evaluate(el => {
+        const track = getComputedStyle(el, '::before');
+        const box = el.getBoundingClientRect(), thumb = el.firstElementChild.getBoundingClientRect();
+        return { width: parseFloat(track.width), height: parseFloat(track.height), radius: parseFloat(track.borderRadius), hitHeight: box.height, thumbLeft: thumb.left - box.left, thumbWidth: thumb.width, on: el.getAttribute('aria-checked') === 'true' };
+      });
+      assert.equal(shape.width, 56); assert.equal(shape.height, 28);
+      assert.ok(shape.radius >= shape.height / 2); assert.ok(shape.hitHeight >= 44);
+      assert.equal(shape.thumbLeft, shape.on ? 32 : 4); assert.equal(shape.thumbWidth, 20);
+    };
     const recurring = page.locator('.editor-aux').filter({ has: page.locator('button[aria-label="Recurring invoice"]') });
     await recurring.locator('summary').click();
     assert.equal(await vmRead('vm.draft.repeat.enabled'), false);
+    await assertPill(recurring.getByRole('switch'));
     await recurring.getByRole('switch').click();
     assert.equal(await vmRead('vm.draft.repeat.enabled'), true);
+    await page.waitForTimeout(200); await assertPill(recurring.getByRole('switch'));
     await recurring.getByRole('combobox').first().selectOption('custom');
     assert.ok(await recurring.getByText('Every', { exact: true }).isVisible());
     await recurring.getByRole('switch').click(); await recurring.locator('summary').click();
     const reminders = page.locator('.editor-aux').filter({ has: page.locator('button[aria-label="Overdue reminders"]') });
-    await reminders.locator('summary').click(); await reminders.getByRole('switch').click();
+    await reminders.locator('summary').click(); await assertPill(reminders.getByRole('switch')); await reminders.getByRole('switch').click();
     assert.equal(await vmRead('vm.draft.overdueRemindersEnabled'), true);
+    await page.waitForTimeout(200); await assertPill(reminders.getByRole('switch'));
     await reminders.getByRole('switch').click(); await reminders.locator('summary').click();
     // Native keyboard section and menu operation.
     await notes.locator('summary').focus(); await page.keyboard.press('Enter');

@@ -246,6 +246,8 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 **Limits / next gate:** template duplication needs care in later field changes; printable preview can scroll horizontally on a phone, but editing never uses a horizontal table. Keyboard/geometry tests do not certify all screen readers or browsers. This stage does not change the legacy save/send/schedule semantics or certify live Auth/RLS/provider behaviour. No production release/build marker, database, provider, legal, Analytics or real communication change. Stop for Owner review before integration or Step 5.
 
+**Owner review refinement:** recurring and overdue-reminder switches use a 56×28px pill track inside a 56×44px touch target, with a 20px thumb. This replaces the nearly circular stretched track without changing state or handlers. Focused browser checks cover both states and retained touch-target size.
+
 ### Later, separately scoped releases
 
 1. Status rules: invoice/quote/credit semantics, manual payment retention, historical Paid compatibility, refunds/partial payments and overdue rules. Decide before migrating anything.

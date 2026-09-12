@@ -621,7 +621,11 @@
         .editor-existing-controls input,.editor-existing-controls select { min-width:0!important; max-width:100%; min-height:44px; }
         .editor-existing-controls .min-w-\[360px\],.editor-existing-controls .sm\:min-w-\[360px\] { min-width:0!important; }
         .editor-existing-controls button:not(.rounded-full) { min-height:44px; }
-        .editor-existing-controls .relative.inline-flex { min-height:44px; min-width:48px; }
+        .editor-existing-controls button[role="switch"] { position:relative; width:56px; min-width:56px; height:44px; min-height:44px; padding:0; background:transparent!important; }
+        .editor-existing-controls button[role="switch"]::before { content:''; position:absolute; left:0; top:8px; width:56px; height:28px; border-radius:9999px; background:#cbd5e1; transition:background-color .15s; }
+        .editor-existing-controls button[role="switch"][aria-checked="true"]::before { background:#4f46e5; }
+        .editor-existing-controls button[role="switch"]>span { position:relative; width:20px; height:20px; transform:translateX(4px); }
+        .editor-existing-controls button[role="switch"][aria-checked="true"]>span { transform:translateX(32px); }
         .editor-existing-controls p,.editor-existing-controls li { overflow-wrap:anywhere; }
         .editor-preview-surface { overflow:auto; max-width:100%; padding-bottom:12px; }
         .editor-preview-hidden { position:fixed; left:-12000px; top:0; width:1024px; pointer-events:none; }
