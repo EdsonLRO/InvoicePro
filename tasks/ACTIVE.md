@@ -1,14 +1,14 @@
 # Active programme: COMM-001 commercial launch integration
 
-## UX-REDESIGN-001 — Controlled redesign, Step 0
+## UX-REDESIGN-001 — Controlled redesign, Step 1
 
-Status: Baseline and preservation checklist prepared; awaiting Owner review before Step 1.
-Owner: Codex, sequential read-only verification/documentation. Risk: Medium; no runtime or provider change.
-Branch: `codex/tallyo-redesign-baseline`, from `7429b2b74474493b81edd7e548bcd35bbe1c9b89`.
-Scope/lock: `docs/design/tallyo-redesign/` and this task pointer only; unrelated working files preserved.
+Status: Step 1 prepared for Owner review in draft PR #156 (base: `codex/tallyo-redesign`). Local browser/isolation/rollback checks and both remote verification runs passed. Both Pages projects visibly skipped the redesign pushes; production is unchanged. Stop before Step 2 or main merge.
+Owner: Codex, sequential implementation/QA. Risk: Medium dev-only work; provider changes require separate approval.
+Branch: `codex/tallyo-redesign-preview`, targeting `codex/tallyo-redesign`, both including baseline `baa12d0` from main `7429b2b`.
+Scope/lock: `dev/redesign/`, preview tests, CI targeting, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer; unrelated working files preserved.
 Single working checklist: [Controlled upgrade](../docs/design/tallyo-redesign/UPGRADE.md).
-Authority: start Step 0 only. No application implementation, push-triggered preview, main merge, deployment, migration, secret/configuration change, email, account mutation or payment. Stop for Owner review.
-Reference sources/screenshots remain design-only and will be checkpointed locally; Step 1 must establish safe hosted-preview and CI branch controls before pushing.
+Authority: Step 1 only, plus exact Owner approval of the two Pages preview branch exclusions on 12 September 2026. No redesigned screens, main merge, public deployment, migration, secret change, real email, account mutation or payment.
+Both Pages projects now include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate Auth/RLS/backend behaviour. Frozen references remain unchanged. Stop before Step 2.
 
 ## AUTH-004 — Recovery email canonical destination
 

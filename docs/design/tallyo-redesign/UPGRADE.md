@@ -1,11 +1,11 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Step 0 baseline review prepared; STOP for Owner review before Step 1.
+Status: Step 1 prepared and verified for Owner review in draft PR #156; STOP before Step 2 or main merge.
 Recorded: 12 September 2026.
-Owner: Codex, sequential repository/read-only verification and documentation.
-Risk: Medium planning/documentation. No runtime, provider or security change.
-Branch: `codex/tallyo-redesign-baseline`, based on verified remote main.
-Authority: the Owner approved starting Step 0 only, following the staged plan in this task.
+Owner: Codex, sequential development, provider verification and QA.
+Risk: Medium development-only foundation; provider changes remain approval-gated. No production runtime or security change.
+Branch: `codex/tallyo-redesign-preview`, targeting local integration branch `codex/tallyo-redesign`; both include baseline `baa12d0`.
+Authority: the Owner approved Step 1 only, following the staged plan in this task. Step 2 remains unstarted.
 
 ## 1. Scope and stop rules
 
@@ -147,6 +147,41 @@ The nine primary references, two supporting images, nine HTML sources and nine r
 Step 1 must check live provider build-branch controls before ANY push. A documentation branch may trigger hosted previews. Do not push/PR this baseline merely to create a remote backup before those controls are understood. This stage creates a local Git checkpoint only.
 
 The current GitHub security workflow runs for main pushes and PRs targeting main. PRs targeting a redesign integration branch will need equivalent checks deliberately configured in Step 1; do not assume they already run. No checks/protections are weakened.
+
+### Step 1 progress — 12 September 2026
+
+**Verified control-plane evidence (read-only):** `tallyo-app` production deployment `99c8fa2c-8dab-4460-9db4-a013c5fe9b20` is successful, references main `7429b2b`, and lists `app.tallyo.co.uk` as its alias. Both `tallyo-app` and `tallyo-website` use production branch `main` with automatic deployments enabled, build watch paths `*`, and preview branch selection **All non-production branches**. Both show preview access restricted by Cloudflare Access. No setting was changed; no secret was revealed.
+
+The Helper rate-limiter Worker has production branch `main` and non-production builds unchecked. Its build command separately checks out `codex/website-ai-subscription-readiness` before deploying. Thus the Worker source must not be assumed equal to the triggering main commit. This pre-existing configuration was not changed and is outside the visual upgrade. Do not merge the redesign to main under preview authority.
+
+**Approved and applied:** the Owner accepted the recommendation on 12 September 2026. Only the two Pages preview branch controls changed from All non-production branches to Custom, include `*`, exclude `codex/tallyo-redesign*`. Each was saved once and reopened: both retain production branch `main`, automatic production deployments checked, include `*` and the exact single exclusion. Access, build commands, runtime values, watch paths and the Worker were not changed. No secrets were revealed. Rollback: restore All non-production branches in each project. This is a reversible preview-only configuration restriction, not a production release or access-policy change. [Cloudflare branch-control documentation](https://developers.cloudflare.com/pages/configuration/branch-build-controls/) confirms excludes take precedence over includes.
+
+GitHub Pages is independently configured as legacy publishing from `main` at `/`; the only other repository workflow is Security checks. The active main ruleset remains unchanged. Redesign integration/step branches had no existing remote counterparts at the pre-push check.
+
+**Local implementation:** `dev/redesign/preview.mjs` serves an immutable in-memory snapshot of the existing app and official assets on loopback HTTP only. It never reads real `config.js` or environment secrets. Four existing pinned CDN libraries are cached under ignored `tmp/redesign-vendor/` and checked against the app's SHA-384 values on preparation and startup. No new production dependency or app source change.
+
+`dev/redesign/fixture.js` replaces startup with a clearly labelled fictional account and a small in-memory data adapter. It supports sample customer/item/document CRUD for UI exploration. Unknown tables/methods do not fall back to a live service. Edge Functions, RPC, actual sign-in and account actions are unavailable. Email, Checkout, refunds and Analytics are not simulated as successful. Changes disappear on reload. Use only fictional sample input.
+
+Isolation layers: loopback bind, exact Host and Origin checks, GET/HEAD-only allowlisted assets, no config/service-worker/API route, no-store responses, no indexing, no framing, CSP blocking connections/workers/frames/forms/external assets, and disabled browser transports/external links. This is a **UI fixture, not a Supabase/Auth/RLS/payment integration environment**. Authentication initialization is intentionally replaced only in the locally served fixture; no production bypass is added. Backend, MFA, permissions, scheduler execution, real delivery, PDF fidelity and provider integration require their existing separate tests.
+
+Local usage from the repository root:
+
+```text
+node dev/redesign/preview.mjs --prepare
+node dev/redesign/preview.mjs
+```
+
+Open `http://127.0.0.1:4173`. Preparation downloads only the four already-pinned CDN assets. The running preview uses local assets only. Stop with Ctrl+C; restart to load a new source snapshot. Browser testing uses a separately available Playwright installation and Chrome (`NODE_PATH` may point to the installed dependency directory): `node tests/redesign-preview-browser.cjs`. It creates fresh contexts, never attaches to the user's signed-in browser, and aborts every non-loopback request. Browser dependencies are not newly installed or committed.
+
+**Validation passed:** `node tests/redesign-preview-harness.mjs`; `node tests/security-workflow-harness.cjs`; JavaScript syntax checks; `node tests/redesign-preview-browser.cjs`. Actual browser checks cover unchanged app mounting, sample customer creation and refresh reset, blocked provider operations, zero external request attempts, no uncaught errors and a 390px Overview without horizontal overflow. Actual preview artifact A → changed-title artifact B → original A passed, including revision headers and rendered title. This rehearses local snapshot rollback only, not a production Cloudflare rollback. Desktop/mobile baseline captures under ignored `tmp/redesign-evidence/` were visually inspected; frozen design references remain untouched.
+
+The CI diff preserves main triggers and every existing check, adds PRs targeting `codex/tallyo-redesign` and pushes on the integration/step branches, and includes the offline preview harness. Both the [push run](https://github.com/EdsonLRO/InvoicePro/actions/runs/34689528431) and [integration-target PR run](https://github.com/EdsonLRO/InvoicePro/actions/runs/34689566065) passed at `9fadc42`: the complete workflow's security harnesses, website build/tests and frozen Edge Function type-check step succeeded. Browser acceptance remains a local test, not a hosted CI job. No live integration test was run.
+
+**Push isolation verified:** both Pages deployment histories display `codex/tallyo-redesign` at `baa12d0` and `codex/tallyo-redesign-preview` at `9fadc42` as **skipped / No deployment available**. Current app production remains `99c8fa2c` and website production remains `397e7da2`. GitHub reports zero deployment records for the preview head and only the two successful verification checks. Skipped provider attempt records are expected; there is no published preview artifact from these pushes.
+
+**Rollback availability checked, not executed:** the current app deployment still lists its retained `index.html`, `build-report.json` and `service-worker.js` assets. The prior successful main deployment `423f10c2-42d1-4990-b3c2-18517b013cd4` at `bd8b754` exposes **Rollback to this deployment** in the dashboard menu; this action was not selected. [Cloudflare's rollback documentation](https://developers.cloudflare.com/pages/configuration/rollbacks/) limits rollback targets to successful production deployments, not previews. This confirms the present retained targets and available mechanism, not a future retention guarantee, a downloaded backup or a performed production recovery. Keep the current production deployment as the candidate source and reverify availability/compatibility immediately before any separately approved release. The actual exercised rollback is the local A-B-A preview test above.
+
+**Review handoff:** [draft PR #156](https://github.com/EdsonLRO/InvoicePro/pull/156) targets `codex/tallyo-redesign`, never `main`. The eight-file Step 1 diff contains the two dev files, two preview tests, CI workflow and its harness, this checklist and the task pointer. No screen implementation or main merge. Review the foundation before authorising Step 2. A future UI step may add only the fixture cases it needs; do not build a duplicate backend framework. The final documentation-only head must also pass the existing PR checks; read that result from the PR rather than creating another closeout document.
 
 Historical preview configuration says browser configuration mirrored production. Access protection and a Stripe test flag are NOT backend isolation. Prefer existing free/local test facilities, mocked outbound delivery and fictional records. Obtain approval before any new paid service or sensitive provider setting. Do not copy production datasets or active scheduled jobs into an unattended preview.
 
