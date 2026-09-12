@@ -1,5 +1,15 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-REDESIGN-001 — Controlled redesign, Step 0
+
+Status: Baseline and preservation checklist prepared; awaiting Owner review before Step 1.
+Owner: Codex, sequential read-only verification/documentation. Risk: Medium; no runtime or provider change.
+Branch: `codex/tallyo-redesign-baseline`, from `7429b2b74474493b81edd7e548bcd35bbe1c9b89`.
+Scope/lock: `docs/design/tallyo-redesign/` and this task pointer only; unrelated working files preserved.
+Single working checklist: [Controlled upgrade](../docs/design/tallyo-redesign/UPGRADE.md).
+Authority: start Step 0 only. No application implementation, push-triggered preview, main merge, deployment, migration, secret/configuration change, email, account mutation or payment. Stop for Owner review.
+Reference sources/screenshots remain design-only and will be checkpointed locally; Step 1 must establish safe hosted-preview and CI branch controls before pushing.
+
 ## AUTH-004 — Recovery email canonical destination
 
 Status: Verified under exact Owner approval; PR #154 merged as `bd8b754c75517a8c64655221fbf00a7423c2c6b8` and only the two approved functions were deployed. Active versions are `mfa-recovery` v35 and `owner-account-admin` v3; live source equals the merge, JWT gates return 401 without authorization, and main checks passed. No live email or account mutation was tested.
