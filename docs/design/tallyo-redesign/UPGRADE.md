@@ -1,11 +1,11 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Steps 1–4 approved and merged only into the non-production integration branch. [PR #159](https://github.com/EdsonLRO/InvoicePro/pull/159) merged as `da529c7` after the Owner approved the final refinements and requested the next action. Step 5 customer/remaining-screen presentation is implemented and locally verified in [draft PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160), awaiting Owner review. Current-head hosted checks belong to that PR. STOP before Step 5 integration, Step 6 or main merge.
+Status: Steps 1–5 approved and merged only into the non-production integration branch. [PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160) merged as `937184956e7ad8024f19141443df03aa613fb4a2`. Step 6 acceptance checks passed on that feature-frozen candidate; evidence below is ready for Owner acceptance. STOP before Step 7, main merge or deployment.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
-Risk: Medium frontend presentation and read-only customer summaries on an isolated branch; no financial helper, backend, Auth or provider change.
-Branch: `codex/tallyo-redesign-customers`, targeting `codex/tallyo-redesign`, from Step 4 merge `da529c7`.
-Authority: the Owner confirmed “perfect all good now move to next action” on 12 September 2026. Step 4 checks passed at `da87646` in both hosted runs (`34697242162`, `34697239462`); no review objections were present. Later stages and production release remain separate approvals.
+Risk: Low evidence-only acceptance closeout; the approved candidate contains Medium frontend presentation/read-only summaries. No new runtime, backend, Auth or provider change.
+Branch: `codex/tallyo-redesign-acceptance`, targeting `codex/tallyo-redesign`, from Step 5 merge `9371849`.
+Authority: the Owner approved the Step 5 customer scrollbar refinement, then approved proceeding to Step 6. Both latest Step 5 hosted checks passed (`34698931859`, `34698928579`); no review objections were present. Candidate acceptance and production release remain separate approvals.
 
 Step 2 approval: the Owner replied “Reviewed and approved” after reviewing the symmetric Overview refinement. Both hosted verification runs passed at `933a3c8`: [push](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692038558), [PR](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692039918). This closes the Step 2 review gate, not the separately scoped Step 3 implementation or production release gates.
 
@@ -269,6 +269,31 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 **Review:** refresh `http://127.0.0.1:4173/#customers`, select Willow & Pine Studio, then review Recurring and Business settings, including a phone-sized window. Local ignored evidence: `tmp/redesign-evidence/step5-customer-1440.png`, `step5-customer-390.png`, `step5-recurring-390.png`; desktop/mobile renderings were visually inspected. Frozen mockup files and official assets remain unchanged. Stop for Owner review before integrating Step 5 or starting Step 6 acceptance. Production stays untouched.
 
 **Customer scrollbar review refinement:** added 12px internal right padding to the document/activity lists so amounts and arrows do not sit against the scrollbar. Focused browser geometry checks cover both lists at 320–1440px; scrolling and actions are unchanged.
+
+### Step 6 — feature-frozen acceptance
+
+**Candidate:** `937184956e7ad8024f19141443df03aa613fb4a2`, the approved Step 5 integration. The local preview artifact revision is `82ac8590b26aa6cf5f101a196709b6c9733e0d2d9240acae6af109df75281885`. Step 6 changes only this checklist and the active-task pointer, not the application or tests. No further features are bundled into acceptance.
+
+**Result on 12 September 2026:** no blocking regression found in the exercised scope. All 36 existing Node CI harnesses, all five isolated Chromium browser suites and all four website test groups passed. The restricted shell initially prevented two harnesses from spawning local build subprocesses; those checks passed unchanged when child processes were permitted. No failing assertion was removed or weakened.
+
+| Coverage | Evidence | Boundary |
+|---|---|---|
+| Responsive presentation | Five browser suites; 320–1440px layouts, desktop/mobile navigation, editor sections, customer/recurring cards, symmetric panels, menu geometry and scrollbar clearance | Chromium emulated widths; not a physical Safari/Firefox device matrix |
+| Keyboard and touch access | Menu focus containment/return, Escape, labelled scroll regions, keyboard scrolling, wheel chaining, editor controls and touch-target geometry | Focused checks, not a complete WCAG or screen-reader certification |
+| Documents and editor | Existing filters, sorting, selections, draft retention, actual fictional CRUD, validation, catalogue reuse, financial-field combinations, PDF/XLSX output including multi-page PDF | Provider-dependent actions are blocked; email dialog review/cancel only |
+| Customer and automation context | ID-only associations, immutable saved snapshots, mixed currencies, refunds, missing/empty records, linked routes and in-memory schedule edit/pause/resume | No real scheduler run, account mutation or customer communication |
+| Performance | Existing scale harness passed: 2,000 documents, 1,000 customers, 1,000 items and bounded calculations/filtering; measured calculation/filter section 2.5ms against existing 1,000ms guard | Synthetic local measurement, not network latency, Core Web Vitals or a production SLA |
+| PWA and rollback | Existing PWA update harness and actual isolated artifact A→B→A restoration passed | Preview intentionally blocks service workers; installed-PWA update and production rollback remain release checks |
+| Preservation/security regressions | Unchanged full methods/startup and printable-canvas hashes; existing Auth/MFA/recovery/entitlement/tenant/payment/consent regression harnesses; zero external requests and uncaught errors in browser suites | Existing regression coverage, not a fresh penetration test or live Auth/RLS certification |
+| Build and hosted checks | Synthetic app-build permutations and 31 website routes plus 404 passed. [Integration CI](https://github.com/EdsonLRO/InvoicePro/actions/runs/34699123941) passed, including Owner runtime tests and frozen checks for all 19 functions | Build/type-check only; no function deployment or production activation |
+
+**Visual review:** refreshed desktop and mobile customer screenshots were inspected, including the approved space between amounts/arrows and scrollbars. The five suites regenerated the existing ignored `tmp/redesign-evidence/` screenshots. The 30 frozen reference assets remain unchanged. No new image assets or runtime dependencies were needed.
+
+**Accepted-scope limitations to review:** legacy status/save/send semantics remain; this release does not implement quote acceptance/automatic conversion, new status rules or a CRM. Customer detail only links documents with a saved customer ID; other documents remain in Documents. Open document editor preserves the current draft rather than silently replacing its customer. Preview may horizontally scroll its printable canvas on phones, while editing does not. Overview retains its disclosed bounds of 50 attention items and 20 activity events; customer activity shows six loaded events.
+
+**Owner review:** use `http://127.0.0.1:4173/#dashboard`, then Documents, the editor, Customers and Recurring at desktop and narrow widths. Fictional changes reset on refresh. Accepting this candidate is not permission to send email, change accounts/payments, merge main or deploy.
+
+**Next gate:** stop for Owner acceptance. Step 7 must separately refresh the live frontend baseline and exact compatible rollback artifact, confirm retained artifact retrieval, plan installed-PWA update/rollback checks, and obtain explicit approval for the exact frontend release/build marker and bounded smoke checks. Do not undo the September recovery corrections or change backend/provider settings. Main was independently verified unchanged at `7429b2b74474493b81edd7e548bcd35bbe1c9b89` during acceptance.
 
 ### Later, separately scoped releases
 
