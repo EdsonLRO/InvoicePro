@@ -1,6 +1,6 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Steps 1 and 2 approved and merged into the non-production integration branch. [PR #157](https://github.com/EdsonLRO/InvoicePro/pull/157) merged as `8df885a`. Step 3 Documents/catalogue is implemented and locally verified for Owner review. STOP before Step 4 or main merge.
+Status: Steps 1 and 2 approved and merged into the non-production integration branch. [PR #157](https://github.com/EdsonLRO/InvoicePro/pull/157) merged as `8df885a`. Step 3 Documents/catalogue is implemented and locally verified for Owner review in [draft PR #158](https://github.com/EdsonLRO/InvoicePro/pull/158). STOP before Step 4 or main merge.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
 Risk: Medium frontend Documents/catalogue work on an isolated branch; no financial helper, backend, Auth or provider change.

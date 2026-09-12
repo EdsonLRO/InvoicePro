@@ -2,7 +2,7 @@
 
 ## UX-REDESIGN-001 — Controlled redesign, Step 3
 
-Status: Owner approved Step 2; PR #157 merged only into `codex/tallyo-redesign` as `8df885a`. Owner then explicitly authorised Step 3. Documents/catalogue is implemented for local review; all 34 Node harnesses and three isolated browser suites pass. Prepare one draft PR targeting the integration branch; current-head hosted checks remain required. Stop before Step 4 or main merge.
+Status: Owner approved Step 2; PR #157 merged only into `codex/tallyo-redesign` as `8df885a`. Owner then explicitly authorised Step 3. Documents/catalogue is ready for review in draft PR #158 targeting the integration branch; all 34 Node harnesses and three isolated browser suites pass. Current-head hosted checks are authoritative on the PR. Stop before Step 4 or main merge.
 Owner: Codex, sequential implementation/QA. Risk: Medium dev-only work; provider changes require separate approval.
 Branch: `codex/tallyo-redesign-documents`, targeting `codex/tallyo-redesign`, from Step 2 merge `8df885a`.
 Scope/lock: index.html Documents/catalogue presentation and catalogue terminology, focused tests/CI, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer. Existing filters, pagination, exports, mutation/payment/security handlers, routes, backend, provider settings and unrelated working files preserved. No new dependency or data model.
