@@ -250,6 +250,8 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 **Catalogue review refinement:** at the Owner's request, Products & services cells now align vertically to the row centre, including the checkbox and price; mobile card selection centres beside the name block. Focused browser geometry checks cover rows with and without descriptions at 320–1440px. No catalogue data or action changes.
 
+**Overview review refinement:** the Owner requested internal scrolling instead of expansion controls in Needs your attention and Recent activity. Both lists now scroll within a 320px maximum height, retaining symmetric desktop cards and natural stacked mobile layout. Scroll regions are labelled, keyboard-focusable and support wheel/touch scrolling; no event is hidden behind View more. Existing bounds remain 50 attention items and 20 recent loaded activity events, with explanatory footnotes and unchanged actions/data selectors. Focused busy-state tests cover keyboard/wheel scrolling, last-action reachability, matching heights and empty states.
+
 ### Later, separately scoped releases
 
 1. Status rules: invoice/quote/credit semantics, manual payment retention, historical Paid compatibility, refunds/partial payments and overdue rules. Decide before migrating anything.

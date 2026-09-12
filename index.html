@@ -326,6 +326,11 @@
         .overview-count { border-radius: 6px; padding: 2px 8px; background: #eef2ff; color: #4338ca; font-size: 12px; font-weight: 600; }
         .overview-link { color: #4338ca; font-size: 13px; font-weight: 600; min-height: 44px; }
         .overview-attention { margin-top: 12px; }
+        .overview-scroll { max-height:320px; overflow-y:auto; overflow-x:hidden; scrollbar-gutter:stable; overscroll-behavior-y:contain; padding-right:8px; scrollbar-color:#94a3b8 #f1f5f9; }
+        .overview-scroll::-webkit-scrollbar { width:8px; }
+        .overview-scroll::-webkit-scrollbar-track { background:#f1f5f9; border-radius:8px; }
+        .overview-scroll::-webkit-scrollbar-thumb { background:#94a3b8; border-radius:8px; }
+        .overview-scroll:focus-visible { outline:2px solid #818cf8; outline-offset:3px; border-radius:4px; }
         .overview-attention li { display: flex; align-items: center; gap: 12px; padding: 19px 0; border-top: 1px solid #edf1f6; }
         .overview-attention li:last-child { padding-bottom: 0; }
         .overview-symbol { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; border-radius: 10px; background: #eef2ff; color: #4f46e5; }
@@ -391,8 +396,6 @@
             .overview-attention .shell-button { width: 100%; min-height: 46px; font-size: 14px; }
             .overview-attention-copy strong { font-size: 15px; }
             .overview-attention-copy p { font-size: 13px; }
-            .overview-activity li:nth-child(n+4) { display: none; }
-            .overview-activity.show-all li { display: block; }
             .overview-aging li { grid-template-columns: 1fr auto; gap: 8px; }
             .overview-bar { grid-column: 1 / -1; grid-row: 2; }
             .overview-activity strong { font-size: 14px; }
@@ -1331,26 +1334,25 @@
                     <section class="overview-card" aria-labelledby="attention-title">
                         <div class="overview-section-heading"><h2 id="attention-title">Needs your attention</h2><span class="overview-count">{{ overviewAttention.length }}</span></div>
                         <p class="overview-subtitle">A few small actions to keep things moving.</p>
-                        <ul v-if="overviewAttention.length" class="overview-attention">
-                            <li v-for="item in overviewAttention.slice(0, overviewShowAttention ? 50 : 4)" :key="item.key">
+                        <ul v-if="overviewAttention.length" class="overview-attention overview-scroll" tabindex="0" aria-labelledby="attention-title">
+                            <li v-for="item in overviewAttention.slice(0, 50)" :key="item.key">
                                 <span class="overview-symbol" :class="item.kind"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon(item.kind)"/></svg></span>
                                 <div class="overview-attention-copy"><strong>{{ item.title }}</strong><p>{{ item.detail }}</p></div>
                                 <button @click="overviewAct(item)" class="shell-button">{{ item.action }} <span aria-hidden="true">↗</span></button>
                             </li>
                         </ul>
                         <p v-else class="overview-empty">Nothing needs your attention in the loaded records. You're ready for your next invoice.</p>
-                        <button v-if="overviewAttention.length > 4" @click="overviewShowAttention = !overviewShowAttention" class="overview-link">{{ overviewShowAttention ? 'Show fewer' : 'Show more (' + Math.min(overviewAttention.length, 50) + ')' }}</button>
                         <p v-if="overviewAttention.length > 50" class="overview-footnote">Showing up to 50 items. Use Documents and Recurring to review the rest.</p>
                     </section>
                     <section class="overview-card" aria-labelledby="overview-activity-title">
-                        <div class="overview-section-heading"><h2 id="overview-activity-title">Recent activity</h2><button v-if="overviewActivity.length > 3" @click="overviewShowActivity = !overviewShowActivity" class="overview-link" :aria-expanded="overviewShowActivity">{{ overviewShowActivity ? 'Show less' : 'View more' }}</button></div>
-                        <ul class="overview-activity" :class="{'show-all': overviewShowActivity}">
-                            <li v-for="event in overviewActivity.slice(0, overviewShowActivity ? 20 : 3)" :key="event.key">
+                        <div class="overview-section-heading"><h2 id="overview-activity-title">Recent activity</h2></div>
+                        <ul v-if="overviewActivity.length" class="overview-activity overview-scroll" tabindex="0" aria-labelledby="overview-activity-title">
+                            <li v-for="event in overviewActivity" :key="event.key">
                                 <button @click="loadInvoice(event.invoice)"><span class="overview-symbol"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon(event.icon)"/></svg></span><span><strong>{{ event.label }}</strong><small>{{ overviewDocumentLabel(event.invoice) }} · {{ event.invoice.customer?.name || 'No customer' }}</small><time :datetime="event.ts">{{ overviewTime(event.ts) }}</time></span></button>
                             </li>
                         </ul>
                         <p v-if="!overviewActivity.length" class="overview-empty">Saved document activity will appear here.</p>
-                        <p class="overview-footnote">Recent loaded records. Open a document for its full history.</p>
+                        <p class="overview-footnote">Up to 20 recent loaded events. Open a document for its full history.</p>
                     </section>
                     <section v-if="overviewStat.outstanding > 0" class="overview-card" aria-labelledby="overview-aging-title">
                         <div class="overview-section-heading"><h2 id="overview-aging-title">Where your outstanding balance sits</h2></div>
@@ -2983,8 +2985,6 @@
                 overviewCurrencyChoice: '',
                 overviewMenu: '',
                 overviewMenuTrigger: null,
-                overviewShowActivity: false,
-                overviewShowAttention: false,
                 mobileMenuOpen: false,
                 subscriptionWelcomeOpen: false,
                 subscriptionWelcomeShown: false,
