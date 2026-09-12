@@ -4,19 +4,37 @@
   if (location.protocol !== 'http:' || location.hostname !== '127.0.0.1') throw new Error('Preview requires loopback HTTP');
   const clone = value => JSON.parse(JSON.stringify(value));
   const uid = '00000000-0000-4000-8000-000000000001';
-  const user = { id: uid, email: 'john@northstone.example', email_confirmed_at: '2026-09-01T09:00:00Z' };
+  const user = { id: uid, email: 'john@northstone.example', email_confirmed_at: '2026-09-01T09:00:00Z', user_metadata: { full_name: 'John Bennett' } };
+  const date = offset => { const d = new Date(); d.setUTCDate(d.getUTCDate() + offset); return d.toISOString().slice(0, 10); };
+  const at = (offset, time) => date(offset) + 'T' + time + ':00Z';
   const customer = { id: '00000000-0000-4000-8000-000000000002', name: 'Willow & Pine Studio (fictional)', email: 'hello@willowpine.example', address: 'Example address — demonstration only' };
   const item = { name: 'Website maintenance', qty: 1, unit: 'service', price: 200, discount: 0, tax: 20 };
   const tables = {
     company_settings: [{ user_id: uid, name: 'North & Stone (fictional)', email: user.email, default_currency: 'GBP', invoice_prefix: 'INV-', payment_details: 'Bank transfer instructions — fictional preview only', brand_color: '#4f46e5' }],
     customers: [customer], saved_items: [{ id: '00000000-0000-4000-8000-000000000003', name: item.name, price: 200, description: 'Monthly maintenance service' }],
-    invoices: [
-      { id: '00000000-0000-4000-8000-000000000042', number: '1042', status: 'Sent', doc_type: 'invoice', issue_date: '2026-09-01', due_date: '2026-09-04', currency: 'GBP', customer_snapshot: customer, items: [item], payments: [], grand_total: 240 },
-      { id: '00000000-0000-4000-8000-000000000037', number: '1037', status: 'Paid', doc_type: 'invoice', issue_date: '2026-09-01', due_date: '2026-09-08', currency: 'GBP', customer_snapshot: customer, items: [item], payments: [{ amount: 240, date: '2026-09-08', note: 'Fictional manual payment' }], grand_total: 240 },
-      { id: '00000000-0000-4000-8000-000000000217', number: '0217', status: 'Sent', doc_type: 'quote', issue_date: '2026-09-10', due_date: '2026-09-25', currency: 'GBP', customer_snapshot: customer, items: [{ ...item, name: 'Design project', price: 800 }], payments: [], grand_total: 960 },
-    ], recurring_templates: [], audit_events: [],
+    invoices: [], recurring_templates: [], audit_events: [],
   };
-  Object.values(tables).forEach(rows => rows.forEach(row => { row.user_id = uid; row.created_at = '2026-09-01T09:00:00Z'; row.updated_at = row.created_at; }));
+  // Coherent sample records for Step 2; dates remain useful whenever the preview is opened.
+  const invoice = (suffix, number, amount, dueOffset, status = 'Sent') => ({
+    id: '00000000-0000-4000-8000-' + String(suffix).padStart(12, '0'), number, doc_type: 'invoice', status,
+    issue_date: date(-12), due_date: date(dueOffset), currency: 'GBP', customer_snapshot: customer,
+    items: [{ ...item, price: amount / 1.2 }], payments: [], grand_total: amount,
+    history: [{ type: 'created', ts: at(-12, '10:00'), text: 'Document created' }, { type: 'sent', ts: at(-11, '10:00'), text: 'Marked as sent' }]
+  });
+  const overdue = invoice(42, 'INV-1042', 240, -8);
+  const second = invoice(38, 'INV-1038', 1600, -4);
+  const current = invoice(46, 'INV-1046', 5000, 14);
+  const paid = invoice(44, 'INV-1044', 4320, -2, 'Paid');
+  paid.payments = [{ amount: 4320, date: date(0), note: 'Fictional manual payment' }];
+  paid.history.push({ type: 'payment', ts: at(0, '09:18'), text: 'Fictional payment recorded' });
+  const quote = { ...invoice(217, 'QUO-0217', 960, 13), doc_type: 'quote',
+    history: [{ type: 'created', ts: at(-7, '11:00'), text: 'Document created' }, { type: 'sent', ts: at(-6, '10:00'), text: 'Marked as sent' }] };
+  second.history.push({ type: 'reminder', ts: at(0, '08:30'), text: 'Fictional reminder recorded' });
+  tables.invoices = [overdue, second, current, paid, quote];
+  tables.recurring_templates = [{ id: '00000000-0000-4000-8000-000000000050', name: 'Monthly website maintenance', customer_snapshot: customer, items: [item],
+    currency: 'GBP', active: true, frequency: 'monthly', start_date: date(-29), next_run: date(1), email_enabled: true, history: [] }];
+  tables.audit_events = [{ event_type: 'email_delivered', object_type: 'document', object_id: current.id, created_at: at(0, '08:42'), metadata: {} }];
+  Object.values(tables).forEach(rows => rows.forEach(row => { row.user_id = uid; row.created_at ||= at(-12, '09:00'); row.updated_at = row.created_at; }));
   const blocked = () => ({ data: null, error: { message: 'Unavailable in this fictional preview. No email, payment or account action was performed.' } });
   // Deny all transports as defence in depth in addition to the server CSP.
   window.fetch = async () => { throw new Error('Preview blocks network requests'); };
@@ -88,6 +106,9 @@
       banner.textContent = 'FICTIONAL PREVIEW · No emails, payments or live accounts · Changes reset on refresh · Use sample data only';
       banner.style.cssText = 'padding:10px 16px;background:#fef3c7;color:#78350f;font:600 13px/1.4 system-ui;text-align:center;position:relative;z-index:100';
       document.body.prepend(banner);
+      const layout = document.createElement('style');
+      layout.textContent = '#app{height:calc(100dvh - 40px)} .shell-sidebar{top:40px} @media(max-width:699px){#app{height:calc(100dvh - 58px)}}';
+      document.head.append(layout);
     };
     return createApp(options);
   };

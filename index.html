@@ -271,39 +271,132 @@
         }
         .recovery-codes-overlay { align-items: flex-start; overflow-y: auto; }
         .recovery-codes-dialog { flex-shrink: 0; margin: 0.5rem 0; }
-        .primary-navigation {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 100%;
-            z-index: 30;
-            max-height: calc(100vh - 4rem);
-            flex-direction: column;
-            gap: 0.25rem;
-            overflow-y: auto;
-            border-top: 1px solid #1e293b;
-            background: #0f172a;
-            padding: 0.5rem 1rem 1rem;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        /* Release 1 shell / Overview. Existing editor and account surfaces stay intact. */
+        .shell-header { flex-shrink: 0; z-index: 20; background: #fff; border-bottom: 1px solid #e2e8f0; }
+        .shell-topbar { height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 28px; }
+        .shell-mobile-brand { width: 110px; }
+        .shell-mobile-activity { display: none; }
+        .shell-page-title { font-size: 15px; font-weight: 600; }
+        .shell-top-actions { display: flex; align-items: center; gap: 20px; }
+        .shell-account { font-size: 14px; color: #475569; }
+        .shell-icon { width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+        .shell-sidebar { position: fixed; inset: 0 auto 0 0; width: 224px; padding: 28px 16px 18px; background: #0f172a; color: #cbd5e1; display: flex; flex-direction: column; overflow-y: auto; }
+        .shell-brand { width: 124px; margin: 0 12px 28px; }
+        .shell-business { margin: 0 0 24px; padding: 14px; border: 1px solid #334155; background: #182335; border-radius: 10px; font-size: 13px; overflow-wrap: anywhere; }
+        .shell-business small { display: block; color: #94a3b8; margin-top: 4px; }
+        .primary-navigation { display: flex; flex-direction: column; gap: 5px; }
+        .primary-navigation-item { display: flex; align-items: center; gap: 11px; width: 100%; min-height: 44px; padding: 10px 12px; border-radius: 8px; text-align: left; font-size: 14px; font-weight: 500; }
+        .primary-navigation-item:hover { background: #1e293b; color: #fff; }
+        .primary-navigation-item[aria-current="page"] { background: #293253; color: #fff; box-shadow: inset 3px 0 #818cf8; }
+        .shell-nav-label { margin: 22px 12px 6px; font-size: 10px; font-weight: 700; letter-spacing: .14em; color: #94a3b8; }
+        .shell-help { margin-top: auto; padding-top: 22px; }
+        .shell-main { min-height: 0; }
+        .shell-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #4338ca; font-size: 14px; font-weight: 600; }
+        .shell-button:hover { background: #eef2ff; }
+        .shell-button-primary { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+        .shell-button-primary:hover { background: #4338ca; }
+        .shell-bottom-nav { display: none; }
+        .shell-sheet-backdrop { position: fixed; inset: 0; z-index: 45; background: rgb(15 23 42 / .4); display: flex; align-items: flex-start; justify-content: flex-end; padding: 76px 28px 28px; }
+        .shell-sheet { width: 360px; max-height: calc(100dvh - 104px); overflow-y: auto; background: #fff; color: #1e293b; padding: 20px; border-radius: 14px; box-shadow: 0 20px 60px #0f172a33; }
+        .shell-sheet-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .shell-sheet h2 { font-size: 20px; font-weight: 650; }
+        .shell-sheet .primary-navigation-item:hover { background: #f1f5f9; color: #1e293b; }
+        .shell-close { min-width: 44px; min-height: 44px; border-radius: 8px; }
+        .overview { position: relative; max-width: 1400px; margin: auto; }
+        .overview .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+        .overview-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
+        .overview-eyebrow { color: #64748b; font-size: 11px; font-weight: 700; letter-spacing: .12em; margin-bottom: 8px; }
+        .overview h1 { font-size: 30px; font-weight: 700; letter-spacing: -.035em; line-height: 1.25; }
+        .overview-subtitle { color: #64748b; font-size: 14px; margin-top: 8px; }
+        .overview-currency { display: flex; align-items: center; gap: 8px; color: #475569; font-size: 13px; }
+        .overview-currency select { min-height: 44px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; }
+        .overview-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .overview-kpi { background: #fff; border: 1px solid #dce4ef; border-radius: 12px; padding: 20px; }
+        .overview-kpi dt { font-size: 13px; color: #475569; font-weight: 600; }
+        .overview-kpi dd { margin-top: 10px; font-size: 27px; font-weight: 700; letter-spacing: -.035em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+        .overview-kpi small { display: block; color: #64748b; font-size: 12px; margin-top: 7px; }
+        .overview-kpi.overdue { border-color: #f1d5c7; }
+        .overview-kpi.overdue dd { color: #b4532d; }
+        .overview-kpi.paid dd { color: #047857; }
+        .overview-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); gap: 24px; align-items: stretch; }
+        .overview-grid.is-first-run .overview-setup-card { grid-column: 1; grid-row: 1 / span 2; order: -1; }
+        .overview-card { background: #fff; border: 1px solid #dce4ef; border-radius: 12px; padding: 22px; min-width: 0; }
+        .overview-card h2 { font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+        .overview-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .overview-count { border-radius: 6px; padding: 2px 8px; background: #eef2ff; color: #4338ca; font-size: 12px; font-weight: 600; }
+        .overview-link { color: #4338ca; font-size: 13px; font-weight: 600; min-height: 44px; }
+        .overview-attention { margin-top: 12px; }
+        .overview-attention li { display: flex; align-items: center; gap: 12px; padding: 19px 0; border-top: 1px solid #edf1f6; }
+        .overview-attention li:last-child { padding-bottom: 0; }
+        .overview-symbol { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; border-radius: 10px; background: #eef2ff; color: #4f46e5; }
+        .overview-symbol.overdue { background: #fff3ed; color: #b4532d; }
+        .overview-symbol.dispute { background: #fef2f2; color: #b91c1c; }
+        .overview-attention-copy { flex: 1; min-width: 0; }
+        .overview-attention-copy strong { display: block; font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+        .overview-attention-copy p { color: #64748b; font-size: 12px; line-height: 1.65; margin-top: 3px; overflow-wrap: anywhere; }
+        .overview-attention .shell-button { font-size: 12px; padding: 8px 10px; flex-shrink: 0; }
+        .overview-activity li { border-bottom: 1px solid #edf1f6; }
+        .overview-activity li:last-child { border: 0; }
+        .overview-activity button { display: flex; gap: 12px; align-items: flex-start; width: 100%; padding: 14px 0; text-align: left; }
+        .overview-activity strong { display: block; font-weight: 500; font-size: 13px; }
+        .overview-activity small, .overview-activity time { display: block; color: #64748b; font-size: 11px; margin-top: 4px; }
+        .overview-activity .overview-symbol { border-radius: 50%; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; }
+        .overview-empty { padding: 24px 0 12px; color: #475569; font-size: 14px; line-height: 1.7; }
+        .overview-aging { margin-top: 20px; }
+        .overview-aging li { display: grid; grid-template-columns: 135px 1fr 94px; align-items: center; gap: 12px; margin: 16px 0; font-size: 12px; color: #475569; }
+        .overview-aging strong { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .overview-bar { height: 8px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+        .overview-bar span { display: block; height: 100%; background: #818cf8; border-radius: 3px; }
+        .overview-aging li:not(:first-child) .overview-bar span { background: #bd7853; }
+        .overview-footnote { font-size: 12px; color: #64748b; line-height: 1.65; }
+        .overview-card > .overview-footnote { border-top: 1px solid #edf1f6; padding-top: 14px; margin-top: 18px; }
+        .overview-setup { margin-top: 12px; }
+        .overview-setup button { display: flex; align-items: center; gap: 10px; text-align: left; min-height: 44px; width: 100%; font-size: 13px; color: #4338ca; }
+        .overview-setup .complete { color: #64748b; }
+        .overview-step { display: grid; place-items: center; border: 1px solid #cbd5e1; border-radius: 50%; width: 20px; height: 20px; flex-shrink: 0; font-size: 11px; }
+        .overview-methods { margin-top: 22px; color: #64748b; font-size: 12px; line-height: 1.7; }
+        .overview-methods summary { cursor: pointer; padding: 10px 0; }
+        @media (min-width: 1100px) {
+            .shell-topbar { margin-left: 224px; }
+            .shell-main { margin-left: 224px; margin-right: 0; width: calc(100% - 224px); max-width: none; }
+            .shell-mobile-brand { display: none; }
         }
-        .primary-navigation-item { width: 100%; padding-left: 1rem; padding-right: 1rem; text-align: left; }
-        @media (min-width: 1280px) {
-            .primary-menu-toggle { display: none; }
-            .primary-navigation {
-                position: static;
-                display: flex !important;
-                max-height: none;
-                flex-direction: row;
-                align-items: center;
-                gap: 0.25rem;
-                overflow: visible;
-                border: 0;
-                background: transparent;
-                padding: 0;
-                box-shadow: none;
-            }
-            .primary-navigation-item { width: auto; padding-left: 0.75rem; padding-right: 0.75rem; text-align: center; }
-            .primary-navigation-account { margin-top: 0; margin-left: 0.5rem; }
+        @media (max-width: 1099px) {
+            body:has(.shell-bottom-nav) .app-cookie-settings { bottom: calc(82px + env(safe-area-inset-bottom)); }
+            .shell-mobile-activity { display: grid; place-items: center; width: 44px; height: 44px; }
+            .shell-sidebar, .shell-page-title, .shell-top-actions { display: none; }
+            .shell-topbar { background: #0f172a; color: #fff; padding: 0 20px; height: 62px; }
+            .shell-main { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
+            .shell-bottom-nav { display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; bottom: 0; left: 0; right: 0; z-index: 30; background: #fff; border-top: 1px solid #dce4ef; padding: 8px 4px calc(8px + env(safe-area-inset-bottom)); }
+            .shell-bottom-nav button { min-height: 52px; color: #64748b; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 5px; font-size: 11px; font-weight: 600; }
+            .shell-bottom-nav button[aria-current="page"] { color: #4f46e5; }
+            .shell-bottom-nav .shell-new-icon { background: #4f46e5; color: #fff; border-radius: 13px; width: 46px; height: 46px; display: grid; place-items: center; font-size: 28px; }
+            .shell-sheet-backdrop { align-items: flex-end; padding: 16px 12px calc(88px + env(safe-area-inset-bottom)); }
+            .shell-sheet { width: 100%; max-width: 500px; max-height: calc(100dvh - 120px); }
+            .overview-grid { grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); gap: 16px; }
+        }
+        @media (max-width: 699px) {
+            .overview h1 { font-size: 27px; }
+            .overview-heading { align-items: flex-start; flex-direction: column; gap: 10px; margin: 10px 0 22px; }
+            .overview-eyebrow { display: none; }
+            .overview-kpis { display: block; border: 1px solid #dce4ef; border-radius: 12px; overflow: hidden; background: white; margin-bottom: 26px; }
+            .overview-kpi { border: 0; border-radius: 0; padding: 16px; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 8px; }
+            .overview-kpi + .overview-kpi { border-top: 1px solid #edf1f6; }
+            .overview-kpi dt { font-size: 14px; }
+            .overview-kpi dd { font-size: 20px; margin: 0; }
+            .overview-kpi small { display: none; }
+            .overview-grid { display: flex; flex-direction: column; gap: 24px; }
+            .overview-card { width: 100%; padding: 18px; }
+            .overview-attention li { flex-wrap: wrap; gap: 10px; }
+            .overview-attention .shell-button { width: 100%; min-height: 46px; font-size: 14px; }
+            .overview-attention-copy strong { font-size: 15px; }
+            .overview-attention-copy p { font-size: 13px; }
+            .overview-activity li:nth-child(n+4) { display: none; }
+            .overview-activity.show-all li { display: block; }
+            .overview-aging li { grid-template-columns: 1fr auto; gap: 8px; }
+            .overview-bar { grid-column: 1 / -1; grid-row: 2; }
+            .overview-activity strong { font-size: 14px; }
+            .overview-activity small, .overview-activity time { font-size: 12px; }
         }
         @media (min-width: 640px) {
             .recovery-codes-overlay { align-items: center; }
@@ -612,32 +705,56 @@
     </div>
 
     <template v-if="isLoggedIn">
-        <header class="bg-slate-900 text-white shadow-md z-20 flex-shrink-0">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 relative">
-                <div class="h-16 flex min-w-0 items-center justify-between">
-                    <img src="./tallyo-wordmark-white.png" alt="Tallyo" class="h-9 w-auto shrink-0 object-contain">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="primary-menu-toggle p-2 -mr-2 text-slate-300 hover:text-white" aria-label="Menu" aria-controls="primary-navigation" :aria-expanded="mobileMenuOpen ? 'true' : 'false'">
-                        <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>
-                    <nav id="primary-navigation" @click="mobileMenuOpen = false"
-                         :class="mobileMenuOpen ? 'flex' : 'hidden'"
-                         class="primary-navigation">
-                        <button @click="navigateTo('dashboard')" :class="{'bg-slate-800 text-white': activeTab === 'dashboard', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'dashboard'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Dashboard</button>
-                        <button @click="goToCreate" :class="{'bg-slate-800 text-white': activeTab === 'create', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'create'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Create Invoice</button>
-                        <button @click="navigateTo('invoices')" :class="{'bg-slate-800 text-white': activeTab === 'invoices', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'invoices'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">My Invoices</button>
-                        <button @click="navigateTo('customers')" :class="{'bg-slate-800 text-white': activeTab === 'customers', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'customers'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Customers</button>
-                        <button @click="navigateTo('items')" :class="{'bg-slate-800 text-white': activeTab === 'items', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'items'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Saved Items</button>
-                        <button @click="navigateTo('branding')" :class="{'bg-slate-800 text-white': activeTab === 'branding', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'branding'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Branding</button>
-                        <button @click="navigateTo('recurring')" :class="{'bg-slate-800 text-white': activeTab === 'recurring', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'recurring'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Recurring<span v-if="dueTemplates.length" class="ml-1.5 inline-flex items-center justify-center bg-amber-500 text-white text-[10px] font-bold rounded-full h-4 min-w-4 px-1">{{ dueTemplates.length }}</span></button>
-                        <button @click="navigateTo('settings')" :class="{'bg-slate-800 text-white': activeTab === 'settings', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'settings'}" class="primary-navigation-item py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">Company Settings</button>
-                        <button @click="navigateTo('account')" :class="{'bg-slate-800 text-white': activeTab === 'account', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'account'}" class="primary-navigation-item primary-navigation-account mt-1 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap border border-slate-700">Account</button>
-                        <button v-if="ownerConsole.available" @click="navigateTo('owner')" :class="{'bg-slate-800 text-white': activeTab === 'owner', 'text-slate-400 hover:text-white hover:bg-slate-800': activeTab !== 'owner'}" class="primary-navigation-item primary-navigation-account mt-1 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap border border-slate-700">Owner Console</button>
-                        <button ref="helpPanelTrigger" type="button" @click.stop="openHelpPanel" class="primary-navigation-item primary-navigation-account mt-1 py-2 rounded-lg border border-slate-700 text-sm font-medium text-slate-300 transition-colors whitespace-nowrap hover:bg-slate-800 hover:text-white">Help &amp; install</button>
-                    </nav>
+        <header class="shell-header">
+            <aside class="shell-sidebar" aria-label="Application sidebar">
+                <img src="./tallyo-wordmark-white.png" alt="Tallyo" class="shell-brand">
+                <div class="shell-business">{{ company.name || 'Your business' }}<small>Your workspace</small></div>
+                <nav id="primary-navigation" class="primary-navigation" aria-label="Main navigation">
+                    <button @click="navigateTo('dashboard')" :aria-current="activeTab === 'dashboard' ? 'page' : null" class="primary-navigation-item"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('overview')"/></svg>Overview</button>
+                    <div v-for="group in overviewNavigation" :key="group.label">
+                        <p class="shell-nav-label">{{ group.label }}</p>
+                        <button v-for="item in group.items" :key="item.label" @click="overviewNavigate(item)" :aria-current="overviewNavCurrent(item) ? 'page' : null" class="primary-navigation-item"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon(item.icon)"/></svg>{{ item.label }}</button>
+                    </div>
+                    <button v-if="ownerConsole.available" @click="navigateTo('owner')" :aria-current="activeTab === 'owner' ? 'page' : null" class="primary-navigation-item">Owner Console</button>
+                </nav>
+                <div class="shell-help"><button ref="helpPanelTrigger" type="button" @click.stop="openHelpPanel" class="primary-navigation-item"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('help')"/></svg>Help &amp; support</button></div>
+            </aside>
+            <div class="shell-topbar">
+                <img src="./tallyo-wordmark-white.png" alt="Tallyo" class="shell-mobile-brand">
+                <button @click="overviewOpenActivity" class="shell-mobile-activity" aria-label="Recent activity"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('reminder')"/></svg></button>
+                <span class="shell-page-title">{{ overviewPageTitle }}</span>
+                <div class="shell-top-actions">
+                    <button @click="openOverviewMenu('new', $event)" class="shell-button shell-button-primary" aria-haspopup="dialog">＋ New</button>
+                    <button @click="navigateTo('account')" class="shell-account">Account ↗</button>
                 </div>
             </div>
         </header>
+        <nav class="shell-bottom-nav" aria-label="Mobile navigation">
+            <button @click="navigateTo('dashboard')" :aria-current="activeTab === 'dashboard' ? 'page' : null"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('overview')"/></svg>Overview</button>
+            <button @click="navigateTo('invoices')" :aria-current="['invoices','create','edit'].includes(activeTab) ? 'page' : null"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('documents')"/></svg>Documents</button>
+            <button @click="openOverviewMenu('new', $event)" aria-label="New" aria-haspopup="dialog"><span class="shell-new-icon" aria-hidden="true">+</span></button>
+            <button @click="navigateTo('customers')" :aria-current="activeTab === 'customers' ? 'page' : null"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('customers')"/></svg>Customers</button>
+            <button @click="openOverviewMenu('more', $event)" aria-haspopup="dialog" :aria-expanded="overviewMenu === 'more'"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('more')"/></svg>More</button>
+        </nav>
+        <div v-if="overviewMenu" class="shell-sheet-backdrop" @click.self="closeOverviewMenu">
+            <section ref="overviewMenuPanel" class="shell-sheet" role="dialog" aria-modal="true" aria-labelledby="overview-menu-title" tabindex="-1" @keydown.esc.stop.prevent="closeOverviewMenu" @keydown.tab="trapOverviewMenuFocus">
+                <div class="shell-sheet-heading"><h2 id="overview-menu-title">{{ overviewMenu === 'new' ? 'Create something new' : 'More in Tallyo' }}</h2><button @click="closeOverviewMenu" class="shell-close" aria-label="Close menu">✕</button></div>
+                <template v-if="overviewMenu === 'new'">
+                    <button @click="overviewCreate('document')" class="primary-navigation-item">＋ Invoice or quote</button>
+                    <p class="overview-footnote">Your unsaved draft is kept. Use New Invoice in the editor to start another.</p>
+                    <button @click="overviewCreate('customer')" class="primary-navigation-item">＋ Customer</button>
+                    <button @click="overviewCreate('item')" class="primary-navigation-item">＋ Product or service</button>
+                </template>
+                <template v-else>
+                    <div v-for="group in overviewNavigation" :key="group.label">
+                        <p class="shell-nav-label">{{ group.label }}</p>
+                        <button v-for="item in group.items" :key="item.label" @click="overviewNavigate(item); closeOverviewMenu()" class="primary-navigation-item">{{ item.label }}</button>
+                    </div>
+                    <button v-if="ownerConsole.available" @click="navigateTo('owner'); closeOverviewMenu()" class="primary-navigation-item">Owner Console</button>
+                    <button @click="closeOverviewMenu(); openHelpPanel()" class="primary-navigation-item">Help &amp; support</button>
+                </template>
+            </section>
+        </div>
 
         <div v-if="dataLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4" role="status" aria-live="polite" aria-label="Loading account data">
             <div class="rounded-xl bg-white px-6 py-4 shadow-xl text-sm font-semibold text-slate-700">Loading your Tallyo data…</div>
@@ -658,7 +775,7 @@
             </div>
         </div>
 
-        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto">
+        <main class="shell-main flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto" id="main-content">
             
             <div v-show="activeTab === 'account'" class="max-w-3xl mx-auto space-y-8">
                 
@@ -1009,68 +1126,63 @@
                 </div>
             </div>
 
-            <div v-show="activeTab === 'dashboard'">
-                <h2 class="text-3xl font-semibold mb-6">Dashboard</h2>
-
-                <div v-if="invoices.length === 0" class="bg-white p-12 rounded-xl shadow-sm border border-slate-200 text-center">
-                    <p class="text-slate-400 mb-4">No invoices yet. Create your first one to see your numbers here.</p>
-                    <button @click="newInvoice" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium shadow-sm transition-colors">+ Create Invoice</button>
+            <section v-show="activeTab === 'dashboard'" class="overview" aria-label="Overview">
+                <div class="overview-heading">
+                    <div><p class="overview-eyebrow">YOUR BUSINESS, AT A GLANCE</p><h1>{{ overviewGreeting }}</h1><p class="overview-subtitle">Here's what needs your attention today.</p></div>
+                    <label v-if="overviewCurrencies.length > 1" class="overview-currency">Figures in <select v-model="overviewCurrency" aria-label="Overview currency"><option v-for="currency in overviewCurrencies" :key="currency" :value="currency">{{ currency }}</option></select></label>
+                    <span v-else class="overview-footnote">{{ overviewStat.currency }} · {{ overviewMonth }}</span>
                 </div>
-
-                <div v-else class="space-y-8">
-                    <div v-for="stat in dashboardStats" :key="stat.currency">
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3" v-if="dashboardStats.length > 1">{{ stat.currency }}</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Outstanding</p>
-                                <p class="text-2xl font-bold text-slate-800">{{ getCurrencySymbol(stat.currency) }}{{ stat.outstanding.toFixed(2) }}</p>
-                                <p class="text-xs text-slate-400 mt-1">{{ stat.sentCount }} sent invoice{{ stat.sentCount === 1 ? '' : 's' }}</p>
-                            </div>
-                            <div class="bg-white p-5 rounded-xl shadow-sm border" :class="stat.overdue > 0 ? 'border-red-200' : 'border-slate-200'">
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Overdue</p>
-                                <p class="text-2xl font-bold" :class="stat.overdue > 0 ? 'text-red-600' : 'text-slate-800'">{{ getCurrencySymbol(stat.currency) }}{{ stat.overdue.toFixed(2) }}</p>
-                                <p class="text-xs text-slate-400 mt-1">{{ stat.overdueCount }} invoice{{ stat.overdueCount === 1 ? '' : 's' }} past due</p>
-                            </div>
-                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Paid This Month</p>
-                                <p class="text-2xl font-bold text-green-600">{{ getCurrencySymbol(stat.currency) }}{{ stat.paidThisMonth.toFixed(2) }}</p>
-                                <p class="text-xs text-slate-400 mt-1">{{ getCurrencySymbol(stat.currency) }}{{ stat.paidTotal.toFixed(2) }} all time</p>
-                            </div>
-                            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Drafts</p>
-                                <p class="text-2xl font-bold text-slate-800">{{ stat.draftCount }}</p>
-                                <p class="text-xs text-slate-400 mt-1">not yet sent</p>
-                            </div>
-                        </div>
-
-                        <div class="bg-white mt-5 p-5 rounded-xl shadow-sm border border-slate-200">
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Accounts Receivable Aging — outstanding balances by age</p>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 text-center">
-                                <div>
-                                    <p class="text-xs text-slate-400 mb-1">Current</p>
-                                    <p class="text-lg font-bold text-slate-700">{{ getCurrencySymbol(stat.currency) }}{{ stat.aging.current.toFixed(2) }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-400 mb-1">1–30 days</p>
-                                    <p class="text-lg font-bold" :class="stat.aging.d30 > 0 ? 'text-amber-600' : 'text-slate-400'">{{ getCurrencySymbol(stat.currency) }}{{ stat.aging.d30.toFixed(2) }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-400 mb-1">31–60 days</p>
-                                    <p class="text-lg font-bold" :class="stat.aging.d60 > 0 ? 'text-orange-600' : 'text-slate-400'">{{ getCurrencySymbol(stat.currency) }}{{ stat.aging.d60.toFixed(2) }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-400 mb-1">61–90 days</p>
-                                    <p class="text-lg font-bold" :class="stat.aging.d90 > 0 ? 'text-red-500' : 'text-slate-400'">{{ getCurrencySymbol(stat.currency) }}{{ stat.aging.d90.toFixed(2) }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-400 mb-1">90+ days</p>
-                                    <p class="text-lg font-bold" :class="stat.aging.d90plus > 0 ? 'text-red-700' : 'text-slate-400'">{{ getCurrencySymbol(stat.currency) }}{{ stat.aging.d90plus.toFixed(2) }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <dl class="overview-kpis">
+                    <div class="overview-kpi"><dt>Outstanding</dt><dd>{{ overviewMoney(overviewStat.outstanding) }}</dd><small>{{ overviewStat.sentCount }} invoice{{ overviewStat.sentCount === 1 ? '' : 's' }} with a balance</small></div>
+                    <div class="overview-kpi overdue"><dt>Overdue</dt><dd>{{ overviewMoney(overviewStat.overdue) }}</dd><small>{{ overviewStat.overdueCount }} past due · included in outstanding</small></div>
+                    <div class="overview-kpi paid"><dt>Paid this month</dt><dd>{{ overviewMoney(overviewStat.paidThisMonth) }}</dd><small>Recorded payments, net of refunds</small></div>
+                    <div class="overview-kpi"><dt>Recurring this week</dt><dd>{{ overviewWeekTemplates.length }}</dd><small>Schedules still due · all currencies · Mon–Sun UTC</small></div>
+                </dl>
+                <div class="overview-grid" :class="{'is-first-run': invoices.length === 0}">
+                    <section class="overview-card" aria-labelledby="attention-title">
+                        <div class="overview-section-heading"><h2 id="attention-title">Needs your attention</h2><span class="overview-count">{{ overviewAttention.length }}</span></div>
+                        <p class="overview-subtitle">A few small actions to keep things moving.</p>
+                        <ul v-if="overviewAttention.length" class="overview-attention">
+                            <li v-for="item in overviewAttention.slice(0, overviewShowAttention ? 50 : 4)" :key="item.key">
+                                <span class="overview-symbol" :class="item.kind"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon(item.kind)"/></svg></span>
+                                <div class="overview-attention-copy"><strong>{{ item.title }}</strong><p>{{ item.detail }}</p></div>
+                                <button @click="overviewAct(item)" class="shell-button">{{ item.action }} <span aria-hidden="true">↗</span></button>
+                            </li>
+                        </ul>
+                        <p v-else class="overview-empty">Nothing needs your attention in the loaded records. You're ready for your next invoice.</p>
+                        <button v-if="overviewAttention.length > 4" @click="overviewShowAttention = !overviewShowAttention" class="overview-link">{{ overviewShowAttention ? 'Show fewer' : 'Show more (' + Math.min(overviewAttention.length, 50) + ')' }}</button>
+                        <p v-if="overviewAttention.length > 50" class="overview-footnote">Showing up to 50 items. Use Documents and Recurring to review the rest.</p>
+                    </section>
+                    <section class="overview-card" aria-labelledby="overview-activity-title">
+                        <div class="overview-section-heading"><h2 id="overview-activity-title">Recent activity</h2><button v-if="overviewActivity.length > 3" @click="overviewShowActivity = !overviewShowActivity" class="overview-link" :aria-expanded="overviewShowActivity">{{ overviewShowActivity ? 'Show less' : 'View more' }}</button></div>
+                        <ul class="overview-activity" :class="{'show-all': overviewShowActivity}">
+                            <li v-for="event in overviewActivity.slice(0, overviewShowActivity ? 20 : 3)" :key="event.key">
+                                <button @click="loadInvoice(event.invoice)"><span class="overview-symbol"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon(event.icon)"/></svg></span><span><strong>{{ event.label }}</strong><small>{{ overviewDocumentLabel(event.invoice) }} · {{ event.invoice.customer?.name || 'No customer' }}</small><time :datetime="event.ts">{{ overviewTime(event.ts) }}</time></span></button>
+                            </li>
+                        </ul>
+                        <p v-if="!overviewActivity.length" class="overview-empty">Saved document activity will appear here.</p>
+                        <p class="overview-footnote">Recent loaded records. Open a document for its full history.</p>
+                    </section>
+                    <section v-if="overviewStat.outstanding > 0" class="overview-card" aria-labelledby="overview-aging-title">
+                        <div class="overview-section-heading"><h2 id="overview-aging-title">Where your outstanding balance sits</h2></div>
+                        <p class="overview-subtitle">{{ overviewMoney(overviewStat.outstanding) }} outstanding · {{ overviewStat.currency }}</p>
+                        <ul class="overview-aging">
+                            <li v-for="bucket in overviewAging" :key="bucket.key"><span>{{ bucket.label }}</span><span class="overview-bar" aria-hidden="true"><span :style="{width: (overviewStat.outstanding > 0 ? bucket.amount / overviewStat.outstanding * 100 : 0) + '%'}"></span></span><strong>{{ overviewMoney(bucket.amount) }}</strong></li>
+                        </ul>
+                        <p class="overview-footnote">Outstanding includes overdue balances. Drafts, cancelled documents, quotes and credit notes are excluded.</p>
+                    </section>
+                    <section v-if="overviewSetup.some(step => !step.done)" class="overview-card overview-setup-card" aria-labelledby="overview-setup-title">
+                        <div class="overview-section-heading"><h2 id="overview-setup-title">Get Tallyo ready</h2><span class="overview-footnote">{{ overviewSetup.filter(step => step.done).length }} of 5</span></div>
+                        <p class="overview-subtitle">Pick up where you left off. No need to do it all now.</p>
+                        <ol class="overview-setup"><li v-for="(step, index) in overviewSetup" :key="step.label"><button @click="overviewSetupAction(step)" :class="{complete: step.done}"><span class="overview-step" aria-hidden="true">{{ step.done ? '✓' : index + 1 }}</span><span>{{ step.label }}<span v-if="step.done" class="sr-only"> — complete</span></span><span v-if="!step.done" aria-hidden="true" style="margin-left:auto">→</span></button></li></ol>
+                    </section>
                 </div>
-            </div>
+                <details class="overview-methods"><summary>How these figures work</summary>
+                    <p>Figures use the records currently loaded in Tallyo; they are not a live bank balance. Refresh the app for the latest updates. Dates and month boundaries use UTC. Currencies are never added together.</p>
+                    <p>Outstanding uses invoice totals less recorded payments, excluding Draft and Cancelled. Paid this month uses dated payment records, including negative refund entries, not invoices marked Paid without a payment record. Legacy status behaviour is unchanged.</p>
+                    <p>Recurring this week counts active schedules with their next run between Monday and Sunday, including ones still due earlier this week. It is not a count of invoices already generated or every future occurrence. Attention and activity include all currencies.</p>
+                </details>
+            </section>
 
             <div v-show="activeTab === 'create' || activeTab === 'edit' || isExportingPDF" :class="{'pdf-export-surface': isExportingPDF && activeTab !== 'create' && activeTab !== 'edit'}">
                 <div class="flex justify-between items-center mb-6 flex-wrap gap-4">
@@ -2594,6 +2706,11 @@
 
                 // App State
                 activeTab: 'dashboard',
+                overviewCurrencyChoice: '',
+                overviewMenu: '',
+                overviewMenuTrigger: null,
+                overviewShowActivity: false,
+                overviewShowAttention: false,
                 mobileMenuOpen: false,
                 subscriptionWelcomeOpen: false,
                 subscriptionWelcomeShown: false,
@@ -2678,6 +2795,122 @@
             };
         },
         computed: {
+            overviewNavigation() {
+                return [
+                    { label: 'SALES', items: [
+                        { label: 'Documents', tab: 'invoices', icon: 'documents' },
+                        { label: 'Customers', tab: 'customers', icon: 'customers' },
+                        { label: 'Products & services', tab: 'items', icon: 'items' }
+                    ] },
+                    { label: 'AUTOMATION', items: [
+                        { label: 'Recurring', tab: 'recurring', icon: 'recurring' },
+                        { label: 'Reminders', tab: 'invoices', icon: 'reminder', reminders: true }
+                    ] },
+                    { label: 'SETTINGS', items: [
+                        { label: 'Business settings', tab: 'settings', icon: 'settings' },
+                        { label: 'Branding', tab: 'branding', icon: 'branding' },
+                        { label: 'Account', tab: 'account', icon: 'account' }
+                    ] }
+                ];
+            },
+            overviewPageTitle() {
+                return { dashboard: 'Overview', invoices: 'Documents', create: 'Create document', edit: 'Edit document', customers: 'Customers', items: 'Products & services', recurring: 'Recurring', settings: 'Business settings', branding: 'Branding', account: 'Account', owner: 'Owner Console' }[this.activeTab] || 'Tallyo';
+            },
+            overviewGreeting() {
+                const hour = new Date().getHours();
+                const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+                // Never derive a person's name from an email address.
+                const name = String(this.currentUser?.user_metadata?.full_name || '').trim().split(/\s+/)[0].slice(0, 40);
+                return name ? greeting + ', ' + name : greeting;
+            },
+            overviewMonth() { return new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }); },
+            overviewCurrencies() {
+                return [...new Set([this.company.defaultCurrency || 'GBP', ...this.dashboardStats.map(stat => stat.currency)])].sort();
+            },
+            overviewCurrency: {
+                get() { return this.overviewCurrencies.includes(this.overviewCurrencyChoice) ? this.overviewCurrencyChoice : (this.company.defaultCurrency || 'GBP'); },
+                set(value) { this.overviewCurrencyChoice = value; }
+            },
+            overviewStat() {
+                return this.dashboardStats.find(stat => stat.currency === this.overviewCurrency) || {
+                    currency: this.overviewCurrency, outstanding: 0, overdue: 0, paidThisMonth: 0, sentCount: 0, overdueCount: 0,
+                    aging: { current: 0, d30: 0, d60: 0, d90: 0, d90plus: 0 }
+                };
+            },
+            overviewWeekTemplates() {
+                const monday = new Date(new Date().toISOString().slice(0, 10));
+                monday.setUTCDate(monday.getUTCDate() - (monday.getUTCDay() + 6) % 7);
+                const sunday = new Date(monday); sunday.setUTCDate(sunday.getUTCDate() + 6);
+                const start = monday.toISOString().slice(0, 10), end = sunday.toISOString().slice(0, 10);
+                return this.recurringTemplates.filter(t => t.active !== false && t.nextRun >= start && t.nextRun <= end);
+            },
+            overviewAging() {
+                return [['current', 'Not due / no due date'], ['d30', '1–30 days overdue'], ['d60', '31–60 days overdue'], ['d90', '61–90 days overdue'], ['d90plus', '91+ days overdue']]
+                    .map(([key, label]) => ({ key, label, amount: this.overviewStat.aging[key] }));
+            },
+            overviewAttention() {
+                const items = [];
+                for (const inv of this.invoices) {
+                    if ((inv.docType || 'invoice') !== 'invoice') continue;
+                    const dispute = this.disputeStateFor(inv.id);
+                    if (dispute && ['needs_response', 'warning_needs_response', 'unknown'].includes(dispute.status)) {
+                        items.push({ key: 'dispute-' + inv.id, kind: 'dispute', invoice: inv, title: 'Payment dispute · ' + this.overviewDocumentLabel(inv), detail: dispute.label + ' · Review the current case before taking action.', action: 'Review' });
+                    }
+                }
+                for (const inv of this.overdueInvoices) {
+                    if (this.invoiceOutstanding(inv) <= 0.001) continue;
+                    items.push({ key: 'overdue-' + inv.id, kind: 'overdue', invoice: inv, title: this.overviewDocumentLabel(inv) + ' · ' + (inv.customer?.name || 'No customer'), detail: this.daysOverdue(inv) + ' days overdue · ' + this.overviewMoney(this.invoiceOutstanding(inv), inv.currency) + ' ' + (inv.currency || 'GBP') + ' outstanding', action: 'Send reminder' });
+                }
+                const today = new Date().toISOString().slice(0, 10);
+                const tomorrow = new Date(today); tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+                const tomorrowKey = tomorrow.toISOString().slice(0, 10);
+                for (const template of [...this.recurringTemplates].sort((a, b) => String(a.nextRun).localeCompare(String(b.nextRun)))) {
+                    if (template.active === false || !template.nextRun || template.nextRun > tomorrowKey) continue;
+                    const when = template.nextRun < today ? 'due for review' : template.nextRun === today ? 'due today' : 'due tomorrow';
+                    items.push({ key: 'recurring-' + template.id, kind: 'recurring', template, title: 'Recurring invoice ' + when, detail: template.name + ' · Next run ' + template.nextRun, action: 'Review schedule' });
+                }
+                for (const inv of this.invoices) {
+                    if (inv.docType !== 'quote' || this.normalizedStatus(inv) !== 'Sent') continue;
+                    const sentDates = (inv.history || []).filter(ev => ev.type === 'sent').map(ev => ev.ts)
+                        .concat((this.emailEventsByDocument[inv.id] || []).filter(ev => ev.event_type === 'document_email_sent').map(ev => ev.created_at))
+                        .filter(ts => Number.isFinite(Date.parse(ts))).sort();
+                    const sent = sentDates.at(-1);
+                    if (!sent) continue; // Issue date alone is not evidence of sending.
+                    const days = Math.floor((Date.parse(today) - Date.parse(sent.slice(0, 10))) / 86400000);
+                    if (days < 5) continue;
+                    items.push({ key: 'quote-' + inv.id, kind: 'documents', invoice: inv, title: this.overviewDocumentLabel(inv) + ' · ' + (inv.customer?.name || 'No customer'), detail: 'Sent or marked sent ' + days + ' days ago · Check whether a follow-up is needed.', action: 'View quote' });
+                }
+                return items;
+            },
+            overviewActivity() {
+                const items = [];
+                const labels = { created: 'Document created', sent: 'Document marked sent', payment: 'Payment recorded', refund: 'Refund update recorded', recurring: 'Recurring invoice created', reminder: 'Reminder recorded' };
+                for (const inv of this.invoices) {
+                    (inv.history || []).forEach((event, index) => {
+                        if (!labels[event.type] || !Number.isFinite(Date.parse(event.ts))) return;
+                        items.push({ key: inv.id + '-history-' + index, invoice: inv, ts: event.ts, label: labels[event.type], icon: event.type === 'payment' ? 'check' : event.type === 'recurring' ? 'recurring' : 'documents' });
+                    });
+                }
+                const delivery = { email_delivered: 'Email delivered', email_bounced: 'Email bounced', email_failed: 'Email delivery failed', email_delivery_delayed: 'Email delivery delayed' };
+                const docs = new Map(this.invoices.map(inv => [inv.id, inv]));
+                for (const [index, event] of this.auditEvents.entries()) {
+                    const inv = docs.get(event.object_id);
+                    if (!inv || !delivery[event.event_type] || !Number.isFinite(Date.parse(event.created_at))) continue;
+                    items.push({ key: 'audit-' + index, invoice: inv, ts: event.created_at, label: delivery[event.event_type], icon: 'mail' });
+                }
+                return items.sort((a, b) => Date.parse(b.ts) - Date.parse(a.ts)).slice(0, 20);
+            },
+            overviewSetup() {
+                const invoices = this.invoices.filter(inv => (inv.docType || 'invoice') === 'invoice');
+                const sent = invoices.some(inv => (this.emailEventsByDocument[inv.id] || []).some(ev => ['document_email_sent', 'email_delivered'].includes(ev.event_type)));
+                return [
+                    { label: 'Add business details', done: Boolean(this.company.name && this.company.address), route: 'settings' },
+                    { label: 'Add your logo', done: Boolean(this.company.logo), route: 'settings' },
+                    { label: 'Add your first customer', done: this.customers.length > 0, route: 'customers' },
+                    { label: 'Create your first invoice', done: invoices.length > 0, route: 'create' },
+                    { label: 'Send your first invoice', done: sent, route: 'invoices' }
+                ];
+            },
             brandColor() { return this.company.brandColor || '#4f46e5'; },
             brandRgb() {
                 let h = (this.brandColor || '').replace('#', '');
@@ -2935,6 +3168,89 @@
             }
         },
         methods: {
+            overviewIcon(name) {
+                return {
+                    overview: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',
+                    documents: 'M8 3h9l4 4v14H8z M17 3v5h4 M4 7v14h1 M11 12h7 M11 16h5',
+                    customers: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8 M18 8a3 3 0 0 1 0 6 M22 21v-2a4 4 0 0 0-3-4',
+                    items: 'M12 3 3 7v10l9 4 9-4V7z M3 7l9 4 9-4 M12 11v10',
+                    recurring: 'M4 7h13l-3-3 M20 17H7l3 3 M4 7v6 M20 17v-6',
+                    reminder: 'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9 M10 21h4',
+                    settings: 'M3 6h18 M3 12h18 M3 18h18 M8 3v6 M16 9v6 M9 15v6',
+                    branding: 'M4 20l4-1L20 7l-3-3L5 16z M14 7l3 3',
+                    account: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20 M12 6a3 3 0 1 0 0 6 3 3 0 0 0 0-6 M6 20v-2a6 6 0 0 1 12 0v2',
+                    help: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20 M9 8a3 3 0 1 1 4 3c-1 0-1 2-1 2 M12 17h.01',
+                    more: 'M4 12h.01 M12 12h.01 M20 12h.01',
+                    overdue: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20 M12 6v6l4 2',
+                    dispute: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20 M12 6v7 M12 17h.01',
+                    check: 'M5 12l4 4L19 6', mail: 'M3 5h18v14H3z M3 5l9 7 9-7'
+                }[name] || 'M5 12h14';
+            },
+            overviewMoney(value, currency = this.overviewStat.currency) {
+                try { return new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(value); }
+                catch { return String(currency) + ' ' + Number(value || 0).toFixed(2); }
+            },
+            overviewTime(ts) {
+                const value = new Date(ts);
+                const day = value.toISOString().slice(0, 10);
+                const today = new Date().toISOString().slice(0, 10);
+                const label = day === today ? 'Today' : value.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+                return label + ', ' + value.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+            },
+            overviewDocumentLabel(inv) {
+                const number = String(inv.number || '');
+                return /^(INV|QUO|CN)[-#]/i.test(number) ? number : this.docTypeNoun(inv.docType) + ' #' + number;
+            },
+            overviewNavCurrent(item) {
+                return this.activeTab === item.tab && (!item.reminders ? !(item.tab === 'invoices' && this.invoiceStatusFilter === 'Overdue') : this.invoiceStatusFilter === 'Overdue');
+            },
+            overviewNavigate(item) {
+                if (item.tab === 'invoices') {
+                    this.invoiceSearch = ''; this.invoiceTypeFilter = item.reminders ? 'invoice' : 'All';
+                    this.invoiceStatusFilter = item.reminders ? 'Overdue' : 'All'; this.invoicePage = 1;
+                }
+                this.navigateTo(item.tab);
+            },
+            openOverviewMenu(kind, event) {
+                this.overviewMenuTrigger = event?.currentTarget || null;
+                this.overviewMenu = kind;
+                this.$nextTick(() => this.$refs.overviewMenuPanel?.focus());
+            },
+            closeOverviewMenu() {
+                this.overviewMenu = '';
+                this.$nextTick(() => this.overviewMenuTrigger?.focus());
+            },
+            trapOverviewMenuFocus(event) {
+                const panel = this.$refs.overviewMenuPanel;
+                const buttons = panel?.querySelectorAll('button:not([disabled])');
+                if (!buttons?.length) return;
+                const first = buttons[0], last = buttons[buttons.length - 1];
+                if (event.shiftKey && (document.activeElement === first || document.activeElement === panel)) { event.preventDefault(); last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+            },
+            overviewCreate(kind) {
+                this.closeOverviewMenu();
+                if (kind === 'document') this.goToCreate();
+                if (kind === 'customer') { this.navigateTo('customers'); this.newCustomer(); }
+                if (kind === 'item') { this.navigateTo('items'); this.newItem(); }
+            },
+            overviewAct(item) {
+                if (item.kind === 'overdue') this.openReminder(item.invoice);
+                else if (item.template) { this.navigateTo('recurring'); this.editTemplate(item.template); }
+                else this.loadInvoice(item.invoice);
+            },
+            overviewSetupAction(step) {
+                if (step.route === 'create') this.goToCreate();
+                else this.navigateTo(step.route);
+            },
+            overviewOpenActivity() {
+                this.navigateTo('dashboard');
+                this.$nextTick(() => {
+                    const main = document.getElementById('main-content');
+                    const heading = document.getElementById('overview-activity-title');
+                    if (main && heading) main.scrollTop += heading.getBoundingClientRect().top - main.getBoundingClientRect().top - 16;
+                });
+            },
             showAppNotice(title, message, duration = 7000, tone = 'success') {
                 if (this.appNoticeTimer) window.clearTimeout(this.appNoticeTimer);
                 this.appNotice = {
@@ -2984,6 +3300,7 @@
                 this.$nextTick(() => {
                     const trigger = this.$refs.helpPanelTrigger;
                     if (trigger && typeof trigger.focus === 'function') trigger.focus();
+                    if (trigger && trigger.offsetParent === null) this.overviewMenuTrigger?.focus();
                 });
             },
             async requestInstall() {

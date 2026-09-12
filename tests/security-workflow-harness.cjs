@@ -47,4 +47,5 @@ for (const harness of [
 assert.match(workflow, /pull_request:\s+branches:\s+- main\s+- codex\/tallyo-redesign/, 'redesign integration PRs keep equivalent checks');
 assert.match(workflow, /push:\s+branches:\s+- main\s+- codex\/tallyo-redesign\s+- codex\/tallyo-redesign-\*/, 'redesign pushes run checks without removing main');
 assert.ok(workflow.includes('node tests/redesign-preview-harness.mjs'));
+assert.ok(workflow.includes('node tests/redesign-overview-harness.cjs'));
 console.log('Security workflow harness passed.');

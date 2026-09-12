@@ -119,14 +119,14 @@ const documents = Array.from({ length: 2000 }, (_, index) => ({
     'the legacy centred-card Auth shell must not return');
   assert.match(app, /@media \(max-width: 39\.99rem\) \{[\s\S]*?\.auth-benefit-grid \{ display: none; \}/,
     'the signed-out form must remain the primary action on narrow phones');
-  assert.match(app, /class="primary-menu-toggle[^\"]*" aria-label="Menu" aria-controls="primary-navigation" :aria-expanded=/,
-    'the menu button must remain available until the full navigation fits');
-  assert.match(app, /\.primary-navigation \{[\s\S]*?max-height: calc\(100vh - 4rem\);[\s\S]*?overflow-y: auto;/,
-    'the compact navigation must remain scrollable on short windows');
-  assert.match(app, /@media \(min-width: 1280px\) \{[\s\S]*?\.primary-menu-toggle \{ display: none; \}[\s\S]*?\.primary-navigation \{[\s\S]*?display: flex !important;/,
-    'the full navigation must replace the menu button only at a safe desktop width');
-  assert.match(app, /id="primary-navigation"[\s\S]*?:class="mobileMenuOpen \? 'flex' : 'hidden'"[\s\S]*?class="primary-navigation"/,
-    'compact navigation visibility must follow the menu state');
+  assert.match(app, /class="shell-bottom-nav" aria-label="Mobile navigation"/,
+    'narrow layouts must retain labelled, touch-friendly navigation');
+  assert.match(app, /\.shell-sheet \{[^}]*max-height:[^}]*overflow-y: auto;/,
+    'compact navigation must remain scrollable on short windows');
+  assert.match(app, /@media \(max-width: 1099px\) \{[\s\S]*?\.shell-sidebar, \.shell-page-title, \.shell-top-actions \{ display: none; \}/,
+    'the desktop sidebar must give way to mobile navigation before crowding the content');
+  assert.match(app, /ref="overviewMenuPanel"[^>]*role="dialog"[^>]*aria-modal="true"[\s\S]*?@keydown.tab="trapOverviewMenuFocus"/,
+    'the mobile menu must be labelled and contain keyboard focus');
   assert.match(app, /inline-flex min-w-16 items-center justify-center rounded px-2 py-1 text-center text-xs font-medium leading-tight/,
     'document type badges must remain centred when labels wrap');
   assert.match(app, /invoiceListEmailStatus\(id\) \{[\s\S]*?providerAcceptedStates[\s\S]*?return providerAcceptedStates\.has\(status\.state\) \? null : status;/,
