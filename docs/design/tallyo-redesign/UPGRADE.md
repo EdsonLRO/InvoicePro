@@ -254,6 +254,8 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 **Documents menu review refinement:** More uses a centred 10px decorative chevron and a floating actions dropdown without expanding the row/card. Only one document menu opens at a time; the final row opens upward to keep actions accessible near the bottom navigation. Existing action handlers and Escape/focus behaviour remain unchanged. Focused tests check stable row heights, single-line labels, arrow alignment, unclipped actions and viewport bounds at 320–1440px, plus the existing Documents regressions. Local preview only.
 
+**Overview scroll-boundary refinement:** continued wheel scrolling at either end of an attention/activity panel now passes naturally to the surrounding page. Internal scrolling, panel heights and keyboard access are retained. Browser tests verify upward and downward wheel chaining for both panels at desktop and phone widths.
+
 ### Later, separately scoped releases
 
 1. Status rules: invoice/quote/credit semantics, manual payment retention, historical Paid compatibility, refunds/partial payments and overdue rules. Decide before migrating anything.

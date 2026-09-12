@@ -160,6 +160,28 @@ const path = require('node:path');
       await page.locator('#main-content').evaluate(el => { el.scrollTop = 0; });
       await page.screenshot({ path: path.join(root, 'tmp/redesign-evidence/step2-scroll-panels-' + width + '.png') });
     }
+    // Wheel input chains to the page only after reaching a panel boundary.
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 700 });
+      for (const list of await overview.locator('.overview-scroll').all()) {
+        for (const direction of [-1, 1]) {
+          await list.evaluate((el, direction) => {
+            el.scrollIntoView({ block: 'center' });
+            if (direction < 0) document.querySelector('#main-content').scrollTop += 80;
+            el.scrollTop = direction < 0 ? 0 : el.scrollHeight;
+          }, direction);
+          await page.waitForTimeout(350);
+          const panel = await list.boundingBox();
+          await page.mouse.move(panel.x + panel.width / 2, panel.y + panel.height / 2);
+          const before = await page.locator('#main-content').evaluate(el => el.scrollTop);
+          await page.mouse.wheel(0, direction * 180);
+          await page.waitForTimeout(350);
+          const after = await page.locator('#main-content').evaluate(el => el.scrollTop);
+          assert.ok(direction < 0 ? after < before : after > before,
+            `wheel chains ${direction < 0 ? 'up' : 'down'} to page at ${width}px`);
+        }
+      }
+    }
     // Empty/new account and mixed-currency state without touching real data.
     await page.evaluate(() => {
       const vm = document.querySelector('#app').__vue_app__._container._vnode.component.proxy;
