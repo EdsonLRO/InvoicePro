@@ -120,6 +120,18 @@ const path = require('node:path');
     for (const width of [320, 390, 768, 1099, 1100, 1280, 1440]) {
       await page.setViewportSize({ width, height: 844 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'no horizontal Overview overflow at ' + width);
+      const cards = await overview.locator('.overview-grid > .overview-card').evaluateAll(elements => elements.map(el => {
+        const { top, bottom, height } = el.getBoundingClientRect();
+        return { top, bottom, height };
+      }));
+      if (width >= 700) {
+        for (const [left, right] of [[0, 1], [2, 3]]) {
+          assert.ok(Math.abs(cards[left].top - cards[right].top) < 1, 'paired card tops align at ' + width);
+          assert.ok(Math.abs(cards[left].height - cards[right].height) < 1, 'paired card heights match at ' + width);
+        }
+      } else {
+        for (let i = 1; i < cards.length; i++) assert.ok(cards[i].top >= cards[i - 1].bottom, 'mobile cards remain stacked at ' + width);
+      }
     }
     // Empty/new account and mixed-currency state without touching real data.
     await page.evaluate(() => {
