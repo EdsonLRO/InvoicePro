@@ -2,15 +2,15 @@
 
 This checklist tracks whether the current app is ready for real customer use. It is not a public-launch checklist for the future SaaS website.
 
-## Authenticated-app redesign candidate — preparation only, 2026-09-19
+## Authenticated-app redesign — released, focused follow-up approved, 2026-09-19
 
-Steps 1–6 of the controlled visual redesign are accepted on the non-production integration branch. Step 7 prepares build `2026.09.19.1` on `codex/tallyo-redesign-release`; it does not authorise a `main` merge or deployment. Remote `main` remains `7429b2b74474493b81edd7e548bcd35bbe1c9b89`, which is also the merge base of accepted integration `8dcde1ecd7c606d52ea9aafbabc6bfc26b8722d3`, so there is no intervening production-source drift to reconcile.
+PR #162 merged as `00191f703d430c7a1052848fa7c1e3c5a2e50fce` and published build `2026.09.19.1`. Cloudflare deployment `c7df1127-6a13-4ee7-a9e3-39b6e318b66c`, GitHub Pages, the public shell, 16-asset build report, service-worker cache `tallyo-shell-2026-09-19-1` and an isolated signed-out installed-PWA cache lifecycle all passed.
 
-Current production readback returns HTTP 200 and build `2026.09.11.1` from both `https://app.tallyo.co.uk` and the GitHub Pages fallback. Cloudflare lists deployment `99c8fa2c-8dab-4460-9db4-a013c5fe9b20` as the latest production artifact from source `7429b2b`; its deployment-specific hostname remains present and protected by the existing wildcard Access application. This is the exact frontend rollback target after a redesign release. The earlier Owner Console deployment `9ee7120d-122b-44e8-8c43-0077feed8e39` is also retained, but rollback should prefer the latest compatible `99c8fa2c` artifact. No database restore, function rollback or provider/configuration change belongs to this visual release.
+The Owner approved PR #163 and build `2026.09.19.2` for one correction: on narrow screens the invoice editor now flows from Notes to Summary, save guidance/action, Payments and Activity History. Desktop geometry and application behaviour remain unchanged. The exact rollback target is deployment `c7df1127-6a13-4ee7-a9e3-39b6e318b66c`, build `2026.09.19.1`; no database restore, function rollback or provider/configuration change belongs to this frontend release.
 
-Cutover remains Owner-gated. The proposed release is limited to merging the reviewed frontend candidate into `main`, allowing the existing Cloudflare/GitHub publication workflows to build it, and running bounded public shell/build-report/service-worker plus Owner-performed installed-PWA checks. If validation fails, restore Cloudflare deployment `99c8fa2c`, confirm build `2026.09.11.1`, and leave the September recovery functions/configuration untouched.
+The approved follow-up release is limited to marking PR #163 ready, merging it into `main`, allowing the existing Cloudflare/GitHub publication workflows to build it, and running bounded public shell, build-report, service-worker and installed-PWA checks. If validation fails, restore deployment `c7df1127`, confirm build `2026.09.19.1`, and leave backend functions/configuration untouched.
 
-Candidate commit `4ba6d852e83fa2a7cb6894fa24a8d4cae6a05eb3` is available in [draft PR #162](https://github.com/EdsonLRO/InvoicePro/pull/162). All 36 application harnesses, five isolated Chromium suites and the website test groups pass locally; both hosted Security checks passed ([run 35446530566](https://github.com/EdsonLRO/InvoicePro/actions/runs/35446530566), [run 35446559211](https://github.com/EdsonLRO/InvoicePro/actions/runs/35446559211)). The local fictional preview artifact revision is `7b997f681d7e29ac04153f5ab81585b3df04027de25d58637c4e179ddcf7d58a`. The PR remains draft and unapproved for production.
+PR #163 commit `756a8b31880b092bc6af2e82463763fd9877f1c5` passed the focused editor source and Chromium suites, preview-isolation/rollback and accessibility/safety harnesses. Hosted Security checks and both Pages preview checks passed before the Owner approved production release. No real account, email, payment, provider or private data was used.
 
 ## Recovery link correction — deployed and verified, 2026-09-11
 
@@ -43,9 +43,9 @@ Statuses: Planned, In Progress, Implemented, Verified, Blocked, Deferred, Not Ap
 
 ## Current Verdict
 
-**Status:** Verified for the approved initial UK-business public release; redesign build `2026.09.19.1` is a prepared candidate only.
+**Status:** Verified for the approved initial UK-business public release; redesign build `2026.09.19.1` is public and focused mobile follow-up build `2026.09.19.2` is Owner-approved for release.
 
-Tallyo's current invoicing-app scope is feature-complete and regression-verified. Controlled live Stripe invoice-payment, Tallyo Pro Billing, connected-account onboarding, one GBP 1 direct connected payment and one full refund completed bounded acceptance before launch. Build `2026.09.11.1` is public at `https://app.tallyo.co.uk` and on the GitHub Pages fallback; exact Cloudflare deployment `99c8fa2c-8dab-4460-9db4-a013c5fe9b20` is the current compatible rollback artifact. The production website is public at `https://tallyo.co.uk` and `https://www.tallyo.co.uk`. The approved legal pages, subscription and connected-payment interfaces, Owner Console and bounded AI Helper are available. No production state changed during redesign preparation.
+Tallyo's current invoicing-app scope is feature-complete and regression-verified. Build `2026.09.19.1` is public at `https://app.tallyo.co.uk` and on the GitHub Pages fallback; Cloudflare deployment `c7df1127-6a13-4ee7-a9e3-39b6e318b66c` is the rollback artifact for the approved mobile follow-up. The production website, legal pages, subscription and connected-payment interfaces, Owner Console and bounded AI Helper are unchanged by this frontend-only correction.
 
 ## Release Gates
 

@@ -44,4 +44,6 @@ assert.match(app, /document\.addEventListener\('click', closeOpenRecordMenus\)/)
 assert.match(editor, /editor-save-row[\s\S]*?editor-rail[\s\S]*?editor-side-options[\s\S]*?editor-payments[\s\S]*?editor-activity/);
 assert.match(app, /\.editor-rail>\.editor-payments\s*\{\s*grid-column:1;\s*grid-row:2;/);
 assert.match(app, /\.editor-rail>\.editor-activity\s*\{\s*grid-column:1;\s*grid-row:3;/);
+assert.match(app, /@media \(max-width:899px\)[\s\S]*?\.editor-form,\.editor-side-options\s*\{\s*display:contents;\s*\}[\s\S]*?\.editor-summary\s*\{[^}]*order:2;\s*\}[\s\S]*?\.editor-save-row\s*\{[^}]*order:3;\s*\}[\s\S]*?\.editor-rail>\.editor-payments\s*\{[^}]*order:4;\s*\}[\s\S]*?\.editor-rail>\.editor-activity\s*\{[^}]*order:5;\s*\}/,
+  'mobile editor flows from Notes to Summary, save, Payments and Activity');
 console.log('Step 4 contracts passed: non-navigation handler/startup and printable-template hashes, reviewed history routing, one PDF canvas, complete editor bindings, explicit save/review, accessible automation controls.');
