@@ -16,7 +16,7 @@ const functionDirectories = fs.readdirSync(functionsRoot, { withFileTypes: true 
   .map((entry) => entry.name)
   .sort();
 
-assert.equal(functionDirectories.length, 19, 'expected all nineteen Edge Functions');
+assert.equal(functionDirectories.length, 21, 'expected all twenty-one Edge Functions');
 
 const sharedConnectSource = fs.readFileSync(
   path.join(functionsRoot, '_shared', 'stripe-connect.ts'),

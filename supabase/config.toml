@@ -117,3 +117,15 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/send-marketing-overview/deno.json"
 entrypoint = "./functions/send-marketing-overview/index.ts"
+
+[functions.manage-quote-access]
+enabled = true
+verify_jwt = true
+import_map = "./functions/manage-quote-access/deno.json"
+entrypoint = "./functions/manage-quote-access/index.ts"
+
+[functions.quote-public]
+enabled = true
+verify_jwt = false
+import_map = "./functions/quote-public/deno.json"
+entrypoint = "./functions/quote-public/index.ts"

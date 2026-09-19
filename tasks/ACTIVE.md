@@ -1,5 +1,46 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-QUOTE-003 — Disabled quote acceptance UI slice
+
+Task ID: UX-QUOTE-003
+Title: Add the default-off customer quote page and minimal owner controls
+Priority: High
+Status: Repository candidate implemented; source gate remains off and nothing is deployed
+Phase: Controlled UI integration
+Owner role: Product owner
+Risk level: High because the UI exposes the signed-out token boundary prepared in `UX-QUOTE-002`
+Branch: `codex/quote-acceptance-ui`, stacked on runtime commit `7f3d20c`
+Scope: static `/quote/` customer page; gated owner link controls; Cloudflare build/header/redirect integration; customer-route service-worker exclusion; account-export token-hash redaction; focused static and browser tests; CI registration and this task record
+Product boundary: customer actions are view, accept, decline and view linked invoice. Acceptance captures the entered name, uses the server timestamp and displays the automatically created invoice. Owner controls create/copy or revoke a link and open the linked invoice; they do not send an email.
+Security boundary: the raw token remains in the URL fragment and request body only, is never logged or persisted by browser code, and is omitted from account exports. The public page has no signed-in app shell, Analytics, third-party script or service-worker cache/fallback. Owner actions still require the reviewed authenticated function.
+Privacy boundary: no IP address, fingerprint, decline reason, marketing data, payment data or Analytics event is added. The public shell contains no customer data; all text is inserted with DOM `textContent`.
+Release gate: `TALLYO_QUOTE_ACCEPTANCE_ENABLED` defaults false in source and the Pages build rejects an enabled value unless `TALLYO_QUOTE_ACCEPTANCE_PUBLIC_RELEASE_APPROVED=true` is separately supplied.
+Validation: the focused source harness, Cloudflare fail-closed/approved build permutations, all direct Node CI harnesses, website suite, existing Deno runtime tests and both quote-function frozen-lock checks pass. Headless Chrome at 390 px passes keyboard validation, accept, linked invoice, decline, horizontal overflow and zero outside requests; the fictional-data capture was also visually inspected. The sandboxed Deno runner hit a Windows IPC-handle panic, then the same tests passed outside the sandbox; this is tooling evidence, not an application failure.
+Approval boundary: repository implementation, tests, commit, push and a draft stacked pull request are authorised. Stop before merge, migration application, Edge Function deployment, public gate activation, Pages release, email, payment or provider/configuration change.
+Next action: inspect and commit the final diff, prepare a draft stacked pull request, then repeat focused security review on the immutable integrated candidate before any release decision.
+
+## UX-QUOTE-002 — Quote acceptance runtime foundation
+
+Task ID: UX-QUOTE-002
+Title: Add the protected quote-link schema and narrow server runtime
+Priority: High
+Status: Repository candidate implemented and source-validated; unapplied and undeployed
+Phase: Controlled runtime foundation
+Owner role: Product owner
+Assigned specialists: Backend/Supabase, Security, Privacy and QA performed sequentially by Codex
+Risk level: High because this adds a signed-out token boundary and an atomic document-creation path
+Affected files: one timestamped quote-acceptance migration; `manage-quote-access`; `quote-public`; their shared validation helper, focused tests, function configuration, CI registration and this task record
+Dependencies: approved `UX-QUOTE-001` specification on `codex/quote-acceptance-spec`; released document-status rules in PR #166
+Security boundary: raw 256-bit tokens are returned once and never stored; `anon` receives no table/RPC grant; owner access requires a valid user JWT and row ownership; public responses resolve only the hashed scoped token; the response and linked invoice are committed atomically
+Privacy boundary: confirmed name is stored only on the quote response and owner-visible convenience history; no IP address, fingerprint, decline reason, analytics payload, email or payment side effect
+Approval boundary: local source, tests, commit, push and a focused draft PR are authorised. Stop before applying the migration, deploying either function, adding the customer page to production, enabling a public gate, merging to `main` or releasing.
+Lock state: acquired 2026-09-19 for the affected files above
+Branch: `codex/quote-acceptance-runtime`, stacked from `codex/quote-acceptance-spec`
+Required validation: migration contract/privilege tests; protected-field and immutable-response tests; duplicate/concurrent acceptance; cross-owner denial; function method/origin/body/JWT/token/name validation; Deno frozen-lock checks; existing security workflow harness
+Evidence: focused contract/helper tests, all existing Node regression harnesses, both frozen-lock Edge Function checks and the website suite pass locally. Draft PR #168 is stacked on the approved specification branch; branch workflow run `35467031469` passed the focused harnesses, website suite and frozen-lock checks for all 21 Edge Functions. Disposable PostgreSQL run `35468437526` applied the migration and passed protected-field, tenant-attribution, sequential replay, decline, forced rollback, privilege and overlapping-accept probes. Focused security scan `8a14a58e-f139-434b-9504-6077fffaa0e5` found one low-severity shared-isolate availability issue in the constant global limiter; the draft now uses a bounded token-hash shard plus the existing stricter per-token limits, without processing or retaining an IP address or fingerprint. The privacy review confirmed purpose-bound name/timestamp storage, hash-only token persistence and no analytics, email, payment, decline-reason or new network-identifier data. No Supabase project was contacted or changed.
+Release prerequisites: ensure the future account export omits the token hash while including appropriate link/response metadata; validate the limiter correction and future disabled customer/owner UI; re-run focused security review on the final UI-integrated candidate before any release decision.
+Next action: complete validation of the limiter correction, then prepare the disabled customer/owner UI as a separate controlled slice. Do not merge, apply, deploy or activate.
+
 ## UX-QUOTE-001 — Customer quote acceptance specification and isolated preview
 
 Task ID: UX-QUOTE-001
