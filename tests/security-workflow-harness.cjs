@@ -33,6 +33,7 @@ for (const harness of [
   'operational-health-harness.cjs',
   'owner-console-harness.cjs',
   'quote-acceptance-runtime-harness.cjs',
+  'quote-acceptance-ui-harness.cjs',
   'refund-consequence-preview-harness.cjs',
   'recurring-calendar-reliability-harness.cjs',
   'scale-accessibility-safety-harness.cjs',

@@ -41,10 +41,18 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
+  const requestUrl = new URL(req.url);
 
   // Only handle same-origin GET requests (the app shell). Everything else
   // (Supabase API calls, CDN scripts, etc.) goes straight to the network.
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) {
+  if (req.method !== 'GET' || requestUrl.origin !== self.location.origin) {
+    return;
+  }
+
+  // Customer quote views contain time-sensitive state and must never be
+  // cached or replaced with the authenticated app shell.
+  if (requestUrl.pathname === '/quote' || requestUrl.pathname.startsWith('/quote/')) {
+    event.respondWith(fetch(req));
     return;
   }
 

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'">
+  <title>Quote · Tallyo</title>
+  <link rel="stylesheet" href="./quote.css">
+  <script src="../config.js"></script>
+  <script defer src="./quote.js"></script>
+</head>
+<body>
+  <header class="brand-bar">
+    <a class="brand" href="https://tallyo.co.uk" aria-label="Tallyo website">
+      <img src="../tallyo-wordmark-white.png" alt="Tallyo">
+    </a>
+    <span>Secure quote</span>
+  </header>
+  <main id="quote-app" class="page" aria-busy="true">
+    <section class="state-card" aria-labelledby="state-title">
+      <span class="spinner" aria-hidden="true"></span>
+      <h1 id="state-title">Opening your quote…</h1>
+      <p>Please wait a moment.</p>
+    </section>
+  </main>
+  <p id="quote-live" class="sr-only" aria-live="polite"></p>
+  <footer><span>Tallyo provides the secure quote page for the business shown above.</span><a href="https://tallyo.co.uk/privacy/">Privacy Notice</a></footer>
+</body>
+</html>
