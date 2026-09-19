@@ -2,15 +2,17 @@
 
 This checklist tracks whether the current app is ready for real customer use. It is not a public-launch checklist for the future SaaS website.
 
-## Authenticated-app redesign — released, preview follow-up approved, 2026-09-19
+## Authenticated-app redesign — released, list-card follow-up approved, 2026-09-19
 
 PR #162 merged as `00191f703d430c7a1052848fa7c1e3c5a2e50fce` and published build `2026.09.19.1`. Cloudflare deployment `c7df1127-6a13-4ee7-a9e3-39b6e318b66c`, GitHub Pages, the public shell, 16-asset build report, service-worker cache `tallyo-shell-2026-09-19-1` and an isolated signed-out installed-PWA cache lifecycle all passed.
 
 PR #163 merged as `c918bfb` and published build `2026.09.19.2` at Cloudflare deployment `db056e05-2e12-46ec-b076-45215c707831`. On narrow screens the invoice editor flows from Notes to Summary, save guidance/action, Payments and Activity History.
 
-The Owner approved PR #164 and build `2026.09.19.3` for one focused correction: the full printable invoice preview fits phone widths without horizontal scrolling, the preview page retains visible rounded edges, and the visible line-item header has a correct right-hand curve at phone and desktop widths. The approved release is limited to marking PR #164 ready, merging it into `main`, allowing the existing publication workflows to build it, and running bounded public shell, build-report, service-worker, preview-geometry and installed-PWA checks. If validation fails, restore deployment `db056e05`, confirm build `2026.09.19.2`, and leave backend functions/configuration untouched.
+PR #164 merged as `06d718d` and published build `2026.09.19.3` at Cloudflare deployment `9690dc1c-2ab5-42ae-a88f-bbb79cab46a7`. The full printable invoice preview fits phone widths without horizontal scrolling, and the preview page and line-item heading retain complete rounded edges.
 
-PR #164 commit `94149e8` passed the focused editor source and Chromium suites, preview-isolation/rollback and accessibility/safety harnesses. The actual local in-app preview was visually inspected after reload at phone and wider widths; the white page and blue line-item header retain both rounded edges. Hosted Security checks and both Pages preview checks passed before the Owner approved production release. No real account, email, payment, provider or private data was used.
+The Owner approved PR #165 and build `2026.09.19.4` for one focused presentation correction: customer and Products & services records use individual rounded, outlined cards with matching expanded and compact colours. The approved release is limited to marking PR #165 ready, merging it into `main`, allowing the existing publication workflows to build it, and running bounded public shell, build-report, service-worker and installed-PWA checks. If validation fails, restore deployment `9690dc1c`, confirm build `2026.09.19.3`, and leave backend functions/configuration untouched.
+
+PR #165 commit `4adadde` passed the focused source, fictional preview-isolation, accessibility/safety and Chromium suites. The Owner visually reviewed multiple expanded and compact iterations before approval; the final compact cards use the exact expanded white/light-slate colours and complete contour. Hosted Security checks and both Pages preview checks passed before production approval. No real account, email, payment, provider or private data was used.
 
 ## Recovery link correction — deployed and verified, 2026-09-11
 
@@ -43,9 +45,9 @@ Statuses: Planned, In Progress, Implemented, Verified, Blocked, Deferred, Not Ap
 
 ## Current Verdict
 
-**Status:** Verified for the approved initial UK-business public release; redesign build `2026.09.19.2` is public and focused preview follow-up build `2026.09.19.3` is Owner-approved for release.
+**Status:** Verified for the approved initial UK-business public release; redesign build `2026.09.19.3` is public and focused list-card follow-up build `2026.09.19.4` is Owner-approved for release.
 
-Tallyo's current invoicing-app scope is feature-complete and regression-verified. Build `2026.09.19.2` is public at `https://app.tallyo.co.uk`; Cloudflare deployment `db056e05-2e12-46ec-b076-45215c707831` is the rollback artifact for the approved preview follow-up. The production website, legal pages, subscription and connected-payment interfaces, Owner Console and bounded AI Helper are unchanged by this frontend-only correction.
+Tallyo's current invoicing-app scope is feature-complete and regression-verified. Build `2026.09.19.3` is public at `https://app.tallyo.co.uk`; Cloudflare deployment `9690dc1c-2ab5-42ae-a88f-bbb79cab46a7` is the rollback artifact for the approved list-card follow-up. The production website, legal pages, subscription and connected-payment interfaces, Owner Console and bounded AI Helper are unchanged by this frontend-only correction.
 
 ## Release Gates
 
