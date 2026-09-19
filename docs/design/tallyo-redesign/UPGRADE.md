@@ -1,9 +1,9 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Steps 1–5 approved and merged only into the non-production integration branch. [PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160) merged as `937184956e7ad8024f19141443df03aa613fb4a2`. Step 6 acceptance checks passed on that feature-frozen candidate; evidence below is ready for Owner acceptance. STOP before Step 7, main merge or deployment.
+Status: Steps 1–5 approved and merged only into the non-production integration branch. [PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160) merged as `937184956e7ad8024f19141443df03aa613fb4a2`. Owner review of Step 6 found a contextual Back-navigation defect; the correction is committed as `c0d8004` in [draft PR #161](https://github.com/EdsonLRO/InvoicePro/pull/161) and locally verified. STOP before Step 6 acceptance, Step 7, main merge or deployment.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
-Risk: Low evidence-only acceptance closeout; the approved candidate contains Medium frontend presentation/read-only summaries. No new runtime, backend, Auth or provider change.
+Risk: Medium client-side route/history presentation; no backend, Auth, provider, financial or persistence change.
 Branch: `codex/tallyo-redesign-acceptance`, targeting `codex/tallyo-redesign`, from Step 5 merge `9371849`.
 Authority: the Owner approved the Step 5 customer scrollbar refinement, then approved proceeding to Step 6. Both latest Step 5 hosted checks passed (`34698931859`, `34698928579`); no review objections were present. Candidate acceptance and production release remain separate approvals.
 
@@ -272,9 +272,11 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 ### Step 6 — feature-frozen acceptance
 
-**Candidate:** `937184956e7ad8024f19141443df03aa613fb4a2`, the approved Step 5 integration. The local preview artifact revision is `82ac8590b26aa6cf5f101a196709b6c9733e0d2d9240acae6af109df75281885`. Step 6 changes only this checklist and the active-task pointer, not the application or tests. No further features are bundled into acceptance.
+**Candidate:** Step 5 integration `937184956e7ad8024f19141443df03aa613fb4a2` plus the bounded contextual navigation correction `c0d8004348550a1505ee05beb3362bda3a9f0b70`. The corrected local preview artifact revision is `5390e9f42c75a9aa543f5d8e9f01e20bf3fd2286566ff1de3493fa7eba845f88`. No further feature is bundled into acceptance.
 
-**Result on 12 September 2026:** no blocking regression found in the exercised scope. All 36 existing Node CI harnesses, all five isolated Chromium browser suites and all four website test groups passed. The restricted shell initially prevented two harnesses from spawning local build subprocesses; those checks passed unchanged when child processes were permitted. No failing assertion was removed or weakened.
+**Result updated 19 September 2026:** no remaining blocking regression found in the exercised scope. All 36 existing Node CI harnesses, all five isolated Chromium browser suites and all four website test groups pass. The corrected tests exercise native browser Back and Forward across customer detail → document editor, customer detail → recurring schedule and editor → Preview, plus the matching in-app Back/Cancel controls. No failing assertion was removed or weakened.
+
+**Navigation review refinement:** each app history entry now records its route and the minimum relevant record identifier. Returning from a linked document or schedule restores the same customer detail; Forward restores the same schedule; Preview has its own history entry so Back returns to the same unsaved editor. Customer, product/service and recurring Cancel actions use the same bounded app history with a safe section fallback. Only the reviewed navigation block and popstate listeners changed. A normalised hash keeps every other existing method/startup byte frozen to the Step 4 baseline; the printable template hash is unchanged.
 
 | Coverage | Evidence | Boundary |
 |---|---|---|
@@ -284,7 +286,7 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 | Customer and automation context | ID-only associations, immutable saved snapshots, mixed currencies, refunds, missing/empty records, linked routes and in-memory schedule edit/pause/resume | No real scheduler run, account mutation or customer communication |
 | Performance | Existing scale harness passed: 2,000 documents, 1,000 customers, 1,000 items and bounded calculations/filtering; measured calculation/filter section 2.5ms against existing 1,000ms guard | Synthetic local measurement, not network latency, Core Web Vitals or a production SLA |
 | PWA and rollback | Existing PWA update harness and actual isolated artifact A→B→A restoration passed | Preview intentionally blocks service workers; installed-PWA update and production rollback remain release checks |
-| Preservation/security regressions | Unchanged full methods/startup and printable-canvas hashes; existing Auth/MFA/recovery/entitlement/tenant/payment/consent regression harnesses; zero external requests and uncaught errors in browser suites | Existing regression coverage, not a fresh penetration test or live Auth/RLS certification |
+| Preservation/security regressions | All non-navigation methods/startup and the printable canvas remain hash-frozen; the navigation block has focused static/browser checks; existing Auth/MFA/recovery/entitlement/tenant/payment/consent regression harnesses pass; zero external requests and uncaught errors in browser suites | Existing regression coverage, not a fresh penetration test or live Auth/RLS certification |
 | Build and hosted checks | Synthetic app-build permutations and 31 website routes plus 404 passed. [Integration CI](https://github.com/EdsonLRO/InvoicePro/actions/runs/34699123941) passed, including Owner runtime tests and frozen checks for all 19 functions | Build/type-check only; no function deployment or production activation |
 
 **Visual review:** refreshed desktop and mobile customer screenshots were inspected, including the approved space between amounts/arrows and scrollbars. The five suites regenerated the existing ignored `tmp/redesign-evidence/` screenshots. The 30 frozen reference assets remain unchanged. No new image assets or runtime dependencies were needed.

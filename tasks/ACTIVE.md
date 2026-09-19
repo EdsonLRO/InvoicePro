@@ -2,10 +2,10 @@
 
 ## UX-REDESIGN-001 — Controlled redesign, Step 6
 
-Status: Owner approved the Step 5 scrollbar refinement and Step 6 acceptance. PR #160 merged only into `codex/tallyo-redesign` as `937184956e7ad8024f19141443df03aa613fb4a2`. The feature-frozen candidate passes all 36 Node harnesses, five isolated browser suites and website tests locally; hosted integration verification also passed. Step 6 evidence is ready for Owner acceptance. Stop before Step 7, main merge or deployment.
-Owner: Codex, sequential QA. Risk: Low evidence-only closeout of the approved Medium presentation work; no runtime edits during Step 6.
+Status: Owner review found that browser Back lost customer/schedule/editor/Preview context. The bounded navigation correction is committed as `c0d8004` in draft PR #161. All 36 Node harnesses, five isolated browser suites and website tests pass locally; hosted checks are pending on the new head. Stop before Step 6 acceptance, Step 7, main merge or deployment.
+Owner: Codex, sequential implementation/QA. Risk: Medium client-side navigation state only; all non-navigation handlers and the printable template remain hash-frozen.
 Branch: `codex/tallyo-redesign-acceptance`, targeting `codex/tallyo-redesign`, from Step 5 merge `9371849`.
-Scope/lock: `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer only. Existing regression/browser suites are run unchanged; no dependency, runtime, provider, build-marker or data-model changes.
+Scope/lock: browser route/history presentation in `index.html`, its focused redesign tests, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer. No dependency, backend, provider, build-marker, financial, email, Auth or data-model change.
 Single working checklist: [Controlled upgrade](../docs/design/tallyo-redesign/UPGRADE.md).
 Authority: Step 5 non-production integration and Step 6 acceptance only. No main merge, public deployment, migration, secret change, real email, account mutation or payment.
 Both Pages projects include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate live Auth/RLS/backend behaviour or installed-PWA update/rollback. Frozen references remain unchanged. Owner candidate acceptance and separate production approval are still required.
