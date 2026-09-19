@@ -49,4 +49,5 @@ assert.match(workflow, /push:\s+branches:\s+- main\s+- codex\/tallyo-redesign\s+
 assert.ok(workflow.includes('node tests/redesign-preview-harness.mjs'));
 assert.ok(workflow.includes('node tests/redesign-overview-harness.cjs'));
 assert.ok(workflow.includes('node tests/redesign-documents-harness.cjs'));
+assert.ok(workflow.includes('deno test tests/invoice-status-rules-runtime-test.ts'));
 console.log('Security workflow harness passed.');

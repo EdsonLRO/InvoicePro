@@ -1,6 +1,6 @@
 # Tallyo document status rules — review specification
 
-Status: approved product rules; browser/UI candidate prepared for review. No database, Edge Function, provider or production change.
+Status: approved product rules; browser/UI and signed-webhook/reminder source candidates prepared and locally validated. No database, provider or production change; no Edge Function has been deployed.
 
 ## Purpose
 
@@ -104,4 +104,18 @@ The first controlled implementation slice:
 - rejects browser-side payment recording for a non-invoice;
 - leaves the database constraint, signed Stripe webhooks, reminder function and production unchanged.
 
-The loopback-only fictional preview is `http://127.0.0.1:4173/#create`, artifact revision `428e4b805088365b45ea013cbe1ba9a9088c1e6c88844d28e4ec16e760863e14`. Source contracts, the 14-scenario specification, all retained payment/refund/dispute checks and the isolated editor/Documents/Overview Chromium suites pass. Stop for Owner review before preparing the separate backend-alignment slice.
+The loopback-only fictional preview is `http://127.0.0.1:4173/#create`, artifact revision `428e4b805088365b45ea013cbe1ba9a9088c1e6c88844d28e4ec16e760863e14`. Source contracts, the 14-scenario specification, all retained payment/refund/dispute checks and the isolated editor/Invoices/Overview Chromium suites pass. The Owner approved this browser/UI candidate.
+
+## Signed-webhook and reminder source candidate
+
+The separately approved high-risk source slice:
+
+- centralises the stored lifecycle rule used by both signed Stripe webhook paths;
+- preserves Cancelled, otherwise stores Sent after a confirmed provider payment/refund mutation, while the application derives Paid, Partially Paid and Overdue from the balance and due date;
+- records the one-time “fully paid” activity transition from pre/post payment totals rather than relying on a stored Paid value;
+- keeps atomic database RPCs, optimistic retries, event idempotency, signature verification and all provider gates unchanged;
+- keeps overdue reminders invoice-only, excludes Draft, Cancelled and legacy stored Paid rows, and separately requires a positive outstanding balance and elapsed due date;
+- retains the existing database status constraint so historical Paid rows remain compatible;
+- adds executable runtime scenarios for Draft/Sent/legacy Paid/Cancelled payment mutations, zero/partial/full/overpayment and invoice/quote/credit reminder eligibility.
+
+All focused status, Stripe payment-integrity, Connect payment and recurring/reminder harnesses pass. The complete non-browser harness set passes; the Cloudflare readiness harness passes when its local build subprocesses are permitted, and all changed Edge Functions pass frozen-lock Deno type-checking. No function was invoked or deployed, no migration was added, and no provider object, email, payment or refund was created. Stop again before push, PR merge or production release.

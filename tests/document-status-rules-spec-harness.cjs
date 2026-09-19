@@ -8,7 +8,9 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const app = read('index.html');
 const schema = read('schema.sql');
 const stripeWebhook = read('supabase/functions/stripe-webhook/index.ts');
+const invoiceStatus = read('supabase/functions/_shared/invoice-status.ts');
 const connectShared = read('supabase/functions/_shared/stripe-connect.ts');
+const connectWebhook = read('supabase/functions/stripe-connect-webhook/index.ts');
 const documentEmail = read('supabase/functions/send-document-email/index.ts');
 const overdueReminders = read('supabase/functions/send-overdue-reminders/index.ts');
 const editor = app.slice(app.indexOf('<div class="editor-layout"'), app.indexOf('<div class="editor-preview-surface"'));
@@ -24,10 +26,20 @@ assert.match(app, /Payments can only be recorded against invoices\./, 'browser r
 assert.match(app, /stored === 'Sent' && !this\.hasPaymentHistory\(inv\)/, 'only unpaid issued documents expose Cancel');
 assert.doesNotMatch(app, /Reverted to draft/, 'issued documents are not silently reverted to Draft');
 assert.match(schema, /check \(status in \('Draft','Sent','Paid','Cancelled'\)\)/, 'current schema retains legacy Paid storage');
-assert.match(stripeWebhook, /function statusAfterPaymentChange\(/, 'owner Stripe webhook has a payment status helper');
-assert.match(connectShared, /export function statusAfterPaymentChange\(/, 'Connect webhook has a second payment status helper');
+assert.match(invoiceStatus, /export function storedInvoiceStatusAfterPaymentChange\(/, 'signed payment mutations share one stored lifecycle rule');
+assert.match(invoiceStatus, /invoice\?\.status === "Cancelled" \? "Cancelled" : "Sent"/, 'payment mutations preserve Cancelled and otherwise store Sent');
+assert.match(invoiceStatus, /invoiceTotal > 0 && amountPaid >= invoiceTotal - 0\.001/, 'fully paid detection requires a positive total and the complete balance');
+assert.doesNotMatch(stripeWebhook, /function statusAfterPaymentChange\(/, 'owner webhook does not duplicate payment lifecycle logic');
+assert.doesNotMatch(connectShared, /export function statusAfterPaymentChange\(/, 'Connect shared code does not duplicate payment lifecycle logic');
+for (const webhook of [stripeWebhook, connectWebhook]) {
+  assert.match(webhook, /storedInvoiceStatusAfterPaymentChange/, 'signed webhook uses the shared stored lifecycle rule');
+  assert.match(webhook, /becameFullyPaid/, 'signed webhook records the fully-paid transition independently of stored lifecycle');
+  assert.doesNotMatch(webhook, /nextStatus === "Paid"/, 'signed webhook does not rely on a stored Paid lifecycle');
+}
 assert.match(documentEmail, /inv\.status === "Draft" \? "Sent" : inv\.status/, 'emailing a draft issues it as Sent');
-assert.match(overdueReminders, /inv\.status === "Draft" \|\| inv\.status === "Paid" \|\| inv\.status === "Cancelled"/, 'reminders skip stored Draft, Paid and Cancelled rows');
+assert.match(overdueReminders, /storedInvoiceAllowsOverdueReminder\(inv\)/, 'reminders share the defensive stored-lifecycle guard');
+assert.match(overdueReminders, /\.eq\("doc_type", "invoice"\)/, 'reminder queries only select invoices');
+assert.match(invoiceStatus, /\["Draft", "Paid", "Cancelled"\]/, 'reminders skip stored Draft, legacy Paid and Cancelled rows');
 
 const money = value => Math.round(((Number(value) || 0) + Number.EPSILON) * 100) / 100;
 

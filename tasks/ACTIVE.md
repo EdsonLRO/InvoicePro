@@ -2,11 +2,11 @@
 
 ## UX-STATUS-001 — Document status rules
 
-Status: product rules approved; browser/UI candidate and executable scenario matrix prepared for Owner review. SQL, signed Stripe webhooks, the reminder function, providers and production are unchanged.
-Owner: Codex, sequential product-rule inventory and QA. Risk: High for the later implementation because payment/refund-derived state spans browser and signed Stripe webhook paths; this specification phase is read-only with respect to those paths.
+Status: product rules and browser/UI candidate approved; signed Stripe webhook and overdue-reminder source alignment is prepared and locally validated. SQL, providers and production are unchanged; no Edge Function has been deployed.
+Owner: Codex, sequential product-rule implementation and QA. Risk: High because payment/refund-derived state spans browser and signed Stripe webhook paths.
 Branch: `codex/document-status-rules`, from production merge `e900694`.
-Scope/lock: browser editor/list status presentation and guards in `index.html`, the focused status specification/harness, existing editor contracts/browser coverage, CI registration, the controlled-upgrade pointer and this active-task pointer. No SQL, Edge Function, provider, payment/refund execution, email, Auth, subscription, entitlement or production change.
-Review gate: inspect the fictional preview at `http://127.0.0.1:4173/#create`. After approval, prepare the signed-webhook/reminder alignment as a separate high-risk source slice; stop again before merge, deployment or production release.
+Scope/lock: browser editor/list status presentation and guards in `index.html`; one shared server lifecycle helper; the existing Owner and Connect signed webhook callers; the overdue-reminder lifecycle guard; focused status/runtime/payment/reminder tests; CI registration; the controlled-upgrade pointer and this active-task pointer. No SQL, provider action, payment/refund execution, email, Auth, subscription, entitlement or production change.
+Review gate: the fictional preview at `http://127.0.0.1:4173/#create` is approved. Review the focused signed-webhook/reminder source diff and validation evidence; stop again before push, PR merge, Edge Function deployment or production release.
 
 ## UX-REDESIGN-001 — Controlled redesign release and list-card follow-up
 
