@@ -313,6 +313,8 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 **Release boundary:** Step 7 may prepare, test, commit, push and open a focused PR to `main`. It must stop before marking the PR ready, merging it or allowing a production deployment. No migration, Edge Function, email, payment, refund, secret, configuration or legal/public-claim change is included.
 
+**Prepared result:** candidate commit `4ba6d852e83fa2a7cb6894fa24a8d4cae6a05eb3` is in [draft PR #162](https://github.com/EdsonLRO/InvoicePro/pull/162), targeting `main`. All 36 application harnesses, all five isolated Chromium suites and the website suite pass locally. Both hosted Security checks passed ([run 35446530566](https://github.com/EdsonLRO/InvoicePro/actions/runs/35446530566), [run 35446559211](https://github.com/EdsonLRO/InvoicePro/actions/runs/35446559211)). The refreshed fictional preview at `http://127.0.0.1:4173/#dashboard` has artifact revision `7b997f681d7e29ac04153f5ab81585b3df04027de25d58637c4e179ddcf7d58a`. The PR remains draft; no deployment occurred.
+
 ### Later, separately scoped releases
 
 1. Status rules: invoice/quote/credit semantics, manual payment retention, historical Paid compatibility, refunds/partial payments and overdue rules. Decide before migrating anything.

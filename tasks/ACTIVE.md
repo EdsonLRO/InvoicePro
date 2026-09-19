@@ -2,7 +2,7 @@
 
 ## UX-REDESIGN-001 — Controlled redesign, Step 7 preparation
 
-Status: Step 7 release preparation is active. Remote `main` remains the accepted candidate's merge base; candidate build `2026.09.19.1` and exact rollback deployment `99c8fa2c-8dab-4460-9db4-a013c5fe9b20` are being validated. Stop before marking the release PR ready, merging `main` or deploying.
+Status: Step 7 release preparation is complete in draft PR #162. Candidate build `2026.09.19.1`, commit `4ba6d85`, exact rollback deployment `99c8fa2c-8dab-4460-9db4-a013c5fe9b20`, all local suites and both hosted checks are verified. Stop before marking the PR ready, merging `main` or deploying; exact Owner production approval is required.
 Owner: Codex, sequential implementation/QA. Risk: Medium frontend release preparation; all non-navigation handlers and the printable template remain hash-frozen in the accepted candidate.
 Branch: `codex/tallyo-redesign-release`, from accepted integration merge `8dcde1e`, for a focused future PR to `main`.
 Scope/lock: build/cache markers, accepted redesign candidate, release/rollback evidence and focused tests. No dependency, backend, provider, financial, email, Auth or data-model change.

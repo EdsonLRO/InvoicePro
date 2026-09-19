@@ -10,6 +10,8 @@ Current production readback returns HTTP 200 and build `2026.09.11.1` from both 
 
 Cutover remains Owner-gated. The proposed release is limited to merging the reviewed frontend candidate into `main`, allowing the existing Cloudflare/GitHub publication workflows to build it, and running bounded public shell/build-report/service-worker plus Owner-performed installed-PWA checks. If validation fails, restore Cloudflare deployment `99c8fa2c`, confirm build `2026.09.11.1`, and leave the September recovery functions/configuration untouched.
 
+Candidate commit `4ba6d852e83fa2a7cb6894fa24a8d4cae6a05eb3` is available in [draft PR #162](https://github.com/EdsonLRO/InvoicePro/pull/162). All 36 application harnesses, five isolated Chromium suites and the website test groups pass locally; both hosted Security checks passed ([run 35446530566](https://github.com/EdsonLRO/InvoicePro/actions/runs/35446530566), [run 35446559211](https://github.com/EdsonLRO/InvoicePro/actions/runs/35446559211)). The local fictional preview artifact revision is `7b997f681d7e29ac04153f5ab81585b3df04027de25d58637c4e179ddcf7d58a`. The PR remains draft and unapproved for production.
+
 ## Recovery link correction — deployed and verified, 2026-09-11
 
 The Owner reported a GitHub 404 from the confirmation email after PR #152. Its release smoke test did not exercise actual emailed destinations. Local tests reproduced the old-origin failure in the confirmation link and Owner password-reset redirect before the fix.
