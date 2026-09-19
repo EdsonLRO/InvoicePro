@@ -14,6 +14,14 @@ The Owner approved PR #165 and build `2026.09.19.4` for one focused presentation
 
 PR #165 commit `4adadde` passed the focused source, fictional preview-isolation, accessibility/safety and Chromium suites. The Owner visually reviewed multiple expanded and compact iterations before approval; the final compact cards use the exact expanded white/light-slate colours and complete contour. Hosted Security checks and both Pages preview checks passed before production approval. No real account, email, payment, provider or private data was used.
 
+## Document status rules — release candidate, 2026-09-19
+
+Draft PR #166 prepares app build `2026.09.19.5` and service-worker cache `tallyo-shell-2026-09-19-5`. It removes manual Paid selection, keeps Draft/Sent/Cancelled as user-controlled lifecycle states, derives invoice Paid/Partially Paid/Overdue from balance and due date, and preserves legacy stored Paid compatibility. The Owner and connected-account signed webhooks share the same stored lifecycle rule; the reminder job remains invoice-only and excludes Draft, Cancelled and legacy stored Paid rows.
+
+The only backend release candidates are `stripe-webhook`, `stripe-connect-webhook` and `send-overdue-reminders`. Current production versions are 43, 26 and 42, all intentionally `verify_jwt=false`; provider-signature and automation-secret validation remain unchanged. Rollback sources are merge `e900694`. The current app rollback is deployment `019a9e6e-19d4-4599-9628-baaa048cd2c9`, confirmed as build `2026.09.19.4`.
+
+No migration, database change, Auth, secret, provider configuration, subscription, entitlement, website, email send, payment or refund is included. Exact Owner approval is required before marking PR #166 ready, merging it, publishing the app or deploying the three functions.
+
 ## Recovery link correction — deployed and verified, 2026-09-11
 
 The Owner reported a GitHub 404 from the confirmation email after PR #152. Its release smoke test did not exercise actual emailed destinations. Local tests reproduced the old-origin failure in the confirmation link and Owner password-reset redirect before the fix.

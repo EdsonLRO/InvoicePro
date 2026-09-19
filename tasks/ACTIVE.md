@@ -7,6 +7,7 @@ Owner: Codex, sequential product-rule implementation and QA. Risk: High because 
 Branch: `codex/document-status-rules`, from production merge `e900694`.
 Scope/lock: browser editor/list status presentation and guards in `index.html`; one shared server lifecycle helper; the existing Owner and Connect signed webhook callers; the overdue-reminder lifecycle guard; focused status/runtime/payment/reminder tests; CI registration; the controlled-upgrade pointer and this active-task pointer. No SQL, provider action, payment/refund execution, email, Auth, subscription, entitlement or production change.
 Review gate: the fictional preview at `http://127.0.0.1:4173/#create` is approved. Review the focused signed-webhook/reminder source diff and validation evidence; stop again before push, PR merge, Edge Function deployment or production release.
+Release candidate: draft PR #166, app build `2026.09.19.5`, and only `stripe-webhook`, `stripe-connect-webhook` and `send-overdue-reminders`. Current rollback is Cloudflare deployment `019a9e6e-19d4-4599-9628-baaa048cd2c9` / build `2026.09.19.4` plus merge `e900694` function sources corresponding to deployed versions 43, 26 and 42. Preserve all three existing `verify_jwt=false` settings. Exact Owner approval is still required before marking ready, merging or deploying.
 
 ## UX-REDESIGN-001 — Controlled redesign release and list-card follow-up
 

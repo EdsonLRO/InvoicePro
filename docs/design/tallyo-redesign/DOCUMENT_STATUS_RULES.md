@@ -119,3 +119,9 @@ The separately approved high-risk source slice:
 - adds executable runtime scenarios for Draft/Sent/legacy Paid/Cancelled payment mutations, zero/partial/full/overpayment and invoice/quote/credit reminder eligibility.
 
 All focused status, Stripe payment-integrity, Connect payment and recurring/reminder harnesses pass. The complete non-browser harness set passes; the Cloudflare readiness harness passes when its local build subprocesses are permitted, and all changed Edge Functions pass frozen-lock Deno type-checking. No function was invoked or deployed, no migration was added, and no provider object, email, payment or refund was created. Stop again before push, PR merge or production release.
+
+## Release candidate boundary
+
+Draft PR #166 prepares app build `2026.09.19.5` with service-worker cache `tallyo-shell-2026-09-19-5`. Production remains build `2026.09.19.4` at Cloudflare deployment `019a9e6e-19d4-4599-9628-baaa048cd2c9` until separate exact approval.
+
+Only `stripe-webhook`, `stripe-connect-webhook` and `send-overdue-reminders` are backend release candidates. Their current rollback sources are merge `e900694`, deployed as versions 43, 26 and 42 respectively, all with `verify_jwt=false`. Those JWT settings are intentional and must remain unchanged: the two webhooks verify provider signatures and the scheduled reminder function validates its automation secret. No migration, configuration, secret, Auth, subscription, entitlement, website, email send, payment or refund belongs to this release.
