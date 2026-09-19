@@ -1,5 +1,15 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-REDESIGN-001 — Controlled redesign, Step 7 preparation
+
+Status: Step 7 release preparation is complete in draft PR #162. Candidate build `2026.09.19.1`, commit `4ba6d85`, exact rollback deployment `99c8fa2c-8dab-4460-9db4-a013c5fe9b20`, all local suites and both hosted checks are verified. Stop before marking the PR ready, merging `main` or deploying; exact Owner production approval is required.
+Owner: Codex, sequential implementation/QA. Risk: Medium frontend release preparation; all non-navigation handlers and the printable template remain hash-frozen in the accepted candidate.
+Branch: `codex/tallyo-redesign-release`, from accepted integration merge `8dcde1e`, for a focused future PR to `main`.
+Scope/lock: build/cache markers, accepted redesign candidate, release/rollback evidence and focused tests. No dependency, backend, provider, financial, email, Auth or data-model change.
+Single working checklist: [Controlled upgrade](../docs/design/tallyo-redesign/UPGRADE.md).
+Authority: Steps 1–6 non-production integration are complete and the Owner authorised Step 7 preparation. Marking the release PR ready, a `main` merge, public deployment, migration, secret change, real email, account mutation or payment remain unauthorised.
+Both Pages projects include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate live Auth/RLS/backend behaviour or installed-PWA update/rollback. Frozen references remain unchanged. Separate Step 7 and production approvals are still required.
+
 ## AUTH-004 — Recovery email canonical destination
 
 Status: Verified under exact Owner approval; PR #154 merged as `bd8b754c75517a8c64655221fbf00a7423c2c6b8` and only the two approved functions were deployed. Active versions are `mfa-recovery` v35 and `owner-account-admin` v3; live source equals the merge, JWT gates return 401 without authorization, and main checks passed. No live email or account mutation was tested.
