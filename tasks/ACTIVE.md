@@ -1,13 +1,44 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-QUOTE-001 — Customer quote acceptance specification and isolated preview
+
+Task ID: UX-QUOTE-001
+Title: Specify and prototype secure customer quote acceptance with automatic linked-invoice creation
+Priority: High
+Status: Owner Approved — specification and isolated preview complete; runtime remains unimplemented
+Phase: Product/security specification and isolated fictional-data preview
+Owner role: Product
+Assigned specialists: Product, Frontend, Backend/Supabase, Security, Legal/Privacy and QA performed sequentially by Codex
+Model/work mode: Sol for the public-token, RLS, privacy and atomicity boundary; Terra for the isolated preview and routine tests
+Risk level: High for the later runtime workflow; the current slice is repository-only design/prototype work
+Affected files: `docs/design/tallyo-redesign/QUOTE_ACCEPTANCE_RULES.md`, `dev/quote-acceptance/`, `tests/quote-acceptance-preview-harness.cjs`, `tasks/ACTIVE.md`; frozen reference images and production application/backend files remain read-only
+Dependencies: released document-status rules in PR #166; existing invoice snapshot/numbering/activity contracts; approved quote-acceptance design references
+Security boundary: a future signed-out customer may access only one scoped quote through a high-entropy server-validated token. No direct `anon` table grants or policies; privileged writes must be atomic, tenant-attributed, idempotent and service-side. Tokens must not be stored in plaintext.
+Legal materiality: Triggered. The flow processes customer-confirmed name, quote contents, acceptance timestamp and limited security evidence for a UK business user's customer contact. Treat the Tallyo business user as controller and Tallyo as processor for the quote/contact workflow, subject to the existing DPA and Privacy Notice. Do not describe the name as verified identity or the action as a qualified electronic signature.
+Jurisdiction: initial UK-business scope only
+Affected user/data-subject types: Tallyo business user; quote recipient/customer contact, including sole traders where identifiable
+Mandatory controls: data minimisation; clear acceptance wording; server timestamp; scoped expiry/revocation; replay-safe exactly-once conversion; preserved quote snapshot; separate linked invoice; append-only trusted acceptance/conversion events; no automatic email, payment or marketing; no Analytics personal data
+Required evidence: current-source mapping; state/abuse matrix; isolated public and internal preview; keyboard/mobile checks; zero external requests; focused privacy/legal disposition; migration/function/test plan
+Legal disposition: Approved with conditions for specification and fictional-data preview only. Runtime implementation remains gated on the documented minimisation, transparency, retention, secure-link and rights-handling controls. No public legal text changes are proposed in this slice.
+External review required: No for the isolated specification/preview. Review may be appropriate before making claims that acceptance forms a binding contract in every scenario or jurisdiction; the product must avoid that claim.
+Acceptance criteria: the specification resolves product states and invariants; the preview shows pending, accepted and internal linked-document states; duplicate/retry/expired/revoked/declined paths are defined; no production source, schema, function, provider or configuration changes occur
+Required tests: local-only server allowlist; no external requests; responsive/keyboard interaction; fictional data only; state transitions do not create real records; spec consistency assertions
+Required documentation: this task record and `QUOTE_ACCEPTANCE_RULES.md`; update broader authorities only when a runtime or release state changes
+Approval boundary: Owner authorised the specification and isolated preview. Stop before any production UI integration, migration creation/application, Edge Function implementation/deployment, email, public link activation, merge to `main` or production release.
+Lock state: acquired 2026-09-19 for the files listed above; no production application, migration or function path is locked or edited
+Branch: `codex/quote-acceptance-spec`, from released main merge `6fcf675`
+Commit: Pending branch closeout
+Evidence: Current app `convertToInvoice` changes the quote row in place, reuses its ID and records a browser timestamp. The current schema has no quote-link or public-access-token fields. Supabase guidance checked 2026-09-19 requires explicit grants plus RLS for exposed tables and distinguishes public functions from authenticated user functions. ICO guidance checked 2026-09-19 supports purpose limitation, data minimisation and privacy by design. The focused contract harness and headless Chrome preview suite pass for pending, acceptance, linked draft invoice, deliberate decline confirmation, expired/revoked states, owner activity, keyboard submit, 390px/desktop overflow and zero external requests. Full-resolution customer and owner screenshots were reviewed and approved by the Owner on 2026-09-19.
+Blocked reason: None for this slice
+Next action: close the design/specification branch and stop. A separate controlled step may prepare the smallest runtime implementation slice; no migration, Edge Function, production integration, merge or release is authorised by this approval.
+
 ## UX-STATUS-001 — Document status rules
 
-Status: product rules and browser/UI candidate approved; signed Stripe webhook and overdue-reminder source alignment is prepared and locally validated. SQL, providers and production are unchanged; no Edge Function has been deployed.
+Status: Verified and released under exact Owner approval. PR #166 merged as `6fcf675`; app build `2026.09.19.5` and only `stripe-webhook` v44, `stripe-connect-webhook` v27 and `send-overdue-reminders` v43 are active. Public build/service-worker checks, deployed-source comparison and fail-closed unauthorised probes passed. No migration, database change, email, payment or refund occurred.
 Owner: Codex, sequential product-rule implementation and QA. Risk: High because payment/refund-derived state spans browser and signed Stripe webhook paths.
 Branch: `codex/document-status-rules`, from production merge `e900694`.
 Scope/lock: browser editor/list status presentation and guards in `index.html`; one shared server lifecycle helper; the existing Owner and Connect signed webhook callers; the overdue-reminder lifecycle guard; focused status/runtime/payment/reminder tests; CI registration; the controlled-upgrade pointer and this active-task pointer. No SQL, provider action, payment/refund execution, email, Auth, subscription, entitlement or production change.
-Review gate: the fictional preview at `http://127.0.0.1:4173/#create` is approved. Review the focused signed-webhook/reminder source diff and validation evidence; stop again before push, PR merge, Edge Function deployment or production release.
-Release candidate: draft PR #166, app build `2026.09.19.5`, and only `stripe-webhook`, `stripe-connect-webhook` and `send-overdue-reminders`. Current rollback is Cloudflare deployment `019a9e6e-19d4-4599-9628-baaa048cd2c9` / build `2026.09.19.4` plus merge `e900694` function sources corresponding to deployed versions 43, 26 and 42. Preserve all three existing `verify_jwt=false` settings. Exact Owner approval is still required before marking ready, merging or deploying.
+Release evidence: [PR #166](https://github.com/EdsonLRO/InvoicePro/pull/166#issuecomment-5744309486). Retained rollback is Cloudflare deployment `019a9e6e-19d4-4599-9628-baaa048cd2c9` / build `2026.09.19.4` plus merge `e900694` function sources corresponding to previous versions 43, 26 and 42.
 
 ## UX-REDESIGN-001 — Controlled redesign release and list-card follow-up
 
