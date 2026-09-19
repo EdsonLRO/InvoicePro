@@ -715,10 +715,14 @@
         .editor-preview-hidden { position:fixed; left:-12000px; top:0; width:1024px; pointer-events:none; }
         .editor-preview-note { color:#64748b; font-size:13px; margin-bottom:16px; }
         .editor-preview-surface #invoice-canvas { width:800px; min-width:800px; margin:0 auto; }
+        .editor-preview-document { border:1px solid #e2e8f0!important; border-radius:.75rem!important; overflow:hidden; }
+        .editor-preview-document .pdf-line-items thead th:nth-child(6) { border-top-right-radius:.5rem; }
         .editor-layout button:focus-visible,.editor-layout summary:focus-visible,.editor-header button:focus-visible,.editor-header summary:focus-visible { outline:3px solid #818cf8; outline-offset:3px; }
         @media (min-width:1500px) { .editor-item-fields { grid-template-columns:repeat(5,minmax(0,1fr)); } }
         @media (max-width:1240px) { .editor-layout { grid-template-columns:minmax(0,1fr) 290px; gap:16px; } .editor-header { flex-wrap:wrap; } }
         @media (max-width:899px) {
+            .editor-preview-surface:not(.editor-preview-hidden) { overflow-x:hidden; padding-bottom:0; }
+            .editor-preview-surface:not(.editor-preview-hidden) #invoice-canvas { zoom:min(1,calc((100vw - 40px)/800px)); margin:0 auto; }
             .editor-layout { grid-template-columns:1fr; gap:14px; padding-bottom:12px; }
             .editor-form,.editor-side-options { display:contents; }
             .editor-form>.editor-section { grid-column:1; grid-row:auto; order:1; }
@@ -741,6 +745,9 @@
             .editor-field input,.editor-field select,.editor-field textarea { font-size:16px; }
             .editor-existing-controls input,.editor-existing-controls select { font-size:16px; }
             .editor-summary { padding:18px; }
+        }
+        @media (min-width:640px) and (max-width:899px) {
+            .editor-preview-surface:not(.editor-preview-hidden) #invoice-canvas { zoom:min(1,calc((100vw - 56px)/800px)); }
         }
     </style>
 </head>
@@ -1821,7 +1828,7 @@
                 </div>
                 <div class="editor-preview-surface" :class="{ 'editor-preview-hidden': !editorPreview && !isExportingPDF }" :aria-hidden="!editorPreview && !isExportingPDF ? 'true' : null" :inert="!editorPreview && !isExportingPDF ? true : null">
                     <p v-if="editorPreview && !isExportingPDF" class="editor-preview-note">Document preview · Changes are not saved automatically. Use More → Download PDF for a copy.</p>
-                <div id="invoice-canvas" :class="{'pdf-mode': isExportingPDF || editorPreview}" :style="brandStyle" class="bg-white p-4 sm:p-6 lg:p-10 rounded-xl shadow-sm border border-slate-200 relative">
+                <div id="invoice-canvas" :class="{'pdf-mode': isExportingPDF || editorPreview, 'editor-preview-document': editorPreview && !isExportingPDF}" :style="brandStyle" class="bg-white p-4 sm:p-6 lg:p-10 rounded-xl shadow-sm border border-slate-200 relative">
                     <div v-if="company.logo" class="mb-6 flex" :class="{'justify-center': company.logoPosition === 'center', 'justify-end': company.logoPosition === 'right'}">
                         <img :src="company.logo" alt="Logo" class="h-16 object-contain">
                     </div>
@@ -3030,7 +3037,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.09.19.2';
+    const APP_BUILD = '2026.09.19.3';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {

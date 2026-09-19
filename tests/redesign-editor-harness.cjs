@@ -46,4 +46,10 @@ assert.match(app, /\.editor-rail>\.editor-payments\s*\{\s*grid-column:1;\s*grid-
 assert.match(app, /\.editor-rail>\.editor-activity\s*\{\s*grid-column:1;\s*grid-row:3;/);
 assert.match(app, /@media \(max-width:899px\)[\s\S]*?\.editor-form,\.editor-side-options\s*\{\s*display:contents;\s*\}[\s\S]*?\.editor-summary\s*\{[^}]*order:2;\s*\}[\s\S]*?\.editor-save-row\s*\{[^}]*order:3;\s*\}[\s\S]*?\.editor-rail>\.editor-payments\s*\{[^}]*order:4;\s*\}[\s\S]*?\.editor-rail>\.editor-activity\s*\{[^}]*order:5;\s*\}/,
   'mobile editor flows from Notes to Summary, save, Payments and Activity');
+assert.match(app, /@media \(max-width:899px\)[\s\S]*?\.editor-preview-surface:not\(\.editor-preview-hidden\)\s*\{[^}]*overflow-x:hidden;[^}]*\}[\s\S]*?\.editor-preview-surface:not\(\.editor-preview-hidden\) #invoice-canvas\s*\{[^}]*zoom:min\(1,calc\(\(100vw - 40px\)\/800px\)\);[^}]*margin:0 auto;/,
+  'mobile document preview fits the available width without changing the printable template');
+assert.match(app, /'editor-preview-document': editorPreview && !isExportingPDF/);
+assert.match(app, /\.editor-preview-document\s*\{[^}]*border:1px solid #e2e8f0!important;[^}]*border-radius:\.75rem!important;[^}]*overflow:hidden;/);
+assert.match(app, /\.editor-preview-document \.pdf-line-items thead th:nth-child\(6\)\s*\{[^}]*border-top-right-radius:\.5rem;/,
+  'preview-only document and visible final table column keep complete rounded right edges');
 console.log('Step 4 contracts passed: non-navigation handler/startup and printable-template hashes, reviewed history routing, one PDF canvas, complete editor bindings, explicit save/review, accessible automation controls.');

@@ -2,12 +2,12 @@
 
 ## UX-REDESIGN-001 — Controlled redesign release and mobile follow-up
 
-Status: PR #162 merged as `00191f7` and build `2026.09.19.1` is verified in production at Cloudflare deployment `c7df1127-6a13-4ee7-a9e3-39b6e318b66c`. The Owner approved PR #163 for a focused mobile ordering correction and app build `2026.09.19.2`; rollback is the retained `c7df1127` deployment and build `2026.09.19.1`.
+Status: PR #163 merged as `c918bfb` and build `2026.09.19.2` is verified in production at Cloudflare deployment `db056e05-2e12-46ec-b076-45215c707831`. The Owner approved PR #164 for the focused invoice-preview fit and edge correction as app build `2026.09.19.3`; rollback is the retained `db056e05` deployment and build `2026.09.19.2`.
 Owner: Codex, sequential implementation/QA. Risk: Medium frontend release preparation; all non-navigation handlers and the printable template remain hash-frozen in the accepted candidate.
-Branch: `codex/mobile-invoice-summary-order`, from production merge `00191f7`, in focused PR #163 to `main`.
-Scope/lock: mobile editor layout order, build/cache markers, release evidence and focused tests. No dependency, backend, provider, financial, email, Auth or data-model change.
+Branch: `codex/mobile-invoice-preview-fit`, from production merge `c918bfb`, in focused PR #164 to `main`.
+Scope/lock: mobile preview fit, preview-only edge treatment, build/cache markers, release evidence and focused tests. No dependency, printable-template content, backend, provider, financial, email, Auth or data-model change.
 Single working checklist: [Controlled upgrade](../docs/design/tallyo-redesign/UPGRADE.md).
-Authority: the Owner approved marking PR #163 ready, merging it and publishing app build `2026.09.19.2`. Migration, secret, backend, website, real email, account mutation and payment changes remain unauthorised.
+Authority: the Owner approved marking PR #164 ready, merging it and publishing app build `2026.09.19.3`. Migration, secret, backend, website, real email, account mutation and payment changes remain unauthorised.
 Both Pages projects include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate live Auth/RLS/backend behaviour or installed-PWA update/rollback. Frozen references remain unchanged. Separate Step 7 and production approvals are still required.
 
 ## AUTH-004 — Recovery email canonical destination

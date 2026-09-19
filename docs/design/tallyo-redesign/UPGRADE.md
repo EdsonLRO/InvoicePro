@@ -1,6 +1,6 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Steps 1–7 are approved and released through [PR #162](https://github.com/EdsonLRO/InvoicePro/pull/162) as build `2026.09.19.1`. The Owner separately approved [PR #163](https://github.com/EdsonLRO/InvoicePro/pull/163) and build `2026.09.19.2` for the focused mobile invoice-summary ordering correction.
+Status: Steps 1–7 are approved and released through [PR #163](https://github.com/EdsonLRO/InvoicePro/pull/163) as build `2026.09.19.2`. The Owner separately approved [PR #164](https://github.com/EdsonLRO/InvoicePro/pull/164) and build `2026.09.19.3` for the focused invoice-preview fit and edge correction.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
 Risk: Medium client-side route/history presentation; no backend, Auth, provider, financial or persistence change.
@@ -309,7 +309,7 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 **Baseline:** remote `main` remains `7429b2b74474493b81edd7e548bcd35bbe1c9b89` and is the exact merge base of accepted integration `8dcde1ecd7c606d52ea9aafbabc6bfc26b8722d3`; no intervening source change requires conflict resolution. Public readback returns HTTP 200 and build `2026.09.11.1`. Cloudflare lists current production deployment `99c8fa2c-8dab-4460-9db4-a013c5fe9b20` from `7429b2b`; its deployment hostname is retained behind Access. GitHub Pages serves the same build and is not treated as an immutable older artifact.
 
-**Release and rollback:** build `2026.09.19.1` with service-worker cache `tallyo-shell-2026-09-19-1` was published from merge `00191f7`; public shell, build report, service worker and isolated installed-PWA lifecycle checks passed. The focused approved follow-up is build `2026.09.19.2` with cache `tallyo-shell-2026-09-19-2`. Its rollback target is Cloudflare deployment `c7df1127-6a13-4ee7-a9e3-39b6e318b66c`, restoring build `2026.09.19.1` without changing the database, Edge Functions, Auth, provider settings or website.
+**Release and rollback:** build `2026.09.19.2` is public from merge `c918bfb` and Cloudflare deployment `db056e05-2e12-46ec-b076-45215c707831`. The approved preview follow-up is build `2026.09.19.3` with service-worker cache `tallyo-shell-2026-09-19-3`. Its rollback target is deployment `db056e05`, restoring build `2026.09.19.2` without changing the database, Edge Functions, Auth, provider settings or website.
 
 **Release boundary:** Step 7 may prepare, test, commit, push and open a focused PR to `main`. It must stop before marking the PR ready, merging it or allowing a production deployment. No migration, Edge Function, email, payment, refund, secret, configuration or legal/public-claim change is included.
 
