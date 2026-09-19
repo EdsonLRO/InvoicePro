@@ -692,6 +692,8 @@
         .editor-field { display:flex; flex-direction:column; gap:6px; min-width:0; font-size:12px; font-weight:600; color:#475569; }
         .editor-field input,.editor-field select,.editor-field textarea { border:1px solid #cbd5e1; border-radius:7px; padding:10px; width:100%; min-width:0; min-height:44px; background:#fff; color:#1e293b; font-size:14px; font-weight:400; }
         .editor-field input:read-only { background:#f1f5f9; }
+        .editor-status-readout { display:flex; flex-direction:column; align-items:flex-start; gap:7px; min-width:0; color:#475569; font-size:12px; font-weight:600; }
+        .editor-status-readout small { color:#64748b; font-size:12px; line-height:1.45; font-weight:400; }
         .editor-customer { margin-top:14px; padding:12px 14px; border-radius:8px; background:#f8fafc; color:#64748b; font-size:13px; line-height:1.7; overflow-wrap:anywhere; }
         .editor-item { border:1px solid #e2e8f0; background:#fbfcfe; border-radius:9px; margin:14px 0; padding:14px; display:grid; gap:12px; }
         .editor-item-heading { display:flex; align-items:center; justify-content:space-between; }
@@ -1482,7 +1484,7 @@
                 </div>
                 <details class="overview-methods"><summary>How these figures work</summary>
                     <p>Figures use the records currently loaded in Tallyo; they are not a live bank balance. Refresh the app for the latest updates. Dates and month boundaries use UTC. Currencies are never added together.</p>
-                    <p>Outstanding uses invoice totals less recorded payments, excluding Draft and Cancelled. Paid this month uses dated payment records, including negative refund entries, not invoices marked Paid without a payment record. Legacy status behaviour is unchanged.</p>
+                    <p>Outstanding uses invoice totals less recorded payments, excluding Draft and Cancelled. Paid this month uses dated payment records, including negative refund entries, not invoices marked Paid without a payment record. Historical manually Paid invoices remain Paid until a later payment or refund change; quotes and credit notes do not use payment or overdue states.</p>
                     <p>Recurring this week counts active schedules with their next run between Monday and Sunday, including ones still due earlier this week. It is not a count of invoices already generated or every future occurrence. Attention and activity include all currencies.</p>
                 </details>
             </section>
@@ -1491,7 +1493,7 @@
                 <header class="editor-header">
                     <div>
                         <p class="editor-eyebrow">SALES / DOCUMENT EDITOR</p>
-                        <h2>{{ editingExisting ? 'Edit ' + docTypeNoun(draft.docType) + ' #' + draft.number : 'New ' + docTypeNoun(draft.docType) }} <span>{{ draft.status || 'Draft' }}</span></h2>
+                        <h2>{{ editingExisting ? 'Edit ' + docTypeNoun(draft.docType) + ' #' + draft.number : 'New ' + docTypeNoun(draft.docType) }} <span>{{ effectiveStatus(draft) }}</span></h2>
                         <p class="editor-save-note">Changes are saved when you select Save. Sending opens a review first.</p>
                     </div>
                     <div class="editor-actions">
@@ -1539,7 +1541,8 @@
                             <summary><span><strong>{{ docTypeNoun(draft.docType) }} details</strong><small>{{ draft.number }} · {{ draft.date }} → {{ draft.dueDate }} · {{ draft.currency }}</small></span></summary>
                             <div class="editor-section-body editor-fields">
                                 <label class="editor-field">Document type<select aria-label="Document type" v-model="draft.docType" @change="onDocTypeChange"><option value="invoice">Invoice</option><option value="quote">Quote</option><option value="credit">Credit Note</option></select></label>
-                                <label class="editor-field">Document status<select aria-label="Document status" :value="draft.status || 'Draft'" @change="changeStatus($event.target.value)"><option value="Draft">Draft</option><option value="Sent">Sent</option><option value="Paid">Paid</option><option value="Cancelled">Cancelled</option></select></label>
+                                <div class="editor-status-readout"><span>Current status</span><span class="record-badge" :class="statusBadgeClass(effectiveStatus(draft))">{{ effectiveStatus(draft) }}</span><small>{{ statusExplanation(draft) }}</small></div>
+                                <label v-if="statusActions(draft).length" class="editor-field">Status action<select aria-label="Status action" value="" @change="applyStatusAction($event)"><option value="">Choose an action…</option><option v-for="action in statusActions(draft)" :key="action.value" :value="action.value">{{ action.label }}</option></select></label>
                                 <label class="editor-field">Number<input v-model="draft.number" type="text"></label>
                                 <label class="editor-field">Currency<select aria-label="Currency" v-model="draft.currency"><option v-for="c in currencies" :key="c.code" :value="c.code">{{ c.code }} ({{ c.symbol }}) - {{ c.name }}</option></select></label>
                                 <label class="editor-field">Issue date<input v-model="draft.date" type="date"></label>
@@ -6505,13 +6508,15 @@
                 }
             },
             async changeStatus(newStatus) {
-                const previousStatus = this.draft.status || 'Draft';
+                const allowed = this.statusActions(this.draft).map(action => action.value);
+                if (!allowed.includes(newStatus)) return alert('That status change is not available for this document.');
+                const previousStatus = this.normalizedStatus(this.draft);
                 if (previousStatus === newStatus) return;
                 this.draft.status = newStatus;
                 // For a brand-new, unsaved document just set the status locally; it saves with the doc.
                 if (!this.isUuid(this.draft.id)) return;
-                const labels = { Draft: 'Reverted to draft', Sent: 'Marked as sent', Paid: 'Marked as paid', Cancelled: 'Marked as cancelled' };
-                const types = { Draft: 'status', Sent: 'sent', Paid: 'paid', Cancelled: 'cancelled' };
+                const labels = { Sent: 'Marked as sent', Cancelled: 'Marked as cancelled' };
+                const types = { Sent: 'sent', Cancelled: 'cancelled' };
                 this.addHistory(types[newStatus] || 'status', labels[newStatus] || ('Status changed to ' + newStatus));
                 const saved = await this.persistDraft();
                 if (saved) {
@@ -6520,6 +6525,34 @@
                         to_status: newStatus
                     });
                 }
+            },
+            hasPaymentHistory(inv) {
+                return !!(inv && Array.isArray(inv.payments) && inv.payments.length);
+            },
+            statusActions(inv) {
+                const stored = this.normalizedStatus(inv || {});
+                if (stored === 'Draft' && !this.hasPaymentHistory(inv)) {
+                    return [{ value: 'Sent', label: 'Mark as sent' }, { value: 'Cancelled', label: 'Cancel document' }];
+                }
+                if (stored === 'Sent' && !this.hasPaymentHistory(inv)) {
+                    return [{ value: 'Cancelled', label: 'Cancel document' }];
+                }
+                return [];
+            },
+            applyStatusAction(event) {
+                const select = event && event.target;
+                const next = select ? select.value : '';
+                if (select) select.value = '';
+                if (next) this.changeStatus(next);
+            },
+            statusExplanation(inv) {
+                const status = this.effectiveStatus(inv || {});
+                if (status === 'Paid') return 'Calculated from recorded payments. Historical Paid records remain compatible.';
+                if (status === 'Overdue') return 'Calculated from the due date and remaining balance.';
+                if (status === 'Partially Paid') return 'Calculated from recorded payments and the remaining balance.';
+                if (status === 'Cancelled') return 'The document remains available as a cancelled record.';
+                if (status === 'Sent') return 'Issued to the customer. Email delivery is tracked separately.';
+                return 'Not yet issued to the customer.';
             },
             async addActivityNote() {
                 const text = (this.activityNote || '').trim();
@@ -6538,6 +6571,7 @@
                 try { return new Date(ts).toLocaleString(); } catch (e) { return ts; }
             },
             async recordPayment() {
+                if ((this.draft.docType || 'invoice') !== 'invoice') return alert('Payments can only be recorded against invoices.');
                 const amt = parseFloat(this.newPayment.amount);
                 if (!amt || amt <= 0) return alert("Enter a valid payment amount.");
                 const outstanding = Math.max(0, Number(this.draftBalance) || 0);
@@ -7118,13 +7152,18 @@
             effectiveStatus(inv) {
                 const s = this.normalizedStatus(inv);
                 if (s === 'Cancelled') return 'Cancelled';
-                const total = inv.totals ? inv.totals.grandTotal : 0;
-                const paid = this.amountPaid(inv);
+                const docType = inv.docType || inv.doc_type || 'invoice';
+                if (docType !== 'invoice') return s === 'Draft' ? 'Draft' : 'Sent';
+                const total = Math.max(0, Number(inv.totals ? inv.totals.grandTotal : inv.grand_total) || 0);
+                const paid = Math.max(0, this.amountPaid(inv));
+                const balance = Math.max(0, total - paid);
                 const today = new Date().toISOString().split('T')[0];
-                if (s === 'Paid' || (total > 0 && paid >= total - 0.001)) return 'Paid';
-                if (paid > 0.001) return (inv.dueDate && inv.dueDate < today) ? 'Overdue' : 'Partially Paid';
-                if (s === 'Sent' && inv.dueDate && inv.dueDate < today) return 'Overdue';
-                return s;
+                const dueDate = inv.dueDate || inv.due_date || '';
+                if (s === 'Draft' && paid <= 0.001) return 'Draft';
+                if (s === 'Paid' || (total > 0 && balance <= 0.001)) return 'Paid';
+                if (dueDate && dueDate < today && balance > 0.001) return 'Overdue';
+                if (paid > 0.001 && balance > 0.001) return 'Partially Paid';
+                return s === 'Draft' ? 'Sent' : s;
             },
             statusBadgeClass(status) {
                 return {

@@ -52,6 +52,7 @@ jobs:
           node tests/cloudflare-pages-readiness-harness.cjs
           node tests/complimentary-access-harness.cjs
           node tests/core-lifecycle-harness.cjs
+          node tests/document-status-rules-spec-harness.cjs
           node tests/customer-item-validation-harness.cjs
           node tests/dispute-lifecycle-visibility-harness.cjs
           node tests/email-status-accuracy-harness.cjs

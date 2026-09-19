@@ -11,12 +11,18 @@ const stripeWebhook = read('supabase/functions/stripe-webhook/index.ts');
 const connectShared = read('supabase/functions/_shared/stripe-connect.ts');
 const documentEmail = read('supabase/functions/send-document-email/index.ts');
 const overdueReminders = read('supabase/functions/send-overdue-reminders/index.ts');
+const editor = app.slice(app.indexOf('<div class="editor-layout"'), app.indexOf('<div class="editor-preview-surface"'));
 
 // Characterise the current boundaries that the implementation phase must
 // deliberately replace or preserve. This file is an executable product-rule
 // specification; it does not claim that production uses the target helper yet.
-assert.match(app, /<option value="Paid">Paid<\/option>/, 'current editor still exposes manual Paid');
-assert.match(app, /if \(s === 'Paid' \|\| \(total > 0 && paid >= total - 0\.001\)\) return 'Paid';/, 'current browser trusts legacy Paid and payment totals');
+assert.doesNotMatch(editor, /<option value="Paid">Paid<\/option>/, 'editor no longer exposes manual Paid');
+assert.match(app, /aria-label="Status action"/, 'editor exposes only contextual lifecycle actions');
+assert.match(app, /if \(s === 'Paid' \|\| \(total > 0 && balance <= 0\.001\)\) return 'Paid';/, 'browser preserves legacy Paid and derives new Paid from the balance');
+assert.match(app, /if \(docType !== 'invoice'\) return s === 'Draft' \? 'Draft' : 'Sent';/, 'quotes and credit notes do not derive payment or overdue states');
+assert.match(app, /Payments can only be recorded against invoices\./, 'browser rejects payment recording for quotes and credit notes');
+assert.match(app, /stored === 'Sent' && !this\.hasPaymentHistory\(inv\)/, 'only unpaid issued documents expose Cancel');
+assert.doesNotMatch(app, /Reverted to draft/, 'issued documents are not silently reverted to Draft');
 assert.match(schema, /check \(status in \('Draft','Sent','Paid','Cancelled'\)\)/, 'current schema retains legacy Paid storage');
 assert.match(stripeWebhook, /function statusAfterPaymentChange\(/, 'owner Stripe webhook has a payment status helper');
 assert.match(connectShared, /export function statusAfterPaymentChange\(/, 'Connect webhook has a second payment status helper');
@@ -28,7 +34,7 @@ const money = value => Math.round(((Number(value) || 0) + Number.EPSILON) * 100)
 function deriveStatus({ docType = 'invoice', lifecycle = 'Draft', total = 0, netPaid = 0, dueDate = '', today = '2026-09-19', legacyPaid = false }) {
   const stored = lifecycle === 'Due' ? 'Sent' : lifecycle;
   if (stored === 'Cancelled') return 'Cancelled';
-  if (docType !== 'invoice') return stored;
+  if (docType !== 'invoice') return stored === 'Draft' ? 'Draft' : 'Sent';
   if (stored === 'Draft' && money(netPaid) <= 0) return 'Draft';
 
   const invoiceTotal = Math.max(0, money(total));

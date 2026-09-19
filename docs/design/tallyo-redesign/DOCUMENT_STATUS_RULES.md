@@ -1,6 +1,6 @@
 # Tallyo document status rules — review specification
 
-Status: proposed behaviour for Owner review; no runtime, database or provider change.
+Status: approved product rules; browser/UI candidate prepared for review. No database, Edge Function, provider or production change.
 
 ## Purpose
 
@@ -50,7 +50,7 @@ For an overdue part-paid invoice, the primary status is Overdue and the interfac
 
 ### Historical compatibility
 
-Existing stored Paid rows must remain visibly Paid if they pre-date complete payment evidence. They are not silently reopened or rewritten. New user actions must not create another manual Paid row. A later confirmed refund/payment change can move such a row back into the derived model.
+Existing stored Paid invoice rows must remain visibly Paid if they pre-date complete payment evidence. They are not silently reopened or rewritten. New user actions must not create another manual Paid row. A later confirmed refund/payment change can move such a row back into the derived model.
 
 ## Current behaviour found
 
@@ -86,8 +86,22 @@ These inconsistencies explain why implementation must be coordinated rather than
 
 ## Review questions
 
-Approve or change these three product decisions before implementation:
+The Owner approved these three product decisions before implementation:
 
 1. Paid must be derived and never manually selected.
 2. An overdue part-paid invoice shows Overdue as its primary status, with the remaining balance visible.
 3. A document with any payment/refund history cannot be cancelled; it remains available for the later linked-credit correction path.
+
+## Browser/UI candidate
+
+The first controlled implementation slice:
+
+- replaces the editor's free-form status dropdown with a read-only current status and contextual actions;
+- permits Draft → Sent/Cancelled and unpaid Sent → Cancelled only;
+- removes manual Paid and reversion of an issued document to Draft;
+- derives invoice Paid, Overdue and Partially Paid from total, payments and due date while preserving historical stored Paid invoices;
+- keeps quote and standalone credit-note status limited to Draft, Sent and Cancelled;
+- rejects browser-side payment recording for a non-invoice;
+- leaves the database constraint, signed Stripe webhooks, reminder function and production unchanged.
+
+The loopback-only fictional preview is `http://127.0.0.1:4173/#create`, artifact revision `428e4b805088365b45ea013cbe1ba9a9088c1e6c88844d28e4ec16e760863e14`. Source contracts, the 14-scenario specification, all retained payment/refund/dispute checks and the isolated editor/Documents/Overview Chromium suites pass. Stop for Owner review before preparing the separate backend-alignment slice.

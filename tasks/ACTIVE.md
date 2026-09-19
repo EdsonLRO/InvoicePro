@@ -2,11 +2,11 @@
 
 ## UX-STATUS-001 — Document status rules
 
-Status: specification and executable scenario matrix prepared for Owner review; runtime behaviour is unchanged.
+Status: product rules approved; browser/UI candidate and executable scenario matrix prepared for Owner review. SQL, signed Stripe webhooks, the reminder function, providers and production are unchanged.
 Owner: Codex, sequential product-rule inventory and QA. Risk: High for the later implementation because payment/refund-derived state spans browser and signed Stripe webhook paths; this specification phase is read-only with respect to those paths.
 Branch: `codex/document-status-rules`, from production merge `e900694`.
-Scope/lock: `docs/design/tallyo-redesign/DOCUMENT_STATUS_RULES.md`, the controlled-upgrade pointer, this active-task pointer and the focused specification harness. No application, SQL, Edge Function, provider, payment, refund, email, Auth, subscription, entitlement or production change.
-Review gate: approve or revise the three product decisions covering derived Paid, overdue-part-paid precedence and cancellation with payment/refund history. Implementation remains a later controlled slice and must stop again before any backend alignment, merge or production release.
+Scope/lock: browser editor/list status presentation and guards in `index.html`, the focused status specification/harness, existing editor contracts/browser coverage, CI registration, the controlled-upgrade pointer and this active-task pointer. No SQL, Edge Function, provider, payment/refund execution, email, Auth, subscription, entitlement or production change.
+Review gate: inspect the fictional preview at `http://127.0.0.1:4173/#create`. After approval, prepare the signed-webhook/reminder alignment as a separate high-risk source slice; stop again before merge, deployment or production release.
 
 ## UX-REDESIGN-001 — Controlled redesign release and list-card follow-up
 
