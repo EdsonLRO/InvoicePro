@@ -1,6 +1,6 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Steps 1–5 approved and merged only into the non-production integration branch. [PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160) merged as `937184956e7ad8024f19141443df03aa613fb4a2`. Step 6 review corrections for contextual Back navigation (`c0d8004`), outside-click More-menu dismissal (`cd1ad16`), the full-width Payments/Activity editor flow (`8d04b17`) and the Overview-return/Help-dialog/Invoices-label refinement (`38e8573`) are committed in [draft PR #161](https://github.com/EdsonLRO/InvoicePro/pull/161) and locally verified. STOP before Step 6 acceptance, Step 7, main merge or deployment.
+Status: Steps 1–6 are approved and integrated only into the non-production redesign branch through [PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160) and [PR #161](https://github.com/EdsonLRO/InvoicePro/pull/161). Step 6 includes the reviewed contextual Back navigation (`c0d8004`), outside-click More-menu dismissal (`cd1ad16`), full-width Payments/Activity editor flow (`8d04b17`) and Overview-return/Help-dialog/Invoices-label refinement (`38e8573`). STOP before Step 7, any `main` merge or deployment.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
 Risk: Medium client-side route/history presentation; no backend, Auth, provider, financial or persistence change.
@@ -284,6 +284,8 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 **Overview-return and shell-copy review refinement:** Review schedule now explicitly records Overview as its return point before opening the recurring form, so both the in-app Go back control and native browser Back restore Overview. Help & support now opens as a centred, bounded dialog on desktop and mobile rather than a bottom sheet; the same content, focus return, Escape and backdrop dismissal remain. User-facing navigation and the combined invoice/quote/credit-note list now say Invoices while the established `invoices` route and all document capabilities remain unchanged. Focused browser assertions cover both return paths, mobile dialog geometry and the renamed navigation.
 
+**Acceptance:** the Owner approved Step 6 on 19 September 2026 after reviewing the refreshed local preview. PR #161 is integrated only into `codex/tallyo-redesign`; this approval does not cover Step 7, `main`, a production build marker or deployment.
+
 | Coverage | Evidence | Boundary |
 |---|---|---|
 | Responsive presentation | Five browser suites; 320–1440px layouts, desktop/mobile navigation, editor sections, customer/recurring cards, symmetric panels, menu geometry and scrollbar clearance | Chromium emulated widths; not a physical Safari/Firefox device matrix |
@@ -301,7 +303,7 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 **Owner review:** use `http://127.0.0.1:4173/#dashboard`, then Invoices, the editor, Customers and Recurring at desktop and narrow widths. Fictional changes reset on refresh. Accepting this candidate is not permission to send email, change accounts/payments, merge main or deploy.
 
-**Next gate:** stop for Owner acceptance. Step 7 must separately refresh the live frontend baseline and exact compatible rollback artifact, confirm retained artifact retrieval, plan installed-PWA update/rollback checks, and obtain explicit approval for the exact frontend release/build marker and bounded smoke checks. Do not undo the September recovery corrections or change backend/provider settings. Main was independently verified unchanged at `7429b2b74474493b81edd7e548bcd35bbe1c9b89` during acceptance.
+**Next gate:** Step 6 is accepted. Start Step 7 only as a separate controlled task: refresh the live frontend baseline and exact compatible rollback artifact, confirm retained artifact retrieval, plan installed-PWA update/rollback checks, and obtain explicit approval for the exact frontend release/build marker and bounded smoke checks. Do not undo the September recovery corrections or change backend/provider settings. Main was independently verified unchanged at `7429b2b74474493b81edd7e548bcd35bbe1c9b89` during acceptance.
 
 ### Later, separately scoped releases
 
