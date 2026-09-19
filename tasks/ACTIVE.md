@@ -1,13 +1,13 @@
 # Active programme: COMM-001 commercial launch integration
 
-## UX-REDESIGN-001 — Controlled redesign, Step 7 pending
+## UX-REDESIGN-001 — Controlled redesign, Step 7 preparation
 
-Status: Step 6 was approved by the Owner on 19 September 2026 and integrated only into the non-production `codex/tallyo-redesign` branch through PR #161. All 36 Node harnesses, five isolated browser suites, website tests and both final hosted checks passed. Step 7 has not started. Stop before Step 7 implementation, any `main` merge or deployment.
-Owner: Codex, sequential implementation/QA. Risk: Medium frontend release preparation when separately started; all non-navigation handlers and the printable template remain hash-frozen in the accepted candidate.
-Branch: accepted integration `codex/tallyo-redesign`; any Step 7 work requires its own focused branch and review.
-Scope/lock: the accepted redesign candidate and its validation record. No dependency, backend, provider, build-marker, financial, email, Auth or data-model change occurred in Step 6.
+Status: Step 7 release preparation is active. Remote `main` remains the accepted candidate's merge base; candidate build `2026.09.19.1` and exact rollback deployment `99c8fa2c-8dab-4460-9db4-a013c5fe9b20` are being validated. Stop before marking the release PR ready, merging `main` or deploying.
+Owner: Codex, sequential implementation/QA. Risk: Medium frontend release preparation; all non-navigation handlers and the printable template remain hash-frozen in the accepted candidate.
+Branch: `codex/tallyo-redesign-release`, from accepted integration merge `8dcde1e`, for a focused future PR to `main`.
+Scope/lock: build/cache markers, accepted redesign candidate, release/rollback evidence and focused tests. No dependency, backend, provider, financial, email, Auth or data-model change.
 Single working checklist: [Controlled upgrade](../docs/design/tallyo-redesign/UPGRADE.md).
-Authority: Steps 1–6 non-production integration are complete. Step 7, a `main` merge, public deployment, migration, secret change, real email, account mutation or payment remain unauthorised.
+Authority: Steps 1–6 non-production integration are complete and the Owner authorised Step 7 preparation. Marking the release PR ready, a `main` merge, public deployment, migration, secret change, real email, account mutation or payment remain unauthorised.
 Both Pages projects include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate live Auth/RLS/backend behaviour or installed-PWA update/rollback. Frozen references remain unchanged. Separate Step 7 and production approvals are still required.
 
 ## AUTH-004 — Recovery email canonical destination

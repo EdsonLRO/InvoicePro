@@ -1,11 +1,11 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Steps 1–6 are approved and integrated only into the non-production redesign branch through [PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160) and [PR #161](https://github.com/EdsonLRO/InvoicePro/pull/161). Step 6 includes the reviewed contextual Back navigation (`c0d8004`), outside-click More-menu dismissal (`cd1ad16`), full-width Payments/Activity editor flow (`8d04b17`) and Overview-return/Help-dialog/Invoices-label refinement (`38e8573`). STOP before Step 7, any `main` merge or deployment.
+Status: Steps 1–6 are approved and integrated only into the non-production redesign branch through [PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160) and [PR #161](https://github.com/EdsonLRO/InvoicePro/pull/161). Step 7 release preparation is active on `codex/tallyo-redesign-release`; candidate build `2026.09.19.1` is not approved for `main` or deployment.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
 Risk: Medium client-side route/history presentation; no backend, Auth, provider, financial or persistence change.
-Branch: `codex/tallyo-redesign-acceptance`, targeting `codex/tallyo-redesign`, from Step 5 merge `9371849`.
-Authority: the Owner approved the Step 5 customer scrollbar refinement, then approved proceeding to Step 6. Both latest Step 5 hosted checks passed (`34698931859`, `34698928579`); no review objections were present. Candidate acceptance and production release remain separate approvals.
+Branch: `codex/tallyo-redesign-release`, from accepted integration merge `8dcde1e`, for a future PR targeting `main`.
+Authority: the Owner approved Step 6 and separately instructed Codex to start Step 7 preparation. A `main` merge and production deployment remain separate exact approvals.
 
 Step 2 approval: the Owner replied “Reviewed and approved” after reviewing the symmetric Overview refinement. Both hosted verification runs passed at `933a3c8`: [push](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692038558), [PR](https://github.com/EdsonLRO/InvoicePro/actions/runs/34692039918). This closes the Step 2 review gate, not the separately scoped Step 3 implementation or production release gates.
 
@@ -304,6 +304,14 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 **Owner review:** use `http://127.0.0.1:4173/#dashboard`, then Invoices, the editor, Customers and Recurring at desktop and narrow widths. Fictional changes reset on refresh. Accepting this candidate is not permission to send email, change accounts/payments, merge main or deploy.
 
 **Next gate:** Step 6 is accepted. Start Step 7 only as a separate controlled task: refresh the live frontend baseline and exact compatible rollback artifact, confirm retained artifact retrieval, plan installed-PWA update/rollback checks, and obtain explicit approval for the exact frontend release/build marker and bounded smoke checks. Do not undo the September recovery corrections or change backend/provider settings. Main was independently verified unchanged at `7429b2b74474493b81edd7e548bcd35bbe1c9b89` during acceptance.
+
+### Step 7 — production release preparation
+
+**Baseline:** remote `main` remains `7429b2b74474493b81edd7e548bcd35bbe1c9b89` and is the exact merge base of accepted integration `8dcde1ecd7c606d52ea9aafbabc6bfc26b8722d3`; no intervening source change requires conflict resolution. Public readback returns HTTP 200 and build `2026.09.11.1`. Cloudflare lists current production deployment `99c8fa2c-8dab-4460-9db4-a013c5fe9b20` from `7429b2b`; its deployment hostname is retained behind Access. GitHub Pages serves the same build and is not treated as an immutable older artifact.
+
+**Candidate and rollback:** prepare only build `2026.09.19.1` with service-worker cache `tallyo-shell-2026-09-19-1`. The exact rollback target is Cloudflare deployment `99c8fa2c`; rollback must restore build `2026.09.11.1` without changing the database, Edge Functions, Auth, provider settings or September recovery correction. The existing isolated artifact A→B→A test and PWA cache-rotation harness must pass before review. After any separately approved deployment, validate public HTTP/build report/service worker and have the Owner confirm installed-PWA update behaviour; restore `99c8fa2c` if those checks fail.
+
+**Release boundary:** Step 7 may prepare, test, commit, push and open a focused PR to `main`. It must stop before marking the PR ready, merging it or allowing a production deployment. No migration, Edge Function, email, payment, refund, secret, configuration or legal/public-claim change is included.
 
 ### Later, separately scoped releases
 

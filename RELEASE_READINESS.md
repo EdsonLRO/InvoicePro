@@ -2,6 +2,14 @@
 
 This checklist tracks whether the current app is ready for real customer use. It is not a public-launch checklist for the future SaaS website.
 
+## Authenticated-app redesign candidate — preparation only, 2026-09-19
+
+Steps 1–6 of the controlled visual redesign are accepted on the non-production integration branch. Step 7 prepares build `2026.09.19.1` on `codex/tallyo-redesign-release`; it does not authorise a `main` merge or deployment. Remote `main` remains `7429b2b74474493b81edd7e548bcd35bbe1c9b89`, which is also the merge base of accepted integration `8dcde1ecd7c606d52ea9aafbabc6bfc26b8722d3`, so there is no intervening production-source drift to reconcile.
+
+Current production readback returns HTTP 200 and build `2026.09.11.1` from both `https://app.tallyo.co.uk` and the GitHub Pages fallback. Cloudflare lists deployment `99c8fa2c-8dab-4460-9db4-a013c5fe9b20` as the latest production artifact from source `7429b2b`; its deployment-specific hostname remains present and protected by the existing wildcard Access application. This is the exact frontend rollback target after a redesign release. The earlier Owner Console deployment `9ee7120d-122b-44e8-8c43-0077feed8e39` is also retained, but rollback should prefer the latest compatible `99c8fa2c` artifact. No database restore, function rollback or provider/configuration change belongs to this visual release.
+
+Cutover remains Owner-gated. The proposed release is limited to merging the reviewed frontend candidate into `main`, allowing the existing Cloudflare/GitHub publication workflows to build it, and running bounded public shell/build-report/service-worker plus Owner-performed installed-PWA checks. If validation fails, restore Cloudflare deployment `99c8fa2c`, confirm build `2026.09.11.1`, and leave the September recovery functions/configuration untouched.
+
 ## Recovery link correction — deployed and verified, 2026-09-11
 
 The Owner reported a GitHub 404 from the confirmation email after PR #152. Its release smoke test did not exercise actual emailed destinations. Local tests reproduced the old-origin failure in the confirmation link and Owner password-reset redirect before the fix.
@@ -33,11 +41,9 @@ Statuses: Planned, In Progress, Implemented, Verified, Blocked, Deferred, Not Ap
 
 ## Current Verdict
 
-**Status:** Verified for the approved initial UK-business public release.
+**Status:** Verified for the approved initial UK-business public release; redesign build `2026.09.19.1` is a prepared candidate only.
 
-The separate complimentary-access candidate is not yet part of the production verdict. Migration `20260909115547` and app build `2026.09.09.1` remain unapplied/undeployed pending high-risk review and exact Owner approval.
-
-Tallyo's current invoicing-app scope is feature-complete and regression-verified. Controlled live Stripe invoice-payment, Tallyo Pro Billing, connected-account onboarding, one GBP 1 direct connected payment and one full refund completed bounded acceptance before launch. Build `2026.07.23.2` remains on GitHub Pages as the app rollback route. Release build `2026.07.28.2` is public at `https://app.tallyo.co.uk`; it corrects account-data export ordering for the singleton company-settings record while retaining authenticated RLS reads. The production website is public at `https://tallyo.co.uk` and `https://www.tallyo.co.uk`. The approved legal pages, subscription and connected-payment interfaces and bounded AI Helper are available. Final DNS, Auth Site URL, Access-removal and public smoke gates completed on 2026-07-28 without a Stripe transaction or customer communication.
+Tallyo's current invoicing-app scope is feature-complete and regression-verified. Controlled live Stripe invoice-payment, Tallyo Pro Billing, connected-account onboarding, one GBP 1 direct connected payment and one full refund completed bounded acceptance before launch. Build `2026.09.11.1` is public at `https://app.tallyo.co.uk` and on the GitHub Pages fallback; exact Cloudflare deployment `99c8fa2c-8dab-4460-9db4-a013c5fe9b20` is the current compatible rollback artifact. The production website is public at `https://tallyo.co.uk` and `https://www.tallyo.co.uk`. The approved legal pages, subscription and connected-payment interfaces, Owner Console and bounded AI Helper are available. No production state changed during redesign preparation.
 
 ## Release Gates
 
