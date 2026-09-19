@@ -5,6 +5,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const recurring = fs.readFileSync(path.join(root, 'supabase', 'functions', 'generate-recurring', 'index.ts'), 'utf8');
 const reminders = fs.readFileSync(path.join(root, 'supabase', 'functions', 'send-overdue-reminders', 'index.ts'), 'utf8');
+const invoiceStatus = fs.readFileSync(path.join(root, 'supabase', 'functions', '_shared', 'invoice-status.ts'), 'utf8');
 
 const helperStart = recurring.indexOf('function daysInMonth');
 const helperEnd = recurring.indexOf('// ---- totals and email rendering ----');
@@ -46,12 +47,15 @@ for (const pattern of [
 
 for (const pattern of [
   /eq\("overdue_reminders_enabled", true\)/,
-  /inv\.status === "Draft" \|\| inv\.status === "Paid" \|\| inv\.status === "Cancelled"/,
+  /storedInvoiceAllowsOverdueReminder\(inv\)/,
   /if \(outstanding <= 0\.001\)/,
   /"Idempotency-Key": resendRequestKey/,
   /eq\("user_id", userId\)/,
   /overdue_reminder_run_completed/,
   /return json\([\s\S]*?ok \? 200 : 500\)/,
 ]) assert.match(reminders, pattern);
+
+assert.match(invoiceStatus, /\["Draft", "Paid", "Cancelled"\]/);
+assert.match(invoiceStatus, /invoice\?\.doc_type \|\| ""/);
 
 console.log('Recurring calendar and retry reliability harness passed.');

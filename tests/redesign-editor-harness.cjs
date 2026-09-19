@@ -9,6 +9,18 @@ const hash = source => createHash('sha256').update(source.replace(/\r\n/g, '\n')
 // its popstate listeners and the bounded Overview schedule action. Keep every other
 // existing method/startup byte frozen, and exercise the reviewed blocks separately.
 let protectedMethods = app.slice(app.indexOf('        methods: {'));
+const statusChangeStart = protectedMethods.indexOf('            async changeStatus(newStatus)');
+const statusChangeEnd = protectedMethods.indexOf('            async addActivityNote()', statusChangeStart);
+assert.ok(statusChangeStart >= 0 && statusChangeEnd > statusChangeStart, 'reviewed status action block must remain bounded');
+protectedMethods = protectedMethods.slice(0, statusChangeStart) + '            /* document status actions reviewed separately */\n' + protectedMethods.slice(statusChangeEnd);
+const paymentRecordStart = protectedMethods.indexOf('            async recordPayment()');
+const paymentRecordEnd = protectedMethods.indexOf('            stripePaymentBadge(payment)', paymentRecordStart);
+assert.ok(paymentRecordStart >= 0 && paymentRecordEnd > paymentRecordStart, 'reviewed manual-payment guard must remain bounded');
+protectedMethods = protectedMethods.slice(0, paymentRecordStart) + '            /* manual payment document-type guard reviewed separately */\n' + protectedMethods.slice(paymentRecordEnd);
+const statusPolicyStart = protectedMethods.indexOf('            normalizedStatus(inv)');
+const statusPolicyEnd = protectedMethods.indexOf('            statusBadgeClass(status)', statusPolicyStart);
+assert.ok(statusPolicyStart >= 0 && statusPolicyEnd > statusPolicyStart, 'reviewed effective-status policy must remain bounded');
+protectedMethods = protectedMethods.slice(0, statusPolicyStart) + '            /* effective document status policy reviewed separately */\n' + protectedMethods.slice(statusPolicyEnd);
 const overviewActStart = protectedMethods.indexOf('            overviewAct(item)');
 const overviewActEnd = protectedMethods.indexOf('            overviewSetupAction(step)', overviewActStart);
 assert.ok(overviewActStart >= 0 && overviewActEnd > overviewActStart, 'reviewed Overview action must remain bounded');
@@ -18,7 +30,7 @@ const navigationEnd = protectedMethods.indexOf('            ownerRecoveryTokenFr
 assert.ok(navigationStart >= 0 && navigationEnd > navigationStart, 'reviewed navigation block must remain bounded');
 protectedMethods = protectedMethods.slice(0, navigationStart) + '            /* navigation methods reviewed separately */\n' + protectedMethods.slice(navigationEnd);
 protectedMethods = protectedMethods.replace(/\r?\n\s*window\.(addEventListener|removeEventListener)\('popstate', this\.handlePopState\);/g, '');
-assert.equal(hash(protectedMethods), 'f272145143174a39dbb6b564e24e5a8f4ca73a418d0c3b0890bd3252df703d6a', 'all unreviewed methods/startup must remain unchanged');
+assert.equal(hash(protectedMethods), '6c7147990e0792cebe2678555f7cf7da4c99f19ef9e02a264e2dd27d10cbd2a6', 'all unreviewed methods/startup must remain unchanged');
 const canvasStart = app.indexOf('\n', app.indexOf('<div id="invoice-canvas"'));
 const canvasEnd = app.indexOf('\n                </div>', app.indexOf('company.invoiceFooter', canvasStart)) + 23;
 assert.equal(hash(app.slice(canvasStart, canvasEnd)), 'd478ee1f800c304a181747174eeb2ee4c8fa37a4ab0c294eaf8ac18eaa9187d6', 'printable document content must remain unchanged');
@@ -29,7 +41,9 @@ assert.match(app, /Changes are saved when you select Save/);
 assert.doesNotMatch(app, /Last saved just now/);
 const editor = app.slice(app.indexOf('<div class="editor-layout"'), app.indexOf('<div class="editor-preview-surface"'));
 for (const binding of ['draft.customer', 'draft.docType', 'draft.number', 'draft.currency', 'draft.date', 'draft.dueDate', 'draft.poNumber', 'item.name', 'item.qty', 'item.unit', 'item._h', 'item._m', 'item.price', 'item.discount', 'item.tax', 'draft.globalDiscount', 'draft.shippingCost', 'draft.terms', 'draft.notes', 'draft.onlinePaymentMode', 'draft.depositAmount', 'draft.repeat.frequency', 'draft.repeat.emailEnabled', 'draft.overdueFirstReminderDays', 'draft.overdueRepeatReminderDays', 'draft.overdueMaxReminders']) assert.ok(editor.includes(binding), binding + ' remains editable');
-for (const handler of ['changeStatus', 'onCustomerSelect', 'onDocTypeChange', 'onUnitSelect', 'applyTime', 'selectMatch', 'saveAsNewPreset', 'setTaxMode', 'toggleRepeat', 'toggleOverdueReminders', 'recordPayment', 'openStripeCheckout', 'openStripeRefundModal', 'removePayment', 'addActivityNote']) assert.ok(editor.includes(handler + '(') || editor.includes('"' + handler + '"'), handler + ' remains bound');
+for (const handler of ['applyStatusAction', 'onCustomerSelect', 'onDocTypeChange', 'onUnitSelect', 'applyTime', 'selectMatch', 'saveAsNewPreset', 'setTaxMode', 'toggleRepeat', 'toggleOverdueReminders', 'recordPayment', 'openStripeCheckout', 'openStripeRefundModal', 'removePayment', 'addActivityNote']) assert.ok(editor.includes(handler + '(') || editor.includes('"' + handler + '"'), handler + ' remains bound');
+assert.match(app, /async changeStatus\(newStatus\)[\s\S]*?statusActions\(this\.draft\)/, 'status changes are restricted to contextual actions');
+assert.doesNotMatch(editor, /value="Paid"/, 'Paid is not a user-selectable editor status');
 assert.match(editor, /company\.paymentDetails/);
 assert.match(editor, /role="switch" aria-label="Recurring invoice"/);
 assert.match(editor, /role="switch" aria-label="Overdue reminders"/);

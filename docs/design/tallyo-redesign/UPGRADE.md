@@ -324,6 +324,10 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 Each later release repeats preview, tests, Owner review, compatible rollback planning and separate production approval. These are planned, not authorised implementations.
 
+### Status rules — specification phase
+
+The focused review specification is [DOCUMENT_STATUS_RULES.md](DOCUMENT_STATUS_RULES.md). The Owner approved its three explicit product decisions. The first browser/UI slice now provides contextual lifecycle actions, derived invoice display state and quote/credit separation, with an executable 14-scenario matrix and isolated browser evidence. SQL, signed Stripe webhooks, the reminder function, providers and production remain unchanged. Stop for Owner review of the fictional preview before preparing backend alignment.
+
 ## 6. Rollback and known gaps
 
 - Keep the existing backend and provider configuration unchanged for Release 1. Restore a compatible frontend artifact at the same canonical domain if release validation fails; do not route users to an obsolete GitHub Pages origin by assumption.

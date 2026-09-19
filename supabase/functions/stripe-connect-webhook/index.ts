@@ -8,11 +8,14 @@ import {
   formatMoney,
   isUuid,
   json,
-  statusAfterPaymentChange,
   stripeV1,
   supabaseClients,
   verifyStripeSignature,
 } from "../_shared/stripe-connect.ts";
+import {
+  isInvoiceFullyPaid,
+  storedInvoiceStatusAfterPaymentChange,
+} from "../_shared/invoice-status.ts";
 
 type InvoicePayment = {
   amount?: unknown;
@@ -303,6 +306,7 @@ async function handleCheckout(
   }
 
   const now = new Date().toISOString();
+  const previousPaid = amountPaid(payments);
   payments.push({
     amount,
     date: now.split("T")[0],
@@ -314,7 +318,10 @@ async function handleCheckout(
     providerPaymentIntentId: session.payment_intent || null,
     currency: claim.currency,
   });
-  const nextStatus = statusAfterPaymentChange(invoice, amountPaid(payments));
+  const newPaid = amountPaid(payments);
+  const nextStatus = storedInvoiceStatusAfterPaymentChange(invoice);
+  const becameFullyPaid = !isInvoiceFullyPaid(invoice.grand_total, previousPaid) &&
+    isInvoiceFullyPaid(invoice.grand_total, newPaid);
   history.push({
     ts: now,
     type: "payment",
@@ -323,7 +330,7 @@ async function handleCheckout(
     } confirmed`,
     providerMarker: `stripe-connect:${event.id}`,
   });
-  if (nextStatus === "Paid" && invoice.status !== "Paid") {
+  if (becameFullyPaid) {
     history.push({
       ts: now,
       type: "paid",
@@ -545,7 +552,7 @@ async function handleRefund(
     config.liveMode,
     payments,
     history,
-    statusAfterPaymentChange(invoice, amountPaid(payments)),
+    storedInvoiceStatusAfterPaymentChange(invoice),
     eventType,
     {
       refund_id: refundId,
