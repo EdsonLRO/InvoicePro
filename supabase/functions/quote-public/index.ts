@@ -15,7 +15,13 @@ import {
 
 const allowView = createMemoryRateLimiter({ windowMs: 60_000, limit: 60 });
 const allowResponse = createMemoryRateLimiter({ windowMs: 60_000, limit: 10 });
-const allowGlobal = createMemoryRateLimiter({ windowMs: 60_000, limit: 600 });
+// A small hash shard prevents one unknown token from consuming the safety
+// ceiling for every quote handled by the same warm isolate. Per-token limits
+// below remain the primary customer-action control.
+const allowSafetyShard = createMemoryRateLimiter({
+  windowMs: 60_000,
+  limit: 600,
+});
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
@@ -34,13 +40,6 @@ Deno.serve(async (request) => {
     return jsonResponse(request, { message: parsed.error }, parsed.status);
   }
   const body = parsed.value as Record<string, unknown>;
-  if (!allowGlobal("all")) {
-    return jsonResponse(
-      request,
-      { message: "Please wait a moment before trying again." },
-      429,
-    );
-  }
   const action = String(body.action || "");
   const token = body.token;
   if (
@@ -67,6 +66,13 @@ Deno.serve(async (request) => {
 
   try {
     const tokenHash = await quoteTokenHash(token as string);
+    if (!allowSafetyShard(tokenHash.slice(0, 2))) {
+      return jsonResponse(
+        request,
+        { message: "Please wait a moment before trying again." },
+        429,
+      );
+    }
     const allowed = action === "view" || action === "invoice"
       ? allowView(`${tokenHash}:${action}`)
       : allowResponse(`${tokenHash}:${action}`);

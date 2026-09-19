@@ -36,6 +36,8 @@ assert.equal(allow('quote', 1), true, 'first request must pass');
 assert.equal(allow('quote', 2), true, 'second request must pass');
 assert.equal(allow('quote', 3), false, 'third request in window must fail');
 assert.equal(allow('other', 3), true, 'other token hash must have its own bucket');
+assert.equal(allow('other', 4), true, 'second token request must still pass');
+assert.equal(allow('other', 5), false, 'second token must enforce its own limit');
 assert.equal(allow('quote', 1_002), true, 'expired bucket must reset');
 
 console.log('Quote access runtime helper tests passed.');

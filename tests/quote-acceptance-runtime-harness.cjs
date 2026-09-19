@@ -63,7 +63,8 @@ assert.doesNotMatch(manage, /console\.(?:log|warn|error).*token/i);
 
 assert.match(publicFn, /\["view", "accept", "decline", "invoice"\]/);
 assert.match(publicFn, /createMemoryRateLimiter/);
-assert.match(publicFn, /allowGlobal\("all"\)/);
+assert.match(publicFn, /allowSafetyShard\(tokenHash\.slice\(0, 2\)\)/);
+assert.doesNotMatch(publicFn, /allowGlobal\("all"\)/);
 assert.match(publicFn, /normalizeConfirmedName/);
 assert.match(publicFn, /admin\.rpc\("quote_public_action"/);
 assert.doesNotMatch(publicFn, /Authorization:\s*`Bearer \$\{token/i);
