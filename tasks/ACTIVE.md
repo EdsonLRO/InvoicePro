@@ -27,7 +27,7 @@ Required documentation: this task record and `QUOTE_ACCEPTANCE_RULES.md`; update
 Approval boundary: Owner authorised the specification and isolated preview. Stop before any production UI integration, migration creation/application, Edge Function implementation/deployment, email, public link activation, merge to `main` or production release.
 Lock state: acquired 2026-09-19 for the files listed above; no production application, migration or function path is locked or edited
 Branch: `codex/quote-acceptance-spec`, from released main merge `6fcf675`
-Commit: Pending branch closeout
+Commit: `5b380bd` (`docs: specify quote acceptance workflow`); branch closeout record follows
 Evidence: Current app `convertToInvoice` changes the quote row in place, reuses its ID and records a browser timestamp. The current schema has no quote-link or public-access-token fields. Supabase guidance checked 2026-09-19 requires explicit grants plus RLS for exposed tables and distinguishes public functions from authenticated user functions. ICO guidance checked 2026-09-19 supports purpose limitation, data minimisation and privacy by design. The focused contract harness and headless Chrome preview suite pass for pending, acceptance, linked draft invoice, deliberate decline confirmation, expired/revoked states, owner activity, keyboard submit, 390px/desktop overflow and zero external requests. Full-resolution customer and owner screenshots were reviewed and approved by the Owner on 2026-09-19.
 Blocked reason: None for this slice
 Next action: close the design/specification branch and stop. A separate controlled step may prepare the smallest runtime implementation slice; no migration, Edge Function, production integration, merge or release is authorised by this approval.
