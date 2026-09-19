@@ -2,7 +2,7 @@
 
 ## UX-REDESIGN-001 — Controlled redesign, Step 6
 
-Status: Owner review corrections for exact browser Back context (`c0d8004`), outside-click More-menu dismissal (`cd1ad16`) and the full-width Payments/Activity editor flow (`8d04b17`) are committed in draft PR #161. All 36 Node harnesses, five isolated browser suites and website tests pass locally; both hosted checks passed on the editor-flow implementation head. Stop before Step 6 acceptance, Step 7, main merge or deployment.
+Status: Owner review corrections for exact browser Back context (`c0d8004`), outside-click More-menu dismissal (`cd1ad16`), the full-width Payments/Activity editor flow (`8d04b17`) and the Overview-return/Help-dialog/Invoices-label refinement (`38e8573`) are committed in draft PR #161. All 36 Node harnesses, five isolated browser suites and website tests pass locally on the current implementation; hosted checks remain to be refreshed for this head. Stop before Step 6 acceptance, Step 7, main merge or deployment.
 Owner: Codex, sequential implementation/QA. Risk: Medium client-side navigation state only; all non-navigation handlers and the printable template remain hash-frozen.
 Branch: `codex/tallyo-redesign-acceptance`, targeting `codex/tallyo-redesign`, from Step 5 merge `9371849`.
 Scope/lock: browser route/history presentation in `index.html`, its focused redesign tests, `docs/design/tallyo-redesign/UPGRADE.md` and this task pointer. No dependency, backend, provider, build-marker, financial, email, Auth or data-model change.
