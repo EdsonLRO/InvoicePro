@@ -36,8 +36,10 @@ assert.ok(vm.customerContextActivity.every(event => event.invoice.customer.id ==
 vm.customerContextId = 'missing';
 assert.equal(vm.customerContext, null); assert.deepEqual(vm.customerContextDocuments, []); assert.deepEqual(vm.customerContextActivity, []);
 assert.deepEqual(vm.customerContextSummary, { outstanding: 0, paid: 0 });
-assert.match(app, /customer-name[^>]*@click="customerContextId = customer.id/);
-assert.match(app, /activeTab\(\) \{ this.editorPreview = false; this.customerContextId = '';/);
+assert.match(app, /customer-name[^>]*@click="openCustomerContext\(customer\)"/);
+assert.match(app, /openCustomerContext\(customer\)[\s\S]*?setRouteKey\('customers-detail'\)/);
+assert.match(app, /openRecurringTemplate\(template\)[\s\S]*?setRouteKey\('recurring-form'\)/);
+assert.doesNotMatch(app, /activeTab\(\) \{ this\.editorPreview = false; this\.customerContextId = '';/);
 assert.match(app, /class="schedule-table" aria-label="Recurring schedules"/);
 assert.match(app, /@click="toggleTemplateActive\(t\)"/);
 assert.match(app, /v-show="activeTab === 'owner' && ownerConsole.available"/);

@@ -301,6 +301,8 @@
         .shell-sheet-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
         .shell-sheet h2 { font-size: 20px; font-weight: 650; }
         .shell-sheet .primary-navigation-item:hover { background: #f1f5f9; color: #1e293b; }
+        .help-dialog-backdrop { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; padding:16px; background:rgb(15 23 42 / .6); }
+        .help-dialog { width:min(520px,100%); max-height:calc(100dvh - 32px); overflow-y:auto; border-radius:16px; background:#fff; padding:28px; box-shadow:0 24px 70px #0f172a40; }
         .shell-close { min-width: 44px; min-height: 44px; border-radius: 8px; }
         .overview { position: relative; max-width: 1400px; margin: auto; }
         .overview .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
@@ -378,6 +380,7 @@
             .shell-bottom-nav .shell-new-icon { background: #4f46e5; color: #fff; border-radius: 13px; width: 46px; height: 46px; display: grid; place-items: center; font-size: 28px; }
             .shell-sheet-backdrop { align-items: flex-end; padding: 16px 12px calc(88px + env(safe-area-inset-bottom)); }
             .shell-sheet { width: 100%; max-width: 500px; max-height: calc(100dvh - 120px); }
+            .help-dialog { padding:20px; }
             .overview-grid { grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); gap: 16px; }
         }
         @media (max-width: 699px) {
@@ -649,8 +652,13 @@
         .editor-more>div { position:absolute; top:100%; right:0; z-index:30; min-width:190px; padding:6px; background:#fff; border:1px solid #dfe5ed; border-radius:10px; box-shadow:0 12px 30px #0f172a20; }
         .editor-more>div button { min-height:44px; padding:10px; text-align:left; }
         .editor-button:disabled { opacity:.5; }
-        .editor-layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:22px; align-items:start; }
-        .editor-form,.editor-rail { min-width:0; display:grid; gap:14px; }
+        .editor-layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; column-gap:22px; row-gap:14px; align-items:start; }
+        .editor-form,.editor-side-options { min-width:0; display:grid; gap:14px; }
+        .editor-form { grid-column:1; grid-row:1; }
+        .editor-rail { display:contents; }
+        .editor-side-options { grid-column:2; grid-row:1; }
+        .editor-rail>.editor-payments { grid-column:1; grid-row:2; }
+        .editor-rail>.editor-activity { grid-column:1; grid-row:3; }
         .editor-section,.editor-summary { min-width:0; background:#fff; border:1px solid #dfe5ed; border-radius:12px; }
         .editor-section>summary { scroll-margin-top:170px; }
         .editor-section>summary { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:17px 20px; min-height:64px; cursor:pointer; list-style:none; }
@@ -712,6 +720,10 @@
         @media (max-width:1240px) { .editor-layout { grid-template-columns:minmax(0,1fr) 290px; gap:16px; } .editor-header { flex-wrap:wrap; } }
         @media (max-width:899px) {
             .editor-layout { grid-template-columns:1fr; gap:14px; padding-bottom:12px; }
+            .editor-form { grid-column:1; grid-row:1; }
+            .editor-rail>.editor-payments { grid-column:1; grid-row:2; }
+            .editor-rail>.editor-activity { grid-column:1; grid-row:3; }
+            .editor-side-options { grid-column:1; grid-row:4; }
             .editor-header { position:sticky; top:0; z-index:12; background:#f8fafc; padding:12px 0; gap:12px; }
             .editor-header h2 { font-size:21px; }
             .editor-eyebrow { display:none; }
@@ -996,7 +1008,7 @@
         </header>
         <nav class="shell-bottom-nav" aria-label="Mobile navigation">
             <button @click="navigateTo('dashboard')" :aria-current="activeTab === 'dashboard' ? 'page' : null"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('overview')"/></svg>Overview</button>
-            <button @click="navigateTo('invoices')" :aria-current="['invoices','create','edit'].includes(activeTab) ? 'page' : null"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('documents')"/></svg>Documents</button>
+            <button @click="navigateTo('invoices')" :aria-current="['invoices','create','edit'].includes(activeTab) ? 'page' : null"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('documents')"/></svg>Invoices</button>
             <button @click="openOverviewMenu('new', $event)" aria-label="New" aria-haspopup="dialog"><span class="shell-new-icon" aria-hidden="true">+</span></button>
             <button @click="navigateTo('customers')" :aria-current="activeTab === 'customers' ? 'page' : null"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('customers')"/></svg>Customers</button>
             <button @click="openOverviewMenu('more', $event)" aria-haspopup="dialog" :aria-expanded="overviewMenu === 'more'"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('more')"/></svg>More</button>
@@ -1415,7 +1427,7 @@
                             </li>
                         </ul>
                         <p v-else class="overview-empty">Nothing needs your attention in the loaded records. You're ready for your next invoice.</p>
-                        <p v-if="overviewAttention.length > 50" class="overview-footnote">Showing up to 50 items. Use Documents and Recurring to review the rest.</p>
+                        <p v-if="overviewAttention.length > 50" class="overview-footnote">Showing up to 50 items. Use Invoices and Recurring to review the rest.</p>
                     </section>
                     <section class="overview-card" aria-labelledby="overview-activity-title">
                         <div class="overview-section-heading"><h2 id="overview-activity-title">Recent activity</h2></div>
@@ -1456,7 +1468,7 @@
                         <p class="editor-save-note">Changes are saved when you select Save. Sending opens a review first.</p>
                     </div>
                     <div class="editor-actions">
-                        <button type="button" @click="editorPreview = !editorPreview" :aria-pressed="editorPreview" class="editor-button">{{ editorPreview ? 'Back to editing' : 'Preview' }}</button>
+                        <button type="button" @click="toggleEditorPreview" :aria-pressed="editorPreview" class="editor-button">{{ editorPreview ? 'Back to editing' : 'Preview' }}</button>
                         <details class="record-menu editor-more" @keydown.esc.prevent="$event.currentTarget.open = false; $event.currentTarget.querySelector('summary').focus()">
                             <summary>More</summary>
                             <div>
@@ -1559,6 +1571,7 @@
                         <div class="editor-save-row"><p>Ready? Save your changes, or review the email before sending.</p><button @click="saveInvoice" :disabled="documentSaveBusy" class="editor-button">{{ documentSaveBusy ? 'Saving…' : ('Save ' + docTypeNoun(draft.docType)) }}</button></div>
                     </div>
                     <aside class="editor-rail" aria-label="Document summary and options">
+                        <div class="editor-side-options">
                         <section class="editor-summary">
                             <h3>Summary <span>{{ draft.currency }}</span></h3>
                             <dl>
@@ -1658,6 +1671,7 @@
                                 </div>
                             </div>
                         </details>
+                        </div>
                         <details class="editor-section editor-aux editor-payments" v-if="editingExisting" :open="!!paymentAttentionFor(draft) || !!draftDisputeState"><summary><span><strong>Payments</strong><small>{{ paymentAttentionFor(draft) || draftDisputeState ? 'Needs attention · review below' : 'Records and online payment amount' }}</small></span></summary>
                             <div v-if="editingExisting" class="editor-section-body editor-existing-controls">
                                 <h3 class="text-lg font-semibold mb-1">Payments</h3>
@@ -1767,7 +1781,7 @@
                                 </div>
                             </div>
                         </details>
-                        <details class="editor-section editor-aux" v-if="editingExisting"><summary><span><strong>Activity History</strong><small>{{ emailStatusFor(draft.id) ? emailStatusFor(draft.id).label : 'View this document’s recent activity' }}</small></span></summary>
+                        <details class="editor-section editor-aux editor-activity" v-if="editingExisting"><summary><span><strong>Activity History</strong><small>{{ emailStatusFor(draft.id) ? emailStatusFor(draft.id).label : 'View this document’s recent activity' }}</small></span></summary>
                             <div v-if="editingExisting" class="editor-section-body editor-existing-controls">
                                 <div class="flex items-center justify-between mb-1 flex-wrap gap-3">
                                     <h3 class="text-lg font-semibold">Activity History</h3>
@@ -2115,7 +2129,7 @@
 
             <div v-show="activeTab === 'invoices'" class="documents-page" aria-labelledby="documents-title">
                 <div class="list-heading">
-                    <div><h2 id="documents-title">Documents</h2><p>Invoices, quotes and credit notes, all in one place.</p></div>
+                    <div><h2 id="documents-title">Invoices</h2><p>Invoices, quotes and credit notes, all in one place.</p></div>
                     <button @click="newInvoice" aria-label="New document" class="overview-button primary"><span class="list-long-new">+ New document</span><span class="list-short-new" aria-hidden="true">+ New</span></button>
                 </div>
 
@@ -2317,7 +2331,7 @@
             <div v-show="activeTab === 'customers'" class="customers-page">
 
                 <div v-if="customerView === 'list' && customerContext" class="customer-detail">
-                    <button class="overview-button" @click="customerContextId = ''; $nextTick(() => $refs.customerListHeading.focus())">← All customers</button>
+                    <button class="overview-button" @click="navigateBack('customers')">← All customers</button>
                     <div class="customer-heading">
                         <div><h2 ref="customerContextHeading" tabindex="-1">{{ customerContext.name }}</h2><p v-if="customerContext.email">{{ customerContext.email }}</p><p v-if="customerContext.phone || customerContext.mobile">{{ customerContext.phone }} {{ customerContext.mobile }}</p><p v-if="customerContext.address">{{ customerContext.address }}</p></div>
                         <div class="customer-heading-actions"><button class="overview-button" @click="editCustomer(customerContext)">Edit customer</button><button class="overview-button primary" @click="goToCreate">Open document editor</button></div>
@@ -2333,10 +2347,10 @@
                         <section aria-labelledby="customer-documents-title"><h3 id="customer-documents-title">Recent documents</h3>
                             <p v-if="!customerContextDocuments.length" class="customer-context-note">No linked documents yet.</p>
                             <ul v-else class="customer-context-list" tabindex="0" aria-label="Customer documents"><li v-for="inv in customerContextDocuments" :key="inv.id"><button class="customer-document" @click="loadInvoice(inv)"><span><strong>{{ inv.number }}</strong><small>{{ docTypeNoun(inv.docType) }} · {{ inv.date }}</small></span><span>{{ overviewMoney(inv.totals.grandTotal, inv.currency) }} {{ inv.currency || 'GBP' }}<small>{{ effectiveStatus(inv) }}</small></span></button></li></ul>
-                            <p class="customer-context-note">Documents keep their original customer details. Older, unlinked records can still be found in Documents.</p>
+                            <p class="customer-context-note">Documents keep their original customer details. Older, unlinked records can still be found in Invoices.</p>
                         </section>
                         <section aria-labelledby="customer-recurring-title"><h3 id="customer-recurring-title">Recurring schedules</h3><p v-if="!customerContextSchedules.length" class="customer-context-note">No linked recurring schedules.</p>
-                            <div v-for="schedule in customerContextSchedules" :key="schedule.id" class="customer-schedule"><strong>{{ schedule.name || 'Recurring invoice' }}</strong><p>{{ recurFrequencyLabel(schedule) }} · {{ schedule.active ? 'Active' : 'Paused' }}<br>Next: {{ schedule.nextRun || 'Not scheduled' }} · Auto-email {{ schedule.emailEnabled ? 'on' : 'off' }}</p><button class="overview-button" @click="navigateTo('recurring'); editTemplate(schedule)">View schedule</button></div>
+                            <div v-for="schedule in customerContextSchedules" :key="schedule.id" class="customer-schedule"><strong>{{ schedule.name || 'Recurring invoice' }}</strong><p>{{ recurFrequencyLabel(schedule) }} · {{ schedule.active ? 'Active' : 'Paused' }}<br>Next: {{ schedule.nextRun || 'Not scheduled' }} · Auto-email {{ schedule.emailEnabled ? 'on' : 'off' }}</p><button class="overview-button" @click="openRecurringTemplate(schedule)">View schedule</button></div>
                         </section>
                         <section aria-labelledby="customer-activity-title"><h3 id="customer-activity-title">Recent activity</h3><p v-if="!customerContextActivity.length" class="customer-context-note">No recent activity on linked documents.</p>
                             <ul v-else class="customer-context-list" tabindex="0" aria-label="Customer recent activity"><li v-for="event in customerContextActivity" :key="event.key"><button class="customer-document" @click="loadInvoice(event.invoice)"><span><strong>{{ event.label }}</strong><small>{{ event.invoice.number }} · {{ formatDateTime(event.ts) }}</small></span><span aria-hidden="true">→</span></button></li></ul>
@@ -2381,7 +2395,7 @@
                                 <tr v-for="(customer, idx) in paginatedCustomers" :key="customer.id || idx" class="customer-record hover:bg-slate-50">
                                     <td class="p-4 align-top"><label class="record-select-control"><input type="checkbox" :aria-label="'Select ' + customer.name" :value="customer.id" v-model="selectedCustomers" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></label></td>
                                     <td class="p-4 align-top">
-                                        <button class="customer-name" @click="customerContextId = customer.id; $nextTick(() => $refs.customerContextHeading.focus())">{{ customer.name }}</button>
+                                        <button class="customer-name" @click="openCustomerContext(customer)">{{ customer.name }}</button>
                                         <div v-if="customer.taxId" class="text-xs text-slate-400 mt-1">Tax ID: {{ customer.taxId }}</div>
                                     </td>
                                     <td class="p-4 text-sm text-slate-600 align-top">
@@ -2425,7 +2439,7 @@
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Additional Info</label><textarea v-model="customerForm.additionalInfo" rows="3" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
                             <div class="pt-2 flex gap-3">
                                 <button @click="saveCustomer" :disabled="customerSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ customerSaveBusy ? 'Saving…' : 'Save Customer' }}</button>
-                                <button @click="backToCustomers" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
+                                <button @click="navigateBack('customers')" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
                             </div>
                         </div>
                     </div>
@@ -2502,7 +2516,7 @@
                             <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Default Price</label><input type="number" min="0" step="0.01" v-model.number="itemForm.price" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
                             <div class="pt-2 flex gap-3">
                                 <button @click="saveSavedItem" :disabled="itemSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ itemSaveBusy ? 'Saving…' : 'Save product or service' }}</button>
-                                <button @click="backToItems" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
+                                <button @click="navigateBack('items')" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
                             </div>
                         </div>
                     </div>
@@ -2747,7 +2761,7 @@
 
                         <div class="flex gap-3 pt-2 border-t border-slate-100">
                             <button @click="saveTemplate" :disabled="scheduleSaveBusy" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors mt-4 disabled:opacity-50">{{ scheduleSaveBusy ? 'Saving…' : 'Save Schedule' }}</button>
-                            <button @click="backToRecurring" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-lg font-medium transition-colors mt-4">Cancel</button>
+                            <button @click="navigateBack('recurring')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2.5 rounded-lg font-medium transition-colors mt-4">← Go back</button>
                         </div>
                     </div>
 
@@ -2897,8 +2911,8 @@
             </div>
         </main>
 
-        <div v-if="helpPanelOpen" class="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/60 p-0 sm:items-center sm:p-4" @click.self="closeHelpPanel">
-            <section ref="helpPanel" role="dialog" aria-modal="true" aria-labelledby="help-panel-title" tabindex="-1" @keydown.esc.stop="closeHelpPanel" class="max-h-[90vh] w-full overflow-y-auto rounded-t-2xl bg-white p-5 shadow-2xl sm:max-w-lg sm:rounded-2xl sm:p-7">
+        <div v-if="helpPanelOpen" class="help-dialog-backdrop" @click.self="closeHelpPanel">
+            <section ref="helpPanel" role="dialog" aria-modal="true" aria-labelledby="help-panel-title" tabindex="-1" @keydown.esc.stop="closeHelpPanel" class="help-dialog">
                 <div class="mb-5 flex items-start justify-between gap-4">
                     <div>
                         <h2 id="help-panel-title" class="text-xl font-semibold text-slate-900">Help &amp; install Tallyo</h2>
@@ -3015,6 +3029,12 @@
 
     const APP_BUILD = '2026.09.11.1';
     const { createApp } = Vue;
+    const closeOpenRecordMenus = event => {
+        document.querySelectorAll('details.record-menu[open]').forEach(menu => {
+            if (!menu.contains(event.target)) menu.removeAttribute('open');
+        });
+    };
+    document.addEventListener('click', closeOpenRecordMenus);
 
     const tallyoApp = createApp({
         data() {
@@ -3212,7 +3232,7 @@
             overviewNavigation() {
                 return [
                     { label: 'SALES', items: [
-                        { label: 'Documents', tab: 'invoices', icon: 'documents' },
+                        { label: 'Invoices', tab: 'invoices', icon: 'documents' },
                         { label: 'Customers', tab: 'customers', icon: 'customers' },
                         { label: 'Products & services', tab: 'items', icon: 'items' }
                     ] },
@@ -3228,7 +3248,7 @@
                 ];
             },
             overviewPageTitle() {
-                return { dashboard: 'Overview', invoices: 'Documents', create: 'Create document', edit: 'Edit document', customers: 'Customers', items: 'Products & services', recurring: 'Recurring', settings: 'Business settings', branding: 'Branding', account: 'Account', owner: 'Owner Console' }[this.activeTab] || 'Tallyo';
+                return { dashboard: 'Overview', invoices: 'Invoices', create: 'Create document', edit: 'Edit document', customers: 'Customers', items: 'Products & services', recurring: 'Recurring', settings: 'Business settings', branding: 'Branding', account: 'Account', owner: 'Owner Console' }[this.activeTab] || 'Tallyo';
             },
             overviewGreeting() {
                 const hour = new Date().getHours();
@@ -3575,7 +3595,6 @@
             }
         },
         watch: {
-            activeTab() { this.editorPreview = false; this.customerContextId = ''; },
             authMode(nextMode, previousMode) {
                 if (!this.turnstile.enabled || nextMode === previousMode) return;
                 this.removeTurnstileWidget();
@@ -3651,7 +3670,10 @@
             },
             overviewAct(item) {
                 if (item.kind === 'overdue') this.openReminder(item.invoice);
-                else if (item.template) { this.navigateTo('recurring'); this.editTemplate(item.template); }
+                else if (item.template) {
+                    this.writeNavigationState('dashboard', { replace: true });
+                    this.openRecurringTemplate(item.template);
+                }
                 else this.loadInvoice(item.invoice);
             },
             overviewSetupAction(step) {
@@ -3809,13 +3831,62 @@
             routeUrl(routeKey) {
                 return `${window.location.pathname}${window.location.search}#${routeKey}`;
             },
+            navigationState(routeKey, depth = null) {
+                const state = {
+                    tallyoNavigation: true,
+                    tallyoRouteKey: routeKey,
+                    tallyoDepth: depth === null ? Number(window.history.state?.tallyoDepth || 0) : depth
+                };
+                if (routeKey === 'customers-detail' && this.customerContextId) state.customerContextId = this.customerContextId;
+                if ((routeKey === 'edit' || routeKey === 'edit-preview') && this.editingExisting && this.draft?.id) state.documentId = this.draft.id;
+                if (routeKey === 'recurring-form' && this.editingTemplate !== null) state.recurringTemplateId = this.recurringTemplates[this.editingTemplate]?.id || null;
+                return state;
+            },
+            writeNavigationState(routeKey, options = {}) {
+                if (routeKey === 'customers' && this.customerView === 'list' && this.customerContextId) routeKey = 'customers-detail';
+                const currentDepth = Number(window.history.state?.tallyoDepth || 0);
+                const replace = options.replace === true || window.location.hash === `#${routeKey}`;
+                const state = this.navigationState(routeKey, replace ? currentDepth : currentDepth + 1);
+                window.history[replace ? 'replaceState' : 'pushState'](state, '', this.routeUrl(routeKey));
+            },
+            restoreNavigationState(state = window.history.state) {
+                const routeKey = state?.tallyoNavigation ? state.tallyoRouteKey : this.routeKeyFromHash();
+                if (routeKey === 'customers-detail') this.customerContextId = state?.customerContextId || this.customerContextId;
+                if ((routeKey === 'edit' || routeKey === 'edit-preview') && state?.documentId && this.draft?.id !== state.documentId) {
+                    const invoice = this.invoices.find(inv => inv.id === state.documentId);
+                    if (invoice) {
+                        this.draft = this.prepareInvoiceDraft(invoice);
+                        this.syncTimeFields();
+                        this.editingExisting = true;
+                    }
+                }
+                if (routeKey === 'recurring-form' && state?.recurringTemplateId) {
+                    const index = this.recurringTemplates.findIndex(template => template.id === state.recurringTemplateId);
+                    if (index >= 0 && (this.editingTemplate !== index || !this.recurringForm)) {
+                        this.recurringForm = JSON.parse(JSON.stringify(this.recurringTemplates[index]));
+                        this.editingTemplate = index;
+                        this.recurringView = 'form';
+                    }
+                }
+                this.applyRoute(this.tabFromRouteKey(routeKey), routeKey);
+                this.$nextTick(() => {
+                    if (routeKey === 'customers-detail') this.$refs.customerContextHeading?.focus();
+                    if (routeKey === 'customers') this.$refs.customerListHeading?.focus();
+                });
+            },
             applyRoute(tab, routeKey = null) {
                 let nextTab = this.routeTabs().includes(tab) ? tab : 'dashboard';
                 if (nextTab === 'edit' && !this.editingExisting) nextTab = 'invoices';
                 this.activeTab = nextTab;
                 this.mobileMenuOpen = false;
                 const key = routeKey || nextTab;
-                if (nextTab === 'customers' && !(key === 'customers-form' && this.customerView === 'form')) this.customerView = 'list';
+                this.editorPreview = ['create-preview', 'edit-preview'].includes(key) && ['create', 'edit'].includes(nextTab);
+                if (nextTab === 'customers') {
+                    const keepForm = key === 'customers-form' && this.customerView === 'form';
+                    const keepDetail = key === 'customers-detail' && this.customerContext;
+                    if (!keepForm) this.customerView = 'list';
+                    if (!keepDetail && !keepForm) this.customerContextId = '';
+                }
                 if (nextTab === 'items' && !(key === 'items-form' && this.itemView === 'form')) this.itemView = 'list';
                 if (nextTab === 'recurring') {
                     const keepForm = key === 'recurring-form' && this.recurringView === 'form' && this.recurringForm;
@@ -3827,28 +3898,48 @@
                 }
             },
             setRouteKey(routeKey, options = {}) {
-                const nextHash = `#${routeKey}`;
-                if (window.location.hash === nextHash) return;
-                if (options.replace) {
-                    window.history.replaceState(null, '', this.routeUrl(routeKey));
-                } else {
-                    window.location.hash = routeKey;
-                }
+                this.writeNavigationState(routeKey, options);
             },
             navigateTo(tab, options = {}) {
-                this.applyRoute(tab);
-                const nextHash = `#${this.activeTab}`;
-                if (window.location.hash === nextHash) return;
-                if (options.replace) {
-                    window.history.replaceState(null, '', this.routeUrl(this.activeTab));
-                } else {
-                    window.location.hash = this.activeTab;
-                }
+                const routeKey = options.routeKey || tab;
+                this.applyRoute(tab, routeKey);
+                this.writeNavigationState(this.activeTab === tab ? routeKey : this.activeTab, options);
             },
             handleHashChange() {
                 if (!this.isLoggedIn) return;
-                const routeKey = this.routeKeyFromHash();
-                this.applyRoute(this.tabFromRouteKey(routeKey), routeKey);
+                this.restoreNavigationState(window.history.state);
+            },
+            handlePopState(event) {
+                if (!this.isLoggedIn) return;
+                this.restoreNavigationState(event.state);
+            },
+            navigateBack(fallbackRoute) {
+                if (window.history.state?.tallyoNavigation && Number(window.history.state.tallyoDepth || 0) > 0) {
+                    window.history.back();
+                    return;
+                }
+                this.navigateTo(this.tabFromRouteKey(fallbackRoute), { routeKey: fallbackRoute, replace: true });
+            },
+            openCustomerContext(customer) {
+                this.customerView = 'list';
+                this.customerContextId = customer?.id || '';
+                this.setRouteKey('customers-detail');
+                this.$nextTick(() => this.$refs.customerContextHeading?.focus());
+            },
+            openRecurringTemplate(template) {
+                this.recurringForm = JSON.parse(JSON.stringify(template));
+                this.editingTemplate = this.recurringTemplates.indexOf(template);
+                this.recurringView = 'form';
+                this.applyRoute('recurring', 'recurring-form');
+                this.setRouteKey('recurring-form');
+            },
+            toggleEditorPreview() {
+                if (this.editorPreview) {
+                    this.navigateBack(this.activeTab);
+                    return;
+                }
+                this.editorPreview = true;
+                this.setRouteKey(`${this.activeTab}-preview`);
             },
             ownerRecoveryTokenFromHash() {
                 const hash = String(window.location.hash || '');
@@ -7430,6 +7521,7 @@
         },
         async mounted() {
             window.addEventListener('hashchange', this.handleHashChange);
+            window.addEventListener('popstate', this.handlePopState);
             this.ownerMfaRecovery.token = this.ownerRecoveryTokenFromHash();
             this.beforeInstallPromptHandler = (event) => {
                 event.preventDefault();
@@ -7484,6 +7576,7 @@
         },
         beforeUnmount() {
             window.removeEventListener('hashchange', this.handleHashChange);
+            window.removeEventListener('popstate', this.handlePopState);
             if (this.beforeInstallPromptHandler) window.removeEventListener('beforeinstallprompt', this.beforeInstallPromptHandler);
             if (this.appInstalledHandler) window.removeEventListener('appinstalled', this.appInstalledHandler);
             if (this.accessibleLabelObserver) this.accessibleLabelObserver.disconnect();

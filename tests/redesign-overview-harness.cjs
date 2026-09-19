@@ -93,13 +93,14 @@ assert.equal(model().overviewActivity.length, 0);
 
 const actions = [];
 state.navigateTo = tab => actions.push(['navigate', tab]);
+state.writeNavigationState = (route, options) => actions.push(['record-return', route, options]);
 state.openReminder = inv => actions.push(['review-reminder', inv.id]);
 state.loadInvoice = inv => actions.push(['open-document', inv.id]);
-state.editTemplate = template => actions.push(['open-schedule', template.id]);
+state.openRecurringTemplate = template => actions.push(['open-schedule', template.id]);
 state.overviewAct({ kind: 'overdue', invoice: { id: 'one' } });
 state.overviewAct({ template: { id: 'schedule' } });
 state.overviewAct({ kind: 'dispute', invoice: { id: 'one' } });
-assert.deepEqual(actions, [['review-reminder', 'one'], ['navigate', 'recurring'], ['open-schedule', 'schedule'], ['open-document', 'one']]);
+assert.deepEqual(actions, [['review-reminder', 'one'], ['record-return', 'dashboard', { replace: true }], ['open-schedule', 'schedule'], ['open-document', 'one']]);
 state.overviewNavigate({ tab: 'invoices', reminders: true });
 assert.equal(state.invoiceStatusFilter, 'Overdue'); assert.equal(state.invoiceTypeFilter, 'invoice');
 state.overviewNavigate({ tab: 'invoices' });
@@ -109,4 +110,6 @@ assert.equal(state.overviewDocumentLabel({ number: 'INV-1042', docType: 'invoice
 assert.equal(state.overviewDocumentLabel({ number: '1042', docType: 'invoice' }), 'Invoice #1042');
 const overviewSource = block('            overviewNavigation()', '            brandColor()') + block('            overviewIcon(name)', '            showAppNotice(');
 assert.doesNotMatch(overviewSource, /functions\.invoke|supabaseClient|fetch\(|sendReminderEmail\(|trackEvent\(|gtag\(/, 'Overview selectors/actions must not add provider, email, payment or analytics calls');
+assert.match(overviewSource, /label: 'Invoices', tab: 'invoices'/);
+assert.match(overviewSource, /item\.template\)[\s\S]*?writeNavigationState\('dashboard', \{ replace: true \}\)[\s\S]*?openRecurringTemplate\(item\.template\)/);
 console.log('Overview harness passed: currency separation, existing financial semantics, net payments, UTC week boundaries, eligible attention, evidence-based quote age/setup/activity, empty states and review-only actions.');
