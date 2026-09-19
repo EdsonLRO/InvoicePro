@@ -66,6 +66,9 @@ jobs:
           deno test --allow-read tests/owner-console-runtime-test.ts
           node tests/pwa-update-harness.cjs
           node tests/preview-acceptance-readiness-harness.cjs
+          node tests/quote-acceptance-runtime-harness.cjs
+          node tests/quote-acceptance-ui-harness.cjs
+          node tests/quote-access-runtime-test.mjs
           node tests/refund-consequence-preview-harness.cjs
           node tests/recurring-calendar-reliability-harness.cjs
           node tests/scale-accessibility-safety-harness.cjs
