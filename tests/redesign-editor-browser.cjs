@@ -131,6 +131,11 @@ const path = require('node:path');
     await page.setViewportSize({ width: 390, height: 1000 });
     await page.reload(); await page.locator('#preview-warning').waitFor();
     assert.equal(await form.locator('details[open]').count(), 0);
+    const mobileSummary = page.locator('.editor-summary');
+    assert.ok(await mobileSummary.isVisible(), 'mobile summary is visible in the form flow');
+    const mobileCreateFlow = await Promise.all([notes, mobileSummary, form.locator('.editor-save-row')].map(locator => locator.boundingBox()));
+    assert.ok(mobileCreateFlow[1].y >= mobileCreateFlow[0].y + mobileCreateFlow[0].height, 'mobile Summary follows Notes');
+    assert.ok(mobileCreateFlow[2].y >= mobileCreateFlow[1].y + mobileCreateFlow[1].height, 'mobile save row follows Summary');
     await page.screenshot({ path: path.join(root, 'tmp/redesign-evidence/step4-mobile-editor.png') });
     await items.locator('summary').click();
     assert.ok(await item.getByLabel('Description').isVisible());
@@ -169,6 +174,11 @@ const path = require('node:path');
     }
     await paymentPanel.locator('summary').click();
     await page.setViewportSize({ width: 390, height: 1000 });
+    const mobileExistingFlow = await Promise.all([notes, mobileSummary, form.locator('.editor-save-row'), paymentPanel, activityPanel].map(locator => locator.boundingBox()));
+    assert.ok(mobileExistingFlow[1].y >= mobileExistingFlow[0].y + mobileExistingFlow[0].height, 'existing mobile Summary follows Notes');
+    assert.ok(mobileExistingFlow[2].y >= mobileExistingFlow[1].y + mobileExistingFlow[1].height, 'existing mobile save row follows Summary');
+    assert.ok(mobileExistingFlow[3].y >= mobileExistingFlow[2].y + mobileExistingFlow[2].height, 'existing mobile Payments follows the save row');
+    assert.ok(mobileExistingFlow[4].y >= mobileExistingFlow[3].y + mobileExistingFlow[3].height, 'existing mobile Activity follows Payments');
     // Actual multi-page PDF download from the same draft, with no regeneration on Preview.
     await vmRead("vm.draft.items = Array.from({length:24}, (_,i) => ({name:'Fictional service '+(i+1),qty:1,unit:'day',price:100,discount:0,tax:20}))");
     const pdfWait = page.waitForEvent('download');
