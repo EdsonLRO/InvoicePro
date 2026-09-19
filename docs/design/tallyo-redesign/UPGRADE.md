@@ -1,6 +1,6 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Steps 1–5 approved and merged only into the non-production integration branch. [PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160) merged as `937184956e7ad8024f19141443df03aa613fb4a2`. Step 6 review corrections for contextual Back navigation (`c0d8004`) and outside-click More-menu dismissal (`cd1ad16`) are committed in [draft PR #161](https://github.com/EdsonLRO/InvoicePro/pull/161) and locally verified. STOP before Step 6 acceptance, Step 7, main merge or deployment.
+Status: Steps 1–5 approved and merged only into the non-production integration branch. [PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160) merged as `937184956e7ad8024f19141443df03aa613fb4a2`. Step 6 review corrections for contextual Back navigation (`c0d8004`), outside-click More-menu dismissal (`cd1ad16`) and the full-width Payments/Activity editor flow (`8d04b17`) are committed in [draft PR #161](https://github.com/EdsonLRO/InvoicePro/pull/161) and locally verified. STOP before Step 6 acceptance, Step 7, main merge or deployment.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
 Risk: Medium client-side route/history presentation; no backend, Auth, provider, financial or persistence change.
@@ -272,13 +272,15 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 ### Step 6 — feature-frozen acceptance
 
-**Candidate:** Step 5 integration `937184956e7ad8024f19141443df03aa613fb4a2` plus the bounded contextual navigation correction `c0d8004348550a1505ee05beb3362bda3a9f0b70` and outside-click More-menu correction `cd1ad16`. The corrected local preview artifact revision is `56ef7ac2273eb7bc80c6e0f41d82de916decc51330d44dc108b026921acbf44e`. No further feature is bundled into acceptance.
+**Candidate:** Step 5 integration `937184956e7ad8024f19141443df03aa613fb4a2` plus the bounded contextual navigation correction `c0d8004348550a1505ee05beb3362bda3a9f0b70`, outside-click More-menu correction `cd1ad16` and editor-flow refinement `8d04b17`. The corrected local preview artifact revision is `654dd58cf50b3faec268c3a9259a8d73f705a91057b8ec829f28559622b1ccaa`. No further feature is bundled into acceptance.
 
 **Result updated 19 September 2026:** no remaining blocking regression found in the exercised scope. All 36 existing Node CI harnesses, all five isolated Chromium browser suites and all four website test groups pass. The corrected tests exercise native browser Back and Forward across customer detail → document editor, customer detail → recurring schedule and editor → Preview, plus the matching in-app Back/Cancel controls. Both hosted checks passed on implementation commit `cd1ad16` ([run 35442586348](https://github.com/EdsonLRO/InvoicePro/actions/runs/35442586348), [run 35442588332](https://github.com/EdsonLRO/InvoicePro/actions/runs/35442588332)). No failing assertion was removed or weakened.
 
 **Navigation review refinement:** each app history entry now records its route and the minimum relevant record identifier. Returning from a linked document or schedule restores the same customer detail; Forward restores the same schedule; Preview has its own history entry so Back returns to the same unsaved editor. Customer, product/service and recurring Cancel actions use the same bounded app history with a safe section fallback. Only the reviewed navigation block and popstate listeners changed. A normalised hash keeps every other existing method/startup byte frozen to the Step 4 baseline; the printable template hash is unchanged.
 
 **Menu dismissal review refinement:** every record-action `More` menu now closes after a click elsewhere in Tallyo. Its existing summary toggle, menu actions and Escape-key focus return remain intact. Focused browser assertions cover the invoice editor and Documents list, including reopening actions after an outside click; no document action or provider behaviour changed.
+
+**Editor-flow review refinement:** Payments and Activity History now continue the main editor column immediately after Notes and the save row, with the same width and expandable-section treatment as the preceding editor sections. Summary, Recurring and Overdue reminders remain grouped in the contextual right rail on desktop and follow the document activity on narrow screens. Existing payment, Stripe, activity and save handlers are unchanged; geometry assertions cover desktop alignment, flow order and 320–1440px overflow.
 
 | Coverage | Evidence | Boundary |
 |---|---|---|
