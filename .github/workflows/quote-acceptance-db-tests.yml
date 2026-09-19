@@ -47,7 +47,12 @@ jobs:
             "$image"
 
           for attempt in $(seq 1 30); do
-            if docker exec "$container" pg_isready --username postgres --dbname tallyo_quote; then
+            ready_count=$(docker logs "$container" 2>&1 \
+              | grep --count 'database system is ready to accept connections' || true)
+            if [ "$ready_count" -ge 2 ] \
+              && docker exec "$container" \
+                psql --username postgres --dbname tallyo_quote \
+                --tuples-only --command 'select 1' >/dev/null; then
               break
             fi
             if [ "$attempt" -eq 30 ]; then
