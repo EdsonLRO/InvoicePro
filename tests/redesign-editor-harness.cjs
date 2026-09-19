@@ -5,10 +5,16 @@ const { createHash } = require('node:crypto');
 const app = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
 const hash = source => createHash('sha256').update(source.replace(/\r\n/g, '\n').trim()).digest('hex');
 
-// Step 4 is presentation-only. These baseline hashes (integration c756f24)
-// deliberately fail if handlers or printable content change. A later approved
-// behaviour change must review and replace this guard, not silently update it.
-assert.equal(hash(app.slice(app.indexOf('        methods: {'))), '99862950887320c853dc07cf5fbe80de330361e8af1dcc94787bf65e67ef564e', 'existing methods/startup must remain unchanged');
+// The approved navigation refinement changes only the contiguous route/history
+// block and its popstate listeners. Keep every other existing method/startup byte
+// frozen against integration c756f24, and exercise the navigation block below.
+let protectedMethods = app.slice(app.indexOf('        methods: {'));
+const navigationStart = protectedMethods.indexOf('            routeTabs()');
+const navigationEnd = protectedMethods.indexOf('            ownerRecoveryTokenFromHash()', navigationStart);
+assert.ok(navigationStart >= 0 && navigationEnd > navigationStart, 'reviewed navigation block must remain bounded');
+protectedMethods = protectedMethods.slice(0, navigationStart) + '            /* navigation methods reviewed separately */\n' + protectedMethods.slice(navigationEnd);
+protectedMethods = protectedMethods.replace(/\r?\n\s*window\.(addEventListener|removeEventListener)\('popstate', this\.handlePopState\);/g, '');
+assert.equal(hash(protectedMethods), 'db3952fa253a82879412ac1ff1f5e22e33a993b99f0df370fee0cd0c16751b50', 'all non-navigation methods/startup must remain unchanged');
 const canvasStart = app.indexOf('\n', app.indexOf('<div id="invoice-canvas"'));
 const canvasEnd = app.indexOf('\n                </div>', app.indexOf('company.invoiceFooter', canvasStart)) + 23;
 assert.equal(hash(app.slice(canvasStart, canvasEnd)), 'd478ee1f800c304a181747174eeb2ee4c8fa37a4ab0c294eaf8ac18eaa9187d6', 'printable document content must remain unchanged');
@@ -24,4 +30,9 @@ assert.match(editor, /company\.paymentDetails/);
 assert.match(editor, /role="switch" aria-label="Recurring invoice"/);
 assert.match(editor, /role="switch" aria-label="Overdue reminders"/);
 assert.match(editor, /Done editing items/);
-console.log('Step 4 contracts passed: unchanged handler/startup and printable-template hashes, one PDF canvas, complete editor bindings, explicit save/review, accessible automation controls.');
+assert.match(app, /@click="toggleEditorPreview"/);
+assert.match(app, /handlePopState\(event\)[\s\S]*?restoreNavigationState\(event\.state\)/);
+assert.match(app, /toggleEditorPreview\(\)[\s\S]*?setRouteKey\(`\$\{this\.activeTab\}-preview`\)/);
+assert.match(app, /window\.addEventListener\('popstate', this\.handlePopState\)/);
+assert.match(app, /window\.removeEventListener\('popstate', this\.handlePopState\)/);
+console.log('Step 4 contracts passed: non-navigation handler/startup and printable-template hashes, reviewed history routing, one PDF canvas, complete editor bindings, explicit save/review, accessible automation controls.');

@@ -59,11 +59,17 @@ const path = require('node:path');
     // Preparation and preview must not save, send, or alter the draft.
     const before = await vmRead('JSON.stringify(vm.draft)');
     await page.locator('.editor-header').getByRole('button', { name: 'Preview', exact: true }).click();
+    await page.waitForURL('**/#create-preview');
     assert.equal(await vmRead('JSON.stringify(vm.draft)'), before);
     assert.ok(await page.locator('#invoice-canvas').isVisible());
     assert.match(await page.locator('#invoice-canvas').innerText(), /Thank you for your business/);
     assert.equal(await page.locator('#invoice-canvas input:visible').count(), 0);
+    await page.goBack(); await page.waitForURL('**/#create');
+    assert.ok(await form.isVisible(), 'browser Back returns from Preview to the same editor');
+    assert.equal(await vmRead('JSON.stringify(vm.draft)'), before);
+    await page.goForward(); await page.waitForURL('**/#create-preview');
     await page.locator('.editor-header').getByRole('button', { name: 'Back to editing' }).click();
+    await page.waitForURL('**/#create');
     assert.equal(await vmRead('JSON.stringify(vm.draft)'), before);
     await page.locator('.editor-header').getByRole('button', { name: 'Review & send' }).click();
     assert.equal(await vmRead('vm.documentEmailModal.includeOnlinePayment'), false);
@@ -162,6 +168,6 @@ const path = require('node:path');
     assert.equal(await vmRead('vm.draft.items.length'), 24);
     assert.equal(await vmRead('vm.activeTab'), 'edit');
     assert.deepEqual(errors, []); assert.deepEqual(outside, []);
-    console.log('Step 4 browser passed: editor fields, catalogue reuse, time/custom units, discounts/tax/shipping, notes/terms, preview retention, review-only email, invalid save, keyboard controls, 320–1440px layouts, touch targets, multi-page PDF, zero external requests/errors.');
+    console.log('Step 4 browser passed: editor fields, catalogue reuse, time/custom units, discounts/tax/shipping, notes/terms, exact Back/Forward preview retention, review-only email, invalid save, keyboard controls, 320–1440px layouts, touch targets, multi-page PDF, zero external requests/errors.');
   } finally { await context.close(); await browser.close(); await new Promise(resolve => server.close(resolve)); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
