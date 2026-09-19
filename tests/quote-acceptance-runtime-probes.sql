@@ -189,7 +189,7 @@ $$;
 
 alter table public.audit_events
     add constraint quote_acceptance_rollback_probe
-    check (event_type <> 'quote_accepted');
+    check (event_type <> 'quote_accepted') not valid;
 
 do $$
 begin
