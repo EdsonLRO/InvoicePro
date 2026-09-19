@@ -1,5 +1,13 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-STATUS-001 — Document status rules
+
+Status: specification and executable scenario matrix prepared for Owner review; runtime behaviour is unchanged.
+Owner: Codex, sequential product-rule inventory and QA. Risk: High for the later implementation because payment/refund-derived state spans browser and signed Stripe webhook paths; this specification phase is read-only with respect to those paths.
+Branch: `codex/document-status-rules`, from production merge `e900694`.
+Scope/lock: `docs/design/tallyo-redesign/DOCUMENT_STATUS_RULES.md`, the controlled-upgrade pointer, this active-task pointer and the focused specification harness. No application, SQL, Edge Function, provider, payment, refund, email, Auth, subscription, entitlement or production change.
+Review gate: approve or revise the three product decisions covering derived Paid, overdue-part-paid precedence and cancellation with payment/refund history. Implementation remains a later controlled slice and must stop again before any backend alignment, merge or production release.
+
 ## UX-REDESIGN-001 — Controlled redesign release and list-card follow-up
 
 Status: PR #164 merged as `06d718d` and build `2026.09.19.3` is verified in production at Cloudflare deployment `9690dc1c-2ab5-42ae-a88f-bbb79cab46a7`. The Owner approved PR #165 and app build `2026.09.19.4` for the focused customer and Products & services list-card presentation; rollback is the retained `9690dc1c` deployment and build `2026.09.19.3`.

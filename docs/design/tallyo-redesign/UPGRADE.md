@@ -324,6 +324,10 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 Each later release repeats preview, tests, Owner review, compatible rollback planning and separate production approval. These are planned, not authorised implementations.
 
+### Status rules — specification phase
+
+The focused review specification is [DOCUMENT_STATUS_RULES.md](DOCUMENT_STATUS_RULES.md). It records the current inconsistencies, recommended user-controlled lifecycle, derived invoice states, quote/credit boundaries, historical Paid compatibility and a controlled implementation order. `tests/document-status-rules-spec-harness.cjs` provides an executable 14-scenario product-rule matrix and characterises the current status-writing boundaries. No runtime, persistence, database, provider or production behaviour changes in this phase. Stop for Owner review of the three explicit product decisions before implementation.
+
 ## 6. Rollback and known gaps
 
 - Keep the existing backend and provider configuration unchanged for Release 1. Restore a compatible frontend artifact at the same canonical domain if release validation fails; do not route users to an obsolete GitHub Pages origin by assumption.
