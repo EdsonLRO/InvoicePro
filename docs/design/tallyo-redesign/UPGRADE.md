@@ -1,6 +1,6 @@
 # Tallyo controlled upgrade — single working checklist
 
-Status: Steps 1–5 approved and merged only into the non-production integration branch. [PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160) merged as `937184956e7ad8024f19141443df03aa613fb4a2`. Owner review of Step 6 found a contextual Back-navigation defect; the correction is committed as `c0d8004` in [draft PR #161](https://github.com/EdsonLRO/InvoicePro/pull/161) and locally verified. STOP before Step 6 acceptance, Step 7, main merge or deployment.
+Status: Steps 1–5 approved and merged only into the non-production integration branch. [PR #160](https://github.com/EdsonLRO/InvoicePro/pull/160) merged as `937184956e7ad8024f19141443df03aa613fb4a2`. Step 6 review corrections for contextual Back navigation (`c0d8004`) and outside-click More-menu dismissal (`cd1ad16`) are committed in [draft PR #161](https://github.com/EdsonLRO/InvoicePro/pull/161) and locally verified. STOP before Step 6 acceptance, Step 7, main merge or deployment.
 Recorded: 12 September 2026.
 Owner: Codex, sequential development, provider verification and QA.
 Risk: Medium client-side route/history presentation; no backend, Auth, provider, financial or persistence change.
@@ -272,11 +272,13 @@ All document types/currencies/status choices, numbering/dates/reference, custome
 
 ### Step 6 — feature-frozen acceptance
 
-**Candidate:** Step 5 integration `937184956e7ad8024f19141443df03aa613fb4a2` plus the bounded contextual navigation correction `c0d8004348550a1505ee05beb3362bda3a9f0b70`. The corrected local preview artifact revision is `5390e9f42c75a9aa543f5d8e9f01e20bf3fd2286566ff1de3493fa7eba845f88`. No further feature is bundled into acceptance.
+**Candidate:** Step 5 integration `937184956e7ad8024f19141443df03aa613fb4a2` plus the bounded contextual navigation correction `c0d8004348550a1505ee05beb3362bda3a9f0b70` and outside-click More-menu correction `cd1ad16`. The corrected local preview artifact revision is `56ef7ac2273eb7bc80c6e0f41d82de916decc51330d44dc108b026921acbf44e`. No further feature is bundled into acceptance.
 
 **Result updated 19 September 2026:** no remaining blocking regression found in the exercised scope. All 36 existing Node CI harnesses, all five isolated Chromium browser suites and all four website test groups pass. The corrected tests exercise native browser Back and Forward across customer detail → document editor, customer detail → recurring schedule and editor → Preview, plus the matching in-app Back/Cancel controls. No failing assertion was removed or weakened.
 
 **Navigation review refinement:** each app history entry now records its route and the minimum relevant record identifier. Returning from a linked document or schedule restores the same customer detail; Forward restores the same schedule; Preview has its own history entry so Back returns to the same unsaved editor. Customer, product/service and recurring Cancel actions use the same bounded app history with a safe section fallback. Only the reviewed navigation block and popstate listeners changed. A normalised hash keeps every other existing method/startup byte frozen to the Step 4 baseline; the printable template hash is unchanged.
+
+**Menu dismissal review refinement:** every record-action `More` menu now closes after a click elsewhere in Tallyo. Its existing summary toggle, menu actions and Escape-key focus return remain intact. Focused browser assertions cover the invoice editor and Documents list, including reopening actions after an outside click; no document action or provider behaviour changed.
 
 | Coverage | Evidence | Boundary |
 |---|---|---|
