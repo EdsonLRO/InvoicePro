@@ -3015,6 +3015,12 @@
 
     const APP_BUILD = '2026.09.11.1';
     const { createApp } = Vue;
+    const closeOpenRecordMenus = event => {
+        document.querySelectorAll('details.record-menu[open]').forEach(menu => {
+            if (!menu.contains(event.target)) menu.removeAttribute('open');
+        });
+    };
+    document.addEventListener('click', closeOpenRecordMenus);
 
     const tallyoApp = createApp({
         data() {

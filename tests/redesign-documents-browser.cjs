@@ -69,9 +69,11 @@ const path = require('node:path');
     assert.equal(await records.count(), 5, 'issued document deletion is still blocked');
     const dismissNotice = page.getByRole('button', { name: 'Dismiss notification' });
     if (await dismissNotice.isVisible()) await dismissNotice.click();
+    await target.locator('summary').click();
     await target.getByRole('button', { name: 'Email', exact: true }).click();
     assert.ok(await page.getByRole('heading', { name: 'Email Invoice', exact: true }).isVisible());
     await page.getByRole('button', { name: 'Cancel', exact: true }).filter({ visible: true }).click();
+    await target.locator('summary').click();
     const pdfWait = page.waitForEvent('download');
     await target.getByRole('button', { name: 'Download PDF', exact: true }).click();
     const pdf = await pdfWait;
@@ -118,6 +120,9 @@ const path = require('node:path');
         if ([390, 1440].includes(width) && await record.locator('.record-open').innerText() === await records.first().locator('.record-open').innerText()) {
           await page.screenshot({ path: path.join(root, `tmp/redesign-evidence/step3-more-menu-${width}.png`) });
         }
+        await docs.getByRole('heading', { name: 'Documents', exact: true }).click();
+        assert.equal(await record.locator('details').getAttribute('open'), null, 'More closes after an outside click');
+        await record.locator('summary').click();
         await record.locator('summary').focus(); await page.keyboard.press('Escape');
       }
     }

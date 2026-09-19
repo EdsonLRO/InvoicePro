@@ -35,4 +35,6 @@ assert.match(app, /handlePopState\(event\)[\s\S]*?restoreNavigationState\(event\
 assert.match(app, /toggleEditorPreview\(\)[\s\S]*?setRouteKey\(`\$\{this\.activeTab\}-preview`\)/);
 assert.match(app, /window\.addEventListener\('popstate', this\.handlePopState\)/);
 assert.match(app, /window\.removeEventListener\('popstate', this\.handlePopState\)/);
+assert.match(app, /closeOpenRecordMenus = event =>[\s\S]*?details\.record-menu\[open\][\s\S]*?!menu\.contains\(event\.target\)/);
+assert.match(app, /document\.addEventListener\('click', closeOpenRecordMenus\)/);
 console.log('Step 4 contracts passed: non-navigation handler/startup and printable-template hashes, reviewed history routing, one PDF canvas, complete editor bindings, explicit save/review, accessible automation controls.');
