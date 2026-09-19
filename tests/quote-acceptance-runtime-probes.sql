@@ -51,6 +51,13 @@ insert into public.invoices (
     'quote', 'QUO-0220', 'Sent', current_date, current_date + 10, 'GBP',
     '{"name":"Rollback example (fictional)"}', '[]', 100,
     repeat('e', 64), now(), now() + interval '10 days', 1
+),
+(
+    'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa6',
+    '11111111-1111-4111-8111-111111111111',
+    'quote', 'QUO-0221', 'Sent', current_date, current_date + 10, 'GBP',
+    '{"name":"Concurrent acceptance example (fictional)"}', '[]', 250,
+    repeat('f', 64), now(), now() + interval '10 days', 1
 );
 
 do $$

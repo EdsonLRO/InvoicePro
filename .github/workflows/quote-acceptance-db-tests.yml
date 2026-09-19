@@ -1,0 +1,76 @@
+name: Quote acceptance database tests
+
+on:
+  pull_request:
+    branches:
+      - codex/quote-acceptance-spec
+    paths:
+      - '.github/workflows/quote-acceptance-db-tests.yml'
+      - 'supabase/migrations/20260919195917_quote_acceptance_runtime.sql'
+      - 'tests/quote-acceptance-*.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quote-acceptance-db-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          persist-credentials: false
+
+      - name: Run disposable PostgreSQL probes
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          image='postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94'
+          container="tallyo-quote-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+          cleanup() {
+            docker rm -f "$container" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          docker run --detach --name "$container" \
+            --env POSTGRES_PASSWORD=postgres \
+            --env POSTGRES_DB=tallyo_quote \
+            "$image"
+
+          for attempt in $(seq 1 30); do
+            if docker exec "$container" pg_isready --username postgres --dbname tallyo_quote; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo 'Disposable PostgreSQL did not become ready.' >&2
+              exit 1
+            fi
+            sleep 1
+          done
+
+          psql_file() {
+            docker exec --interactive "$container" \
+              psql --username postgres --dbname tallyo_quote --set ON_ERROR_STOP=1 \
+              < "$1"
+          }
+
+          psql_file tests/quote-acceptance-local-bootstrap.sql
+          psql_file supabase/migrations/20260919195917_quote_acceptance_runtime.sql
+          psql_file tests/quote-acceptance-runtime-probes.sql
+
+          psql_file tests/quote-acceptance-concurrency-a.sql &
+          first_pid=$!
+          sleep 0.25
+          psql_file tests/quote-acceptance-concurrency-b.sql
+          wait "$first_pid"
+
+          psql_file tests/quote-acceptance-concurrency-verify.sql
