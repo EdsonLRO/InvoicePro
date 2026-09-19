@@ -1,5 +1,24 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-QUOTE-003 — Disabled quote acceptance UI slice
+
+Task ID: UX-QUOTE-003
+Title: Add the default-off customer quote page and minimal owner controls
+Priority: High
+Status: Repository candidate implemented; source gate remains off and nothing is deployed
+Phase: Controlled UI integration
+Owner role: Product owner
+Risk level: High because the UI exposes the signed-out token boundary prepared in `UX-QUOTE-002`
+Branch: `codex/quote-acceptance-ui`, stacked on runtime commit `7f3d20c`
+Scope: static `/quote/` customer page; gated owner link controls; Cloudflare build/header/redirect integration; customer-route service-worker exclusion; account-export token-hash redaction; focused static and browser tests; CI registration and this task record
+Product boundary: customer actions are view, accept, decline and view linked invoice. Acceptance captures the entered name, uses the server timestamp and displays the automatically created invoice. Owner controls create/copy or revoke a link and open the linked invoice; they do not send an email.
+Security boundary: the raw token remains in the URL fragment and request body only, is never logged or persisted by browser code, and is omitted from account exports. The public page has no signed-in app shell, Analytics, third-party script or service-worker cache/fallback. Owner actions still require the reviewed authenticated function.
+Privacy boundary: no IP address, fingerprint, decline reason, marketing data, payment data or Analytics event is added. The public shell contains no customer data; all text is inserted with DOM `textContent`.
+Release gate: `TALLYO_QUOTE_ACCEPTANCE_ENABLED` defaults false in source and the Pages build rejects an enabled value unless `TALLYO_QUOTE_ACCEPTANCE_PUBLIC_RELEASE_APPROVED=true` is separately supplied.
+Validation: the focused source harness, Cloudflare fail-closed/approved build permutations, all direct Node CI harnesses, website suite, existing Deno runtime tests and both quote-function frozen-lock checks pass. Headless Chrome at 390 px passes keyboard validation, accept, linked invoice, decline, horizontal overflow and zero outside requests; the fictional-data capture was also visually inspected. The sandboxed Deno runner hit a Windows IPC-handle panic, then the same tests passed outside the sandbox; this is tooling evidence, not an application failure.
+Approval boundary: repository implementation, tests, commit, push and a draft stacked pull request are authorised. Stop before merge, migration application, Edge Function deployment, public gate activation, Pages release, email, payment or provider/configuration change.
+Next action: inspect and commit the final diff, prepare a draft stacked pull request, then repeat focused security review on the immutable integrated candidate before any release decision.
+
 ## UX-QUOTE-002 — Quote acceptance runtime foundation
 
 Task ID: UX-QUOTE-002

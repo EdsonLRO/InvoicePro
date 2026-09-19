@@ -6,9 +6,23 @@ const app = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
 const hash = source => createHash('sha256').update(source.replace(/\r\n/g, '\n').trim()).digest('hex');
 
 // The reviewed interaction refinements change the contiguous route/history block,
-// its popstate listeners and the bounded Overview schedule action. Keep every other
-// existing method/startup byte frozen, and exercise the reviewed blocks separately.
+// its popstate listeners, the bounded Overview schedule action, and the source-gated
+// quote-access/export blocks. Keep every other method/startup byte frozen and
+// exercise each reviewed block separately.
 let protectedMethods = app.slice(app.indexOf('        methods: {'));
+protectedMethods = protectedMethods.replace(/\r?\n\s*this\.resetQuoteAcceptance\(\);/, '');
+const accountExportStart = protectedMethods.indexOf('            async exportAccountData()');
+const accountExportEnd = protectedMethods.indexOf('            cloneCompanyForAudit(', accountExportStart);
+assert.ok(accountExportStart >= 0 && accountExportEnd > accountExportStart, 'reviewed account export redaction must remain bounded');
+protectedMethods = protectedMethods.slice(0, accountExportStart) + '            /* account export token redaction reviewed separately */\n' + protectedMethods.slice(accountExportEnd);
+const quoteAccessStart = protectedMethods.indexOf('            resetQuoteAcceptance()');
+const quoteAccessEnd = protectedMethods.indexOf('            async deleteInvoice(', quoteAccessStart);
+assert.ok(quoteAccessStart >= 0 && quoteAccessEnd > quoteAccessStart, 'reviewed quote access UI methods must remain bounded');
+protectedMethods = protectedMethods.slice(0, quoteAccessStart) + '            /* quote acceptance UI methods reviewed separately */\n' + protectedMethods.slice(quoteAccessEnd);
+const quoteRowMapStart = protectedMethods.indexOf('            rowToInvoice(r)');
+const quoteRowMapEnd = protectedMethods.indexOf('            invoiceToRow(inv)', quoteRowMapStart);
+assert.ok(quoteRowMapStart >= 0 && quoteRowMapEnd > quoteRowMapStart, 'reviewed quote response row mapping must remain bounded');
+protectedMethods = protectedMethods.slice(0, quoteRowMapStart) + '            /* quote response row mapping reviewed separately */\n' + protectedMethods.slice(quoteRowMapEnd);
 const statusChangeStart = protectedMethods.indexOf('            async changeStatus(newStatus)');
 const statusChangeEnd = protectedMethods.indexOf('            async addActivityNote()', statusChangeStart);
 assert.ok(statusChangeStart >= 0 && statusChangeEnd > statusChangeStart, 'reviewed status action block must remain bounded');
@@ -30,7 +44,7 @@ const navigationEnd = protectedMethods.indexOf('            ownerRecoveryTokenFr
 assert.ok(navigationStart >= 0 && navigationEnd > navigationStart, 'reviewed navigation block must remain bounded');
 protectedMethods = protectedMethods.slice(0, navigationStart) + '            /* navigation methods reviewed separately */\n' + protectedMethods.slice(navigationEnd);
 protectedMethods = protectedMethods.replace(/\r?\n\s*window\.(addEventListener|removeEventListener)\('popstate', this\.handlePopState\);/g, '');
-assert.equal(hash(protectedMethods), '6c7147990e0792cebe2678555f7cf7da4c99f19ef9e02a264e2dd27d10cbd2a6', 'all unreviewed methods/startup must remain unchanged');
+assert.equal(hash(protectedMethods), 'e7489859ff23d21ccaee05445051eb8ccca5befebb3989d90803e08d355af5d3', 'all unreviewed methods/startup must remain unchanged');
 const canvasStart = app.indexOf('\n', app.indexOf('<div id="invoice-canvas"'));
 const canvasEnd = app.indexOf('\n                </div>', app.indexOf('company.invoiceFooter', canvasStart)) + 23;
 assert.equal(hash(app.slice(canvasStart, canvasEnd)), 'd478ee1f800c304a181747174eeb2ee4c8fa37a4ab0c294eaf8ac18eaa9187d6', 'printable document content must remain unchanged');

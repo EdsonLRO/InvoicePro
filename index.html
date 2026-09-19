@@ -737,6 +737,14 @@
         .editor-preview-document { border:1px solid #e2e8f0!important; border-radius:.75rem!important; overflow:hidden; }
         .editor-preview-document .pdf-line-items thead th:nth-child(6) { border-top-right-radius:.5rem; }
         .editor-layout button:focus-visible,.editor-layout summary:focus-visible,.editor-header button:focus-visible,.editor-header summary:focus-visible { outline:3px solid #818cf8; outline-offset:3px; }
+        .quote-access-panel { margin-bottom:18px; padding:18px 20px; border:1px solid #c7d2fe; border-radius:12px; background:#f8faff; display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
+        .quote-access-panel h3 { margin:0 0 5px; color:#1e293b; font-size:16px; }
+        .quote-access-panel p { margin:0; color:#64748b; font-size:13px; line-height:1.5; }
+        .quote-access-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+        .quote-access-link { width:min(560px,100%); margin-top:12px; display:flex; gap:8px; }
+        .quote-access-link input { min-width:0; flex:1; border:1px solid #cbd5e1; border-radius:8px; padding:9px 11px; background:#fff; color:#334155; }
+        .quote-access-error { color:#b91c1c!important; margin-top:8px!important; }
+        .quote-access-notice { color:#047857!important; margin-top:8px!important; }
         @media (min-width:1500px) { .editor-item-fields { grid-template-columns:repeat(5,minmax(0,1fr)); } }
         @media (max-width:1240px) { .editor-layout { grid-template-columns:minmax(0,1fr) 290px; gap:16px; } .editor-header { flex-wrap:wrap; } }
         @media (max-width:899px) {
@@ -1501,14 +1509,14 @@
                         <details class="record-menu editor-more" @keydown.esc.prevent="$event.currentTarget.open = false; $event.currentTarget.querySelector('summary').focus()">
                             <summary>More</summary>
                             <div>
-                                <button @click="saveInvoice" :disabled="documentSaveBusy">{{ documentSaveBusy ? 'Saving…' : ('Save ' + docTypeNoun(draft.docType)) }}</button>
+                                <button @click="saveInvoice" :disabled="documentSaveBusy || quoteAcceptanceLocked">{{ documentSaveBusy ? 'Saving…' : ('Save ' + docTypeNoun(draft.docType)) }}</button>
                                 <button @click="exportPDF(draft)">Download PDF</button>
                                 <button @click="newInvoice">New invoice</button>
                                 <button @click="clearAll">Clear all</button>
-                                <button v-if="draft.docType === 'quote'" @click="convertToInvoice(draft)">Convert to Invoice</button>
+                                <button v-if="draft.docType === 'quote' && !quoteAcceptance.enabled" @click="convertToInvoice(draft)">Convert to Invoice</button>
                             </div>
                         </details>
-                        <button @click="sendDocumentEmail(draft)" :disabled="documentSaveBusy || emailSendingId === draft.id || emailSendingId === 'draft'" class="editor-button editor-primary">Review &amp; send</button>
+                        <button @click="sendDocumentEmail(draft)" :disabled="documentSaveBusy || quoteAcceptanceLocked || emailSendingId === draft.id || emailSendingId === 'draft'" class="editor-button editor-primary">Review &amp; send</button>
                     </div>
                 </header>
 
@@ -1516,8 +1524,26 @@
                     <strong>Standalone credit note:</strong> this document does not automatically link to an invoice or reduce its outstanding balance. Reconcile it separately and do not assume the customer's debt has changed.
                 </div>
 
+                <section v-if="quoteAcceptance.enabled && editingExisting && draft.docType === 'quote'" class="quote-access-panel" aria-labelledby="quote-access-title">
+                    <div>
+                        <h3 id="quote-access-title">Customer quote link</h3>
+                        <p>{{ quoteAcceptanceSummary }}</p>
+                        <p v-if="quoteAcceptance.error" class="quote-access-error" role="alert">{{ quoteAcceptance.error }}</p>
+                        <p v-if="quoteAcceptance.notice" class="quote-access-notice" role="status">{{ quoteAcceptance.notice }}</p>
+                        <div v-if="quoteAcceptance.link" class="quote-access-link">
+                            <input :value="quoteAcceptance.link" readonly aria-label="Secure customer quote link">
+                            <button type="button" class="editor-button" @click="copyQuoteAccessLink">Copy</button>
+                        </div>
+                    </div>
+                    <div class="quote-access-actions">
+                        <button v-if="!quoteAcceptance.response" type="button" class="editor-button" @click="createQuoteAccessLink" :disabled="quoteAcceptance.busy || normalizedStatus(draft) !== 'Sent'">{{ quoteAcceptance.active ? 'Create replacement link' : 'Create secure link' }}</button>
+                        <button v-if="quoteAcceptance.active && !quoteAcceptance.response" type="button" class="editor-button" @click="revokeQuoteAccessLink" :disabled="quoteAcceptance.busy">Revoke link</button>
+                        <button v-if="quoteAcceptance.invoice" type="button" class="editor-button" @click="openLinkedQuoteInvoice" :disabled="quoteAcceptance.busy">View invoice {{ quoteAcceptance.invoice.number }}</button>
+                    </div>
+                </section>
+
                 <div class="editor-layout" v-show="!editorPreview">
-                    <div class="editor-form">
+                    <div class="editor-form" :inert="quoteAcceptanceLocked ? '' : null">
                         <details class="editor-section" :open="editorSections.customer" @toggle="editorSections.customer = $event.target.open">
                             <summary><span><strong>Customer</strong><small>{{ draft.customer ? draft.customer.name : 'Choose who this document is for' }}</small></span></summary>
                             <div class="editor-section-body">
@@ -1598,7 +1624,7 @@
                             <summary><span><strong>Notes</strong><small>{{ draft.notes || 'Add a message for your customer' }}</small></span></summary>
                             <div class="editor-section-body"><label class="editor-field">Notes<textarea v-model="draft.notes" rows="3"></textarea></label></div>
                         </details>
-                        <div class="editor-save-row"><p>Ready? Save your changes, or review the email before sending.</p><button @click="saveInvoice" :disabled="documentSaveBusy" class="editor-button">{{ documentSaveBusy ? 'Saving…' : ('Save ' + docTypeNoun(draft.docType)) }}</button></div>
+                        <div class="editor-save-row"><p>{{ quoteAcceptanceLocked ? 'This quote has a customer response and is now read-only.' : 'Ready? Save your changes, or review the email before sending.' }}</p><button @click="saveInvoice" :disabled="documentSaveBusy || quoteAcceptanceLocked" class="editor-button">{{ documentSaveBusy ? 'Saving…' : ('Save ' + docTypeNoun(draft.docType)) }}</button></div>
                     </div>
                     <aside class="editor-rail" aria-label="Document summary and options">
                         <div class="editor-side-options">
@@ -3111,6 +3137,18 @@
                 pwdRecovery: { busy: false, securityVerified: false, new: '', confirm: '', code: '', error: '', requiresMfa: false, factorId: null, factors: [] },
                 passwordRecoveryStarted: false,
                 accountExportBusy: false,
+                quoteAcceptance: {
+                    enabled: window.TALLYO_QUOTE_ACCEPTANCE_ENABLED === true,
+                    busy: false,
+                    active: false,
+                    link: '',
+                    expiresAt: null,
+                    firstViewedAt: null,
+                    response: null,
+                    invoice: null,
+                    error: '',
+                    notice: ''
+                },
                 stripeConnect: { available: false, busy: false, account: null, error: '' },
                 billing: {
                     enabled: (window.TALLYO_BILLING_TEST_ENABLED === true && window.STRIPE_LIVE_MODE !== true) || (window.TALLYO_BILLING_LIVE_ENABLED === true && window.STRIPE_LIVE_MODE === true),
@@ -3402,6 +3440,22 @@
             },
             totals() {
                 return this.calcTotals(this.draft);
+            },
+            quoteAcceptanceLocked() {
+                return this.quoteAcceptance.enabled && this.draft?.docType === 'quote' && Boolean(this.quoteAcceptance.response);
+            },
+            quoteAcceptanceSummary() {
+                if (this.quoteAcceptance.response) {
+                    const outcome = this.quoteAcceptance.response.outcome === 'accepted' ? 'Accepted' : 'Declined';
+                    const by = outcome === 'Accepted' && this.draft?.quoteResponseName ? ` by ${this.draft.quoteResponseName}` : '';
+                    return `${outcome}${by} · ${this.formatDateTime(this.quoteAcceptance.response.respondedAt)}. This quote is now read-only.`;
+                }
+                if (this.quoteAcceptance.active) {
+                    const viewed = this.quoteAcceptance.firstViewedAt ? ` First viewed ${this.formatDateTime(this.quoteAcceptance.firstViewedAt)}.` : ' Not viewed yet.';
+                    return `Active until ${this.formatDateTime(this.quoteAcceptance.expiresAt)}.${viewed} Creating a replacement invalidates the previous link.`;
+                }
+                if (this.normalizedStatus(this.draft) !== 'Sent') return 'Mark and save this quote as Sent before creating a customer link.';
+                return 'Create a secure link for the customer to view, accept or decline this quote. No email is sent.';
             },
             draftPaid() { return (this.draft.payments || []).reduce((s, p) => s + (parseFloat(p.amount) || 0), 0); },
             orderedHistory() { return [...(this.draft.history || [])].reverse(); },
@@ -3888,6 +3942,7 @@
                         this.draft = this.prepareInvoiceDraft(invoice);
                         this.syncTimeFields();
                         this.editingExisting = true;
+                        this.loadQuoteAccessStatus();
                     }
                 }
                 if (routeKey === 'recurring-form' && state?.recurringTemplateId) {
@@ -4855,6 +4910,7 @@
                 this.isExportingPDF = false;
                 this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 };
                 this.companyAuditSnapshot = null;
+                this.resetQuoteAcceptance();
                 this.customers = []; this.savedItems = []; this.invoices = [];
                 this.auditEvents = [];
                 this.invoiceSearch = '';
@@ -5286,7 +5342,11 @@
                     globalDiscount: Number(r.global_discount) || 0, taxRate: Number(r.tax_rate) || 0,
                     taxMode: r.tax_mode || 'exclusive',
                     shippingCost: Number(r.shipping_cost) || 0,
-                    notes: r.notes || '', terms: r.terms || '', updatedAt: r.updated_at || null
+                    notes: r.notes || '', terms: r.terms || '', updatedAt: r.updated_at || null,
+                    sourceQuoteId: r.source_quote_id || null,
+                    quoteResponse: r.quote_response || null,
+                    quoteResponseName: r.quote_response_name || '',
+                    quoteRespondedAt: r.quote_responded_at || null
                 };
                 inv.totals = this.calcTotals(inv);
                 return inv;
@@ -6007,6 +6067,13 @@
                     }
 
                     const user = userData.user;
+                    const exportDatasets = datasets.map((rows, index) => {
+                        if (tableSpecs[index][0] !== 'invoices') return rows;
+                        return rows.map(row => {
+                            const { quote_access_token_hash, ...safeInvoice } = row;
+                            return safeInvoice;
+                        });
+                    });
                     const payload = {
                         export_version: 1,
                         generated_at: new Date().toISOString(),
@@ -6018,7 +6085,7 @@
                             email_confirmed_at: user.email_confirmed_at || null,
                             last_sign_in_at: user.last_sign_in_at || null
                         },
-                        data: Object.fromEntries(tableSpecs.map(([table], index) => [table, datasets[index]]))
+                        data: Object.fromEntries(tableSpecs.map(([table], index) => [table, exportDatasets[index]]))
                     };
 
                     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -7114,11 +7181,104 @@
                 if(!prepared.overdueMaxReminders) prepared.overdueMaxReminders = Number(this.company.overdueMaxReminders) || 3;
                 return prepared;
             },
+            resetQuoteAcceptance() {
+                const enabled = window.TALLYO_QUOTE_ACCEPTANCE_ENABLED === true;
+                this.quoteAcceptance = { enabled, busy: false, active: false, link: '', expiresAt: null, firstViewedAt: null, response: null, invoice: null, error: '', notice: '' };
+            },
+            async invokeQuoteAccess(action) {
+                if (!this.quoteAcceptance.enabled || !this.isUuid(this.draft?.id)) throw new Error('Save this quote before managing its customer link.');
+                const { data, error } = await supabaseClient.functions.invoke('manage-quote-access', {
+                    body: { action, quoteId: this.draft.id }
+                });
+                if (error) throw new Error(data?.error || error.message || 'The quote link could not be updated.');
+                if (data?.error) throw new Error(data.error);
+                return data || {};
+            },
+            async loadQuoteAccessStatus() {
+                this.resetQuoteAcceptance();
+                if (!this.quoteAcceptance.enabled || this.draft?.docType !== 'quote' || !this.isUuid(this.draft?.id)) return;
+                this.quoteAcceptance.busy = true;
+                try {
+                    const data = await this.invokeQuoteAccess('status');
+                    this.quoteAcceptance.active = data.link?.active === true;
+                    this.quoteAcceptance.expiresAt = data.link?.expiresAt || null;
+                    this.quoteAcceptance.firstViewedAt = data.link?.firstViewedAt || null;
+                    this.quoteAcceptance.response = data.response || null;
+                    this.quoteAcceptance.invoice = data.invoice || null;
+                } catch (error) {
+                    this.quoteAcceptance.error = error?.message || 'The customer quote link status could not be loaded.';
+                } finally {
+                    this.quoteAcceptance.busy = false;
+                }
+            },
+            async createQuoteAccessLink() {
+                if (this.quoteAcceptance.busy) return;
+                if (this.quoteAcceptance.active && !confirm('Create a replacement link? The previous customer link will stop working.')) return;
+                this.quoteAcceptance.busy = true;
+                this.quoteAcceptance.error = '';
+                this.quoteAcceptance.notice = '';
+                try {
+                    const data = await this.invokeQuoteAccess('create');
+                    this.quoteAcceptance.link = String(data.link || '');
+                    this.quoteAcceptance.active = Boolean(this.quoteAcceptance.link);
+                    this.quoteAcceptance.expiresAt = data.expiresAt || null;
+                    await this.copyQuoteAccessLink();
+                } catch (error) {
+                    this.quoteAcceptance.error = error?.message || 'The secure link could not be created.';
+                } finally {
+                    this.quoteAcceptance.busy = false;
+                }
+            },
+            async copyQuoteAccessLink() {
+                if (!this.quoteAcceptance.link) return;
+                try {
+                    await navigator.clipboard.writeText(this.quoteAcceptance.link);
+                    this.quoteAcceptance.notice = 'Secure link copied. Share it only with the intended customer.';
+                } catch {
+                    this.quoteAcceptance.notice = 'The secure link is shown above. Select it to copy manually.';
+                }
+            },
+            async revokeQuoteAccessLink() {
+                if (this.quoteAcceptance.busy || !confirm('Revoke this customer link? It will stop working immediately.')) return;
+                this.quoteAcceptance.busy = true;
+                this.quoteAcceptance.error = '';
+                this.quoteAcceptance.notice = '';
+                try {
+                    await this.invokeQuoteAccess('revoke');
+                    this.quoteAcceptance.active = false;
+                    this.quoteAcceptance.link = '';
+                    this.quoteAcceptance.notice = 'The customer link has been revoked.';
+                } catch (error) {
+                    this.quoteAcceptance.error = error?.message || 'The secure link could not be revoked.';
+                } finally {
+                    this.quoteAcceptance.busy = false;
+                }
+            },
+            async openLinkedQuoteInvoice() {
+                if (!this.quoteAcceptance.invoice || this.quoteAcceptance.busy) return;
+                this.quoteAcceptance.busy = true;
+                this.quoteAcceptance.error = '';
+                try {
+                    const { data, error } = await supabaseClient.from('invoices').select('*').eq('source_quote_id', this.draft.id).maybeSingle();
+                    if (error) throw error;
+                    if (!data) throw new Error('The linked invoice could not be found.');
+                    const mapped = this.rowToInvoice(data);
+                    const index = this.invoices.findIndex(item => item.id === mapped.id);
+                    if (index >= 0) this.invoices[index] = mapped;
+                    else this.invoices.unshift(mapped);
+                    this.loadInvoice(mapped);
+                } catch (error) {
+                    this.quoteAcceptance.error = error?.message || 'The linked invoice could not be opened.';
+                } finally {
+                    this.quoteAcceptance.busy = false;
+                }
+            },
             loadInvoice(inv) {
                 this.draft = this.prepareInvoiceDraft(inv);
                 this.syncTimeFields();
                 this.editingExisting = true;
                 this.navigateTo('edit');
+                this.loadQuoteAccessStatus();
             },
             async deleteInvoice(inv) {
                 const reason = this.documentDeletionReason(inv);
@@ -7153,6 +7313,7 @@
                 const s = this.normalizedStatus(inv);
                 if (s === 'Cancelled') return 'Cancelled';
                 const docType = inv.docType || inv.doc_type || 'invoice';
+                if (docType === 'quote') return ['Draft', 'Sent', 'Accepted', 'Declined'].includes(s) ? s : 'Sent';
                 if (docType !== 'invoice') return s === 'Draft' ? 'Draft' : 'Sent';
                 const total = Math.max(0, Number(inv.totals ? inv.totals.grandTotal : inv.grand_total) || 0);
                 const paid = Math.max(0, this.amountPaid(inv));
