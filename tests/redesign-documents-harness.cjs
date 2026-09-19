@@ -50,4 +50,12 @@ assert.equal(paginate.call({ filteredInvoices: Array.from({ length: 21 }, (_, n)
 assert.ok(app.includes("supabaseClient.from('saved_items')"), 'catalogue rename does not rename storage');
 assert.ok(app.includes('v-model="itemForm.name"') && app.includes('v-model="itemForm.description"') && app.includes('v-model.number="itemForm.price"'));
 assert.ok(!app.includes('Manage Saved Items'));
+assert.ok(app.includes('class="record-card-list overflow-x-auto"'), 'customer list uses the shared row-card frame');
+assert.ok(app.includes('class="catalogue-record"'), 'catalogue records use the shared row-card treatment');
+assert.match(app, /\.customer-record:nth-of-type\(even\), \.catalogue-record:nth-of-type\(even\) \{ --record-row-bg: #f8fafc; \}/,
+  'customer and catalogue rows alternate white and light-slate surfaces');
+assert.match(app, /\.customer-record td:first-child, \.catalogue-record td:first-child \{[^}]*border-left: 1px solid #dce4ef;[^}]*border-radius: 12px 0 0 12px;/,
+  'each desktop row-card has a thin outline and rounded left edge');
+assert.match(app, /\.customer-record td:last-child, \.catalogue-record td:last-child \{[^}]*border-right: 1px solid #dce4ef;[^}]*border-radius: 0 12px 12px 0;/,
+  'each desktop row-card has a thin outline and rounded right edge');
 console.log('Step 3 document presentation/filter/catalogue contracts passed.');

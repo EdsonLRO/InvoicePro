@@ -1,13 +1,13 @@
 # Active programme: COMM-001 commercial launch integration
 
-## UX-REDESIGN-001 — Controlled redesign release and mobile follow-up
+## UX-REDESIGN-001 — Controlled redesign release and list-card follow-up
 
-Status: PR #163 merged as `c918bfb` and build `2026.09.19.2` is verified in production at Cloudflare deployment `db056e05-2e12-46ec-b076-45215c707831`. The Owner approved PR #164 for the focused invoice-preview fit and edge correction as app build `2026.09.19.3`; rollback is the retained `db056e05` deployment and build `2026.09.19.2`.
+Status: PR #164 merged as `06d718d` and build `2026.09.19.3` is verified in production at Cloudflare deployment `9690dc1c-2ab5-42ae-a88f-bbb79cab46a7`. The Owner approved PR #165 and app build `2026.09.19.4` for the focused customer and Products & services list-card presentation; rollback is the retained `9690dc1c` deployment and build `2026.09.19.3`.
 Owner: Codex, sequential implementation/QA. Risk: Medium frontend release preparation; all non-navigation handlers and the printable template remain hash-frozen in the accepted candidate.
-Branch: `codex/mobile-invoice-preview-fit`, from production merge `c918bfb`, in focused PR #164 to `main`.
-Scope/lock: mobile preview fit, preview-only edge treatment, build/cache markers, release evidence and focused tests. No dependency, printable-template content, backend, provider, financial, email, Auth or data-model change.
+Branch: `codex/customer-product-row-cards`, from production merge `06d718d`, in focused PR #165 to `main`.
+Scope/lock: customer and Products & services list presentation, shared alternating row-card styling, build/cache markers, release records and focused responsive tests. No handler, persistence, dependency, printable-template, backend, provider, financial, email, Auth or data-model change.
 Single working checklist: [Controlled upgrade](../docs/design/tallyo-redesign/UPGRADE.md).
-Authority: the Owner approved marking PR #164 ready, merging it and publishing app build `2026.09.19.3`. Migration, secret, backend, website, real email, account mutation and payment changes remain unauthorised.
+Authority: the Owner approved marking PR #165 ready, merging it and publishing app build `2026.09.19.4`. Migration, secret, backend, website, real email, account mutation and payment changes remain unauthorised.
 Both Pages projects include `*` and exclude only `codex/tallyo-redesign*` for previews. Main automatic deployment remains enabled; Access/runtime/Worker settings are unchanged. The local preview uses fictional data, blocks providers and resets edits on refresh; it does not validate live Auth/RLS/backend behaviour or installed-PWA update/rollback. Frozen references remain unchanged. Separate Step 7 and production approvals are still required.
 
 ## AUTH-004 — Recovery email canonical destination

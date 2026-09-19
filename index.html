@@ -473,6 +473,17 @@
         .documents-page .document-record:last-child .record-menu > div { top: auto; bottom: calc(100% + 6px); margin-top: 0; }
         .documents-page .record-actions:has(.record-menu[open]) { position: relative; z-index: 20; }
         .list-empty td { padding: 40px 24px; text-align: center; color: #64748b; }
+        .record-card-list { background: transparent; border: 0; box-shadow: none; overflow: visible; }
+        .customer-table, .catalogue-table { border-collapse: separate; border-spacing: 0 10px; }
+        .customer-table thead th, .catalogue-table thead th { background: #f8fafc; }
+        .customer-table thead th:first-child, .catalogue-table thead th:first-child { border-radius: 10px 0 0 10px; }
+        .customer-table thead th:last-child, .catalogue-table thead th:last-child { border-radius: 0 10px 10px 0; }
+        .customer-record, .catalogue-record { --record-row-bg: #fff; }
+        .customer-record:nth-of-type(even), .catalogue-record:nth-of-type(even) { --record-row-bg: #f8fafc; }
+        .customer-record td, .catalogue-record td { background: var(--record-row-bg); border-top: 1px solid #dce4ef; border-bottom: 1px solid #dce4ef; }
+        .customer-record td:first-child, .catalogue-record td:first-child { border-left: 1px solid #dce4ef; border-radius: 12px 0 0 12px; }
+        .customer-record td:last-child, .catalogue-record td:last-child { border-right: 1px solid #dce4ef; border-radius: 0 12px 12px 0; }
+        .customer-record:hover td, .catalogue-record:hover td { background: #eef2ff; }
         .catalogue-table { width: 100%; text-align: left; table-layout: fixed; }
         .catalogue-table th:first-child { width: 64px; }
         .catalogue-table td:first-child { padding: 7px 4px; }
@@ -521,6 +532,9 @@
             .catalogue-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
             .catalogue-table tr { display: grid; grid-template-columns: 40px minmax(0, 1fr); align-items: center; padding: 14px; }
             .catalogue-table td { padding: 6px; }
+            .catalogue-table .catalogue-record { border: 1px solid #dce4ef; border-radius: 12px; background: var(--record-row-bg); margin-bottom: 12px; overflow: hidden; }
+            .catalogue-table .catalogue-record td { border: 0; border-radius: 0; background: transparent; }
+            .catalogue-table .catalogue-record:nth-of-type(even) { --record-row-bg: #f8fafc; }
             .catalogue-table td:nth-child(n+3) { grid-column: 2; text-align: left; }
             .catalogue-table td:nth-child(3)::before { content: 'Default price: '; color: #64748b; font-weight: 400; }
             .catalogue-table .catalogue-empty td { grid-column: 1 / -1; }
@@ -589,6 +603,9 @@
             .customer-table thead { display:none; }
             .customer-table .customer-record { display:grid; grid-template-columns:44px minmax(0,1fr); padding:12px; }
             .customer-table .customer-record td { padding:6px; }
+            .customer-table .customer-record { border:1px solid #dce4ef; border-radius:12px; background:var(--record-row-bg); margin-bottom:12px; overflow:hidden; }
+            .customer-table .customer-record td { border:0; border-radius:0; background:transparent; }
+            .customer-table .customer-record:nth-of-type(even) { --record-row-bg:#f8fafc; }
             .customer-record td:first-child { grid-row:1/4; }
             .customer-record td:not(:first-child) { grid-column:2; text-align:left; }
             .remaining-screen .flex.gap-3 { flex-wrap:wrap; }
@@ -2389,7 +2406,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+                    <div class="record-card-list overflow-x-auto">
                         <table class="customer-table" aria-label="Saved customers">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
@@ -2399,7 +2416,7 @@
                                     <th class="p-4 font-medium text-slate-500 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100">
+                            <tbody>
                                 <tr v-if="customers.length === 0"><td colspan="4" class="p-8 text-center text-slate-400">No customers saved yet.</td></tr>
                                 <tr v-else-if="filteredCustomers.length === 0"><td colspan="4" class="p-8 text-center text-slate-400">No customers match your search.</td></tr>
                                 <tr v-for="(customer, idx) in paginatedCustomers" :key="customer.id || idx" class="customer-record hover:bg-slate-50">
@@ -2479,7 +2496,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+                    <div class="record-card-list">
                         <table class="catalogue-table" role="table" aria-label="Products and services">
                             <thead class="bg-slate-50 border-b border-slate-200">
                                 <tr>
@@ -2489,10 +2506,10 @@
                                     <th class="p-4 font-medium text-slate-500 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100">
+                            <tbody>
                                 <tr v-if="savedItems.length === 0" class="catalogue-empty"><td colspan="4" class="p-8 text-center text-slate-400">No products or services yet. Add one to reuse it on your invoices and quotes.</td></tr>
                                 <tr v-else-if="filteredItems.length === 0" class="catalogue-empty"><td colspan="4" class="p-8 text-center text-slate-400">No products or services match your search.</td></tr>
-                                <tr v-for="item in paginatedItems" :key="item.id" class="hover:bg-slate-50">
+                                <tr v-for="item in paginatedItems" :key="item.id" class="catalogue-record">
                                     <td class="p-4 align-top"><label class="record-select-control"><input type="checkbox" :aria-label="'Select ' + item.name" :value="item.id" v-model="selectedItems" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"></label></td>
                                     <td class="p-4 align-top">
                                         <button @click="editSavedItem(item)" class="font-medium text-indigo-700 text-left" :aria-label="'Edit ' + item.name">{{ item.name }}</button>
@@ -3037,7 +3054,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.09.19.3';
+    const APP_BUILD = '2026.09.19.4';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
