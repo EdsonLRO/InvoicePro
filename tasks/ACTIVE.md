@@ -1,5 +1,27 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-QUOTE-002 — Quote acceptance runtime foundation
+
+Task ID: UX-QUOTE-002
+Title: Add the protected quote-link schema and narrow server runtime
+Priority: High
+Status: Repository candidate implemented and source-validated; unapplied and undeployed
+Phase: Controlled runtime foundation
+Owner role: Product owner
+Assigned specialists: Backend/Supabase, Security, Privacy and QA performed sequentially by Codex
+Risk level: High because this adds a signed-out token boundary and an atomic document-creation path
+Affected files: one timestamped quote-acceptance migration; `manage-quote-access`; `quote-public`; their shared validation helper, focused tests, function configuration, CI registration and this task record
+Dependencies: approved `UX-QUOTE-001` specification on `codex/quote-acceptance-spec`; released document-status rules in PR #166
+Security boundary: raw 256-bit tokens are returned once and never stored; `anon` receives no table/RPC grant; owner access requires a valid user JWT and row ownership; public responses resolve only the hashed scoped token; the response and linked invoice are committed atomically
+Privacy boundary: confirmed name is stored only on the quote response and owner-visible convenience history; no IP address, fingerprint, decline reason, analytics payload, email or payment side effect
+Approval boundary: local source, tests, commit, push and a focused draft PR are authorised. Stop before applying the migration, deploying either function, adding the customer page to production, enabling a public gate, merging to `main` or releasing.
+Lock state: acquired 2026-09-19 for the affected files above
+Branch: `codex/quote-acceptance-runtime`, stacked from `codex/quote-acceptance-spec`
+Required validation: migration contract/privilege tests; protected-field and immutable-response tests; duplicate/concurrent acceptance; cross-owner denial; function method/origin/body/JWT/token/name validation; Deno frozen-lock checks; existing security workflow harness
+Evidence: focused contract/helper tests, all existing Node regression harnesses, both frozen-lock Edge Function checks and the website suite pass. Disposable PostgreSQL bootstrap/probes cover protected fields, tenant attribution, sequential replay, decline, rollback and grants; the local Docker engine was unavailable, so actual SQL execution remains required before this migration can be approved for application. No Supabase project was contacted or changed.
+Release prerequisites: run the disposable PostgreSQL probes including a forced concurrent accept; ensure the future account export omits the token hash while including appropriate link/response metadata; complete focused security/privacy review; then implement the disabled customer/owner UI in a separate slice.
+Next action: commit and push a focused draft PR for security/privacy review. Do not merge, apply, deploy or activate.
+
 ## UX-QUOTE-001 — Customer quote acceptance specification and isolated preview
 
 Task ID: UX-QUOTE-001
