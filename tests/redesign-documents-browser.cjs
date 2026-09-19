@@ -120,7 +120,7 @@ const path = require('node:path');
         if ([390, 1440].includes(width) && await record.locator('.record-open').innerText() === await records.first().locator('.record-open').innerText()) {
           await page.screenshot({ path: path.join(root, `tmp/redesign-evidence/step3-more-menu-${width}.png`) });
         }
-        await docs.getByRole('heading', { name: 'Documents', exact: true }).click();
+        await docs.getByRole('heading', { name: 'Invoices', exact: true }).click();
         assert.equal(await record.locator('details').getAttribute('open'), null, 'More closes after an outside click');
         await record.locator('summary').click();
         await record.locator('summary').focus(); await page.keyboard.press('Escape');

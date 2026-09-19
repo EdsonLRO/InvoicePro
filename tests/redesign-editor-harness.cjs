@@ -5,16 +5,20 @@ const { createHash } = require('node:crypto');
 const app = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
 const hash = source => createHash('sha256').update(source.replace(/\r\n/g, '\n').trim()).digest('hex');
 
-// The approved navigation refinement changes only the contiguous route/history
-// block and its popstate listeners. Keep every other existing method/startup byte
-// frozen against integration c756f24, and exercise the navigation block below.
+// The reviewed interaction refinements change the contiguous route/history block,
+// its popstate listeners and the bounded Overview schedule action. Keep every other
+// existing method/startup byte frozen, and exercise the reviewed blocks separately.
 let protectedMethods = app.slice(app.indexOf('        methods: {'));
+const overviewActStart = protectedMethods.indexOf('            overviewAct(item)');
+const overviewActEnd = protectedMethods.indexOf('            overviewSetupAction(step)', overviewActStart);
+assert.ok(overviewActStart >= 0 && overviewActEnd > overviewActStart, 'reviewed Overview action must remain bounded');
+protectedMethods = protectedMethods.slice(0, overviewActStart) + '            /* Overview action reviewed separately */\n' + protectedMethods.slice(overviewActEnd);
 const navigationStart = protectedMethods.indexOf('            routeTabs()');
 const navigationEnd = protectedMethods.indexOf('            ownerRecoveryTokenFromHash()', navigationStart);
 assert.ok(navigationStart >= 0 && navigationEnd > navigationStart, 'reviewed navigation block must remain bounded');
 protectedMethods = protectedMethods.slice(0, navigationStart) + '            /* navigation methods reviewed separately */\n' + protectedMethods.slice(navigationEnd);
 protectedMethods = protectedMethods.replace(/\r?\n\s*window\.(addEventListener|removeEventListener)\('popstate', this\.handlePopState\);/g, '');
-assert.equal(hash(protectedMethods), 'db3952fa253a82879412ac1ff1f5e22e33a993b99f0df370fee0cd0c16751b50', 'all non-navigation methods/startup must remain unchanged');
+assert.equal(hash(protectedMethods), 'f272145143174a39dbb6b564e24e5a8f4ca73a418d0c3b0890bd3252df703d6a', 'all unreviewed methods/startup must remain unchanged');
 const canvasStart = app.indexOf('\n', app.indexOf('<div id="invoice-canvas"'));
 const canvasEnd = app.indexOf('\n                </div>', app.indexOf('company.invoiceFooter', canvasStart)) + 23;
 assert.equal(hash(app.slice(canvasStart, canvasEnd)), 'd478ee1f800c304a181747174eeb2ee4c8fa37a4ab0c294eaf8ac18eaa9187d6', 'printable document content must remain unchanged');

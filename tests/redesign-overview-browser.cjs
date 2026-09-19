@@ -35,12 +35,16 @@ const path = require('node:path');
     await overview.getByRole('button', { name: /Review schedule/ }).click();
     await page.waitForURL('**/#recurring-form');
     assert.ok(await page.getByRole('button', { name: /Save.*Schedule/i }).isVisible());
-    await desktop.getByRole('button', { name: 'Overview', exact: true }).click();
+    await page.getByRole('button', { name: '← Go back', exact: true }).click();
+    await page.waitForURL('**/#dashboard');
+    await overview.getByRole('button', { name: /Review schedule/ }).click();
+    await page.waitForURL('**/#recurring-form');
+    await page.goBack(); await page.waitForURL('**/#dashboard');
     await overview.getByRole('button', { name: /View quote/ }).click();
     await page.waitForURL('**/#edit');
     assert.match(await page.getByRole('heading', { name: /Edit Quote/ }).innerText(), /QUO-0217/);
     // Preserve all existing hashes and conditional Owner access.
-    for (const [label, hash] of [['Documents', 'invoices'], ['Customers', 'customers'], ['Products & services', 'items'], ['Branding', 'branding'], ['Business settings', 'settings'], ['Account', 'account'], ['Recurring', 'recurring']]) {
+    for (const [label, hash] of [['Invoices', 'invoices'], ['Customers', 'customers'], ['Products & services', 'items'], ['Branding', 'branding'], ['Business settings', 'settings'], ['Account', 'account'], ['Recurring', 'recurring']]) {
       await desktop.getByRole('button', { name: label, exact: true }).click();
       await page.waitForURL('**/#' + hash);
     }
@@ -49,12 +53,12 @@ const path = require('node:path');
     await page.locator('#preview-warning').waitFor();
     assert.equal(await overview.isVisible(), true);
     await desktop.getByRole('button', { name: 'Customers', exact: true }).click();
-    await desktop.getByRole('button', { name: 'Documents', exact: true }).click();
+    await desktop.getByRole('button', { name: 'Invoices', exact: true }).click();
     await page.goBack(); await page.waitForURL('**/#customers');
     await page.goForward(); await page.waitForURL('**/#invoices');
     await desktop.getByRole('button', { name: 'Reminders', exact: true }).click();
     assert.equal(await page.locator('select').filter({ visible: true }).nth(1).inputValue(), 'Overdue');
-    await desktop.getByRole('button', { name: 'Documents', exact: true }).click();
+    await desktop.getByRole('button', { name: 'Invoices', exact: true }).click();
     assert.equal(await page.locator('select').filter({ visible: true }).nth(1).inputValue(), 'All');
     await desktop.getByRole('button', { name: 'Overview', exact: true }).click();
     await mkdir(path.join(root, 'tmp/redesign-evidence'), { recursive: true });
@@ -75,6 +79,13 @@ const path = require('node:path');
     assert.equal(await page.evaluate(() => document.activeElement.textContent.trim()), 'More');
     await mobile.getByRole('button', { name: 'More', exact: true }).click();
     await menu.getByRole('button', { name: 'Help & support', exact: true }).click();
+    const help = page.getByRole('dialog', { name: 'Help & install Tallyo' });
+    const helpBox = await help.boundingBox();
+    const helpStyle = await help.evaluate(el => ({ radius: getComputedStyle(el).borderRadius, position: getComputedStyle(el.parentElement).alignItems }));
+    assert.ok(helpBox.x >= 12 && helpBox.x + helpBox.width <= 378, 'Help dialog keeps mobile side margins');
+    assert.ok(helpBox.y >= 12 && helpBox.y + helpBox.height <= 832, 'Help dialog is centred within the viewport');
+    assert.equal(helpStyle.position, 'center');
+    assert.equal(helpStyle.radius, '16px');
     await page.getByRole('button', { name: 'Close help and install', exact: true }).click();
     assert.equal(await page.evaluate(() => document.activeElement.textContent.trim()), 'More');
     // Open all secondary routes through mobile, including branding and install/help.
