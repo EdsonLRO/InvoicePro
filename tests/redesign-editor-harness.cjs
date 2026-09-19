@@ -37,4 +37,7 @@ assert.match(app, /window\.addEventListener\('popstate', this\.handlePopState\)/
 assert.match(app, /window\.removeEventListener\('popstate', this\.handlePopState\)/);
 assert.match(app, /closeOpenRecordMenus = event =>[\s\S]*?details\.record-menu\[open\][\s\S]*?!menu\.contains\(event\.target\)/);
 assert.match(app, /document\.addEventListener\('click', closeOpenRecordMenus\)/);
+assert.match(editor, /editor-save-row[\s\S]*?editor-rail[\s\S]*?editor-side-options[\s\S]*?editor-payments[\s\S]*?editor-activity/);
+assert.match(app, /\.editor-rail>\.editor-payments\s*\{\s*grid-column:1;\s*grid-row:2;/);
+assert.match(app, /\.editor-rail>\.editor-activity\s*\{\s*grid-column:1;\s*grid-row:3;/);
 console.log('Step 4 contracts passed: non-navigation handler/startup and printable-template hashes, reviewed history routing, one PDF canvas, complete editor bindings, explicit save/review, accessible automation controls.');

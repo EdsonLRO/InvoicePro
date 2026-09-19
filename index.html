@@ -649,8 +649,13 @@
         .editor-more>div { position:absolute; top:100%; right:0; z-index:30; min-width:190px; padding:6px; background:#fff; border:1px solid #dfe5ed; border-radius:10px; box-shadow:0 12px 30px #0f172a20; }
         .editor-more>div button { min-height:44px; padding:10px; text-align:left; }
         .editor-button:disabled { opacity:.5; }
-        .editor-layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; gap:22px; align-items:start; }
-        .editor-form,.editor-rail { min-width:0; display:grid; gap:14px; }
+        .editor-layout { display:grid; grid-template-columns:minmax(0,1fr) 320px; column-gap:22px; row-gap:14px; align-items:start; }
+        .editor-form,.editor-side-options { min-width:0; display:grid; gap:14px; }
+        .editor-form { grid-column:1; grid-row:1; }
+        .editor-rail { display:contents; }
+        .editor-side-options { grid-column:2; grid-row:1; }
+        .editor-rail>.editor-payments { grid-column:1; grid-row:2; }
+        .editor-rail>.editor-activity { grid-column:1; grid-row:3; }
         .editor-section,.editor-summary { min-width:0; background:#fff; border:1px solid #dfe5ed; border-radius:12px; }
         .editor-section>summary { scroll-margin-top:170px; }
         .editor-section>summary { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:17px 20px; min-height:64px; cursor:pointer; list-style:none; }
@@ -712,6 +717,10 @@
         @media (max-width:1240px) { .editor-layout { grid-template-columns:minmax(0,1fr) 290px; gap:16px; } .editor-header { flex-wrap:wrap; } }
         @media (max-width:899px) {
             .editor-layout { grid-template-columns:1fr; gap:14px; padding-bottom:12px; }
+            .editor-form { grid-column:1; grid-row:1; }
+            .editor-rail>.editor-payments { grid-column:1; grid-row:2; }
+            .editor-rail>.editor-activity { grid-column:1; grid-row:3; }
+            .editor-side-options { grid-column:1; grid-row:4; }
             .editor-header { position:sticky; top:0; z-index:12; background:#f8fafc; padding:12px 0; gap:12px; }
             .editor-header h2 { font-size:21px; }
             .editor-eyebrow { display:none; }
@@ -1559,6 +1568,7 @@
                         <div class="editor-save-row"><p>Ready? Save your changes, or review the email before sending.</p><button @click="saveInvoice" :disabled="documentSaveBusy" class="editor-button">{{ documentSaveBusy ? 'Saving…' : ('Save ' + docTypeNoun(draft.docType)) }}</button></div>
                     </div>
                     <aside class="editor-rail" aria-label="Document summary and options">
+                        <div class="editor-side-options">
                         <section class="editor-summary">
                             <h3>Summary <span>{{ draft.currency }}</span></h3>
                             <dl>
@@ -1658,6 +1668,7 @@
                                 </div>
                             </div>
                         </details>
+                        </div>
                         <details class="editor-section editor-aux editor-payments" v-if="editingExisting" :open="!!paymentAttentionFor(draft) || !!draftDisputeState"><summary><span><strong>Payments</strong><small>{{ paymentAttentionFor(draft) || draftDisputeState ? 'Needs attention · review below' : 'Records and online payment amount' }}</small></span></summary>
                             <div v-if="editingExisting" class="editor-section-body editor-existing-controls">
                                 <h3 class="text-lg font-semibold mb-1">Payments</h3>
@@ -1767,7 +1778,7 @@
                                 </div>
                             </div>
                         </details>
-                        <details class="editor-section editor-aux" v-if="editingExisting"><summary><span><strong>Activity History</strong><small>{{ emailStatusFor(draft.id) ? emailStatusFor(draft.id).label : 'View this document’s recent activity' }}</small></span></summary>
+                        <details class="editor-section editor-aux editor-activity" v-if="editingExisting"><summary><span><strong>Activity History</strong><small>{{ emailStatusFor(draft.id) ? emailStatusFor(draft.id).label : 'View this document’s recent activity' }}</small></span></summary>
                             <div v-if="editingExisting" class="editor-section-body editor-existing-controls">
                                 <div class="flex items-center justify-between mb-1 flex-wrap gap-3">
                                     <h3 class="text-lg font-semibold">Activity History</h3>

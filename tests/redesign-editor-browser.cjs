@@ -152,6 +152,14 @@ const path = require('node:path');
     assert.equal(await vmRead('vm.draft.items[0].price'), 800);
     assert.equal(await vmRead('vm.draft.items[0].tax'), 20);
     const paymentPanel = page.locator('.editor-payments');
+    const activityPanel = page.locator('.editor-activity');
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    const flowGeometry = await Promise.all([notes, form.locator('.editor-save-row'), paymentPanel, activityPanel].map(locator => locator.boundingBox()));
+    const [notesBox, saveBox, paymentBox, activityBox] = flowGeometry;
+    assert.ok(Math.abs(paymentBox.x - notesBox.x) < 1 && Math.abs(paymentBox.width - notesBox.width) < 1, 'Payments matches the main editor section width');
+    assert.ok(Math.abs(activityBox.x - notesBox.x) < 1 && Math.abs(activityBox.width - notesBox.width) < 1, 'Activity matches the main editor section width');
+    assert.ok(paymentBox.y >= saveBox.y + saveBox.height, 'Payments follows the save row');
+    assert.ok(activityBox.y >= paymentBox.y + paymentBox.height, 'Activity follows Payments');
     await paymentPanel.locator('summary').click();
     assert.ok(await paymentPanel.getByRole('button', { name: 'Record Payment', exact: true }).isVisible());
     // No payment action is invoked. Expanded legacy controls must also fit the rail/mobile.
