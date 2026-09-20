@@ -1089,6 +1089,20 @@
             </div>
         </div>
 
+        <div v-if="documentCancellation.open" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4" @click.self="closeDocumentCancellation">
+            <section ref="documentCancellationDialog" class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="document-cancellation-title" aria-describedby="document-cancellation-description" tabindex="-1" @keydown.esc.stop.prevent="closeDocumentCancellation">
+                <p class="text-sm font-bold uppercase tracking-wider text-red-600 mb-2">Cancel, don’t delete</p>
+                <h2 id="document-cancellation-title" class="text-2xl font-semibold text-slate-900 mb-3">{{ documentCancellationTitle }}</h2>
+                <p id="document-cancellation-description" class="text-slate-600 mb-3">{{ documentCancellationDescription }}</p>
+                <p class="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600 mb-5">The cancelled record and its activity history will remain available. This does not delete the invoice or quote.</p>
+                <p v-if="documentCancellation.error" class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 mb-5" role="alert">{{ documentCancellation.error }}</p>
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                    <button type="button" @click="closeDocumentCancellation" :disabled="documentCancellation.busy" class="bg-white border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg hover:bg-slate-50 font-medium disabled:opacity-50">Keep {{ documentCancellationKeepLabel }}</button>
+                    <button type="button" @click="confirmDocumentCancellation" :disabled="documentCancellation.busy" class="bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 font-semibold disabled:opacity-50">{{ documentCancellation.busy ? 'Cancelling…' : documentCancellationConfirmLabel }}</button>
+                </div>
+            </section>
+        </div>
+
         <main class="shell-main flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full max-w-7xl mx-auto" id="main-content">
             
             <div v-show="activeTab === 'account'" class="remaining-screen account-page max-w-3xl mx-auto space-y-8">
@@ -1511,6 +1525,7 @@
                             <div>
                                 <button @click="saveInvoice" :disabled="documentSaveBusy || quoteAcceptanceLocked">{{ documentSaveBusy ? 'Saving…' : ('Save ' + docTypeNoun(draft.docType)) }}</button>
                                 <button @click="exportPDF(draft)">Download PDF</button>
+                                <button v-if="editingExisting && canCancelDocument(draft)" @click="openDocumentCancellation([draft], 'editor')" class="record-danger">Cancel {{ docTypeNoun(draft.docType).toLowerCase() }}</button>
                                 <button @click="newInvoice">New invoice</button>
                                 <button @click="clearAll">Clear all</button>
                                 <button v-if="draft.docType === 'quote' && !quoteAcceptance.enabled" @click="convertToInvoice(draft)">Convert to Invoice</button>
@@ -2249,6 +2264,7 @@
                         <button @click="bulkDuplicateInvoices" :disabled="invoiceBulkBusy" class="bg-white border border-slate-300 text-indigo-600 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Duplicate</button>
                         <button @click="bulkEmailInvoices" :disabled="invoiceBulkBusy" class="bg-white border border-slate-300 text-indigo-600 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Email</button>
                         <button @click="bulkPdfInvoices" :disabled="invoiceBulkBusy" class="bg-white border border-slate-300 text-indigo-600 hover:bg-slate-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">PDF</button>
+                        <button @click="openDocumentCancellation(selectedInvoiceRows, 'bulk')" :disabled="invoiceBulkBusy" class="bg-white border border-red-300 text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Cancel selected</button>
                         <button @click="bulkDeleteInvoices" :disabled="invoiceBulkBusy" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50">Delete</button>
                     </div>
                     <div class="flex items-center gap-2 ml-auto">
@@ -2295,6 +2311,7 @@
                                             <button @click="duplicateInvoice(inv)">Duplicate</button>
                                             <button @click="sendDocumentEmail(inv)" :disabled="emailSendingId === inv.id">{{ emailSendingId === inv.id ? (emailSendingStage === 'prepared' ? 'Preparing...' : 'Sending...') : 'Email' }}</button>
                                             <button @click="exportPDF(inv)">Download PDF</button>
+                                            <button v-if="canCancelDocument(inv)" @click="openDocumentCancellation([inv], 'list')" class="record-danger">Cancel {{ docTypeNoun(inv.docType).toLowerCase() }}</button>
                                             <button @click="deleteInvoice(inv)" class="record-danger">Delete</button>
                                         </div>
                                     </details>
@@ -3083,7 +3100,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.09.19.6';
+    const APP_BUILD = '2026.09.20.1';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -3204,6 +3221,7 @@
                 invoicePage: 1,
                 selectedInvoices: [],
                 invoiceBulkBusy: false,
+                documentCancellation: { open: false, ids: [], source: '', busy: false, error: '' },
                 emailSendingId: null,
                 emailSendingStage: null,
                 documentEmailModal: {
@@ -3576,6 +3594,32 @@
             },
             selectedInvoiceRows() {
                 return this.selectedInvoices.map(id => this.invoices.find(inv => inv.id === id)).filter(Boolean);
+            },
+            documentCancellationRows() {
+                if (this.documentCancellation.source === 'editor' && this.draft && this.documentCancellation.ids.includes(this.draft.id)) return [this.draft];
+                return this.documentCancellation.ids.map(id => this.invoices.find(inv => inv.id === id)).filter(Boolean);
+            },
+            documentCancellationTitle() {
+                const rows = this.documentCancellationRows;
+                if (rows.length !== 1) return 'Cancel ' + rows.length + ' selected documents?';
+                const row = rows[0];
+                return 'Cancel ' + this.docTypeNoun(row.docType).toLowerCase() + ' ' + (row.number || '') + '?';
+            },
+            documentCancellationDescription() {
+                const rows = this.documentCancellationRows;
+                if (rows.length !== 1) return 'These invoices and quotes will no longer be available for sending or customer action.';
+                return (rows[0].docType || 'invoice') === 'quote'
+                    ? 'The quote can no longer be sent or accepted by the customer.'
+                    : 'The invoice can no longer be sent or used for an online card payment.';
+            },
+            documentCancellationKeepLabel() {
+                const rows = this.documentCancellationRows;
+                return rows.length === 1 ? this.docTypeNoun(rows[0].docType).toLowerCase() : 'documents';
+            },
+            documentCancellationConfirmLabel() {
+                const rows = this.documentCancellationRows;
+                if (rows.length !== 1) return 'Cancel ' + rows.length + ' documents';
+                return 'Cancel ' + this.docTypeNoun(rows[0].docType).toLowerCase();
             },
             dashboardStats() {
                 const today = new Date().toISOString().split('T')[0];
@@ -6574,6 +6618,110 @@
                     this.invoiceBulkBusy = false;
                 }
             },
+            documentCancellationReason(inv) {
+                if (!inv || !this.isUuid(inv.id)) return 'Save the invoice or quote before cancelling it.';
+                const docType = inv.docType || 'invoice';
+                if (!['invoice', 'quote'].includes(docType)) return 'Credit notes cannot be cancelled with this action.';
+                const stored = this.normalizedStatus(inv);
+                if (inv.quoteResponse || ['Accepted', 'Declined'].includes(stored)) return 'A quote that has already been accepted or declined must remain unchanged.';
+                if (stored === 'Cancelled') return 'This ' + docType + ' is already cancelled.';
+                if (this.hasPaymentHistory(inv)) return 'An invoice with payment or refund history cannot be cancelled.';
+                if (this.disputeStateFor(inv.id)) return 'An invoice with dispute history cannot be cancelled.';
+                if (!['Draft', 'Sent'].includes(stored)) return 'Only unpaid draft or sent invoices and quotes can be cancelled.';
+                return '';
+            },
+            canCancelDocument(inv) {
+                return !this.documentCancellationReason(inv);
+            },
+            openDocumentCancellation(rows, source) {
+                const targets = (Array.isArray(rows) ? rows : []).filter(Boolean);
+                if (!targets.length) return;
+                const blocked = targets.map(inv => ({ inv, reason: this.documentCancellationReason(inv) })).filter(item => item.reason);
+                if (blocked.length) {
+                    const first = blocked[0];
+                    const prefix = targets.length > 1 ? blocked.length + ' selected document' + (blocked.length === 1 ? '' : 's') + ' cannot be cancelled. ' : '';
+                    this.showAppNotice('Selection can’t be cancelled', prefix + first.reason + (targets.length > 1 ? ' Remove protected records from the selection and try again.' : ''), 0, 'warning');
+                    return;
+                }
+                document.querySelectorAll('details.record-menu[open]').forEach(menu => { menu.open = false; });
+                this.documentCancellation = { open: true, ids: targets.map(inv => inv.id), source: source || 'list', busy: false, error: '' };
+                this.$nextTick(() => this.$refs.documentCancellationDialog && this.$refs.documentCancellationDialog.focus());
+            },
+            closeDocumentCancellation() {
+                if (this.documentCancellation.busy) return;
+                this.documentCancellation = { open: false, ids: [], source: '', busy: false, error: '' };
+            },
+            async persistDocumentCancellation(inv, timestamp) {
+                const previousStatus = this.normalizedStatus(inv);
+                const history = [...(Array.isArray(inv.history) ? inv.history : []), {
+                    ts: timestamp,
+                    type: 'cancelled',
+                    text: 'Marked as cancelled'
+                }];
+                let updateQuery = supabaseClient.from('invoices').update({
+                    status: 'Cancelled',
+                    history,
+                    updated_at: timestamp
+                }).eq('id', inv.id).eq('user_id', this.currentUser.id);
+                if (inv.updatedAt) updateQuery = updateQuery.eq('updated_at', inv.updatedAt);
+                const { data, error } = await updateQuery.select().maybeSingle();
+                if (error) throw error;
+                if (!data) throw new Error('This document changed in another tab or device.');
+                const mapped = this.rowToInvoice(data);
+                const index = this.invoices.findIndex(item => item.id === mapped.id);
+                if (index >= 0) this.invoices[index] = mapped;
+                if (this.draft && this.draft.id === mapped.id) {
+                    this.draft.status = 'Cancelled';
+                    this.draft.history = history;
+                    this.draft.updatedAt = mapped.updatedAt;
+                }
+                await this.logAppAuditEvent('document_status_changed', 'document', mapped.id, {
+                    from_status: previousStatus,
+                    to_status: 'Cancelled'
+                });
+                return mapped;
+            },
+            async confirmDocumentCancellation() {
+                if (this.documentCancellation.busy) return;
+                const rows = this.documentCancellationRows;
+                if (!rows.length || rows.length !== this.documentCancellation.ids.length) {
+                    this.documentCancellation.error = 'Refresh the page and choose the invoices or quotes again.';
+                    return;
+                }
+                const blocked = rows.map(inv => this.documentCancellationReason(inv)).find(Boolean);
+                if (blocked) {
+                    this.documentCancellation.error = blocked;
+                    return;
+                }
+                this.documentCancellation.busy = true;
+                this.documentCancellation.error = '';
+                if (this.documentCancellation.source === 'bulk') this.invoiceBulkBusy = true;
+                const cancelledIds = [];
+                try {
+                    for (const inv of rows) {
+                        await this.persistDocumentCancellation(inv, new Date().toISOString());
+                        cancelledIds.push(inv.id);
+                    }
+                    this.selectedInvoices = this.selectedInvoices.filter(id => !cancelledIds.includes(id));
+                    const count = cancelledIds.length;
+                    const single = rows.length === 1 ? rows[0] : null;
+                    this.documentCancellation.busy = false;
+                    this.closeDocumentCancellation();
+                    this.showAppNotice(
+                        count === 1 ? this.docTypeNoun(single.docType) + ' cancelled' : count + ' documents cancelled',
+                        count === 1 ? 'It remains in your records with a Cancelled status.' : 'They remain in your records with a Cancelled status.'
+                    );
+                } catch (error) {
+                    console.error('Document cancellation failed:', error);
+                    this.selectedInvoices = this.selectedInvoices.filter(id => !cancelledIds.includes(id));
+                    this.documentCancellation.error = cancelledIds.length
+                        ? cancelledIds.length + ' document' + (cancelledIds.length === 1 ? ' was' : 's were') + ' cancelled before another record changed. Refresh the page to review the latest status.'
+                        : 'Tallyo could not cancel the selected invoice or quote. Refresh the page and try again.';
+                } finally {
+                    this.documentCancellation.busy = false;
+                    this.invoiceBulkBusy = false;
+                }
+            },
             async changeStatus(newStatus) {
                 const allowed = this.statusActions(this.draft).map(action => action.value);
                 if (!allowed.includes(newStatus)) return alert('That status change is not available for this document.');
@@ -6610,7 +6758,8 @@
                 const select = event && event.target;
                 const next = select ? select.value : '';
                 if (select) select.value = '';
-                if (next) this.changeStatus(next);
+                if (next === 'Cancelled') this.openDocumentCancellation([this.draft], 'editor');
+                else if (next) this.changeStatus(next);
             },
             statusExplanation(inv) {
                 const status = this.effectiveStatus(inv || {});

@@ -12,6 +12,14 @@ for (const binding of ['invoiceSearch', 'invoiceTypeFilter', 'invoiceStatusFilte
 for (const action of ['newInvoice', 'loadInvoice(inv)', 'duplicateInvoice(inv)', 'sendDocumentEmail(inv)', 'exportPDF(inv)', 'deleteInvoice(inv)', 'exportExcel', 'bulkDuplicateInvoices', 'bulkEmailInvoices', 'bulkPdfInvoices', 'bulkDeleteInvoices']) {
   assert.equal(docs.split(`@click="${action}"`).length - 1, 1, action + ' uses one existing handler, not duplicate mobile controls');
 }
+assert.ok(docs.includes(`@click="openDocumentCancellation([inv], 'list')"`), 'each eligible invoice or quote exposes cancellation from More');
+assert.ok(docs.includes(`@click="openDocumentCancellation(selectedInvoiceRows, 'bulk')"`), 'selected invoices and quotes expose bulk cancellation');
+assert.match(app, /editingExisting && canCancelDocument\(draft\)[\s\S]*?Cancel \{\{ docTypeNoun\(draft\.docType\)\.toLowerCase\(\) \}\}/,
+  'the editor More menu exposes the same cancellation action');
+assert.match(app, /documentCancellationReason\(inv\)[\s\S]*?!\['invoice', 'quote'\]\.includes\(docType\)[\s\S]*?quoteResponse[\s\S]*?hasPaymentHistory\(inv\)[\s\S]*?disputeStateFor\(inv\.id\)/,
+  'cancellation is limited to mutable unpaid invoices and quotes without response or dispute history');
+assert.match(app, /update\(\{[\s\S]*?status: 'Cancelled',[\s\S]*?history,[\s\S]*?updated_at: timestamp[\s\S]*?\}\)\.eq\('id', inv\.id\)\.eq\('user_id', this\.currentUser\.id\)/,
+  'single and bulk cancellation use one owner-bound persistence path');
 assert.ok(docs.includes('invoiceListEmailStatus(inv.id)'), 'use delivery outcomes, not invented delivery claims');
 assert.ok(docs.includes('effectiveStatus(inv)'), 'preserve status semantics');
 assert.ok(docs.includes('inv.currency || \'GBP\''), 'disambiguate each document currency');

@@ -24,6 +24,10 @@ assert.match(app, /if \(s === 'Paid' \|\| \(total > 0 && balance <= 0\.001\)\) r
 assert.match(app, /if \(docType !== 'invoice'\) return s === 'Draft' \? 'Draft' : 'Sent';/, 'quotes and credit notes do not derive payment or overdue states');
 assert.match(app, /Payments can only be recorded against invoices\./, 'browser rejects payment recording for quotes and credit notes');
 assert.match(app, /stored === 'Sent' && !this\.hasPaymentHistory\(inv\)/, 'only unpaid issued documents expose Cancel');
+assert.match(app, /openDocumentCancellation\(\[draft\], 'editor'\)/, 'editor More exposes cancellation');
+assert.match(app, /openDocumentCancellation\(selectedInvoiceRows, 'bulk'\)/, 'bulk toolbar exposes cancellation');
+assert.match(app, /next === 'Cancelled'\) this\.openDocumentCancellation\(\[this\.draft\], 'editor'\)/, 'the details status action uses the same confirmation flow');
+assert.match(app, /type: 'cancelled',[\s\S]*?text: 'Marked as cancelled'/, 'cancellation is preserved in document Activity History');
 assert.doesNotMatch(app, /Reverted to draft/, 'issued documents are not silently reverted to Draft');
 assert.match(schema, /check \(status in \('Draft','Sent','Paid','Cancelled'\)\)/, 'current schema retains legacy Paid storage');
 assert.match(invoiceStatus, /export function storedInvoiceStatusAfterPaymentChange\(/, 'signed payment mutations share one stored lifecycle rule');
