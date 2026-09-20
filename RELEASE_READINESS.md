@@ -1,8 +1,12 @@
 # Tallyo Release Readiness Checklist
 
-## Accepted-quote invoice follow-up candidate
+## Accepted-quote invoice follow-up — released and verified, 2026-09-20
 
-Draft PR #172 on `codex/quote-acceptance-followup` prepares app build `2026.09.20.3`, additive migration `20260920110017_quote_acceptance_followup.sql`, and focused updates to `quote-public` and `send-document-email`. Automatic delivery is off by default and creates no online-payment link. Acceptance remains committed if email delivery fails; the linked invoice remains Draft and is surfaced for manual review. Local application/security/runtime/website/frozen-lock checks pass, and PR security plus disposable PostgreSQL migration probes pass at commit `2bc5335`. No migration, function, app build, provider setting or email has been applied or sent. Production release requires a separate exact Owner approval with a current app rollback deployment and pre-change function-source rollback.
+The Owner approved the bounded release after reviewing the automatic-delivery option. PR #172 merged as `86d358137f0bc296bef2c8414942af63638f9ecc`; additive migration `20260920110017_quote_acceptance_followup.sql` is applied; `send-document-email` advanced from v58 to v59 with JWT verification retained; and `quote-public` advanced from v1 to v2 with JWT verification disabled as reviewed. No other migration or function was applied or deployed.
+
+App build `2026.09.20.3` is active at Cloudflare deployment `2b9d901a-7567-432d-8d34-6ba3eb84273f`. The public shell, service-worker cache `tallyo-shell-2026-09-20-3`, 19-asset build report and `/quote/` route passed. Empty requests returned 401 from the JWT-protected email function and 404 from the public quote function without sending email or mutating data. The Owner subsequently confirmed the fictional end-to-end flow works: quote acceptance creates the linked invoice and, only when selected before sending the quote, emails it automatically with the chosen due period.
+
+Automatic delivery remains off by default and creates no online-payment link. Acceptance commits before the delivery attempt; provider or address failure leaves the invoice Draft and surfaces “Review & send invoice”. Rollback was not required. The retained rollback is Cloudflare deployment `08a69220-3035-43c4-b68f-eb03b7ed2f2e` / build `2026.09.20.2`, plus `quote-public` v1 and `send-document-email` v58 sources from `e0c8059`; the additive migration can remain dormant if the application and functions are rolled back. Codex sent no email during bounded release validation, and no payment, refund, Stripe object, secret, Auth setting, provider configuration or website source change occurred.
 
 This checklist tracks whether the current app is ready for real customer use. It is not a public-launch checklist for the future SaaS website.
 
