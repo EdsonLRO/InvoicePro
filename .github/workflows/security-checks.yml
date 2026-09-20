@@ -69,6 +69,7 @@ jobs:
           node tests/quote-acceptance-runtime-harness.cjs
           node tests/quote-acceptance-ui-harness.cjs
           node tests/quote-access-runtime-test.mjs
+          node tests/quote-email-acceptance-harness.cjs
           node tests/refund-consequence-preview-harness.cjs
           node tests/recurring-calendar-reliability-harness.cjs
           node tests/scale-accessibility-safety-harness.cjs

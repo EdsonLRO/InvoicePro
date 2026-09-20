@@ -35,6 +35,10 @@ const paymentRecordStart = protectedMethods.indexOf('            async recordPay
 const paymentRecordEnd = protectedMethods.indexOf('            stripePaymentBadge(payment)', paymentRecordStart);
 assert.ok(paymentRecordStart >= 0 && paymentRecordEnd > paymentRecordStart, 'reviewed manual-payment guard must remain bounded');
 protectedMethods = protectedMethods.slice(0, paymentRecordStart) + '            /* manual payment document-type guard reviewed separately */\n' + protectedMethods.slice(paymentRecordEnd);
+const documentEmailStart = protectedMethods.indexOf('            async confirmDocumentEmail()');
+const documentEmailEnd = protectedMethods.indexOf('            async openStripeCheckout(', documentEmailStart);
+assert.ok(documentEmailStart >= 0 && documentEmailEnd > documentEmailStart, 'reviewed document email integration must remain bounded');
+protectedMethods = protectedMethods.slice(0, documentEmailStart) + '            /* document email quote-response integration reviewed separately */\n' + protectedMethods.slice(documentEmailEnd);
 const statusPolicyStart = protectedMethods.indexOf('            normalizedStatus(inv)');
 const statusPolicyEnd = protectedMethods.indexOf('            statusBadgeClass(status)', statusPolicyStart);
 assert.ok(statusPolicyStart >= 0 && statusPolicyEnd > statusPolicyStart, 'reviewed effective-status policy must remain bounded');
@@ -48,7 +52,7 @@ const navigationEnd = protectedMethods.indexOf('            ownerRecoveryTokenFr
 assert.ok(navigationStart >= 0 && navigationEnd > navigationStart, 'reviewed navigation block must remain bounded');
 protectedMethods = protectedMethods.slice(0, navigationStart) + '            /* navigation methods reviewed separately */\n' + protectedMethods.slice(navigationEnd);
 protectedMethods = protectedMethods.replace(/\r?\n\s*window\.(addEventListener|removeEventListener)\('popstate', this\.handlePopState\);/g, '');
-assert.equal(hash(protectedMethods), 'e7489859ff23d21ccaee05445051eb8ccca5befebb3989d90803e08d355af5d3', 'all unreviewed methods/startup must remain unchanged');
+assert.equal(hash(protectedMethods), '8d95ee18afb6c125823bb3b328867ff37ca350e5f2b9d70eb09ef018505bd637', 'all unreviewed methods/startup must remain unchanged');
 const canvasStart = app.indexOf('\n', app.indexOf('<div id="invoice-canvas"'));
 const canvasEnd = app.indexOf('\n                </div>', app.indexOf('company.invoiceFooter', canvasStart)) + 23;
 assert.equal(hash(app.slice(canvasStart, canvasEnd)), 'd478ee1f800c304a181747174eeb2ee4c8fa37a4ab0c294eaf8ac18eaa9187d6', 'printable document content must remain unchanged');

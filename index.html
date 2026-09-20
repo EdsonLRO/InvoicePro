@@ -2129,7 +2129,7 @@
                     <div class="flex justify-between items-start gap-4 mb-6">
                         <div>
                             <h3 id="document-email-title" class="text-xl font-semibold">Email {{ docTypeNoun(documentEmailModal.inv && documentEmailModal.inv.docType) }}</h3>
-                            <p class="text-sm text-slate-500 mt-1">Review the recipient and choose whether to offer online card payment.</p>
+                            <p class="text-sm text-slate-500 mt-1">{{ documentEmailModal.inv && documentEmailModal.inv.docType === 'quote' ? 'Review the recipient. The email will include a secure quote response button.' : 'Review the recipient and choose whether to offer online card payment.' }}</p>
                         </div>
                         <button @click="closeDocumentEmailModal" :disabled="documentEmailModal.sending" aria-label="Close email window" class="text-slate-400 hover:text-slate-700 text-2xl leading-none disabled:opacity-50">&times;</button>
                     </div>
@@ -2138,6 +2138,11 @@
                         <div>
                             <label for="document-email-recipient" class="block text-sm font-semibold text-slate-700 mb-1">Recipient email</label>
                             <input id="document-email-recipient" type="email" v-model.trim="documentEmailModal.to" autocomplete="email" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+
+                        <div v-if="documentEmailModal.inv && documentEmailModal.inv.docType === 'quote'" class="rounded-xl border border-indigo-200 bg-indigo-50 p-4">
+                            <span class="block font-semibold text-slate-800">Customer response included</span>
+                            <span class="block text-sm text-slate-600 mt-1">Tallyo will add a secure “View and respond to quote” button. You do not need to create a link first. Sending this quote again replaces any previous response link.</span>
                         </div>
 
                         <div v-if="canOfferOnlinePayment(documentEmailModal.inv)" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -3100,7 +3105,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.09.20.1';
+    const APP_BUILD = '2026.09.20.2';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -6452,9 +6457,19 @@
                     if (error) throw error;
                     if (data && data.error) throw new Error(data.error);
                     if (data && data.invoice) this.applyInvoiceRow(data.invoice);
+                    if (data && data.quoteAccess && this.draft && this.draft.id === target.id) {
+                        this.quoteAcceptance.link = String(data.quoteAccess.link || '');
+                        this.quoteAcceptance.active = Boolean(this.quoteAcceptance.link);
+                        this.quoteAcceptance.expiresAt = data.quoteAccess.expiresAt || null;
+                        this.quoteAcceptance.notice = 'The emailed quote includes this secure response link.';
+                    }
                     await this.loadAuditEvents();
                     this.documentEmailModal = { open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance', sending: false, error: '' };
-                    this.showAppNotice('Email is on its way', 'You can check its delivery status in Activity History.');
+                    if (target.docType === 'quote') {
+                        this.showAppNotice('Quote email is on its way', 'The email includes a secure button for the customer to accept or decline the quote.');
+                    } else {
+                        this.showAppNotice('Email is on its way', 'You can check its delivery status in Activity History.');
+                    }
                 } catch (e) {
                     console.error('Email send failed:', e);
                     modal.error = 'Could not send email: ' + (e.message || e);
