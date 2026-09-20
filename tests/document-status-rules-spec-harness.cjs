@@ -40,7 +40,7 @@ for (const webhook of [stripeWebhook, connectWebhook]) {
   assert.match(webhook, /becameFullyPaid/, 'signed webhook records the fully-paid transition independently of stored lifecycle');
   assert.doesNotMatch(webhook, /nextStatus === "Paid"/, 'signed webhook does not rely on a stored Paid lifecycle');
 }
-assert.match(documentEmail, /inv\.status === "Draft" \? "Sent" : inv\.status/, 'emailing a draft issues it as Sent');
+assert.match(documentEmail, /emailDocument\.status === "Draft" \? "Sent" : emailDocument\.status/, 'emailing a draft issues it as Sent');
 assert.match(overdueReminders, /storedInvoiceAllowsOverdueReminder\(inv\)/, 'reminders share the defensive stored-lifecycle guard');
 assert.match(overdueReminders, /\.eq\("doc_type", "invoice"\)/, 'reminder queries only select invoices');
 assert.match(invoiceStatus, /\["Draft", "Paid", "Cancelled"\]/, 'reminders skip stored Draft, legacy Paid and Cancelled rows');

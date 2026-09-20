@@ -1,5 +1,24 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-QUOTE-004 — Include quote response action in sent quote emails
+
+Task ID: UX-QUOTE-004
+Title: Prepare and include the secure customer-response link when emailing a quote
+Priority: High
+Status: Focused repository candidate implemented and validated; not merged or deployed
+Phase: Controlled email integration
+Owner role: Product owner
+Risk level: High because the transactional email function creates a signed-out quote token and issues a draft quote
+Branch: `codex/quote-email-acceptance-link`, from released merge `c10c69d`
+Scope: reuse the released quote-token model inside `send-document-email`; include one clear response button plus a plain-text URL; explain the behavior in the sender dialog; retain manual create/revoke controls; update build/cache markers; add focused regression coverage
+Security boundary: the raw 256-bit token appears only in the customer URL returned to the email renderer and authenticated sender; only its SHA-256 hash is stored. Owner and document ownership checks remain in the JWT-protected email function. The response omits the hash, and a conditional post-send update cannot overwrite an accepted or declined quote.
+Email boundary: this changes only a user-initiated transactional quote email. It does not send a test or live email during preparation, add marketing, reuse unrelated addresses, or alter Resend/provider configuration.
+Validation: focused token/database/email/UI harness passes; quote runtime, public UI, payment-email, email-status, document-status, PWA and app-public harnesses pass; mobile/keyboard customer quote browser flow passes with no external requests; `send-document-email` passes frozen-lock Deno type-check; full Node security suite and website suite pass, with sandbox-only child-process/pipe restrictions rerun successfully outside the sandbox.
+Approval boundary: implementation, tests, commit, push and a draft pull request are authorised. Stop before merge, app publication, Edge Function deployment, live email or provider/configuration change.
+Release candidate: app build `2026.09.20.2`; deploy only `send-document-email` with JWT verification retained after exact Owner approval. No migration, database, Auth, secret, payment, refund, Stripe object, other Edge Function, website or unrelated change.
+Rollback candidate: restore app deployment `f6c2daa1-9915-430e-a96f-0ea373ca416d` / build `2026.09.20.1` and redeploy the currently active pre-change `send-document-email` source captured before release.
+Next action: inspect the final diff, commit, push and open a focused draft pull request for Owner review; do not deploy.
+
 ## UX-QUOTE-003 — Disabled quote acceptance UI slice
 
 Task ID: UX-QUOTE-003

@@ -8,6 +8,7 @@ import {
   createOptionalInvoicePaymentLinks,
   stripeConnectReady,
 } from "../_shared/invoice-payment-options.mjs";
+import { prepareQuoteEmailAccess } from "../_shared/quote-email-access.mjs";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 
@@ -36,6 +37,12 @@ type PaymentLink = {
   url: string;
   amount: number;
   kind: string;
+};
+
+type QuoteAccess = {
+  link: string;
+  expiresAt: string;
+  tokenHash: string;
 };
 
 function json(body: Record<string, unknown>, status = 200) {
@@ -138,7 +145,12 @@ function calcTotals(inv: any) {
   return { subtotal, globalDiscountAmt, taxAmt, taxByRate, shipping, mode, grandTotal };
 }
 
-function buildEmail(inv: any, company: any, paymentLinks: PaymentLink[] = []) {
+function buildEmail(
+  inv: any,
+  company: any,
+  paymentLinks: PaymentLink[] = [],
+  quoteAccess: QuoteAccess | null = null,
+) {
   const noun = docTypeNoun(inv.doc_type);
   const currency = inv.currency || "GBP";
   const color = brandColor(company);
@@ -191,6 +203,14 @@ function buildEmail(inv: any, company: any, paymentLinks: PaymentLink[] = []) {
   if (paymentLinks.length) {
     textLines.push("", "Pay online:");
     paymentLinks.forEach((link) => textLines.push(`- ${link.label}: ${link.url}`));
+  }
+  if (quoteAccess) {
+    textLines.push(
+      "",
+      "View and respond to this quote:",
+      quoteAccess.link,
+      "Open the quote to accept or decline it.",
+    );
   }
 
   if (inv.notes) textLines.push("", "Notes:", String(inv.notes));
@@ -252,6 +272,7 @@ function buildEmail(inv: any, company: any, paymentLinks: PaymentLink[] = []) {
         </tbody>
       </table>
       ${paymentLinks.length ? `<div style="margin:22px 0;text-align:center;">${paymentLinks.map((link) => `<a href="${escapeHtml(link.url)}" style="display:inline-block;background:${escapeHtml(color)};color:#ffffff;text-decoration:none;font-weight:700;border-radius:8px;padding:12px 18px;margin:4px;">${escapeHtml(link.label)}</a>`).join("")}</div>` : ""}
+      ${quoteAccess ? `<div style="margin:24px 0;padding:18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center;"><p style="margin:0 0 14px;color:#334155;">Open the quote to accept or decline it.</p><a href="${escapeHtml(quoteAccess.link)}" style="display:inline-block;background:${escapeHtml(color)};color:#ffffff;text-decoration:none;font-weight:700;border-radius:8px;padding:12px 18px;">View and respond to quote</a></div>` : ""}
       ${inv.notes ? `<h2 style="font-size:16px;margin-top:20px;">Notes</h2><p>${escapeHtml(inv.notes).replaceAll("\n", "<br>")}</p>` : ""}
       ${inv.terms ? `<h2 style="font-size:16px;margin-top:20px;">Terms</h2><p>${escapeHtml(inv.terms).replaceAll("\n", "<br>")}</p>` : ""}
       ${company?.payment_details ? `<h2 style="font-size:16px;margin-top:20px;">Payment details</h2><p>${escapeHtml(company.payment_details).replaceAll("\n", "<br>")}</p>` : ""}
@@ -791,17 +812,53 @@ Deno.serve(async (req) => {
   if (!inv || inv.user_id !== userData.user.id) return json({ error: "Document not found" }, 404);
   if (inv.status === "Cancelled") return json({ error: "Cancelled documents cannot be emailed" }, 400);
 
+  let emailDocument = inv;
+  let quoteAccess: QuoteAccess | null = null;
+  if (inv.doc_type === "quote") {
+    try {
+      const prepared = await prepareQuoteEmailAccess({
+        quote: inv,
+        userId: userData.user.id,
+        admin,
+      });
+      if (!prepared) {
+        throw new Error("The secure quote response link could not be prepared.");
+      }
+      emailDocument = prepared.invoice;
+      quoteAccess = {
+        link: prepared.link,
+        expiresAt: prepared.expiresAt,
+        tokenHash: prepared.tokenHash,
+      };
+      await insertRequiredAuditEvent(admin, {
+        user_id: userData.user.id,
+        actor_user_id: userData.user.id,
+        event_type: "quote_link_created",
+        object_type: "quote",
+        object_id: documentId,
+        source: "edge_function",
+        metadata: { channel: "document_email" },
+      });
+    } catch (error) {
+      return json({
+        error: error instanceof Error
+          ? error.message
+          : "The secure quote response link could not be prepared.",
+      }, 409);
+    }
+  }
+
   const { data: company } = await admin.from("company_settings").select("*").eq("user_id", userData.user.id).maybeSingle();
   const paymentLinks = await createPaymentLinks(
-    inv,
+    emailDocument,
     userData.user.id,
     admin,
     authHeader,
     includeOnlinePayment,
     paymentKind,
   );
-  const email = buildEmail(inv, company || {}, paymentLinks);
-  const filenameNumber = String(inv.number || "invoice").replace(/[^a-z0-9_-]+/gi, "-");
+  const email = buildEmail(emailDocument, company || {}, paymentLinks, quoteAccess);
+  const filenameNumber = String(emailDocument.number || "invoice").replace(/[^a-z0-9_-]+/gi, "-");
   const resendPayload = {
     from: FROM_EMAIL,
     to: [to],
@@ -810,8 +867,8 @@ Deno.serve(async (req) => {
     text: email.text,
     attachments: [
       {
-        filename: `${docTypeNoun(inv.doc_type).replaceAll(" ", "-")}-${filenameNumber}.pdf`,
-        content: buildPdfBase64(inv, company || {}),
+        filename: `${docTypeNoun(emailDocument.doc_type).replaceAll(" ", "-")}-${filenameNumber}.pdf`,
+        content: buildPdfBase64(emailDocument, company || {}),
       },
     ],
     tags: [
@@ -825,7 +882,8 @@ Deno.serve(async (req) => {
     documentId,
     userData.user.id,
     to.toLowerCase(),
-    String(inv.updated_at || inv.created_at || ""),
+    String(emailDocument.updated_at || emailDocument.created_at || ""),
+    quoteAccess?.tokenHash || "no_quote_response_link",
     paymentLinks.length
       ? paymentLinks.map((link) => `${link.kind}:${link.amount}`).join(",")
       : "no_online_payment",
@@ -854,7 +912,10 @@ Deno.serve(async (req) => {
       provider: "resend",
       metadata: { reason: timedOut ? "provider_timeout" : "provider_request_failed" },
     });
-    return json({ error: timedOut ? "Email provider timed out; it is safe to retry" : "Email provider could not be reached" }, timedOut ? 504 : 502);
+    const quoteRetryNote = quoteAccess
+      ? " The secure quote response link is ready; it is safe to retry."
+      : "";
+    return json({ error: timedOut ? `Email provider timed out; it is safe to retry.${quoteRetryNote}` : `Email provider could not be reached.${quoteRetryNote}` }, timedOut ? 504 : 502);
   }
   const resendBody = await resendResponse.json().catch(() => ({}));
   if (!resendResponse.ok) {
@@ -868,25 +929,53 @@ Deno.serve(async (req) => {
       provider: "resend",
       metadata: { status: resendResponse.status, reason: "provider_rejected_request" },
     });
-    return json({ error: resendBody?.message || "Email could not be sent" }, 502);
+    return json({
+      error: `${resendBody?.message || "Email could not be sent"}${
+        quoteAccess
+          ? " The secure quote response link is ready; it is safe to retry."
+          : ""
+      }`,
+    }, 502);
   }
 
   const nowISO = new Date().toISOString();
-  const history = Array.isArray(inv.history) ? inv.history : [];
+  const history = Array.isArray(emailDocument.history) ? emailDocument.history : [];
   history.push({
     ts: nowISO,
     type: "sent",
     text: `Sent to email provider for delivery to ${to}`,
   });
 
-  const nextStatus = inv.status === "Draft" ? "Sent" : inv.status;
-  const { data: updated, error: updateError } = await admin.from("invoices")
+  const nextStatus = emailDocument.status === "Draft" ? "Sent" : emailDocument.status;
+  let updateQuery = admin.from("invoices")
     .update({ history, status: nextStatus, updated_at: nowISO })
     .eq("id", documentId)
-    .eq("user_id", userData.user.id)
+    .eq("user_id", userData.user.id);
+  if (emailDocument.doc_type === "quote") {
+    updateQuery = updateQuery.is("quote_response", null);
+  }
+  const { data: updatedAfterSend, error: updateError } = await updateQuery
     .select("*")
-    .single();
+    .maybeSingle();
   if (updateError) return json({ error: updateError.message }, 500);
+
+  let updated = updatedAfterSend;
+  if (!updated && emailDocument.doc_type === "quote") {
+    const { data: respondedQuote, error: respondedQuoteError } = await admin
+      .from("invoices")
+      .select("*")
+      .eq("id", documentId)
+      .eq("user_id", userData.user.id)
+      .not("quote_response", "is", null)
+      .maybeSingle();
+    if (respondedQuoteError) {
+      return json({ error: respondedQuoteError.message }, 500);
+    }
+    updated = respondedQuote;
+  }
+  if (!updated) {
+    return json({ error: "Document changed while the email was being sent" }, 409);
+  }
 
   await insertAuditEvent(admin, {
     user_id: userData.user.id,
@@ -900,5 +989,12 @@ Deno.serve(async (req) => {
     metadata: {},
   });
 
-  return json({ ok: true, emailId: resendBody?.id || null, invoice: updated });
+  return json({
+    ok: true,
+    emailId: resendBody?.id || null,
+    invoice: updated,
+    ...(quoteAccess
+      ? { quoteAccess: { link: quoteAccess.link, expiresAt: quoteAccess.expiresAt } }
+      : {}),
+  });
 });
