@@ -5,7 +5,7 @@
 Task ID: UX-QUOTE-005
 Title: Make the generated invoice actionable and optionally email it after quote acceptance
 Priority: High
-Status: Focused repository candidate implemented and under validation; not deployed
+Status: Draft PR #172 implemented and validated; not merged or deployed
 Phase: Controlled quote follow-up
 Owner role: Product owner
 Risk level: High because a signed-out acceptance may trigger a transactional email and service-role status update
@@ -15,7 +15,8 @@ Security and privacy boundary: the public request cannot choose an email address
 Failure boundary: quote acceptance and linked Draft creation commit before delivery. A missing/invalid customer email or provider failure keeps the invoice Draft and records the quote attempt as failed for manual review. No automatic retry loop is added.
 Approval boundary: repository implementation, tests, commit, push and a focused draft pull request are authorised. Stop before migration application, either Edge Function deployment, app publication, live/test email, provider/configuration change or merge.
 Release candidate: migration `20260920110017_quote_acceptance_followup.sql`; `quote-public` retains JWT verification disabled; `send-document-email` retains JWT verification enabled; app build `2026.09.20.3` and service-worker cache `tallyo-shell-2026-09-20-3`.
-Next action: finish the relevant suite, inspect the full diff, commit, push and open a draft pull request for Owner review.
+Validation: the full Node application/security harness set, focused automatic-delivery runtime tests, public website suite and frozen-lock checks for all 21 Edge Functions pass locally. Draft PR #172 security checks and disposable PostgreSQL 17 migration/constraint/privilege/concurrency probes pass at commit `2bc5335`.
+Next action: Owner review of draft PR #172. Stop before merge, migration, function deployment, app publication or any email.
 
 ## UX-QUOTE-004 — Include quote response action in sent quote emails
 
