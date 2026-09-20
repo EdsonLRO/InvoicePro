@@ -5,7 +5,7 @@
 Task ID: UX-QUOTE-005
 Title: Make the generated invoice actionable and optionally email it after quote acceptance
 Priority: High
-Status: Draft PR #172 implemented and validated; not merged or deployed
+Status: Released and Owner-verified on 2026-09-20; PR #172 merged as `86d3581`
 Phase: Controlled quote follow-up
 Owner role: Product owner
 Risk level: High because a signed-out acceptance may trigger a transactional email and service-role status update
@@ -13,17 +13,17 @@ Branch: `codex/quote-acceptance-followup`, from merged PR #171 (`e0c8059`)
 Scope: add a default-off automatic-send choice and due-period selector to the authenticated quote-email dialog; store the choice on the quote; claim at most one post-acceptance attempt; set the linked invoice due date; send only to the saved customer snapshot address without a payment link; mark Sent only after provider acceptance; show Draft follow-up/failure in Needs your attention; add focused runtime and contract coverage; prepare app build `2026.09.20.3`
 Security and privacy boundary: the public request cannot choose an email address, payment option or due period. The authenticated email function stores the exact recipient reviewed by the owner, and the public function can only use that stored value. Existing quote-token, origin, response, tenant and rate-limit controls remain. No Analytics or marketing data is added.
 Failure boundary: quote acceptance and linked Draft creation commit before delivery. A missing/invalid customer email or provider failure keeps the invoice Draft and records the quote attempt as failed for manual review. No automatic retry loop is added.
-Approval boundary: repository implementation, tests, commit, push and a focused draft pull request are authorised. Stop before migration application, either Edge Function deployment, app publication, live/test email, provider/configuration change or merge.
-Release candidate: migration `20260920110017_quote_acceptance_followup.sql`; `quote-public` retains JWT verification disabled; `send-document-email` retains JWT verification enabled; app build `2026.09.20.3` and service-worker cache `tallyo-shell-2026-09-20-3`.
-Validation: the full Node application/security harness set, focused automatic-delivery runtime tests, public website suite and frozen-lock checks for all 21 Edge Functions pass locally. Draft PR #172 security checks and disposable PostgreSQL 17 migration/constraint/privilege/concurrency probes pass at commit `2bc5335`.
-Next action: Owner review of draft PR #172. Stop before merge, migration, function deployment, app publication or any email.
+Approval boundary: completed under exact Owner approval. Only migration `20260920110017`, `quote-public`, `send-document-email` and app build `2026.09.20.3` were released. Codex sent no email during bounded release validation, and no payment, refund, Stripe object, secret, Auth setting, provider configuration, website source or unrelated change occurred.
+Release: migration `20260920110017_quote_acceptance_followup.sql` is applied; `quote-public` v2 retains JWT verification disabled; `send-document-email` v59 retains JWT verification enabled; app build `2026.09.20.3` and service-worker cache `tallyo-shell-2026-09-20-3` are active at Cloudflare deployment `2b9d901a-7567-432d-8d34-6ba3eb84273f`.
+Validation: the full Node application/security harness set, focused automatic-delivery runtime tests, public website suite, frozen-lock checks, PR security checks and disposable PostgreSQL probes passed. Production migration/function inventories, fail-closed empty probes, public shell, quote route, service worker and 19-asset build report passed. The Owner confirmed the fictional automatic-delivery flow works.
+Next action: routine bounded monitoring only; rollback remains build `2026.09.20.2` at deployment `08a69220-3035-43c4-b68f-eb03b7ed2f2e` plus `quote-public` v1 and `send-document-email` v58 sources from `e0c8059`.
 
 ## UX-QUOTE-004 — Include quote response action in sent quote emails
 
 Task ID: UX-QUOTE-004
 Title: Prepare and include the secure customer-response link when emailing a quote
 Priority: High
-Status: Focused repository candidate implemented and validated; not merged or deployed
+Status: Released on 2026-09-20; PR #171 merged as `e0c8059`
 Phase: Controlled email integration
 Owner role: Product owner
 Risk level: High because the transactional email function creates a signed-out quote token and issues a draft quote
@@ -32,17 +32,17 @@ Scope: reuse the released quote-token model inside `send-document-email`; includ
 Security boundary: the raw 256-bit token appears only in the customer URL returned to the email renderer and authenticated sender; only its SHA-256 hash is stored. Owner and document ownership checks remain in the JWT-protected email function. The response omits the hash, and a conditional post-send update cannot overwrite an accepted or declined quote.
 Email boundary: this changes only a user-initiated transactional quote email. It does not send a test or live email during preparation, add marketing, reuse unrelated addresses, or alter Resend/provider configuration.
 Validation: focused token/database/email/UI harness passes; quote runtime, public UI, payment-email, email-status, document-status, PWA and app-public harnesses pass; mobile/keyboard customer quote browser flow passes with no external requests; `send-document-email` passes frozen-lock Deno type-check; full Node security suite and website suite pass, with sandbox-only child-process/pipe restrictions rerun successfully outside the sandbox.
-Approval boundary: implementation, tests, commit, push and a draft pull request are authorised. Stop before merge, app publication, Edge Function deployment, live email or provider/configuration change.
-Release candidate: app build `2026.09.20.2`; deploy only `send-document-email` with JWT verification retained after exact Owner approval. No migration, database, Auth, secret, payment, refund, Stripe object, other Edge Function, website or unrelated change.
-Rollback candidate: restore app deployment `f6c2daa1-9915-430e-a96f-0ea373ca416d` / build `2026.09.20.1` and redeploy the currently active pre-change `send-document-email` source captured before release.
-Next action: inspect the final diff, commit, push and open a focused draft pull request for Owner review; do not deploy.
+Approval boundary: completed under exact Owner approval. App build `2026.09.20.2` and `send-document-email` v58 were released without a migration, database, Auth, secret, payment, refund, Stripe object, other Edge Function, website or unrelated change.
+Release: sent quote emails create the secure response link before delivery and include the clear customer response action in HTML and plain text. Manual replacement/revocation controls and concurrent-response protection remain.
+Rollback: the later UX-QUOTE-005 release supersedes this build; the complete current rollback is recorded above and in `RELEASE_READINESS.md`.
+Next action: complete; maintain regression coverage as part of the released quote workflow.
 
 ## UX-QUOTE-003 — Disabled quote acceptance UI slice
 
 Task ID: UX-QUOTE-003
 Title: Add the default-off customer quote page and minimal owner controls
 Priority: High
-Status: Repository candidate implemented; source gate remains off and nothing is deployed
+Status: Released as part of PR #167 (`07180f5`) and app build `2026.09.19.6`
 Phase: Controlled UI integration
 Owner role: Product owner
 Risk level: High because the UI exposes the signed-out token boundary prepared in `UX-QUOTE-002`
@@ -51,17 +51,17 @@ Scope: static `/quote/` customer page; gated owner link controls; Cloudflare bui
 Product boundary: customer actions are view, accept, decline and view linked invoice. Acceptance captures the entered name, uses the server timestamp and displays the automatically created invoice. Owner controls create/copy or revoke a link and open the linked invoice; they do not send an email.
 Security boundary: the raw token remains in the URL fragment and request body only, is never logged or persisted by browser code, and is omitted from account exports. The public page has no signed-in app shell, Analytics, third-party script or service-worker cache/fallback. Owner actions still require the reviewed authenticated function.
 Privacy boundary: no IP address, fingerprint, decline reason, marketing data, payment data or Analytics event is added. The public shell contains no customer data; all text is inserted with DOM `textContent`.
-Release gate: `TALLYO_QUOTE_ACCEPTANCE_ENABLED` defaults false in source and the Pages build rejects an enabled value unless `TALLYO_QUOTE_ACCEPTANCE_PUBLIC_RELEASE_APPROVED=true` is separately supplied.
+Release gate: production explicitly enables the two reviewed quote-acceptance settings; source remains fail-closed and the Pages build rejects an enabled feature without the separate public-release approval setting.
 Validation: the focused source harness, Cloudflare fail-closed/approved build permutations, all direct Node CI harnesses, website suite, existing Deno runtime tests and both quote-function frozen-lock checks pass. Headless Chrome at 390 px passes keyboard validation, accept, linked invoice, decline, horizontal overflow and zero outside requests; the fictional-data capture was also visually inspected. The sandboxed Deno runner hit a Windows IPC-handle panic, then the same tests passed outside the sandbox; this is tooling evidence, not an application failure.
-Approval boundary: repository implementation, tests, commit, push and a draft stacked pull request are authorised. Stop before merge, migration application, Edge Function deployment, public gate activation, Pages release, email, payment or provider/configuration change.
-Next action: inspect and commit the final diff, prepare a draft stacked pull request, then repeat focused security review on the immutable integrated candidate before any release decision.
+Approval boundary: completed under exact Owner approval in PR #167. No email, payment, refund, Stripe object, secret, Auth setting or unrelated provider change occurred.
+Next action: complete; the later PRs #171 and #172 added the released email-link and optional invoice-delivery follow-ups.
 
 ## UX-QUOTE-002 — Quote acceptance runtime foundation
 
 Task ID: UX-QUOTE-002
 Title: Add the protected quote-link schema and narrow server runtime
 Priority: High
-Status: Repository candidate implemented and source-validated; unapplied and undeployed
+Status: Released as part of PR #167 (`07180f5`); migration `20260919195917` is applied and both functions are active
 Phase: Controlled runtime foundation
 Owner role: Product owner
 Assigned specialists: Backend/Supabase, Security, Privacy and QA performed sequentially by Codex
@@ -70,20 +70,20 @@ Affected files: one timestamped quote-acceptance migration; `manage-quote-access
 Dependencies: approved `UX-QUOTE-001` specification on `codex/quote-acceptance-spec`; released document-status rules in PR #166
 Security boundary: raw 256-bit tokens are returned once and never stored; `anon` receives no table/RPC grant; owner access requires a valid user JWT and row ownership; public responses resolve only the hashed scoped token; the response and linked invoice are committed atomically
 Privacy boundary: confirmed name is stored only on the quote response and owner-visible convenience history; no IP address, fingerprint, decline reason, analytics payload, email or payment side effect
-Approval boundary: local source, tests, commit, push and a focused draft PR are authorised. Stop before applying the migration, deploying either function, adding the customer page to production, enabling a public gate, merging to `main` or releasing.
-Lock state: acquired 2026-09-19 for the affected files above
+Approval boundary: completed under exact Owner approval. `manage-quote-access` v1 retains JWT verification and `quote-public` was released with JWT verification disabled as reviewed; the later follow-up advanced only `quote-public` to v2.
+Lock state: released after production validation on 2026-09-20
 Branch: `codex/quote-acceptance-runtime`, stacked from `codex/quote-acceptance-spec`
 Required validation: migration contract/privilege tests; protected-field and immutable-response tests; duplicate/concurrent acceptance; cross-owner denial; function method/origin/body/JWT/token/name validation; Deno frozen-lock checks; existing security workflow harness
 Evidence: focused contract/helper tests, all existing Node regression harnesses, both frozen-lock Edge Function checks and the website suite pass locally. Draft PR #168 is stacked on the approved specification branch; branch workflow run `35467031469` passed the focused harnesses, website suite and frozen-lock checks for all 21 Edge Functions. Disposable PostgreSQL run `35468437526` applied the migration and passed protected-field, tenant-attribution, sequential replay, decline, forced rollback, privilege and overlapping-accept probes. Focused security scan `8a14a58e-f139-434b-9504-6077fffaa0e5` found one low-severity shared-isolate availability issue in the constant global limiter; the draft now uses a bounded token-hash shard plus the existing stricter per-token limits, without processing or retaining an IP address or fingerprint. The privacy review confirmed purpose-bound name/timestamp storage, hash-only token persistence and no analytics, email, payment, decline-reason or new network-identifier data. No Supabase project was contacted or changed.
-Release prerequisites: ensure the future account export omits the token hash while including appropriate link/response metadata; validate the limiter correction and future disabled customer/owner UI; re-run focused security review on the final UI-integrated candidate before any release decision.
-Next action: complete validation of the limiter correction, then prepare the disabled customer/owner UI as a separate controlled slice. Do not merge, apply, deploy or activate.
+Release prerequisites: satisfied. Account export omits the token hash, the bounded limiter and integrated UI were validated, and focused security plus disposable PostgreSQL checks passed before release.
+Next action: complete; retain the token, ownership, origin, idempotency and atomic-conversion invariants in future changes.
 
 ## UX-QUOTE-001 — Customer quote acceptance specification and isolated preview
 
 Task ID: UX-QUOTE-001
 Title: Specify and prototype secure customer quote acceptance with automatic linked-invoice creation
 Priority: High
-Status: Owner Approved — specification and isolated preview complete; runtime remains unimplemented
+Status: Complete and implemented through released PRs #167, #171 and #172
 Phase: Product/security specification and isolated fictional-data preview
 Owner role: Product
 Assigned specialists: Product, Frontend, Backend/Supabase, Security, Legal/Privacy and QA performed sequentially by Codex
@@ -95,9 +95,9 @@ Security boundary: a future signed-out customer may access only one scoped quote
 Legal materiality: Triggered. The flow processes customer-confirmed name, quote contents, acceptance timestamp and limited security evidence for a UK business user's customer contact. Treat the Tallyo business user as controller and Tallyo as processor for the quote/contact workflow, subject to the existing DPA and Privacy Notice. Do not describe the name as verified identity or the action as a qualified electronic signature.
 Jurisdiction: initial UK-business scope only
 Affected user/data-subject types: Tallyo business user; quote recipient/customer contact, including sole traders where identifiable
-Mandatory controls: data minimisation; clear acceptance wording; server timestamp; scoped expiry/revocation; replay-safe exactly-once conversion; preserved quote snapshot; separate linked invoice; append-only trusted acceptance/conversion events; no automatic email, payment or marketing; no Analytics personal data
+Mandatory controls: data minimisation; clear acceptance wording; server timestamp; scoped expiry/revocation; replay-safe exactly-once conversion; preserved quote snapshot; separate linked invoice; append-only trusted acceptance/conversion events; automatic invoice email only after explicit owner opt-in; no automatic payment or marketing; no Analytics personal data
 Required evidence: current-source mapping; state/abuse matrix; isolated public and internal preview; keyboard/mobile checks; zero external requests; focused privacy/legal disposition; migration/function/test plan
-Legal disposition: Approved with conditions for specification and fictional-data preview only. Runtime implementation remains gated on the documented minimisation, transparency, retention, secure-link and rights-handling controls. No public legal text changes are proposed in this slice.
+Legal disposition: The specification and fictional-data preview were approved with conditions. The released runtime satisfied the documented minimisation, transparency, retention, secure-link and rights-handling controls without changing public legal text.
 External review required: No for the isolated specification/preview. Review may be appropriate before making claims that acceptance forms a binding contract in every scenario or jurisdiction; the product must avoid that claim.
 Acceptance criteria: the specification resolves product states and invariants; the preview shows pending, accepted and internal linked-document states; duplicate/retry/expired/revoked/declined paths are defined; no production source, schema, function, provider or configuration changes occur
 Required tests: local-only server allowlist; no external requests; responsive/keyboard interaction; fictional data only; state transitions do not create real records; spec consistency assertions
@@ -108,7 +108,7 @@ Branch: `codex/quote-acceptance-spec`, from released main merge `6fcf675`
 Commit: `5b380bd` (`docs: specify quote acceptance workflow`); branch closeout record follows
 Evidence: Current app `convertToInvoice` changes the quote row in place, reuses its ID and records a browser timestamp. The current schema has no quote-link or public-access-token fields. Supabase guidance checked 2026-09-19 requires explicit grants plus RLS for exposed tables and distinguishes public functions from authenticated user functions. ICO guidance checked 2026-09-19 supports purpose limitation, data minimisation and privacy by design. The focused contract harness and headless Chrome preview suite pass for pending, acceptance, linked draft invoice, deliberate decline confirmation, expired/revoked states, owner activity, keyboard submit, 390px/desktop overflow and zero external requests. Full-resolution customer and owner screenshots were reviewed and approved by the Owner on 2026-09-19.
 Blocked reason: None for this slice
-Next action: close the design/specification branch and stop. A separate controlled step may prepare the smallest runtime implementation slice; no migration, Edge Function, production integration, merge or release is authorised by this approval.
+Next action: complete; the released workflow is now in bounded monitoring.
 
 ## UX-STATUS-001 — Document status rules
 
