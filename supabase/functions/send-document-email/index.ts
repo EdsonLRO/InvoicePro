@@ -560,6 +560,151 @@ async function resendIdempotencyKey(parts: string[]): Promise<string> {
   return `tallyo-document-email-${hex}`;
 }
 
+type AcceptedQuoteInvoiceDelivery = {
+  admin: any;
+  invoice: any;
+  ownerUserId: string;
+  to: string;
+  fetcher?: typeof fetch;
+  now?: Date;
+  resendKey?: string;
+};
+
+/**
+ * Send the invoice created from an accepted quote. This is deliberately a
+ * single-purpose server-side path: it never creates payment links and it only
+ * moves a still-Draft, quote-linked invoice to Sent after Resend accepts it.
+ */
+export async function sendAcceptedQuoteInvoice({
+  admin,
+  invoice,
+  ownerUserId,
+  to,
+  fetcher = fetch,
+  now = new Date(),
+  resendKey = Deno.env.get("RESEND_API_KEY") || "",
+}: AcceptedQuoteInvoiceDelivery) {
+  const recipient = String(to || "").trim();
+  if (!resendKey) throw new Error("Email service is not configured");
+  if (!validEmail(recipient)) throw new Error("Accepted quote has no valid customer email address");
+  if (!invoice || invoice.user_id !== ownerUserId) throw new Error("Generated invoice does not belong to the quote owner");
+  if (invoice.doc_type !== "invoice" || invoice.status !== "Draft" || !invoice.source_quote_id) {
+    throw new Error("Generated invoice is not available for automatic delivery");
+  }
+
+  const { data: company, error: companyError } = await admin
+    .from("company_settings")
+    .select("*")
+    .eq("user_id", ownerUserId)
+    .maybeSingle();
+  if (companyError) throw new Error("Business details could not be loaded");
+
+  const email = buildEmail(invoice, company || {}, [], null);
+  const filenameNumber = String(invoice.number || "invoice").replace(/[^a-z0-9_-]+/gi, "-");
+  const resendRequestKey = await resendIdempotencyKey([
+    String(invoice.id),
+    ownerUserId,
+    recipient.toLowerCase(),
+    "accepted_quote_auto_send",
+  ]);
+  let resendResponse: Response;
+  try {
+    resendResponse = await fetcher("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": resendRequestKey,
+      },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: [recipient],
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
+        attachments: [{
+          filename: `Invoice-${filenameNumber}.pdf`,
+          content: buildPdfBase64(invoice, company || {}),
+        }],
+        tags: [
+          { name: "category", value: "document_email" },
+          { name: "document_id", value: String(invoice.id) },
+          { name: "user_id", value: ownerUserId },
+        ],
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch (error) {
+    const timedOut = error instanceof DOMException && error.name === "TimeoutError";
+    await insertAuditEvent(admin, {
+      user_id: ownerUserId,
+      actor_user_id: null,
+      event_type: "email_send_failed",
+      object_type: "invoice",
+      object_id: invoice.id,
+      source: "system",
+      provider: "resend",
+      metadata: {
+        channel: "accepted_quote_auto_send",
+        reason: timedOut ? "provider_timeout" : "provider_request_failed",
+      },
+    });
+    throw new Error(timedOut ? "Email provider timed out" : "Email provider could not be reached");
+  }
+
+  const resendBody = await resendResponse.json().catch(() => ({}));
+  if (!resendResponse.ok) {
+    await insertAuditEvent(admin, {
+      user_id: ownerUserId,
+      actor_user_id: null,
+      event_type: "email_send_failed",
+      object_type: "invoice",
+      object_id: invoice.id,
+      source: "system",
+      provider: "resend",
+      metadata: {
+        channel: "accepted_quote_auto_send",
+        status: resendResponse.status,
+        reason: "provider_rejected_request",
+      },
+    });
+    throw new Error(String(resendBody?.message || "Email could not be sent"));
+  }
+
+  const nowISO = now.toISOString();
+  const history = Array.isArray(invoice.history) ? [...invoice.history] : [];
+  history.push({
+    ts: nowISO,
+    type: "sent",
+    text: `Sent automatically after quote acceptance to ${recipient}`,
+  });
+  const { data: updated, error: updateError } = await admin
+    .from("invoices")
+    .update({ history, status: "Sent", updated_at: nowISO })
+    .eq("id", invoice.id)
+    .eq("user_id", ownerUserId)
+    .eq("doc_type", "invoice")
+    .eq("status", "Draft")
+    .eq("source_quote_id", invoice.source_quote_id)
+    .select("*")
+    .maybeSingle();
+  if (updateError) throw new Error("Automatic email was accepted but the invoice status could not be updated");
+  if (!updated) throw new Error("Generated invoice changed before automatic delivery completed");
+
+  await insertAuditEvent(admin, {
+    user_id: ownerUserId,
+    actor_user_id: null,
+    event_type: "document_email_sent",
+    object_type: "invoice",
+    object_id: invoice.id,
+    source: "system",
+    provider: "resend",
+    provider_event_id: resendBody?.id || null,
+    metadata: { channel: "accepted_quote_auto_send" },
+  });
+  return { invoice: updated, emailId: resendBody?.id || null };
+}
+
 async function createStripeCheckoutUrl(inv: any, userId: string, to: string, admin: any, amount: number, kind: string): Promise<string | null> {
   const ownerUserId = Deno.env.get("STRIPE_OWNER_USER_ID") || "";
   if (
@@ -750,7 +895,7 @@ async function createPaymentLinks(
   });
 }
 
-Deno.serve(async (req) => {
+export async function handleDocumentEmailRequest(req: Request) {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
@@ -793,6 +938,14 @@ Deno.serve(async (req) => {
   }
   const includeOnlinePayment = body.includeOnlinePayment === true;
   const paymentKind = includeOnlinePayment ? String(body.paymentKind || "") : "";
+  if (
+    body.autoSendOnAcceptance !== undefined &&
+    typeof body.autoSendOnAcceptance !== "boolean"
+  ) {
+    return json({ error: "Automatic invoice delivery selection must be true or false" }, 400);
+  }
+  const autoSendOnAcceptance = body.autoSendOnAcceptance === true;
+  const autoSendDueDays = Number(body.autoSendDueDays);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(documentId)) {
     return json({ error: "Invalid document ID" }, 400);
   }
@@ -806,6 +959,9 @@ Deno.serve(async (req) => {
       400,
     );
   }
+  if (autoSendOnAcceptance && ![7, 14, 30, 60].includes(autoSendDueDays)) {
+    return json({ error: "Choose when the automatically created invoice will be due" }, 400);
+  }
 
   const { data: inv, error: invError } = await admin.from("invoices").select("*").eq("id", documentId).maybeSingle();
   if (invError) return json({ error: invError.message }, 500);
@@ -816,8 +972,26 @@ Deno.serve(async (req) => {
   let quoteAccess: QuoteAccess | null = null;
   if (inv.doc_type === "quote") {
     try {
+      const { data: quoteWithDeliveryChoice, error: choiceError } = await admin
+        .from("invoices")
+        .update({
+          quote_auto_send_invoice: autoSendOnAcceptance,
+          quote_auto_send_due_days: autoSendOnAcceptance ? autoSendDueDays : null,
+          quote_auto_send_recipient: autoSendOnAcceptance ? to : null,
+          quote_auto_send_status: null,
+          quote_auto_send_attempted_at: null,
+          quote_auto_send_sent_at: null,
+        })
+        .eq("id", documentId)
+        .eq("user_id", userData.user.id)
+        .eq("doc_type", "quote")
+        .is("quote_response", null)
+        .select("*")
+        .maybeSingle();
+      if (choiceError) throw new Error("Automatic delivery choice could not be saved");
+      if (!quoteWithDeliveryChoice) throw new Error("This quote can no longer be sent");
       const prepared = await prepareQuoteEmailAccess({
-        quote: inv,
+        quote: quoteWithDeliveryChoice,
         userId: userData.user.id,
         admin,
       });
@@ -997,4 +1171,6 @@ Deno.serve(async (req) => {
       ? { quoteAccess: { link: quoteAccess.link, expiresAt: quoteAccess.expiresAt } }
       : {}),
   });
-});
+}
+
+if (import.meta.main) Deno.serve(handleDocumentEmailRequest);

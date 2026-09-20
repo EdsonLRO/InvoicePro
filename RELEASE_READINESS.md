@@ -1,5 +1,9 @@
 # Tallyo Release Readiness Checklist
 
+## Accepted-quote invoice follow-up candidate
+
+Draft PR #172 on `codex/quote-acceptance-followup` prepares app build `2026.09.20.3`, additive migration `20260920110017_quote_acceptance_followup.sql`, and focused updates to `quote-public` and `send-document-email`. Automatic delivery is off by default and creates no online-payment link. Acceptance remains committed if email delivery fails; the linked invoice remains Draft and is surfaced for manual review. Local application/security/runtime/website/frozen-lock checks pass, and PR security plus disposable PostgreSQL migration probes pass at commit `2bc5335`. No migration, function, app build, provider setting or email has been applied or sent. Production release requires a separate exact Owner approval with a current app rollback deployment and pre-change function-source rollback.
+
 This checklist tracks whether the current app is ready for real customer use. It is not a public-launch checklist for the future SaaS website.
 
 ## Authenticated-app redesign — released, list-card follow-up approved, 2026-09-19

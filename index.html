@@ -2145,6 +2145,26 @@
                             <span class="block text-sm text-slate-600 mt-1">Tallyo will add a secure “View and respond to quote” button. You do not need to create a link first. Sending this quote again replaces any previous response link.</span>
                         </div>
 
+                        <div v-if="documentEmailModal.inv && documentEmailModal.inv.docType === 'quote'" class="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" v-model="documentEmailModal.autoSendOnAcceptance" class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                                <span>
+                                    <span class="block font-semibold text-slate-800">Automatically send the invoice when accepted</span>
+                                    <span class="block text-sm text-slate-500 mt-1">Creates and emails the invoice once to the recipient above. Leave this off if you want to review it first.</span>
+                                </span>
+                            </label>
+                            <div v-if="documentEmailModal.autoSendOnAcceptance" class="pt-3 border-t border-slate-200">
+                                <label for="quote-auto-send-due-days" class="block text-sm font-semibold text-slate-700 mb-1">Invoice payment due</label>
+                                <select id="quote-auto-send-due-days" v-model.number="documentEmailModal.autoSendDueDays" class="w-full border rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <option :value="7">7 days after acceptance</option>
+                                    <option :value="14">14 days after acceptance</option>
+                                    <option :value="30">30 days after acceptance</option>
+                                    <option :value="60">60 days after acceptance</option>
+                                </select>
+                                <p class="text-xs text-slate-500 mt-2">Automatic emails do not include an online card-payment button. Leave this option off if you need to choose a payment amount or deposit first.</p>
+                            </div>
+                        </div>
+
                         <div v-if="canOfferOnlinePayment(documentEmailModal.inv)" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
                             <label class="flex items-start gap-3 cursor-pointer">
                                 <input type="checkbox" v-model="documentEmailModal.includeOnlinePayment" class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
@@ -3105,7 +3125,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.09.20.2';
+    const APP_BUILD = '2026.09.20.3';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -3235,6 +3255,8 @@
                     to: '',
                     includeOnlinePayment: false,
                     paymentKind: 'full_balance',
+                    autoSendOnAcceptance: false,
+                    autoSendDueDays: 14,
                     sending: false,
                     error: ''
                 },
@@ -3375,6 +3397,22 @@
             },
             overviewAttention() {
                 const items = [];
+                const quotes = new Map(this.invoices.filter(inv => inv.docType === 'quote').map(inv => [inv.id, inv]));
+                for (const inv of this.invoices) {
+                    if ((inv.docType || 'invoice') !== 'invoice' || !inv.sourceQuoteId || this.normalizedStatus(inv) !== 'Draft') continue;
+                    const quote = quotes.get(inv.sourceQuoteId);
+                    const automaticFailed = quote?.quoteAutoSendStatus === 'failed';
+                    items.push({
+                        key: 'accepted-quote-invoice-' + inv.id,
+                        kind: 'accepted-quote-invoice',
+                        invoice: inv,
+                        title: 'Quote accepted · ' + this.overviewDocumentLabel(inv) + ' is ready',
+                        detail: automaticFailed
+                            ? 'Automatic email could not be sent. Review the invoice and send it manually.'
+                            : 'Review the due date and payment options, then send the invoice.',
+                        action: 'Review & send invoice'
+                    });
+                }
                 for (const inv of this.invoices) {
                     if ((inv.docType || 'invoice') !== 'invoice') continue;
                     const dispute = this.disputeStateFor(inv.id);
@@ -4971,7 +5009,7 @@
                 this.invoiceBulkBusy = false;
                 this.emailSendingId = null;
                 this.emailSendingStage = null;
-                this.documentEmailModal = { open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance', sending: false, error: '' };
+                this.documentEmailModal = { open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance', autoSendOnAcceptance: false, autoSendDueDays: 14, sending: false, error: '' };
                 this.stripeCheckoutBusyId = null;
                 this.stripeRefundBusyKey = null;
                 this.billing = {
@@ -5395,7 +5433,12 @@
                     sourceQuoteId: r.source_quote_id || null,
                     quoteResponse: r.quote_response || null,
                     quoteResponseName: r.quote_response_name || '',
-                    quoteRespondedAt: r.quote_responded_at || null
+                    quoteRespondedAt: r.quote_responded_at || null,
+                    quoteAutoSendInvoice: r.quote_auto_send_invoice === true,
+                    quoteAutoSendDueDays: Number(r.quote_auto_send_due_days) || null,
+                    quoteAutoSendStatus: r.quote_auto_send_status || null,
+                    quoteAutoSendAttemptedAt: r.quote_auto_send_attempted_at || null,
+                    quoteAutoSendSentAt: r.quote_auto_send_sent_at || null
                 };
                 inv.totals = this.calcTotals(inv);
                 return inv;
@@ -6358,13 +6401,15 @@
                     to: defaultEmail,
                     includeOnlinePayment: false,
                     paymentKind: inv.onlinePaymentMode === 'deposit' ? 'deposit' : 'full_balance',
+                    autoSendOnAcceptance: inv.docType === 'quote' && inv.quoteAutoSendInvoice === true,
+                    autoSendDueDays: Number(inv.quoteAutoSendDueDays) || 14,
                     sending: false,
                     error: ''
                 };
             },
             closeDocumentEmailModal() {
                 if (this.documentEmailModal.sending) return;
-                this.documentEmailModal = { open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance', sending: false, error: '' };
+                this.documentEmailModal = { open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance', autoSendOnAcceptance: false, autoSendDueDays: 14, sending: false, error: '' };
             },
             stripeConnectReady() {
                 const account = this.stripeConnect && this.stripeConnect.account;
@@ -6413,6 +6458,8 @@
                 modal.error = '';
                 const includeOnlinePayment = modal.includeOnlinePayment === true;
                 const paymentKind = modal.paymentKind;
+                const autoSendOnAcceptance = modal.inv.docType === 'quote' && modal.autoSendOnAcceptance === true;
+                const autoSendDueDays = [7, 14, 30, 60].includes(Number(modal.autoSendDueDays)) ? Number(modal.autoSendDueDays) : 14;
                 this.emailSendingId = this.isUuid(modal.inv.id) ? modal.inv.id : 'draft';
                 this.emailSendingStage = 'prepared';
                 let target = modal.inv;
@@ -6453,6 +6500,10 @@
                 try {
                     const body = { documentId: target.id, to, includeOnlinePayment };
                     if (includeOnlinePayment) body.paymentKind = paymentKind;
+                    if (target.docType === 'quote') {
+                        body.autoSendOnAcceptance = autoSendOnAcceptance;
+                        body.autoSendDueDays = autoSendOnAcceptance ? autoSendDueDays : null;
+                    }
                     const { data, error } = await supabaseClient.functions.invoke('send-document-email', { body });
                     if (error) throw error;
                     if (data && data.error) throw new Error(data.error);
@@ -6464,9 +6515,11 @@
                         this.quoteAcceptance.notice = 'The emailed quote includes this secure response link.';
                     }
                     await this.loadAuditEvents();
-                    this.documentEmailModal = { open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance', sending: false, error: '' };
+                    this.documentEmailModal = { open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance', autoSendOnAcceptance: false, autoSendDueDays: 14, sending: false, error: '' };
                     if (target.docType === 'quote') {
-                        this.showAppNotice('Quote email is on its way', 'The email includes a secure button for the customer to accept or decline the quote.');
+                        this.showAppNotice('Quote email is on its way', autoSendOnAcceptance
+                            ? 'The customer can respond securely. If accepted, the invoice will be due in ' + autoSendDueDays + ' days and emailed automatically.'
+                            : 'The customer can respond securely. If accepted, a Draft invoice will be ready for you to review and send.');
                     } else {
                         this.showAppNotice('Email is on its way', 'You can check its delivery status in Activity History.');
                     }

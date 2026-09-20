@@ -3,11 +3,14 @@ name: Quote acceptance database tests
 on:
   pull_request:
     branches:
+      - main
       - codex/quote-acceptance-spec
     paths:
       - '.github/workflows/quote-acceptance-db-tests.yml'
       - 'supabase/migrations/20260919195917_quote_acceptance_runtime.sql'
+      - 'supabase/migrations/20260920110017_quote_acceptance_followup.sql'
       - 'tests/quote-acceptance-*.sql'
+      - 'tests/quote-auto-send-*.sql'
   workflow_dispatch:
 
 permissions:
@@ -70,7 +73,9 @@ jobs:
 
           psql_file tests/quote-acceptance-local-bootstrap.sql
           psql_file supabase/migrations/20260919195917_quote_acceptance_runtime.sql
+          psql_file supabase/migrations/20260920110017_quote_acceptance_followup.sql
           psql_file tests/quote-acceptance-runtime-probes.sql
+          psql_file tests/quote-auto-send-runtime-probes.sql
 
           psql_file tests/quote-acceptance-concurrency-a.sql &
           first_pid=$!

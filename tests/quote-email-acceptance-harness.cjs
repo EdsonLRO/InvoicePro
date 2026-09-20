@@ -105,7 +105,7 @@ async function main() {
   assert.match(app, /You do not need to create a link first/);
   assert.match(app, /Sending this quote again replaces any previous response link/);
   assert.match(app, /data\.quoteAccess && this\.draft && this\.draft\.id === target\.id/);
-  assert.match(app, /The email includes a secure button for the customer to accept or decline the quote/);
+  assert.match(app, /The email will include a secure quote response button/);
 
   console.log('Quote email acceptance harness passed.');
 }

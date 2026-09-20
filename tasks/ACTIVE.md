@@ -1,5 +1,23 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-QUOTE-005 — Accepted quote invoice follow-up
+
+Task ID: UX-QUOTE-005
+Title: Make the generated invoice actionable and optionally email it after quote acceptance
+Priority: High
+Status: Draft PR #172 implemented and validated; not merged or deployed
+Phase: Controlled quote follow-up
+Owner role: Product owner
+Risk level: High because a signed-out acceptance may trigger a transactional email and service-role status update
+Branch: `codex/quote-acceptance-followup`, from merged PR #171 (`e0c8059`)
+Scope: add a default-off automatic-send choice and due-period selector to the authenticated quote-email dialog; store the choice on the quote; claim at most one post-acceptance attempt; set the linked invoice due date; send only to the saved customer snapshot address without a payment link; mark Sent only after provider acceptance; show Draft follow-up/failure in Needs your attention; add focused runtime and contract coverage; prepare app build `2026.09.20.3`
+Security and privacy boundary: the public request cannot choose an email address, payment option or due period. The authenticated email function stores the exact recipient reviewed by the owner, and the public function can only use that stored value. Existing quote-token, origin, response, tenant and rate-limit controls remain. No Analytics or marketing data is added.
+Failure boundary: quote acceptance and linked Draft creation commit before delivery. A missing/invalid customer email or provider failure keeps the invoice Draft and records the quote attempt as failed for manual review. No automatic retry loop is added.
+Approval boundary: repository implementation, tests, commit, push and a focused draft pull request are authorised. Stop before migration application, either Edge Function deployment, app publication, live/test email, provider/configuration change or merge.
+Release candidate: migration `20260920110017_quote_acceptance_followup.sql`; `quote-public` retains JWT verification disabled; `send-document-email` retains JWT verification enabled; app build `2026.09.20.3` and service-worker cache `tallyo-shell-2026-09-20-3`.
+Validation: the full Node application/security harness set, focused automatic-delivery runtime tests, public website suite and frozen-lock checks for all 21 Edge Functions pass locally. Draft PR #172 security checks and disposable PostgreSQL 17 migration/constraint/privilege/concurrency probes pass at commit `2bc5335`.
+Next action: Owner review of draft PR #172. Stop before merge, migration, function deployment, app publication or any email.
+
 ## UX-QUOTE-004 — Include quote response action in sent quote emails
 
 Task ID: UX-QUOTE-004
