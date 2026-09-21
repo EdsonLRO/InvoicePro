@@ -1,5 +1,13 @@
 # Tallyo Release Readiness Checklist
 
+## Customer CSV import — released and verified, 2026-09-21
+
+The Owner approved the bounded release after confirming the local import flow worked. PR #174 merged feature commit `ffba867e24a3d0cb8dbf2fb61a85711c34062f09` as `7d5566d53ae9023fff4b291db2afef5da3d46602`. The Customers page accepts a maximum 1 MB / 500-row CSV, parses it locally, recognises only the seven existing customer fields, previews valid rows, explains skipped rows, rejects invalid email addresses and skips existing or in-file duplicate emails. Import requires explicit confirmation, uses one existing owner-scoped insert and does not overwrite existing customers.
+
+Parser, static integration, mobile/desktop browser, customer validation, public integration, PWA, Cloudflare Pages readiness, tenant-isolation, security-workflow and redesigned-customer regression checks passed. The browser preview used fictional data and made no external requests. Main Security checks `35580335856` and Pages workflow `35580334221` passed.
+
+App build `2026.09.20.4` is active at Cloudflare deployment `c0441aea-ceec-4725-89a3-7c9e3ab3e635`. The public shell, 20-asset build report, service-worker cache `tallyo-shell-2026-09-20-4` and published CSV helper returned the expected release markers. Rollback was not required; the retained app rollback is deployment `cb1cd9a0-8ca1-416c-b987-c1cb617b30eb` / build `2026.09.20.3`. No database, migration, Edge Function, RLS, Auth, provider, email, payment, website-source or unrelated change occurred.
+
 ## Accepted-quote invoice follow-up — released and verified, 2026-09-20
 
 The Owner approved the bounded release after reviewing the automatic-delivery option. PR #172 merged as `86d358137f0bc296bef2c8414942af63638f9ecc`; additive migration `20260920110017_quote_acceptance_followup.sql` is applied; `send-document-email` advanced from v58 to v59 with JWT verification retained; and `quote-public` advanced from v1 to v2 with JWT verification disabled as reviewed. No other migration or function was applied or deployed.
@@ -61,9 +69,9 @@ Statuses: Planned, In Progress, Implemented, Verified, Blocked, Deferred, Not Ap
 
 ## Current Verdict
 
-**Status:** Verified for the approved initial UK-business public release; redesign build `2026.09.19.3` is public and focused list-card follow-up build `2026.09.19.4` is Owner-approved for release.
+**Status:** Verified for the approved initial UK-business public release; app build `2026.09.20.4` is public and the bounded customer CSV import is Owner-verified.
 
-Tallyo's current invoicing-app scope is feature-complete and regression-verified. Build `2026.09.19.3` is public at `https://app.tallyo.co.uk`; Cloudflare deployment `9690dc1c-2ab5-42ae-a88f-bbb79cab46a7` is the rollback artifact for the approved list-card follow-up. The production website, legal pages, subscription and connected-payment interfaces, Owner Console and bounded AI Helper are unchanged by this frontend-only correction.
+Tallyo's current invoicing-app scope is feature-complete and regression-verified. Build `2026.09.20.4` is public at `https://app.tallyo.co.uk` through Cloudflare deployment `c0441aea-ceec-4725-89a3-7c9e3ab3e635`; deployment `cb1cd9a0-8ca1-416c-b987-c1cb617b30eb` / build `2026.09.20.3` is the retained app rollback. The production website, legal pages, subscription and connected-payment interfaces, Owner Console and bounded AI Helper are unchanged by the customer-import release.
 
 ## Release Gates
 

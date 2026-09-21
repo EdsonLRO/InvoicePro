@@ -5,8 +5,8 @@
 Task ID: UX-CUSTOMERS-001
 Title: Import a small customer list from CSV with preview and skipped-row feedback
 Priority: Medium
-Status: Local implementation and Owner review complete; PR preparation in progress
-Phase: Validated repository handoff
+Status: Released and Owner-verified on 2026-09-21; PR #174 merged as `7d5566d`
+Phase: Complete
 Owner role: Product owner
 Assigned specialists: Frontend, Backend/Supabase, Security, Privacy and QA performed sequentially by Codex
 Model/work mode: Terra for implementation and QA; Sol-level review for private-data, tenant-isolation and release boundaries
@@ -20,13 +20,13 @@ Legal disposition: Approved with conditions for repository implementation. Condi
 Acceptance criteria: upload a CSV; recognise the documented headers and reasonable aliases; preview valid rows; identify skipped rows with row numbers; skip existing/in-file duplicate emails; import valid rows in one owner-scoped request; keep existing customers unchanged; remain usable on mobile and by keyboard; show non-technical errors
 Required tests: quoted CSV/BOM/CRLF/newline parsing; header/alias validation; invalid/missing values; duplicate handling; 1 MB/500-row bounds; no network/storage use in parser; app wiring; build/service-worker publication; existing customer validation, public-build, PWA and tenant-boundary regression
 Required documentation: this active task record; update current product/release authorities only after Owner-approved release
-Approval boundary: local implementation, tests, commit, push and PR preparation are authorised. Stop before merge to `main` or production publication because the change handles private customer data and a main merge triggers production workflows.
-Lock state: acquired 2026-09-20 for the affected files listed above; release after commit/PR handoff or rollback
+Approval boundary: completed under explicit Owner approval. PR #174 was marked ready, merged and published as app build `2026.09.20.4`. No excluded backend, provider, communication, payment or website change was made.
+Lock state: released 2026-09-21 after production validation
 Branch: `codex/customer-csv-import`
-Commit: pending
-Evidence: the Owner confirmed the local import flow works. Parser, static integration, mobile/desktop browser, customer validation, public integration, PWA, Cloudflare Pages readiness, tenant-isolation, security-workflow and redesigned-customer regression checks pass. The browser preview made no external requests and used fictional data only.
+Commit: feature `ffba867e24a3d0cb8dbf2fb61a85711c34062f09`; merge `7d5566d53ae9023fff4b291db2afef5da3d46602`
+Evidence: the Owner confirmed the local import flow works. Parser, static integration, mobile/desktop browser, customer validation, public integration, PWA, Cloudflare Pages readiness, tenant-isolation, security-workflow and redesigned-customer regression checks passed. The browser preview made no external requests and used fictional data only. Main Security checks `35580335856` and Pages workflow `35580334221` passed. Cloudflare deployment `c0441aea-ceec-4725-89a3-7c9e3ab3e635` serves build `2026.09.20.4`; the public shell, 20-asset build report, service-worker cache and CSV helper passed bounded read-only checks.
 Blocked reason: none
-Next action: complete diff hygiene and sensitive-value review, then commit, push and prepare the pull request without merging or publishing
+Next action: routine bounded monitoring only; retained app rollback is build `2026.09.20.3` at deployment `cb1cd9a0-8ca1-416c-b987-c1cb617b30eb`
 
 ## UX-QUOTE-005 — Accepted quote invoice follow-up
 
