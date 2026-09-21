@@ -55,6 +55,7 @@ jobs:
           node tests/document-status-rules-spec-harness.cjs
           deno test tests/invoice-status-rules-runtime-test.ts
           node tests/customer-item-validation-harness.cjs
+          node tests/customer-csv-import-harness.cjs
           node tests/dispute-lifecycle-visibility-harness.cjs
           node tests/email-status-accuracy-harness.cjs
           node tests/edge-dependency-pin-harness.cjs

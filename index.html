@@ -38,6 +38,7 @@
     <!-- Your project settings (uploaded once, never overwritten when index.html changes) -->
     <script src="./config.js"></script>
     <script src="./app-user-messages.js"></script>
+    <script src="./customer-csv-import.js"></script>
     <script type="module" src="./analytics-app.js"></script>
 
     <style>
@@ -1099,6 +1100,62 @@
                 <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                     <button type="button" @click="closeDocumentCancellation" :disabled="documentCancellation.busy" class="bg-white border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg hover:bg-slate-50 font-medium disabled:opacity-50">Keep {{ documentCancellationKeepLabel }}</button>
                     <button type="button" @click="confirmDocumentCancellation" :disabled="documentCancellation.busy" class="bg-red-600 text-white px-5 py-2.5 rounded-lg hover:bg-red-700 font-semibold disabled:opacity-50">{{ documentCancellation.busy ? 'Cancelling…' : documentCancellationConfirmLabel }}</button>
+                </div>
+            </section>
+        </div>
+
+        <div v-if="customerImport.open" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4" @click.self="closeCustomerImport">
+            <section ref="customerImportDialog" class="w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-5 sm:p-7 shadow-2xl" style="max-height: calc(100vh - 2rem);" role="dialog" aria-modal="true" aria-labelledby="customer-import-title" aria-describedby="customer-import-description" tabindex="-1" @keydown.esc.stop.prevent="closeCustomerImport" @keydown.tab="trapCustomerImportFocus">
+                <div class="flex items-start justify-between gap-4 mb-4">
+                    <div>
+                        <p class="text-sm font-bold uppercase tracking-wider text-indigo-600 mb-1">Customer import</p>
+                        <h2 id="customer-import-title" class="text-2xl font-semibold text-slate-900">Import customers from CSV</h2>
+                    </div>
+                    <button type="button" @click="closeCustomerImport" :disabled="customerImport.busy" aria-label="Close customer import" class="text-slate-400 hover:text-slate-700 text-2xl leading-none disabled:opacity-50">&times;</button>
+                </div>
+                <p id="customer-import-description" class="text-sm text-slate-600 mb-4">Use columns for Name, Email, Phone, Mobile, Address, Tax ID and Additional Info. Only Name is required. Extra columns are ignored.</p>
+                <div class="rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-slate-700 mb-5">
+                    Only import customer details you are allowed to store in Tallyo. Existing customers are not changed, and rows with an email already in your customer list are skipped.
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-end gap-3 mb-5">
+                    <label class="flex-1 text-sm font-medium text-slate-700">Choose CSV file
+                        <input ref="customerImportFile" type="file" accept=".csv,text/csv" @change="handleCustomerCsvFile" class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">
+                    </label>
+                    <button type="button" @click="downloadCustomerCsvTemplate" class="bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-50 font-medium text-sm">Download template</button>
+                </div>
+
+                <p v-if="customerImport.error" class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 mb-5" role="alert">{{ customerImport.error }}</p>
+
+                <div v-if="customerImport.fileName && !customerImport.error" aria-live="polite">
+                    <p class="text-sm font-medium text-slate-800 mb-3">{{ customerImport.fileName }}</p>
+                    <div class="grid grid-cols-2 gap-3 mb-5">
+                        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4"><span class="block text-xs font-bold uppercase tracking-wide text-emerald-700">Ready to import</span><strong class="text-2xl text-slate-900">{{ customerImport.rows.length }}</strong></div>
+                        <div class="rounded-xl border border-amber-200 bg-amber-50 p-4"><span class="block text-xs font-bold uppercase tracking-wide text-amber-700">Skipped</span><strong class="text-2xl text-slate-900">{{ customerImport.issues.length }}</strong></div>
+                    </div>
+
+                    <section v-if="customerImport.rows.length" aria-labelledby="customer-import-preview-title" class="mb-5">
+                        <h3 id="customer-import-preview-title" class="text-sm font-semibold text-slate-900 mb-2">Preview</h3>
+                        <ul class="rounded-xl border border-slate-200 divide-y divide-slate-200 overflow-hidden">
+                            <li v-for="(customer, index) in customerImport.rows.slice(0, 5)" :key="customer.email || customer.name + index" class="px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 bg-white">
+                                <strong class="text-sm text-slate-900">{{ customer.name }}</strong><span class="text-sm text-slate-500">{{ customer.email || 'No email' }}</span>
+                            </li>
+                        </ul>
+                        <p v-if="customerImport.rows.length > 5" class="text-xs text-slate-500 mt-2">Plus {{ customerImport.rows.length - 5 }} more valid rows.</p>
+                    </section>
+
+                    <section v-if="customerImport.issues.length" aria-labelledby="customer-import-issues-title" class="mb-5">
+                        <h3 id="customer-import-issues-title" class="text-sm font-semibold text-slate-900 mb-2">Rows that will be skipped</h3>
+                        <ul class="max-h-44 overflow-y-auto rounded-xl border border-amber-200 bg-amber-50 divide-y divide-amber-200 text-sm text-slate-700">
+                            <li v-for="issue in customerImport.issues.slice(0, 20)" :key="issue.row + issue.message" class="px-4 py-2"><strong>Row {{ issue.row }}:</strong> {{ issue.message }}</li>
+                        </ul>
+                        <p v-if="customerImport.issues.length > 20" class="text-xs text-slate-500 mt-2">Plus {{ customerImport.issues.length - 20 }} more skipped rows.</p>
+                    </section>
+                </div>
+
+                <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-slate-200">
+                    <button type="button" @click="closeCustomerImport" :disabled="customerImport.busy" class="bg-white border border-slate-300 text-slate-700 px-5 py-2.5 rounded-lg hover:bg-slate-50 font-medium disabled:opacity-50">Cancel</button>
+                    <button type="button" @click="importCustomersFromCsv" :disabled="customerImport.busy || !customerImport.rows.length" class="bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 font-semibold shadow-sm disabled:opacity-50">{{ customerImport.busy ? 'Importing…' : 'Import ' + customerImport.rows.length + ' customer' + (customerImport.rows.length === 1 ? '' : 's') }}</button>
                 </div>
             </section>
         </div>
@@ -2460,7 +2517,10 @@
                 <div v-else-if="customerView === 'list'">
                     <div class="flex justify-between items-center mb-6">
                         <h2 ref="customerListHeading" tabindex="-1" class="text-3xl font-semibold">Customers</h2>
-                        <button @click="newCustomer" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">+ New Customer</button>
+                        <div class="flex items-center gap-2 flex-wrap justify-end">
+                            <button @click="openCustomerImport" class="bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 px-4 py-2 rounded-lg font-medium transition-colors text-sm">Import CSV</button>
+                            <button @click="newCustomer" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors text-sm">+ New Customer</button>
+                        </div>
                     </div>
 
                     <div class="mb-5 flex items-center gap-3 flex-wrap">
@@ -3125,7 +3185,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.09.20.3';
+    const APP_BUILD = '2026.09.20.4';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -3272,6 +3332,8 @@
                 editingTemplate: null,
                 recurringForm: null,
                 customerForm: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' },
+                customerImport: { open: false, busy: false, fileName: '', rows: [], issues: [], totalRows: 0, error: '' },
+                customerImportReturnFocus: null,
                 customerView: 'list',
                 customerContextId: '',
                 customerContextCurrencyChoice: '',
@@ -7745,6 +7807,102 @@
                 this.resetCustomerForm();
                 this.customerView = 'form';
                 this.setRouteKey('customers-form');
+            },
+            resetCustomerImport() {
+                this.customerImport = { open: false, busy: false, fileName: '', rows: [], issues: [], totalRows: 0, error: '' };
+                if (this.$refs.customerImportFile) this.$refs.customerImportFile.value = '';
+            },
+            openCustomerImport() {
+                if (!window.TallyoCustomerCsv || typeof window.TallyoCustomerCsv.parseCustomers !== 'function') {
+                    this.showUserMessage('Could not import customers: The CSV reader is not available.');
+                    return;
+                }
+                this.customerImportReturnFocus = document.activeElement;
+                this.resetCustomerImport();
+                this.customerImport.open = true;
+                this.$nextTick(() => {
+                    const target = this.$refs.customerImportFile || this.$refs.customerImportDialog;
+                    if (target && typeof target.focus === 'function') target.focus();
+                });
+            },
+            closeCustomerImport() {
+                if (!this.customerImport.open || this.customerImport.busy) return;
+                const returnFocus = this.customerImportReturnFocus;
+                this.resetCustomerImport();
+                this.customerImportReturnFocus = null;
+                this.$nextTick(() => {
+                    if (returnFocus && typeof returnFocus.focus === 'function') returnFocus.focus();
+                });
+            },
+            trapCustomerImportFocus(event) {
+                const panel = this.$refs.customerImportDialog;
+                const controls = panel?.querySelectorAll('button:not([disabled]), input:not([disabled])');
+                if (!controls?.length) return;
+                const first = controls[0], last = controls[controls.length - 1];
+                if (event.shiftKey && (document.activeElement === first || document.activeElement === panel)) { event.preventDefault(); last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+            },
+            async handleCustomerCsvFile(event) {
+                const file = event && event.target && event.target.files && event.target.files[0];
+                this.customerImport.fileName = file ? file.name : '';
+                this.customerImport.rows = [];
+                this.customerImport.issues = [];
+                this.customerImport.totalRows = 0;
+                this.customerImport.error = '';
+                if (!file) return;
+                try {
+                    if (!/\.csv$/i.test(file.name || '')) throw new Error('Choose a CSV file.');
+                    if (file.size > window.TallyoCustomerCsv.MAX_BYTES) throw new Error('Choose a CSV file smaller than 1 MB.');
+                    const text = await file.text();
+                    const preview = window.TallyoCustomerCsv.parseCustomers(text, { existingCustomers: this.customers });
+                    this.customerImport.rows = preview.rows;
+                    this.customerImport.issues = preview.issues;
+                    this.customerImport.totalRows = preview.totalRows;
+                    if (!preview.totalRows) this.customerImport.error = 'The CSV file does not contain any customer rows.';
+                } catch (error) {
+                    this.customerImport.error = error && error.message ? error.message : 'The CSV file could not be read.';
+                } finally {
+                    if (event && event.target) event.target.value = '';
+                }
+            },
+            downloadCustomerCsvTemplate() {
+                const blob = new Blob([window.TallyoCustomerCsv.templateCsv()], { type: 'text/csv;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'tallyo-customer-import-template.csv';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+            },
+            async importCustomersFromCsv() {
+                if (this.customerImport.busy || !this.customerImport.rows.length) return;
+                this.customerImport.busy = true;
+                this.customerImport.error = '';
+                try {
+                    const rows = this.customerImport.rows.map(customer => this.customerToRow(customer));
+                    const { data, error } = await supabaseClient.from('customers').insert(rows).select();
+                    if (error) throw error;
+                    const imported = (data || []).map(row => this.rowToCustomer(row));
+                    this.customers.push(...imported);
+                    this.customers.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                    this.customerPage = 1;
+                    const importedCount = imported.length;
+                    const skippedCount = this.customerImport.issues.length;
+                    this.customerImport.busy = false;
+                    this.closeCustomerImport();
+                    this.showAppNotice(
+                        importedCount === 1 ? 'Customer imported' : 'Customers imported',
+                        `${importedCount} customer${importedCount === 1 ? '' : 's'} added${skippedCount ? `; ${skippedCount} row${skippedCount === 1 ? '' : 's'} skipped` : ''}.`,
+                        7000,
+                        'success'
+                    );
+                } catch (error) {
+                    console.error('Customer CSV import failed:', error);
+                    this.customerImport.busy = false;
+                    this.showUserMessage('Could not import customers: ' + (error && error.message ? error.message : error));
+                }
             },
             backToCustomers() {
                 this.resetCustomerForm();

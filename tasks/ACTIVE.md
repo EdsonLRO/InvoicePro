@@ -1,5 +1,33 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-CUSTOMERS-001 — Simple customer CSV import
+
+Task ID: UX-CUSTOMERS-001
+Title: Import a small customer list from CSV with preview and skipped-row feedback
+Priority: Medium
+Status: Local implementation and Owner review complete; PR preparation in progress
+Phase: Validated repository handoff
+Owner role: Product owner
+Assigned specialists: Frontend, Backend/Supabase, Security, Privacy and QA performed sequentially by Codex
+Model/work mode: Terra for implementation and QA; Sol-level review for private-data, tenant-isolation and release boundaries
+Risk level: High review boundary because customer contact data is private, although the implementation reuses the existing owner-scoped browser insert and makes no RLS or backend change
+Affected files: `index.html`, `customer-csv-import.js`, `app-user-messages.js`, app build/cache allowlists, focused tests, CI registration and this task record
+Dependencies: released customer address book, existing `customers` RLS, existing paid/grace write-entitlement enforcement and existing Privacy Notice/Data Processing Terms
+Security boundary: the selected file is parsed locally; only confirmed valid rows are sent to the existing `customers` insert; owner-scoped RLS and current entitlement policies remain authoritative; no service role, new grant, migration, Edge Function, storage bucket, vendor or background job is added
+Legal materiality: Triggered because customer names and contact details may be personal data. Initial jurisdiction remains the approved UK-business scope. The Tallyo business user remains controller for imported customer/contact data and Tallyo remains processor under the existing terms. The importer must state that the user should import only details they are allowed to store, minimise supported fields, ignore unknown columns and preserve existing rights/export/deletion behaviour.
+Authoritative review: ICO data-minimisation guidance and current Supabase bulk-insert documentation checked 2026-09-20. The reviewed design is limited to the seven existing customer fields and uses a single array insert followed by `.select()`.
+Legal disposition: Approved with conditions for repository implementation. Conditions are local preview, explicit confirmation, data-minimised supported fields, no overwrite/upsert, no marketing reuse and no new vendor or retention promise. External professional review is not required for this bounded feature.
+Acceptance criteria: upload a CSV; recognise the documented headers and reasonable aliases; preview valid rows; identify skipped rows with row numbers; skip existing/in-file duplicate emails; import valid rows in one owner-scoped request; keep existing customers unchanged; remain usable on mobile and by keyboard; show non-technical errors
+Required tests: quoted CSV/BOM/CRLF/newline parsing; header/alias validation; invalid/missing values; duplicate handling; 1 MB/500-row bounds; no network/storage use in parser; app wiring; build/service-worker publication; existing customer validation, public-build, PWA and tenant-boundary regression
+Required documentation: this active task record; update current product/release authorities only after Owner-approved release
+Approval boundary: local implementation, tests, commit, push and PR preparation are authorised. Stop before merge to `main` or production publication because the change handles private customer data and a main merge triggers production workflows.
+Lock state: acquired 2026-09-20 for the affected files listed above; release after commit/PR handoff or rollback
+Branch: `codex/customer-csv-import`
+Commit: pending
+Evidence: the Owner confirmed the local import flow works. Parser, static integration, mobile/desktop browser, customer validation, public integration, PWA, Cloudflare Pages readiness, tenant-isolation, security-workflow and redesigned-customer regression checks pass. The browser preview made no external requests and used fictional data only.
+Blocked reason: none
+Next action: complete diff hygiene and sensitive-value review, then commit, push and prepare the pull request without merging or publishing
+
 ## UX-QUOTE-005 — Accepted quote invoice follow-up
 
 Task ID: UX-QUOTE-005

@@ -95,6 +95,7 @@ const appAssets = [
   "tailwind.css",
   "app-help-install.js",
   "app-user-messages.js",
+  "customer-csv-import.js",
   "manifest.json",
   "service-worker.js",
   "tallyo-mark.png",

@@ -42,7 +42,7 @@ export async function artifact() {
     .replace('<link rel="manifest" href="./manifest.json">', '')
     .replace('<body', '<body data-redesign-preview="fictional"');
   if (/<script[^>]+src="https?:/.test(html)) throw new Error('Unexpected external script; preview fails closed');
-  for (const name of ['tailwind.css', 'analytics-consent.css', 'app-user-messages.js', 'app-help-install.js', 'tallyo-wordmark-white.png', 'icon-192.png']) {
+  for (const name of ['tailwind.css', 'analytics-consent.css', 'app-user-messages.js', 'customer-csv-import.js', 'app-help-install.js', 'tallyo-wordmark-white.png', 'icon-192.png']) {
     files.set(`/${name}`, { bytes: await readFile(resolve(root, name)), type: name.endsWith('.png') ? 'image/png' : name.endsWith('.css') ? 'text/css' : 'text/javascript' });
   }
   files.set('/fixture.js', { bytes: await readFile(resolve(root, 'dev/redesign/fixture.js')), type: 'text/javascript' });
