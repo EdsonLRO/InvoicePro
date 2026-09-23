@@ -1,5 +1,13 @@
 # Tallyo Release Readiness Checklist
 
+## Invoice editor usability — approved release, 2026-09-23
+
+The Owner reviewed the local fictional preview and approved PR #176 and app build `2026.09.23.1`. The release adds one Expand all / Collapse all control across the editor, lets an owner create and select a Product or service while editing a line item, supports exact fixed-amount document discounts alongside percentages, makes tax-mode effects explicit in line totals, improves item-heading hierarchy, aligns the Discount and Shipping controls, and preserves readable PDF headings and totals when a light brand colour is selected.
+
+The complete repository release suite passed, including application, security, tenant-isolation, PWA, website and frozen Edge Function checks. The focused editor browser suite passed at 320–1440 px with keyboard/touch coverage, exact `£501 - £26 = £475` calculation evidence, inclusive/exclusive tax evidence, quick Product or service creation, multi-page PDF generation and no external requests. The generated light-brand PDF was rendered and visually inspected. `git diff --check` passed apart from expected checkout line-ending warnings.
+
+This is a frontend-only release with a service-worker cache update to `tallyo-shell-2026-09-23-1`. No database, migration, Edge Function, RLS, Auth, provider configuration, secret, email, payment, refund, Stripe object or website source changes. If bounded production validation fails, restore Cloudflare deployment `c0441aea-ceec-4725-89a3-7c9e3ab3e635` / build `2026.09.20.4` and leave backend/provider state unchanged.
+
 ## Customer CSV import — released and verified, 2026-09-21
 
 The Owner approved the bounded release after confirming the local import flow worked. PR #174 merged feature commit `ffba867e24a3d0cb8dbf2fb61a85711c34062f09` as `7d5566d53ae9023fff4b291db2afef5da3d46602`. The Customers page accepts a maximum 1 MB / 500-row CSV, parses it locally, recognises only the seven existing customer fields, previews valid rows, explains skipped rows, rejects invalid email addresses and skips existing or in-file duplicate emails. Import requires explicit confirmation, uses one existing owner-scoped insert and does not overwrite existing customers.

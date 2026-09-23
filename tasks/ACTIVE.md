@@ -1,5 +1,22 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-EDITOR-002 — Invoice editor usability and exact discounts
+
+Task ID: UX-EDITOR-002
+Title: Improve the invoice editor without expanding product scope
+Priority: Medium
+Status: Owner-approved release through PR #176 on 2026-09-23
+Phase: Release
+Owner role: Product owner
+Risk level: High release boundary because document totals and production publication are involved; implementation remains a focused frontend change with regression coverage
+Branch: `codex/invoice-editor-usability-fixes`
+Scope: expand/collapse all editor sections; create and select a Product or service from the line-item selector; percentage or fixed-amount document discount; explicit inclusive/exclusive tax effect; larger item headings; contrast-safe light-brand PDF headings/totals; aligned Discount and Shipping controls; app build/cache `2026.09.23.1`
+Compatibility boundary: the existing database percentage field remains unchanged. A fixed amount is converted to its precise equivalent percentage when persisted so the current document total is preserved without a migration. Existing invoice/quote/payment, Auth, RLS, entitlement and provider flows remain unchanged.
+Approval boundary: the Owner reviewed the fictional local preview and approved commit, push, merge and publication. No database, migration, Edge Function, RLS, Auth, provider configuration, secret, email, payment, refund, Stripe object, website source or unrelated change is authorised or included.
+Validation: complete repository release suite; focused editor static and desktop/mobile/keyboard browser suites; 320–1440 px layouts; exact fixed-discount and tax-mode calculations; quick Product or service creation; multi-page PDF generation; rendered light-brand PDF inspection; no external browser requests; diff hygiene and sensitive-value review
+Rollback: restore Cloudflare deployment `c0441aea-ceec-4725-89a3-7c9e3ab3e635` / build `2026.09.20.4`; backend and provider state do not change
+Next action: merge PR #176 after required checks, publish build `2026.09.23.1`, and run bounded public shell/build-report/service-worker/PWA checks
+
 ## UX-CUSTOMERS-001 — Simple customer CSV import
 
 Task ID: UX-CUSTOMERS-001
