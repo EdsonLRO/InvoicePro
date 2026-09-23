@@ -388,15 +388,14 @@ main > .section { margin-top: var(--layout-gap); }
 .demo-copy h2 { font-size: clamp(1.65rem, 3vw, 2.45rem); }
 .demo-copy > :last-child { margin-bottom: 0; }
 .demo-window { min-width: 0; overflow: hidden; border: 1px solid var(--slate-200); border-radius: var(--radius-lg); background: var(--white); box-shadow: 0 12px 34px rgba(26, 39, 69, 0.08); }
-.demo-window-capture { border: 0; background: transparent; box-shadow: 0 14px 34px rgba(26, 39, 69, 0.11); }
+.demo-window-capture { padding: clamp(0.22rem, 0.55vw, 0.42rem); border-color: rgba(156, 172, 205, 0.42); background: linear-gradient(145deg, rgba(255,255,255,0.96), rgba(237,242,252,0.88)); box-shadow: 0 18px 42px rgba(26, 39, 69, 0.12); }
 .demo-window-bar { display: flex; align-items: center; gap: 0.38rem; min-height: 2.7rem; padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--slate-200); background: var(--slate-100); }
 .demo-window-bar i { width: 0.55rem; height: 0.55rem; border-radius: 999px; background: var(--slate-300); }
 .demo-window-bar strong { margin-left: 0.35rem; font-size: 0.78rem; }
 .demo-window-bar span { margin-left: auto; color: var(--slate-500); font-size: 0.64rem; }
 .demo-window-body { min-height: 10.5rem; padding: clamp(0.6rem, 1.4vw, 0.9rem); background: linear-gradient(145deg, #fff, #f5f7fb); font-size: 0.9rem; }
-.demo-window-screenshot { display: block; width: 100%; height: auto; border-radius: inherit; background: var(--slate-100); }
-.product-demo-mobile .demo-window-capture { width: min(100%, 20rem); aspect-ratio: 390 / 779; justify-self: center; }
-.product-demo-mobile .demo-window-screenshot { transform: translateY(-7.59%); }
+.demo-window-screenshot { display: block; width: 100%; height: auto; border: 1px solid rgba(156, 172, 205, 0.38); border-radius: calc(var(--radius-lg) - 0.35rem); background: var(--slate-100); box-shadow: 0 3px 12px rgba(26, 39, 69, 0.06); }
+.product-demo-mobile .demo-window-capture { width: min(100%, 20rem); justify-self: center; }
 .demo-metrics, .demo-form, .demo-schedule { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem; }
 .demo-metrics p, .demo-form p, .demo-schedule p { display: grid; gap: 0.12rem; margin: 0; padding: 0.55rem; border: 1px solid var(--slate-200); border-radius: 0.65rem; background: var(--white); }
 .demo-metrics span, .demo-form span, .demo-schedule span, .demo-total span, .demo-balance span { color: var(--slate-500); font-size: 0.7rem; }
