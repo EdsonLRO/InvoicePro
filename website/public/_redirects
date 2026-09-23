@@ -6,4 +6,10 @@
 /help.html /help/ 301
 /faq.html /faq/ 301
 /about.html /about/ 301
+/industries/freelancers/ /features/ 301
+/industries/consultants/ /features/ 301
+/industries/cleaners/ /features/ 301
+/industries/electricians/ /features/ 301
+/industries/photographers/ /features/ 301
+/industries/sole-traders/ /features/ 301
 /* /404.html 404

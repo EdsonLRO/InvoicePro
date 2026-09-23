@@ -176,7 +176,7 @@ const enabledConnectPricing = read("pricing/index.html");
 assert.match(enabledConnectPricing, /Customer card payments are available after you connect your own Stripe account/);
 assert.match(enabledConnectPricing, /Optional customer card payments through your connected Stripe account/);
 assert.match(enabledConnectPricing, /Tallyo does not add an application fee/);
-assert.match(read("security/index.html"), /Stripe handles card processing and payouts directly with your business/);
+assert.match(read("faq/index.html"), /Connect your own Stripe account in Account settings/);
 assert.match(read("helper/index.html"), /Connect your own Stripe account in Account settings/);
 assert.doesNotMatch(enabledConnectPricing, /__TALLYO_CONNECT_PAYMENT_/);
 

@@ -26,7 +26,7 @@ export const featureGroups = Object.freeze([
     label: "Create and send",
     title: "Documents that look professional",
     description: "Create invoices, quotes and credit notes, add your branding, export polished PDFs and send documents from one workspace.",
-    items: ["Invoices, quotes and credit notes", "Branded PDF documents", "Email sending and delivery updates", "Excel list export"]
+    items: ["Invoices, customer-accepted quotes and credit notes", "Branded PDF documents", "Email sending and delivery updates", "Excel list export"]
   },
   {
     label: "Track payments",
@@ -55,17 +55,17 @@ export const featureGroups = Object.freeze([
 ]);
 
 export const productScenes = Object.freeze([
-  { id: "dashboard", label: "Dashboard", title: "See what needs attention", caption: "Outstanding, paid and overdue work is brought together for a quick start to the day.", variant: "dashboard", image: "/assets/product/tallyo-dashboard.jpg", imageAlt: "Tallyo dashboard showing fictional outstanding, overdue, paid and draft totals" },
-  { id: "invoice-editor", label: "Invoice editor", title: "Build a clear customer invoice", caption: "Add the customer, dates, line items and payment details in one focused editor.", variant: "document", image: "/assets/product/tallyo-invoice-editor.jpg", imageAlt: "Tallyo invoice editor filled with fictional Willow and Pine Studio invoice details" },
-  { id: "quote", label: "Quotes", title: "Start with an agreed quote", caption: "Prepare a quote, keep its status visible and convert it to an invoice when the work is agreed.", variant: "quote", image: "/assets/product/tallyo-quote-editor.jpg", imageAlt: "Tallyo quote editor filled with fictional Willow and Pine Studio quote details" },
-  { id: "customers", label: "Customers and saved items", title: "Reuse the details you need", caption: "Keep repeat customers and commonly used products or services ready for the next document.", variant: "customers", image: "/assets/product/tallyo-customers.jpg", imageAlt: "Tallyo customer list filtered to the fictional Willow and Pine Studio customer" },
-  { id: "recurring", label: "Recurring invoices", title: "Plan repeat invoicing", caption: "Choose the next run and decide whether a saved schedule should email each generated invoice.", variant: "recurring", image: "/assets/product/tallyo-recurring.jpg", imageAlt: "Tallyo recurring invoices page showing a fictional monthly schedule" },
-  { id: "overdue", label: "Overdue work", title: "Follow up by choice", caption: "Review overdue balances and enable reminders only for the invoices you want Tallyo to follow up.", variant: "overdue", image: "/assets/product/tallyo-overdue.jpg", imageAlt: "Tallyo invoices page showing a fictional overdue Willow and Pine Studio invoice" },
-  { id: "payments", label: "Payments", title: "Keep payment status with the invoice", caption: "See recorded payments and the remaining balance together with the relevant invoice.", variant: "payments", image: "/assets/product/tallyo-payments.jpg", imageAlt: "Tallyo payment history showing a fictional one pound card payment and refund" },
-  { id: "activity", label: "Activity history", title: "Understand what happened", caption: "Document, email, payment and refund activity stays attached to the relevant record.", variant: "activity", image: "/assets/product/tallyo-activity.jpg", imageAlt: "Tallyo activity history showing fictional document payment and refund events" },
-  { id: "branding", label: "Branding", title: "Make documents recognisably yours", caption: "Add business details, a logo and document styling that carry through to customer PDFs.", variant: "branding", image: "/assets/product/tallyo-branding.jpg", imageAlt: "Tallyo branding controls and fictional invoice preview" },
-  { id: "security", label: "Account security", title: "Choose stronger sign-in protection", caption: "Manage authenticator-app MFA, recovery codes and sign-out controls from Account Security.", variant: "security", image: "/assets/product/tallyo-security.jpg", imageAlt: "Tallyo two-factor authentication settings without private account information" },
-  { id: "mobile", label: "Mobile", title: "Work from a supported phone", caption: "The core document and account flows adapt to smaller screens and can be installed for quick access.", variant: "mobile", image: "/assets/product/tallyo-mobile-quote.jpg", imageAlt: "Tallyo quote editor on a mobile screen using fictional customer details" }
+  { id: "dashboard", label: "Overview", title: "Start with what needs attention", caption: "Outstanding balances, overdue work, recorded payments and the next small actions are clear as soon as you open Tallyo.", variant: "dashboard", image: "/assets/product/tallyo-dashboard.jpg", imageAlt: "Updated Tallyo Overview using fictional data, with outstanding, overdue and paid totals plus attention and activity panels" },
+  { id: "invoice-editor", label: "Invoice editor", title: "Build the invoice in clear sections", caption: "Reuse products or services, keep the totals visible and open only the part of the invoice you need to change.", variant: "document", image: "/assets/product/tallyo-invoice-editor.jpg", imageAlt: "Updated Tallyo invoice editor showing fictional line items and a live invoice summary" },
+  { id: "quote", label: "Accepted quote", title: "Move from agreement to invoice", caption: "The accepted quote keeps the customer name and timestamp, stays read-only and links directly to the invoice Tallyo creates.", variant: "quote", image: "/assets/product/tallyo-quote-editor.jpg", imageAlt: "Accepted fictional Tallyo quote showing Sarah Jones, the acceptance time and linked invoice INV-1048" },
+  { id: "customers", label: "Customer details", title: "See the invoicing relationship", caption: "Review the customer’s balances, recent documents, recurring schedules and latest activity without turning Tallyo into a CRM.", variant: "customers", image: "/assets/product/tallyo-customers.jpg", imageAlt: "Updated Tallyo customer detail page using fictional Willow and Pine Studio documents, balances and recurring schedules" },
+  { id: "recurring", label: "Recurring invoices", title: "Plan repeat invoicing", caption: "See the next run, frequency and email choice for every active schedule, then open one when the work changes.", variant: "recurring", image: "/assets/product/tallyo-recurring.jpg", imageAlt: "Updated Tallyo recurring invoices list showing fictional monthly and quarterly schedules" },
+  { id: "overdue", label: "Overdue reminders", title: "Follow up deliberately", caption: "Filter overdue invoices, see the remaining balance and confirm which records use automatic reminders.", variant: "overdue", image: "/assets/product/tallyo-overdue.jpg", imageAlt: "Updated Tallyo reminders view showing a fictional overdue invoice with automatic reminders enabled" },
+  { id: "payments", label: "Payment records", title: "Track deposits through to full payment", caption: "Record a deposit and the remaining payment against the same invoice so paid and outstanding amounts stay easy to reconcile.", variant: "payments", image: "/assets/product/tallyo-payments.jpg", imageAlt: "Updated Tallyo payment records showing a fictional five hundred pound deposit, remaining payment and paid balance" },
+  { id: "activity", label: "Activity history", title: "Understand what happened", caption: "Invoice, email, reminder, deposit and final-payment events remain together in a concise chronological history.", variant: "activity", image: "/assets/product/tallyo-activity.jpg", imageAlt: "Updated Tallyo activity history showing fictional invoice delivery, reminder, deposit and full payment events" },
+  { id: "branding", label: "Branding", title: "Make documents recognisably yours", caption: "Choose the brand colour and logo position while a live invoice preview shows exactly how customer documents will feel.", variant: "branding", image: "/assets/product/tallyo-branding.jpg", imageAlt: "Updated Tallyo branding controls with a fictional North and Stone invoice preview" },
+  { id: "security", label: "Account security", title: "Choose stronger sign-in protection", caption: "Keep a primary and backup authenticator in view, and replace recovery codes from the same focused security area.", variant: "security", image: "/assets/product/tallyo-security.jpg", imageAlt: "Updated Tallyo two-factor authentication and recovery-code settings using fictional account data" },
+  { id: "mobile", label: "Customer quote acceptance", title: "Make the customer’s next step obvious", caption: "The secure mobile page confirms who accepted the quote, when it happened and which invoice was created next.", variant: "mobile", image: "/assets/product/tallyo-mobile-quote.jpg", imageAlt: "Mobile Tallyo customer quote page showing a fictional accepted quote and linked invoice" }
 ]);
 
 export const industries = Object.freeze([
@@ -198,20 +198,12 @@ export const helpArticles = Object.freeze([
 export const faqs = Object.freeze([
   { question: "What is Tallyo?", answer: "Tallyo is a straightforward invoicing and business-records workspace for small businesses and independent operators." },
   { question: "Who is Tallyo for?", answer: "It is designed for UK sole traders, freelancers, consultants, tradespeople and small service businesses that create quotes and invoices." },
-  { question: "Can I use Tallyo in a browser?", answer: "Yes. Tallyo works in supported modern browsers on phone, tablet and computer." },
-  { question: "Can I install Tallyo?", answer: "Yes. The app can be installed on supported devices for quick access. Authenticated business records still require an internet connection." },
-  { question: "Does Tallyo work offline?", answer: "The app shell can open offline, but you need an internet connection to sign in and access or update authenticated business records." },
-  { question: "Can I create quotes as well as invoices?", answer: "Yes. You can create quotes and convert a quote into an invoice when the work is agreed." },
-  { question: "How do recurring invoices work?", answer: "You choose a schedule for an invoice. Tallyo can create future invoices and, when you enable it for that schedule, email them automatically." },
-  { question: "Can Tallyo send overdue reminders?", answer: "Yes. Reminders are opt-in for each invoice, so they are only scheduled when you choose to enable them." },
+  { question: "Can I use Tallyo on different devices?", answer: "Yes. Tallyo works in supported modern browsers on phone, tablet and computer and can be installed for quick access. Authenticated business records require an internet connection." },
+  { question: "What documents can I create?", answer: "Tallyo supports invoices, quotes and credit notes. An accepted quote can create one linked draft invoice automatically." },
   { question: "Can customers pay an invoice by card?", answer: connectPaymentPlaceholders.faq },
-  { question: "How do I track payments?", answer: "Record full or partial payments against an invoice, including the date and an optional reference, so the remaining balance stays clear." },
-  { question: "Is there a free trial?", answer: "No. The Free Invoice Maker can be used without an account, while Tallyo Pro is the paid invoicing workspace." },
-  { question: "How much is Tallyo Pro?", answer: "Tallyo Pro is £8 per month or £80 per year. The annual option saves £16 compared with paying monthly for a year." },
-  { question: "Can I use Tallyo on my phone?", answer: "Yes. The interface adapts to supported phone browsers and can be installed for quick access." },
   { question: "Can I export my records?", answer: "Yes. Tallyo can create a structured account export and offers Excel export for document lists." },
-  { question: "How do I get support?", answer: "Use the Help Centre for common tasks or email main@tallyo.co.uk for help with your Tallyo account or service." },
-  { question: "Does Tallyo replace accounting software?", answer: "No. Tallyo helps with invoicing and business records, but it is not a full accounting suite and does not prepare tax returns." }
+  { question: "Does Tallyo replace accounting software?", answer: "No. Tallyo helps with invoicing and business records, but it is not a full accounting suite and does not prepare tax returns." },
+  { question: "How do I get support?", answer: "Use the Help Centre for step-by-step guidance or email main@tallyo.co.uk for help with your Tallyo account or service." }
 ]);
 
 export const installationSteps = Object.freeze([

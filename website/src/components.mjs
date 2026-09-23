@@ -6,16 +6,24 @@ const escapeHtml = (value) => String(value)
 
 export const list = (items) => `<ul class="check-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
 
-export const finalCta = ({ secondary = true } = {}) => `
+export const finalCta = ({
+  eyebrow = "Ready when you are",
+  title = "Bring your invoicing work into one clear workspace.",
+  copy = "Create professional documents, track payments and spend less time repeating the same setup.",
+  primaryLabel = "Create account",
+  secondary = true,
+  secondaryLabel = "Explore features",
+  secondaryHref = "/features/"
+} = {}) => `
   <section class="section section-cta" aria-labelledby="final-cta-title">
     <div>
-      <p class="eyebrow">Ready when you are</p>
-      <h2 id="final-cta-title">Bring your invoicing work into one clear workspace.</h2>
-      <p>Create professional documents, track payments and spend less time repeating the same setup.</p>
+      <p class="eyebrow">${escapeHtml(eyebrow)}</p>
+      <h2 id="final-cta-title">${escapeHtml(title)}</h2>
+      <p>${escapeHtml(copy)}</p>
     </div>
     <div class="cta-row">
-      <a class="button button-light" id="cta_footer_create_account" data-analytics-placement="footer" data-signup-link href="#">Create account</a>
-      ${secondary ? '<a class="button button-ghost-light" href="/features/">Explore features</a>' : ""}
+      <a class="button button-light" id="cta_footer_create_account" data-analytics-placement="footer" data-signup-link href="#">${escapeHtml(primaryLabel)}</a>
+      ${secondary ? `<a class="button button-ghost-light" href="${escapeHtml(secondaryHref)}">${escapeHtml(secondaryLabel)}</a>` : ""}
     </div>
   </section>`;
 
@@ -68,7 +76,7 @@ export const helpArticlePage = (article) => `
       <aside class="article-note" aria-labelledby="guide-note-${escapeHtml(article.slug)}"><p class="card-label">Good to know</p><h2 id="guide-note-${escapeHtml(article.slug)}">Keep this in mind</h2><p>${escapeHtml(article.note)}</p><a href="/faq/">Read common questions</a></aside>
     </div>
   </article>
-  ${finalCta()}`;
+  <section class="section article-next" aria-label="More help"><a href="/help/">← Back to the Help Centre</a><a href="mailto:main@tallyo.co.uk">Contact support</a></section>`;
 
 export const industryLandingPage = (industry) => `
   ${breadcrumbs([{ label: "Home", href: "/" }, { label: "Industries", href: "/#industries" }, { label: industry.name }])}

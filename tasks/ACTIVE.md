@@ -1,5 +1,21 @@
 # Active programme: COMM-001 commercial launch integration
 
+## WEBSITE-REDESIGN-001 — Public website redesign and content consolidation
+
+Task ID: WEBSITE-REDESIGN-001
+Title: Redesign the public Tallyo website and give each route a clear purpose
+Priority: Medium
+Status: Final redesign Owner-approved on 2026-09-23; protected merge and normal production publication authorised
+Phase: Release
+Owner role: Product owner
+Risk level: Medium; public marketing, SEO and interaction changes only
+Branch: `codex/tallyo-website-redesign-phase1`
+Scope: approved visual redesign; simplified homepage; workflow-based Product Tour with current fictional-data app captures for Overview, invoice editing, quote acceptance, customer context, recurring schedules, overdue reminders, deposits/full payment, activity, branding, account security and mobile quote acceptance; clearer Features, Help, FAQ and Security boundaries; open section-based Free Invoice Maker with a responsive no-horizontal-scroll preview; persistent site-wide Tallyo Helper access through a compact question panel; Cookie settings moved from the page footer into the navigation menu; intent-specific free invoice and quote guidance; retirement and redirect of six thin industry landing pages; responsive and accessibility coverage
+Approval boundary: the Owner reviewed and approved the refreshed core pages, final Free Invoice Maker, compact Helper, Cookie-settings placement and current fictional-data Product Tour captures on 2026-09-23. Marking PR #177 ready, merging it through the protected pull-request workflow, allowing the normal Pages publication workflows and running bounded public validation are authorised. No app source/runtime, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund, Stripe object, legal page or unrelated change is included.
+Validation: complete website suite; public Helper fail-closed and mock-provider checks; Analytics release-gate checks; free-generator conversion and one-email consent checks; deterministic loopback-only screenshot capture with external requests blocked and all records visibly fictional; professional 1280×720 desktop and 390×844 customer-mobile framing; desktop visual inspection of Home, Features, Product Tour, Pricing, Security, Help, FAQ and the revised Free Invoice Maker; 390px Free Invoice Maker geometry and live-calculation check with fictional data; no mobile horizontal overflow; compact Helper open, answer, close, keyboard and mobile geometry checks; site-wide Helper and navigation Cookie-settings markup checks; shared 20px top-level section and card-gap coverage across desktop and mobile; equal-height pricing cards; centred desktop navigation; diff hygiene
+Rollback: restore website deployment `a7197370-ace3-4ffd-8861-06d1349ccdcb` from main source `13dfb04` if bounded public validation fails; backend, app source/runtime and provider state remain unchanged
+Next action: mark PR #177 ready, merge it through the protected workflow, allow the normal Pages publication and validate the public website routes, refreshed assets, SEO metadata, redirects, Helper fail-closed behaviour and Analytics consent gate
+
 ## UX-EDITOR-002 — Invoice editor usability and exact discounts
 
 Task ID: UX-EDITOR-002
