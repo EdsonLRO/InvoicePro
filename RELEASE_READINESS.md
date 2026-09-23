@@ -1,5 +1,13 @@
 # Tallyo Release Readiness Checklist
 
+## Public website redesign — approved release, 2026-09-23
+
+The Owner reviewed the local website and approved the complete redesign in PR #177, including the simplified route purposes and SEO copy, consistent section spacing, motion and responsive behaviour, the open section-based Free Invoice Maker, the compact site-wide Tallyo Helper, navigation-based Cookie settings and the refreshed Product Tour screenshots. All screenshot records are fictional; the deterministic capture harness blocked external requests.
+
+The complete website suite passed across 25 public routes plus the 404 page. Focused checks passed for the public Helper fail-closed and mock-provider paths, Analytics consent activation, free-generator conversion and one-email consent, redirects, links, accessibility, 390 px geometry, keyboard interaction and absence of horizontal overflow. The refreshed product assets were visually inspected at professional 1280×720 desktop and 390×844 customer-mobile sizes. Hosted Security and both Pages preview checks are green for commit `5a2f7c0243f9c9429258cc1eaa4e981aa5ccd801`.
+
+The approved release is limited to marking PR #177 ready, merging through the protected pull-request workflow, allowing the normal Cloudflare Pages publication workflows and running bounded public route and asset validation. No app source/runtime, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund, Stripe object, legal publication or unrelated change is included. If public validation fails, restore website deployment `a7197370-ace3-4ffd-8861-06d1349ccdcb` from main source `13dfb04`; backend and provider state remain unchanged.
+
 ## Invoice editor usability — approved release, 2026-09-23
 
 The Owner reviewed the local fictional preview and approved PR #176 and app build `2026.09.23.1`. The release adds one Expand all / Collapse all control across the editor, lets an owner create and select a Product or service while editing a line item, supports exact fixed-amount document discounts alongside percentages, makes tax-mode effects explicit in line totals, improves item-heading hierarchy, aligns the Discount and Shipping controls, and preserves readable PDF headings and totals when a light brand colour is selected.
