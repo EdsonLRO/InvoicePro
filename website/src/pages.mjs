@@ -2,21 +2,17 @@ import {
   faqs,
   featureGroups,
   helpArticles,
-  industries,
-  installationSteps,
   productFacts,
   productScenes,
-  publishedIndustrySlugs,
   workflowSteps
 } from "./content.mjs";
-import { finalCta, helpArticlePage, industryLandingPage, list, productDemo, workflow } from "./components.mjs";
+import { finalCta, helpArticlePage, list, productDemo, workflow } from "./components.mjs";
 import { commercialOffer, connectPaymentPlaceholders, pricingFaqs } from "./commercial-offer.mjs";
 import { siteConfig } from "./config.mjs";
 import { cookieNotice, dataProcessingTerms, privacyNotice } from "./legal-content.mjs";
 import { serviceTerms } from "./service-terms-content.mjs";
 
 const icon = (symbol) => `<span class="feature-icon" aria-hidden="true">${symbol}</span>`;
-const industryHref = (industry) => publishedIndustrySlugs.includes(industry.slug) ? `/industries/${industry.slug}/` : "/features/";
 const subscriptionAvailability = siteConfig.subscriptionCheckoutEnabled
   ? "Choose monthly or annual billing after you create your Tallyo account."
   : "Subscriptions are being prepared and checkout is not active yet.";
@@ -31,35 +27,50 @@ const pricingDescription = siteConfig.subscriptionCheckoutEnabled
   : "Use the Free Invoice Maker without an account, or see Tallyo Pro at £8 monthly or £80 annually. Subscription checkout is not active yet.";
 
 const home = `
-  <section class="hero" aria-labelledby="home-title">
-    <div class="hero-copy">
-      <p class="eyebrow">Straightforward invoicing for UK small businesses</p>
-      <h1 id="home-title">${productFacts.positioning}</h1>
-      <p class="hero-lead">${productFacts.supporting}</p>
+  <section class="hero home-hero" aria-labelledby="home-title" data-home-hero>
+    <div class="hero-copy" data-hero-copy>
+      <p class="hero-badge"><span aria-hidden="true"></span>Invoicing built for UK small businesses</p>
+      <h1 id="home-title"><span>Professional invoices.</span><span class="hero-title-accent">Clearer payment tracking.</span><span>Less admin.</span></h1>
+      <p class="hero-lead">Create, send and follow up from one calm workspace — with quotes, recurring invoices and payment progress kept connected.</p>
       <div class="cta-row">
-        <a class="button button-primary" id="cta_hero_create_account" data-analytics-placement="hero" data-signup-link href="#">Create account</a>
+        <a class="button button-primary hero-primary-action" id="cta_hero_create_account" data-analytics-placement="hero" data-signup-link href="#">Start with Tallyo <span aria-hidden="true">→</span></a>
         <a class="button button-secondary" id="cta_hero_free_invoice" href="/free-invoice-generator/">Make a free invoice</a>
       </div>
-      <ul class="trust-list" aria-label="Tallyo product highlights">
-        <li>Clear payment tracking</li>
-        <li>Optional two-factor authentication</li>
-        <li>Installable on supported devices</li>
-      </ul>
+      <p class="hero-pricing"><strong>£8 monthly · £80 annually</strong><span>One business, one user. Cancel through your account.</span></p>
     </div>
-    <div class="product-frame" aria-label="Fictional Tallyo dashboard preview">
-      <div class="frame-bar"><span></span><span></span><span></span><strong>Tallyo</strong></div>
-      <div class="frame-body">
-        <div class="mini-sidebar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-        <div class="mini-content">
-          <p class="mini-kicker">Good morning, Northstar Home Services</p>
-          <h2>Keep today’s invoices moving</h2>
-          <div class="metric-grid">
-            <article><span>Outstanding</span><strong>£2,460</strong><small>4 invoices</small></article>
-            <article><span>Paid this month</span><strong>£4,820</strong><small>8 payments</small></article>
+    <div class="hero-visual" aria-label="Fictional Tallyo overview showing work that needs attention" data-product-stage>
+      <div class="hero-orbit hero-orbit-one" aria-hidden="true"></div>
+      <div class="hero-orbit hero-orbit-two" aria-hidden="true"></div>
+      <div class="product-frame hero-product-frame">
+        <div class="frame-bar"><span></span><span></span><span></span><strong>Overview</strong></div>
+        <div class="frame-body">
+          <aside class="mini-sidebar" aria-hidden="true">
+            <b>T</b><i class="active"></i><i></i><i></i><i></i><i></i>
+          </aside>
+          <div class="mini-content">
+            <div class="mini-heading-row"><div><p class="mini-kicker">Good morning, Northstar Home Services</p><h2>What needs your attention</h2></div><span class="mini-new">+ New</span></div>
+            <div class="metric-grid">
+              <article><span>Outstanding</span><strong>£2,460</strong><small>4 invoices</small></article>
+              <article class="metric-overdue"><span>Overdue</span><strong>£840</strong><small>2 invoices</small></article>
+              <article><span>Paid this month</span><strong>£4,820</strong><small>8 payments</small></article>
+            </div>
+            <div class="attention-panel">
+              <div class="attention-heading"><strong>Needs your attention</strong><span>2 items</span></div>
+              <div class="attention-row"><span class="attention-icon">!</span><p><b>INV-1042 · Willow &amp; Pine Studio</b><small>£320 outstanding · 8 days overdue</small></p><button type="button" tabindex="-1">Send reminder</button></div>
+              <div class="attention-row"><span class="attention-icon attention-icon-calendar">↻</span><p><b>Recurring invoice due tomorrow</b><small>Monthly maintenance · £240</small></p><button type="button" tabindex="-1">Review</button></div>
+            </div>
           </div>
-          <div class="mini-table"><div><span>INV-DEMO-1042</span><b>Willow &amp; Pine Studio</b><em>Due</em></div><div><span>INV-DEMO-1041</span><b>Fictional client</b><em class="paid">Paid</em></div></div>
         </div>
       </div>
+      <div class="hero-event-card hero-event-accepted" data-float-depth="0.75"><span aria-hidden="true">✓</span><p><strong>Quote accepted</strong><small>Invoice INV-1048 is ready</small></p></div>
+      <div class="hero-event-card hero-event-paid" data-float-depth="-0.55"><span aria-hidden="true">£</span><p><strong>Payment received</strong><small>£560.00 · just now</small></p></div>
+    </div>
+  </section>
+
+  <section class="home-capability-strip" aria-label="Tallyo workflow highlights">
+    <div class="capability-marquee">
+      <div class="capability-marquee-group"><p><span>01</span> Quotes that become invoices</p><p><span>02</span> Recurring invoices and reminders</p><p><span>03</span> Payments and balances together</p><p><span>04</span> Professional branded PDFs</p></div>
+      <div class="capability-marquee-group" aria-hidden="true"><p><span>01</span> Quotes that become invoices</p><p><span>02</span> Recurring invoices and reminders</p><p><span>03</span> Payments and balances together</p><p><span>04</span> Professional branded PDFs</p></div>
     </div>
   </section>
 
@@ -77,45 +88,64 @@ const home = `
     ${workflow(workflowSteps)}
   </section>
 
-  <section class="section home-product-tour" aria-labelledby="product-preview-title">
-    <div class="section-heading"><p class="eyebrow">See the workflow</p><h2 id="product-preview-title">Familiar screens for the job in front of you.</h2><p>These simplified product views use fictional data and demonstrate supported Tallyo workflows.</p></div>
-    <div class="product-tour-preview">${productScenes.slice(0, 3).map(productDemo).join("")}</div>
-    <p class="section-link"><a href="/product-tour/">Explore the complete product tour →</a></p>
+  <section class="section home-decision-panel" aria-labelledby="home-decision-title">
+    <div><p class="eyebrow">A clear next step</p><h2 id="home-decision-title">Try one document free, or keep the whole workflow together.</h2><p>The Free Invoice Maker works without an account. Tallyo Pro saves customers, products and services, documents, payment records and repeat work.</p></div>
+    <div class="home-decision-actions"><p><strong>${commercialOffer.free.price}</strong><span>Free Invoice Maker</span><a href="/free-invoice-generator/">Create an invoice</a></p><p><strong>${commercialOffer.pro.monthlyPrice}</strong><span>per month · ${commercialOffer.pro.annualPrice} annually</span><a href="/pricing/">Compare plans</a></p></div>
+    <p class="home-decision-trust"><a href="/security/">Account and data protection</a><span aria-hidden="true">·</span><a href="/product-tour/">See the product in use</a></p>
   </section>
 
-  <section class="section" aria-labelledby="feature-preview-title">
-    <div class="section-heading"><p class="eyebrow">Built around real invoicing work</p><h2 id="feature-preview-title">Useful tools without accounting-suite complexity.</h2></div>
-    <div class="feature-grid">${featureGroups.map((group, index) => `<article class="feature-card">${icon(String(index + 1).padStart(2, "0"))}<p class="card-label">${group.label}</p><h3>${group.title}</h3><p>${group.description}</p>${list(group.items)}</article>`).join("")}</div>
-    <p class="section-link"><a href="/features/">See all Tallyo features →</a></p>
-  </section>
+  <section class="section section-soft faq-preview" aria-labelledby="faq-preview-title"><div class="section-heading"><p class="eyebrow">Before you start</p><h2 id="faq-preview-title">Three useful answers.</h2></div><div class="faq-list home-faq-list">${faqs.slice(0, 3).map((item) => `<details><summary>${item.question}</summary><p>${item.answer}</p></details>`).join("")}</div><p class="section-link"><a href="/faq/">Read all product questions →</a></p></section>
 
-  <section class="section section-dark" aria-labelledby="security-preview-title">
-    <div><p class="eyebrow">Account protection</p><h2 id="security-preview-title">Built with account and customer-data protection in mind.</h2><p>Tallyo uses confirmed accounts, optional authenticator-app MFA, database-enforced row-level access and server-side handling for sensitive email and payment work.</p><a class="text-link-light" href="/security/">Read how Tallyo approaches security →</a></div>
-    <div class="security-points"><p><strong>Payment records stay connected</strong><span>Recorded payments and balances remain with the relevant invoice.</span></p><p><strong>Access is scoped per account</strong><span>Database rules restrict each signed-in account to its own workspace.</span></p><p><strong>Honest limitations</strong><span>Security controls reduce risk; they are not a guarantee or certification.</span></p></div>
-  </section>
+  ${finalCta({ title: "Ready to make invoicing feel more manageable?", copy: "Start with the free maker or create a Tallyo account when you want your work saved and connected.", secondaryLabel: "Make a free invoice", secondaryHref: "/free-invoice-generator/" })}`;
 
-  <section class="section" id="industries" aria-labelledby="industry-title"><div class="section-heading"><p class="eyebrow">Made for independent work</p><h2 id="industry-title">A flexible fit for different small businesses.</h2><p>Each example uses the same supported invoicing tools; Tallyo does not claim specialist trade features.</p></div><div class="industry-grid">${industries.map((industry) => `<article><h3>${industry.name}</h3><p>${industry.summary}</p><a href="${industryHref(industry)}">See the useful workflow <span aria-hidden="true">→</span></a></article>`).join("")}</div></section>
+const productTourChapters = Object.freeze([
+  { id: "overview", label: "Overview", title: "Know what needs attention", copy: "Start with outstanding balances, overdue work and the next useful action.", scenes: ["dashboard"] },
+  { id: "create", label: "Create & send", title: "Move from customer details to a clear document", copy: "Reuse customers and services, prepare an invoice or quote, then review it before sending.", scenes: ["invoice-editor", "quote", "customers"] },
+  { id: "automate", label: "Automate", title: "Choose what repeats", copy: "Schedule recurring invoices and enable overdue reminders only where they are useful.", scenes: ["recurring", "overdue"] },
+  { id: "track", label: "Track payment", title: "Keep progress with the document", copy: "See payments, remaining balances and recent activity without rebuilding the story elsewhere.", scenes: ["payments", "activity"] },
+  { id: "personalise", label: "Personalise & access", title: "Present your business and protect access", copy: "Apply your branding, manage account protection and use core workflows on a supported phone.", scenes: ["branding", "security", "mobile"] }
+]);
 
-  <section class="section section-soft split" id="install" aria-labelledby="install-title"><div><p class="eyebrow">Use Tallyo your way</p><h2 id="install-title">In the browser or installed for quick access.</h2><p>Use Tallyo on a supported phone, tablet or computer. An internet connection is required to access and update authenticated business records.</p><a class="button button-secondary" href="/help/install-tallyo/">See installation instructions</a></div><div class="device-stack" aria-hidden="true"><span class="device desktop"></span><span class="device tablet"></span><span class="device phone"></span></div></section>
+const productTourChapter = (chapter, chapterIndex) => {
+  const scenes = chapter.scenes.map((sceneId) => productScenes.find((scene) => scene.id === sceneId)).filter(Boolean);
+  return `<section class="tour-chapter" id="tour-${chapter.id}" role="tabpanel" tabindex="0" aria-labelledby="tour-tab-${chapter.id}" data-tour-panel${chapterIndex ? " hidden" : ""}>
+    <header><p class="card-label">${String(chapterIndex + 1).padStart(2, "0")} · ${chapter.label}</p><h2>${chapter.title}</h2><p>${chapter.copy}</p></header>
+    <div class="tour-chapter-scenes">${scenes.map((scene, index) => productDemo(scene, index)).join("")}</div>
+  </section>`;
+};
 
-  <section class="section" aria-labelledby="pricing-preview-title"><div class="section-heading"><p class="eyebrow">Simple pricing</p><h2 id="pricing-preview-title">Make one document free, or keep your invoicing organised with Tallyo Pro.</h2><p>${commercialOffer.pro.monthlyPrice} monthly or ${commercialOffer.pro.annualPrice} annually. ${subscriptionAvailability}</p></div><div class="pricing-preview"><strong>${commercialOffer.free.name}</strong><span>${commercialOffer.free.price} · ${commercialOffer.free.audience}</span><strong>${commercialOffer.pro.name}</strong><span>${commercialOffer.pro.monthlyPrice}/month or ${commercialOffer.pro.annualPrice}/year</span></div><p class="section-link"><a href="/pricing/">See pricing and what is included →</a></p></section>
-
-  <section class="section section-soft faq-preview" aria-labelledby="faq-preview-title"><div class="section-heading"><p class="eyebrow">Questions, answered</p><h2 id="faq-preview-title">Understand the product before you start.</h2><p>Read factual answers about installation, payment tracking, recurring work, exports and account protection.</p></div><p class="section-link"><a href="/faq/">Browse frequently asked questions →</a></p></section>
-
-  ${finalCta()}`;
+const connectedOutcomeSteps = Object.freeze([
+  ["01", "Quote accepted", "The customer confirms the quote through the secure response page."],
+  ["02", "Invoice created", "Tallyo preserves the accepted quote and creates one linked invoice."],
+  ["03", "Payment tracked", "Full, partial, deposit and connected-card payment progress stays with the invoice."],
+  ["04", "Follow-up stays clear", "Status, delivery, reminders and activity remain connected to the document."]
+]);
 
 const features = `
-  <section class="page-hero"><p class="eyebrow">Features</p><h1>Everything you need to move from quote to paid.</h1><p>Tallyo keeps documents, customers, payments and recurring work together in one focused workspace.</p></section>
-  <section class="section feature-detail-list" aria-label="Tallyo feature groups">${featureGroups.map((group, index) => `<article><div class="feature-number">${String(index + 1).padStart(2, "0")}</div><div><p class="card-label">${group.label}</p><h2>${group.title}</h2><p>${group.description}</p>${list(group.items)}</div></article>`).join("")}</section>
-  <section class="section section-soft workflow-outcome" aria-labelledby="workflow-title"><div class="section-heading"><p class="eyebrow">One connected outcome</p><h2 id="workflow-title">Customer → Quote → Invoice → Payment → Status → Follow-up</h2><p>Convert a quote when work is agreed, record payment, then keep the status and activity with the document.</p></div><p class="section-link"><a href="/product-tour/">See each supported workflow →</a></p></section>
+  <section class="page-hero feature-hero">
+    <div class="feature-hero-copy"><p class="eyebrow">Features</p><h1>Everything you need to move from quote to paid.</h1><p>Tallyo keeps documents, customers, payments and recurring work together in one focused workspace.</p><div class="cta-row"><a class="button button-primary" href="/product-tour/">Explore the product tour</a><a class="button button-secondary" href="/free-invoice-generator/">Make a free invoice</a></div></div>
+    <div class="feature-hero-summary" aria-label="Tallyo workflow summary"><p><span>01</span><strong>Create</strong><small>Quotes, invoices and credit notes</small></p><p><span>02</span><strong>Track</strong><small>Payment, delivery and document status</small></p><p><span>03</span><strong>Automate</strong><small>Recurring invoices and chosen reminders</small></p></div>
+  </section>
+  <section class="section feature-detail-list" aria-label="Tallyo feature groups">${featureGroups.map((group, index) => `<article id="feature-${index + 1}"><div class="feature-number">${String(index + 1).padStart(2, "0")}</div><div><p class="card-label">${group.label}</p><h2>${group.title}</h2><p>${group.description}</p>${list(group.items)}</div></article>`).join("")}</section>
+  <section class="section workflow-outcome" aria-labelledby="workflow-title" data-horizontal-flow>
+    <div class="workflow-outcome-sticky">
+      <div class="section-heading"><p class="eyebrow">One connected outcome</p><h2 id="workflow-title">From customer approval to a clear payment record.</h2><p>Keep scrolling to follow the work from accepted quote to invoice, payment and follow-up.</p></div>
+      <div class="workflow-outcome-viewport" data-horizontal-viewport><div class="workflow-outcome-track" data-horizontal-track>${connectedOutcomeSteps.map(([number, title, copy]) => `<article class="workflow-outcome-step"><span>${number}</span><h3>${title}</h3><p>${copy}</p></article>`).join("")}</div></div>
+      <div class="workflow-outcome-progress" aria-hidden="true"><span data-horizontal-progress></span></div>
+      <p class="section-link"><a href="/product-tour/">See each supported workflow →</a></p>
+    </div>
+  </section>
   <section class="section limitations" aria-labelledby="limitations-title"><div><p class="eyebrow">Clear boundaries</p><h2 id="limitations-title">Focused invoicing, not full accounting software.</h2></div>${list(productFacts.limitations)}</section>
-  ${finalCta()}`;
+  ${finalCta({ title: "See how the work fits together.", copy: "Tour the main workflows, then decide whether Tallyo suits the way you invoice.", secondaryLabel: "Open the product tour", secondaryHref: "/product-tour/" })}`;
 
 const productTour = `
-  <section class="page-hero"><p class="eyebrow">Product tour</p><h1>See how Tallyo connects everyday invoicing work.</h1><p>Every view below represents a supported workflow and uses only consistent fictional demonstration data.</p></section>
-  <section class="section product-tour" aria-label="Tallyo product tour">${productScenes.map(productDemo).join("")}</section>
-  <section class="section section-soft limitations" aria-labelledby="tour-boundaries"><div><p class="eyebrow">About these views</p><h2 id="tour-boundaries">Accurate workflow, simplified presentation.</h2></div>${list(["No real customer, business, payment or account data is shown.", "The illustrations simplify the live interface for a public product tour.", "Only currently supported Tallyo workflows are represented.", "Authenticated records still require an internet connection."])}</section>
-  ${finalCta()}`;
+  <section class="page-hero tour-hero"><p class="eyebrow">Product tour</p><h1>See how Tallyo connects everyday invoicing work.</h1><p>Choose a workflow to explore. Every screen uses fictional demonstration data and shows currently supported Tallyo features.</p></section>
+  <div class="tour-explorer" data-tour-chapters>
+    <div class="tour-index" role="tablist" aria-label="Choose a product workflow">${productTourChapters.map((chapter, index) => `<button id="tour-tab-${chapter.id}" type="button" role="tab" aria-selected="${index === 0}" aria-controls="tour-${chapter.id}" tabindex="${index === 0 ? "0" : "-1"}" data-tour-tab="${chapter.id}">${chapter.label}</button>`).join("")}</div>
+    <p class="tour-demo-note"><strong>Safe demonstration:</strong> no real customer, business, payment or account data is shown.</p>
+    <div class="product-tour">${productTourChapters.map(productTourChapter).join("")}</div>
+  </div>
+  ${finalCta({ title: "Want to try the document experience?", copy: "Create a free invoice in your browser, with no account required.", secondaryLabel: "Explore all features", secondaryHref: "/features/" })}`;
 
 const pricing = `
   <section class="page-hero"><p class="eyebrow">Simple pricing</p><h1>One free maker. One complete invoicing workspace.</h1><p>Use the browser-only Free Invoice Maker without an account, or choose Tallyo Pro for saved invoicing work. ${subscriptionAvailability}</p></section>
@@ -125,14 +155,13 @@ const pricing = `
   </div></section>
   <section class="section section-soft pricing-boundaries" aria-labelledby="pricing-boundaries-title"><div><p class="eyebrow">Before you choose</p><h2 id="pricing-boundaries-title">Straightforward billing, with clear limits.</h2></div>${list([commercialOffer.billing.setupFee, commercialOffer.billing.sameFeatures, commercialOffer.billing.noTrial, commercialOffer.billing.cancellation, commercialOffer.billing.annualRefund, commercialOffer.paymentAvailability])}</section>
   <section class="section faq-list" aria-labelledby="pricing-faq-title"><div class="section-heading"><p class="eyebrow">Pricing questions</p><h2 id="pricing-faq-title">What to expect.</h2></div>${pricingFaqs.map((item) => `<details><summary>${item.question}</summary><p>${item.answer}</p></details>`).join("")}</section>
-  ${finalCta({ secondary: false })}`;
+  ${finalCta({ title: "Choose the route that fits today.", copy: "Make one document free, or create an account for saved and connected invoicing work.", secondary: false })}`;
 
 const security = `
   <section class="page-hero"><p class="eyebrow">Security</p><h1>Practical controls, described honestly.</h1><p>Tallyo combines confirmed accounts, optional MFA, database access rules and server-side sensitive operations. No system can remove every risk, so this page explains both controls and limitations.</p></section>
-  <section class="section"><div class="security-grid"><article><h2>Account access</h2><p>Email confirmation is required. Optional TOTP multi-factor authentication adds an authenticator-app code at sign-in.</p></article><article><h2>Workspace separation</h2><p>Supabase Row Level Security restricts database access so each signed-in account can access its own workspace records.</p></article><article><h2>Payment records</h2><p>Payment amounts, dates and notes remain connected to the relevant invoice and account. ${connectPaymentPlaceholders.availability}</p></article><article><h2>Server-side secrets</h2><p>Private email, payment and service credentials stay in server-side provider environments rather than browser code.</p></article><article><h2>Browser protections</h2><p>The app uses a Content Security Policy, integrity-checked pinned libraries and a self-hosted stylesheet.</p></article><article><h2>Recovery and sessions</h2><p>Tallyo provides device and all-device sign-out controls, optional backup authenticators and one-time recovery-code support.</p></article></div></section>
-  <section class="section section-dark" aria-labelledby="limits-security-title"><div><p class="eyebrow">What these controls do not mean</p><h2 id="limits-security-title">Security is an ongoing practice, not a badge.</h2></div><div>${list(["Tallyo does not claim to be fully secure or certified.", "Activity history is useful, but it is not a tamper-proof compliance audit log.", "Authenticated business records require an internet connection.", "Users remain responsible for protecting downloaded files and their devices."])}</div></section>
-  <section class="section"><div class="section-heading"><p class="eyebrow">Account guide</p><h2>Set up protection in plain language.</h2><p>Follow the focused guide to authenticator-app MFA, recovery codes and the right sign-out choice.</p></div><p class="section-link"><a href="/help/account-security/">Read the account-security guide →</a></p></section>
-  ${finalCta()}`;
+  <section class="section"><div class="security-grid security-grid-three"><article><p class="card-label">Your sign-in</p><h2>Confirm and strengthen access</h2><p>Email confirmation establishes the account. Optional authenticator-app MFA, one-time recovery codes and device sign-out controls provide additional protection.</p></article><article><p class="card-label">Your workspace</p><h2>Keep account records separated</h2><p>Database row-level access rules restrict signed-in accounts to their own workspace records. Private email, payment and service credentials remain server-side.</p></article><article><p class="card-label">Your documents</p><h2>Protect records beyond Tallyo</h2><p>Browser controls reduce common risks, but users must still protect downloaded PDFs, exports and the devices used to access them.</p></article></div></section>
+  <section class="section section-dark security-boundary" aria-labelledby="limits-security-title"><div><p class="eyebrow">Clear boundary</p><h2 id="limits-security-title">Controls reduce risk; they do not remove it.</h2><p>Tallyo does not claim certification or complete security. Activity history supports everyday follow-up but is not a tamper-proof compliance audit log.</p></div><a class="button button-ghost-light" href="/help/account-security/">Set up account protection</a></section>
+  ${finalCta({ title: "Review the product before creating an account.", copy: "See the real Tallyo workflows and decide whether the workspace suits your business.", secondaryLabel: "View the product tour", secondaryHref: "/product-tour/" })}`;
 
 const helper = `
   <section class="page-hero"><p class="eyebrow">Tallyo Helper</p><h1>General product guidance, without guessing.</h1><p>__TALLYO_HELPER_HERO_COPY__</p></section>
@@ -152,25 +181,24 @@ const helper = `
     <script type="application/json" id="helper-knowledge">__TALLYO_HELPER_KNOWLEDGE__</script>
   </section>
   <section class="section limitations" aria-labelledby="helper-limits-title"><div><p class="eyebrow">Clear limits</p><h2 id="helper-limits-title">A product guide, not an account assistant.</h2></div>${list(["The helper cannot authenticate, inspect or change an account.", "It never connects to Supabase, Stripe, Resend or private business records.", "__TALLYO_HELPER_PROVIDER_LIMIT__", "When reviewed knowledge does not answer a question, it says so and links to public help."])}</section>
-  ${finalCta()}`;
+  <section class="section article-next" aria-label="More help"><a href="/help/">Browse the Help Centre</a><a href="mailto:main@tallyo.co.uk">Contact support</a></section>`;
 
 const help = `
   <section class="page-hero"><p class="eyebrow">Help Centre</p><h1>Clear guidance for the work you want to finish.</h1><p>Use focused, step-by-step guides based on the current Tallyo product.</p></section>
   <section class="section"><div class="help-grid"><a class="helper-help-card" href="/helper/"><span>Ask</span><h2>Use Tallyo Helper</h2><p>${helperCardCopy}</p></a>${helpArticles.map((article, index) => `<a href="/help/${article.slug}/"><span>${String(index + 1).padStart(2, "0")}</span><h2>${article.title}</h2><p>${article.description}</p></a>`).join("")}</div></section>
-  <section class="section section-soft" id="install" aria-labelledby="install-help-title"><div class="section-heading"><p class="eyebrow">Install Tallyo</p><h2 id="install-help-title">Keep Tallyo close on supported devices.</h2><p>Installation adds a convenient app icon. It does not make authenticated business records available offline.</p></div><div class="install-grid">${installationSteps.map(([name, step]) => `<article><h3>${name}</h3><p>${step}</p></article>`).join("")}</div><p class="section-link"><a href="/help/install-tallyo/">Open the complete installation guide →</a></p></section>
   <section class="section support-contact" aria-labelledby="support-contact-title"><div class="section-heading"><p class="eyebrow">Contact support</p><h2 id="support-contact-title">Need help from a person?</h2><p>Email <a href="mailto:main@tallyo.co.uk">main@tallyo.co.uk</a> with a clear description of the problem. Never send your password, authenticator code, recovery codes, card details or bank details.</p></div></section>
-  ${finalCta()}`;
+  `;
 
 const faq = `
-  <section class="page-hero"><p class="eyebrow">Frequently asked questions</p><h1>Direct answers about Tallyo.</h1><p>These answers describe the current product and avoid promises about unfinished plans, pricing or future features.</p></section>
+  <section class="page-hero"><p class="eyebrow">Frequently asked questions</p><h1>Decide whether Tallyo is right for your business.</h1><p>For step-by-step instructions, use the <a href="/help/">Help Centre</a>. These answers focus on the product, access and what Tallyo is designed to do.</p></section>
   <section class="section faq-list" aria-label="Frequently asked questions">${faqs.map((item) => `<details><summary>${item.question}</summary><p>${item.answer}</p></details>`).join("")}</section>
-  ${finalCta()}`;
+  <section class="section article-next" aria-label="Next steps"><a href="/pricing/">Compare pricing</a><a href="/help/">Open the Help Centre</a></section>`;
 
 const about = `
   <section class="page-hero"><p class="eyebrow">About Tallyo</p><h1>Invoicing software shaped around everyday small-business work.</h1><p>Tallyo is built to make professional documents, payment follow-up and repeat invoicing feel more manageable for independent operators.</p></section>
   <section class="section split"><div><p class="eyebrow">Why Tallyo</p><h2>Small businesses need clarity, not another complicated system.</h2><p>Tallyo brings quotes, invoices, customers, payments and recurring work together while keeping the interface focused on the next useful action.</p></div><div class="principles"><p><strong>Straightforward</strong><span>Plain language and a focused workflow.</span></p><p><strong>Honest</strong><span>Real features and limitations, without invented proof.</span></p><p><strong>Protective</strong><span>Account and customer-data controls treated as product requirements.</span></p></div></section>
   <section class="section section-soft" aria-labelledby="audience-title"><div class="section-heading"><p class="eyebrow">Who it serves</p><h2 id="audience-title">Built broadly for UK small businesses.</h2><p>Freelancers, sole traders, consultants, tradespeople and independent service companies can adapt the same core workflow to their work.</p></div></section>
-  ${finalCta()}`;
+  ${finalCta({ title: "See whether Tallyo fits your day-to-day work.", copy: "Explore the real workflows or create one invoice free before opening an account.", secondaryLabel: "Make a free invoice", secondaryHref: "/free-invoice-generator/" })}`;
 
 const marketingOverviewForm = siteConfig.marketingOverviewEnabled ? `
   <form class="generator-overview-form" data-overview-form novalidate>
@@ -211,6 +239,13 @@ const emailPreferenceConfirmation = `
 
 const generatorPage = (defaultType) => {
   const lowerType = defaultType.toLowerCase();
+  const isInvoice = defaultType === "Invoice";
+  const guidance = isInvoice
+    ? `<h2 id="generator-guidance-title">Before you send the invoice</h2><p>Check the invoice number, issue date, supply date when relevant, customer details, due date and payment instructions.</p><p>VAT-registered businesses may need additional information. This free maker does not produce the required sterling VAT totals for foreign-currency VAT invoices.</p><p><a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">Read the current GOV.UK invoice requirements</a>. Tallyo does not provide tax, legal or accounting advice.</p>`
+    : `<h2 id="generator-guidance-title">Before you send the quote</h2><p>Describe the work clearly, confirm the price and tax treatment, and set a realistic valid-until date.</p><p>Add any scope, exclusions or payment expectations the customer should understand before deciding.</p><p>A quote records what you propose. It does not replace advice about contracts, tax or your legal obligations.</p>`;
+  const explainer = isInvoice
+    ? `<section class="section generator-explainer" aria-labelledby="generator-explainer-title"><div class="section-heading"><p class="eyebrow">A clearer invoice</p><h2 id="generator-explainer-title">Include the details your customer needs to pay.</h2></div><div><article><h3>Use a unique number</h3><p>Give every invoice a reference you can identify later and keep the sequence consistent in your own records.</p></article><article><h3>Make the dates clear</h3><p>Show when the invoice was issued, when payment is due and, where relevant, when the goods or services were supplied.</p></article><article><h3>Check tax and payment details</h3><p>Confirm the applicable tax treatment and tell the customer how to pay before downloading the PDF.</p></article></div></section>`
+    : `<section class="section generator-explainer" aria-labelledby="generator-explainer-title"><div class="section-heading"><p class="eyebrow">A clearer quote</p><h2 id="generator-explainer-title">Make the proposed work easy to understand.</h2></div><div><article><h3>Define the scope</h3><p>Use specific line items and notes so the customer can see what the price covers.</p></article><article><h3>Set a validity date</h3><p>A valid-until date makes it clear how long the proposed price and terms remain open.</p></article><article><h3>Record what happens next</h3><p>Explain how the customer should approve the quote and when an invoice or deposit will follow.</p></article></div></section>`;
   return `
   <section class="page-hero generator-hero"><p class="eyebrow">Free ${defaultType} Maker</p><h1>Create a professional ${lowerType}, free.</h1><p>No account needed. While you work, this page keeps your document details and selected logo in your browser and does not send them to Tallyo, analytics or another service.</p></section>
   <section class="generator-shell" data-generator data-default-type="${defaultType}">
@@ -223,7 +258,7 @@ const generatorPage = (defaultType) => {
           <label>Reference number<input name="reference" maxlength="40" value="0001" autocomplete="off"></label>
           <label>Issue date<input name="issueDate" type="date"></label>
           <label>Supply date<input name="supplyDate" type="date"><span>Use for invoices when it differs from the issue date.</span></label>
-          <label>Due or valid-until date<input name="dueDate" type="date"></label>
+          <label>${isInvoice ? "Due date" : "Valid until"}<input name="dueDate" type="date"></label>
         </div></fieldset>
         <fieldset><legend>Your business</legend><div class="generator-fields generator-fields-two">
           <label>Business or trading name<input name="senderName" maxlength="100" autocomplete="organization"></label>
@@ -249,7 +284,7 @@ const generatorPage = (defaultType) => {
         <div class="generator-actions"><button class="button button-primary" type="button" data-print>Download PDF</button><button class="button button-secondary" type="reset">Clear everything</button></div>
         <p class="generator-status" data-generator-status role="status" aria-live="polite"></p>
       </form>
-      <aside class="generator-guidance" aria-labelledby="generator-guidance-title"><h2 id="generator-guidance-title">Before you send it</h2><p>Prices are treated as excluding tax. Tax is rounded to the nearest penny for each line after its discount. Check that the document suits your business and tax position.</p><p>VAT-registered businesses may need extra invoice information. This free maker does not produce the required sterling VAT totals for foreign-currency VAT invoices.</p><p><a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">Read the current GOV.UK invoice requirements</a>. Tallyo does not provide tax, legal or accounting advice.</p></aside>
+      <aside class="generator-guidance" aria-labelledby="generator-guidance-title">${guidance}</aside>
     </div>
     <div class="generator-preview-wrap" role="region" aria-label="Scrollable live document preview" tabindex="0"><p class="preview-label">Live preview</p><p class="preview-scroll-hint">Swipe sideways to view the full document.</p><article class="generator-preview" data-preview aria-label="Document preview">
       <header><img data-preview-logo alt="Business logo" hidden><div><p data-preview-type>${defaultType}</p><h2 data-preview-reference>${defaultType} 0001</h2><p data-preview-dates></p></div></header>
@@ -260,6 +295,7 @@ const generatorPage = (defaultType) => {
       <footer>Created with Tallyo</footer>
     </article></div>
   </section>
+  ${explainer}
   ${defaultType === "Invoice" ? invoiceConversionDialog : ""}`;
 };
 
@@ -278,8 +314,8 @@ const foundationPages = [
   { route: "/data-processing-terms/", output: "data-processing-terms/index.html", title: "Tallyo Business-User Data Processing Terms", description: "Read the data-processing terms that form part of the Tallyo account agreement for UK business users.", content: dataProcessingTerms, schema: "webpage" },
   { route: "/terms/", output: "terms/index.html", title: "Tallyo Terms of Service", description: "Read the terms for Tallyo accounts, subscriptions and connected customer card payments for UK business users.", content: serviceTerms, schema: "webpage" },
   { route: "/email-preferences/", output: "email-preferences/index.html", title: "Tallyo email preferences", description: "Confirmation that an introductory Tallyo email preference has been recorded.", content: emailPreferenceConfirmation, schema: "webpage", noindex: true },
-  { route: "/free-invoice-generator/", output: "free-invoice-generator/index.html", title: "Free invoice maker — Tallyo", description: "Create and print a privacy-first, browser-local invoice for your UK small business without making an account.", content: generatorPage("Invoice"), schema: "webpage", scripts: ["/assets/generator.js"] },
-  { route: "/free-quote-generator/", output: "free-quote-generator/index.html", title: "Free quote maker — Tallyo", description: "Create and print a privacy-first, browser-local quote for your UK small business without making an account.", content: generatorPage("Quote"), schema: "webpage", scripts: ["/assets/generator.js"] }
+  { route: "/free-invoice-generator/", output: "free-invoice-generator/index.html", title: "Free invoice generator for UK small businesses", description: "Create, preview and download a professional invoice in your browser without an account. Add your logo, line items, tax and payment details.", content: generatorPage("Invoice"), schema: "webpage", scripts: ["/assets/generator.js"] },
+  { route: "/free-quote-generator/", output: "free-quote-generator/index.html", title: "Free quote generator for UK small businesses", description: "Create, preview and download a professional customer quote in your browser without an account. Set scope, price, tax and a validity date.", content: generatorPage("Quote"), schema: "webpage", scripts: ["/assets/generator.js"] }
 ];
 
 const helpPages = helpArticles.map((article) => ({
@@ -293,17 +329,7 @@ const helpPages = helpArticles.map((article) => ({
   breadcrumbs: [{ name: "Home", path: "/" }, { name: "Help", path: "/help/" }, { name: article.title, path: `/help/${article.slug}/` }]
 }));
 
-const industryPages = industries.filter((industry) => publishedIndustrySlugs.includes(industry.slug)).map((industry) => ({
-  route: `/industries/${industry.slug}/`,
-  output: `industries/${industry.slug}/index.html`,
-  title: `Invoicing software for ${industry.name.toLowerCase()}`,
-  description: `${industry.summary} Explore supported Tallyo invoicing workflows for ${industry.name.toLowerCase()}.`,
-  content: industryLandingPage(industry),
-  schema: "webpage",
-  breadcrumbs: [{ name: "Home", path: "/" }, { name: industry.name, path: `/industries/${industry.slug}/` }]
-}));
-
-export const pages = Object.freeze([...foundationPages, ...helpPages, ...industryPages]);
+export const pages = Object.freeze([...foundationPages, ...helpPages]);
 
 export const notFoundPage = Object.freeze({
   route: "/404/",
@@ -314,4 +340,4 @@ export const notFoundPage = Object.freeze({
   schema: "webpage"
 });
 
-export { faqs, helpArticles, industries, productScenes };
+export { faqs, helpArticles, productScenes };

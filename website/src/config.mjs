@@ -131,7 +131,6 @@ export const navigation = Object.freeze([
   { label: "Product Tour", href: "/product-tour/" },
   { label: "Free Invoice Maker", href: "/free-invoice-generator/" },
   { label: "Pricing", href: "/pricing/" },
-  { label: "Security", href: "/security/" },
   { label: "Help", href: "/help/" }
 ]);
 
@@ -153,7 +152,7 @@ export const footerGroups = Object.freeze([
       { label: "Tallyo Helper", href: "/helper/" },
       { label: "FAQ", href: "/faq/" },
       { label: "About Tallyo", href: "/about/" },
-      { label: "Install Tallyo", href: "/help/#install" }
+      { label: "Install Tallyo", href: "/help/install-tallyo/" }
     ]
   },
   {

@@ -217,7 +217,7 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
     <div class="footer-main">
       <div class="footer-intro"><a class="brand brand-footer" href="/" aria-label="Tallyo home"><img class="brand-wordmark" src="${assetUrl("/assets/tallyo-wordmark-white.png")}" alt="" aria-hidden="true"><span class="sr-only">Tallyo</span></a><p>Professional invoices, clearer payment tracking and less repeated admin for UK small businesses.</p></div>
       ${footerMarkup}
-      <div class="footer-group"><h2>Account</h2><a data-login-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/#install">Install Tallyo</a></div>
+      <div class="footer-group"><h2>Account</h2><a data-login-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/install-tallyo/">Install Tallyo</a></div>
     </div>
     <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo. <button class="cookie-settings-control" type="button" data-cookie-settings hidden>Cookie settings</button></p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
   </footer>

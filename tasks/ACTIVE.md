@@ -1,5 +1,20 @@
 # Active programme: COMM-001 commercial launch integration
 
+## WEBSITE-REDESIGN-001 — Public website redesign and content consolidation
+
+Task ID: WEBSITE-REDESIGN-001
+Title: Redesign the public Tallyo website and give each route a clear purpose
+Priority: Medium
+Status: Local preview implemented and validated; awaiting Owner visual review before production release
+Phase: Review
+Owner role: Product owner
+Risk level: Medium; public marketing, SEO and interaction changes only
+Branch: `codex/tallyo-website-redesign-phase1`
+Scope: approved visual redesign; simplified homepage; workflow-based Product Tour; clearer Features, Help, FAQ and Security boundaries; intent-specific free invoice and quote guidance; retirement and redirect of six thin industry landing pages; responsive and accessibility coverage
+Approval boundary: implementation, local validation, commit, push and draft pull request are authorised. Merging to `main` would publish the website through the normal production workflow and remains blocked until the Owner reviews the consolidated preview. No app, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund, Stripe object, legal page or unrelated change is included.
+Validation: complete website suite; public Helper fail-closed and mock-provider checks; Analytics release-gate checks; free-generator conversion and one-email consent checks; desktop visual inspection of Home, Features, Product Tour and Free Invoice Maker; diff hygiene
+Next action: Owner reviews `http://127.0.0.1:4190/`; after approval, complete the protected pull-request and production release workflow
+
 ## UX-EDITOR-002 — Invoice editor usability and exact discounts
 
 Task ID: UX-EDITOR-002
