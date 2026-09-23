@@ -14,8 +14,22 @@ function extract(pattern, message) {
 const calcTotals = new Function(
   'src',
   extract(
-    /calcTotals\(src\) \{([\s\S]*?)\r?\n            \},\r?\n            isUuid\(v\)/,
+    /calcTotals\(src\) \{([\s\S]*?)\r?\n            \},\r?\n            discountPercentForStorage\(src\)/,
     'calcTotals must remain extractable'
+  )
+);
+const discountPercentForStorage = new Function(
+  'src',
+  extract(
+    /discountPercentForStorage\(src\) \{([\s\S]*?)\r?\n            \},\r?\n            isUuid\(v\)/,
+    'discountPercentForStorage must remain extractable'
+  )
+);
+const calculateRowTotal = new Function(
+  'item',
+  extract(
+    /calculateRowTotal\(item\) \{([\s\S]*?)\r?\n            \},\r?\n\s*async saveInvoice/,
+    'calculateRowTotal must remain extractable'
   )
 );
 const validateDraftForSave = new Function(
@@ -37,6 +51,19 @@ const validDraft = {
 assert.equal(validate(validDraft), '', 'a valid invoice must pass validation');
 assert.equal(calcTotals(validDraft).grandTotal, 120, 'exclusive VAT totals must remain exact');
 assert.equal(calcTotals({ ...validDraft, taxMode: 'inclusive' }).grandTotal, 100, 'inclusive VAT totals must remain exact');
+assert.equal(calculateRowTotal.call({ draft: validDraft }, validDraft.items[0]), 120, 'exclusive line total visibly includes added tax');
+assert.equal(calculateRowTotal.call({ draft: { ...validDraft, taxMode: 'inclusive' } }, validDraft.items[0]), 100, 'inclusive line total visibly preserves the entered price');
+const fixedDiscountDraft = {
+  ...validDraft,
+  items: [{ name: 'Project', qty: 1, price: 501, discount: 0, tax: 0 }],
+  _discountMode: 'amount',
+  _discountAmount: 26,
+};
+assert.equal(calcTotals(fixedDiscountDraft).globalDiscountAmt, 26, 'fixed discount must use the entered currency amount');
+assert.equal(calcTotals(fixedDiscountDraft).grandTotal, 475, '£501 less a £26 discount must equal £475 exactly');
+const storedDiscountPercent = discountPercentForStorage.call({ calcTotals }, fixedDiscountDraft);
+assert.equal(calcTotals({ ...fixedDiscountDraft, _discountMode: 'percent', globalDiscount: storedDiscountPercent }).grandTotal, 475,
+  'the exact fixed discount total must survive the existing percentage-based persistence format');
 
 for (const [change, expected] of [
   [{ items: [] }, /at least one line item/i],
@@ -45,7 +72,8 @@ for (const [change, expected] of [
   [{ items: [{ name: 'Item', qty: 1, price: -1 }] }, /unit price cannot be negative/i],
   [{ items: [{ name: 'Item', qty: 1, price: 1, discount: 101 }] }, /discount must be between/i],
   [{ items: [{ name: 'Item', qty: 1, price: 1, tax: -1 }] }, /tax must be between/i],
-  [{ globalDiscount: 101 }, /global discount must be between/i],
+  [{ globalDiscount: 101 }, /discount must be between/i],
+  [{ _discountMode: 'amount', _discountAmount: 101, items: [{ name: 'Item', qty: 1, price: 100, tax: 0 }] }, /discount amount cannot exceed/i],
   [{ shippingCost: -0.01 }, /shipping cannot be negative/i],
   [{ items: [{ name: 'Free', qty: 1, price: 0 }] }, /total must be greater than zero/i],
 ]) {

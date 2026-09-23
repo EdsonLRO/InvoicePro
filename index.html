@@ -410,7 +410,7 @@
             .recovery-codes-dialog { max-height: 90vh; margin: 0; overflow-y: auto; }
         }
         .pdf-mode tbody td { vertical-align: middle !important; padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; }
-        #invoice-canvas .font-bold.text-slate-400 { color: var(--brand) !important; }
+        #invoice-canvas .font-bold.text-slate-400 { color: var(--brand-ink) !important; }
         @media (max-width: 1024px) {
             .recurring-table-frame table {
                 min-width: 980px;
@@ -698,7 +698,7 @@
         .editor-customer { margin-top:14px; padding:12px 14px; border-radius:8px; background:#f8fafc; color:#64748b; font-size:13px; line-height:1.7; overflow-wrap:anywhere; }
         .editor-item { border:1px solid #e2e8f0; background:#fbfcfe; border-radius:9px; margin:14px 0; padding:14px; display:grid; gap:12px; }
         .editor-item-heading { display:flex; align-items:center; justify-content:space-between; }
-        .editor-item-heading h3 { font-size:13px; font-weight:650; }
+        .editor-item-heading h3 { font-size:17px; line-height:1.35; font-weight:700; color:#1e293b; }
         .editor-item-heading button { color:#b91c1c; font-size:12px; min-height:44px; padding:0 8px; }
         .editor-item-fields { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
         .editor-line-total { display:flex; justify-content:space-between; padding-top:12px; border-top:1px solid #e2e8f0; font-size:13px; color:#64748b; }
@@ -708,6 +708,14 @@
         .editor-tax-mode { display:flex; border:1px solid #cbd5e1; border-radius:8px; overflow:hidden; }
         .editor-tax-mode button { flex:1; font-size:12px; min-height:44px; padding:8px; background:white; }
         .editor-tax-mode button[aria-pressed=true] { background:#eef2ff; color:#4338ca; font-weight:650; }
+        .editor-adjustment-help { grid-column:1/-1; margin-top:-4px; color:#64748b; font-size:12px; line-height:1.5; }
+        .editor-discount-control { min-width:0; }
+        .editor-discount-control>span { display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:8px; }
+        .editor-discount-entry { display:grid; grid-template-columns:auto minmax(0,1fr); gap:8px; align-items:stretch; }
+        .editor-discount-mode { display:flex; align-self:stretch; border:1px solid #cbd5e1; border-radius:8px; overflow:hidden; }
+        .editor-discount-mode button { min-width:44px; min-height:44px; height:100%; padding:8px 11px; background:#fff; color:#475569; font-size:13px; }
+        .editor-discount-mode button+button { border-left:1px solid #cbd5e1; }
+        .editor-discount-mode button[aria-pressed=true] { background:#eef2ff; color:#4338ca; font-weight:700; }
         .editor-summary { padding:20px; }
         .editor-summary h3 { display:flex; justify-content:space-between; font-weight:650; margin-bottom:16px; }
         .editor-summary h3 span { font-size:11px; font-weight:600; color:#64748b; padding-top:4px; }
@@ -1576,6 +1584,7 @@
                         <p class="editor-save-note">Changes are saved when you select Save. Sending opens a review first.</p>
                     </div>
                     <div class="editor-actions">
+                        <button type="button" @click="toggleAllEditorSections" class="editor-button">{{ allEditorSectionsExpanded ? 'Collapse all' : 'Expand all' }}</button>
                         <button type="button" @click="toggleEditorPreview" :aria-pressed="editorPreview" class="editor-button">{{ editorPreview ? 'Back to editing' : 'Preview' }}</button>
                         <details class="record-menu editor-more" @keydown.esc.prevent="$event.currentTarget.open = false; $event.currentTarget.querySelector('summary').focus()">
                             <summary>More</summary>
@@ -1655,8 +1664,9 @@
                                 <article v-for="(item, index) in draft.items" :key="index" class="editor-item">
                                     <div class="editor-item-heading"><h3>Item {{ index + 1 }}</h3><button type="button" @click="removeItem(index)" :aria-label="'Remove item ' + (index + 1)">Remove</button></div>
                                     <label class="editor-field">Add from Products &amp; services
-                                        <select aria-label="Add from Products & services" :value="''" @change="if ($event.target.value !== '') selectMatch(index, savedItems[Number($event.target.value)]); $event.target.value = ''">
+                                        <select aria-label="Add from Products & services" :value="''" @change="onProductServiceSelect(index, $event)">
                                             <option value="">Choose an existing product or service…</option>
+                                            <option value="__new__">+ Add new product or service</option>
                                             <option v-for="(preset, presetIndex) in savedItems" :value="presetIndex">{{ preset.name }} — {{ getCurrencySymbol(draft.currency) }}{{ (Number(preset.price) || 0).toFixed(2) }}</option>
                                         </select>
                                     </label>
@@ -1674,12 +1684,22 @@
                                         <label class="editor-field">Discount (%)<input type="number" v-model.number="item.discount"></label>
                                         <label class="editor-field">Tax (%)<input type="number" min="0" v-model.number="item.tax"></label>
                                     </div>
-                                    <p class="editor-line-total">Line total <strong>{{ getCurrencySymbol(draft.currency) }}{{ calculateRowTotal(item).toFixed(2) }}</strong></p>
+                                    <p class="editor-line-total"><span>Line total <small v-if="Number(item.tax) > 0">({{ draft.taxMode === 'inclusive' ? 'tax included' : 'tax added' }})</small></span><strong>{{ getCurrencySymbol(draft.currency) }}{{ calculateRowTotal(item).toFixed(2) }}</strong></p>
                                 </article>
                                 <button type="button" class="editor-button" @click="addItem">+ Add item</button>
                                 <div class="editor-adjustments editor-fields">
                                     <fieldset class="editor-wide"><legend>Tax mode</legend><div class="editor-tax-mode"><button type="button" :aria-pressed="draft.taxMode !== 'inclusive'" @click="setTaxMode('exclusive')">Add tax on top</button><button type="button" :aria-pressed="draft.taxMode === 'inclusive'" @click="setTaxMode('inclusive')">Prices include tax</button></div></fieldset>
-                                    <label class="editor-field">Document discount (%)<input type="number" v-model.number="draft.globalDiscount"></label>
+                                    <p class="editor-adjustment-help">{{ taxModeHelp }}</p>
+                                    <div class="editor-discount-control">
+                                        <span>Discount</span>
+                                        <div class="editor-discount-entry">
+                                            <div class="editor-discount-mode" aria-label="Discount type">
+                                                <button type="button" :aria-pressed="draft._discountMode !== 'amount'" @click="setDiscountMode('percent')">%</button>
+                                                <button type="button" :aria-pressed="draft._discountMode === 'amount'" @click="setDiscountMode('amount')">{{ getCurrencySymbol(draft.currency) }}</button>
+                                            </div>
+                                            <label class="editor-field"><input v-if="draft._discountMode === 'amount'" aria-label="Discount amount" type="number" min="0" step="0.01" v-model.number="draft._discountAmount"><input v-else aria-label="Discount percentage" type="number" min="0" max="100" step="0.01" v-model.number="draft.globalDiscount"></label>
+                                        </div>
+                                    </div>
                                     <label class="editor-field">Shipping ({{ getCurrencySymbol(draft.currency) }})<input type="number" v-model.number="draft.shippingCost"></label>
                                 </div>
                                 <button type="button" class="editor-button mt-4" @click="editorSections.items = false; $event.currentTarget.closest('details').querySelector('summary').focus()">Done editing items</button>
@@ -1713,7 +1733,7 @@
                             </dl>
                             <p class="editor-help">Online payment is optional. Review availability and the amount in the email window; it starts off every time.</p>
                         </section>
-                        <details class="editor-section editor-aux" v-if="draft.docType === 'invoice' && draft.repeat"><summary><span><strong>Recurring invoice</strong><small>{{ draft.repeat.enabled ? recurFreqShort(draft.repeat) + ' · next ' + draft.repeat.startDate : 'Off · no repeat schedule' }}</small></span></summary>
+                        <details class="editor-section editor-aux" v-if="draft.docType === 'invoice' && draft.repeat" :open="editorSections.recurring" @toggle="editorSections.recurring = $event.target.open"><summary><span><strong>Recurring invoice</strong><small>{{ draft.repeat.enabled ? recurFreqShort(draft.repeat) + ' · next ' + draft.repeat.startDate : 'Off · no repeat schedule' }}</small></span></summary>
                             <div v-if="draft.docType === 'invoice' && draft.repeat" class="editor-section-body editor-existing-controls">
                                 <div class="flex items-center justify-between flex-wrap gap-3">
                                     <div>
@@ -1763,7 +1783,7 @@
                                 </div>
                             </div>
                         </details>
-                        <details class="editor-section editor-aux" v-if="draft.docType === 'invoice'"><summary><span><strong>Overdue reminders</strong><small>{{ draft.overdueRemindersEnabled ? 'On · first after ' + draft.overdueFirstReminderDays + ' days' : 'Off' }}</small></span></summary>
+                        <details class="editor-section editor-aux" v-if="draft.docType === 'invoice'" :open="editorSections.reminders" @toggle="editorSections.reminders = $event.target.open"><summary><span><strong>Overdue reminders</strong><small>{{ draft.overdueRemindersEnabled ? 'On · first after ' + draft.overdueFirstReminderDays + ' days' : 'Off' }}</small></span></summary>
                             <div v-if="draft.docType === 'invoice'" class="editor-section-body editor-existing-controls">
                                 <div class="flex items-center justify-between flex-wrap gap-3">
                                     <div>
@@ -1800,7 +1820,7 @@
                             </div>
                         </details>
                         </div>
-                        <details class="editor-section editor-aux editor-payments" v-if="editingExisting" :open="!!paymentAttentionFor(draft) || !!draftDisputeState"><summary><span><strong>Payments</strong><small>{{ paymentAttentionFor(draft) || draftDisputeState ? 'Needs attention · review below' : 'Records and online payment amount' }}</small></span></summary>
+                        <details class="editor-section editor-aux editor-payments" v-if="editingExisting" :open="editorSections.payments" @toggle="editorSections.payments = $event.target.open"><summary><span><strong>Payments</strong><small>{{ paymentAttentionFor(draft) || draftDisputeState ? 'Needs attention · review below' : 'Records and online payment amount' }}</small></span></summary>
                             <div v-if="editingExisting" class="editor-section-body editor-existing-controls">
                                 <h3 class="text-lg font-semibold mb-1">Payments</h3>
                                 <p class="text-sm text-slate-500 mb-4">Record full or partial payments, or open a Stripe card checkout. The balance and status update automatically.</p>
@@ -1909,7 +1929,7 @@
                                 </div>
                             </div>
                         </details>
-                        <details class="editor-section editor-aux editor-activity" v-if="editingExisting"><summary><span><strong>Activity History</strong><small>{{ emailStatusFor(draft.id) ? emailStatusFor(draft.id).label : 'View this document’s recent activity' }}</small></span></summary>
+                        <details class="editor-section editor-aux editor-activity" v-if="editingExisting" :open="editorSections.activity" @toggle="editorSections.activity = $event.target.open"><summary><span><strong>Activity History</strong><small>{{ emailStatusFor(draft.id) ? emailStatusFor(draft.id).label : 'View this document’s recent activity' }}</small></span></summary>
                             <div v-if="editingExisting" class="editor-section-body editor-existing-controls">
                                 <div class="flex items-center justify-between mb-1 flex-wrap gap-3">
                                     <h3 class="text-lg font-semibold">Activity History</h3>
@@ -1966,7 +1986,7 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <h1 class="text-4xl font-bold uppercase tracking-wider mb-2" :style="{ color: 'var(--brand)' }">{{ docTypeLabel(draft.docType) }}</h1>
+                            <h1 class="text-4xl font-bold uppercase tracking-wider mb-2" :style="{ color: 'var(--brand-ink)' }">{{ docTypeLabel(draft.docType) }}</h1>
                             <div class="flex items-center justify-end gap-2 text-slate-600">
                                 <span class="font-medium">{{ docTypeNoun(draft.docType) }} #:</span>
                                 <input type="text" v-model="draft.number" class="border rounded px-2 py-1 w-28 text-right focus:ring-2 focus:ring-indigo-500 outline-none no-print">
@@ -2138,10 +2158,8 @@
                             </div>
                             <div class="flex justify-between items-center mb-3 text-sm">
                                 <span class="text-slate-600 font-medium flex items-center gap-2">
-                                    Discount 
-                                    <span class="no-print text-xs font-normal text-slate-400">%</span>
-                                    <input type="number" v-model.number="draft.globalDiscount" class="border rounded px-2 py-1 w-16 text-right focus:ring-indigo-500 outline-none">
-                                    <span class="pdf-text text-xs text-slate-500">({{ draft.globalDiscount || 0 }}%)</span>
+                                    Discount
+                                    <span class="pdf-text text-xs text-slate-500">{{ draft._discountMode === 'amount' ? '(' + getCurrencySymbol(draft.currency) + Number(draft._discountAmount || 0).toFixed(2) + ')' : '(' + (draft.globalDiscount || 0) + '%)' }}</span>
                                 </span>
                                 <span class="font-medium text-green-600" v-if="totals.globalDiscountAmt > 0">-{{ getCurrencySymbol(draft.currency) }}{{ totals.globalDiscountAmt.toFixed(2) }}</span>
                                 <span class="font-medium text-slate-400" v-else>{{ getCurrencySymbol(draft.currency) }}0.00</span>
@@ -2160,7 +2178,7 @@
                             </div>
                             <div class="flex justify-between mt-4 pt-4 border-t-2 text-xl font-bold" :style="{ borderColor: 'var(--brand)' }">
                                 <span>Total</span>
-                                <span :style="{ color: 'var(--brand)' }">{{ getCurrencySymbol(draft.currency) }}{{ totals.grandTotal.toFixed(2) }}</span>
+                                <span :style="{ color: 'var(--brand-ink)' }">{{ getCurrencySymbol(draft.currency) }}{{ totals.grandTotal.toFixed(2) }}</span>
                             </div>
                             <div v-if="draftPaid > 0" class="flex justify-between items-center mt-3 text-sm">
                                 <span class="text-slate-600 font-medium">Amount Paid</span>
@@ -2275,6 +2293,25 @@
                         <div class="pt-2 flex gap-3">
                             <button @click="saveQuickCustomer" :disabled="quickCustomerSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ quickCustomerSaveBusy ? 'Saving…' : 'Save & Select' }}</button>
                             <button @click="closeQuickCustomer" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="showQuickItem" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" role="dialog" aria-modal="true" aria-labelledby="quick-item-title">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 sm:p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 id="quick-item-title" class="text-xl font-semibold">Add product or service</h3>
+                        <button @click="closeQuickItem" aria-label="Close new product or service dialog" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+                    </div>
+                    <div class="space-y-4">
+                        <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Name *</label><input type="text" v-model="quickItem.name" @keyup.enter="saveQuickItem" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
+                        <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Description (optional)</label><textarea v-model="quickItem.description" rows="3" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></div>
+                        <div><label class="block text-xs font-bold text-slate-500 uppercase mb-1">Default price ({{ getCurrencySymbol(draft.currency) }})</label><input type="number" min="0" step="0.01" v-model.number="quickItem.price" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></div>
+                        <p class="text-sm text-slate-500">This saves the entry to Products &amp; services and selects it for the current invoice item.</p>
+                        <div class="pt-2 flex flex-col-reverse sm:flex-row gap-3">
+                            <button @click="closeQuickItem" class="bg-slate-100 text-slate-600 px-6 py-2.5 rounded-lg hover:bg-slate-200 font-medium transition">Cancel</button>
+                            <button @click="saveQuickItem" :disabled="quickItemSaveBusy" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ quickItemSaveBusy ? 'Saving…' : 'Save & select' }}</button>
                         </div>
                     </div>
                 </div>
@@ -2724,7 +2761,7 @@
                                 <div class="text-xs text-slate-500">{{ company.email || 'you@email.com' }}</div>
                             </div>
                             <div class="text-right">
-                                <div class="text-2xl font-bold uppercase tracking-wider" :style="{ color: 'var(--brand)' }">Invoice</div>
+                                <div class="text-2xl font-bold uppercase tracking-wider" :style="{ color: 'var(--brand-ink)' }">Invoice</div>
                                 <div class="text-xs text-slate-500">#INV-0001</div>
                             </div>
                         </div>
@@ -2742,7 +2779,7 @@
                         <div class="flex justify-end">
                             <div class="w-1/2 p-4 rounded-lg border" :style="{ backgroundColor: 'var(--brand-tint)', borderColor: 'var(--brand)' }">
                                 <div class="flex justify-between text-xs mb-1"><span class="text-slate-600">Subtotal</span><span>£290.00</span></div>
-                                <div class="flex justify-between text-base font-bold pt-2 mt-1 border-t-2" :style="{ borderColor: 'var(--brand)' }"><span>Total</span><span :style="{ color: 'var(--brand)' }">£290.00</span></div>
+                                <div class="flex justify-between text-base font-bold pt-2 mt-1 border-t-2" :style="{ borderColor: 'var(--brand)' }"><span>Total</span><span :style="{ color: 'var(--brand-ink)' }">£290.00</span></div>
                             </div>
                         </div>
                     </div>
@@ -3185,7 +3222,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.09.20.4';
+    const APP_BUILD = '2026.09.23.1';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -3212,6 +3249,7 @@
                 appNoticeTimer: null,
                 documentSaveBusy: false,
                 quickCustomerSaveBusy: false,
+                quickItemSaveBusy: false,
                 customerSaveBusy: false,
                 itemSaveBusy: false,
                 scheduleSaveBusy: false,
@@ -3292,7 +3330,7 @@
                 editingExisting: false,
                 isExportingPDF: false,
                 editorPreview: false,
-                editorSections: { customer: window.innerWidth >= 900, details: window.innerWidth >= 900, items: window.innerWidth >= 900, terms: false, notes: false },
+                editorSections: { customer: window.innerWidth >= 900, details: window.innerWidth >= 900, items: window.innerWidth >= 900, terms: false, notes: false, recurring: false, reminders: false, payments: false, activity: false },
                 company: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 },
                 companyAuditSnapshot: null,
                 customers: [],
@@ -3346,6 +3384,9 @@
                 editingCustomer: null,
                 showQuickCustomer: false,
                 quickCustomer: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' },
+                showQuickItem: false,
+                quickItem: { name: '', description: '', price: 0 },
+                quickItemTargetIndex: null,
                 itemForm: { name: '', description: '', price: 0 },
                 customerSearch: '',
                 itemSearch: '',
@@ -3550,12 +3591,22 @@
                 const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
                 return lum > 0.62 ? '#1e293b' : '#ffffff';
             },
+            brandInk() {
+                const channel = value => {
+                    const normalized = value / 255;
+                    return normalized <= 0.04045 ? normalized / 12.92 : Math.pow((normalized + 0.055) / 1.055, 2.4);
+                };
+                const { r, g, b } = this.brandRgb;
+                const luminance = 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+                const contrastOnWhite = 1.05 / (luminance + 0.05);
+                return contrastOnWhite >= 4.5 ? this.brandColor : '#1e293b';
+            },
             brandTint() {
                 const { r, g, b } = this.brandRgb;
                 return `rgba(${r}, ${g}, ${b}, 0.10)`;
             },
             brandStyle() {
-                return { '--brand': this.brandColor, '--brand-text': this.brandText, '--brand-tint': this.brandTint };
+                return { '--brand': this.brandColor, '--brand-text': this.brandText, '--brand-ink': this.brandInk, '--brand-tint': this.brandTint };
             },
             logoUrlField: {
                 get() { const l = this.company.logo || ''; return l.startsWith('data:') ? '' : l; },
@@ -3563,6 +3614,17 @@
             },
             totals() {
                 return this.calcTotals(this.draft);
+            },
+            taxModeHelp() {
+                return this.draft.taxMode === 'inclusive'
+                    ? 'Prices include tax: entering a tax rate shows how much tax is already included without increasing the total.'
+                    : 'Add tax on top: entering a tax rate increases the line and document totals.';
+            },
+            allEditorSectionsExpanded() {
+                const keys = ['customer', 'details', 'items', 'terms', 'notes'];
+                if (this.draft.docType === 'invoice') keys.push('recurring', 'reminders');
+                if (this.editingExisting) keys.push('payments', 'activity');
+                return keys.every(key => this.editorSections[key] === true);
             },
             quoteAcceptanceLocked() {
                 return this.quoteAcceptance.enabled && this.draft?.docType === 'quote' && Boolean(this.quoteAcceptance.response);
@@ -5105,6 +5167,9 @@
                 this.editingCustomer = null;
                 this.showQuickCustomer = false;
                 this.quickCustomer = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '' };
+                this.showQuickItem = false;
+                this.quickItem = { name: '', description: '', price: 0 };
+                this.quickItemTargetIndex = null;
                 this.itemView = 'list';
                 this.itemForm = { name: '', description: '', price: 0 };
                 this.itemSearch = '';
@@ -5133,6 +5198,7 @@
                 this.dataLoading = false;
                 this.documentSaveBusy = false;
                 this.quickCustomerSaveBusy = false;
+                this.quickItemSaveBusy = false;
                 this.customerSaveBusy = false;
                 this.itemSaveBusy = false;
                 this.scheduleSaveBusy = false;
@@ -5421,11 +5487,13 @@
                     grossSum += (mode === 'inclusive') ? afterDisc : (afterDisc + lineTax);
                     if (rate > 0) taxRaw[rate] = (taxRaw[rate] || 0) + lineTax;
                 });
-                const gd = Number(src.globalDiscount) || 0;
-                const gdFactor = 1 - gd / 100;
                 const base = (mode === 'inclusive') ? grossSum : netSum;
                 const subtotal = r2(base);
-                const globalDiscountAmt = r2(base * (gd / 100));
+                const fixedDiscount = src._discountMode === 'amount';
+                const gd = Number(src.globalDiscount) || 0;
+                const requestedDiscount = fixedDiscount ? (Number(src._discountAmount) || 0) : base * (gd / 100);
+                const globalDiscountAmt = r2(requestedDiscount);
+                const gdFactor = base > 0 ? Math.max(0, 1 - globalDiscountAmt / base) : 1;
                 // scale per-rate tax by the global discount, then total it
                 const taxByRate = {};
                 let taxAmt = 0;
@@ -5436,9 +5504,14 @@
                 });
                 const shipping = parseFloat(src.shippingCost) || 0;
                 const grandTotal = (mode === 'inclusive')
-                    ? r2(grossSum * gdFactor + shipping)
-                    : r2(netSum * gdFactor + taxAmt + shipping);
-                return { subtotal, globalDiscountAmt, taxAmt, taxByRate, shipping, mode, grandTotal };
+                    ? r2(base - globalDiscountAmt + shipping)
+                    : r2(base - globalDiscountAmt + taxAmt + shipping);
+                return { subtotal, discountBase: subtotal, globalDiscountAmt, taxAmt, taxByRate, shipping, mode, grandTotal };
+            },
+            discountPercentForStorage(src) {
+                const totals = this.calcTotals(src);
+                if (totals.discountBase <= 0 || totals.globalDiscountAmt <= 0) return 0;
+                return Math.min(100, (totals.globalDiscountAmt / totals.discountBase) * 100);
             },
             isUuid(v) { return typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v); },
 
@@ -5520,7 +5593,7 @@
                     overdue_first_reminder_days: Math.min(Math.max(Number(inv.overdueFirstReminderDays) || Number(this.company.overdueFirstReminderDays) || 3, 1), 365),
                     overdue_repeat_reminder_days: Math.min(Math.max(Number(inv.overdueRepeatReminderDays) || Number(this.company.overdueRepeatReminderDays) || 7, 1), 365),
                     overdue_max_reminders: Math.min(Math.max(Number(inv.overdueMaxReminders) || Number(this.company.overdueMaxReminders) || 3, 1), 24),
-                    global_discount: inv.globalDiscount || 0, tax_rate: inv.taxRate || 0,
+                    global_discount: this.discountPercentForStorage(inv), tax_rate: inv.taxRate || 0,
                     tax_mode: inv.taxMode || 'exclusive',
                     shipping_cost: inv.shippingCost || 0, tip: 0,
                     notes: inv.notes || null, terms: inv.terms || null,
@@ -5850,7 +5923,7 @@
                     date: today, dueDate: today, poNumber: '',
                     notes: co.defaultNotes || '', terms: co.defaultTerms || '',
                     customer: null, status: 'Draft', currency: co.defaultCurrency || 'GBP',
-                    globalDiscount: 0, taxMode: this.lastTaxMode || 'exclusive', shippingCost: 0, payments: [],
+                    globalDiscount: 0, _discountMode: 'percent', _discountAmount: 0, taxMode: this.lastTaxMode || 'exclusive', shippingCost: 0, payments: [],
                     onlinePaymentMode: 'full', depositAmount: 0,
                     overdueRemindersEnabled: false,
                     overdueFirstReminderDays: Number(co.overdueFirstReminderDays) || 3,
@@ -5885,6 +5958,22 @@
             generateInvoiceNumber() { return this.generateNumber('invoice'); },
             addItem() { this.draft.items.push({ name: '', qty: 1, unit: '', price: 0, discount: 0, tax: 0, showSuggestions: false, _h: '', _m: '', _custom: false }); },
             setTaxMode(m) { this.draft.taxMode = m; this.lastTaxMode = m; },
+            setDiscountMode(mode) {
+                if (!['percent', 'amount'].includes(mode)) return;
+                if (mode === 'amount' && this.draft._discountMode !== 'amount') this.draft._discountAmount = this.calcTotals(this.draft).globalDiscountAmt;
+                if (mode === 'percent' && this.draft._discountMode === 'amount') this.draft.globalDiscount = this.discountPercentForStorage(this.draft);
+                this.draft._discountMode = mode;
+            },
+            resetEditorSections() {
+                const desktop = window.innerWidth >= 900;
+                this.editorSections = { customer: desktop, details: desktop, items: desktop, terms: false, notes: false, recurring: false, reminders: false, payments: Boolean(this.editingExisting && (this.paymentAttentionFor(this.draft) || this.draftDisputeState)), activity: false };
+            },
+            toggleAllEditorSections() {
+                const open = !this.allEditorSectionsExpanded;
+                ['customer', 'details', 'items', 'terms', 'notes'].forEach(key => { this.editorSections[key] = open; });
+                if (this.draft.docType === 'invoice') ['recurring', 'reminders'].forEach(key => { this.editorSections[key] = open; });
+                if (this.editingExisting) ['payments', 'activity'].forEach(key => { this.editorSections[key] = open; });
+            },
             onLogoUpload(e) {
                 const file = e.target.files && e.target.files[0];
                 if (!file) return;
@@ -5978,6 +6067,41 @@
                 this.draft.items[index].price = match.price;
                 this.draft.items[index].showSuggestions = false;
             },
+            onProductServiceSelect(index, event) {
+                const value = event.target.value;
+                event.target.value = '';
+                if (value === '__new__') {
+                    this.quickItemTargetIndex = index;
+                    this.quickItem = { name: '', description: '', price: 0 };
+                    this.showQuickItem = true;
+                    return;
+                }
+                if (value !== '' && this.savedItems[Number(value)]) this.selectMatch(index, this.savedItems[Number(value)]);
+            },
+            async saveQuickItem() {
+                const validationIssue = this.validateSavedItemForSave(this.quickItem);
+                if (validationIssue) return alert(validationIssue);
+                if (this.quickItemSaveBusy) return;
+                this.quickItemSaveBusy = true;
+                try {
+                    const { data, error } = await supabaseClient.from('saved_items').insert(this.itemToRow(this.quickItem)).select().single();
+                    if (error) throw error;
+                    const saved = this.rowToItem(data);
+                    this.savedItems.push(saved);
+                    this.savedItems.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                    if (Number.isInteger(this.quickItemTargetIndex) && this.draft.items[this.quickItemTargetIndex]) this.selectMatch(this.quickItemTargetIndex, saved);
+                    this.closeQuickItem();
+                } catch (e) {
+                    alert('Could not save product or service: ' + (e.message || e));
+                } finally {
+                    this.quickItemSaveBusy = false;
+                }
+            },
+            closeQuickItem() {
+                this.showQuickItem = false;
+                this.quickItem = { name: '', description: '', price: 0 };
+                this.quickItemTargetIndex = null;
+            },
             async saveAsNewPreset(index) {
                 const item = this.draft.items[index];
                 const preset = { name: item.name, description: '', price: item.price };
@@ -5989,7 +6113,14 @@
                 item.showSuggestions = false;
             },
             hideSuggestions(index) { setTimeout(() => this.draft.items[index].showSuggestions = false, 200); },
-            calculateRowTotal(item) { const q = Number(item.qty) || 0; const p = Number(item.price) || 0; const d = Number(item.discount) || 0; const t = q * p; return t - (t * (d / 100)); },
+            calculateRowTotal(item) {
+                const q = Number(item.qty) || 0;
+                const p = Number(item.price) || 0;
+                const d = Number(item.discount) || 0;
+                const rate = Number(item.tax) || 0;
+                const afterDiscount = (q * p) * (1 - d / 100);
+                return this.draft.taxMode === 'inclusive' ? afterDiscount : afterDiscount * (1 + rate / 100);
+            },
             
             async saveInvoice() {
                 const repeat = this.draft.repeat ? JSON.parse(JSON.stringify(this.draft.repeat)) : null;
@@ -6027,7 +6158,7 @@
                     customer: inv.customer || null,
                     items: (inv.items || []).map(i => ({ name: i.name || '', qty: i.qty || 0, unit: i.unit || '', price: i.price || 0, discount: i.discount || 0, tax: i.tax || 0 })),
                     currency: inv.currency || 'GBP',
-                    globalDiscount: inv.globalDiscount || 0, taxMode: inv.taxMode || 'exclusive', shippingCost: inv.shippingCost || 0,
+                    globalDiscount: this.discountPercentForStorage(inv), taxMode: inv.taxMode || 'exclusive', shippingCost: inv.shippingCost || 0,
                     notes: inv.notes || '', terms: inv.terms || '',
                     frequency: repeat.frequency || 'monthly', customInterval: repeat.customInterval || 1, customUnit: repeat.customUnit || 'months',
                     emailEnabled: repeat.emailEnabled === true,
@@ -6130,8 +6261,15 @@
                     const tax = Number(item.tax || 0);
                     if (!Number.isFinite(tax) || tax < 0 || tax > 100) return 'Line ' + line + ': tax must be between 0% and 100%.';
                 }
-                const globalDiscount = Number((src && src.globalDiscount) || 0);
-                if (!Number.isFinite(globalDiscount) || globalDiscount < 0 || globalDiscount > 100) return 'Global discount must be between 0% and 100%.';
+                if (src && src._discountMode === 'amount') {
+                    const discountAmount = Number(src._discountAmount || 0);
+                    if (!Number.isFinite(discountAmount) || discountAmount < 0) return 'Discount amount cannot be negative.';
+                    const undiscounted = this.calcTotals({ ...src, _discountMode: 'percent', globalDiscount: 0 });
+                    if (discountAmount > undiscounted.discountBase + 0.001) return 'Discount amount cannot exceed the subtotal.';
+                } else {
+                    const globalDiscount = Number((src && src.globalDiscount) || 0);
+                    if (!Number.isFinite(globalDiscount) || globalDiscount < 0 || globalDiscount > 100) return 'Discount must be between 0% and 100%.';
+                }
                 const shipping = Number((src && src.shippingCost) || 0);
                 if (!Number.isFinite(shipping) || shipping < 0) return 'Shipping cannot be negative.';
                 const grandTotal = Number(this.calcTotals(src).grandTotal);
@@ -7110,11 +7248,13 @@
                 copy.history.push({ ts: new Date().toISOString(), type: 'converted', text: 'Converted from quote to invoice' });
                 this.draft = copy;
                 this.editingExisting = this.isUuid(copy.id);
+                this.resetEditorSections();
                 this.navigateTo('create');
             },
             newInvoice() {
                 this.draft = this.getEmptyDraft();
                 this.editingExisting = false;
+                this.resetEditorSections();
                 this.navigateTo('create');
             },
 
@@ -7440,10 +7580,13 @@
                 this.draft = this.getEmptyDraft();
                 this.draft.number = keepNumber;
                 this.draft.id = keepId;
+                this.resetEditorSections();
             },
             prepareInvoiceDraft(inv) {
                 const prepared = JSON.parse(JSON.stringify(inv));
                 if(prepared.globalDiscount === undefined) prepared.globalDiscount = 0;
+                prepared._discountMode = 'percent';
+                prepared._discountAmount = 0;
                 if(prepared.taxRate === undefined) prepared.taxRate = 0;
                 if(prepared.shippingCost === undefined) prepared.shippingCost = 0;
                 if(prepared.taxMode === undefined) prepared.taxMode = 'exclusive';
@@ -7556,6 +7699,7 @@
                 this.draft = this.prepareInvoiceDraft(inv);
                 this.syncTimeFields();
                 this.editingExisting = true;
+                this.resetEditorSections();
                 this.navigateTo('edit');
                 this.loadQuoteAccessStatus();
             },
