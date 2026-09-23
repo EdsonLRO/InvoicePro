@@ -38,7 +38,7 @@ const fakeSupabase = {
 const fetchAllOwnedRows = new Function('supabaseClient', `return async function(${fetchParts[1]}) {${fetchParts[2]}}`)(fakeSupabase);
 
 const calcBody = extract(
-  /calcTotals\(src\) \{([\s\S]*?)\r?\n            \},\r?\n            isUuid\(v\)/,
+  /calcTotals\(src\) \{([\s\S]*?)\r?\n            \},\r?\n            discountPercentForStorage\(src\)/,
   'calcTotals must remain extractable'
 )[1];
 const calcTotals = new Function('src', calcBody);

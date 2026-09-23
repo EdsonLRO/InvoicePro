@@ -70,7 +70,7 @@ assert.match(app, /Only import customer details you are allowed to store in Tall
 assert.match(app, /parseCustomers\(text, \{ existingCustomers: this\.customers \}\)/);
 assert.match(app, /from\('customers'\)\.insert\(rows\)\.select\(\)/);
 assert.match(app, /rows\.map\(customer => this\.customerToRow\(customer\)\)/);
-assert.doesNotMatch(app.match(/async importCustomersFromCsv\(\)[\s\S]*?\n\s*},\n\s*backToCustomers/)[0], /\.upsert\(|\.update\(|\.delete\(/);
+assert.doesNotMatch(app.match(/async importCustomersFromCsv\(\)[\s\S]*?\r?\n\s*},\r?\n\s*backToCustomers/)[0], /\.upsert\(|\.update\(|\.delete\(/);
 assert.match(app, /showUserMessage\('Could not import customers:/);
 assert.match(messages, /Customers weren\\'t imported|Customers weren't imported/);
 assert.match(worker, /'\.\/customer-csv-import\.js'/);

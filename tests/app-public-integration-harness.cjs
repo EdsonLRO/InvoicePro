@@ -55,6 +55,6 @@ assert.match(workerSource, /'\.\/app-user-messages\.js'/, 'customer-facing messa
 assert.match(appBuildSource, /"app-user-messages\.js"/, 'Cloudflare Pages must publish the customer-facing message helper');
 assert.match(workerSource, /'\.\/customer-csv-import\.js'/, 'customer CSV helper must be part of the offline app shell');
 assert.match(appBuildSource, /"customer-csv-import\.js"/, 'Cloudflare Pages must publish the customer CSV helper');
-assert.match(workerSource, /tallyo-shell-2026-09-20-4/, 'service-worker cache marker must match this build');
+assert.match(workerSource, /tallyo-shell-2026-09-23-1/, 'service-worker cache marker must match this build');
 
 console.log('App public integration harness passed.');
