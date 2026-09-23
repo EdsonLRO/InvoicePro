@@ -37,7 +37,7 @@
 
   button?.addEventListener("click", () => setMenu(button.getAttribute("aria-expanded") !== "true"));
   navigation?.addEventListener("click", (event) => {
-    if (event.target.closest("a") && button?.getAttribute("aria-expanded") === "true") setMenu(false);
+    if (event.target.closest("a, [data-cookie-settings]") && button?.getAttribute("aria-expanded") === "true") setMenu(false);
   });
 
   document.addEventListener("keydown", (event) => {
