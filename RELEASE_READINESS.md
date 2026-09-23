@@ -1,12 +1,14 @@
 # Tallyo Release Readiness Checklist
 
-## Public website redesign — approved release, 2026-09-23
+## Public website redesign — released and verified, 2026-09-23
 
 The Owner reviewed the local website and approved the complete redesign in PR #177, including the simplified route purposes and SEO copy, consistent section spacing, motion and responsive behaviour, the open section-based Free Invoice Maker, the compact site-wide Tallyo Helper, navigation-based Cookie settings and the refreshed Product Tour screenshots. All screenshot records are fictional; the deterministic capture harness blocked external requests.
 
 The complete website suite passed across 25 public routes plus the 404 page. Focused checks passed for the public Helper fail-closed and mock-provider paths, Analytics consent activation, free-generator conversion and one-email consent, redirects, links, accessibility, 390 px geometry, keyboard interaction and absence of horizontal overflow. The refreshed product assets were visually inspected at professional 1280×720 desktop and 390×844 customer-mobile sizes. Hosted Security and both Pages preview checks are green for commit `5a2f7c0243f9c9429258cc1eaa4e981aa5ccd801`.
 
-The approved release is limited to marking PR #177 ready, merging through the protected pull-request workflow, allowing the normal Cloudflare Pages publication workflows and running bounded public route and asset validation. No app source/runtime, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund, Stripe object, legal publication or unrelated change is included. If public validation fails, restore website deployment `a7197370-ace3-4ffd-8861-06d1349ccdcb` from main source `13dfb04`; backend and provider state remain unchanged.
+PR #177 merged through the protected workflow as `d85e2e671fba129e91b24ce88b0460b78dd03ce1`. Main Security and Pages workflows passed. Website deployment `ee4e8833-04ca-41de-8622-87d461b8e5d3` serves production mode with 25 routes and asset revision `734c852f0b38`. Bounded public checks returned HTTP 200 for the primary routes and all eleven refreshed product images, confirmed the revised Product Tour copy, Helper launcher, navigation Cookie settings, indexable metadata and retired-industry redirect, and confirmed no static Google tag loads before consent.
+
+The normal workflow also republished the unchanged app at deployment `187fdefa-28ab-4317-9427-fb5863df1099`; public readback remains build `2026.09.23.1`, 20 assets and service-worker cache `tallyo-shell-2026-09-23-1`. No app source/runtime, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund, Stripe object, legal publication or unrelated change occurred. Rollback was not required. The retained website rollback is deployment `a7197370-ace3-4ffd-8861-06d1349ccdcb` from main source `13dfb04`; backend and provider state remain unchanged.
 
 ## Invoice editor usability — approved release, 2026-09-23
 
