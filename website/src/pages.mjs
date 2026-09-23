@@ -251,42 +251,45 @@ const generatorPage = (defaultType) => {
   <section class="generator-shell" data-generator data-default-type="${defaultType}">
     <div class="generator-editor">
       <div class="privacy-note" role="note"><strong>Private by default</strong><span>Tallyo does not save this document automatically. Refreshing the page clears the document draft. Read the <a href="/privacy/">Privacy Notice</a>.</span></div>
+      <div class="generator-editor-heading">
+        <div><p class="eyebrow">Document editor</p><h2>Build your ${lowerType}</h2><p>Work through each section. Your preview updates as you type.</p></div>
+      </div>
       <form data-generator-form novalidate>
-        <fieldset><legend>Document details</legend><div class="generator-fields generator-fields-three">
+        <section class="generator-section"><header><strong>Document details</strong><small>Type, number and dates</small></header><fieldset><legend class="sr-only">Document details</legend><div class="generator-fields generator-fields-three">
           <label>Document type<select name="documentType"><option>Invoice</option><option>Quote</option><option>Estimate</option></select></label>
           <label>Currency<select name="currency"><option value="GBP">GBP — British pound</option><option value="EUR">EUR — Euro</option><option value="USD">USD — US dollar</option></select></label>
           <label>Reference number<input name="reference" maxlength="40" value="0001" autocomplete="off"></label>
           <label>Issue date<input name="issueDate" type="date"></label>
           <label>Supply date<input name="supplyDate" type="date"><span>Use for invoices when it differs from the issue date.</span></label>
           <label>${isInvoice ? "Due date" : "Valid until"}<input name="dueDate" type="date"></label>
-        </div></fieldset>
-        <fieldset><legend>Your business</legend><div class="generator-fields generator-fields-two">
+        </div></fieldset></section>
+        <section class="generator-section"><header><strong>Your business</strong><small>Name, contact details and logo</small></header><fieldset><legend class="sr-only">Your business</legend><div class="generator-fields generator-fields-two">
           <label>Business or trading name<input name="senderName" maxlength="100" autocomplete="organization"></label>
           <label>Your name <span>(sole traders)</span><input name="senderLegalName" maxlength="100" autocomplete="name"></label>
           <label class="wide">Business address<textarea name="senderAddress" rows="3" maxlength="300" autocomplete="street-address"></textarea></label>
           <label>Email or phone<input name="senderContact" maxlength="120" autocomplete="email"></label>
           <label>VAT number <span>(if registered)</span><input name="vatNumber" maxlength="30" autocomplete="off"></label>
           <label class="wide logo-field">Logo <span>(optional, stays in this browser)</span><input name="logo" type="file" accept="image/png,image/jpeg,image/webp"><button class="text-button" type="button" data-remove-logo hidden>Remove logo</button></label>
-        </div></fieldset>
-        <fieldset><legend>Customer</legend><div class="generator-fields generator-fields-two">
+        </div></fieldset></section>
+        <section class="generator-section"><header><strong>Customer</strong><small>Who this ${lowerType} is for</small></header><fieldset><legend class="sr-only">Customer</legend><div class="generator-fields generator-fields-two">
           <label>Customer or company name<input name="customerName" maxlength="100" autocomplete="organization"></label>
           <label class="wide">Customer address<textarea name="customerAddress" rows="3" maxlength="300" autocomplete="street-address"></textarea></label>
-        </div></fieldset>
-        <fieldset><legend>Items</legend><div class="generator-item-list" data-items></div><button class="button button-secondary button-small" type="button" data-add-item>Add another item</button></fieldset>
-        <fieldset><legend>Additional cost</legend><div class="generator-fields generator-fields-two">
+        </div></fieldset></section>
+        <section class="generator-section"><header><strong>Items</strong><small>Work, products, prices and tax</small></header><fieldset><legend class="sr-only">Items</legend><div class="generator-item-list" data-items></div><button class="button button-secondary button-small" type="button" data-add-item>+ Add another item</button></fieldset></section>
+        <section class="generator-section"><header><strong>Additional cost</strong><small>Optional shipping or other charges</small></header><fieldset><legend class="sr-only">Additional cost</legend><div class="generator-fields generator-fields-two">
           <label>Shipping or other cost<input name="additionalCost" type="number" min="0" max="1000000" step="0.01" value="0.00" inputmode="decimal"></label>
           <label>Tax on additional cost (%)<input name="additionalTaxRate" type="number" min="0" max="100" step="0.01" value="0" inputmode="decimal"></label>
-        </div></fieldset>
-        <fieldset><legend>Finishing details</legend><div class="generator-fields generator-fields-two">
+        </div></fieldset></section>
+        <section class="generator-section"><header><strong>Finishing details</strong><small>Notes and payment instructions</small></header><fieldset><legend class="sr-only">Finishing details</legend><div class="generator-fields generator-fields-two">
           <label class="wide">Notes<textarea name="notes" rows="3" maxlength="500"></textarea></label>
           <label class="wide">Payment instructions<textarea name="paymentInstructions" rows="3" maxlength="500"></textarea></label>
-        </div></fieldset>
-        <div class="generator-actions"><button class="button button-primary" type="button" data-print>Download PDF</button><button class="button button-secondary" type="reset">Clear everything</button></div>
+        </div></fieldset></section>
+        <div class="generator-actions"><a class="button button-secondary" href="#document-preview">Preview</a><button class="button button-primary" type="button" data-print>Download PDF</button><button class="text-button generator-clear" type="reset">Clear everything</button></div>
         <p class="generator-status" data-generator-status role="status" aria-live="polite"></p>
       </form>
       <aside class="generator-guidance" aria-labelledby="generator-guidance-title">${guidance}</aside>
     </div>
-    <div class="generator-preview-wrap" role="region" aria-label="Scrollable live document preview" tabindex="0"><p class="preview-label">Live preview</p><p class="preview-scroll-hint">Swipe sideways to view the full document.</p><article class="generator-preview" data-preview aria-label="Document preview">
+    <div class="generator-preview-wrap" id="document-preview" role="region" aria-label="Live document preview" tabindex="0"><div class="generator-preview-heading"><div><p class="preview-label">Live preview</p><p>Updates automatically while you edit.</p></div><button class="button button-secondary button-small" type="button" data-print-preview>Download PDF</button></div><article class="generator-preview" data-preview aria-label="Document preview">
       <header><img data-preview-logo alt="Business logo" hidden><div><p data-preview-type>${defaultType}</p><h2 data-preview-reference>${defaultType} 0001</h2><p data-preview-dates></p></div></header>
       <div class="preview-parties"><section><h3>From</h3><p data-preview-sender></p></section><section><h3>To</h3><p data-preview-customer></p></section></div>
       <div class="preview-table-wrap"><table><caption class="sr-only">Items and calculated amounts</caption><thead><tr><th>Description</th><th>Qty / unit</th><th>Unit price</th><th>Discount</th><th>Tax</th><th>Net</th><th>Total</th></tr></thead><tbody data-preview-items></tbody></table></div>

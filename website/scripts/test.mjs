@@ -92,6 +92,7 @@ for (const page of [...pages, notFoundPage]) {
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, `one h1 for ${page.route}`);
   assert.match(html, /class="skip-link" href="#main-content"/, `skip link for ${page.route}`);
   assert.match(html, /aria-expanded="false" aria-controls="primary-navigation"/, `mobile menu semantics for ${page.route}`);
+  assert.match(html, /class="helper-fab" href="\/helper\/" aria-label="Open Tallyo Helper"/, `persistent Helper access for ${page.route}`);
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(ids).size, ids.length, `unique element IDs for ${page.route}`);
   assert.match(html, /property="og:title"/, `Open Graph title for ${page.route}`);
@@ -162,13 +163,16 @@ assert.match(featuresPage, /data-horizontal-flow/, "features page includes the s
 assert.equal((featuresPage.match(/class="workflow-outcome-step"/g) || []).length, 4, "connected workflow renders four focused steps");
 
 const generatorPageHtml = read("free-invoice-generator/index.html");
-assert.match(generatorPageHtml, /role="region" aria-label="Scrollable live document preview" tabindex="0"/, "mobile document preview is keyboard reachable");
-assert.match(generatorPageHtml, /Swipe sideways to view the full document\./, "mobile document preview explains horizontal navigation");
+assert.match(generatorPageHtml, /role="region" aria-label="Live document preview" tabindex="0"/, "document preview is keyboard reachable");
+assert.doesNotMatch(generatorPageHtml, /Swipe sideways/, "mobile document preview no longer requires horizontal navigation");
+assert.equal((generatorPageHtml.match(/class="generator-section"/g) || []).length, 6, "invoice maker groups the open editor into six clear sections");
+assert.doesNotMatch(generatorPageHtml, /<details class="generator-section"/, "invoice maker keeps every editing section visible");
 assert.match(generatorPageHtml, /href="\/privacy\/">Privacy Notice<\/a>/, "free document form clearly links the Privacy Notice");
 assert.match(generatorPageHtml, /data-generator-conversion/, "invoice maker includes the pre-download conversion dialog");
 assert.match(generatorPageHtml, /Continue download/, "invoice maker keeps a clear download action");
 assert.doesNotMatch(read("free-quote-generator/index.html"), /data-generator-conversion/, "quote maker keeps its existing direct PDF flow");
-assert.match(read("assets/styles.css"), /\.generator-preview-wrap \{ overflow-x: auto;/, "mobile document preview scrolls inside its own region");
+assert.match(read("assets/styles.css"), /\.generator-preview table \{ display: block; min-width: 0;/, "mobile document preview reflows without a wide fixed table");
+assert.match(read("assets/styles.css"), /content: attr\(data-label\)/, "mobile preview preserves labels when table rows become cards");
 
 for (const article of helpArticles) {
   const route = `/help/${article.slug}/`;
@@ -356,7 +360,9 @@ assert.match(home, /data-cookie-reject>Reject analytics<\/button>/);
 assert.match(home, /data-cookie-settings>Manage preferences<\/button>/);
 const bannerMarkup = home.match(/<section class="cookie-banner"[\s\S]+?<\/section>/)?.[0] || "";
 assert.equal((bannerMarkup.match(/class="cookie-choice" type="button" data-cookie-(?:accept|reject|settings)/g) || []).length, 3, "banner choices use the same visible control class");
-assert.match(home, /data-cookie-settings hidden>Cookie settings<\/button>/, "persistent settings control is rendered");
+assert.match(home, /class="nav-cookie-settings"[^>]+data-cookie-settings hidden/, "Cookie settings is available from the main navigation menu");
+const footerBottomMarkup = home.match(/<div class="footer-bottom">[\s\S]+?<\/div>/)?.[0] || "";
+assert.doesNotMatch(footerBottomMarkup, /data-cookie-settings/, "Cookie settings is removed from the page footer");
 assert.doesNotMatch(home, /<script[^>]+src="https:\/\/www\.googletagmanager\.com/i, "no static Google tag is rendered");
 
 assert.equal(read("robots.txt"), "User-agent: *\nDisallow: /\n");
@@ -405,7 +411,7 @@ assert.doesNotMatch(styles, /\.page-hero \+ \.section \{[^}]*padding-top:/, "pag
 assert.match(styles, /\.plan-card \{[^}]*height: 100%;[^}]*flex-direction: column;/, "pricing cards fill the shared row height");
 assert.match(styles, /\.plan-grid \{ align-items: stretch; \}/, "pricing cards use equal heights");
 assert.match(styles, /\.plan-card:not\(\.plan-card-featured\) \.button \{ margin-top: 0; \}/, "the free-plan action remains in the natural reading flow");
-assert.ok(statSync(join(distRoot, "assets", "styles.css")).size < 78_000, "CSS baseline under 78 KB after workflow navigation and content-layout refinements");
+assert.ok(statSync(join(distRoot, "assets", "styles.css")).size < 80_000, "CSS baseline under 80 KB after persistent Helper and navigation utility refinements");
 assert.ok(statSync(join(distRoot, "assets", "site.js")).size < 10_000, "JS baseline under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper.js")).size < 10_000, "helper UI stays under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper-core.mjs")).size < 10_000, "helper matcher stays under 10 KB");

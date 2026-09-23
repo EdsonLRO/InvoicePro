@@ -100,8 +100,21 @@ for (const root of roots) {
       values.forEach((item, index) => {
         const line = result.lines[index];
         const tr = document.createElement("tr");
-        const cells = [item.description.trim() || `Item ${index + 1}`, `${item.quantity || "0"} ${item.unit.trim() || "units"}`, formatMoney(line.unitPrice, currency), `${item.discountRate || "0"}%`, `${item.taxRate || "0"}%`, formatMoney(line.net, currency), formatMoney(line.total, currency)];
-        for (const value of cells) { const td = document.createElement("td"); td.textContent = value; tr.append(td); }
+        const cells = [
+          ["Description", item.description.trim() || `Item ${index + 1}`],
+          ["Qty / unit", `${item.quantity || "0"} ${item.unit.trim() || "units"}`],
+          ["Unit price", formatMoney(line.unitPrice, currency)],
+          ["Discount", `${item.discountRate || "0"}%`],
+          ["Tax", `${item.taxRate || "0"}%`],
+          ["Net", formatMoney(line.net, currency)],
+          ["Total", formatMoney(line.total, currency)]
+        ];
+        for (const [label, value] of cells) {
+          const td = document.createElement("td");
+          td.dataset.label = label;
+          td.textContent = value;
+          tr.append(td);
+        }
         body.append(tr);
       });
       setText(preview, "[data-preview-subtotal]", formatMoney(result.subtotal, currency));
@@ -228,6 +241,9 @@ for (const root of roots) {
   });
 
   root.querySelector("[data-print]").addEventListener("click", () => {
+    downloadController.begin();
+  });
+  root.querySelector("[data-print-preview]")?.addEventListener("click", () => {
     downloadController.begin();
   });
 

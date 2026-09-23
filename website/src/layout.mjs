@@ -208,18 +208,19 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-button><span class="sr-only">Open main menu</span><i></i><i></i><i></i></button>
       <nav class="primary-nav" id="primary-navigation" aria-label="Main navigation" data-navigation>
         <div class="nav-links">${navMarkup}</div>
-        <div class="nav-actions"><a class="login-link" id="cta_login" data-login-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a class="button button-primary button-small" id="cta_header_create_account" data-signup-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a></div>
+        <div class="nav-actions"><button class="nav-cookie-settings" type="button" data-cookie-settings hidden aria-label="Cookie settings" title="Cookie settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 13.1A8.5 8.5 0 0 1 10.9 3.8 8.5 8.5 0 1 0 20.2 13.1Z"></path><circle cx="8.2" cy="12.1" r="1"></circle><circle cx="12.3" cy="16" r="1"></circle><circle cx="7.3" cy="17.2" r=".8"></circle></svg><span>Cookie settings</span></button><a class="login-link" id="cta_login" data-login-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a class="button button-primary button-small" id="cta_header_create_account" data-signup-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a></div>
       </nav>
     </div>
   </header>
   <main id="main-content" tabindex="-1">${content}</main>
+  <a class="helper-fab" href="/helper/" aria-label="Open Tallyo Helper"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4.5h13A2.5 2.5 0 0 1 21 7v7a2.5 2.5 0 0 1-2.5 2.5h-7L7 20v-3.5H5.5A2.5 2.5 0 0 1 3 14V7a2.5 2.5 0 0 1 2.5-2.5Z"></path><circle cx="8" cy="10.5" r="1"></circle><circle cx="12" cy="10.5" r="1"></circle><circle cx="16" cy="10.5" r="1"></circle></svg><span class="helper-fab-label">Ask Tallyo</span></a>
   <footer class="site-footer">
     <div class="footer-main">
       <div class="footer-intro"><a class="brand brand-footer" href="/" aria-label="Tallyo home"><img class="brand-wordmark" src="${assetUrl("/assets/tallyo-wordmark-white.png")}" alt="" aria-hidden="true"><span class="sr-only">Tallyo</span></a><p>Professional invoices, clearer payment tracking and less repeated admin for UK small businesses.</p></div>
       ${footerMarkup}
       <div class="footer-group"><h2>Account</h2><a data-login-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/install-tallyo/">Install Tallyo</a></div>
     </div>
-    <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo. <button class="cookie-settings-control" type="button" data-cookie-settings hidden>Cookie settings</button></p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
+    <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo.</p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
   </footer>
   ${cookieConsentMarkup}
 </body>
