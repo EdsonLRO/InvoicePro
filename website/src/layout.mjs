@@ -163,8 +163,28 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
     JSON.stringify(schemaFor({ ...page, description })),
     siteConfig.connectPaymentsEnabled
   );
-  const pageScripts = ["/assets/growth.js", ...(page.scripts || [])].map((src) => `<script type="module" src="${escapeAttribute(assetUrl(src))}"></script>`).join("\n  ");
-  const inlineScripts = [schema, ...(page.helper ? [helperKnowledgeJson] : [])];
+  const pageScripts = [...new Set(["/assets/growth.js", "/assets/helper.js", ...(page.scripts || [])])]
+    .map((src) => `<script type="module" src="${escapeAttribute(assetUrl(src))}"></script>`)
+    .join("\n  ");
+  const inlineScripts = [schema, helperKnowledgeJson];
+  const helperWidgetMarkup = page.helper ? "" : `
+  <aside class="helper-widget" data-helper-widget>
+    <section class="helper-widget-panel" id="tallyo-helper-widget" data-helper data-ai-enabled="${String(siteConfig.aiHelperEnabled)}" role="dialog" aria-modal="false" aria-labelledby="helper-widget-title" hidden>
+      <header class="helper-widget-header">
+        <div><span class="helper-widget-mark" aria-hidden="true">T</span><div><h2 id="helper-widget-title">Tallyo Helper</h2><p>Public product guidance</p></div></div>
+        <button class="helper-widget-close" type="button" data-helper-close aria-label="Close Tallyo Helper"><span aria-hidden="true">×</span></button>
+      </header>
+      <p class="helper-widget-boundary">Ask about Tallyo features and workflows. The Helper cannot see your account or records.</p>
+      <ol class="helper-conversation helper-widget-conversation" data-helper-conversation aria-label="Tallyo Helper conversation" aria-live="polite" aria-relevant="additions"></ol>
+      <form class="helper-form helper-widget-form" data-helper-form>
+        <label class="sr-only" for="helper-widget-question">Ask a general question about Tallyo</label>
+        <div><input id="helper-widget-question" data-helper-input name="question" type="text" maxlength="240" autocomplete="off" spellcheck="true" placeholder="Ask a question…" required><button class="button button-primary" type="submit">Send</button></div>
+      </form>
+      <div class="helper-widget-footer"><span>Do not share passwords or private business information.</span><a href="/helper/">Open full Helper</a></div>
+      <p class="sr-only" data-helper-status role="status" aria-live="polite"></p>
+    </section>
+    <button class="helper-fab" type="button" data-helper-toggle aria-expanded="false" aria-controls="tallyo-helper-widget" aria-label="Open Tallyo Helper"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4.5h13A2.5 2.5 0 0 1 21 7v7a2.5 2.5 0 0 1-2.5 2.5h-7L7 20v-3.5H5.5A2.5 2.5 0 0 1 3 14V7a2.5 2.5 0 0 1 2.5-2.5Z"></path><circle cx="8" cy="10.5" r="1"></circle><circle cx="12" cy="10.5" r="1"></circle><circle cx="16" cy="10.5" r="1"></circle></svg><span class="helper-fab-label">Ask Tallyo</span></button>
+  </aside>`;
 
   return {
     html: `<!doctype html>
@@ -213,7 +233,7 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
     </div>
   </header>
   <main id="main-content" tabindex="-1">${content}</main>
-  <a class="helper-fab" href="/helper/" aria-label="Open Tallyo Helper"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4.5h13A2.5 2.5 0 0 1 21 7v7a2.5 2.5 0 0 1-2.5 2.5h-7L7 20v-3.5H5.5A2.5 2.5 0 0 1 3 14V7a2.5 2.5 0 0 1 2.5-2.5Z"></path><circle cx="8" cy="10.5" r="1"></circle><circle cx="12" cy="10.5" r="1"></circle><circle cx="16" cy="10.5" r="1"></circle></svg><span class="helper-fab-label">Ask Tallyo</span></a>
+  ${helperWidgetMarkup}
   <footer class="site-footer">
     <div class="footer-main">
       <div class="footer-intro"><a class="brand brand-footer" href="/" aria-label="Tallyo home"><img class="brand-wordmark" src="${assetUrl("/assets/tallyo-wordmark-white.png")}" alt="" aria-hidden="true"><span class="sr-only">Tallyo</span></a><p>Professional invoices, clearer payment tracking and less repeated admin for UK small businesses.</p></div>
@@ -222,6 +242,7 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
     </div>
     <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo.</p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
   </footer>
+  <script type="application/json" id="helper-knowledge">${helperKnowledgeJson}</script>
   ${cookieConsentMarkup}
 </body>
 </html>`,

@@ -92,14 +92,23 @@ for (const page of [...pages, notFoundPage]) {
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, `one h1 for ${page.route}`);
   assert.match(html, /class="skip-link" href="#main-content"/, `skip link for ${page.route}`);
   assert.match(html, /aria-expanded="false" aria-controls="primary-navigation"/, `mobile menu semantics for ${page.route}`);
-  assert.match(html, /class="helper-fab" href="\/helper\/" aria-label="Open Tallyo Helper"/, `persistent Helper access for ${page.route}`);
+  assert.match(html, /type="module" src="\/assets\/helper\.js\?v=[a-f0-9]{12}"/, `Helper behaviour loads for ${page.route}`);
+  assert.equal((html.match(/id="helper-knowledge"/g) || []).length, 1, `one reviewed Helper knowledge source for ${page.route}`);
+  if (page.helper) {
+    assert.match(html, /class="section section-soft helper-shell" data-helper/, "full Helper remains the dedicated expanded experience");
+    assert.doesNotMatch(html, /data-helper-widget/, "full Helper page does not duplicate the compact panel");
+  } else {
+    assert.match(html, /class="helper-widget" data-helper-widget/, `compact Helper is available for ${page.route}`);
+    assert.match(html, /role="dialog" aria-modal="false" aria-labelledby="helper-widget-title" hidden/, `compact Helper starts closed for ${page.route}`);
+    assert.match(html, /data-helper-toggle aria-expanded="false" aria-controls="tallyo-helper-widget" aria-label="Open Tallyo Helper"/, `compact Helper control has disclosure semantics for ${page.route}`);
+  }
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(ids).size, ids.length, `unique element IDs for ${page.route}`);
   assert.match(html, /property="og:title"/, `Open Graph title for ${page.route}`);
   assert.match(html, /property="og:image" content="https:\/\/tallyo\.co\.uk\/assets\/tallyo-social-card\.webp\?v=[a-f0-9]{12}"/, `Open Graph image for ${page.route}`);
   assert.match(html, /name="twitter:card" content="summary_large_image"/, `large social card for ${page.route}`);
   assert.match(html, /type="module" src="\/assets\/growth\.js\?v=[a-f0-9]{12}"/, `provider-neutral growth module for ${page.route}`);
-  for (const assetName of ["styles.css", "site.js", "growth.js"]) {
+  for (const assetName of ["styles.css", "site.js", "growth.js", "helper.js"]) {
     const revision = html.match(new RegExp(`/assets/${assetName.replace(".", "\\.")}\\?v=([a-f0-9]{12})`))?.[1];
     assert.ok(revision, `versioned ${assetName} for ${page.route}`);
     seenAssetRevisions.add(revision);
@@ -126,7 +135,7 @@ for (const page of [...pages, notFoundPage]) {
 const home = read("index.html");
 assert.equal(seenAssetRevisions.size, 1, "all rendered pages and core assets share one content revision");
 const assetRevision = [...seenAssetRevisions][0];
-assert.doesNotMatch(home, /(?:href|src)="\/assets\/(?:styles\.css|site\.js|growth\.js)"/, "core assets are never referenced without a revision");
+assert.doesNotMatch(home, /(?:href|src)="\/assets\/(?:styles\.css|site\.js|growth\.js|helper\.js)"/, "core assets are never referenced without a revision");
 for (const id of ["cta_header_create_account", "cta_hero_create_account", "cta_hero_free_invoice", "cta_footer_create_account", "cta_login"]) {
   assert.match(home, new RegExp(`id="${id}"`), `missing CTA id ${id}`);
 }
@@ -156,7 +165,8 @@ for (const screenshotName of ["tallyo-dashboard.jpg", "tallyo-invoice-editor.jpg
   assert.match(productTour, new RegExp(`/assets/product/${screenshotName.replace(".", "\\.")}\\?v=[a-f0-9]{12}`), `product tour includes versioned ${screenshotName}`);
   assert.deepEqual([...readFileSync(join(distRoot, "assets", "product", screenshotName)).subarray(0, 3)], [255, 216, 255], `${screenshotName} is encoded as JPEG`);
 }
-assert.doesNotMatch(productTour, /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|acct_|cs_(?:test|live)_|eyJ[A-Za-z0-9_-]{10,}/, "product tour has no emails, provider IDs or JWT-like data");
+const productTourVisibleHtml = productTour.replace(/<script type="application\/json" id="helper-knowledge">[\s\S]*?<\/script>/, "");
+assert.doesNotMatch(productTourVisibleHtml, /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|acct_|cs_(?:test|live)_|eyJ[A-Za-z0-9_-]{10,}/, "product tour has no visible emails, provider IDs or JWT-like data");
 
 const featuresPage = read("features/index.html");
 assert.match(featuresPage, /data-horizontal-flow/, "features page includes the scroll-driven connected workflow");
@@ -411,7 +421,10 @@ assert.doesNotMatch(styles, /\.page-hero \+ \.section \{[^}]*padding-top:/, "pag
 assert.match(styles, /\.plan-card \{[^}]*height: 100%;[^}]*flex-direction: column;/, "pricing cards fill the shared row height");
 assert.match(styles, /\.plan-grid \{ align-items: stretch; \}/, "pricing cards use equal heights");
 assert.match(styles, /\.plan-card:not\(\.plan-card-featured\) \.button \{ margin-top: 0; \}/, "the free-plan action remains in the natural reading flow");
-assert.ok(statSync(join(distRoot, "assets", "styles.css")).size < 80_000, "CSS baseline under 80 KB after persistent Helper and navigation utility refinements");
+assert.match(styles, /\.helper-widget-panel \{[^}]*position: fixed;[^}]*bottom: 5rem;[^}]*backdrop-filter: blur\(22px\) saturate\(150%\)/, "compact Helper opens as a liquid-glass panel beside its icon");
+assert.match(styles, /\.helper-widget-panel\[hidden\] \{ display: none; \}/, "compact Helper remains absent from layout while closed");
+assert.match(styles, /@media \(max-width: 37\.99rem\) \{[^}]*\.helper-widget-panel \{[^}]*left: 1rem;[^}]*width: calc\(100vw - 2rem\)/s, "compact Helper keeps a full mobile inset inside narrow viewports");
+assert.ok(statSync(join(distRoot, "assets", "styles.css")).size < 90_000, "CSS baseline under 90 KB after compact Helper and navigation utility refinements");
 assert.ok(statSync(join(distRoot, "assets", "site.js")).size < 10_000, "JS baseline under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper.js")).size < 10_000, "helper UI stays under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper-core.mjs")).size < 10_000, "helper matcher stays under 10 KB");
@@ -432,6 +445,10 @@ for (const helperAsset of ["helper.js", "helper-core.mjs"]) {
   assert.doesNotMatch(source, /fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage|indexedDB/, `${helperAsset} remains browser-local without persistence or network calls`);
   assert.doesNotMatch(source, /https?:\/\//, `${helperAsset} has no provider endpoint`);
 }
+const helperUiSource = read("assets/helper.js");
+assert.match(helperUiSource, /document\.querySelectorAll\("\[data-helper\]"\)/, "one Helper controller supports full and compact views");
+assert.match(helperUiSource, /event\.key === "Escape"/, "compact Helper supports Escape to close");
+assert.match(helperUiSource, /!widget\.contains\(event\.target\)/, "compact Helper closes when visitors click elsewhere");
 for (const moduleAsset of ["helper.js", "generator.js", "growth.js"]) {
   const source = read(`assets/${moduleAsset}`);
   assert.doesNotMatch(source, /__TALLYO_ASSET_REVISION__/, `${moduleAsset} resolves the asset revision`);

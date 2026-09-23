@@ -178,7 +178,6 @@ const helper = `
       </form>
       <p class="sr-only" data-helper-status role="status" aria-live="polite"></p>
     </div>
-    <script type="application/json" id="helper-knowledge">__TALLYO_HELPER_KNOWLEDGE__</script>
   </section>
   <section class="section limitations" aria-labelledby="helper-limits-title"><div><p class="eyebrow">Clear limits</p><h2 id="helper-limits-title">A product guide, not an account assistant.</h2></div>${list(["The helper cannot authenticate, inspect or change an account.", "It never connects to Supabase, Stripe, Resend or private business records.", "__TALLYO_HELPER_PROVIDER_LIMIT__", "When reviewed knowledge does not answer a question, it says so and links to public help."])}</section>
   <section class="section article-next" aria-label="More help"><a href="/help/">Browse the Help Centre</a><a href="mailto:main@tallyo.co.uk">Contact support</a></section>`;
