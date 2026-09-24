@@ -4,7 +4,7 @@
   "topics": [
     { "topic": "Free invoice generator UK", "intent": "tool", "route": "/free-invoice-generator/", "status": "reserved-for-pr3" },
     { "topic": "Free quote generator UK", "intent": "tool", "route": "/free-quote-generator/", "status": "reserved-for-pr3" },
-    { "topic": "Invoice template for UK sole traders", "intent": "template", "route": null, "status": "planned" },
+    { "topic": "Invoice template for sole traders", "intent": "template", "route": null, "status": "planned" },
     { "topic": "How to create an invoice UK", "intent": "guide", "route": null, "status": "planned" },
     { "topic": "What an invoice must include", "intent": "guide", "route": null, "status": "legal-review-required" },
     { "topic": "Quote vs invoice", "intent": "guide", "route": "/help/create-invoices-quotes-and-credit-notes/", "status": "covered-by-help" },

@@ -882,14 +882,16 @@ main > .section:last-of-type{margin-bottom:var(--layout-gap)}
 }
 
 @media print {
-  @page { size: A4 portrait; margin: 12mm; }
-  .preview-banner, .site-header, .site-footer, .helper-widget, .section-cta, .generator-hero, .generator-editor, .generator-conversion-dialog, .preview-label, .preview-scroll-hint { display: none !important; }
-  body { background: var(--white); color: #000; }
-  .section, .page-hero { width: 100%; padding: 1rem 0; }
-  .generator-shell { display: block; width: 100%; margin: 0; }
-  .generator-preview-wrap { position: static; }
-  .generator-preview { width: 100%; min-height: 0; padding: 0; overflow: visible; border: 0; border-radius: 0; box-shadow: none; }
-  .preview-table-wrap { overflow: visible; }
-  .generator-preview table { min-width: 0; font-size: 8pt; }
-  .generator-preview th, .generator-preview td { padding: 5pt 3pt; }
+  @page{size:A4 portrait;margin:0}
+  .skip-link,.preview-banner,.site-header,.site-footer,.helper-widget,.generator-editor,.generator-conversion-dialog,.generator-preview-heading{display:none!important}
+  html,body{margin:0;color:#000}
+  body{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  main{overflow:visible}
+  main > *:not(.generator-shell){display:none!important}
+  .generator-shell{display:block;width:100%;margin:0}
+  .generator-preview-wrap{position:static;overflow:visible}
+  .generator-preview{width:100%;min-height:0;padding:12mm;overflow:visible;border:0;border-radius:0;box-shadow:none}
+  .preview-table-wrap{overflow:visible}
+  .generator-preview table{min-width:0;font-size:8pt}
+  .generator-preview th,.generator-preview td{padding:5pt 3pt}
 }

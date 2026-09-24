@@ -86,20 +86,25 @@ assert.equal(validateOverviewBody({ ...valid.body, consent: false }).ok, false, 
 assert.equal(validateOverviewBody({ ...valid.body, consentVersion: "old" }).ok, false, "server rejects stale consent wording");
 const overviewEmail = buildOverviewEmail({ unsubscribeUrl: "https://example.invalid/unsubscribe" });
 assert.match(CONSENT_WORDING, /^Yes, Tallyo may send me one promotional email/);
-assert.equal(overviewEmail.subject, "See what else you can do with Tallyo");
-assert.equal(overviewEmail.preheader, "Save customers and items, automate invoices and reminders, track payments and accept online card payments.");
-assert.match(overviewEmail.text, /Create invoices faster\. Get paid with less admin\./);
+assert.equal(overviewEmail.subject, "See how Tallyo keeps invoicing work connected");
+assert.equal(overviewEmail.preheader, "Create clear documents, turn accepted quotes into invoices, repeat regular work and track every payment.");
+assert.match(overviewEmail.text, /From quote to paid, keep the whole job clear\./);
 assert.match(overviewEmail.text, /No account or subscription has been created\. This is the one introductory email you requested\./);
 assert.match(overviewEmail.text, /You have not been added to an ongoing newsletter and Tallyo will not send further promotional messages under this consent\./);
 assert.match(overviewEmail.text, /Privacy Notice: https:\/\/tallyo\.co\.uk\/privacy\//);
 assert.match(overviewEmail.text, /Unsubscribe: https:\/\/example\.invalid\/unsubscribe/);
 for (const copy of [
-  "Create professional invoices in minutes",
-  "Save customers and items",
-  "Track invoices and payment status",
-  "Automate recurring invoices and reminders",
-  "Accept online payments with Stripe",
-  "Keep invoices on brand",
+  "Create clear documents your way",
+  "Move from quote to invoice",
+  "Handle repeat work and overdue follow-up",
+  "See what has been paid and what is left",
+  "Make every PDF recognisably yours",
+  "Online card payments",
+  "import a customer CSV",
+  "exact-amount discounts",
+  "emailed automatically or kept as a draft",
+  "deposits, part-payments and final payments",
+  "Tallyo, Basic, Modern or Professional",
   "£8 monthly",
   "£80 annually"
 ]) {
@@ -109,16 +114,17 @@ for (const copy of [
 for (const href of [
   "https://app.tallyo.co.uk/",
   "https://tallyo.co.uk/",
+  "https://tallyo.co.uk/product-tour/",
   "https://tallyo.co.uk/pricing/",
   "https://tallyo.co.uk/privacy/",
   "https://tallyo.co.uk/free-invoice-generator/",
   "https://example.invalid/unsubscribe"
 ]) assert.match(overviewEmail.html, new RegExp(`href="${href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
-assert.equal(OVERVIEW_EMAIL_IMAGES.length, 4, "the email remains concise with four real product screenshots");
+assert.equal(OVERVIEW_EMAIL_IMAGES.length, 5, "the email uses five current, focused product screenshots");
 assert.deepEqual(overviewEmail.images, OVERVIEW_EMAIL_IMAGES);
-assert.equal(new Set(OVERVIEW_EMAIL_IMAGES.map(({ src }) => src)).size, 4);
+assert.equal(new Set(OVERVIEW_EMAIL_IMAGES.map(({ src }) => src)).size, 5);
 for (const { src, alt } of OVERVIEW_EMAIL_IMAGES) {
-  assert.match(src, /^https:\/\/tallyo\.co\.uk\/assets\/email\/overview-[a-z-]+\.jpg$/);
+  assert.match(src, /^https:\/\/tallyo\.co\.uk\/assets\/product\/tallyo-[a-z-]+\.jpg\?v=20260924-overview$/);
   assert.ok(alt.length >= 35, "every screenshot has meaningful alt text");
   assert.match(overviewEmail.html, new RegExp(`src="${src.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[^>]+alt="${alt.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`));
   const asset = join(root, "website/public", new URL(src).pathname);
@@ -197,6 +203,12 @@ assert.match(generator, /emitAnalyticsEvent\("download_invoice"\)/);
 assert.doesNotMatch(generator, /emitAnalyticsEvent\([^\n]+email/i, "no email or personal data enters Analytics");
 assert.match(styles, /width: min\(44rem, calc\(100% - 1\.5rem\)\)/, "panel fits narrow mobile viewports");
 assert.match(styles, /width: 2\.75rem; height: 2\.75rem/, "dismiss control retains an accessible tap target");
+assert.match(styles, /main > \*:not\(\.generator-shell\)\{display:none!important\}/, "printing excludes every page section outside the document generator");
+assert.doesNotMatch(pages.match(/<section class="section generator-explainer"[\s\S]+?<\/section>/)?.[0] || "", /generator-shell/, "the explainer remains outside the printable generator shell");
+assert.match(styles, /\.skip-link[^}]+display:none!important/, "printing excludes the keyboard skip link");
+assert.match(styles, /@page\{size:A4 portrait;margin:0\}/, "print output reserves no browser header or footer margin");
+assert.match(pages, /switch off Headers and footers if that option is enabled/, "the download panel explains the remaining browser print setting");
+assert.match(generator, /switch off ‘Headers and footers’/, "the post-print status repeats the browser setting guidance");
 
 assert.match(serverPolicy, /CONSENT_WORDING =\s*"Yes, Tallyo may send me one promotional email/);
 assert.match(server, /RATE_LIMIT_PER_HOUR = 3/);

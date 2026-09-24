@@ -6,14 +6,14 @@
       "id": "what-is-tallyo",
       "question": "What is Tallyo?",
       "triggers": ["what is tallyo", "tell me about tallyo", "what does tallyo do"],
-      "answer": "Tallyo is a straightforward invoicing and business-records workspace for UK small businesses and independent operators.",
+      "answer": "Tallyo is a straightforward invoicing and business-records workspace built around your business.",
       "links": [{ "label": "About Tallyo", "href": "/about/" }]
     },
     {
       "id": "who-is-it-for",
       "question": "Who is Tallyo for?",
       "triggers": ["who is tallyo for", "who can use tallyo", "is tallyo for me"],
-      "answer": "Tallyo is designed for UK sole traders, freelancers, consultants, tradespeople and small service businesses that create quotes and invoices.",
+      "answer": "Tallyo is designed for sole traders, freelancers, consultants, tradespeople and service companies that create quotes and invoices.",
       "links": [{ "label": "Explore features", "href": "/features/" }]
     },
     {
