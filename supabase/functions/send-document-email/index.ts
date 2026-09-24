@@ -86,6 +86,17 @@ function brandColor(company: any): string {
   return /^#[0-9a-f]{6}$/i.test(color) ? color : "#4f46e5";
 }
 
+const DOCUMENT_TEMPLATES = new Set(["tallyo", "basic", "modern", "professional"]);
+
+function documentTemplate(company: any): string {
+  const template = String(company?.invoice_template || "tallyo").trim().toLowerCase();
+  return DOCUMENT_TEMPLATES.has(template) ? template : "tallyo";
+}
+
+function usesAlternatingItemRows(company: any): boolean {
+  return company?.alternate_item_rows !== false;
+}
+
 function amountPaid(payments: unknown): number {
   if (!Array.isArray(payments)) return 0;
   return payments.reduce((sum: number, payment: InvoicePayment) => {
@@ -366,7 +377,7 @@ function customerLines(customer: any): string[] {
   ].filter((line) => String(line || "").trim()).map((line) => String(line));
 }
 
-function buildPdfBase64(inv: any, company: any): string {
+export function buildPdfBase64(inv: any, company: any): string {
   const noun = docTypeNoun(inv.doc_type);
   const currency = inv.currency || "GBP";
   const totals = calcTotals(inv);
@@ -374,11 +385,18 @@ function buildPdfBase64(inv: any, company: any): string {
   const customer = inv.customer_snapshot || {};
   const companyName = company?.name || "Tallyo";
   const brand = hexToPdfRgb(brandColor(company));
+  const template = documentTemplate(company);
+  const alternateRows = usesAlternatingItemRows(company);
   const text = "0.070 0.090 0.150";
   const muted = "0.390 0.455 0.560";
   const faint = "0.875 0.900 0.965";
   const veryFaint = "0.965 0.973 0.984";
   const border = "0.820 0.850 0.900";
+  const slate = "0.118 0.161 0.231";
+  const tableFill = template === "basic" ? "1 1 1" : template === "professional" ? slate : template === "modern" ? veryFaint : brand;
+  const tableText = template === "basic" || template === "modern" ? text : "1 1 1";
+  const summaryFill = template === "basic" ? "1 1 1" : veryFaint;
+  const summaryRule = template === "basic" ? text : brand;
   const pages: string[][] = [];
   let commands: string[] = [];
   const footerText = company?.invoice_footer || "Thank you for your business.";
@@ -393,15 +411,16 @@ function buildPdfBase64(inv: any, company: any): string {
     commands = [];
   };
   const addTableHeader = (target: string[], headerY: number) => {
-    target.push(pdfRect(tableX, headerY, 515, 32, brand));
-    target.push(pdfText("ITEM / DESCRIPTION", 50, headerY + 12, 8, "1 1 1", "F2"));
-    target.push(pdfText("QTY / UNIT", 235, headerY + 12, 8, "1 1 1", "F2"));
-    target.push(pdfText("PRICE", 338, headerY + 12, 8, "1 1 1", "F2"));
-    target.push(pdfText("DISC", 405, headerY + 17, 8, "1 1 1", "F2"));
-    target.push(pdfText("(%)", 412, headerY + 7, 8, "1 1 1", "F2"));
-    target.push(pdfText("TAX", 455, headerY + 17, 8, "1 1 1", "F2"));
-    target.push(pdfText("(%)", 461, headerY + 7, 8, "1 1 1", "F2"));
-    target.push(pdfText("TOTAL", 510, headerY + 12, 8, "1 1 1", "F2"));
+    target.push(pdfRect(tableX, headerY, 515, 32, tableFill, template === "basic" ? text : null));
+    if (template === "professional") target.push(pdfRect(tableX, headerY, 5, 32, brand));
+    target.push(pdfText("ITEM / DESCRIPTION", 50, headerY + 12, 8, tableText, "F2"));
+    target.push(pdfText("QTY / UNIT", 235, headerY + 12, 8, tableText, "F2"));
+    target.push(pdfText("PRICE", 338, headerY + 12, 8, tableText, "F2"));
+    target.push(pdfText("DISC", 405, headerY + 17, 8, tableText, "F2"));
+    target.push(pdfText("(%)", 412, headerY + 7, 8, tableText, "F2"));
+    target.push(pdfText("TAX", 455, headerY + 17, 8, tableText, "F2"));
+    target.push(pdfText("(%)", 461, headerY + 7, 8, tableText, "F2"));
+    target.push(pdfText("TOTAL", 510, headerY + 12, 8, tableText, "F2"));
   };
 
   commands.push(pdfText(companyName, 40, 780, 13, text, "F2"));
@@ -409,10 +428,12 @@ function buildPdfBase64(inv: any, company: any): string {
     commands.push(pdfText(shorten(line, 42), 40, 762 - index * 13, 8, muted));
   });
 
-  commands.push(pdfText(noun.toUpperCase(), 425, 775, 24, faint, "F2"));
+  const titleColor = template === "basic" || template === "professional" ? text : template === "modern" ? brand : faint;
+  commands.push(pdfText(noun.toUpperCase(), template === "professional" ? 400 : 425, 775, template === "professional" ? 20 : 24, titleColor, "F2"));
   commands.push(pdfText(`${noun} #:`, 425, 755, 9, text, "F2"));
   commands.push(pdfText(inv.number || "", 478, 755, 9, text));
-  commands.push(pdfRect(40, 716, 515, 1.2, border));
+  commands.push(pdfRect(40, 716, 515, template === "professional" ? 4 : 1.2, template === "basic" ? text : template === "professional" ? slate : border));
+  if (template === "professional") commands.push(pdfRect(40, 716, 515, 1, brand));
 
   commands.push(pdfText("BILL TO", 40, 686, 8, faint, "F2"));
   commands.push(pdfText(customer.name || "Customer", 40, 670, 11, text, "F2"));
@@ -452,7 +473,7 @@ function buildPdfBase64(inv: any, company: any): string {
     const discount = Number(item.discount) || 0;
     const tax = Number(item.tax) || 0;
     const lineTotal = qty * price * (1 - discount / 100);
-    if (itemIndex % 2 === 0) commands.push(pdfRect(tableX, y - 9, 515, 30, "0.985 0.988 0.992"));
+    if (alternateRows && itemIndex % 2 === 1) commands.push(pdfRect(tableX, y - 9, 515, 30, template === "modern" ? "0.945 0.965 0.985" : "0.985 0.988 0.992"));
     commands.push(pdfText(shorten(item.name || "Item", 44), 50, y, 8, text));
     commands.push(pdfText(`${qty}${unit}`, 250, y, 8, text));
     commands.push(pdfText(formatMoneyAscii(currency, price), 332, y, 8, text));
@@ -497,16 +518,16 @@ function buildPdfBase64(inv: any, company: any): string {
   const totalBoxHeight = 120;
   const totalBoxBottom = totalBoxTop - totalBoxHeight;
   let summaryY = (totalBoxTop + totalBoxBottom + (summaryRows.length * 19) + 24) / 2;
-  commands.push(pdfRect(365, totalBoxBottom, 190, totalBoxHeight, veryFaint, border));
+  commands.push(pdfRect(365, totalBoxBottom, 190, totalBoxHeight, summaryFill, border));
   summaryRows.forEach(([label, amount]) => {
     commands.push(pdfText(label, 392, summaryY, 8, muted));
     commands.push(pdfText(formatMoneyAscii(currency, amount), 470, summaryY, 8, amount < 0 ? muted : text, "F2"));
     summaryY -= 19;
   });
-  commands.push(pdfRect(385, summaryY + 5, 150, 1.2, brand));
+  commands.push(pdfRect(385, summaryY + 5, 150, 1.2, summaryRule));
   summaryY -= 24;
   commands.push(pdfText("Total", 402, summaryY, 12, text, "F2"));
-  commands.push(pdfText(formatMoneyAscii(currency, total), 460, summaryY, 12, brand, "F2"));
+  commands.push(pdfText(formatMoneyAscii(currency, total), 460, summaryY, 12, template === "basic" || template === "professional" ? text : brand, "F2"));
 
   finishPage();
   return buildPdfFromPages(pages);

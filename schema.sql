@@ -38,6 +38,9 @@ create table public.company_settings (
     invoice_footer   text,
     brand_color      text default '#4f46e5',
     logo_position    text default 'left',
+    invoice_template text not null default 'tallyo'
+        check (invoice_template in ('tallyo', 'basic', 'modern', 'professional')),
+    alternate_item_rows boolean not null default true,
     updated_at       timestamptz default now()
 );
 

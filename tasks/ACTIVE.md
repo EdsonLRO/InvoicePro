@@ -16,6 +16,26 @@ Validation: complete 26-route-plus-404 website suite, Helper/Analytics/Free Invo
 Release approval: On 2026-09-24 the Owner approved the reviewed app and website changes for production publication.
 Next action: publish through the normal website production workflow and verify the public navigation, footer gap and shared blue CTA presentation
 
+## UX-BRANDING-001 — Curated invoice templates and row styling
+
+Task ID: UX-BRANDING-001
+Title: Let each business choose a clear document template and optional alternating item rows
+Priority: Medium
+Status: Release approved; production deployment in progress
+Phase: Release
+Owner role: Product owner
+Risk level: High release boundary because two owner-scoped `company_settings` preferences require an additive production migration and the transactional email PDF function must render the same selected layout
+Branch: `codex/invoice-template-styles`
+Scope: retain the existing Tallyo layout as the default; add Basic, Modern and Professional document templates; add an on-by-default alternating-item-row preference; provide accessible template choices and a live Branding preview; apply the saved choices to invoice, quote and credit-note previews, browser-downloaded PDFs and emailed PDF attachments
+Research basis: reviewed current Xero and QuickBooks template guidance and Adobe invoice-layout guidance; the bounded design follows the established pattern of curated layouts combined with logo, colour and selected presentation controls rather than a free-form document designer
+Data boundary: add only `invoice_template` and `alternate_item_rows` to the existing owner-scoped `company_settings` row; keep current RLS, grants, Auth, tenant ownership and account export behavior unchanged
+Compatibility boundary: existing businesses default to `tallyo` with alternating rows enabled; invalid or missing values fail safely to those defaults; no invoice totals, tax, payment, reminder, recurring, quote-acceptance or email-recipient behavior changes
+Excluded: free-form template building, custom fonts, per-document template overrides, new vendors or dependencies, Auth/RLS/grant changes, payment/refund/Stripe behavior, secrets, real email and unrelated website work
+Approval boundary: repository and local fictional-data implementation may proceed; stop before applying the migration, deploying `send-document-email`, merging or publishing the app
+Validation: focused static contract, desktop/mobile browser interaction, four distinct generated PDF attachments, alternating-row on/off behavior, unknown-value fallback, email/quote-send regressions, Edge Function frozen-lock type check, isolated preview transport protections and diff hygiene passed; no live database, provider or email action was used
+Release approval: On 2026-09-24 the Owner approved the reviewed app and website changes for production publication.
+Next action: apply only `20260924112357_invoice_template_preferences.sql`, deploy only `send-document-email`, publish app build `2026.09.24.1`, and run bounded production readback without sending email or changing payment, Auth, secret or unrelated provider state
+
 ## WEBSITE-CONTENT-002 — Plain-language workflows and invoice guide
 
 Task ID: WEBSITE-CONTENT-002

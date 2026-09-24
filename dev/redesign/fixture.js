@@ -10,7 +10,7 @@
   const customer = { id: '00000000-0000-4000-8000-000000000002', name: 'Willow & Pine Studio (fictional)', email: 'hello@willowpine.example', address: 'Example address — demonstration only' };
   const item = { name: 'Website maintenance', qty: 1, unit: 'service', price: 200, discount: 0, tax: 20 };
   const tables = {
-    company_settings: [{ user_id: uid, name: 'North & Stone (fictional)', email: user.email, default_currency: 'GBP', invoice_prefix: 'INV-', payment_details: 'Bank transfer instructions — fictional preview only', brand_color: '#4f46e5' }],
+    company_settings: [{ user_id: uid, name: 'North & Stone (fictional)', email: user.email, default_currency: 'GBP', invoice_prefix: 'INV-', payment_details: 'Bank transfer instructions — fictional preview only', brand_color: '#4f46e5', invoice_template: 'tallyo', alternate_item_rows: true }],
     customers: [customer], saved_items: [{ id: '00000000-0000-4000-8000-000000000003', name: item.name, price: 200, description: 'Monthly maintenance service' }],
     invoices: [], recurring_templates: [], audit_events: [],
   };
@@ -62,6 +62,7 @@
       range(a, b) { start = a; end = b + 1; return api; }, limit(n) { end = n; return api; },
       single() { one = true; return api; }, maybeSingle() { one = true; return api; },
       insert(value) { action = 'insert'; payload = value; return api; },
+      upsert(value) { action = 'upsert'; payload = value; return api; },
       update(value) { action = 'update'; payload = value; return api; },
       delete() { action = 'delete'; return api; },
       then(onFulfilled, onRejected) {
@@ -70,6 +71,13 @@
           if (action === 'insert') {
             rows = (Array.isArray(payload) ? payload : [payload]).map(row => ({ ...clone(row), id: crypto.randomUUID(), user_id: uid, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }));
             tables[table].push(...rows);
+          } else if (action === 'upsert') {
+            rows = (Array.isArray(payload) ? payload : [payload]).map(value => {
+              const existing = tables[table].find(row => (value.user_id && row.user_id === value.user_id) || (value.id && row.id === value.id));
+              if (existing) { Object.assign(existing, clone(value)); return existing; }
+              const created = { ...clone(value), id: value.id || crypto.randomUUID(), user_id: value.user_id || uid, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+              tables[table].push(created); return created;
+            });
           } else if (action === 'update' || action === 'delete') {
             if (!filters.length) throw new Error('Preview mutations require an explicit filter');
             if (action === 'update') rows.forEach(row => Object.assign(row, clone(payload)));
