@@ -1,5 +1,13 @@
 # Tallyo Release Readiness Checklist
 
+## Plain-language website and installation guidance — Owner-approved release, 2026-09-24
+
+The Owner reviewed the accumulated local website candidate and approved all changes for publication. The focused release replaces repeated or compressed product wording with clear explanations, adds the concise `/invoice-guide/`, expands the quote-to-payment journey to five accurate steps, clarifies recurring invoices, overdue reminders, deposits, part-payments, final payments and activity history, and makes installation visible throughout the website with illustrated Chrome, Edge, Android and iPhone/iPad guidance.
+
+The complete website suite passes across 26 routes plus 404, including public Helper fail-closed and mock-provider coverage, Analytics activation gates, Free Invoice Maker conversion and one-email consent checks, structured data, links, accessibility and stylesheet budgets. Desktop, 390×844 and 320px visual checks passed for the installation action and guide; the invoice guide and five-step Features workflow passed desktop/mobile review; mobile horizontal movement and absence of page overflow were verified; no browser console error remains.
+
+This release changes only public website source, content, SEO metadata, responsive presentation, tests and authoritative release records. Legal pages, the authenticated app, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund and Stripe objects are excluded. The pre-release website rollback is Cloudflare deployment `ee154bf5-929d-4621-90f9-e05391d66802` from main source `03aab6c`; backend and provider state remain unchanged.
+
 ## Public website redesign — released and verified, 2026-09-23
 
 The Owner reviewed the local website and approved the complete redesign in PR #177, including the simplified route purposes and SEO copy, consistent section spacing, motion and responsive behaviour, the open section-based Free Invoice Maker, the compact site-wide Tallyo Helper, navigation-based Cookie settings and the refreshed Product Tour screenshots. All screenshot records are fictional; the deterministic capture harness blocked external requests.

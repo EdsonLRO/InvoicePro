@@ -83,7 +83,7 @@
       "id": "installation",
       "question": "Can I install Tallyo?",
       "triggers": ["can i install tallyo", "install tallyo", "add tallyo to home screen"],
-      "answer": "Yes. You can install Tallyo from supported desktop and mobile browsers for quick access. The exact browser action may be called Install app or Add to Home Screen.",
+      "answer": "Yes. On Chrome or Edge on a computer, look for the install or app symbol at the right end of the address bar. On Android Chrome, open the three-dot menu and choose Install and create shortcut. On iPhone or iPad Safari, use the Page or Share menu, then Add to Home Screen.",
       "links": [{ "label": "Installation guide", "href": "/help/install-tallyo/" }]
     },
     {

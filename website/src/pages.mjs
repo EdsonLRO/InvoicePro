@@ -31,7 +31,7 @@ const home = `
     <div class="hero-copy" data-hero-copy>
       <p class="hero-badge"><span aria-hidden="true"></span>Invoicing built for UK small businesses</p>
       <h1 id="home-title"><span>Professional invoices.</span><span class="hero-title-accent">Clearer payment tracking.</span><span>Less admin.</span></h1>
-      <p class="hero-lead">Create, send and follow up from one calm workspace — with quotes, recurring invoices and payment progress kept connected.</p>
+      <p class="hero-lead">Create, send and follow up from one calm workspace — with quotes, repeat invoices, reminders and payment updates kept together.</p>
       <div class="cta-row">
         <a class="button button-primary hero-primary-action" id="cta_hero_create_account" data-analytics-placement="hero" data-signup-link href="#">Start with Tallyo <span aria-hidden="true">→</span></a>
         <a class="button button-secondary" id="cta_hero_free_invoice" href="/free-invoice-generator/">Make a free invoice</a>
@@ -69,17 +69,17 @@ const home = `
 
   <section class="home-capability-strip" aria-label="Tallyo workflow highlights">
     <div class="capability-marquee">
-      <div class="capability-marquee-group"><p><span>01</span> Quotes that become invoices</p><p><span>02</span> Recurring invoices and reminders</p><p><span>03</span> Payments and balances together</p><p><span>04</span> Professional branded PDFs</p></div>
-      <div class="capability-marquee-group" aria-hidden="true"><p><span>01</span> Quotes that become invoices</p><p><span>02</span> Recurring invoices and reminders</p><p><span>03</span> Payments and balances together</p><p><span>04</span> Professional branded PDFs</p></div>
+      <div class="capability-marquee-group"><p><span>01</span> Accepted quotes become invoices</p><p><span>02</span> Regular invoices created on schedule</p><p><span>03</span> Deposits and payments recorded</p><p><span>04</span> Reminders you choose to send</p></div>
+      <div class="capability-marquee-group" aria-hidden="true"><p><span>01</span> Accepted quotes become invoices</p><p><span>02</span> Regular invoices created on schedule</p><p><span>03</span> Deposits and payments recorded</p><p><span>04</span> Reminders you choose to send</p></div>
     </div>
   </section>
 
   <section class="section home-benefits" aria-labelledby="benefits-title">
-    <div class="section-heading"><p class="eyebrow">From quote to paid</p><h2 id="benefits-title">The essentials, connected.</h2><p>Keep the customer, document, payment and follow-up in one place.</p></div>
+    <div class="section-heading"><p class="eyebrow">From quote to payment</p><h2 id="benefits-title">See the whole invoicing journey.</h2><p>Keep the customer, document, payments and reminders in one place.</p></div>
     <div class="benefit-grid">
       <article>${icon("01")}<h3>Create with confidence</h3><p>Build branded quotes, invoices and credit notes that are clear for your customers.</p></article>
-      <article>${icon("02")}<h3>Know what is due</h3><p>See paid, outstanding and overdue balances without rebuilding your records elsewhere.</p></article>
-      <article>${icon("03")}<h3>Make repeat work easier</h3><p>Reuse customers and services, then automate recurring invoices when the schedule suits you.</p></article>
+      <article>${icon("02")}<h3>Know what is still to pay</h3><p>Record deposits, part-payments and final payments, then see which invoices are late.</p></article>
+      <article>${icon("03")}<h3>Make regular work easier</h3><p>Reuse customers and services, then let Tallyo create new invoices on the schedule you choose.</p></article>
     </div>
   </section>
 
@@ -91,7 +91,7 @@ const home = `
   <section class="section home-decision-panel" aria-labelledby="home-decision-title">
     <div><p class="eyebrow">A clear next step</p><h2 id="home-decision-title">Try one document free, or keep the whole workflow together.</h2><p>The Free Invoice Maker works without an account. Tallyo Pro saves customers, products and services, documents, payment records and repeat work.</p></div>
     <div class="home-decision-actions"><p><strong>${commercialOffer.free.price}</strong><span>Free Invoice Maker</span><a href="/free-invoice-generator/">Create an invoice</a></p><p><strong>${commercialOffer.pro.monthlyPrice}</strong><span>per month · ${commercialOffer.pro.annualPrice} annually</span><a href="/pricing/">Compare plans</a></p></div>
-    <p class="home-decision-trust"><a href="/security/">Account and data protection</a><span aria-hidden="true">·</span><a href="/product-tour/">See the product in use</a></p>
+    <p class="home-decision-trust"><a href="/invoice-guide/">Read the simple invoice guide</a><span aria-hidden="true">·</span><a href="/product-tour/">See the product in use</a></p>
   </section>
 
   <section class="section section-soft faq-preview" aria-labelledby="faq-preview-title"><div class="section-heading"><p class="eyebrow">Before you start</p><h2 id="faq-preview-title">Three useful answers.</h2></div><div class="faq-list home-faq-list">${faqs.slice(0, 3).map((item) => `<details><summary>${item.question}</summary><p>${item.answer}</p></details>`).join("")}</div><p class="section-link"><a href="/faq/">Read all product questions →</a></p></section>
@@ -99,10 +99,10 @@ const home = `
   ${finalCta({ title: "Ready to make invoicing feel more manageable?", copy: "Start with the free maker or create a Tallyo account when you want your work saved and connected.", secondaryLabel: "Make a free invoice", secondaryHref: "/free-invoice-generator/" })}`;
 
 const productTourChapters = Object.freeze([
-  { id: "overview", label: "Overview", title: "Know what needs attention", copy: "Start with outstanding balances, overdue work and the next useful action.", scenes: ["dashboard"] },
+  { id: "overview", label: "Overview", title: "Know what needs attention", copy: "Start with money still to come in, invoices that are late and the next useful action.", scenes: ["dashboard"] },
   { id: "create", label: "Create & send", title: "Move from customer details to a clear document", copy: "Reuse customers and services, prepare an invoice or quote, then review it before sending.", scenes: ["invoice-editor", "quote", "customers"] },
-  { id: "automate", label: "Automate", title: "Choose what repeats", copy: "Schedule recurring invoices and enable overdue reminders only where they are useful.", scenes: ["recurring", "overdue"] },
-  { id: "track", label: "Track payment", title: "Keep progress with the document", copy: "See payments, remaining balances and recent activity without rebuilding the story elsewhere.", scenes: ["payments", "activity"] },
+  { id: "automate", label: "Repeat & remind", title: "Create regular invoices and chosen reminders", copy: "Set when Tallyo creates each new invoice, choose whether it emails automatically and turn reminders on only for the overdue invoices you want followed up.", scenes: ["recurring", "overdue"] },
+  { id: "track", label: "Payments & history", title: "See what has been paid and what happened", copy: "Record deposits, part-payments and final payments, see what is left, and read the document history in one place.", scenes: ["payments", "activity"] },
   { id: "personalise", label: "Personalise & access", title: "Present your business and protect access", copy: "Apply your branding, manage account protection and use core workflows on a supported phone.", scenes: ["branding", "security", "mobile"] }
 ]);
 
@@ -115,21 +115,22 @@ const productTourChapter = (chapter, chapterIndex) => {
 };
 
 const connectedOutcomeSteps = Object.freeze([
-  ["01", "Quote accepted", "The customer confirms the quote through the secure response page."],
-  ["02", "Invoice created", "Tallyo preserves the accepted quote and creates one linked invoice."],
-  ["03", "Payment tracked", "Full, partial, deposit and connected-card payment progress stays with the invoice."],
-  ["04", "Follow-up stays clear", "Status, delivery, reminders and activity remain connected to the document."]
+  ["01", "Send the quote", "Email the quote with a secure link so the customer can review the work, price and next step."],
+  ["02", "Quote accepted", "The customer enters their name and accepts the quote. Tallyo records who accepted it and when."],
+  ["03", "Invoice created", "Tallyo keeps the accepted quote and creates one linked invoice. If you chose automatic sending before emailing the quote, it sends the invoice too; otherwise the invoice stays ready for your review."],
+  ["04", "Payment tracked", "Record a deposit, part-payment or final payment on the invoice and see the amount still left to pay."],
+  ["05", "Follow-up stays clear", "See when the invoice was sent, when reminders went out and when payments were recorded in one activity history."]
 ]);
 
 const features = `
   <section class="page-hero feature-hero">
-    <div class="feature-hero-copy"><p class="eyebrow">Features</p><h1>Everything you need to move from quote to paid.</h1><p>Tallyo keeps documents, customers, payments and recurring work together in one focused workspace.</p><div class="cta-row"><a class="button button-primary" href="/product-tour/">Explore the product tour</a><a class="button button-secondary" href="/free-invoice-generator/">Make a free invoice</a></div></div>
-    <div class="feature-hero-summary" aria-label="Tallyo workflow summary"><p><span>01</span><strong>Create</strong><small>Quotes, invoices and credit notes</small></p><p><span>02</span><strong>Track</strong><small>Payment, delivery and document status</small></p><p><span>03</span><strong>Automate</strong><small>Recurring invoices and chosen reminders</small></p></div>
+    <div class="feature-hero-copy"><p class="eyebrow">Features</p><h1>Create invoices, follow payments and reduce repeat work.</h1><p>Tallyo keeps quotes, invoices, customers, payments and regular invoicing together, so you can see what to do next.</p><div class="cta-row"><a class="button button-primary" href="/product-tour/">Explore the product tour</a><a class="button button-secondary" href="/free-invoice-generator/">Make a free invoice</a></div></div>
+    <div class="feature-hero-summary" aria-label="Tallyo workflow summary"><p><span>01</span><strong>Create</strong><small>Quotes, invoices and credit notes</small></p><p><span>02</span><strong>Follow</strong><small>Sends, reminders, deposits and payments</small></p><p><span>03</span><strong>Repeat</strong><small>Regular invoices on your chosen schedule</small></p></div>
   </section>
   <section class="section feature-detail-list" aria-label="Tallyo feature groups">${featureGroups.map((group, index) => `<article id="feature-${index + 1}"><div class="feature-number">${String(index + 1).padStart(2, "0")}</div><div><p class="card-label">${group.label}</p><h2>${group.title}</h2><p>${group.description}</p>${list(group.items)}</div></article>`).join("")}</section>
   <section class="section workflow-outcome" aria-labelledby="workflow-title" data-horizontal-flow>
     <div class="workflow-outcome-sticky">
-      <div class="section-heading"><p class="eyebrow">One connected outcome</p><h2 id="workflow-title">From customer approval to a clear payment record.</h2><p>Keep scrolling to follow the work from accepted quote to invoice, payment and follow-up.</p></div>
+      <div class="section-heading"><p class="eyebrow">From quote to payment</p><h2 id="workflow-title">See what happens at every step.</h2><p>Keep scrolling to follow a quote from sending and customer acceptance through to the invoice, payments and follow-up.</p></div>
       <div class="workflow-outcome-viewport" data-horizontal-viewport><div class="workflow-outcome-track" data-horizontal-track>${connectedOutcomeSteps.map(([number, title, copy]) => `<article class="workflow-outcome-step"><span>${number}</span><h3>${title}</h3><p>${copy}</p></article>`).join("")}</div></div>
       <div class="workflow-outcome-progress" aria-hidden="true"><span data-horizontal-progress></span></div>
       <p class="section-link"><a href="/product-tour/">See each supported workflow →</a></p>
@@ -158,8 +159,8 @@ const pricing = `
   ${finalCta({ title: "Choose the route that fits today.", copy: "Make one document free, or create an account for saved and connected invoicing work.", secondary: false })}`;
 
 const security = `
-  <section class="page-hero"><p class="eyebrow">Security</p><h1>Practical controls, described honestly.</h1><p>Tallyo combines confirmed accounts, optional MFA, database access rules and server-side sensitive operations. No system can remove every risk, so this page explains both controls and limitations.</p></section>
-  <section class="section"><div class="security-grid security-grid-three"><article><p class="card-label">Your sign-in</p><h2>Confirm and strengthen access</h2><p>Email confirmation establishes the account. Optional authenticator-app MFA, one-time recovery codes and device sign-out controls provide additional protection.</p></article><article><p class="card-label">Your workspace</p><h2>Keep account records separated</h2><p>Database row-level access rules restrict signed-in accounts to their own workspace records. Private email, payment and service credentials remain server-side.</p></article><article><p class="card-label">Your documents</p><h2>Protect records beyond Tallyo</h2><p>Browser controls reduce common risks, but users must still protect downloaded PDFs, exports and the devices used to access them.</p></article></div></section>
+  <section class="page-hero"><p class="eyebrow">Security</p><h1>Practical account protection, explained clearly.</h1><p>Tallyo confirms account email addresses, offers optional two-step sign-in and keeps sensitive operations on the server. No system can remove every risk, so this page explains both the protection and its limits.</p></section>
+  <section class="section"><div class="security-grid security-grid-three"><article><p class="card-label">Your sign-in</p><h2>Add another sign-in check</h2><p>Confirm your email, then optionally use an authenticator app for two-step sign-in. One-time recovery codes and device sign-out controls help if access changes.</p></article><article><p class="card-label">Your account records</p><h2>Keep each account separate</h2><p>Database rules limit a signed-in account to its own records. Private email, payment and service credentials stay on the server.</p></article><article><p class="card-label">Your documents</p><h2>Protect files you download</h2><p>Tallyo reduces common browser risks, but you still need to protect downloaded PDFs, exports and the devices where you use them.</p></article></div></section>
   <section class="section section-dark security-boundary" aria-labelledby="limits-security-title"><div><p class="eyebrow">Clear boundary</p><h2 id="limits-security-title">Controls reduce risk; they do not remove it.</h2><p>Tallyo does not claim certification or complete security. Activity history supports everyday follow-up but is not a tamper-proof compliance audit log.</p></div><a class="button button-ghost-light" href="/help/account-security/">Set up account protection</a></section>
   ${finalCta({ title: "Review the product before creating an account.", copy: "See the real Tallyo workflows and decide whether the workspace suits your business.", secondaryLabel: "View the product tour", secondaryHref: "/product-tour/" })}`;
 
@@ -184,6 +185,7 @@ const helper = `
 
 const help = `
   <section class="page-hero"><p class="eyebrow">Help Centre</p><h1>Clear guidance for the work you want to finish.</h1><p>Use focused, step-by-step guides based on the current Tallyo product.</p></section>
+  <section class="section section-soft help-start" aria-labelledby="help-start-title"><div><p class="eyebrow">New to invoicing?</p><h2 id="help-start-title">Start with the essentials.</h2><p>Learn what an invoice does, what to include, and how quotes, regular invoices, reminders and payments fit together.</p></div><a class="button button-secondary" href="/invoice-guide/">Read the invoice guide</a></section>
   <section class="section"><div class="help-grid"><a class="helper-help-card" href="/helper/"><span>Ask</span><h2>Use Tallyo Helper</h2><p>${helperCardCopy}</p></a>${helpArticles.map((article, index) => `<a href="/help/${article.slug}/"><span>${String(index + 1).padStart(2, "0")}</span><h2>${article.title}</h2><p>${article.description}</p></a>`).join("")}</div></section>
   <section class="section support-contact" aria-labelledby="support-contact-title"><div class="section-heading"><p class="eyebrow">Contact support</p><h2 id="support-contact-title">Need help from a person?</h2><p>Email <a href="mailto:main@tallyo.co.uk">main@tallyo.co.uk</a> with a clear description of the problem. Never send your password, authenticator code, recovery codes, card details or bank details.</p></div></section>
   `;
@@ -194,10 +196,43 @@ const faq = `
   <section class="section article-next" aria-label="Next steps"><a href="/pricing/">Compare pricing</a><a href="/help/">Open the Help Centre</a></section>`;
 
 const about = `
-  <section class="page-hero"><p class="eyebrow">About Tallyo</p><h1>Invoicing software shaped around everyday small-business work.</h1><p>Tallyo is built to make professional documents, payment follow-up and repeat invoicing feel more manageable for independent operators.</p></section>
+  <section class="page-hero"><p class="eyebrow">About Tallyo</p><h1>Invoicing software shaped around everyday small-business work.</h1><p>Tallyo makes it easier to create professional documents, see what has been paid and handle regular invoices without repeating the same setup.</p></section>
   <section class="section split"><div><p class="eyebrow">Why Tallyo</p><h2>Small businesses need clarity, not another complicated system.</h2><p>Tallyo brings quotes, invoices, customers, payments and recurring work together while keeping the interface focused on the next useful action.</p></div><div class="principles"><p><strong>Straightforward</strong><span>Plain language and a focused workflow.</span></p><p><strong>Honest</strong><span>Real features and limitations, without invented proof.</span></p><p><strong>Protective</strong><span>Account and customer-data controls treated as product requirements.</span></p></div></section>
   <section class="section section-soft" aria-labelledby="audience-title"><div class="section-heading"><p class="eyebrow">Who it serves</p><h2 id="audience-title">Built broadly for UK small businesses.</h2><p>Freelancers, sole traders, consultants, tradespeople and independent service companies can adapt the same core workflow to their work.</p></div></section>
   ${finalCta({ title: "See whether Tallyo fits your day-to-day work.", copy: "Explore the real workflows or create one invoice free before opening an account.", secondaryLabel: "Make a free invoice", secondaryHref: "/free-invoice-generator/" })}`;
+
+const invoiceGuide = `
+  <nav class="breadcrumbs" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li><li aria-current="page">Invoice guide</li></ol></nav>
+  <section class="page-hero invoice-guide-hero"><div><p class="eyebrow">A simple invoice guide</p><h1>What is an invoice, and how does it work?</h1><p>An invoice is a document that tells a customer what they bought, how much they owe, how to pay and when payment is due.</p></div><aside aria-label="Invoice at a glance"><p class="card-label">At a glance</p><p><strong>What</strong><span>The work, product or service supplied</span></p><p><strong>How much</strong><span>The total and any tax or discount</span></p><p><strong>When</strong><span>The issue date and payment due date</span></p><p><strong>How to pay</strong><span>Your payment instructions</span></p></aside></section>
+
+  <section class="section section-soft" aria-labelledby="invoice-journey-title">
+    <div class="section-heading"><p class="eyebrow">The basic journey</p><h2 id="invoice-journey-title">From agreed work to recorded payment.</h2><p>You may not need every step, but this is the usual flow for a small service business.</p></div>
+    <div class="benefit-grid invoice-journey-grid">
+      <article>${icon("01")}<h3>Agree the work</h3><p>Use a quote when the customer should approve the work and price before you invoice them.</p></article>
+      <article>${icon("02")}<h3>Send the invoice</h3><p>List what you supplied, the price, important dates and clear payment instructions.</p></article>
+      <article>${icon("03")}<h3>Record what arrives</h3><p>Add a deposit, part-payment or final payment so the amount still left is always clear.</p></article>
+      <article>${icon("04")}<h3>Follow up if needed</h3><p>If the due date passes and money is still owed, the invoice is overdue. Send a reminder when appropriate.</p></article>
+    </div>
+  </section>
+
+  <section class="section invoice-tool-guide" aria-labelledby="invoice-tools-title">
+    <div class="section-heading"><p class="eyebrow">Tallyo tools in plain English</p><h2 id="invoice-tools-title">Use only what your work needs.</h2></div>
+    <div class="invoice-tool-grid">
+      <article><h3>Quotes</h3><p>Share the proposed work and price before the customer agrees. When they accept, Tallyo keeps the quote and creates one linked invoice.</p></article>
+      <article><h3>Invoices</h3><p>Ask for payment with a clear record of the customer, items, amount, dates and how to pay.</p></article>
+      <article><h3>Recurring invoices</h3><p>Tell Tallyo when to create the next invoice for regular work. Choose whether each one is emailed automatically or left for review.</p></article>
+      <article><h3>Overdue reminders</h3><p>Choose which late invoices receive reminders. Passing the due date alone does not make Tallyo send one.</p></article>
+      <article><h3>Deposits and part-payments</h3><p>Record money as it arrives. Tallyo updates the paid amount and shows what the customer still owes.</p></article>
+      <article><h3>Activity history</h3><p>See when the document was created or sent, when reminders went out and when payments were recorded.</p></article>
+    </div>
+  </section>
+
+  <section class="section split invoice-checklist" aria-labelledby="invoice-details-title">
+    <div><p class="eyebrow">Before you send</p><h2 id="invoice-details-title">Include the details your customer needs.</h2><p>A clear invoice normally includes a unique invoice number, your business and customer details, the issue and due dates, a description of the work, the amounts and tax where relevant, and instructions for paying.</p></div>
+    <div><p>Requirements can vary, especially for VAT-registered businesses. Check the <a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">current GOV.UK invoice requirements</a> before relying on a template.</p><p>Tallyo provides invoicing tools, not legal, tax or accounting advice.</p></div>
+  </section>
+
+  ${finalCta({ title: "Ready to create a clear invoice?", copy: "Make one free in your browser, or explore how Tallyo keeps invoices, payments and reminders together.", secondaryLabel: "See the product tour", secondaryHref: "/product-tour/" })}`;
 
 const marketingOverviewForm = siteConfig.marketingOverviewEnabled ? `
   <form class="generator-overview-form" data-overview-form novalidate>
@@ -220,8 +255,8 @@ const invoiceConversionDialog = `
     <ul class="generator-conversion-features">
       <li>Saved customers and items</li>
       <li>Recurring invoices</li>
-      <li>Automatic overdue reminders</li>
-      <li>Invoice and payment-status tracking</li>
+      <li>Reminders for overdue invoices you choose</li>
+      <li>Deposits, part-payments and final payments</li>
       <li>Online payments through your connected Stripe account</li>
     </ul>
     <p class="generator-conversion-price"><strong>&pound;8 monthly</strong><span>or &pound;80 annually</span></p>
@@ -240,7 +275,7 @@ const generatorPage = (defaultType) => {
   const lowerType = defaultType.toLowerCase();
   const isInvoice = defaultType === "Invoice";
   const guidance = isInvoice
-    ? `<h2 id="generator-guidance-title">Before you send the invoice</h2><p>Check the invoice number, issue date, supply date when relevant, customer details, due date and payment instructions.</p><p>VAT-registered businesses may need additional information. This free maker does not produce the required sterling VAT totals for foreign-currency VAT invoices.</p><p><a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">Read the current GOV.UK invoice requirements</a>. Tallyo does not provide tax, legal or accounting advice.</p>`
+    ? `<h2 id="generator-guidance-title">Before you send the invoice</h2><p>Check the invoice number, issue date, supply date when relevant, customer details, due date and payment instructions.</p><p>VAT-registered businesses may need additional information. This free maker does not produce the required sterling VAT totals for foreign-currency VAT invoices.</p><p><a href="/invoice-guide/">Read the simple invoice guide</a> or check the <a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">current GOV.UK invoice requirements</a>. Tallyo does not provide tax, legal or accounting advice.</p>`
     : `<h2 id="generator-guidance-title">Before you send the quote</h2><p>Describe the work clearly, confirm the price and tax treatment, and set a realistic valid-until date.</p><p>Add any scope, exclusions or payment expectations the customer should understand before deciding.</p><p>A quote records what you propose. It does not replace advice about contracts, tax or your legal obligations.</p>`;
   const explainer = isInvoice
     ? `<section class="section generator-explainer" aria-labelledby="generator-explainer-title"><div class="section-heading"><p class="eyebrow">A clearer invoice</p><h2 id="generator-explainer-title">Include the details your customer needs to pay.</h2></div><div><article><h3>Use a unique number</h3><p>Give every invoice a reference you can identify later and keep the sequence consistent in your own records.</p></article><article><h3>Make the dates clear</h3><p>Show when the invoice was issued, when payment is due and, where relevant, when the goods or services were supplied.</p></article><article><h3>Check tax and payment details</h3><p>Confirm the applicable tax treatment and tell the customer how to pay before downloading the PDF.</p></article></div></section>`
@@ -302,15 +337,16 @@ const generatorPage = (defaultType) => {
 };
 
 const foundationPages = [
-  { route: "/", output: "index.html", title: "Professional invoices. Clearer payment tracking. Less admin.", description: "Tallyo helps UK small businesses create professional invoices and quotes, track payments and automate recurring invoicing work.", content: home, schema: "software" },
-  { route: "/features/", output: "features/index.html", title: "Invoicing features for small businesses", description: "Explore Tallyo features for invoices, quotes, payment tracking, recurring work, reminders, customers and business records.", content: features, schema: "webpage" },
-  { route: "/product-tour/", output: "product-tour/index.html", title: "Tallyo product tour", description: "Tour supported Tallyo workflows for documents, customers, payments, recurring invoices, activity, branding and account protection.", content: productTour, schema: "webpage" },
+  { route: "/", output: "index.html", title: "Invoice software for UK small businesses", description: "Create professional invoices and quotes, record deposits and payments, repeat regular invoices and send chosen overdue reminders with Tallyo.", content: home, schema: "software" },
+  { route: "/features/", output: "features/index.html", title: "Invoice, quote and payment tracking features", description: "Explore Tallyo tools for invoices, quotes, recurring invoices, overdue reminders, deposits, payment tracking and activity history.", content: features, schema: "webpage" },
+  { route: "/product-tour/", output: "product-tour/index.html", title: "Tallyo invoice software product tour", description: "See how Tallyo creates invoices and quotes, repeats regular invoices, records deposits and payments, sends reminders and keeps activity history.", content: productTour, schema: "webpage" },
   { route: "/pricing/", output: "pricing/index.html", title: "Tallyo pricing — Free Invoice Maker and Tallyo Pro", description: pricingDescription, content: pricing, schema: "webpage" },
   { route: "/security/", output: "security/index.html", title: "How Tallyo protects account access", description: "Learn about Tallyo account, data-access, payment and browser security controls, with honest limitations.", content: security, schema: "webpage" },
   { route: "/helper/", output: "helper/index.html", title: "Tallyo Helper", description: "Ask Tallyo Helper for reviewed public guidance about current product features, payments, documents, installation and account protection.", content: helper, schema: "webpage", helper: true, scripts: ["/assets/helper.js"] },
-  { route: "/help/", output: "help/index.html", title: "Tallyo Help Centre", description: "Find step-by-step guidance for Tallyo documents, payments, recurring work, account protection, delivery and installation.", content: help, schema: "webpage" },
-  { route: "/faq/", output: "faq/index.html", title: "Tallyo frequently asked questions", description: "Answers about Tallyo invoices, quotes, recurring work, payment tracking, pricing, security, installation and internet access.", content: faq, schema: "faq" },
-  { route: "/about/", output: "about/index.html", title: "About Tallyo", description: "Learn why Tallyo is building a straightforward invoicing and business-records workspace for UK small businesses.", content: about, schema: "webpage" },
+  { route: "/help/", output: "help/index.html", title: "Tallyo Help Centre", description: "Find clear step-by-step guidance for invoices, quotes, recurring invoices, overdue reminders, deposits, payments and account access.", content: help, schema: "webpage" },
+  { route: "/faq/", output: "faq/index.html", title: "Tallyo frequently asked questions", description: "Plain answers about invoices, quotes, recurring invoices, reminders, deposits, payment tracking, pricing, security and access.", content: faq, schema: "faq" },
+  { route: "/about/", output: "about/index.html", title: "About Tallyo", description: "Learn why Tallyo is building straightforward invoice software for UK small businesses, sole traders and independent service companies.", content: about, schema: "webpage" },
+  { route: "/invoice-guide/", output: "invoice-guide/index.html", title: "What is an invoice? A simple UK small-business guide", description: "Learn what an invoice is, what to include, and how quotes, recurring invoices, reminders, deposits and payment tracking fit together.", content: invoiceGuide, schema: "webpage", breadcrumbs: [{ name: "Home", path: "/" }, { name: "Invoice guide", path: "/invoice-guide/" }] },
   { route: "/privacy/", output: "privacy/index.html", title: "Tallyo Privacy Notice", description: "Read how Tallyo uses, shares, protects and retains personal information and how to exercise your data-protection rights.", content: privacyNotice, schema: "webpage" },
   { route: "/cookies/", output: "cookies/index.html", title: "Tallyo Cookie Notice", description: "Read about Tallyo's necessary storage, optional Google Analytics and how to change your Analytics choice.", content: cookieNotice, schema: "webpage" },
   { route: "/data-processing-terms/", output: "data-processing-terms/index.html", title: "Tallyo Business-User Data Processing Terms", description: "Read the data-processing terms that form part of the Tallyo account agreement for UK business users.", content: dataProcessingTerms, schema: "webpage" },

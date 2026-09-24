@@ -1,3 +1,5 @@
+import { installationSteps } from "./content.mjs";
+
 const escapeHtml = (value) => String(value)
   .replaceAll("&", "&amp;")
   .replaceAll("<", "&lt;")
@@ -9,7 +11,7 @@ export const list = (items) => `<ul class="check-list">${items.map((item) => `<l
 export const finalCta = ({
   eyebrow = "Ready when you are",
   title = "Bring your invoicing work into one clear workspace.",
-  copy = "Create professional documents, track payments and spend less time repeating the same setup.",
+  copy = "Create professional documents, see what has been paid and spend less time repeating the same setup.",
   primaryLabel = "Create account",
   secondary = true,
   secondaryLabel = "Explore features",
@@ -64,10 +66,28 @@ export const productDemo = (scene, index) => `
     <figcaption>${scene.image ? "Product screenshot using fictional demonstration data." : "Illustrated product view using fictional data. The layout is simplified for this tour."}</figcaption>
   </figure>`;
 
+const installSymbol = `<svg class="install-symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10"></path><path d="m8.5 9.5 3.5 3.5 3.5-3.5"></path><path d="M5 16.5v2A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg>`;
+const shareSymbol = `<svg class="install-symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3"></path><path d="m8.5 6.5 3.5-3.5 3.5 3.5"></path><path d="M7 10H5.5A1.5 1.5 0 0 0 4 11.5v7A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5H17"></path></svg>`;
+
+const installDeviceVisuals = Object.freeze([
+  `<div class="browser-install-demo" aria-label="Chrome address bar with the install symbol highlighted"><div class="browser-install-top"><span class="browser-mark">C</span><span class="browser-address">app.tallyo.co.uk</span><span class="browser-install-target">${installSymbol}<small>Install</small></span><span class="browser-menu-dots" aria-hidden="true">⋮</span></div><p>Look at the right end of the address bar.</p></div>`,
+  `<div class="browser-install-demo" aria-label="Microsoft Edge address bar with the App available symbol highlighted"><div class="browser-install-top"><span class="browser-mark browser-mark-edge">E</span><span class="browser-address">app.tallyo.co.uk</span><span class="browser-install-target">${installSymbol}<small>App available</small></span><span class="browser-menu-dots" aria-hidden="true">⋯</span></div><p>Use the highlighted symbol, or the three-dot menu.</p></div>`,
+  `<div class="phone-install-demo" aria-label="Android Chrome menu with Install and create shortcut highlighted"><div class="phone-browser-bar"><span class="browser-address">app.tallyo.co.uk</span><span class="browser-menu-target" aria-hidden="true">⋮</span></div><div class="phone-browser-menu"><span>New tab</span><strong>${installSymbol} Install and create shortcut</strong><span>Share</span></div></div>`,
+  `<div class="phone-install-demo safari-install-demo" aria-label="Safari Share button and Add to Home Screen action highlighted"><div class="phone-browser-bar"><span class="browser-address">app.tallyo.co.uk</span><span class="browser-install-target">${shareSymbol}<small>Share</small></span></div><div class="phone-browser-menu"><span>Copy</span><strong><span class="home-screen-plus" aria-hidden="true">＋</span> Add to Home Screen</strong><span>Add Bookmark</span></div></div>`
+]);
+
+const installVisualGuide = `
+  <section class="install-visual-guide" data-install-guide aria-labelledby="install-device-title">
+    <div class="section-heading"><p class="eyebrow">Where to click</p><h2 id="install-device-title">Choose the browser on your device.</h2><p>The highlighted symbol or menu item is the one to select.</p></div>
+    <div class="install-device-grid">${installationSteps.map(([title, copy], index) => `<article class="install-device-card"><p class="card-label">${String(index + 1).padStart(2, "0")}</p><h3>${escapeHtml(title)}</h3>${installDeviceVisuals[index]}<p>${escapeHtml(copy)}</p></article>`).join("")}</div>
+    <p class="install-official-links">Browser menus can move after an update. Check the current <a href="https://support.google.com/chrome/answer/9658361?hl=en-GB">Chrome web-app guide</a>, <a href="https://support.microsoft.com/en-us/edge/install-manage-or-uninstall-apps-in-microsoft-edge">Microsoft Edge guide</a> or <a href="https://support.apple.com/guide/iphone/open-as-web-app-iphea86e5236/ios">Apple guide</a> if your screen looks different.</p>
+  </section>`;
+
 export const helpArticlePage = (article) => `
   ${breadcrumbs([{ label: "Home", href: "/" }, { label: "Help", href: "/help/" }, { label: article.title }])}
   <article class="article-shell">
     <header class="article-header"><p class="eyebrow">Tallyo guide</p><h1>${escapeHtml(article.title)}</h1><p>${escapeHtml(article.description)}</p></header>
+    ${article.slug === "install-tallyo" ? installVisualGuide : ""}
     <div class="article-layout">
       <div>
         <h2>Step by step</h2>
@@ -81,6 +101,6 @@ export const helpArticlePage = (article) => `
 export const industryLandingPage = (industry) => `
   ${breadcrumbs([{ label: "Home", href: "/" }, { label: "Industries", href: "/#industries" }, { label: industry.name }])}
   <section class="page-hero industry-hero"><p class="eyebrow">Tallyo for ${escapeHtml(industry.name)}</p><h1>Keep invoicing work clear from first document to payment.</h1><p>${escapeHtml(industry.summary)}</p><p><a class="button button-primary" data-analytics-placement="hero" data-signup-link href="#">Create account</a> <a class="button button-secondary" href="/product-tour/">See the product tour</a></p></section>
-  <section class="section split" aria-labelledby="industry-focus-${escapeHtml(industry.slug)}"><div><p class="eyebrow">A focused workflow</p><h2 id="industry-focus-${escapeHtml(industry.slug)}">Useful invoicing tools for the way you work.</h2><p>Tallyo connects customers, documents, payment status and repeat work without claiming to replace specialist trade or accounting software.</p></div>${list(industry.focus)}</section>
-  <section class="section section-soft" aria-labelledby="industry-outcome-${escapeHtml(industry.slug)}"><div class="section-heading"><p class="eyebrow">The connected outcome</p><h2 id="industry-outcome-${escapeHtml(industry.slug)}">Quote → Invoice → Payment → Follow-up</h2><p>Use the parts that fit your work: prepare a quote, convert agreed work, request payment and keep the result with the document.</p></div><p class="section-link"><a href="/features/">Explore every supported feature →</a></p></section>
+  <section class="section split" aria-labelledby="industry-focus-${escapeHtml(industry.slug)}"><div><p class="eyebrow">A focused workflow</p><h2 id="industry-focus-${escapeHtml(industry.slug)}">Useful invoicing tools for the way you work.</h2><p>Tallyo keeps customers, documents, payments and regular work together without claiming to replace specialist trade or accounting software.</p></div>${list(industry.focus)}</section>
+  <section class="section section-soft" aria-labelledby="industry-outcome-${escapeHtml(industry.slug)}"><div class="section-heading"><p class="eyebrow">From quote to payment</p><h2 id="industry-outcome-${escapeHtml(industry.slug)}">Send a quote. Create the invoice. Record payment. Follow up.</h2><p>Use the parts that fit your work and see every important update with the document it belongs to.</p></div><p class="section-link"><a href="/features/">Explore every supported feature →</a></p></section>
   ${finalCta()}`;

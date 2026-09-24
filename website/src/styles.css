@@ -59,7 +59,15 @@ p { color: var(--slate-600); }
 .brand-wordmark-dark img { position: absolute; inset: 0; width: 100%; height: auto; }
 .brand-wordmark-dark-base { filter: brightness(0) saturate(100%) invert(8%) sepia(29%) saturate(1602%) hue-rotate(198deg) brightness(87%) contrast(100%); }
 .brand-wordmark-dark-colour { clip-path: inset(0 70% 0 0); }
-.menu-button { display: grid; width: 2.75rem; height: 2.75rem; place-content: center; gap: 0.27rem; border: 1px solid var(--slate-300); border-radius: 0.75rem; background: var(--white); cursor: pointer; }
+.menu-button { display: grid; width: 2.75rem; height: 2.75rem; flex: 0 0 2.75rem; place-content: center; gap: 0.27rem; border: 1px solid var(--slate-300); border-radius: 0.75rem; background: var(--white); cursor: pointer; }
+.header-install-shortcut{display:inline-flex;min-height:2.75rem;margin-left:auto;align-items:center;gap:.38rem;padding:.55rem .68rem;border:1px solid rgba(70,88,235,.28);border-radius:.75rem;color:var(--blue-600);background:rgba(235,238,255,.74);font-size:.82rem;font-weight:780;text-decoration:none}
+.header-install-shortcut:hover { background: var(--blue-100); }
+.header-install-shortcut svg { width: 1.05rem; height: 1.05rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+@media (max-width: 22rem) {
+  .header-inner { gap: 0.5rem; }
+  .header-install-shortcut { width: 2.75rem; min-height: 2.75rem; flex: 0 0 2.75rem; justify-content: center; padding: 0; }
+  .header-install-shortcut span { display: none; }
+}
 .menu-button i { display: block; width: 1.1rem; height: 2px; background: var(--navy-900); transition: transform 160ms ease, opacity 160ms ease; }
 .menu-button[aria-expanded="true"] i:nth-of-type(1) { transform: translateY(6px) rotate(45deg); }
 .menu-button[aria-expanded="true"] i:nth-of-type(2) { opacity: 0; }
@@ -70,6 +78,9 @@ p { color: var(--slate-600); }
 .nav-links a, .login-link { padding: 0.78rem 0.85rem; border-radius: 0.65rem; color: var(--slate-700); text-decoration: none; font-size: 0.92rem; font-weight: 680; transition: color 180ms ease, background 180ms ease, opacity 180ms ease; }
 .nav-links a:hover, .login-link:hover { background: var(--slate-100); color: var(--navy-900); }
 .nav-actions { margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px solid var(--slate-200); }
+.nav-install-link { display: inline-flex; min-height: 2.75rem; align-items: center; gap: .55rem; padding: 0.65rem 0.85rem; border: 1px solid rgba(70,88,235,0.24); border-radius: 0.75rem; color: var(--blue-600); background: rgba(235,238,255,0.66); font-size: 0.92rem; font-weight: 760; text-decoration: none; transition: border-color 180ms ease, background 180ms ease, transform 180ms ease; }
+.nav-install-link:hover, .nav-install-link[aria-current="page"] { border-color: rgba(70,88,235,0.42); background: var(--blue-100); transform: translateY(-1px); }
+.nav-install-link svg { width: 1.2rem; height: 1.2rem; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.75; }
 .nav-cookie-settings { display: flex; min-height: 2.75rem; align-items: center; gap: 0.65rem; padding: 0.65rem 0.85rem; border: 0; border-radius: 0.65rem; color: var(--slate-700); background: transparent; cursor: pointer; font-weight: 680; text-align: left; }
 .nav-cookie-settings:hover { color: var(--navy-900); background: var(--slate-100); }
 .nav-cookie-settings svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
@@ -202,6 +213,24 @@ main > .section { margin-top: var(--layout-gap); }
 .security-points span, .principles span { color: #cbd3e5; }
 .text-link-light { color: var(--white); font-weight: 750; }
 .split { display: grid; gap: 1.5rem; align-items: center; }
+.help-start { display: grid; gap: var(--layout-gap); align-items: center; }
+.help-start h2, .help-start p:last-child { margin-bottom: 0; }
+.help-start .button { justify-self: start; }
+.invoice-guide-hero { display: grid; gap: var(--layout-gap); align-items: end; }
+.invoice-guide-hero h1 { max-width: 15ch; }
+.invoice-guide-hero > div > p:last-child { max-width: 42rem; font-size: clamp(1.08rem, 2.1vw, 1.3rem); }
+.invoice-guide-hero aside { padding: 1.15rem; border: 1px solid var(--slate-200); border-radius: var(--radius-md); background: linear-gradient(145deg, var(--white), rgba(233,235,255,0.55)); }
+.invoice-guide-hero aside > p:not(.card-label) { display: grid; grid-template-columns: 6.2rem minmax(0, 1fr); gap: 0.75rem; margin: 0; padding: 0.62rem 0; border-bottom: 1px solid var(--slate-200); }
+.invoice-guide-hero aside > p:last-child { border-bottom: 0; }
+.invoice-guide-hero aside strong { color: var(--navy-900); }
+.invoice-journey-grid { grid-template-columns: 1fr; }
+.invoice-tool-grid { display: grid; gap: var(--layout-gap); }
+.invoice-tool-grid article { padding: 1.15rem; border: 1px solid var(--slate-200); border-radius: var(--radius-md); background: var(--white); }
+.invoice-tool-grid article > :last-child { margin-bottom: 0; }
+.invoice-tool-grid h3 { margin-bottom: 0.45rem; }
+.invoice-checklist { align-items: start; }
+.invoice-checklist > div { padding: 1.15rem; border: 1px solid var(--slate-200); border-radius: var(--radius-md); background: var(--white); }
+.invoice-checklist > div > :last-child { margin-bottom: 0; }
 .device-stack { position: relative; min-height: 18rem; }
 .device { position: absolute; display: block; border: 7px solid var(--navy-900); background: linear-gradient(145deg, var(--blue-100), var(--mint-100)); box-shadow: var(--shadow-soft); }
 .desktop { inset: 1rem 0 3rem; border-radius: 0.8rem; }
@@ -342,6 +371,29 @@ main > .section { margin-top: var(--layout-gap); }
 .article-note { padding: 1.25rem; border: 1px solid var(--slate-200); border-radius: var(--radius-md); background: var(--slate-100); }
 .article-note h2 { font-size: 1.35rem; }
 .article-note a { color: var(--blue-600); font-weight: 750; }
+.install-visual-guide{margin-bottom:var(--layout-gap);padding:clamp(1.25rem,3vw,2.25rem);border:1px solid rgba(181,190,210,.55);border-radius:2rem;background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(235,238,255,.64));box-shadow:0 18px 48px rgba(26,39,69,.08)}
+.install-visual-guide .section-heading { margin-bottom: var(--layout-gap); }
+.install-device-grid { display: grid; gap: var(--layout-gap); }
+.install-device-card{min-width:0;padding:1.1rem;border:1px solid rgba(181,190,210,.58);border-radius:var(--radius-md);background:rgba(255,255,255,.9);box-shadow:0 10px 26px rgba(26,39,69,.06)}
+.install-device-card h3 { margin-bottom: 0.8rem; font-size: 1.25rem; }
+.install-device-card > p:last-child { margin-bottom: 0; }
+.browser-install-demo, .phone-install-demo { margin: 0 0 0.9rem; overflow: hidden; border: 1px solid var(--slate-200); border-radius: 1rem; background: var(--slate-100); }
+.browser-install-top,.phone-browser-bar{display:flex;min-width:0;align-items:center;gap:.45rem;padding:.65rem;background:var(--white)}
+.browser-mark { display: grid; width: 1.7rem; height: 1.7rem; flex: 0 0 auto; place-items: center; border-radius: 50%; color: var(--white); background: linear-gradient(135deg, #4f5ee8, #20b98b); font-size: 0.68rem; font-weight: 850; }
+.browser-mark-edge { background: linear-gradient(135deg, #0c75d8, #18bba5); }
+.browser-address{min-width:0;flex:1;overflow:hidden;padding:.42rem .55rem;border:1px solid var(--slate-200);border-radius:999px;color:var(--slate-600);background:var(--slate-100);font-size:.72rem;text-overflow:ellipsis;white-space:nowrap}
+.browser-install-target{display:inline-flex;min-height:2.05rem;flex:0 0 auto;align-items:center;gap:.32rem;padding:.32rem .48rem;border:1px solid rgba(70,88,235,.38);border-radius:.65rem;color:var(--blue-600);background:var(--blue-100);font-weight:780}
+.browser-install-target small { font-size: 0.68rem; white-space: nowrap; }
+.install-symbol { width: 1.15rem; height: 1.15rem; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.8; }
+.browser-menu-dots, .browser-menu-target { flex: 0 0 auto; color: var(--navy-900); font-size: 1.25rem; font-weight: 800; }
+.browser-install-demo > p { margin: 0; padding: 0.55rem 0.75rem; color: var(--slate-600); font-size: 0.76rem; }
+.phone-install-demo { max-width: 25rem; background: var(--white); }
+.phone-browser-menu{display:grid;gap:.3rem;margin:.5rem;padding:.55rem;border:1px solid var(--slate-200);border-radius:.8rem;background:var(--white);box-shadow:0 10px 24px rgba(26,39,69,.08)}
+.phone-browser-menu span,.phone-browser-menu strong{display:flex;min-height:2.25rem;align-items:center;gap:.45rem;padding:.42rem .6rem;border-radius:.55rem;font-size:.78rem}
+.phone-browser-menu strong{border:1px solid rgba(70,88,235,.28);color:var(--blue-600);background:var(--blue-100)}
+.home-screen-plus { display: grid !important; width: 1.2rem; min-height: 1.2rem !important; padding: 0 !important; place-items: center; border: 1px solid currentColor; border-radius: 0.28rem !important; font-size: 0.9rem !important; line-height: 1; }
+.install-official-links{margin:var(--layout-gap) 0 0;color:var(--slate-600);font-size:.86rem}
+.install-official-links a{color:var(--blue-600);font-weight:720}
 .legal-hero h1 { max-width: 22ch; }
 .legal-document { width: min(58rem, calc(100% - 2rem)); margin: 0 auto; padding: 0 0 3rem; }
 .legal-document section { padding: 1.15rem 0; border-top: 1px solid var(--slate-200); }
@@ -719,6 +771,7 @@ main > .section { margin-top: var(--layout-gap); }
 @media (min-width: 38rem) {
   :root { --page: min(74rem, calc(100% - 3rem)); }
   .metric-grid, .benefit-grid, .industry-grid, .security-grid, .help-grid, .install-grid { grid-template-columns: repeat(2, 1fr); }
+  .invoice-tool-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home-hero .metric-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .home-capability-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mini-content { padding: 2rem; }
@@ -746,6 +799,7 @@ main > .section { margin-top: var(--layout-gap); }
 }
 
 @media (min-width: 50rem) {
+  .install-device-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .generator-hero { display: grid; grid-template: "label label" auto "title copy" auto / minmax(0,1fr) minmax(24rem,.8fr); gap: 0 3rem; align-items: end; }
   .generator-hero .eyebrow { grid-area: label; }
   .generator-hero h1 { grid-area: title; }
@@ -757,6 +811,10 @@ main > .section { margin-top: var(--layout-gap); }
   .benefit-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
   .plan-grid.plan-grid-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .section-dark, .split, .limitations { grid-template-columns: repeat(2, 1fr); }
+  .help-start { grid-template-columns: minmax(0, 1fr) auto; }
+  .invoice-guide-hero { grid-template-columns: minmax(0, 1.08fr) minmax(20rem, 0.72fr); }
+  .invoice-journey-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .invoice-tool-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .home-decision-panel { grid-template-columns: minmax(0,1.05fr) minmax(24rem,0.95fr); }
   .home-decision-trust { grid-column: 1 / -1; }
   .security-grid-three, .generator-explainer > div:last-child { grid-template-columns: repeat(3, minmax(0,1fr)); }
@@ -782,11 +840,13 @@ main > .section { margin-top: var(--layout-gap); }
 @media (min-width: 72rem) {
   body.menu-open { overflow: auto; }
   .menu-button { display: none; }
+  .header-install-shortcut { display: none; }
   .primary-nav { position: static; display: flex; flex: 1; align-items: center; justify-content: flex-end; max-height: none; overflow: visible; padding: 0; border: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
   .brand, .nav-links, .nav-actions { flex-shrink: 0; }
   .nav-links, .nav-actions { flex-direction: row; flex-wrap: nowrap; align-items: center; white-space: nowrap; }
   .nav-links { position: absolute; left: 50%; gap: 0.08rem; transform: translateX(-50%); }
-  .nav-actions { margin: 0 0.65rem 0 0; padding: 0; border: 0; }
+  .nav-actions { gap: 0.12rem; margin: 0 0.65rem 0 0; padding: 0; border: 0; }
+  .nav-install-link { min-height: 2.45rem; padding: 0.42rem 0.58rem; border-radius: 999px; font-size: 0.82rem; }
   .nav-cookie-settings { width: 2.45rem; min-height: 2.45rem; justify-content: center; padding: 0; border-radius: 50%; }
   .nav-cookie-settings span { display: none; }
   .nav-links a, .login-link { position: relative; padding-inline: 0.72rem; border-radius: 999px; letter-spacing: -0.01em; white-space: nowrap; }

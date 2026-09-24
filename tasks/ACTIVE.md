@@ -1,5 +1,22 @@
 # Active programme: COMM-001 commercial launch integration
 
+## WEBSITE-CONTENT-002 — Plain-language workflows and invoice guide
+
+Task ID: WEBSITE-CONTENT-002
+Title: Explain Tallyo's workflows clearly, add a concise invoice guide and make installation easy to find
+Priority: Medium
+Status: Owner-approved for release on 2026-09-24
+Phase: Release
+Owner role: Product owner
+Risk level: Medium; public website content, SEO metadata and layout only
+Branch: `codex/website-plain-language-invoice-guide`
+Scope: replace compressed finance and product terminology across the non-legal public website; expand the horizontal quote-to-payment guide to Send quote → Quote accepted → Invoice created → Payment tracked → Follow-up stays clear; explain optional automatic invoice sending accurately; clarify recurring invoices, overdue invoices and reminders, deposits, part-payments, final payments and activity history; add a concise `/invoice-guide/` page linked from Home, Help, the Free Invoice Maker and the footer; refine page titles and descriptions around real search intent; add a visible site-wide Install Tallyo navigation action and an illustrated `/help/install-tallyo/` guide showing the exact desktop, Android and iPhone/iPad browser controls
+Product boundary: accepted quotes are preserved and create one linked invoice; automatic invoice email remains optional and must be selected before the quote is sent; overdue reminders remain opt-in; payment records do not themselves move money; activity history remains an everyday product record rather than a certified audit log
+Excluded: legal-page copy, authenticated application source/runtime, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund, Stripe object and unrelated website work
+Validation: complete website suite for 26 routes plus 404; public Helper fail-closed and mock-provider checks; Analytics activation-gate checks; Free Invoice Maker conversion and one-email consent checks; desktop, 390×844 and 320px visual review of the installation guide and persistent install action; desktop and 390×844 visual review of the invoice guide; desktop and mobile review of the five-step Features workflow; verified mobile horizontal card movement; no browser console errors; plain-language residue scan and diff hygiene passed
+Approval boundary: the Owner reviewed the accumulated local website changes and approved all of them for publication on 2026-09-24. Approval authorises commit, push, the protected pull-request workflow, merge, normal Cloudflare Pages publication and bounded public validation without another approval request for this scope. If validation fails, restore website deployment `ee154bf5-929d-4621-90f9-e05391d66802` from main source `03aab6c`; backend, app runtime and provider state remain unchanged.
+Next action: commit and push the approved candidate, merge through the protected pull-request workflow, verify the resulting production website deployment and record the release
+
 ## WEBSITE-REDESIGN-001 — Public website redesign and content consolidation
 
 Task ID: WEBSITE-REDESIGN-001

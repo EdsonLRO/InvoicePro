@@ -92,6 +92,9 @@ for (const page of [...pages, notFoundPage]) {
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, `one h1 for ${page.route}`);
   assert.match(html, /class="skip-link" href="#main-content"/, `skip link for ${page.route}`);
   assert.match(html, /aria-expanded="false" aria-controls="primary-navigation"/, `mobile menu semantics for ${page.route}`);
+  assert.match(html, /class="header-install-shortcut" href="\/help\/install-tallyo\/" aria-label="Install Tallyo"/, `installation shortcut stays visible beside the collapsed navigation for ${page.route}`);
+  assert.match(html, /class="nav-install-link" href="\/help\/install-tallyo\/"/, `prominent installation route for ${page.route}`);
+  assert.match(html, /class="nav-install-link"[\s\S]{0,500}<span>Install Tallyo<\/span>/, `installation action is visibly labelled for ${page.route}`);
   assert.match(html, /type="module" src="\/assets\/helper\.js\?v=[a-f0-9]{12}"/, `Helper behaviour loads for ${page.route}`);
   assert.equal((html.match(/id="helper-knowledge"/g) || []).length, 1, `one reviewed Helper knowledge source for ${page.route}`);
   if (page.helper) {
@@ -142,7 +145,7 @@ for (const id of ["cta_header_create_account", "cta_hero_create_account", "cta_h
 assert.match(home, /Northstar Home Services/);
 assert.match(home, /Willow &amp; Pine Studio/);
 assert.equal((home.match(/class="product-demo /g) || []).length, 0, "home does not duplicate the full product tour");
-assert.match(home, /Set up your business[\s\S]*Automate recurring work/, "home shows the complete six-step workflow");
+assert.match(home, /Set up your business[\s\S]*Repeat regular invoices/, "home shows the complete six-step workflow in plain language");
 assert.equal((home.match(/class="capability-marquee-group"/g) || []).length, 2, "home duplicates the capability set for a seamless running strip");
 assert.match(home, /class="capability-marquee-group" aria-hidden="true"/, "the repeated capability set stays hidden from assistive technology");
 for (const densityHook of ["home-benefits", "home-how", "home-decision-panel", "faq-preview"]) {
@@ -170,7 +173,20 @@ assert.doesNotMatch(productTourVisibleHtml, /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|acct
 
 const featuresPage = read("features/index.html");
 assert.match(featuresPage, /data-horizontal-flow/, "features page includes the scroll-driven connected workflow");
-assert.equal((featuresPage.match(/class="workflow-outcome-step"/g) || []).length, 4, "connected workflow renders four focused steps");
+assert.equal((featuresPage.match(/class="workflow-outcome-step"/g) || []).length, 5, "quote-to-payment workflow renders all five focused steps");
+assert.match(featuresPage, /Send the quote[\s\S]*Quote accepted[\s\S]*Invoice created[\s\S]*Payment tracked[\s\S]*Follow-up stays clear/, "quote-to-payment workflow follows the real order");
+assert.match(featuresPage, /If you chose automatic sending before emailing the quote/, "automatic invoice email is described as an owner choice");
+
+const invoiceGuide = read("invoice-guide/index.html");
+assert.match(invoiceGuide, /What is an invoice, and how does it work\?/);
+assert.match(invoiceGuide, /Agree the work[\s\S]*Send the invoice[\s\S]*Record what arrives[\s\S]*Follow up if needed/, "invoice guide explains the basic journey");
+for (const topic of ["Quotes", "Invoices", "Recurring invoices", "Overdue reminders", "Deposits and part-payments", "Activity history"]) {
+  assert.match(invoiceGuide, new RegExp(`>${topic}<`), `invoice guide explains ${topic}`);
+}
+assert.match(invoiceGuide, /https:\/\/www\.gov\.uk\/invoicing-and-taking-payment-from-customers\/invoices-what-they-must-include/);
+assert.match(home, /href="\/invoice-guide\/">Read the simple invoice guide/);
+assert.match(read("help/index.html"), /href="\/invoice-guide\/">Read the invoice guide/);
+assert.match(read("free-invoice-generator/index.html"), /href="\/invoice-guide\/">Read the simple invoice guide/);
 
 const generatorPageHtml = read("free-invoice-generator/index.html");
 assert.match(generatorPageHtml, /role="region" aria-label="Live document preview" tabindex="0"/, "document preview is keyboard reachable");
@@ -201,6 +217,14 @@ const redirects = read("_redirects");
 for (const slug of ["freelancers", "consultants", "cleaners", "electricians", "photographers", "sole-traders"]) {
   assert.match(redirects, new RegExp(`/industries/${slug}/ /features/ 301`), `retired ${slug} page redirects to the relevant product information`);
 }
+
+const installGuide = read("help/install-tallyo/index.html");
+assert.match(installGuide, /data-install-guide/, "installation article includes a visual browser guide");
+assert.equal((installGuide.match(/class="install-device-card"/g) || []).length, 4, "installation guide covers four common browser and device paths");
+assert.match(installGuide, /Chrome on a computer[\s\S]*Microsoft Edge[\s\S]*Android Chrome[\s\S]*iPhone or iPad/, "installation device choices are clearly separated");
+assert.match(installGuide, /Look at the right end of the address bar\./, "desktop guide points to the install icon location");
+assert.match(installGuide, /Install and create shortcut[\s\S]*Add to Home Screen/, "mobile guide shows the exact browser actions");
+assert.match(installGuide, /support\.google\.com\/chrome[\s\S]*support\.microsoft\.com\/en-us\/edge[\s\S]*support\.apple\.com\/guide\/iphone/, "installation guide links to current browser-owner instructions");
 
 const pricing = read("pricing/index.html");
 assert.match(pricing, /Free Invoice Maker/);
@@ -419,6 +443,10 @@ assert.match(styles, /\.nav-links \{ position: absolute; left: 50%;[^}]*translat
 assert.match(styles, /\.header-inner \{[^}]*width: min\(80rem, calc\(100% - 2rem\)\)/, "desktop navigation pill uses the wider approved frame");
 assert.match(styles, /\.nav-links, \.nav-actions \{[^}]*flex-wrap: nowrap;[^}]*white-space: nowrap;/, "desktop navigation groups cannot wrap while scrolling");
 assert.match(styles, /\.nav-links a, \.login-link \{[^}]*white-space: nowrap;/, "desktop navigation labels stay on one line");
+assert.match(styles, /\.nav-install-link \{[^}]*display: inline-flex;[^}]*border: 1px solid/, "installation action is visually distinct in the navigation");
+assert.match(styles, /@media \(max-width: 22rem\) \{[^}]*\.header-inner \{ gap: 0\.5rem; \}/s, "very narrow headers preserve separate install and menu touch targets");
+assert.match(styles, /\.install-device-grid \{ display: grid; gap: var\(--layout-gap\); \}/, "installation device cards use the approved spacing");
+assert.match(styles, /\.browser-install-target\s*\{[^}]*background:\s*var\(--blue-100\);/, "installation symbol is visibly highlighted in browser illustrations");
 assert.match(styles, /\.site-header\.is-condensed \.header-inner \{ width: min\(77rem, calc\(100% - 2\.5rem\)\); \}/, "scrolled navigation shrinks subtly without crowding its labels");
 assert.match(styles, /\.plan-card \.button \+ \.plan-note \{ margin-top: 0\.75rem; \}/, "pricing note cannot collide with the subscription action");
 assert.doesNotMatch(styles, /\.page-hero \+ \.section \{[^}]*padding-top:/, "page headings do not add a second section gap");
