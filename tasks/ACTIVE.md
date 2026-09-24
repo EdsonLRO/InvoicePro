@@ -514,25 +514,33 @@ row was created during activation.
 
 ## Focused task: GROWTH-002 One-off introductory email design
 
-Status: Source complete — awaiting Owner review before deployment or live send
+Status: Complete — production template refresh deployed; no live email sent
 Priority: High
 Assigned roles: Growth, Backend/Supabase, Privacy/Legal and QA
 Model/work mode: Sol / High for the consent and server-email boundary; visual
 layout and screenshot preparation are routine
 Risk level: High because the template is used by the public consent-gated
 server email flow, although this task makes no provider or production change
-Affected scope: the shared one-off email builder, four privacy-safe compressed
+Affected scope: the shared one-off email builder, five privacy-safe compressed
 product screenshots and the focused consent/send test harness
 Acceptance criteria: exact approved subject and preheader; responsive
-table-based HTML and plain text; no more than four real fictional-data product
+table-based HTML and plain text; no more than five real fictional-data product
 screenshots; HTML buttons independent of images; accurate pricing, Stripe-fee
 wording, identity, Privacy Notice and HTTPS unsubscribe route; no account,
 newsletter or repeated-send implication; preserve affirmative versioned
 consent, unique-address enforcement, provider idempotency and rate limiting
-Branch: `codex/one-off-overview-email-design`
-Release boundary: source, review artifacts, validation, commit, push and a
-focused draft PR only. Do not merge, deploy the function or website assets, or
-send any email without separate exact Owner approval.
+Branch: `codex/feature-email-and-free-pdf`
+Completion: PR #185 merged at `4158b5b` after exact Owner approval. Website
+deployment `1bf54acb-661e-4092-b167-0af9f84d0897` and unchanged app build
+`2026.09.24.1` deployment `bfa6a7aa-ad81-462f-b82b-b6a75c6339ff` are active.
+The refreshed overview uses five current fictional-data screenshots and clearer
+feature wording. `send-marketing-overview` version 8 is active with JWT
+verification disabled by design for the public consent form. Readback confirms
+the exact function/version/configuration, approved-origin preflight returned
+204, an unapproved origin returned 403, all five public images returned 200 and
+the public generator stylesheet contains the invoice-only print rules. No
+promotional email was sent; no database, migration, payment, Auth, secret or
+unrelated provider setting changed.
 
 ## Focused task: COMM-001-ENT-003 Complimentary access by email
 
