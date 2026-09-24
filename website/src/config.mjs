@@ -107,9 +107,9 @@ export const siteConfig = Object.freeze({
   appUrl,
   signupUrl: trimSlash(process.env.TALLYO_SIGNUP_URL || appUrl),
   subscriptionUrl: trimSlash(process.env.TALLYO_SUBSCRIPTION_URL || `${appUrl}/#account`),
-  defaultTitle: "Tallyo — Professional invoices. Clearer payment tracking. Less admin.",
+  defaultTitle: "Tallyo — Professional invoices. Clear payment updates. Less admin.",
   defaultDescription:
-    "Create quotes and invoices, track payments, automate recurring work and keep customer transactions organised in one straightforward workspace.",
+    "Create quotes and invoices, record deposits and payments, repeat regular invoices and keep every update in one straightforward workspace.",
   locale: "en_GB",
   themeColor: "#111a31",
   socialImagePath: "/assets/tallyo-social-card.webp",
@@ -148,6 +148,7 @@ export const footerGroups = Object.freeze([
   {
     title: "Learn",
     links: [
+      { label: "Invoice guide", href: "/invoice-guide/" },
       { label: "Help Centre", href: "/help/" },
       { label: "Tallyo Helper", href: "/helper/" },
       { label: "FAQ", href: "/faq/" },

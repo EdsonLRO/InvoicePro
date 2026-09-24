@@ -178,8 +178,8 @@ const privacy = read("website/src/legal-content.mjs");
 for (const copy of [
   "Saved customers and items",
   "Recurring invoices",
-  "Automatic overdue reminders",
-  "Invoice and payment-status tracking",
+  "Reminders for overdue invoices you choose",
+  "Deposits, part-payments and final payments",
   "Online payments through your connected Stripe account",
   "&pound;8 monthly",
   "&pound;80 annually",
