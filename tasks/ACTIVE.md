@@ -5,8 +5,8 @@
 Task ID: WEBSITE-CONTENT-002
 Title: Explain Tallyo's workflows clearly, add a concise invoice guide and make installation easy to find
 Priority: Medium
-Status: Owner-approved for release on 2026-09-24
-Phase: Release
+Status: Released and publicly verified on 2026-09-24
+Phase: Complete
 Owner role: Product owner
 Risk level: Medium; public website content, SEO metadata and layout only
 Branch: `codex/website-plain-language-invoice-guide`
@@ -14,8 +14,10 @@ Scope: replace compressed finance and product terminology across the non-legal p
 Product boundary: accepted quotes are preserved and create one linked invoice; automatic invoice email remains optional and must be selected before the quote is sent; overdue reminders remain opt-in; payment records do not themselves move money; activity history remains an everyday product record rather than a certified audit log
 Excluded: legal-page copy, authenticated application source/runtime, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund, Stripe object and unrelated website work
 Validation: complete website suite for 26 routes plus 404; public Helper fail-closed and mock-provider checks; Analytics activation-gate checks; Free Invoice Maker conversion and one-email consent checks; desktop, 390×844 and 320px visual review of the installation guide and persistent install action; desktop and 390×844 visual review of the invoice guide; desktop and mobile review of the five-step Features workflow; verified mobile horizontal card movement; no browser console errors; plain-language residue scan and diff hygiene passed
-Approval boundary: the Owner reviewed the accumulated local website changes and approved all of them for publication on 2026-09-24. Approval authorises commit, push, the protected pull-request workflow, merge, normal Cloudflare Pages publication and bounded public validation without another approval request for this scope. If validation fails, restore website deployment `ee154bf5-929d-4621-90f9-e05391d66802` from main source `03aab6c`; backend, app runtime and provider state remain unchanged.
-Next action: commit and push the approved candidate, merge through the protected pull-request workflow, verify the resulting production website deployment and record the release
+Approval boundary: completed under the Owner's final review and approval on 2026-09-24. PR #180 merged through the protected workflow and normal publication completed without another approval request. No legal page, authenticated app source/runtime, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund, Stripe object or unrelated change was included.
+Release: merge `87b3c9fa5f87fc8a0bec00ca8e2f0fe9be9fca9b`; website deployment `eafe8293-1b1e-4f3b-83cf-0a663dc102c1`; production asset revision `9e17660c8d45`; normal unchanged-app deployment `ae316695-55eb-4d4c-9323-74981b7ac674`
+Rollback: restore website deployment `ee154bf5-929d-4621-90f9-e05391d66802` from main source `03aab6c`; backend and provider state remain unchanged
+Next action: routine bounded monitoring only
 
 ## WEBSITE-REDESIGN-001 — Public website redesign and content consolidation
 

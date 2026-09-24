@@ -1,12 +1,14 @@
 # Tallyo Release Readiness Checklist
 
-## Plain-language website and installation guidance — Owner-approved release, 2026-09-24
+## Plain-language website and installation guidance — released and verified, 2026-09-24
 
 The Owner reviewed the accumulated local website candidate and approved all changes for publication. The focused release replaces repeated or compressed product wording with clear explanations, adds the concise `/invoice-guide/`, expands the quote-to-payment journey to five accurate steps, clarifies recurring invoices, overdue reminders, deposits, part-payments, final payments and activity history, and makes installation visible throughout the website with illustrated Chrome, Edge, Android and iPhone/iPad guidance.
 
 The complete website suite passes across 26 routes plus 404, including public Helper fail-closed and mock-provider coverage, Analytics activation gates, Free Invoice Maker conversion and one-email consent checks, structured data, links, accessibility and stylesheet budgets. Desktop, 390×844 and 320px visual checks passed for the installation action and guide; the invoice guide and five-step Features workflow passed desktop/mobile review; mobile horizontal movement and absence of page overflow were verified; no browser console error remains.
 
-This release changes only public website source, content, SEO metadata, responsive presentation, tests and authoritative release records. Legal pages, the authenticated app, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund and Stripe objects are excluded. The pre-release website rollback is Cloudflare deployment `ee154bf5-929d-4621-90f9-e05391d66802` from main source `03aab6c`; backend and provider state remain unchanged.
+PR #180 merged through the protected workflow as `87b3c9fa5f87fc8a0bec00ca8e2f0fe9be9fca9b`. Main Security run `35984477644` and Pages run `35984477034` passed. Website deployment `eafe8293-1b1e-4f3b-83cf-0a663dc102c1` serves production mode with asset revision `9e17660c8d45`. Bounded public checks returned HTTP 200 for the apex, `www`, Features, Invoice guide, Install Tallyo, Help and Free Invoice Maker routes; confirmed the five-step workflow, illustrated installation guidance, indexable metadata, sitemap entries and absence of a static Google tag before consent; and read back the published install styles.
+
+This release changes only public website source, content, SEO metadata, responsive presentation, tests and authoritative release records. Legal pages, the authenticated app, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund and Stripe objects are excluded. The normal workflow republished the unchanged app at deployment `ae316695-55eb-4d4c-9323-74981b7ac674`; its public shell, build `2026.09.23.1`, 20-asset report and service-worker cache `tallyo-shell-2026-09-23-1` passed. Rollback was not required. The website rollback is Cloudflare deployment `ee154bf5-929d-4621-90f9-e05391d66802` from main source `03aab6c`; backend and provider state remain unchanged.
 
 ## Public website redesign — released and verified, 2026-09-23
 
