@@ -1,5 +1,15 @@
 # Tallyo Release Readiness Checklist
 
+## Document templates and final website polish — released and verified, 2026-09-24
+
+The Owner approved the reviewed app and website candidates for production. PR #183 merged as `46bcc9ac2ca8ad3679dcb8fd1f5dc81e2f03fb88`; additive migration `20260924112357_invoice_template_preferences.sql` is applied; and only `send-document-email` was deployed, advancing from v59 to v60 with JWT verification retained. App build `2026.09.24.1` and service-worker cache `tallyo-shell-2026-09-24-1` were publicly verified at Cloudflare deployment `5f462120-7bdb-46ee-b0b8-ba2da7df2821`. Public readback returned HTTP 200, the template UI marker, the matching cache marker and all 20 expected assets. An empty unauthenticated function request returned 401 without entering email logic.
+
+Existing businesses default safely to the existing Tallyo layout with alternating rows enabled. The release adds only Basic, Modern and Professional as curated alternatives and one optional alternating-row setting. Focused browser, preference, PDF attachment, email, PWA, quote automatic-send and dependency-lock checks passed, followed by the protected CI and production checks. Migration history is synchronized. The post-migration advisor output is unchanged from the pre-migration output: it reports the existing intentionally authenticated `current_account_has_complimentary_access()` RPC warning, which this release does not alter.
+
+PR #182 then merged as `ef7d9122cb31d45c6b58065819938545bb33392e` and published the reviewed navigation, footer, spacing and rounded CTA-shadow refinements at website deployment `131e7366-51c3-4314-a23a-b5241e56fc98`. Main Security run `36001016296` and Pages run `36001015374` passed. Home, Features and Free Invoice Maker returned HTTP 200; production asset revision `642f9f9f2588` contains the expected Help → Install Tallyo → Log in structure, desktop navigation grid, standard final-section gap, contained CTA shadow and four-column footer.
+
+Rollback was not required. The app rollback is deployment `3b710daf-3ad4-4741-8393-95643fcef8a3` / build `2026.09.23.1` plus `send-document-email` v59 source from `3db4db9`; the additive migration may remain dormant. The website rollback is deployment `12413216-58b6-45c7-95dd-958686d49aeb`, which retains the app release while restoring the prior website presentation. No real email, payment, refund, Stripe object, Auth setting, secret, legal publication or unrelated provider change occurred.
+
 ## Plain-language website and installation guidance — released and verified, 2026-09-24
 
 The Owner reviewed the accumulated local website candidate and approved all changes for publication. The focused release replaces repeated or compressed product wording with clear explanations, adds the concise `/invoice-guide/`, expands the quote-to-payment journey to five accurate steps, clarifies recurring invoices, overdue reminders, deposits, part-payments, final payments and activity history, and makes installation visible throughout the website with illustrated Chrome, Edge, Android and iPhone/iPad guidance.
