@@ -71,6 +71,45 @@
             min-width: 800px !important;
             max-width: 800px !important;
         }
+        .document-template-surface .pdf-document-header { border-color:var(--brand); }
+        .document-template-surface .pdf-line-items thead tr { color:var(--brand-text); background:var(--brand); }
+        .document-template-surface .pdf-line-items tbody tr { background:#fff; }
+        .document-template-surface .pdf-line-items tbody tr.pdf-row-tinted { background:var(--brand-tint); }
+        .document-template-surface .pdf-document-total { border-color:var(--brand); background:var(--brand-tint); }
+        .document-template-surface .pdf-total-rule { border-color:var(--brand); }
+        .document-template-surface .pdf-total-value { color:var(--brand-ink); }
+        .document-template-surface.invoice-template-basic .pdf-document-header { border-bottom:1px solid #cbd5e1; }
+        .document-template-surface.invoice-template-basic .pdf-document-title { color:#0f172a!important; letter-spacing:.08em; }
+        .document-template-surface.invoice-template-basic .pdf-line-items thead tr { color:#0f172a; background:#fff; border-top:2px solid #0f172a; border-bottom:2px solid #0f172a; }
+        .document-template-surface.invoice-template-basic .pdf-document-total { border-color:#cbd5e1; border-radius:0; background:#fff; }
+        .document-template-surface.invoice-template-basic .pdf-total-rule { border-color:#0f172a; }
+        .document-template-surface.invoice-template-basic .pdf-total-value { color:#0f172a; }
+        .document-template-surface.invoice-template-modern .pdf-document-header { padding:1.5rem; border:0; border-radius:1rem; background:var(--brand-tint); }
+        .document-template-surface.invoice-template-modern .pdf-document-title { color:var(--brand-ink)!important; letter-spacing:.02em; text-transform:none; }
+        .document-template-surface.invoice-template-modern .pdf-document-details { padding:1.25rem; border:1px solid #e2e8f0; border-radius:1rem; }
+        .document-template-surface.invoice-template-modern .pdf-line-items { border-collapse:separate; border-spacing:0 .35rem; }
+        .document-template-surface.invoice-template-modern .pdf-line-items thead tr { color:var(--brand-ink); background:var(--brand-tint); }
+        .document-template-surface.invoice-template-modern .pdf-line-items tbody tr { box-shadow:0 0 0 1px #e2e8f0; }
+        .document-template-surface.invoice-template-modern .pdf-document-total { border:0; background:var(--brand-tint); }
+        .document-template-surface.invoice-template-professional .pdf-document-header { border-bottom:4px solid #1e293b; box-shadow:inset 0 -1px 0 var(--brand); }
+        .document-template-surface.invoice-template-professional .pdf-document-title { color:#1e293b!important; font-size:2rem; letter-spacing:.14em; }
+        .document-template-surface.invoice-template-professional .pdf-line-items thead tr { color:#fff; background:#1e293b; box-shadow:inset 5px 0 0 var(--brand); }
+        .document-template-surface.invoice-template-professional .pdf-document-total { border-color:#cbd5e1; border-top:4px solid var(--brand); border-radius:.35rem; background:#f8fafc; }
+        .template-picker-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+        .template-choice { min-width:0; padding:12px; border:1px solid #cbd5e1; border-radius:12px; color:#334155; background:#fff; text-align:left; transition:border-color .15s,box-shadow .15s,transform .15s; }
+        .template-choice:hover { border-color:#818cf8; transform:translateY(-1px); }
+        .template-choice[aria-pressed="true"] { border-color:#4f46e5; box-shadow:0 0 0 3px #e0e7ff; }
+        .template-choice strong,.template-choice span { display:block; }
+        .template-choice>span:last-child { margin-top:7px; color:#64748b; font-size:12px; line-height:1.35; }
+        .template-miniature { height:78px; margin-bottom:10px; overflow:hidden; border:1px solid #e2e8f0; border-radius:8px; background:#fff; }
+        .template-miniature-header { height:24px; margin:9px 9px 6px; border-bottom:3px solid var(--brand); }
+        .template-miniature-lines { height:24px; margin:0 9px; background:repeating-linear-gradient(to bottom,#cbd5e1 0 1px,transparent 1px 8px); }
+        .template-miniature-total { width:34%; height:12px; margin:5px 9px 0 auto; border-top:3px solid var(--brand); background:var(--brand-tint); }
+        .template-choice-basic .template-miniature-header { border-color:#0f172a; }
+        .template-choice-basic .template-miniature-total { border-color:#0f172a; background:#fff; }
+        .template-choice-modern .template-miniature-header { border:0; border-radius:6px; background:var(--brand-tint); }
+        .template-choice-professional .template-miniature-header { border-color:#1e293b; box-shadow:inset 4px 0 0 var(--brand); }
+        @media (min-width:700px) { .template-picker-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
         .invoice-email-status-short { display: none; }
         .no-spin::-webkit-outer-spin-button, .no-spin::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .no-spin { -moz-appearance: textfield; }
@@ -1966,12 +2005,12 @@
                 </div>
                 <div class="editor-preview-surface" :class="{ 'editor-preview-hidden': !editorPreview && !isExportingPDF }" :aria-hidden="!editorPreview && !isExportingPDF ? 'true' : null" :inert="!editorPreview && !isExportingPDF ? true : null">
                     <p v-if="editorPreview && !isExportingPDF" class="editor-preview-note">Document preview · Changes are not saved automatically. Use More → Download PDF for a copy.</p>
-                <div id="invoice-canvas" :class="{'pdf-mode': isExportingPDF || editorPreview, 'editor-preview-document': editorPreview && !isExportingPDF}" :style="brandStyle" class="bg-white p-4 sm:p-6 lg:p-10 rounded-xl shadow-sm border border-slate-200 relative">
-                    <div v-if="company.logo" class="mb-6 flex" :class="{'justify-center': company.logoPosition === 'center', 'justify-end': company.logoPosition === 'right'}">
+                <div id="invoice-canvas" :class="['invoice-template-' + company.invoiceTemplate, {'pdf-mode': isExportingPDF || editorPreview, 'editor-preview-document': editorPreview && !isExportingPDF}]" :style="brandStyle" class="document-template-surface bg-white p-4 sm:p-6 lg:p-10 rounded-xl shadow-sm border border-slate-200 relative">
+                    <div v-if="company.logo" class="pdf-logo-row mb-6 flex" :class="{'justify-center': company.logoPosition === 'center', 'justify-end': company.logoPosition === 'right'}">
                         <img :src="company.logo" alt="Logo" class="h-16 object-contain">
                     </div>
-                    <div class="flex justify-between items-start border-b-2 pb-8 mb-8" :style="{ borderColor: 'var(--brand)' }">
-                        <div>
+                    <div class="pdf-document-header flex justify-between items-start border-b-2 pb-8 mb-8">
+                        <div class="pdf-company-block">
                             <h3 class="font-bold text-xl">{{ company.name }}</h3>
                             <div class="text-sm text-slate-500 mt-2 space-y-0.5">
                                 <p v-if="company.address">{{ company.address }}</p>
@@ -1985,8 +2024,8 @@
                                 <p v-if="company.additionalInfo" class="whitespace-pre-line mt-1">{{ company.additionalInfo }}</p>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <h1 class="text-4xl font-bold uppercase tracking-wider mb-2" :style="{ color: 'var(--brand-ink)' }">{{ docTypeLabel(draft.docType) }}</h1>
+                        <div class="pdf-document-identity text-right">
+                            <h1 class="pdf-document-title text-4xl font-bold uppercase tracking-wider mb-2" :style="{ color: 'var(--brand-ink)' }">{{ docTypeLabel(draft.docType) }}</h1>
                             <div class="flex items-center justify-end gap-2 text-slate-600">
                                 <span class="font-medium">{{ docTypeNoun(draft.docType) }} #:</span>
                                 <input type="text" v-model="draft.number" class="border rounded px-2 py-1 w-28 text-right focus:ring-2 focus:ring-indigo-500 outline-none no-print">
@@ -1995,8 +2034,8 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mb-8">
-                        <div>
+                    <div class="pdf-document-details grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 mb-8">
+                        <div class="pdf-customer-block">
                             <h4 class="text-sm font-bold text-slate-400 uppercase mb-2">Bill To</h4>
                             <select v-model="draft.customer" @change="onCustomerSelect" class="w-full border rounded-lg px-3 py-2 mb-2 focus:ring-2 focus:ring-indigo-500 outline-none no-print">
                                 <option :value="null"></option>
@@ -2030,7 +2069,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="pdf-meta-grid grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-bold text-slate-400 uppercase mb-1">Date</label>
                                 <input type="date" v-model="draft.date" class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -2052,7 +2091,7 @@
                     <div class="mb-8" :class="anySuggestionOpen ? 'overflow-visible' : 'overflow-x-auto sm:overflow-visible'">
                         <table class="pdf-line-items w-full text-left border-collapse min-w-[640px]">
                             <thead>
-                                <tr class="text-sm uppercase pdf-bold-row" :style="{ backgroundColor: 'var(--brand)', color: 'var(--brand-text)' }">
+                                <tr class="text-sm uppercase pdf-bold-row">
                                     <th class="p-3 font-semibold rounded-tl-lg min-w-[200px]">Item / Description</th>
                                     <th class="p-3 w-72 min-w-[180px] font-semibold text-center">Qty / Unit</th>
                                     <th class="p-3 w-32 min-w-[92px] font-semibold text-center">Price</th>
@@ -2063,7 +2102,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(item, index) in draft.items" :key="index" :style="index % 2 === 1 ? { backgroundColor: 'var(--brand-tint)' } : { backgroundColor: '#ffffff' }" class="border-b border-slate-200/50">
+                                <tr v-for="(item, index) in draft.items" :key="index" :class="{ 'pdf-row-tinted': company.alternateItemRows && index % 2 === 1 }" class="border-b border-slate-200/50">
                                     <td class="pl-1 pr-3 py-3 relative align-top">
                                         <textarea v-model="item.name" @focus="item.showSuggestions = true" @blur="hideSuggestions(index)" rows="2" class="w-full border rounded px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none resize-none"></textarea>
                                         <span class="pdf-text text-sm">{{ item.name }}</span>
@@ -2143,7 +2182,7 @@
                             </div>
                         </div>
                         
-                        <div class="w-full md:w-1/3 p-6 rounded-xl border" :style="{ backgroundColor: 'var(--brand-tint)', borderColor: 'var(--brand)' }">
+                        <div class="pdf-document-total w-full md:w-1/3 p-6 rounded-xl border">
                             <div class="no-print mb-4 pb-3 border-b border-slate-200">
                                 <span class="text-xs font-bold text-slate-500 uppercase block mb-2">Tax Mode</span>
                                 <div class="flex rounded-lg overflow-hidden border border-slate-300 text-xs">
@@ -2176,9 +2215,9 @@
                                     <span class="pdf-text">{{ getCurrencySymbol(draft.currency) }}{{ parseFloat(draft.shippingCost || 0).toFixed(2) }}</span>
                                 </span>
                             </div>
-                            <div class="flex justify-between mt-4 pt-4 border-t-2 text-xl font-bold" :style="{ borderColor: 'var(--brand)' }">
+                            <div class="pdf-total-rule flex justify-between mt-4 pt-4 border-t-2 text-xl font-bold">
                                 <span>Total</span>
-                                <span :style="{ color: 'var(--brand-ink)' }">{{ getCurrencySymbol(draft.currency) }}{{ totals.grandTotal.toFixed(2) }}</span>
+                                <span class="pdf-total-value">{{ getCurrencySymbol(draft.currency) }}{{ totals.grandTotal.toFixed(2) }}</span>
                             </div>
                             <div v-if="draftPaid > 0" class="flex justify-between items-center mt-3 text-sm">
                                 <span class="text-slate-600 font-medium">Amount Paid</span>
@@ -2720,9 +2759,23 @@
 
             <div v-show="activeTab === 'branding'" class="max-w-4xl mx-auto">
                 <h2 class="text-3xl font-semibold mb-2">Branding</h2>
-                <p class="text-sm text-slate-500 mb-6">Choose your brand colour and logo position. The preview updates live, and these settings apply to every invoice, quote, and PDF you create.</p>
+                <p class="text-sm text-slate-500 mb-6">Choose a document style, brand colour, logo position, and item-row finish. The preview updates live, and your choices apply to invoices, quotes, credit notes, downloaded PDFs, and emailed PDF attachments.</p>
 
                 <div class="bg-white p-5 sm:p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+                    <fieldset class="mb-8">
+                        <legend class="block text-sm font-bold text-slate-600 mb-3">Document style</legend>
+                        <div class="template-picker-grid" :style="brandStyle">
+                            <button v-for="template in invoiceTemplateOptions" :key="template.id" type="button" class="template-choice" :class="'template-choice-' + template.id" :aria-pressed="company.invoiceTemplate === template.id ? 'true' : 'false'" @click="company.invoiceTemplate = template.id">
+                                <span class="template-miniature" aria-hidden="true">
+                                    <span class="template-miniature-header"></span>
+                                    <span class="template-miniature-lines"></span>
+                                    <span class="template-miniature-total"></span>
+                                </span>
+                                <strong>{{ template.name }}</strong>
+                                <span>{{ template.description }}</span>
+                            </button>
+                        </div>
+                    </fieldset>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <label class="block text-sm font-bold text-slate-600 mb-3">Brand Colour</label>
@@ -2743,6 +2796,13 @@
                             <p class="text-xs text-slate-500 mt-2">Where your logo sits at the top of the invoice. Set a logo URL on the Company Settings page.</p>
                         </div>
                     </div>
+                    <label class="mt-6 flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 cursor-pointer">
+                        <input type="checkbox" v-model="company.alternateItemRows" class="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                        <span>
+                            <span class="block text-sm font-bold text-slate-700">Alternating item row colours</span>
+                            <span class="block text-xs text-slate-500 mt-1">Use a subtle brand tint on every second item row to make longer documents easier to scan.</span>
+                        </span>
+                    </label>
                     <div class="mt-6 pt-6 border-t">
                         <button @click="saveCompanyDetails" class="bg-indigo-600 text-white px-8 py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Save Branding</button>
                     </div>
@@ -2750,36 +2810,39 @@
 
                 <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <div class="p-3 border-b border-slate-100 bg-slate-50 text-xs font-medium text-slate-500 uppercase tracking-wide">Live Preview</div>
-                    <div class="p-6" :style="brandStyle">
-                        <div class="mb-4 flex" :class="{'justify-center': company.logoPosition === 'center', 'justify-end': company.logoPosition === 'right'}">
+                    <div class="document-template-surface p-6" :class="'invoice-template-' + company.invoiceTemplate" :style="brandStyle">
+                        <div class="pdf-logo-row mb-4 flex" :class="{'justify-center': company.logoPosition === 'center', 'justify-end': company.logoPosition === 'right'}">
                             <img v-if="company.logo" :src="company.logo" class="h-12 object-contain" alt="Logo">
                             <div v-else class="h-12 w-24 rounded bg-slate-100 flex items-center justify-center text-[10px] text-slate-400">YOUR LOGO</div>
                         </div>
-                        <div class="flex justify-between items-start border-b-2 pb-4 mb-4" :style="{ borderColor: 'var(--brand)' }">
-                            <div>
+                        <div class="pdf-document-header flex justify-between items-start border-b-2 pb-4 mb-4">
+                            <div class="pdf-company-block">
                                 <div class="font-bold text-lg">{{ company.name || 'Your Company' }}</div>
                                 <div class="text-xs text-slate-500">{{ company.email || 'you@email.com' }}</div>
                             </div>
-                            <div class="text-right">
-                                <div class="text-2xl font-bold uppercase tracking-wider" :style="{ color: 'var(--brand-ink)' }">Invoice</div>
+                            <div class="pdf-document-identity text-right">
+                                <div class="pdf-document-title text-2xl font-bold uppercase tracking-wider" :style="{ color: 'var(--brand-ink)' }">Invoice</div>
                                 <div class="text-xs text-slate-500">#INV-0001</div>
                             </div>
                         </div>
-                        <table class="w-full text-left text-xs mb-4">
+                        <div class="pdf-document-details mb-4">
+                            <div class="pdf-customer-block text-xs text-slate-500"><strong class="text-slate-700">Bill to:</strong> Willow & Pine Studio</div>
+                        </div>
+                        <table class="pdf-line-items w-full text-left text-xs mb-4">
                             <thead>
-                                <tr :style="{ backgroundColor: 'var(--brand)', color: 'var(--brand-text)' }">
+                                <tr>
                                     <th class="p-2">Item</th><th class="p-2 text-center">Qty</th><th class="p-2 text-right">Price</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr class="border-b border-slate-100"><td class="p-2">Design work</td><td class="p-2 text-center">2</td><td class="p-2 text-right">£200.00</td></tr>
-                                <tr class="border-b border-slate-100"><td class="p-2">Consulting</td><td class="p-2 text-center">1.5 hrs</td><td class="p-2 text-right">£90.00</td></tr>
+                                <tr class="border-b border-slate-100" :class="{ 'pdf-row-tinted': company.alternateItemRows }"><td class="p-2">Consulting</td><td class="p-2 text-center">1.5 hrs</td><td class="p-2 text-right">£90.00</td></tr>
                             </tbody>
                         </table>
                         <div class="flex justify-end">
-                            <div class="w-1/2 p-4 rounded-lg border" :style="{ backgroundColor: 'var(--brand-tint)', borderColor: 'var(--brand)' }">
+                            <div class="pdf-document-total w-1/2 p-4 rounded-lg border">
                                 <div class="flex justify-between text-xs mb-1"><span class="text-slate-600">Subtotal</span><span>£290.00</span></div>
-                                <div class="flex justify-between text-base font-bold pt-2 mt-1 border-t-2" :style="{ borderColor: 'var(--brand)' }"><span>Total</span><span :style="{ color: 'var(--brand-ink)' }">£290.00</span></div>
+                                <div class="pdf-total-rule flex justify-between text-base font-bold pt-2 mt-1 border-t-2"><span>Total</span><span class="pdf-total-value">£290.00</span></div>
                             </div>
                         </div>
                     </div>
@@ -3222,7 +3285,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.09.23.1';
+    const APP_BUILD = '2026.09.24.1';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -3331,7 +3394,7 @@
                 isExportingPDF: false,
                 editorPreview: false,
                 editorSections: { customer: window.innerWidth >= 900, details: window.innerWidth >= 900, items: window.innerWidth >= 900, terms: false, notes: false, recurring: false, reminders: false, payments: false, activity: false },
-                company: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 },
+                company: { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', invoiceTemplate: 'tallyo', alternateItemRows: true, overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 },
                 companyAuditSnapshot: null,
                 customers: [],
                 savedItems: [],
@@ -3380,6 +3443,12 @@
                 customerBulkBusy: false,
                 itemView: 'list',
                 brandPresets: ['#6366f1', '#38bdf8', '#34d399', '#fb7185', '#fbbf24', '#a78bfa', '#f472b6', '#2dd4bf'],
+                invoiceTemplateOptions: [
+                    { id: 'tallyo', name: 'Tallyo', description: 'The familiar balanced Tallyo layout.' },
+                    { id: 'basic', name: 'Basic', description: 'Simple, minimal, and easy to print.' },
+                    { id: 'modern', name: 'Modern', description: 'Soft panels with a friendly finish.' },
+                    { id: 'professional', name: 'Professional', description: 'Compact structure with a corporate feel.' }
+                ],
                 lastTaxMode: 'exclusive',
                 editingCustomer: null,
                 showQuickCustomer: false,
@@ -5119,7 +5188,7 @@
                 window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
                 this.editingExisting = false;
                 this.isExportingPDF = false;
-                this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 };
+                this.company = { name: '', address: '', phone: '', mobile: '', email: '', taxId: '', additionalInfo: '', logo: '', invoicePrefix: '', quotePrefix: 'QUO-', creditPrefix: 'CN-', defaultCurrency: 'GBP', paymentDetails: '', defaultNotes: '', defaultTerms: '', invoiceFooter: '', brandColor: '#4f46e5', logoPosition: 'left', invoiceTemplate: 'tallyo', alternateItemRows: true, overdueFirstReminderDays: 3, overdueRepeatReminderDays: 7, overdueMaxReminders: 3 };
                 this.companyAuditSnapshot = null;
                 this.resetQuoteAcceptance();
                 this.customers = []; this.savedItems = []; this.invoices = [];
@@ -5542,12 +5611,16 @@
                 const price = Math.round((Number(i.price) || 0) * 100) / 100;
                 return { name: String(i.name || '').trim(), description: String(i.description || '').trim() || null, price };
             },
+            normaliseInvoiceTemplate(value) {
+                const template = String(value || '').trim().toLowerCase();
+                return ['tallyo', 'basic', 'modern', 'professional'].includes(template) ? template : 'tallyo';
+            },
             rowToCompany(r) {
-                return { name: r.name || '', address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '', logo: r.logo_url || '', invoicePrefix: r.invoice_prefix || '', quotePrefix: r.quote_prefix || 'QUO-', creditPrefix: r.credit_prefix || 'CN-', defaultCurrency: r.default_currency || 'GBP', paymentDetails: r.payment_details || '', defaultNotes: r.default_notes || '', defaultTerms: r.default_terms || '', invoiceFooter: r.invoice_footer || '', brandColor: r.brand_color || '#4f46e5', logoPosition: r.logo_position || 'left', overdueFirstReminderDays: Number(r.overdue_first_reminder_days) || 3, overdueRepeatReminderDays: Number(r.overdue_repeat_reminder_days) || 7, overdueMaxReminders: Number(r.overdue_max_reminders) || 3 };
+                return { name: r.name || '', address: r.address || '', phone: r.phone || '', mobile: r.mobile || '', email: r.email || '', taxId: r.tax_id || '', additionalInfo: r.additional_info || '', logo: r.logo_url || '', invoicePrefix: r.invoice_prefix || '', quotePrefix: r.quote_prefix || 'QUO-', creditPrefix: r.credit_prefix || 'CN-', defaultCurrency: r.default_currency || 'GBP', paymentDetails: r.payment_details || '', defaultNotes: r.default_notes || '', defaultTerms: r.default_terms || '', invoiceFooter: r.invoice_footer || '', brandColor: r.brand_color || '#4f46e5', logoPosition: r.logo_position || 'left', invoiceTemplate: this.normaliseInvoiceTemplate(r.invoice_template), alternateItemRows: r.alternate_item_rows !== false, overdueFirstReminderDays: Number(r.overdue_first_reminder_days) || 3, overdueRepeatReminderDays: Number(r.overdue_repeat_reminder_days) || 7, overdueMaxReminders: Number(r.overdue_max_reminders) || 3 };
             },
             companyToRow() {
                 const c = this.company;
-                return { user_id: this.currentUser.id, name: c.name || null, address: c.address || null, phone: c.phone || null, mobile: c.mobile || null, email: c.email || null, tax_id: c.taxId || null, additional_info: c.additionalInfo || null, logo_url: c.logo || null, invoice_prefix: c.invoicePrefix || '', quote_prefix: c.quotePrefix || 'QUO-', credit_prefix: c.creditPrefix || 'CN-', default_currency: c.defaultCurrency || 'GBP', payment_details: c.paymentDetails || null, default_notes: c.defaultNotes || null, default_terms: c.defaultTerms || null, invoice_footer: c.invoiceFooter || null, brand_color: c.brandColor || '#4f46e5', logo_position: c.logoPosition || 'left', overdue_first_reminder_days: Math.min(Math.max(Number(c.overdueFirstReminderDays) || 3, 1), 365), overdue_repeat_reminder_days: Math.min(Math.max(Number(c.overdueRepeatReminderDays) || 7, 1), 365), overdue_max_reminders: Math.min(Math.max(Number(c.overdueMaxReminders) || 3, 1), 24), updated_at: new Date().toISOString() };
+                return { user_id: this.currentUser.id, name: c.name || null, address: c.address || null, phone: c.phone || null, mobile: c.mobile || null, email: c.email || null, tax_id: c.taxId || null, additional_info: c.additionalInfo || null, logo_url: c.logo || null, invoice_prefix: c.invoicePrefix || '', quote_prefix: c.quotePrefix || 'QUO-', credit_prefix: c.creditPrefix || 'CN-', default_currency: c.defaultCurrency || 'GBP', payment_details: c.paymentDetails || null, default_notes: c.defaultNotes || null, default_terms: c.defaultTerms || null, invoice_footer: c.invoiceFooter || null, brand_color: c.brandColor || '#4f46e5', logo_position: c.logoPosition || 'left', invoice_template: this.normaliseInvoiceTemplate(c.invoiceTemplate), alternate_item_rows: c.alternateItemRows !== false, overdue_first_reminder_days: Math.min(Math.max(Number(c.overdueFirstReminderDays) || 3, 1), 365), overdue_repeat_reminder_days: Math.min(Math.max(Number(c.overdueRepeatReminderDays) || 7, 1), 365), overdue_max_reminders: Math.min(Math.max(Number(c.overdueMaxReminders) || 3, 1), 24), updated_at: new Date().toISOString() };
             },
             rowToInvoice(r) {
                 const inv = {
@@ -6421,6 +6494,8 @@
                     invoiceFooter: company.invoiceFooter || '',
                     brandColor: company.brandColor || '#4f46e5',
                     logoPosition: company.logoPosition || 'left',
+                    invoiceTemplate: this.normaliseInvoiceTemplate(company.invoiceTemplate),
+                    alternateItemRows: company.alternateItemRows !== false,
                     overdueFirstReminderDays: Number(company.overdueFirstReminderDays) || 3,
                     overdueRepeatReminderDays: Number(company.overdueRepeatReminderDays) || 7,
                     overdueMaxReminders: Number(company.overdueMaxReminders) || 3
@@ -6430,7 +6505,7 @@
                 const changed = keys => keys.some(key => String(before[key] ?? '') !== String(after[key] ?? ''));
                 const meta = {
                     business_profile_changed: changed(['name', 'address', 'phone', 'mobile', 'email', 'taxId', 'additionalInfo']),
-                    branding_changed: changed(['logo', 'brandColor', 'logoPosition']),
+                    branding_changed: changed(['logo', 'brandColor', 'logoPosition', 'invoiceTemplate', 'alternateItemRows']),
                     numbering_changed: changed(['invoicePrefix', 'quotePrefix', 'creditPrefix', 'defaultCurrency']),
                     document_defaults_changed: changed(['defaultNotes', 'defaultTerms', 'invoiceFooter']),
                     payment_instructions_changed: changed(['paymentDetails']),

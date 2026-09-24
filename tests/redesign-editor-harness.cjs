@@ -61,10 +61,10 @@ const navigationEnd = protectedMethods.indexOf('            ownerRecoveryTokenFr
 assert.ok(navigationStart >= 0 && navigationEnd > navigationStart, 'reviewed navigation block must remain bounded');
 protectedMethods = protectedMethods.slice(0, navigationStart) + '            /* navigation methods reviewed separately */\n' + protectedMethods.slice(navigationEnd);
 protectedMethods = protectedMethods.replace(/\r?\n\s*window\.(addEventListener|removeEventListener)\('popstate', this\.handlePopState\);/g, '');
-assert.equal(hash(protectedMethods), '6bfcedaff7712bdb38bcc95a4d41118b10774a9509a9d3c55767ae6c530df486', 'all reviewed methods/startup must remain unchanged');
+assert.equal(hash(protectedMethods), 'f3e5cb4c5b0292499ce334d30d11b8b001bf745b359de8ca7de66b0bc16bff3a', 'all reviewed methods/startup must remain unchanged');
 const canvasStart = app.indexOf('\n', app.indexOf('<div id="invoice-canvas"'));
 const canvasEnd = app.indexOf('\n                </div>', app.indexOf('company.invoiceFooter', canvasStart)) + 23;
-assert.equal(hash(app.slice(canvasStart, canvasEnd)), '7610b7566cd61d6220411352f42c1a4cb882c0dccd5cae0e72bc4832f4b926f2', 'reviewed printable document content must remain unchanged');
+assert.equal(hash(app.slice(canvasStart, canvasEnd)), 'eefab2c82f9725e7668d835b67ff679499bf2e8748a293106f541a9167dcdfee', 'reviewed printable document and template bindings must remain unchanged');
 assert.equal((app.match(/id="invoice-canvas"/g) || []).length, 1);
 assert.match(app, /@click="exportPDF\(draft\)"/);
 assert.match(app, /@click="sendDocumentEmail\(draft\)"[^>]*>Review &amp; send/);
