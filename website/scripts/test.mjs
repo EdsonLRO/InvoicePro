@@ -95,6 +95,7 @@ for (const page of [...pages, notFoundPage]) {
   assert.match(html, /class="header-install-shortcut" href="\/help\/install-tallyo\/" aria-label="Install Tallyo"/, `installation shortcut stays visible beside the collapsed navigation for ${page.route}`);
   assert.match(html, /class="nav-install-link" href="\/help\/install-tallyo\/"/, `prominent installation route for ${page.route}`);
   assert.match(html, /class="nav-install-link"[\s\S]{0,500}<span>Install Tallyo<\/span>/, `installation action is visibly labelled for ${page.route}`);
+  assert.match(html, /<div class="nav-links">[\s\S]*>Help<\/a>[\s\S]*<\/div>\s*<a class="nav-install-link"[\s\S]*<\/a>\s*<div class="nav-actions"><a class="login-link"/, `Install Tallyo sits independently between Help and Log in for ${page.route}`);
   assert.match(html, /type="module" src="\/assets\/helper\.js\?v=[a-f0-9]{12}"/, `Helper behaviour loads for ${page.route}`);
   assert.equal((html.match(/id="helper-knowledge"/g) || []).length, 1, `one reviewed Helper knowledge source for ${page.route}`);
   if (page.helper) {
@@ -144,6 +145,9 @@ for (const id of ["cta_header_create_account", "cta_hero_create_account", "cta_h
 }
 assert.match(home, /Northstar Home Services/);
 assert.match(home, /Willow &amp; Pine Studio/);
+assert.match(home, /one calm workspace with quotes, repeat invoices/, "homepage hero uses the approved punctuation-free wording");
+assert.doesNotMatch(home, /workspace\s+—/, "homepage hero does not restore the removed dash");
+assert.match(home, /footer-group footer-account[\s\S]*?<h2>Product<\/h2>[\s\S]*?<h2>Learn<\/h2>[\s\S]*?<h2>Legal<\/h2>[\s\S]*?footer-intro/, "footer places the four evenly spaced link groups before the brand block");
 assert.equal((home.match(/class="product-demo /g) || []).length, 0, "home does not duplicate the full product tour");
 assert.match(home, /Set up your business[\s\S]*Repeat regular invoices/, "home shows the complete six-step workflow in plain language");
 assert.equal((home.match(/class="capability-marquee-group"/g) || []).length, 2, "home duplicates the capability set for a seamless running strip");
@@ -433,23 +437,29 @@ assert.match(styles, /\.motion-ready \.home-how \.workflow-steps li\[data-active
 assert.match(styles, /\.faq-preview \{ padding-block: clamp\(1\.35rem, 2vw, 1\.8rem\); \}/, "FAQ preview remains compact");
 assert.match(styles, /\.section-cta \{[^}]*margin-top: var\(--layout-gap\)/, "final CTA uses the same approved panel gap");
 assert.match(styles, /\.section-cta \{[^}]*backdrop-filter: blur\(24px\) saturate\(155%\)/, "final CTA uses the liquid-glass treatment");
+assert.match(styles, /\.section-cta \{[^}]*box-shadow: 0 16px 34px -26px/, "blue CTA cards use a contained rounded shadow without a square bottom strip");
 assert.match(styles, /\.workflow-outcome \.section-heading \{ max-width: none; \}/, "feature workflow uses the available panel width");
 assert.match(styles, /\.feature-hero-summary p::before \{[^}]*translateX\(-102%\)/, "feature summary rows include the reference-style hover wash");
 assert.match(styles, /\.workflow-outcome-step \{[^}]*box-shadow: 0 6px 16px/, "connected workflow cards keep an individual soft shadow");
-assert.match(styles, /@media \(max-width: 71\.99rem\) \{[^}]*\.workflow-outcome \{ min-height: 0 !important;/s, "connected workflow switches to manual scrolling below the full desktop layout");
+assert.match(styles, /@media \(max-width: 71\.99rem\) \{[\s\S]*?\.workflow-outcome \{ min-height: 0 !important;/, "connected workflow switches to manual scrolling below the full desktop layout");
 assert.match(styles, /\.tour-index \{ position: relative;/, "product tour index scrolls away with the page");
-assert.match(styles, /\.primary-nav \{ position: static;[^}]*justify-content: flex-end;/, "desktop navigation reserves the right edge for account actions");
-assert.match(styles, /\.nav-links \{ position: absolute; left: 50%;[^}]*translateX\(-50%\); \}/, "desktop navigation links are centred within the complete header pill");
+assert.match(styles, /\.primary-nav\{[^}]*display:grid;[^}]*grid-template-columns:4fr auto 1fr auto 1fr auto;/, "desktop navigation preserves the centred option group while balancing the spaces around the installation link");
+assert.match(styles, /\.nav-links\{grid-column:2;[^}]*\}[\s\S]*\.nav-install-link\{grid-column:4\}[\s\S]*\.nav-actions\{grid-column:6;/, "desktop navigation centres Install Tallyo between Help and Log in");
 assert.match(styles, /\.header-inner \{[^}]*width: min\(80rem, calc\(100% - 2rem\)\)/, "desktop navigation pill uses the wider approved frame");
 assert.match(styles, /\.nav-links, \.nav-actions \{[^}]*flex-wrap: nowrap;[^}]*white-space: nowrap;/, "desktop navigation groups cannot wrap while scrolling");
-assert.match(styles, /\.nav-links a, \.login-link \{[^}]*white-space: nowrap;/, "desktop navigation labels stay on one line");
-assert.match(styles, /\.nav-install-link \{[^}]*display: inline-flex;[^}]*border: 1px solid/, "installation action is visually distinct in the navigation");
+assert.match(styles, /\.nav-links a,\.nav-install-link,\.login-link\{[^}]*white-space:nowrap/, "desktop navigation labels stay on one line");
+assert.match(styles, /\.nav-install-link\{[^}]*display:inline-flex;[^}]*color:var\(--blue-600\);/, "installation action remains a proportional icon-and-text link");
+assert.doesNotMatch(styles, /\.nav-install-link\s*\{[^}]*(?:border|background):/, "installation link has no persistent button treatment");
+assert.match(styles, /#cta_header_create_account\{[^}]*padding:\.78rem \.1rem;[^}]*border:0;[^}]*color:var\(--slate-700\);[^}]*font-size:\.92rem;[^}]*font-weight:680/, "Create account matches the navigation height, typography and colour");
+assert.doesNotMatch(styles, /#cta_header_create_account\{[^}]*border-bottom/, "Create account has no underline treatment");
+assert.match(styles, /@media \(max-width: 71\.99rem\) \{[^}]*\.nav-actions\{align-items:flex-start\}[\s\S]*?\.nav-actions #cta_header_create_account\{padding:\.78rem \.85rem\}/, "collapsed navigation aligns Create account directly below Log in");
 assert.match(styles, /@media \(max-width: 22rem\) \{[^}]*\.header-inner \{ gap: 0\.5rem; \}/s, "very narrow headers preserve separate install and menu touch targets");
 assert.match(styles, /\.install-device-grid \{ display: grid; gap: var\(--layout-gap\); \}/, "installation device cards use the approved spacing");
 assert.match(styles, /\.browser-install-target\s*\{[^}]*background:\s*var\(--blue-100\);/, "installation symbol is visibly highlighted in browser illustrations");
 assert.match(styles, /\.site-header\.is-condensed \.header-inner \{ width: min\(77rem, calc\(100% - 2\.5rem\)\); \}/, "scrolled navigation shrinks subtly without crowding its labels");
 assert.match(styles, /\.plan-card \.button \+ \.plan-note \{ margin-top: 0\.75rem; \}/, "pricing note cannot collide with the subscription action");
 assert.doesNotMatch(styles, /\.page-hero \+ \.section \{[^}]*padding-top:/, "page headings do not add a second section gap");
+assert.match(styles, /main > \.section:last-of-type\{margin-bottom:var\(--layout-gap\)\}/, "the final page section keeps the standard gap before the footer even when a hidden dialog follows it");
 assert.match(styles, /\.plan-card \{[^}]*height: 100%;[^}]*flex-direction: column;/, "pricing cards fill the shared row height");
 assert.match(styles, /\.plan-grid \{ align-items: stretch; \}/, "pricing cards use equal heights");
 assert.match(styles, /\.plan-card:not\(\.plan-card-featured\) \.button \{ margin-top: 0; \}/, "the free-plan action remains in the natural reading flow");

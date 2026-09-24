@@ -1,5 +1,21 @@
 # Active programme: COMM-001 commercial launch integration
 
+## WEBSITE-NAV-001 — Refine the website navigation and footer
+
+Task ID: WEBSITE-NAV-001
+Title: Refine the installation link, homepage wording and footer layout
+Priority: Low
+Status: Release approved; publication in progress
+Phase: Release
+Owner role: Product owner
+Risk level: Low; public website layout, copy and static tests only
+Branch: `codex/center-install-nav`
+Scope: keep the installation icon and text link, move it into the centred desktop navigation immediately after Help and before the account actions, preserve the existing mobile installation shortcut and collapsed-menu order, align Create account directly below Log in in the collapsed menu and match its plain text styling without an underline, remove the persistent installation-button treatment, remove the remaining homepage hero dash, preserve the standard section gap before the footer, contain shared blue CTA shadows within their rounded silhouette, and reorganise the footer into evenly spaced Account, Product, Learn and Legal columns followed by the Tallyo brand block
+Excluded: authenticated app source/runtime, installation behavior, website content beyond the exact homepage and footer edits above, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund and unrelated change
+Validation: complete 26-route-plus-404 website suite, Helper/Analytics/Free Invoice Maker release gates, desktop and condensed navigation review, desktop footer and shared blue CTA visual review, and navigation browser geometry checks passed; the original Features-to-Help position is preserved, the Help-to-Install and Install-to-Log-in gaps match in both normal and condensed states, Create account shares the desktop links' exact height and vertical centre, the Free Invoice Maker keeps a measured 20px gap before the footer despite its trailing hidden dialog, blue CTA shadows no longer form a square bottom strip, the mobile page has no horizontal overflow, and the collapsed Create account action remains directly below Log in at 390px with matching computed font and colour and no underline
+Release approval: On 2026-09-24 the Owner approved the reviewed app and website changes for production publication.
+Next action: publish through the normal website production workflow and verify the public navigation, footer gap and shared blue CTA presentation
+
 ## UX-BRANDING-001 — Curated invoice templates and row styling
 
 Task ID: UX-BRANDING-001

@@ -31,7 +31,7 @@ const home = `
     <div class="hero-copy" data-hero-copy>
       <p class="hero-badge"><span aria-hidden="true"></span>Invoicing built for UK small businesses</p>
       <h1 id="home-title"><span>Professional invoices.</span><span class="hero-title-accent">Clearer payment tracking.</span><span>Less admin.</span></h1>
-      <p class="hero-lead">Create, send and follow up from one calm workspace — with quotes, repeat invoices, reminders and payment updates kept together.</p>
+      <p class="hero-lead">Create, send and follow up from one calm workspace with quotes, repeat invoices, reminders and payment updates kept together.</p>
       <div class="cta-row">
         <a class="button button-primary hero-primary-action" id="cta_hero_create_account" data-analytics-placement="hero" data-signup-link href="#">Start with Tallyo <span aria-hidden="true">→</span></a>
         <a class="button button-secondary" id="cta_hero_free_invoice" href="/free-invoice-generator/">Make a free invoice</a>
