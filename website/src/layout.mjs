@@ -229,7 +229,8 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-button><span class="sr-only">Open main menu</span><i></i><i></i><i></i></button>
       <nav class="primary-nav" id="primary-navigation" aria-label="Main navigation" data-navigation>
         <div class="nav-links"><button class="nav-cookie-settings" type="button" data-cookie-settings hidden aria-label="Cookie settings" title="Cookie settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 13.1A8.5 8.5 0 0 1 10.9 3.8 8.5 8.5 0 1 0 20.2 13.1Z"></path><circle cx="8.2" cy="12.1" r="1"></circle><circle cx="12.3" cy="16" r="1"></circle><circle cx="7.3" cy="17.2" r=".8"></circle></svg><span>Cookie settings</span></button>${navMarkup}</div>
-        <div class="nav-actions"><a class="nav-install-link" href="/help/install-tallyo/"${page.route === "/help/install-tallyo/" ? ' aria-current="page"' : ""}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10"></path><path d="m8.5 9.5 3.5 3.5 3.5-3.5"></path><path d="M5 16.5v2A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg><span>Install Tallyo</span></a><a class="login-link" id="cta_login" data-login-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a class="button button-primary button-small" id="cta_header_create_account" data-signup-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a></div>
+        <a class="nav-install-link" href="/help/install-tallyo/"${page.route === "/help/install-tallyo/" ? ' aria-current="page"' : ""}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10"></path><path d="m8.5 9.5 3.5 3.5 3.5-3.5"></path><path d="M5 16.5v2A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg><span>Install Tallyo</span></a>
+        <div class="nav-actions"><a class="login-link" id="cta_login" data-login-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a class="button button-primary button-small" id="cta_header_create_account" data-signup-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a></div>
       </nav>
     </div>
   </header>
@@ -237,9 +238,9 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
   ${helperWidgetMarkup}
   <footer class="site-footer">
     <div class="footer-main">
-      <div class="footer-intro"><a class="brand brand-footer" href="/" aria-label="Tallyo home"><img class="brand-wordmark" src="${assetUrl("/assets/tallyo-wordmark-white.png")}" alt="" aria-hidden="true"><span class="sr-only">Tallyo</span></a><p>Professional invoices, clearer payment tracking and less repeated admin for UK small businesses.</p></div>
+      <div class="footer-group footer-account"><h2>Account</h2><a data-login-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/install-tallyo/">Install Tallyo</a></div>
       ${footerMarkup}
-      <div class="footer-group"><h2>Account</h2><a data-login-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/install-tallyo/">Install Tallyo</a></div>
+      <div class="footer-intro"><a class="brand brand-footer" href="/" aria-label="Tallyo home"><img class="brand-wordmark" src="${assetUrl("/assets/tallyo-wordmark-white.png")}" alt="" aria-hidden="true"><span class="sr-only">Tallyo</span></a><p>Professional invoices, clearer payment tracking and less repeated admin for UK small businesses.</p></div>
     </div>
     <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo.</p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
   </footer>
