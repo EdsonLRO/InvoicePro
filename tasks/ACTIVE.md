@@ -5,8 +5,8 @@
 Task ID: WEBSITE-NAV-001
 Title: Refine the installation link, homepage wording and footer layout
 Priority: Low
-Status: Release approved; publication in progress
-Phase: Release
+Status: Released and publicly verified on 2026-09-24
+Phase: Complete
 Owner role: Product owner
 Risk level: Low; public website layout, copy and static tests only
 Branch: `codex/center-install-nav`
@@ -14,15 +14,17 @@ Scope: keep the installation icon and text link, move it into the centred deskto
 Excluded: authenticated app source/runtime, installation behavior, website content beyond the exact homepage and footer edits above, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund and unrelated change
 Validation: complete 26-route-plus-404 website suite, Helper/Analytics/Free Invoice Maker release gates, desktop and condensed navigation review, desktop footer and shared blue CTA visual review, and navigation browser geometry checks passed; the original Features-to-Help position is preserved, the Help-to-Install and Install-to-Log-in gaps match in both normal and condensed states, Create account shares the desktop links' exact height and vertical centre, the Free Invoice Maker keeps a measured 20px gap before the footer despite its trailing hidden dialog, blue CTA shadows no longer form a square bottom strip, the mobile page has no horizontal overflow, and the collapsed Create account action remains directly below Log in at 390px with matching computed font and colour and no underline
 Release approval: On 2026-09-24 the Owner approved the reviewed app and website changes for production publication.
-Next action: publish through the normal website production workflow and verify the public navigation, footer gap and shared blue CTA presentation
+Release: PR #182 merged as `ef7d9122cb31d45c6b58065819938545bb33392e`; website deployment `131e7366-51c3-4314-a23a-b5241e56fc98`; asset revision `642f9f9f2588`; protected and bounded public checks passed
+Rollback: website deployment `12413216-58b6-45c7-95dd-958686d49aeb`, retaining the app release while restoring the previous website presentation
+Next action: routine bounded monitoring only
 
 ## UX-BRANDING-001 — Curated invoice templates and row styling
 
 Task ID: UX-BRANDING-001
 Title: Let each business choose a clear document template and optional alternating item rows
 Priority: Medium
-Status: Release approved; production deployment in progress
-Phase: Release
+Status: Released and publicly verified on 2026-09-24
+Phase: Complete
 Owner role: Product owner
 Risk level: High release boundary because two owner-scoped `company_settings` preferences require an additive production migration and the transactional email PDF function must render the same selected layout
 Branch: `codex/invoice-template-styles`
@@ -34,7 +36,9 @@ Excluded: free-form template building, custom fonts, per-document template overr
 Approval boundary: repository and local fictional-data implementation may proceed; stop before applying the migration, deploying `send-document-email`, merging or publishing the app
 Validation: focused static contract, desktop/mobile browser interaction, four distinct generated PDF attachments, alternating-row on/off behavior, unknown-value fallback, email/quote-send regressions, Edge Function frozen-lock type check, isolated preview transport protections and diff hygiene passed; no live database, provider or email action was used
 Release approval: On 2026-09-24 the Owner approved the reviewed app and website changes for production publication.
-Next action: apply only `20260924112357_invoice_template_preferences.sql`, deploy only `send-document-email`, publish app build `2026.09.24.1`, and run bounded production readback without sending email or changing payment, Auth, secret or unrelated provider state
+Release: PR #183 merged as `46bcc9ac2ca8ad3679dcb8fd1f5dc81e2f03fb88`; migration `20260924112357_invoice_template_preferences.sql` applied; `send-document-email` v60 retains JWT verification; app build `2026.09.24.1` and cache `tallyo-shell-2026-09-24-1` were publicly verified at deployment `5f462120-7bdb-46ee-b0b8-ba2da7df2821`; protected CI and bounded public checks passed
+Rollback: restore app deployment `3b710daf-3ad4-4741-8393-95643fcef8a3` / build `2026.09.23.1` and `send-document-email` v59 source from `3db4db9`; leave the additive migration dormant
+Next action: routine bounded monitoring only
 
 ## WEBSITE-CONTENT-002 — Plain-language workflows and invoice guide
 
