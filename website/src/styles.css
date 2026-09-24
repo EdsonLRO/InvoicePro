@@ -50,7 +50,7 @@ p { color: var(--slate-600); }
 .skip-link:focus { transform: translateY(0); }
 .preview-banner { padding: 0.45rem 1rem; background: var(--mint-100); color: #174f40; text-align: center; font-size: 0.82rem; font-weight: 700; }
 .site-header { position: sticky; top: 0; z-index: 40; padding: 0.65rem 0 0.25rem; background: linear-gradient(180deg, rgba(251,252,255,0.76), rgba(251,252,255,0)); pointer-events: none; }
-.header-inner { position: relative; width: var(--page); min-height: 3.9rem; margin: 0 auto; padding: 0.34rem 0.48rem 0.34rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid rgba(181,190,210,0.38); border-radius: 999px; background: rgba(255,255,255,0.5); box-shadow: 0 12px 36px rgba(26,39,69,0.065); -webkit-backdrop-filter: blur(24px) saturate(155%); backdrop-filter: blur(24px) saturate(155%); pointer-events: auto; transition: width 500ms cubic-bezier(.2,.8,.2,1), min-height 500ms cubic-bezier(.2,.8,.2,1), padding 500ms cubic-bezier(.2,.8,.2,1), border-color 300ms ease, background 300ms ease, box-shadow 300ms ease; }
+.header-inner { position: relative; width: min(80rem, calc(100% - 2rem)); min-height: 3.9rem; margin: 0 auto; padding: 0.34rem 0.62rem 0.34rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid rgba(181,190,210,0.38); border-radius: 999px; background: rgba(255,255,255,0.5); box-shadow: 0 12px 36px rgba(26,39,69,0.065); -webkit-backdrop-filter: blur(24px) saturate(155%); backdrop-filter: blur(24px) saturate(155%); pointer-events: auto; transition: width 500ms cubic-bezier(.2,.8,.2,1), min-height 500ms cubic-bezier(.2,.8,.2,1), padding 500ms cubic-bezier(.2,.8,.2,1), border-color 300ms ease, background 300ms ease, box-shadow 300ms ease; }
 .site-header.is-condensed .header-inner { min-height: 3.45rem; padding-block: 0.24rem; border-color: rgba(181,190,210,0.46); background: rgba(255,255,255,0.68); box-shadow: 0 16px 42px rgba(20,31,63,0.09); }
 .brand { display: inline-flex; align-items: center; color: var(--navy-900); text-decoration: none; }
 .brand-wordmark { width: 7.4rem; height: auto; }
@@ -783,16 +783,17 @@ main > .section { margin-top: var(--layout-gap); }
   body.menu-open { overflow: auto; }
   .menu-button { display: none; }
   .primary-nav { position: static; display: flex; flex: 1; align-items: center; justify-content: flex-end; max-height: none; overflow: visible; padding: 0; border: 0; background: transparent; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
-  .nav-links, .nav-actions { flex-direction: row; align-items: center; }
-  .nav-links { position: absolute; left: 50%; gap: 0.1rem; transform: translateX(-50%); }
+  .brand, .nav-links, .nav-actions { flex-shrink: 0; }
+  .nav-links, .nav-actions { flex-direction: row; flex-wrap: nowrap; align-items: center; white-space: nowrap; }
+  .nav-links { position: absolute; left: 50%; gap: 0.08rem; transform: translateX(-50%); }
   .nav-actions { margin: 0 0.65rem 0 0; padding: 0; border: 0; }
   .nav-cookie-settings { width: 2.45rem; min-height: 2.45rem; justify-content: center; padding: 0; border-radius: 50%; }
   .nav-cookie-settings span { display: none; }
-  .nav-links a, .login-link { position: relative; border-radius: 999px; }
+  .nav-links a, .login-link { position: relative; padding-inline: 0.72rem; border-radius: 999px; letter-spacing: -0.01em; white-space: nowrap; }
   .nav-links a { background: transparent !important; }
   .nav-links a::after { position: absolute; right: 0.85rem; bottom: 0.5rem; left: 0.85rem; height: 2px; border-radius: 999px; background: linear-gradient(90deg, var(--blue-600), var(--mint-500)); content: ""; transform: scaleX(0); transform-origin: right; transition: transform 220ms cubic-bezier(.2,.75,.2,1); }
   .nav-links a:hover::after, .nav-links a[aria-current="page"]::after { transform: scaleX(1); transform-origin: left; }
-  .site-header.is-condensed .header-inner { width: min(68rem, calc(100% - 3.75rem)); }
+  .site-header.is-condensed .header-inner { width: min(77rem, calc(100% - 2.5rem)); }
   .benefit-grid { grid-template-columns: repeat(3, 1fr); }
   .industry-grid { grid-template-columns: repeat(3, 1fr); }
   .plan-grid { grid-template-columns: repeat(4, 1fr); }

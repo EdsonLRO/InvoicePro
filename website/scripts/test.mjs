@@ -416,6 +416,10 @@ assert.match(styles, /@media \(max-width: 71\.99rem\) \{[^}]*\.workflow-outcome 
 assert.match(styles, /\.tour-index \{ position: relative;/, "product tour index scrolls away with the page");
 assert.match(styles, /\.primary-nav \{ position: static;[^}]*justify-content: flex-end;/, "desktop navigation reserves the right edge for account actions");
 assert.match(styles, /\.nav-links \{ position: absolute; left: 50%;[^}]*translateX\(-50%\); \}/, "desktop navigation links are centred within the complete header pill");
+assert.match(styles, /\.header-inner \{[^}]*width: min\(80rem, calc\(100% - 2rem\)\)/, "desktop navigation pill uses the wider approved frame");
+assert.match(styles, /\.nav-links, \.nav-actions \{[^}]*flex-wrap: nowrap;[^}]*white-space: nowrap;/, "desktop navigation groups cannot wrap while scrolling");
+assert.match(styles, /\.nav-links a, \.login-link \{[^}]*white-space: nowrap;/, "desktop navigation labels stay on one line");
+assert.match(styles, /\.site-header\.is-condensed \.header-inner \{ width: min\(77rem, calc\(100% - 2\.5rem\)\); \}/, "scrolled navigation shrinks subtly without crowding its labels");
 assert.match(styles, /\.plan-card \.button \+ \.plan-note \{ margin-top: 0\.75rem; \}/, "pricing note cannot collide with the subscription action");
 assert.doesNotMatch(styles, /\.page-hero \+ \.section \{[^}]*padding-top:/, "page headings do not add a second section gap");
 assert.match(styles, /\.plan-card \{[^}]*height: 100%;[^}]*flex-direction: column;/, "pricing cards fill the shared row height");
