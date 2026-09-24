@@ -221,7 +221,7 @@ for (const root of roots) {
     try {
       if (root.dataset.defaultType === "Invoice") emitAnalyticsEvent("download_invoice");
       window.print();
-      status.textContent = "Your browser's PDF save window opened. Choose ‘Save as PDF’ to finish the download.";
+      status.textContent = "Your browser's PDF save window opened. Choose ‘Save as PDF’ and switch off ‘Headers and footers’ if your browser shows that option.";
     } catch {
       status.textContent = "The PDF save window could not open. Try Continue download again.";
     }

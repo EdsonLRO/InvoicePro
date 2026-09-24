@@ -29,7 +29,7 @@ const pricingDescription = siteConfig.subscriptionCheckoutEnabled
 const home = `
   <section class="hero home-hero" aria-labelledby="home-title" data-home-hero>
     <div class="hero-copy" data-hero-copy>
-      <p class="hero-badge"><span aria-hidden="true"></span>Invoicing built for UK small businesses</p>
+      <p class="hero-badge"><span aria-hidden="true"></span>Invoicing built around your business</p>
       <h1 id="home-title"><span>Professional invoices.</span><span class="hero-title-accent">Clearer payment tracking.</span><span>Less admin.</span></h1>
       <p class="hero-lead">Create, send and follow up from one calm workspace with quotes, repeat invoices, reminders and payment updates kept together.</p>
       <div class="cta-row">
@@ -196,9 +196,9 @@ const faq = `
   <section class="section article-next" aria-label="Next steps"><a href="/pricing/">Compare pricing</a><a href="/help/">Open the Help Centre</a></section>`;
 
 const about = `
-  <section class="page-hero"><p class="eyebrow">About Tallyo</p><h1>Invoicing software shaped around everyday small-business work.</h1><p>Tallyo makes it easier to create professional documents, see what has been paid and handle regular invoices without repeating the same setup.</p></section>
-  <section class="section split"><div><p class="eyebrow">Why Tallyo</p><h2>Small businesses need clarity, not another complicated system.</h2><p>Tallyo brings quotes, invoices, customers, payments and recurring work together while keeping the interface focused on the next useful action.</p></div><div class="principles"><p><strong>Straightforward</strong><span>Plain language and a focused workflow.</span></p><p><strong>Honest</strong><span>Real features and limitations, without invented proof.</span></p><p><strong>Protective</strong><span>Account and customer-data controls treated as product requirements.</span></p></div></section>
-  <section class="section section-soft" aria-labelledby="audience-title"><div class="section-heading"><p class="eyebrow">Who it serves</p><h2 id="audience-title">Built broadly for UK small businesses.</h2><p>Freelancers, sole traders, consultants, tradespeople and independent service companies can adapt the same core workflow to their work.</p></div></section>
+  <section class="page-hero"><p class="eyebrow">About Tallyo</p><h1>Invoicing software shaped around your everyday work.</h1><p>Tallyo makes it easier to create professional documents, see what has been paid and handle regular invoices without repeating the same setup.</p></section>
+  <section class="section split"><div><p class="eyebrow">Why Tallyo</p><h2>Your business needs clarity, not another complicated system.</h2><p>Tallyo brings quotes, invoices, customers, payments and recurring work together while keeping the interface focused on the next useful action.</p></div><div class="principles"><p><strong>Straightforward</strong><span>Plain language and a focused workflow.</span></p><p><strong>Honest</strong><span>Real features and limitations, without invented proof.</span></p><p><strong>Protective</strong><span>Account and customer-data controls treated as product requirements.</span></p></div></section>
+  <section class="section section-soft" aria-labelledby="audience-title"><div class="section-heading"><p class="eyebrow">Who it serves</p><h2 id="audience-title">Built to fit your business.</h2><p>Freelancers, sole traders, consultants, tradespeople and service companies can adapt the same core workflow to their work.</p></div></section>
   ${finalCta({ title: "See whether Tallyo fits your day-to-day work.", copy: "Explore the real workflows or create one invoice free before opening an account.", secondaryLabel: "Make a free invoice", secondaryHref: "/free-invoice-generator/" })}`;
 
 const invoiceGuide = `
@@ -264,7 +264,7 @@ const invoiceConversionDialog = `
     ${marketingOverviewForm}
     <div class="generator-conversion-download">
       <button class="button button-secondary" type="button" data-conversion-continue>Continue download</button>
-      <p>No account, email address, marketing consent, subscription or payment card is required.</p>
+      <p>No account, email address, marketing consent, subscription or payment card is required. In the browser window, choose Save as PDF and switch off Headers and footers if that option is enabled.</p>
     </div>
   </dialog>`;
 
@@ -337,7 +337,7 @@ const generatorPage = (defaultType) => {
 };
 
 const foundationPages = [
-  { route: "/", output: "index.html", title: "Invoice software for UK small businesses", description: "Create professional invoices and quotes, record deposits and payments, repeat regular invoices and send chosen overdue reminders with Tallyo.", content: home, schema: "software" },
+  { route: "/", output: "index.html", title: "Invoice software built around your business", description: "Create professional invoices and quotes, record deposits and payments, repeat regular invoices and send chosen overdue reminders with Tallyo.", content: home, schema: "software" },
   { route: "/features/", output: "features/index.html", title: "Invoice, quote and payment tracking features", description: "Explore Tallyo tools for invoices, quotes, recurring invoices, overdue reminders, deposits, payment tracking and activity history.", content: features, schema: "webpage" },
   { route: "/product-tour/", output: "product-tour/index.html", title: "Tallyo invoice software product tour", description: "See how Tallyo creates invoices and quotes, repeats regular invoices, records deposits and payments, sends reminders and keeps activity history.", content: productTour, schema: "webpage" },
   { route: "/pricing/", output: "pricing/index.html", title: "Tallyo pricing — Free Invoice Maker and Tallyo Pro", description: pricingDescription, content: pricing, schema: "webpage" },
@@ -345,15 +345,15 @@ const foundationPages = [
   { route: "/helper/", output: "helper/index.html", title: "Tallyo Helper", description: "Ask Tallyo Helper for reviewed public guidance about current product features, payments, documents, installation and account protection.", content: helper, schema: "webpage", helper: true, scripts: ["/assets/helper.js"] },
   { route: "/help/", output: "help/index.html", title: "Tallyo Help Centre", description: "Find clear step-by-step guidance for invoices, quotes, recurring invoices, overdue reminders, deposits, payments and account access.", content: help, schema: "webpage" },
   { route: "/faq/", output: "faq/index.html", title: "Tallyo frequently asked questions", description: "Plain answers about invoices, quotes, recurring invoices, reminders, deposits, payment tracking, pricing, security and access.", content: faq, schema: "faq" },
-  { route: "/about/", output: "about/index.html", title: "About Tallyo", description: "Learn why Tallyo is building straightforward invoice software for UK small businesses, sole traders and independent service companies.", content: about, schema: "webpage" },
-  { route: "/invoice-guide/", output: "invoice-guide/index.html", title: "What is an invoice? A simple UK small-business guide", description: "Learn what an invoice is, what to include, and how quotes, recurring invoices, reminders, deposits and payment tracking fit together.", content: invoiceGuide, schema: "webpage", breadcrumbs: [{ name: "Home", path: "/" }, { name: "Invoice guide", path: "/invoice-guide/" }] },
+  { route: "/about/", output: "about/index.html", title: "About Tallyo", description: "Learn why Tallyo is building straightforward invoice software around the everyday needs of freelancers, sole traders and service companies.", content: about, schema: "webpage" },
+  { route: "/invoice-guide/", output: "invoice-guide/index.html", title: "What is an invoice? A simple business guide", description: "Learn what an invoice is, what to include, and how quotes, recurring invoices, reminders, deposits and payment tracking fit together.", content: invoiceGuide, schema: "webpage", breadcrumbs: [{ name: "Home", path: "/" }, { name: "Invoice guide", path: "/invoice-guide/" }] },
   { route: "/privacy/", output: "privacy/index.html", title: "Tallyo Privacy Notice", description: "Read how Tallyo uses, shares, protects and retains personal information and how to exercise your data-protection rights.", content: privacyNotice, schema: "webpage" },
   { route: "/cookies/", output: "cookies/index.html", title: "Tallyo Cookie Notice", description: "Read about Tallyo's necessary storage, optional Google Analytics and how to change your Analytics choice.", content: cookieNotice, schema: "webpage" },
   { route: "/data-processing-terms/", output: "data-processing-terms/index.html", title: "Tallyo Business-User Data Processing Terms", description: "Read the data-processing terms that form part of the Tallyo account agreement for UK business users.", content: dataProcessingTerms, schema: "webpage" },
   { route: "/terms/", output: "terms/index.html", title: "Tallyo Terms of Service", description: "Read the terms for Tallyo accounts, subscriptions and connected customer card payments for UK business users.", content: serviceTerms, schema: "webpage" },
   { route: "/email-preferences/", output: "email-preferences/index.html", title: "Tallyo email preferences", description: "Confirmation that an introductory Tallyo email preference has been recorded.", content: emailPreferenceConfirmation, schema: "webpage", noindex: true },
-  { route: "/free-invoice-generator/", output: "free-invoice-generator/index.html", title: "Free invoice generator for UK small businesses", description: "Create, preview and download a professional invoice in your browser without an account. Add your logo, line items, tax and payment details.", content: generatorPage("Invoice"), schema: "webpage", scripts: ["/assets/generator.js"] },
-  { route: "/free-quote-generator/", output: "free-quote-generator/index.html", title: "Free quote generator for UK small businesses", description: "Create, preview and download a professional customer quote in your browser without an account. Set scope, price, tax and a validity date.", content: generatorPage("Quote"), schema: "webpage", scripts: ["/assets/generator.js"] }
+  { route: "/free-invoice-generator/", output: "free-invoice-generator/index.html", title: "Free invoice generator for your business", description: "Create, preview and download a professional invoice in your browser without an account. Add your logo, line items, tax and payment details.", content: generatorPage("Invoice"), schema: "webpage", scripts: ["/assets/generator.js"] },
+  { route: "/free-quote-generator/", output: "free-quote-generator/index.html", title: "Free quote generator for your business", description: "Create, preview and download a professional customer quote in your browser without an account. Set scope, price, tax and a validity date.", content: generatorPage("Quote"), schema: "webpage", scripts: ["/assets/generator.js"] }
 ];
 
 const helpPages = helpArticles.map((article) => ({

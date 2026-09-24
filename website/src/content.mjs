@@ -196,8 +196,8 @@ export const helpArticles = Object.freeze([
 ]);
 
 export const faqs = Object.freeze([
-  { question: "What is Tallyo?", answer: "Tallyo is straightforward invoicing software for small businesses. It keeps customers, quotes, invoices, payments and repeat invoicing together." },
-  { question: "Who is Tallyo for?", answer: "It is designed for UK sole traders, freelancers, consultants, tradespeople and small service businesses that create quotes and invoices." },
+  { question: "What is Tallyo?", answer: "Tallyo is straightforward invoicing software built around your business. It keeps customers, quotes, invoices, payments and repeat invoicing together." },
+  { question: "Who is Tallyo for?", answer: "It is designed for sole traders, freelancers, consultants, tradespeople and service companies that create quotes and invoices." },
   { question: "Can I use Tallyo on different devices?", answer: "Yes. Tallyo works in supported modern browsers on phone, tablet and computer and can be installed for quick access. Authenticated business records require an internet connection." },
   { question: "What documents can I create?", answer: "Tallyo supports invoices, quotes and credit notes. When a customer accepts a quote, Tallyo keeps that quote and creates one linked invoice. It can also email the invoice if you chose that option before sending the quote." },
   { question: "What is a recurring invoice?", answer: "A recurring invoice is a new invoice Tallyo creates on a schedule you choose, such as weekly or monthly. You decide whether each new invoice is emailed automatically or left for review." },

@@ -25,6 +25,15 @@ const { chromium } = require('playwright');
 
     const choices = page.locator('.template-choice');
     assert.equal(await choices.count(), 4, 'Branding offers four curated styles');
+    if (process.env.TALLYO_BRANDING_SCREENSHOT) {
+      await page.setViewportSize({ width: 1280, height: 720 });
+      await page.screenshot({
+        path: process.env.TALLYO_BRANDING_SCREENSHOT,
+        type: 'jpeg',
+        quality: 84,
+      });
+      await page.setViewportSize({ width: 1440, height: 1000 });
+    }
     const signatures = new Set();
     for (const template of ['tallyo', 'basic', 'modern', 'professional']) {
       const choice = page.locator(`.template-choice-${template}`);

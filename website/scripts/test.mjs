@@ -291,8 +291,10 @@ assert.match(generator, /does not provide tax, legal or accounting advice/);
 assert.match(generator, /https:\/\/www\.gov\.uk\/invoicing-and-taking-payment-from-customers\/invoices-what-they-must-include/);
 assert.match(generator, /Use a unique number[\s\S]*Make the dates clear[\s\S]*Check tax and payment details/, "invoice guidance matches invoice intent");
 assert.match(quoteGenerator, /Define the scope[\s\S]*Set a validity date[\s\S]*Record what happens next/, "quote guidance matches quote intent");
-assert.match(generator, /<title>Free invoice generator for UK small businesses \| Tallyo<\/title>/);
-assert.match(quoteGenerator, /<title>Free quote generator for UK small businesses \| Tallyo<\/title>/);
+assert.match(generator, /<title>Free invoice generator for your business \| Tallyo<\/title>/);
+assert.match(quoteGenerator, /<title>Free quote generator for your business \| Tallyo<\/title>/);
+const audiencePositioning = [home, read("about/index.html"), read("faq/index.html"), invoiceGuide, generator, quoteGenerator].join("\n");
+assert.doesNotMatch(audiencePositioning, /UK small[- ]business|small[- ]business(?:es)?/i, "public marketing describes Tallyo around the customer's business rather than a UK small-business segment");
 
 const privacy = read("privacy/index.html");
 const cookies = read("cookies/index.html");
