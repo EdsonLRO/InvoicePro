@@ -18,7 +18,8 @@ Excluded: live Stripe/provider configuration, production migration or Function d
 Acceptance: monthly Checkout uses a fixed seven-day card-required trial only when the server gate is enabled; annual Checkout remains directly paid; an account cannot receive a second created trial; `trialing` grants full access through the trial end; signed `trial_will_end` is recorded; UI wording is fail-closed behind separate app and website build gates; the free maker is unchanged; relevant security, function, migration, client and build tests pass
 Validation: focused trial, Billing foundation/client, subscription guidance, app/PWA, full Node security-harness and complete website suites pass; both changed Edge Functions pass frozen-lock Deno type-check and formatting; candidate app build `2026.09.25.1` succeeds in test mode and live trial build fails without its separate approval; the rollback-only SQL probe is prepared but could not be executed locally because Docker Desktop was not running; no live provider, database, email or payment action was used
 Approval boundary: stop before merge, deployment, migration application, Function publication, Stripe settings, real messages or live charging
-Next action: open the review PR and obtain high-risk review before any merge or test-provider deployment
+Pull request: #190 (`codex/tallyo-trial`), review-only and intentionally unmerged
+Next action: obtain high-risk code review and the recorded external legal/Owner approvals before any merge, test-provider deployment or public activation
 
 ## HELPER-CONVERSATION-001 — Session-based public Helper conversation
 
