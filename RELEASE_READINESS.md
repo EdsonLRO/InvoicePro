@@ -1,5 +1,13 @@
 # Tallyo Release Readiness Checklist
 
+## Abandoned subscription Checkout recovery — released and verified, 2026-09-25
+
+The Owner approved PR #192 and the focused production deployment. PR #192 merged through the protected workflow as `827a3628edac6474d138d78b7ed52df05ed69679`; both post-merge Security and Pages workflows passed. Only `create-billing-checkout` was deployed, advancing to v32 with JWT verification retained. Deployed source read-back exactly matches the merge, contains the reviewed Stripe Session-expiry path and no longer contains the wait-for-expiry message. A no-credential request returned HTTP 401 before Checkout logic.
+
+A matching verified open Checkout continues to resume. A different-plan or changed-server-trial request verifies the existing Session's account, Customer, plan, trial terms and provider mode, expires that open Session through Stripe, clears only its exact claim, reacquires the claim, re-checks for a non-terminal subscription and creates the selected Checkout. Provider-confirmed completion or any ownership/state uncertainty fails closed. No migration, RLS, grant, Stripe configuration, secret, price, trial, cancellation, entitlement or webhook behavior changed. Validation created no real Checkout, subscription, charge, refund or email.
+
+Rollback, if required, is to restore `create-billing-checkout` v31 source from pre-release `ee79df4` with JWT verification retained. Do not delete provider or database evidence manually.
+
 ## Seven-day subscription trial — released and verified, 2026-09-25
 
 The Owner explicitly accepted the remaining legal and commercial risk, elected to proceed without external professional review and approved the bounded live release. PR #190 merged through the protected workflow as `acbfc8616f687adcfca12c0e1e27508e6d0bd92f`. A current scheduled backup was confirmed before change. Additive migration `20260925110523_seven_day_billing_trial.sql` is applied and its rollback-only production probes passed. `create-billing-checkout` v30 retains JWT verification and `stripe-billing-webhook` v29 retains raw-body Stripe-signature verification. The server trial gates are enabled.

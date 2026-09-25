@@ -2,6 +2,8 @@
 
 > Seven-day trial released (2026-09-25, PR #190): `20260925110523_seven_day_billing_trial.sql` is applied. `create-billing-checkout` v30 retains JWT verification; `stripe-billing-webhook` v29 retains provider-signature verification. The live Stripe destination listens to the reviewed 11 events, including `customer.subscription.trial_will_end`, and both server trial gates are enabled. The public app and website gates are also enabled. Do not change duration, reminder timing, price, provider mode or cancellation behavior without a new reviewed release. See `docs/legal/TRIAL_SUBSCRIPTION_REVIEW.md` and `RELEASE_READINESS.md`.
 >
+> Abandoned Checkout recovery released (2026-09-25, PR #192): `create-billing-checkout` v32 retains JWT verification. A verified matching open Session resumes; a verified different-plan open Session is expired through Stripe before its exact claim is cleared and the requested plan is created. Completed or uncertain Sessions remain fail-closed. No migration, RLS, grant, secret, provider configuration, price, trial, entitlement or webhook change was made. See `docs/architecture/STRIPE_BILLING.md` and `RELEASE_READINESS.md`.
+>
 > Owner Console released under exact approval (2026-09-11, PR #152): migration `20260911170410` is applied; `owner-account-admin` v1 and `mfa-recovery` v33 retain JWT verification; app build `2026.09.11.1` is live. The protected `TALLYO_OWNER_USER_ID` is configured and its value must never be committed or shown in evidence. Identical complimentary-access migration history was repaired from `20260909122037` to `20260909115547` without rerunning schema changes. See `RELEASE_READINESS.md` for verification limits and rollback.
 >
 > How Supabase is used in this app. For another developer or AI coding agent.
