@@ -63,6 +63,7 @@ assert.match(websiteConfig, /The subscription trial requires subscription Checko
 assert.match(websiteConfig, /TALLYO_SUBSCRIPTION_TRIAL_PUBLIC_RELEASE_APPROVED/);
 assert.match(websiteConfig, /subscriptionTrialEnabled: subscriptionTrialRequested/);
 assert.match(websitePages, /siteConfig\.subscriptionTrialEnabled[\s\S]*?Start 7-day free trial/);
+assert.match(websitePages, /isInvoice && siteConfig\.subscriptionTrialEnabled[\s\S]*?cta_generator_start_trial[\s\S]*?data-subscription-link[\s\S]*?Start 7-day free trial/);
 assert.match(commercialOffer, /A card is required[\s\S]*?cancel online[\s\S]*?£8 per month[\s\S]*?email you 3 days before/i);
 assert.match(app, /Start 7-day free trial · then £8\/month/);
 assert.match(app, /A card is required/);

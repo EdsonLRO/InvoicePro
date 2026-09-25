@@ -278,6 +278,9 @@ const emailPreferenceConfirmation = `
 const generatorPage = (defaultType) => {
   const lowerType = defaultType.toLowerCase();
   const isInvoice = defaultType === "Invoice";
+  const trialAction = isInvoice && siteConfig.subscriptionTrialEnabled
+    ? `<a class="button button-secondary generator-trial-action" id="cta_generator_start_trial" data-analytics-placement="generator" data-signup-link data-subscription-link href="#" target="_blank" rel="noopener">Start 7-day free trial</a>`
+    : "";
   const guidance = isInvoice
     ? `<h2 id="generator-guidance-title">Before you send the invoice</h2><p>Check the invoice number, issue date, supply date when relevant, customer details, due date and payment instructions.</p><p>VAT-registered businesses may need additional information. This free maker does not produce the required sterling VAT totals for foreign-currency VAT invoices.</p><p><a href="/invoice-guide/">Read the simple invoice guide</a> or check the <a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">current GOV.UK invoice requirements</a>. Tallyo does not provide tax, legal or accounting advice.</p>`
     : `<h2 id="generator-guidance-title">Before you send the quote</h2><p>Describe the work clearly, confirm the price and tax treatment, and set a realistic valid-until date.</p><p>Add any scope, exclusions or payment expectations the customer should understand before deciding.</p><p>A quote records what you propose. It does not replace advice about contracts, tax or your legal obligations.</p>`;
@@ -322,7 +325,7 @@ const generatorPage = (defaultType) => {
           <label class="wide">Notes<textarea name="notes" rows="3" maxlength="500"></textarea></label>
           <label class="wide">Payment instructions<textarea name="paymentInstructions" rows="3" maxlength="500"></textarea></label>
         </div></fieldset></section>
-        <div class="generator-actions"><a class="button button-secondary" href="#document-preview">Preview</a><button class="button button-primary" type="button" data-print>Download PDF</button><button class="text-button generator-clear" type="reset">Clear everything</button></div>
+        <div class="generator-actions"><a class="button button-secondary" href="#document-preview">Preview</a><button class="button button-primary" type="button" data-print>Download PDF</button>${trialAction}<button class="text-button generator-clear" type="reset">Clear everything</button></div>
         <p class="generator-status" data-generator-status role="status" aria-live="polite"></p>
       </form>
       <aside class="generator-guidance" aria-labelledby="generator-guidance-title">${guidance}</aside>

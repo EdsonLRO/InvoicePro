@@ -747,6 +747,7 @@ main > .section:last-of-type{margin-bottom:var(--layout-gap)}
   .generator-fields .wide { grid-column: auto; }
   .generator-actions { display: grid; grid-template-columns: 1fr 1.25fr; }
   .generator-actions .button { width: 100%; }
+  .generator-actions .generator-trial-action { grid-column: 1 / -1; }
   .generator-actions .generator-clear { grid-column: 1 / -1; justify-self: center; margin-left: 0; }
   .generator-preview-heading { align-items: end; }
   .generator-preview-heading .button { display: none; }
