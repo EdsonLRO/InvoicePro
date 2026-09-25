@@ -7,7 +7,9 @@ adapter. Source remains disabled by default, while the public production website
 explicitly enables the reviewed AI path through its approved Cloudflare
 configuration. The deterministic browser-local matcher remains first in the
 request path and continues to answer exact reviewed questions without an AI
-request.
+request. Greetings, thanks and simple goodbyes also resolve locally with a
+natural conversational reply, so they do not consume a provider request or
+appear as failed product searches.
 
 The reviewed catalogue now covers 44 current product and workflow topics. For
 an unmatched question, the server selects the most relevant reviewed entries by
@@ -61,11 +63,13 @@ disabled, no AI endpoint call is attempted and the current browser-local
 behaviour remains unchanged. When enabled in a reviewed preview:
 
 - exact reviewed answers and safety boundaries still resolve locally;
+- greetings and simple acknowledgements receive a warm local reply;
 - only an unmatched general product question is sent to the same-origin
   endpoint;
 - the form exposes an accessible busy state;
 - insufficient guidance, rate limiting and temporary provider failure remain
-  visibly distinct without exposing provider detail;
+  visibly distinct without exposing provider detail, using helpful visitor
+  language rather than provider or policy terminology;
 - clearing the conversation invalidates an in-flight answer;
 - the page explains that the question is sent securely to OpenAI and that
   Tallyo does not save the conversation.

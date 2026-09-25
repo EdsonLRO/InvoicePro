@@ -1,5 +1,23 @@
 # Active programme: COMM-001 commercial launch integration
 
+## HELPER-CONVERSATION-001 — Friendly, natural public Helper conversation
+
+Task ID: HELPER-CONVERSATION-001
+Title: Make greetings, reviewed answers and unsupported-question guidance feel helpful and conversational
+Priority: Medium
+Status: Implementation Complete
+Phase: Review
+Owner role: Product owner
+Risk level: Medium implementation with the existing high-risk public-AI release boundary unchanged
+Branch: `codex/helper-friendly-conversation`
+Scope: handle greetings and simple conversational acknowledgements locally; make reviewed and AI-composed answers warmer, more fluent and more useful; replace the defensive no-answer wording with guided topics and next steps; add focused regression coverage
+Files locked: `website/src/helper-core.mjs`, `website/src/helper.js`, `website/functions/lib/public-helper.mjs`, `website/content/helper-knowledge.json`, `website/content/helper-ai-adapter.md`, `website/scripts/test.mjs`, `website/scripts/test-public-helper.mjs`, `tasks/ACTIVE.md`
+Security and privacy boundary: preserve local-first answers, exact-origin and rate-limit controls, reviewed-only provider context, strict output, `store: false`, no application prompt/answer logging, no account/private-record access and no tools. Greetings and acknowledgements must not call OpenAI.
+Legal disposition: no new provider, data category, retention, account access, automated decision or public legal claim. Existing Privacy Notice and public-AI conditions remain sufficient for repository implementation; production publication remains a release boundary.
+Acceptance: “hi” receives a warm local welcome with useful examples; thanks receives a natural local acknowledgement; unsupported questions invite a clearer question and suggest relevant topics; AI instructions require concise conversational wording; boundaries and fail-closed behavior remain intact
+Validation: complete website suite passes for 26 routes plus 404, including public Helper fail-closed/mock-provider, Analytics and Free Invoice Maker conversion/consent checks. Local browser verification confirms “hi” receives the friendly welcome and an unrelated question receives useful topic guidance. No live OpenAI request was made and the existing key/provider configuration was not changed.
+Next action: Owner review of the open local Helper preview, then one bundled approval for PR merge and normal website publication
+
 ## HELPER-GROUNDING-001 — Broader grounded public product answers
 
 Task ID: HELPER-GROUNDING-001

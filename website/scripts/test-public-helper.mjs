@@ -308,6 +308,13 @@ assert.equal(response.status, 200);
 assert.equal((await body(response)).source, "reviewed");
 assert.equal(providerCalls, 0, "exact reviewed answers never call the provider");
 
+response = await run(request("Hi"));
+assert.equal(response.status, 200);
+const greetingReply = await body(response);
+assert.equal(greetingReply.source, "conversation");
+assert.match(greetingReply.answer, /happy to help/i);
+assert.equal(providerCalls, 0, "greetings never call the provider");
+
 response = await run(request("How does Tallyo make everyday admin easier?"), {
   ...baseEnv,
   AI_HELPER_RATE_LIMITER: undefined
@@ -503,6 +510,8 @@ const apiSource = readFileSync(join(websiteRoot, "functions", "api", "helper.js"
 assert.doesNotMatch(functionSource, /\bsk-(?:proj-)?[A-Za-z0-9_-]{16,}\b/);
 assert.doesNotMatch(functionSource, /console\.(?:log|info|warn|error)/);
 assert.match(functionSource, /store: false/);
+assert.match(functionSource, /sound like a helpful person, not a manual or policy notice/);
+assert.match(functionSource, /usually two or three sentences/);
 assert.doesNotMatch(functionSource, /SUPABASE|STRIPE|RESEND|service_role/i);
 assert.match(apiSource, /applyConnectPaymentCopy/);
 assert.match(apiSource, /connectPaymentsPublished/);

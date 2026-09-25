@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "no
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { helpArticles, notFoundPage, pages, productScenes } from "../src/pages.mjs";
-import { findHelperAnswer, findRelevantHelperEntries, futurePublicAiAdapter } from "../src/helper-core.mjs";
+import { findHelperAnswer, findRelevantHelperEntries, futurePublicAiAdapter, noAnswer } from "../src/helper-core.mjs";
 import { APPROVED_ANALYTICS_EVENTS, GA4_MEASUREMENT_ID } from "../../analytics-consent.mjs";
 import { calculateDocument, calculationPolicy, formatMoney, parseMoney, parsePercent, parseQuantity } from "../src/document-calculator.mjs";
 import {
@@ -266,7 +266,15 @@ assert.ok(findRelevantHelperEntries(helperKnowledge, "What happens after a clien
   .some((entry) => entry.id === "quote-acceptance"));
 assert.ok(findRelevantHelperEntries(helperKnowledge, "Can I schedule invoices and email them automatically?")
   .some((entry) => entry.id === "recurring-invoices"));
+for (const greeting of ["hi", "Hello", "hey there", "Good morning Tallyo"]) {
+  const reply = findHelperAnswer(helperKnowledge, greeting);
+  assert.equal(reply.reason, "conversation", `friendly local greeting for ${greeting}`);
+  assert.match(reply.answer, /happy to help/i);
+}
+assert.match(findHelperAnswer(helperKnowledge, "thank you").answer, /welcome/i);
 assert.equal(findHelperAnswer(helperKnowledge, "Can you tell me the weather?").reason, "no-answer");
+assert.match(noAnswer.answer, /I’d still like to help/);
+assert.doesNotMatch(noAnswer.answer, /reviewed guidance|I will not guess/i);
 assert.equal(findHelperAnswer(helperKnowledge, "My password is secret").reason, "sensitive");
 assert.equal(findHelperAnswer(helperKnowledge, "Can you inspect my invoice?").reason, "private-account");
 assert.equal(findHelperAnswer(helperKnowledge, "What tax rate should I use?").reason, "advice");

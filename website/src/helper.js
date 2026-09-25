@@ -22,12 +22,12 @@ if (knowledgeElement) {
     const serviceReplies = Object.freeze({
       rate_limited: {
         reason: "rate-limited",
-        answer: "You have asked several questions in a short time. Please wait a minute, then try again.",
+        answer: "I’m glad you have questions. I just need a short pause before I can check another one—please wait a minute, then try again.",
         links: [{ label: "Browse the Help Centre now", href: "/help/" }]
       },
       assistant_unavailable: {
         reason: "unavailable",
-        answer: "Tallyo Helper cannot reach its answer service right now. Please try again shortly or use the Help Centre.",
+        answer: "I’m having trouble checking that answer right now. Please try again in a moment, or use the Help Centre while I reconnect.",
         links: [{ label: "Open the Help Centre", href: "/help/" }]
       }
     });
@@ -69,8 +69,8 @@ if (knowledgeElement) {
 
     const initialMessage = () => addMessage(
       "assistant",
-      "Hi — ask me a general question about Tallyo. I use reviewed public guidance and cannot see accounts or business records.",
-      [{ label: "Browse the Help Centre", href: "/help/" }]
+      "Hi! I’m here to help you get to know Tallyo. Ask me about invoices, quotes, recurring work, reminders, payments, branding or getting started.",
+      [{ label: "See what Tallyo can do", href: "/features/" }]
     );
 
     const ask = async (question, entryId = "") => {
@@ -100,9 +100,10 @@ if (knowledgeElement) {
       if (["no-answer", "unavailable", "rate-limited"].includes(reply.reason)) trackEvent("helper_answer_not_found");
       addMessage("assistant", reply.answer, reply.links || []);
       if (reply.reason === "ai") setStatus("Tallyo Helper answered from reviewed public guidance with AI.");
-      else if (reply.reason === "no-answer") setStatus("Tallyo Helper could not find enough reviewed guidance to answer.");
-      else if (reply.reason === "rate-limited") setStatus("Tallyo Helper is temporarily rate limited.");
-      else if (reply.reason === "unavailable") setStatus("Tallyo Helper is temporarily unavailable.");
+      else if (reply.reason === "no-answer") setStatus("Tallyo Helper needs a little more detail to answer.");
+      else if (reply.reason === "rate-limited") setStatus("Please wait a minute before asking another question.");
+      else if (reply.reason === "unavailable") setStatus("Tallyo Helper could not check that answer right now.");
+      else if (reply.reason === "conversation") setStatus("Tallyo Helper is ready for your question.");
       else setStatus("Tallyo Helper answered using its reviewed guide.");
       input.focus();
     };
