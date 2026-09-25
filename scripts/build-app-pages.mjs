@@ -51,6 +51,7 @@ const publicSiteUrl = httpsUrl("TALLYO_PUBLIC_SITE_URL", String(process.env.TALL
 const stripeLiveMode = process.env.TALLYO_STRIPE_LIVE_MODE === "true";
 const billingTestEnabled = process.env.TALLYO_BILLING_TEST_ENABLED === "true";
 const billingLiveEnabled = process.env.TALLYO_BILLING_LIVE_ENABLED === "true";
+const billingTrialEnabled = process.env.TALLYO_BILLING_TRIAL_ENABLED === "true";
 const analyticsRequested = process.env.TALLYO_GA4_ENABLED === "true";
 const ga4MeasurementId = String(process.env.TALLYO_GA4_MEASUREMENT_ID || "").trim();
 const quoteAcceptanceRequested = process.env.TALLYO_QUOTE_ACCEPTANCE_ENABLED === "true";
@@ -65,6 +66,15 @@ if (billingLiveEnabled && !stripeLiveMode) {
 }
 if (billingLiveEnabled && process.env.TALLYO_BILLING_PUBLIC_RELEASE_APPROVED !== "true") {
   throw new Error("Live Billing browser controls require explicit public-release approval");
+}
+if (billingTrialEnabled && !billingTestEnabled && !billingLiveEnabled) {
+  throw new Error("The Billing trial requires an enabled Billing browser mode");
+}
+if (
+  billingTrialEnabled && billingLiveEnabled &&
+  process.env.TALLYO_BILLING_TRIAL_PUBLIC_RELEASE_APPROVED !== "true"
+) {
+  throw new Error("The live Billing trial requires explicit public-release approval");
 }
 if (analyticsRequested && ga4MeasurementId !== "G-PZFZKCWZ7M") {
   throw new Error("The reviewed Tallyo GA4 Measurement ID is required when Analytics is enabled");
@@ -84,6 +94,7 @@ const configuration = [
   `window.STRIPE_LIVE_MODE = ${JSON.stringify(stripeLiveMode)};`,
   `window.TALLYO_BILLING_TEST_ENABLED = ${JSON.stringify(billingTestEnabled)};`,
   `window.TALLYO_BILLING_LIVE_ENABLED = ${JSON.stringify(billingLiveEnabled)};`,
+  `window.TALLYO_BILLING_TRIAL_ENABLED = ${JSON.stringify(billingTrialEnabled)};`,
   `window.TALLYO_PUBLIC_SITE_URL = ${JSON.stringify(publicSiteUrl)};`,
   `window.TALLYO_GA4_ENABLED = ${JSON.stringify(analyticsRequested)};`,
   `window.TALLYO_GA4_MEASUREMENT_ID = ${JSON.stringify(analyticsRequested ? ga4MeasurementId : "")};`,

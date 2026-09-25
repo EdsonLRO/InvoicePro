@@ -53,6 +53,14 @@ function billingConfig(interval: string) {
   ) {
     throw new Error("Live Billing Checkout is not approved");
   }
+  const trialEnabled = interval === "monthly" &&
+    Deno.env.get("STRIPE_BILLING_TRIAL_ENABLED") === "true";
+  if (
+    trialEnabled && liveMode &&
+    Deno.env.get("STRIPE_BILLING_TRIAL_LIVE_APPROVED") !== "true"
+  ) {
+    throw new Error("Live Billing trial is not approved");
+  }
 
   const stripeKey = Deno.env.get("STRIPE_BILLING_SECRET_KEY") || "";
   const stripeApiVersion = Deno.env.get("STRIPE_BILLING_API_VERSION")?.trim() ||
@@ -105,7 +113,14 @@ function billingConfig(interval: string) {
     throw new Error("The Billing application URL must be a plain URL");
   }
 
-  return { stripeKey, stripeApiVersion, priceId, appBaseUrl, liveMode };
+  return {
+    stripeKey,
+    stripeApiVersion,
+    priceId,
+    appBaseUrl,
+    liveMode,
+    trialEnabled,
+  };
 }
 
 async function stripePost(
@@ -281,6 +296,41 @@ async function claimBillingCheckout(
   return String(data || "");
 }
 
+async function accountCanUseTrial(
+  admin: any,
+  userId: string,
+  customerId: string,
+): Promise<boolean> {
+  const { data, error } = await admin
+    .from("billing_customers")
+    .select("trial_used_at")
+    .eq("user_id", userId)
+    .eq("stripe_customer_id", customerId)
+    .maybeSingle();
+  if (error || !data) {
+    throw new Error("Billing trial eligibility lookup failed");
+  }
+  return data.trial_used_at == null;
+}
+
+async function setBillingCheckoutTrial(
+  admin: any,
+  userId: string,
+  customerId: string,
+  requestId: string,
+): Promise<string> {
+  const { data, error } = await admin.rpc(
+    "set_stripe_billing_checkout_trial",
+    {
+      p_user_id: userId,
+      p_stripe_customer_id: customerId,
+      p_request_id: requestId,
+    },
+  );
+  if (error) throw new Error("Billing trial claim failed");
+  return String(data || "");
+}
+
 type PendingCheckoutResolution =
   | { kind: "resume"; url: string; sessionId: string }
   | { kind: "retry" }
@@ -291,12 +341,13 @@ async function resolvePendingBillingCheckout(
   userId: string,
   customerId: string,
   interval: string,
+  trialDays: number,
   config: ReturnType<typeof billingConfig>,
 ): Promise<PendingCheckoutResolution> {
   const { data: claim, error: claimError } = await admin
     .from("billing_checkout_claims")
     .select(
-      "billing_interval, stripe_checkout_session_id, session_expires_at",
+      "billing_interval, trial_days, stripe_checkout_session_id, session_expires_at",
     )
     .eq("user_id", userId)
     .maybeSingle();
@@ -319,6 +370,13 @@ async function resolvePendingBillingCheckout(
       kind: "blocked",
       message:
         `An unfinished ${activePlan} Checkout is still open. Choose ${activePlan} to resume it, or let it expire before choosing another plan.`,
+    };
+  }
+  if (Number(claim.trial_days || 0) !== trialDays) {
+    return {
+      kind: "blocked",
+      message:
+        "An unfinished Checkout with different trial terms is still open. Resume it or let it expire before starting another.",
     };
   }
 
@@ -344,6 +402,7 @@ async function resolvePendingBillingCheckout(
     String(session?.metadata?.tallyo_user_id || "") !== userId ||
     String(session?.metadata?.plan_key || "") !== "tallyo_pro" ||
     String(session?.metadata?.billing_interval || "") !== interval ||
+    String(session?.metadata?.trial_days || "0") !== String(trialDays) ||
     String(session?.mode || "") !== "subscription" ||
     session?.livemode !== config.liveMode
   ) {
@@ -429,6 +488,10 @@ Deno.serve(async (req) => {
     );
     const user = await requireSensitiveSession(userClient);
     const customerId = await mappedCustomer(admin, user, config);
+    const trialDays = config.trialEnabled &&
+        await accountCanUseTrial(admin, user.id, customerId)
+      ? 7
+      : 0;
     let claimResult = await claimBillingCheckout(
       admin,
       user.id,
@@ -457,6 +520,7 @@ Deno.serve(async (req) => {
         user.id,
         customerId,
         interval,
+        trialDays,
         config,
       );
       if (pending.kind === "resume") {
@@ -496,6 +560,23 @@ Deno.serve(async (req) => {
     if (claimResult !== "claimed") {
       throw new Error("Billing Checkout claim returned an invalid result");
     }
+    if (trialDays === 7) {
+      const trialResult = await setBillingCheckoutTrial(
+        admin,
+        user.id,
+        customerId,
+        requestId,
+      );
+      if (trialResult === "trial_used") {
+        return json({
+          error:
+            "This account has already used its free trial. Choose the monthly or annual subscription instead.",
+        }, 409);
+      }
+      if (trialResult !== "trial_set") {
+        throw new Error("Billing trial eligibility could not be confirmed");
+      }
+    }
     if (await hasBlockingStripeSubscription(customerId, config)) {
       return json({
         error:
@@ -507,6 +588,8 @@ Deno.serve(async (req) => {
     params.set("mode", "subscription");
     params.set("customer", customerId);
     params.set("client_reference_id", user.id);
+    params.set("payment_method_collection", "always");
+    params.set("payment_method_types[0]", "card");
     params.set("line_items[0][price]", config.priceId);
     params.set("line_items[0][quantity]", "1");
     params.set(
@@ -520,12 +603,21 @@ Deno.serve(async (req) => {
     params.set("metadata[tallyo_user_id]", user.id);
     params.set("metadata[plan_key]", "tallyo_pro");
     params.set("metadata[billing_interval]", interval);
+    params.set("metadata[trial_days]", String(trialDays));
     params.set("subscription_data[metadata][tallyo_user_id]", user.id);
     params.set("subscription_data[metadata][plan_key]", "tallyo_pro");
     params.set(
       "subscription_data[metadata][billing_interval]",
       interval,
     );
+    params.set("subscription_data[metadata][trial_days]", String(trialDays));
+    if (trialDays === 7) {
+      params.set("subscription_data[trial_period_days]", "7");
+      params.set(
+        "subscription_data[trial_settings][end_behavior][missing_payment_method]",
+        "cancel",
+      );
+    }
     params.set(
       "expires_at",
       String(Math.floor(Date.now() / 1000) + 30 * 60),
@@ -540,6 +632,7 @@ Deno.serve(async (req) => {
         user.id,
         interval,
         config.priceId,
+        String(trialDays),
         requestId,
       ])}`,
     );

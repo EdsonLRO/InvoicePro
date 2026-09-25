@@ -6,7 +6,7 @@
 | Tallyo has one paid plan at launch | Approved | Avoids artificial complexity before usage evidence exists. |
 | Monthly price is £8 | Approved | Fits the focused UK invoicing position. |
 | Annual price is £80 | Approved | Saves £16 versus twelve monthly payments without “free month” language. |
-| No full-feature free trial | Approved | Reduces repeated-email trial abuse; the free maker and monthly plan provide evaluation routes. |
+| One seven-day full-feature trial for the monthly plan | Approved for repository/test-mode implementation; live activation separately gated | One card-required trial per account gives a clear evaluation period, then continues at £8 monthly unless cancelled online. Stripe's three-day trial-ending event provides the reminder boundary. The Free Invoice Maker remains separate, free and account/card-free. External professional review and explicit Owner approval are required before live activation or public trial wording. |
 | No permanent free saved account at launch | Approved | Keeps ongoing storage, automation and support within the paid product. |
 | Owner-granted complimentary access | Approved for occasional accounts | The Owner may grant or revoke full app access for an existing confirmed account by email without creating a Stripe subscription, voucher system or permanent public free tier. |
 | Minimal Owner Console | Approved and released 2026-09-11, PR #152 | The Owner may search one exact registered email, grant or revoke complimentary access, send a password-reset email, and approve an MFA reset only after the account holder signs in with the password and confirms a short-lived link sent to the registered mailbox. No impersonation, bulk administration or business-record access is included. |

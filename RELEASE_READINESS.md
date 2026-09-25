@@ -1,5 +1,9 @@
 # Tallyo Release Readiness Checklist
 
+## Seven-day subscription trial — repository candidate, not release-approved, 2026-09-25
+
+The candidate is deliberately fail-closed. It must not be merged into an auto-deploying release, migrated, deployed, configured or enabled live until: external professional review is complete; the Owner approves final Terms/Pricing/Privacy and renewal/cancellation wording; a current physical backup is confirmed; the additive migration and two Billing Functions pass reviewed deployment planning; Stripe sandbox evidence covers trial creation, the three-day event, cancellation without charge, conversion, failed first payment and repeat-trial rejection; the Stripe reminder configuration is read back; and separate live server, app and website gates are approved. No real charge or customer message is part of repository validation. Rollback is to leave every new gate false, keep the migration unapplied and retain the currently deployed Billing Functions.
+
 ## Grounded public Helper answers — released and verified, 2026-09-25
 
 The Owner approved the reviewed release after confirming that the existing OpenAI key should remain in use. PR #187 merged through the protected workflow as `89a48e9394cde477c4c1828adc70f9a50ce1883e`. The public Helper catalogue now covers 44 current product and workflow topics, retrieves only the most relevant reviewed entries for an unmatched question and allows a friendly paraphrase or combination only from that supplied context. The interface separately explains insufficient guidance, rate limiting and temporary provider unavailability instead of presenting every case as the same no-answer response.

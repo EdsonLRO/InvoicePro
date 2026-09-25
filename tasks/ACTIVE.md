@@ -1,5 +1,26 @@
 # Active programme: COMM-001 commercial launch integration
 
+## BILLING-TRIAL-001 — Seven-day Tallyo Pro trial
+
+Task ID: BILLING-TRIAL-001
+Title: Add one seven-day full-access trial before the monthly subscription
+Priority: High
+Status: Implementation complete
+Phase: Review
+Owner role: Product owner
+Risk level: High because this changes Stripe subscriptions, entitlements, renewal and cancellation expectations
+Branch: `codex/tallyo-trial`
+Scope: keep the Free Invoice Maker unchanged; add one card-required seven-day trial per account for the £8 monthly Tallyo Pro plan; grant full access while Stripe reports `trialing`; convert automatically to the monthly subscription unless cancelled; preserve online cancellation and account data; reconcile Stripe's three-day trial-ending event; add fail-closed server and browser release gates; update authoritative decisions and architecture
+Files locked: `supabase/functions/create-billing-checkout/index.ts`, `supabase/functions/stripe-billing-webhook/index.ts`, the additive trial migration, `index.html`, `config.js`, `scripts/build-app-pages.mjs`, focused Billing tests, `docs/legal/TRIAL_SUBSCRIPTION_REVIEW.md`, `docs/architecture/STRIPE_BILLING.md`, `DECISIONS.md`, `ROADMAP.md`, `APP_STATUS.md`, `SUPABASE_HANDOFF.md`, `RELEASE_READINESS.md`, `tasks/ACTIVE.md`
+Legal disposition: approved with conditions for repository and Stripe test-mode implementation in `docs/legal/TRIAL_SUBSCRIPTION_REVIEW.md`; external professional review and explicit Owner approval remain required before live activation or public wording
+Security boundary: browser cannot select duration; monthly price remains server-allowlisted; one-trial usage is recorded atomically; signed raw-body webhook, provider-mode isolation, RLS, grants, ownership, idempotency, event ordering and service-role-only writes must remain intact
+Excluded: live Stripe/provider configuration, production migration or Function deployment, real charges, real reminder email, public legal/marketing publication, consumer/international launch, refunds, bank-debit trial collection and unrelated work
+Acceptance: monthly Checkout uses a fixed seven-day card-required trial only when the server gate is enabled; annual Checkout remains directly paid; an account cannot receive a second created trial; `trialing` grants full access through the trial end; signed `trial_will_end` is recorded; UI wording is fail-closed behind separate app and website build gates; the free maker is unchanged; relevant security, function, migration, client and build tests pass
+Validation: focused trial, Billing foundation/client, subscription guidance, app/PWA, full Node security-harness and complete website suites pass; both changed Edge Functions pass frozen-lock Deno type-check and formatting; candidate app build `2026.09.25.1` succeeds in test mode and live trial build fails without its separate approval; the rollback-only SQL probe is prepared but could not be executed locally because Docker Desktop was not running; no live provider, database, email or payment action was used
+Approval boundary: stop before merge, deployment, migration application, Function publication, Stripe settings, real messages or live charging
+Pull request: #190 (`codex/tallyo-trial`), review-only and intentionally unmerged
+Next action: obtain high-risk code review and the recorded external legal/Owner approvals before any merge, test-provider deployment or public activation
+
 ## HELPER-CONVERSATION-001 — Session-based public Helper conversation
 
 Task ID: HELPER-CONVERSATION-001

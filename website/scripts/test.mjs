@@ -23,6 +23,9 @@ const cleanBuildEnvironment = {
   TALLYO_SUBSCRIPTIONS_ENABLED: "",
   TALLYO_SUBSCRIPTION_PRIVATE_PREVIEW_APPROVED: "",
   TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED: "",
+  TALLYO_SUBSCRIPTION_TRIAL_ENABLED: "",
+  TALLYO_SUBSCRIPTION_TRIAL_PRIVATE_PREVIEW_APPROVED: "",
+  TALLYO_SUBSCRIPTION_TRIAL_PUBLIC_RELEASE_APPROVED: "",
   TALLYO_PUBLIC_AI_HELPER_ENABLED: "",
   TALLYO_AI_PRIVATE_PREVIEW_APPROVED: "",
   TALLYO_AI_PUBLIC_RELEASE_APPROVED: "",
@@ -200,6 +203,7 @@ assert.doesNotMatch(generatorPageHtml, /<details class="generator-section"/, "in
 assert.match(generatorPageHtml, /href="\/privacy\/">Privacy Notice<\/a>/, "free document form clearly links the Privacy Notice");
 assert.match(generatorPageHtml, /data-generator-conversion/, "invoice maker includes the pre-download conversion dialog");
 assert.match(generatorPageHtml, /Continue download/, "invoice maker keeps a clear download action");
+assert.doesNotMatch(generatorPageHtml, /cta_generator_start_trial/, "invoice maker hides the trial action while the trial release gate is off");
 assert.doesNotMatch(read("free-quote-generator/index.html"), /data-generator-conversion/, "quote maker keeps its existing direct PDF flow");
 assert.match(read("assets/styles.css"), /\.generator-preview table \{ display: block; min-width: 0;/, "mobile document preview reflows without a wide fixed table");
 assert.match(read("assets/styles.css"), /content: attr\(data-label\)/, "mobile preview preserves labels when table rows become cards");

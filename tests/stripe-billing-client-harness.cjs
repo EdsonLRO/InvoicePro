@@ -11,6 +11,7 @@ const buildScript = read('scripts/build-app-pages.mjs');
 
 assert.match(publicConfig, /window\.TALLYO_BILLING_TEST_ENABLED = false;/, 'public configuration must keep Billing test UI disabled');
 assert.match(publicConfig, /window\.TALLYO_BILLING_LIVE_ENABLED = false;/, 'public configuration must keep live Billing UI disabled');
+assert.match(publicConfig, /window\.TALLYO_BILLING_TRIAL_ENABLED = false;/, 'public configuration must keep the Billing trial disabled');
 assert.match(app, /window\.TALLYO_BILLING_TEST_ENABLED === true && window\.STRIPE_LIVE_MODE !== true/, 'Billing UI must preserve its explicit test gate');
 assert.match(app, /window\.TALLYO_BILLING_LIVE_ENABLED === true && window\.STRIPE_LIVE_MODE === true/, 'Billing UI must require both explicit live gates');
 assert.match(buildScript, /TALLYO_BILLING_TEST_ENABLED cannot be enabled when TALLYO_STRIPE_LIVE_MODE is true/, 'Cloudflare build must reject a mixed Billing-test/live configuration');

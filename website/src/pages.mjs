@@ -14,16 +14,20 @@ import { serviceTerms } from "./service-terms-content.mjs";
 
 const icon = (symbol) => `<span class="feature-icon" aria-hidden="true">${symbol}</span>`;
 const subscriptionAvailability = siteConfig.subscriptionCheckoutEnabled
-  ? "Choose monthly or annual billing after you create your Tallyo account."
+  ? (siteConfig.subscriptionTrialEnabled
+      ? "Start with a 7-day trial of the monthly plan, or choose annual billing after you create your Tallyo account."
+      : "Choose monthly or annual billing after you create your Tallyo account.")
   : "Subscriptions are being prepared and checkout is not active yet.";
 const subscriptionCta = siteConfig.subscriptionCheckoutEnabled
-  ? '<a class="button button-primary" id="cta_pricing_create_account" data-analytics-placement="pricing" data-signup-link data-subscription-link href="#">Choose Tallyo Pro</a>'
+  ? `<a class="button button-primary" id="cta_pricing_create_account" data-analytics-placement="pricing" data-signup-link data-subscription-link href="#">${siteConfig.subscriptionTrialEnabled ? "Start 7-day free trial" : "Choose Tallyo Pro"}</a>`
   : `<button class="button button-primary" type="button" disabled>${commercialOffer.pro.availability}</button>`;
 const helperCardCopy = siteConfig.aiHelperEnabled
   ? "Ask questions in your own words and get answers grounded in current reviewed Tallyo features and guides, without account access."
   : "Get answers from reviewed public product guidance, without account access.";
 const pricingDescription = siteConfig.subscriptionCheckoutEnabled
-  ? "Use the Free Invoice Maker without an account, or choose Tallyo Pro at £8 monthly or £80 annually."
+  ? (siteConfig.subscriptionTrialEnabled
+      ? "Use the Free Invoice Maker without an account, or try every Tallyo Pro feature free for 7 days before the £8 monthly subscription begins."
+      : "Use the Free Invoice Maker without an account, or choose Tallyo Pro at £8 monthly or £80 annually.")
   : "Use the Free Invoice Maker without an account, or see Tallyo Pro at £8 monthly or £80 annually. Subscription checkout is not active yet.";
 
 const home = `
@@ -36,7 +40,7 @@ const home = `
         <a class="button button-primary hero-primary-action" id="cta_hero_create_account" data-analytics-placement="hero" data-signup-link href="#">Start with Tallyo <span aria-hidden="true">→</span></a>
         <a class="button button-secondary" id="cta_hero_free_invoice" href="/free-invoice-generator/">Make a free invoice</a>
       </div>
-      <p class="hero-pricing"><strong>£8 monthly · £80 annually</strong><span>One business, one user. Cancel through your account.</span></p>
+      <p class="hero-pricing"><strong>${siteConfig.subscriptionTrialEnabled ? "7 days free · then £8 monthly" : "£8 monthly · £80 annually"}</strong><span>One business, one user. Cancel through your account.</span></p>
     </div>
     <div class="hero-visual" aria-label="Fictional Tallyo overview showing work that needs attention" data-product-stage>
       <div class="hero-orbit hero-orbit-one" aria-hidden="true"></div>
@@ -152,10 +156,10 @@ const pricing = `
   <section class="page-hero"><p class="eyebrow">Simple pricing</p><h1>One free maker. One complete invoicing workspace.</h1><p>Use the browser-only Free Invoice Maker without an account, or choose Tallyo Pro for saved invoicing work. ${subscriptionAvailability}</p></section>
   <section class="section"><div class="plan-grid plan-grid-two">
     <article class="plan-card"><p class="card-label">${commercialOffer.free.audience}</p><h2>${commercialOffer.free.name}</h2><p class="plan-price">${commercialOffer.free.price}</p><p>${commercialOffer.free.privacy}</p>${list(commercialOffer.free.features)}<a class="button button-secondary" href="/free-invoice-generator/">Make a free invoice</a><h3>Not included</h3>${list(commercialOffer.free.exclusions)}</article>
-    <article class="plan-card plan-card-featured"><p class="card-label">${commercialOffer.pro.audience}</p><h2>${commercialOffer.pro.name}</h2><p class="plan-price">${commercialOffer.pro.monthlyPrice}<span> per month</span></p><p class="plan-annual">or ${commercialOffer.pro.annualPrice} per year · ${commercialOffer.pro.annualEquivalent}. ${commercialOffer.pro.annualSaving}</p>${list(commercialOffer.pro.features)}${subscriptionCta}<p class="plan-note">By choosing Tallyo Pro, you agree to the <a href="/terms/">Terms of Service</a>. ${commercialOffer.pro.reasonableUse}</p></article>
+    <article class="plan-card plan-card-featured"><p class="card-label">${commercialOffer.pro.audience}</p><h2>${commercialOffer.pro.name}</h2><p class="plan-price">${commercialOffer.pro.monthlyPrice}<span> per month</span></p><p class="plan-annual">or ${commercialOffer.pro.annualPrice} per year · ${commercialOffer.pro.annualEquivalent}. ${commercialOffer.pro.annualSaving}</p>${list(commercialOffer.pro.features)}${subscriptionCta}${siteConfig.subscriptionTrialEnabled ? `<p class="plan-note"><strong>7-day monthly-plan trial:</strong> a card is required. After 7 days, the subscription continues automatically at £8 per month unless you cancel online first. We will email you 3 days before it ends. If you cancel during the trial, you keep access until it ends and will not be charged. Cancelling does not delete your Tallyo data.</p>` : ""}<p class="plan-note">By choosing Tallyo Pro, you agree to the <a href="/terms/">Terms of Service</a>. ${commercialOffer.pro.reasonableUse}</p></article>
   </div></section>
-  <section class="section section-soft pricing-boundaries" aria-labelledby="pricing-boundaries-title"><div><p class="eyebrow">Before you choose</p><h2 id="pricing-boundaries-title">Straightforward billing, with clear limits.</h2></div>${list([commercialOffer.billing.setupFee, commercialOffer.billing.sameFeatures, commercialOffer.billing.noTrial, commercialOffer.billing.cancellation, commercialOffer.billing.annualRefund, commercialOffer.paymentAvailability])}</section>
-  <section class="section faq-list" aria-labelledby="pricing-faq-title"><div class="section-heading"><p class="eyebrow">Pricing questions</p><h2 id="pricing-faq-title">What to expect.</h2></div>${pricingFaqs.map((item) => `<details><summary>${item.question}</summary><p>${item.answer}</p></details>`).join("")}</section>
+  <section class="section section-soft pricing-boundaries" aria-labelledby="pricing-boundaries-title"><div><p class="eyebrow">Before you choose</p><h2 id="pricing-boundaries-title">Straightforward billing, with clear limits.</h2></div>${list([commercialOffer.billing.setupFee, commercialOffer.billing.sameFeatures, siteConfig.subscriptionTrialEnabled ? commercialOffer.billing.trial : commercialOffer.billing.noTrial, commercialOffer.billing.cancellation, commercialOffer.billing.annualRefund, commercialOffer.paymentAvailability])}</section>
+  <section class="section faq-list" aria-labelledby="pricing-faq-title"><div class="section-heading"><p class="eyebrow">Pricing questions</p><h2 id="pricing-faq-title">What to expect.</h2></div>${pricingFaqs.map((item, index) => `<details><summary>${item.question}</summary><p>${index === 0 && siteConfig.subscriptionTrialEnabled ? commercialOffer.billing.trial : item.answer}</p></details>`).join("")}</section>
   ${finalCta({ title: "Choose the route that fits today.", copy: "Make one document free, or create an account for saved and connected invoicing work.", secondary: false })}`;
 
 const security = `
@@ -274,6 +278,9 @@ const emailPreferenceConfirmation = `
 const generatorPage = (defaultType) => {
   const lowerType = defaultType.toLowerCase();
   const isInvoice = defaultType === "Invoice";
+  const trialAction = isInvoice && siteConfig.subscriptionTrialEnabled
+    ? `<a class="button button-secondary generator-trial-action" id="cta_generator_start_trial" data-analytics-placement="generator" data-signup-link data-subscription-link href="#" target="_blank" rel="noopener">Start 7-day free trial</a>`
+    : "";
   const guidance = isInvoice
     ? `<h2 id="generator-guidance-title">Before you send the invoice</h2><p>Check the invoice number, issue date, supply date when relevant, customer details, due date and payment instructions.</p><p>VAT-registered businesses may need additional information. This free maker does not produce the required sterling VAT totals for foreign-currency VAT invoices.</p><p><a href="/invoice-guide/">Read the simple invoice guide</a> or check the <a href="https://www.gov.uk/invoicing-and-taking-payment-from-customers/invoices-what-they-must-include">current GOV.UK invoice requirements</a>. Tallyo does not provide tax, legal or accounting advice.</p>`
     : `<h2 id="generator-guidance-title">Before you send the quote</h2><p>Describe the work clearly, confirm the price and tax treatment, and set a realistic valid-until date.</p><p>Add any scope, exclusions or payment expectations the customer should understand before deciding.</p><p>A quote records what you propose. It does not replace advice about contracts, tax or your legal obligations.</p>`;
@@ -318,7 +325,7 @@ const generatorPage = (defaultType) => {
           <label class="wide">Notes<textarea name="notes" rows="3" maxlength="500"></textarea></label>
           <label class="wide">Payment instructions<textarea name="paymentInstructions" rows="3" maxlength="500"></textarea></label>
         </div></fieldset></section>
-        <div class="generator-actions"><a class="button button-secondary" href="#document-preview">Preview</a><button class="button button-primary" type="button" data-print>Download PDF</button><button class="text-button generator-clear" type="reset">Clear everything</button></div>
+        <div class="generator-actions"><a class="button button-secondary" href="#document-preview">Preview</a><button class="button button-primary" type="button" data-print>Download PDF</button>${trialAction}<button class="text-button generator-clear" type="reset">Clear everything</button></div>
         <p class="generator-status" data-generator-status role="status" aria-live="polite"></p>
       </form>
       <aside class="generator-guidance" aria-labelledby="generator-guidance-title">${guidance}</aside>
