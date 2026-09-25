@@ -11,6 +11,12 @@ turn goes to the same-origin AI endpoint so the assistant can understand
 ordinary wording, spelling mistakes and follow-up questions instead of
 behaving like a search box.
 
+The model may use its general conversational ability to understand intent,
+maintain context and explain ordinary concepts naturally. The reviewed Tallyo
+catalogue remains the sole source for claims about Tallyo features, behaviour,
+availability, prices and policies. This distinction lets the Helper converse
+normally without inventing product facts.
+
 The reviewed catalogue now covers 44 current product and workflow topics. For
 each question, the server selects the most relevant reviewed entries using the
 current message and recent user turns, then supplies only that bounded context
