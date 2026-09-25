@@ -5,8 +5,8 @@
 Task ID: BILLING-CHECKOUT-RECOVERY-001
 Title: Let an account switch plans immediately after leaving Stripe Checkout
 Priority: High
-Status: Implementation Complete
-Phase: Review
+Status: Released
+Phase: Complete
 Owner role: Product owner
 Risk level: High because this changes live Stripe Checkout and subscription-creation coordination
 Branch: `codex/checkout-plan-switch`
@@ -15,9 +15,11 @@ Files locked: `supabase/functions/create-billing-checkout/index.ts`, `tests/stri
 Security boundary: preserve authenticated owner and AAL checks, server-allowlisted prices and trial duration, provider-mode isolation, exact Customer/User/session metadata binding, service-role-only claim mutation, Stripe idempotency, atomic claim ownership and non-terminal subscription checks; never clear a claim until Stripe confirms the prior Session is expired
 Excluded: price, duration, reminder, cancellation, entitlement or webhook changes; migration, RLS, grant, provider-dashboard or secret changes; creating a real Checkout, subscription, charge, refund or customer communication during validation
 Acceptance: same-plan retries resume the existing verified Session; a different-plan retry safely expires and replaces an open verified Session in one user action; expired Sessions remain replaceable; completed Sessions never clear or create a duplicate subscription; provider or ownership uncertainty fails closed with a useful retry message; focused Billing, trial and function checks pass
-Approval boundary: repository implementation, tests, commit, push and pull request may proceed; stop before merge or production Edge Function deployment because subscription runtime changes require Owner approval
-Validation: focused Billing foundation, seven-day trial, client, server-entitlement and subscription-guidance harnesses pass; all 45 Node security-workflow commands pass, including the readiness harness after granting its temporary-worktree write; the changed Edge Function passes frozen Deno type-check and formatting; source contracts cover exact provider expiry, provider-confirmed status, exact-session claim clearing, same-plan resumption and completion-race blocking; a read-only production SQL probe returned successfully and live readback confirms the unchanged v31 function retains JWT verification and the old wait behavior; two unrelated Deno runtime tests hit the local Deno 2.9.1 Windows pipe panic and remain for the repository's pinned Linux CI; no database, Edge Function, Stripe object, subscription, charge, email or production state was changed
-Next action: complete full repository verification and independent diff review, then open the protected pull request for Owner review
+Approval boundary: completed under the Owner's explicit approval to merge and deploy the reviewed fix; later price, duration, reminder, cancellation, entitlement, payment-method, provider-mode or refund changes remain separately gated
+Validation: focused Billing foundation, seven-day trial, client, server-entitlement and subscription-guidance harnesses pass; all 45 Node security-workflow commands pass, including the readiness harness after granting its temporary-worktree write; the changed Edge Function passes frozen Deno type-check and formatting; protected PR and post-merge Security/Pages workflows pass; source contracts cover exact provider expiry, provider-confirmed status, exact-session claim clearing, same-plan resumption and completion-race blocking; a read-only production SQL probe returned successfully; deployed `create-billing-checkout` v32 is Active, JWT-protected and source-identical to merge `827a3628edac6474d138d78b7ed52df05ed69679`; the old wait message is absent and a no-credential request returns HTTP 401; no migration, Stripe object, subscription, charge, refund, email, provider configuration or secret changed
+Pull request: #192 (`codex/checkout-plan-switch`), merged as `827a3628edac6474d138d78b7ed52df05ed69679`
+Rollback: restore `create-billing-checkout` v31 source from `ee79df4` with JWT verification retained; leave database and provider evidence unchanged
+Next action: the Owner can retry the monthly seven-day-trial action; routine privacy-minimised function monitoring only
 
 ## BILLING-TRIAL-001 — Seven-day Tallyo Pro trial
 
