@@ -279,6 +279,9 @@ for (const greeting of ["hi", "Hello", "hey there", "Good morning Tallyo"]) {
   assert.match(reply.answer, /happy to help/i);
 }
 assert.match(findHelperAnswer(helperKnowledge, "thank you").answer, /welcome/i);
+assert.match(findHelperAnswer(helperKnowledge, "that sound interesting").answer, /glad it sounds useful/i);
+assert.match(findHelperAnswer(helperKnowledge, "that sounds helpful").answer, /what happens next/i);
+assert.match(findHelperAnswer(helperKnowledge, "how are you?").answer, /doing well/i);
 assert.equal(findHelperAnswer(helperKnowledge, "Can you tell me the weather?").reason, "no-answer");
 assert.equal(findHelperAnswer(helperKnowledge, "Can you recommend a holiday destination?").reason, "no-answer");
 assert.match(noAnswer.answer, /I’d still like to help/);

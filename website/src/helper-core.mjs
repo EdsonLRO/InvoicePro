@@ -55,6 +55,18 @@ const conversationReplies = Object.freeze([
   },
   {
     reason: "conversation",
+    pattern: /^(?:that )?sounds? (?:good|great|helpful|interesting|useful)(?: to me)?$/i,
+    answer: "I’m glad it sounds useful. You can ask me to explain any part of it, what happens next, or how another Tallyo feature works alongside it.",
+    links: []
+  },
+  {
+    reason: "conversation",
+    pattern: /^(?:how are you|how are you doing|how is it going)$/i,
+    answer: "I’m doing well, thank you—and I’m ready to help with anything you’d like to know about Tallyo.",
+    links: []
+  },
+  {
+    reason: "conversation",
     pattern: /^(?:bye|goodbye|see you|see you later)$/i,
     answer: "Thanks for visiting. If another Tallyo question comes up, I’ll be here to help.",
     links: []
