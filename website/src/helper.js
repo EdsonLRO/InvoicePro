@@ -33,7 +33,7 @@ if (knowledgeElement) {
         { role: "user", content: question.slice(0, 240) },
         { role: "assistant", content: answer.slice(0, 600) }
       );
-      if (chatHistory.length > 6) chatHistory.splice(0, chatHistory.length - 6);
+      if (chatHistory.length > 12) chatHistory.splice(0, chatHistory.length - 12);
     };
 
     const serviceReplies = Object.freeze({

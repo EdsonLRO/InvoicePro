@@ -169,7 +169,7 @@ export const createPublicAiAdapter = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           question: String(question || "").trim().slice(0, 240),
-          history: Array.isArray(history) ? history.slice(-6) : []
+          history: Array.isArray(history) ? history.slice(-12) : []
         }),
         credentials: "same-origin",
         signal: controller.signal

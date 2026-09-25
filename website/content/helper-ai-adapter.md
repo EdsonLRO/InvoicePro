@@ -23,11 +23,12 @@ suggestions and next-step questions are interpreted from recent turns regardless
 of exact wording, grammar or spelling. When recent context still leaves a real
 ambiguity, the Helper asks one conversational clarifying question.
 
-The reviewed catalogue now covers 44 current product and workflow topics. For
-each question, the server selects the most relevant reviewed entries using the
-current message and recent user turns, then supplies only that bounded context
-to OpenAI. The model can paraphrase and combine those entries, but still must
-return `answered=false` when they do not support an answer.
+The reviewed catalogue now covers 44 current product and workflow topics. Its
+compact question, answer and approved-link fields are supplied together on each
+provider turn, allowing the model to find relevant meaning across the complete
+catalogue rather than depending on browser keyword selection. The model can
+paraphrase and combine those entries, but still must return `answered=false`
+when they do not support an answer.
 
 On 27 July 2026, one Owner-approved synthetic question was sent from the
 canonical Access-protected website to OpenAI. The Helper returned a bounded
@@ -39,7 +40,7 @@ it, and application code uses `store: false`.
 ## Request boundary
 
 An enabled browser build may send one current message, limited to 240
-characters, plus up to three recent user-and-assistant exchanges from the same
+characters, plus up to six recent user-and-assistant exchanges from the same
 open page to `/api/helper`. The Pages Function independently enforces:
 
 - `POST` with a small JSON body;
@@ -56,8 +57,8 @@ open page to `/api/helper`. The Pages Function independently enforces:
 - a short provider timeout and a small output-token limit;
 - no account, Supabase, Stripe, Resend, payment or other tools;
 - `store: false`;
-- reviewed public knowledge embedded server-side rather than accepted from the
-  browser, with local relevance selection before the provider request;
+- the compact reviewed public knowledge catalogue embedded server-side rather
+  than accepted from the browser and supplied in full for semantic selection;
 - strict JSON output and application-side validation;
 - no more than three links, each restricted to the reviewed public link
   allowlist;
@@ -79,7 +80,7 @@ behaviour remains unchanged. When enabled in a reviewed preview:
 - safety boundaries still resolve locally and never reach the provider;
 - every safe turn is sent to the same-origin endpoint so greetings, natural
   questions and follow-ups share the same conversational path;
-- up to three completed exchanges are held only in page memory and accompany
+- up to six completed exchanges are held only in page memory and accompany
   the next safe message;
 - the form exposes an accessible busy state;
 - insufficient guidance, rate limiting and temporary provider failure remain
@@ -93,7 +94,7 @@ behaviour remains unchanged. When enabled in a reviewed preview:
 
 The published Privacy Notice remains authoritative for the provider and
 retention position. The Helper copy must continue to state that the current
-message and up to three recent exchanges may be sent to OpenAI, the conversation
+message and up to six recent exchanges may be sent to OpenAI, the conversation
 is not intentionally stored by Tallyo, and the Helper has no account access or
 tools.
 

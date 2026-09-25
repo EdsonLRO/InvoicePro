@@ -334,7 +334,7 @@ for (const [name, html] of [["Privacy Notice", privacy], ["Data Processing Terms
 assert.match(privacy, /Effective 31 July 2026/);
 assert.match(privacy, /main@tallyo\.co\.uk/);
 assert.match(privacy, /The public AI Helper answers questions about public Tallyo product information/);
-assert.match(privacy, /up to three recent exchanges from the same open page/);
+assert.match(privacy, /up to six recent exchanges from the same open page/);
 assert.match(privacy, /clears it when the visitor resets the Helper, reloads or leaves the page/);
 assert.match(privacy, /We do not promise a fixed closed-account deletion deadline/);
 assert.match(privacy, /href="\/data-processing-terms\/">Data Processing Terms<\/a>/);

@@ -150,13 +150,13 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
     .replaceAll(
       "__TALLYO_HELPER_MODE_NOTE__",
       siteConfig.aiHelperEnabled
-        ? "Your message and a small recent part of this page’s conversation are sent securely to OpenAI with selected reviewed guidance. Tallyo does not intentionally save the conversation."
+        ? "Your message and a recent part of this page’s conversation are sent securely to OpenAI with reviewed public Tallyo guidance. Tallyo does not intentionally save the conversation."
         : "Answers are matched in this browser and are not sent to an AI provider."
     )
     .replaceAll(
       "__TALLYO_HELPER_PROVIDER_LIMIT__",
       siteConfig.aiHelperEnabled
-        ? "The AI assistant receives your current message, up to three recent exchanges and selected reviewed public Tallyo guidance. It has no account access or tools."
+        ? "The AI assistant receives your current message, up to six recent exchanges and the reviewed public Tallyo knowledge catalogue. It has no account access or tools."
         : "It does not retain user-specific memory or send prompts to a third party."
     ), siteConfig.connectPaymentsEnabled);
   const schema = applyConnectPaymentCopy(

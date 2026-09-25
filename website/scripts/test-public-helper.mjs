@@ -50,7 +50,7 @@ assert.equal(publicHelperPolicy.store, false);
 assert.equal(publicHelperPolicy.tools, false);
 assert.equal(publicHelperPolicy.promptLogging, false);
 assert.equal(publicHelperPolicy.model, "gpt-5.6-terra");
-assert.equal(publicHelperPolicy.maxHistoryMessages, 6);
+assert.equal(publicHelperPolicy.maxHistoryMessages, 12);
 
 const disabledHtml = read("helper/index.html");
 assert.match(disabledHtml, /data-ai-enabled="false"/);
@@ -195,7 +195,7 @@ execFileSync(process.execPath, [buildScript], {
 const enabledHtml = read("helper/index.html");
 assert.match(enabledHtml, /data-ai-enabled="true"/);
 assert.match(enabledHtml, /sent securely to OpenAI/);
-assert.match(enabledHtml, /up to three recent exchanges/);
+assert.match(enabledHtml, /up to six recent exchanges/);
 assert.match(enabledHtml, /has no account access or tools/);
 assert.match(read("help/index.html"), /Ask questions in your own words and get answers grounded in current reviewed Tallyo features and guides/);
 assert.match(read("_headers"), /connect-src 'self'/);
@@ -293,7 +293,7 @@ assert.equal(response.status, 415);
 response = await run(request("", { rawBody: "{" }));
 assert.equal(response.status, 400);
 
-response = await run(request("x".repeat(4_100)));
+response = await run(request("x".repeat(8_300)));
 assert.equal(response.status, 413);
 
 response = await run(request("x".repeat(241)));
@@ -336,7 +336,11 @@ for (const rawBody of [
   JSON.stringify({ question: "What is Tallyo?", history: [
     { role: "user", content: "My password is secret" },
     { role: "assistant", content: "Do not include it." }
-  ] })
+  ] }),
+  JSON.stringify({ question: "What is Tallyo?", history: Array.from({ length: 14 }, (_, index) => ({
+    role: index % 2 === 0 ? "user" : "assistant",
+    content: `Turn ${index + 1}`
+  })) })
 ]) {
   response = await run(request("", { rawBody }));
   assert.equal(response.status, 400);
@@ -471,8 +475,8 @@ assert.deepEqual(await body(response), {
   links: [{ label: "Explore features", href: "/features/" }],
   source: "ai"
 });
-assert.match(lastProviderBody.input, /"id":"features"/, "retrieval supplies the relevant reviewed feature entry");
-assert.doesNotMatch(lastProviderBody.input, /"id":"stripe-payments"/, "retrieval omits unrelated reviewed entries");
+assert.match(lastProviderBody.input, /"id":"features"/, "provider receives the reviewed feature entry");
+assert.match(lastProviderBody.input, /"id":"stripe-payments"/, "provider receives the complete reviewed catalogue for semantic selection");
 
 const recurringHistory = [
   { role: "user", content: "How do recurring invoices work?" },

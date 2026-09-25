@@ -1,11 +1,11 @@
-import { findHelperBoundary, findRelevantHelperEntries, noAnswer } from "../../src/helper-core.mjs";
+import { findHelperBoundary, noAnswer } from "../../src/helper-core.mjs";
 
 const OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
 const OPENAI_MODEL = "gpt-5.6-terra";
-const MAX_BODY_BYTES = 4_096;
+const MAX_BODY_BYTES = 8_192;
 const MAX_ANSWER_CHARACTERS = 600;
 const MAX_LINKS = 3;
-const MAX_HISTORY_MESSAGES = 6;
+const MAX_HISTORY_MESSAGES = 12;
 const PROVIDER_TIMEOUT_MS = 8_000;
 
 const responseHeaders = Object.freeze({
@@ -40,7 +40,7 @@ const reviewedLinks = (publicKnowledge) => {
   return links;
 };
 
-const publicKnowledgeForPrompt = (publicKnowledge, question) => findRelevantHelperEntries(publicKnowledge, question).map((entry) => ({
+const publicKnowledgeForPrompt = (publicKnowledge) => (publicKnowledge?.entries || []).map((entry) => ({
   id: entry.id,
   question: entry.question,
   answer: entry.answer,
@@ -118,7 +118,6 @@ const validateHistory = (value) => {
 };
 
 const providerRequest = (question, history, publicKnowledge) => {
-  const retrievalQuestion = [...history.filter((item) => item.role === "user").map((item) => item.content), question].join(" ");
   return ({
   model: OPENAI_MODEL,
   reasoning: { effort: "low" },
@@ -144,7 +143,7 @@ const providerRequest = (question, history, publicKnowledge) => {
     "Use only links present in REVIEWED_PUBLIC_KNOWLEDGE. Return no more than three.",
     "Output only the required JSON object."
   ].join("\n"),
-  input: `REVIEWED_PUBLIC_KNOWLEDGE:\n${JSON.stringify(publicKnowledgeForPrompt(publicKnowledge, retrievalQuestion))}\n\nRECENT_CONVERSATION:\n${JSON.stringify(history)}\n\nCURRENT_VISITOR_MESSAGE:\n${question}`,
+  input: `REVIEWED_PUBLIC_KNOWLEDGE:\n${JSON.stringify(publicKnowledgeForPrompt(publicKnowledge))}\n\nRECENT_CONVERSATION:\n${JSON.stringify(history)}\n\nCURRENT_VISITOR_MESSAGE:\n${question}`,
   text: {
     verbosity: "low",
     format: {
