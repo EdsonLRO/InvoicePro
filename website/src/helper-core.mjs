@@ -4,6 +4,7 @@ export const normaliseQuestion = (value) => String(value || "")
   .replace(/[^a-z0-9£\s-]/g, " ")
   .replace(/\s+/g, " ")
   .trim()
+  .replace(/\brecurr+i+n+g\b/g, "recurring")
   .slice(0, 240);
 
 export const boundaryRules = Object.freeze([
@@ -144,7 +145,7 @@ export const createPublicAiAdapter = ({
 } = {}) => Object.freeze({
   enabled,
   provider: enabled ? "same-origin-server" : null,
-  async answer(question) {
+  async answer(question, history = []) {
     if (!enabled) throw new Error("The future public AI adapter is disabled.");
     if (typeof fetchImpl !== "function") throw new Error("Tallyo Helper is unavailable.");
 
@@ -154,7 +155,10 @@ export const createPublicAiAdapter = ({
       const response = await fetchImpl(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: normaliseQuestion(question) }),
+        body: JSON.stringify({
+          question: String(question || "").trim().slice(0, 240),
+          history: Array.isArray(history) ? history.slice(-6) : []
+        }),
         credentials: "same-origin",
         signal: controller.signal
       });

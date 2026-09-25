@@ -337,7 +337,7 @@
       "question": "What happens to a question I ask Tallyo Helper?",
       "triggers": ["helper privacy", "save helper conversation", "openai question", "helper data"],
       "keywords": ["helper", "privacy", "question", "openai", "store", "conversation"],
-      "answer": "When the AI path is enabled, Tallyo sends only your current question and selected reviewed public guidance securely to OpenAI. Tallyo does not intentionally save the conversation, and the request uses store:false. Do not enter private business information or secrets.",
+      "answer": "When the AI path is enabled, Tallyo securely sends your current message, up to three recent exchanges from the open page and selected reviewed public guidance to OpenAI. Tallyo does not intentionally store the conversation, the page clears it when you reset, reload or leave, and the request uses store:false. Do not enter private business information or secrets.",
       "links": [{ "label": "Read the Privacy Notice", "href": "/privacy/" }, { "label": "Read the Helper boundaries", "href": "/helper/" }]
     },
     {

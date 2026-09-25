@@ -5,17 +5,17 @@
 The Tallyo Helper has a same-origin Cloudflare Pages Function and browser
 adapter. Source remains disabled by default, while the public production website
 explicitly enables the reviewed AI path through its approved Cloudflare
-configuration. The deterministic browser-local matcher remains first in the
-request path and continues to answer exact reviewed questions without an AI
-request. Greetings, thanks and simple goodbyes also resolve locally with a
-natural conversational reply, so they do not consume a provider request or
-appear as failed product searches.
+configuration. The deterministic browser-local matcher remains as an offline
+and provider-failure fallback. In an enabled build, every safe conversational
+turn goes to the same-origin AI endpoint so the assistant can understand
+ordinary wording, spelling mistakes and follow-up questions instead of
+behaving like a search box.
 
 The reviewed catalogue now covers 44 current product and workflow topics. For
-an unmatched question, the server selects the most relevant reviewed entries by
-local keyword scoring and supplies only that bounded context to OpenAI. The
-model can paraphrase and combine those entries, but still must return
-`answered=false` when they do not support an answer.
+each question, the server selects the most relevant reviewed entries using the
+current message and recent user turns, then supplies only that bounded context
+to OpenAI. The model can paraphrase and combine those entries, but still must
+return `answered=false` when they do not support an answer.
 
 On 27 July 2026, one Owner-approved synthetic question was sent from the
 canonical Access-protected website to OpenAI. The Helper returned a bounded
@@ -26,8 +26,9 @@ it, and application code uses `store: false`.
 
 ## Request boundary
 
-An enabled browser build may send one question, limited to 240 characters, to
-`/api/helper`. The Pages Function independently enforces:
+An enabled browser build may send one current message, limited to 240
+characters, plus up to three recent user-and-assistant exchanges from the same
+open page to `/api/helper`. The Pages Function independently enforces:
 
 - `POST` with a small JSON body;
 - an exact approved HTTPS `Origin`;
@@ -38,7 +39,8 @@ An enabled browser build may send one question, limited to 240 characters, to
   which owns the native `RATE_LIMITER` binding;
 - deterministic rejection of secrets, credentials, payment information,
   private-account requests, advice requests and internal-prompt requests;
-- local answers for exact reviewed questions, avoiding an AI request;
+- strict role, order, length and body-shape validation for recent turns;
+- independent safety checks for the current message and every recent user turn;
 - a short provider timeout and a small output-token limit;
 - no account, Supabase, Stripe, Resend, payment or other tools;
 - `store: false`;
@@ -62,22 +64,26 @@ The generated helper page declares whether the AI path is enabled. When it is
 disabled, no AI endpoint call is attempted and the current browser-local
 behaviour remains unchanged. When enabled in a reviewed preview:
 
-- exact reviewed answers and safety boundaries still resolve locally;
-- greetings and simple acknowledgements receive a warm local reply;
-- only an unmatched general product question is sent to the same-origin
-  endpoint;
+- safety boundaries still resolve locally and never reach the provider;
+- every safe turn is sent to the same-origin endpoint so greetings, natural
+  questions and follow-ups share the same conversational path;
+- up to three completed exchanges are held only in page memory and accompany
+  the next safe message;
 - the form exposes an accessible busy state;
 - insufficient guidance, rate limiting and temporary provider failure remain
   visibly distinct without exposing provider detail, using helpful visitor
   language rather than provider or policy terminology;
-- clearing the conversation invalidates an in-flight answer;
-- the page explains that the question is sent securely to OpenAI and that
-  Tallyo does not save the conversation.
+- clearing the conversation invalidates an in-flight answer and clears recent
+  page memory;
+- the page explains that the current message and a small recent part of the
+  conversation are sent securely to OpenAI and are not intentionally stored by
+  Tallyo.
 
 The published Privacy Notice remains authoritative for the provider and
 retention position. The Helper copy must continue to state that the current
-question may be sent to OpenAI, the conversation is not intentionally saved by
-Tallyo, and the Helper has no account access or tools.
+message and up to three recent exchanges may be sent to OpenAI, the conversation
+is not intentionally stored by Tallyo, and the Helper has no account access or
+tools.
 
 ## Current production gate
 

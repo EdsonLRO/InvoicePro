@@ -1,22 +1,22 @@
 # Active programme: COMM-001 commercial launch integration
 
-## HELPER-CONVERSATION-001 — Friendly, natural public Helper conversation
+## HELPER-CONVERSATION-001 — Session-based public Helper conversation
 
 Task ID: HELPER-CONVERSATION-001
-Title: Make greetings, reviewed answers and unsupported-question guidance feel helpful and conversational
+Title: Replace the one-question lookup flow with a bounded multi-turn AI chat
 Priority: Medium
 Status: Implementation Complete
 Phase: Review
 Owner role: Product owner
 Risk level: Medium implementation with the existing high-risk public-AI release boundary unchanged
 Branch: `codex/helper-friendly-conversation`
-Scope: handle greetings and simple conversational acknowledgements locally; make reviewed and AI-composed answers warmer, more fluent and more useful; replace the defensive no-answer wording with guided topics and next steps; add focused regression coverage
-Files locked: `website/src/helper-core.mjs`, `website/src/helper.js`, `website/functions/lib/public-helper.mjs`, `website/content/helper-knowledge.json`, `website/content/helper-ai-adapter.md`, `website/scripts/test.mjs`, `website/scripts/test-public-helper.mjs`, `tasks/ACTIVE.md`
-Security and privacy boundary: preserve local-first answers, exact-origin and rate-limit controls, reviewed-only provider context, strict output, `store: false`, no application prompt/answer logging, no account/private-record access and no tools. Greetings and acknowledgements must not call OpenAI.
-Legal disposition: no new provider, data category, retention, account access, automated decision or public legal claim. Existing Privacy Notice and public-AI conditions remain sufficient for repository implementation; production publication remains a release boundary.
-Acceptance: “hi” receives a warm local welcome with useful examples; thanks receives a natural local acknowledgement; unsupported questions invite a clearer question and suggest relevant topics; a visible thinking state keeps every response on a short 1–1.6 second minimum cadence; AI instructions require concise conversational wording; boundaries and fail-closed behavior remain intact
-Validation: complete website suite passes for 26 routes plus 404, including public Helper fail-closed/mock-provider, Analytics and Free Invoice Maker conversion/consent checks. Local browser verification confirms “hi” receives the friendly welcome after 1.12 seconds and an unrelated question receives useful topic guidance. The response cadence is source-checked at a 1–1.6 second minimum; slower provider responses are not extended. No live OpenAI request was made and the existing key/provider configuration was not changed.
-Next action: Owner review of the open local Helper preview, then one bundled approval for PR merge and normal website publication
+Scope: route every safe enabled-Helper turn through OpenAI; hold a bounded recent conversation only in page memory; let follow-up wording, greetings and spelling mistakes share one conversational path; keep the reviewed catalogue as the sole product-fact source and as the disabled/provider-failure fallback; update transparent public privacy wording and focused regression coverage
+Files locked: `website/src/helper-core.mjs`, `website/src/helper.js`, `website/functions/lib/public-helper.mjs`, `website/src/layout.mjs`, `website/src/legal-content.mjs`, `website/content/helper-knowledge.json`, `website/content/helper-ai-adapter.md`, `website/content/storage-inventory.md`, `website/scripts/test.mjs`, `website/scripts/test-public-helper.mjs`, `tasks/ACTIVE.md`
+Security and privacy boundary: preserve exact-origin and rate-limit controls, reviewed-only provider facts, strict output, `store: false`, no application prompt/answer logging, no persistent browser storage, no account/private-record access and no tools. Send at most three recent completed exchanges; validate roles, order, size and safety server-side; treat history as untrusted context rather than factual guidance.
+Legal disposition: the same provider and product-question purpose remain, but recent-turn transmission changes the disclosed data flow. Repository implementation may proceed; production publication of the updated Privacy Notice and Helper wording remains an Owner release boundary.
+Acceptance: “hi” receives a natural AI chat response in an enabled build; “how does recurrinng invoices work with tallyo” is understood; a follow-up such as “Can I pause it?” is resolved from recent context; reset/reload/navigation clears the page-memory context; disabled and provider-failure paths retain useful local answers; safety boundaries and fail-closed behaviour remain intact; every reply keeps the short 1–1.6 second minimum cadence.
+Validation: complete website suite passes for 26 routes plus 404. Mock-provider coverage proves exact questions and greetings use the AI path, recent history resolves “Can I pause it?” against recurring-invoice guidance, malformed/unsafe history is rejected, `store: false` and strict output remain, and provider/rate-limit failures stay bounded. Local browser verification confirms the typoed recurring-invoice question reaches the reviewed fallback after the intended pause and Clear conversation removes the page-memory exchange. No live OpenAI request or provider/configuration change was made.
+Next action: update PR #189, then obtain one bundled approval for merge and normal website publication
 
 ## HELPER-GROUNDING-001 — Broader grounded public product answers
 

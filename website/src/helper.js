@@ -26,6 +26,15 @@ if (knowledgeElement) {
 
     const aiAdapter = createPublicAiAdapter({ enabled: root.dataset.aiEnabled === "true" });
     let requestSequence = 0;
+    const chatHistory = [];
+
+    const rememberExchange = (question, answer) => {
+      chatHistory.push(
+        { role: "user", content: question.slice(0, 240) },
+        { role: "assistant", content: answer.slice(0, 600) }
+      );
+      if (chatHistory.length > 6) chatHistory.splice(0, chatHistory.length - 6);
+    };
 
     const serviceReplies = Object.freeze({
       rate_limited: {
@@ -86,27 +95,33 @@ if (knowledgeElement) {
       if (!trimmed) return;
       const startedAt = Date.now();
       const sequence = ++requestSequence;
-      let reply = findHelperAnswer(knowledge, trimmed, entryId);
-      if (reply.reason === "knowledge") trackEvent("helper_answer_found", { answer_key: reply.id });
-      addMessage("user", reply.reason === "sensitive" ? "Sensitive information omitted" : trimmed);
+      const localReply = findHelperAnswer(knowledge, trimmed, entryId);
+      let reply = localReply;
+      const boundaryReply = ["sensitive", "private-account", "advice", "internal"].includes(localReply.reason);
+      addMessage("user", localReply.reason === "sensitive" ? "Sensitive information omitted" : trimmed);
       input.value = "";
       setStatus("Tallyo Helper is thinking…");
       submit.disabled = true;
       form.setAttribute("aria-busy", "true");
       try {
-        if (reply.reason === "no-answer" && aiAdapter.enabled) {
+        if (aiAdapter.enabled && !boundaryReply) {
           try {
-            reply = await aiAdapter.answer(trimmed) || reply;
+            reply = await aiAdapter.answer(trimmed, chatHistory) || localReply;
           } catch (error) {
-            reply = error?.publicAnswer
+            const serviceReply = error?.publicAnswer
               ? { reason: error.code || "boundary", answer: error.publicAnswer, links: error.publicLinks || [] }
               : serviceReplies[error?.code] || serviceReplies.assistant_unavailable;
+            reply = ["knowledge", "conversation"].includes(localReply.reason) ? localReply : serviceReply;
           }
         }
         await waitForNaturalReply(startedAt, trimmed.length);
         if (sequence !== requestSequence) return;
         if (["no-answer", "unavailable", "rate-limited"].includes(reply.reason)) trackEvent("helper_answer_not_found");
+        if (reply.reason === "knowledge") trackEvent("helper_answer_found", { answer_key: reply.id });
         addMessage("assistant", reply.answer, reply.links || []);
+        if (!["sensitive", "private-account", "advice", "internal", "unavailable", "rate-limited"].includes(reply.reason)) {
+          rememberExchange(trimmed, reply.answer);
+        }
         if (reply.reason === "ai") setStatus("Tallyo Helper answered from reviewed public guidance with AI.");
         else if (reply.reason === "no-answer") setStatus("Tallyo Helper needs a little more detail to answer.");
         else if (reply.reason === "rate-limited") setStatus("Please wait a minute before asking another question.");
@@ -143,6 +158,7 @@ if (knowledgeElement) {
 
     reset?.addEventListener("click", () => {
       requestSequence += 1;
+      chatHistory.length = 0;
       conversation.replaceChildren();
       initialMessage();
       setStatus("Conversation cleared. Nothing was saved.");

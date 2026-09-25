@@ -266,6 +266,13 @@ assert.ok(findRelevantHelperEntries(helperKnowledge, "What happens after a clien
   .some((entry) => entry.id === "quote-acceptance"));
 assert.ok(findRelevantHelperEntries(helperKnowledge, "Can I schedule invoices and email them automatically?")
   .some((entry) => entry.id === "recurring-invoices"));
+for (const recurringQuestion of [
+  "how does recurrinng invoices work with tallyo",
+  "how do recurring invoice work",
+  "tell me about recurrring invoices"
+]) {
+  assert.equal(findHelperAnswer(helperKnowledge, recurringQuestion).id, "recurring-invoices", `typo-tolerant recurring answer for ${recurringQuestion}`);
+}
 for (const greeting of ["hi", "Hello", "hey there", "Good morning Tallyo"]) {
   const reply = findHelperAnswer(helperKnowledge, greeting);
   assert.equal(reply.reason, "conversation", `friendly local greeting for ${greeting}`);
@@ -273,6 +280,7 @@ for (const greeting of ["hi", "Hello", "hey there", "Good morning Tallyo"]) {
 }
 assert.match(findHelperAnswer(helperKnowledge, "thank you").answer, /welcome/i);
 assert.equal(findHelperAnswer(helperKnowledge, "Can you tell me the weather?").reason, "no-answer");
+assert.equal(findHelperAnswer(helperKnowledge, "Can you recommend a holiday destination?").reason, "no-answer");
 assert.match(noAnswer.answer, /I’d still like to help/);
 assert.doesNotMatch(noAnswer.answer, /reviewed guidance|I will not guess/i);
 assert.equal(findHelperAnswer(helperKnowledge, "My password is secret").reason, "sensitive");
@@ -323,6 +331,8 @@ for (const [name, html] of [["Privacy Notice", privacy], ["Data Processing Terms
 assert.match(privacy, /Effective 31 July 2026/);
 assert.match(privacy, /main@tallyo\.co\.uk/);
 assert.match(privacy, /The public AI Helper answers questions about public Tallyo product information/);
+assert.match(privacy, /up to three recent exchanges from the same open page/);
+assert.match(privacy, /clears it when the visitor resets the Helper, reloads or leaves the page/);
 assert.match(privacy, /We do not promise a fixed closed-account deletion deadline/);
 assert.match(privacy, /href="\/data-processing-terms\/">Data Processing Terms<\/a>/);
 assert.match(privacy, /Google Analytics 4/);
