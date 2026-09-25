@@ -336,6 +336,34 @@ type PendingCheckoutResolution =
   | { kind: "retry" }
   | { kind: "blocked"; message: string };
 
+async function clearPendingBillingCheckout(
+  admin: any,
+  userId: string,
+  sessionId: string,
+): Promise<void> {
+  const { data: cleared, error: clearError } = await admin.rpc(
+    "clear_stripe_billing_checkout_claim",
+    { p_stripe_checkout_session_id: sessionId },
+  );
+  if (clearError) {
+    throw new Error("Expired Billing Checkout could not be cleared");
+  }
+  if (cleared === true) return;
+
+  // The signed Stripe webhook can clear an expired Session first. Treat an
+  // already-absent claim as success, but never clear or replace a newer claim.
+  const { data: currentClaim, error: lookupError } = await admin
+    .from("billing_checkout_claims")
+    .select("stripe_checkout_session_id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (lookupError) {
+    throw new Error("Billing Checkout state could not be confirmed");
+  }
+  if (!currentClaim) return;
+  throw new Error("Billing Checkout state changed. Try again.");
+}
+
 async function resolvePendingBillingCheckout(
   admin: any,
   userId: string,
@@ -362,22 +390,13 @@ async function resolvePendingBillingCheckout(
     };
   }
 
-  if (String(claim.billing_interval || "") !== interval) {
-    const activePlan = claim.billing_interval === "annual"
-      ? "Annual"
-      : "Monthly";
-    return {
-      kind: "blocked",
-      message:
-        `An unfinished ${activePlan} Checkout is still open. Choose ${activePlan} to resume it, or let it expire before choosing another plan.`,
-    };
-  }
-  if (Number(claim.trial_days || 0) !== trialDays) {
-    return {
-      kind: "blocked",
-      message:
-        "An unfinished Checkout with different trial terms is still open. Resume it or let it expire before starting another.",
-    };
+  const claimedInterval = String(claim.billing_interval || "");
+  const claimedTrialDays = Number(claim.trial_days || 0);
+  if (
+    !["monthly", "annual"].includes(claimedInterval) ||
+    ![0, 7].includes(claimedTrialDays)
+  ) {
+    throw new Error("Billing Checkout claim could not be verified");
   }
 
   const expectedSessionId = config.liveMode
@@ -401,8 +420,9 @@ async function resolvePendingBillingCheckout(
     String(session?.client_reference_id || "") !== userId ||
     String(session?.metadata?.tallyo_user_id || "") !== userId ||
     String(session?.metadata?.plan_key || "") !== "tallyo_pro" ||
-    String(session?.metadata?.billing_interval || "") !== interval ||
-    String(session?.metadata?.trial_days || "0") !== String(trialDays) ||
+    String(session?.metadata?.billing_interval || "") !== claimedInterval ||
+    String(session?.metadata?.trial_days || "0") !==
+      String(claimedTrialDays) ||
     String(session?.mode || "") !== "subscription" ||
     session?.livemode !== config.liveMode
   ) {
@@ -411,6 +431,53 @@ async function resolvePendingBillingCheckout(
 
   const status = String(session?.status || "");
   if (status === "open") {
+    const requestedCheckoutMatchesClaim = claimedInterval === interval &&
+      claimedTrialDays === trialDays;
+    if (!requestedCheckoutMatchesClaim) {
+      let expiredSession: any;
+      try {
+        expiredSession = await stripePost(
+          `checkout/sessions/${sessionId}/expire`,
+          new URLSearchParams(),
+          config.stripeKey,
+          config.stripeApiVersion,
+          `tallyo-billing-checkout-expire-${await sha256([
+            userId,
+            sessionId,
+          ])}`,
+        );
+      } catch {
+        const refreshedSession = await stripeGet(
+          `checkout/sessions/${sessionId}`,
+          config.stripeKey,
+          config.stripeApiVersion,
+        );
+        const refreshedStatus = String(refreshedSession?.status || "");
+        if (refreshedStatus === "complete") {
+          return {
+            kind: "blocked",
+            message:
+              "Your previous Checkout completed and is being confirmed. Refresh Status in a moment.",
+          };
+        }
+        if (refreshedStatus !== "expired") {
+          throw new Error(
+            "Your earlier Checkout could not be replaced. Try again.",
+          );
+        }
+        expiredSession = refreshedSession;
+      }
+      if (
+        String(expiredSession?.id || "") !== sessionId ||
+        String(expiredSession?.status || "") !== "expired" ||
+        expiredSession?.livemode !== config.liveMode
+      ) {
+        throw new Error("Stripe did not confirm Checkout replacement");
+      }
+      await clearPendingBillingCheckout(admin, userId, sessionId);
+      return { kind: "retry" };
+    }
+
     let checkoutUrl: URL;
     try {
       checkoutUrl = new URL(String(session?.url || ""));
@@ -427,13 +494,7 @@ async function resolvePendingBillingCheckout(
   }
 
   if (status === "expired") {
-    const { data: cleared, error: clearError } = await admin.rpc(
-      "clear_stripe_billing_checkout_claim",
-      { p_stripe_checkout_session_id: sessionId },
-    );
-    if (clearError || cleared !== true) {
-      throw new Error("Expired Billing Checkout could not be cleared");
-    }
+    await clearPendingBillingCheckout(admin, userId, sessionId);
     return { kind: "retry" };
   }
 
