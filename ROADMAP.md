@@ -6,6 +6,7 @@
 - Keep preview deployments protected by the retained wildcard Cloudflare Access applications.
 - Preserve the verified production gates, server-side subscription enforcement and documented rollback routes.
 - Preserve the documented separation between Tallyo subscriptions and independent-business customer payments.
+- Complete the gated repository and Stripe test-mode acceptance for the approved seven-day monthly-plan trial before any live activation decision.
 
 ## Next
 
@@ -26,5 +27,5 @@
 - Authenticated AI account access, private-record access, tools or autonomous account actions.
 - Full bookkeeping, bank reconciliation, payroll or tax filing.
 - Native mobile applications.
-- Multiple paid tiers, permanent free saved accounts, free trials, coupons or lifetime plans.
+- Multiple paid tiers, permanent free saved accounts, coupons or lifetime plans.
 - Major authenticated-frontend rewrite.

@@ -90,6 +90,7 @@ export const commercialOffer = Object.freeze({
   billing: Object.freeze({
     setupFee: "No setup fee. No complicated packages.",
     sameFeatures: "Monthly and annual subscriptions include the same Tallyo Pro features.",
+    trial: "Start the monthly plan with every Tallyo Pro feature free for 7 days. A card is required. Unless you cancel online before the trial ends, your subscription continues automatically at £8 per month. We will email you 3 days before it ends. If you cancel during the trial, you keep access until it ends and will not be charged.",
     noTrial: "Tallyo does not currently offer a full-feature free trial.",
     evaluation: "Use the Free Invoice Maker without an account, or choose the monthly subscription as the low-commitment evaluation route.",
     cancellation: "You can cancel future renewal at any time. Your paid access will normally continue until the end of the billing period you have already paid for.",

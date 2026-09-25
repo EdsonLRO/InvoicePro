@@ -4,6 +4,7 @@ const mode = process.env.TALLYO_SITE_MODE === "production" ? "production" : "pre
 const canonicalOrigin = trimSlash(process.env.TALLYO_CANONICAL_ORIGIN || "https://tallyo.co.uk");
 const appUrl = trimSlash(process.env.TALLYO_APP_URL || "https://edsonlro.github.io/InvoicePro/");
 const subscriptionCheckoutRequested = process.env.TALLYO_SUBSCRIPTIONS_ENABLED === "true";
+const subscriptionTrialRequested = process.env.TALLYO_SUBSCRIPTION_TRIAL_ENABLED === "true";
 const aiHelperRequested = process.env.TALLYO_PUBLIC_AI_HELPER_ENABLED === "true";
 const connectPaymentsRequested = process.env.TALLYO_CONNECT_PAYMENTS_ENABLED === "true";
 const analyticsRequested = process.env.TALLYO_GA4_ENABLED === "true";
@@ -40,6 +41,23 @@ if (
   process.env.TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED !== "true"
 ) {
   throw new Error("Subscription production build blocked until public release is approved");
+}
+if (subscriptionTrialRequested && !subscriptionCheckoutRequested) {
+  throw new Error("The subscription trial requires subscription Checkout to be enabled");
+}
+if (
+  subscriptionTrialRequested &&
+  mode !== "production" &&
+  process.env.TALLYO_SUBSCRIPTION_TRIAL_PRIVATE_PREVIEW_APPROVED !== "true"
+) {
+  throw new Error("Subscription trial preview build blocked until the reviewed private-preview scope is approved");
+}
+if (
+  subscriptionTrialRequested &&
+  mode === "production" &&
+  process.env.TALLYO_SUBSCRIPTION_TRIAL_PUBLIC_RELEASE_APPROVED !== "true"
+) {
+  throw new Error("Subscription trial production build blocked until public release is approved");
 }
 if (aiHelperRequested && process.env.TALLYO_AI_PRIVATE_PREVIEW_APPROVED !== "true") {
   throw new Error("AI Helper build blocked until the reviewed private-preview scope is approved");
@@ -117,6 +135,7 @@ export const siteConfig = Object.freeze({
   bingSiteVerification: process.env.TALLYO_BING_SITE_VERIFICATION || "",
   aiHelperEnabled: aiHelperRequested,
   subscriptionCheckoutEnabled: subscriptionCheckoutRequested,
+  subscriptionTrialEnabled: subscriptionTrialRequested,
   connectPaymentsEnabled: connectPaymentsRequested,
   analyticsEnabled: analyticsRequested,
   ga4MeasurementId: analyticsRequested ? ga4MeasurementId : "",

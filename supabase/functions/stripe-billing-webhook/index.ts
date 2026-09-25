@@ -11,6 +11,7 @@ const allowedEvents = new Set([
   "customer.subscription.deleted",
   "customer.subscription.paused",
   "customer.subscription.resumed",
+  "customer.subscription.trial_will_end",
   "invoice.paid",
   "invoice.payment_failed",
   "invoice.payment_action_required",
@@ -19,6 +20,7 @@ const allowedEvents = new Set([
 const supportedStatuses = new Set([
   "incomplete",
   "incomplete_expired",
+  "trialing",
   "active",
   "past_due",
   "unpaid",
@@ -201,7 +203,12 @@ async function retrieveSubscription(
 
 function subscriptionPeriodEnd(subscription: any): string | null {
   const itemPeriodEnd = subscription?.items?.data?.[0]?.current_period_end;
-  const seconds = Number(subscription?.current_period_end || itemPeriodEnd);
+  const trialEnd = String(subscription?.status || "") === "trialing"
+    ? subscription?.trial_end
+    : null;
+  const seconds = Number(
+    trialEnd || subscription?.current_period_end || itemPeriodEnd,
+  );
   if (!Number.isFinite(seconds) || seconds <= 0) return null;
   return new Date(seconds * 1000).toISOString();
 }

@@ -1,5 +1,7 @@
 ﻿# SUPABASE_HANDOFF.md — Tallyo (code name: InvoicePro)
 
+> Seven-day trial candidate (2026-09-25): `20260925110523_seven_day_billing_trial.sql` is repository-only and unapplied. It adds `billing_customers.trial_used_at`, private claim `trial_days`, a service-role-only trial-claim RPC, `trialing` full-access reconciliation and the `customer.subscription.trial_will_end` event. Do not apply the migration, deploy the changed Billing Functions or enable any trial gate without the release sequence and approvals in `docs/legal/TRIAL_SUBSCRIPTION_REVIEW.md` and `RELEASE_READINESS.md`.
+>
 > Owner Console released under exact approval (2026-09-11, PR #152): migration `20260911170410` is applied; `owner-account-admin` v1 and `mfa-recovery` v33 retain JWT verification; app build `2026.09.11.1` is live. The protected `TALLYO_OWNER_USER_ID` is configured and its value must never be committed or shown in evidence. Identical complimentary-access migration history was repaired from `20260909122037` to `20260909115547` without rerunning schema changes. See `RELEASE_READINESS.md` for verification limits and rollback.
 >
 > How Supabase is used in this app. For another developer or AI coding agent.

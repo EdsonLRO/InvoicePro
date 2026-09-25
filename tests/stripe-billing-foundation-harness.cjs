@@ -185,7 +185,7 @@ assert.match(
 assert.match(checkout, /claimResult === "checkout_pending"/);
 assert.match(
   checkout,
-  /\.from\("billing_checkout_claims"\)[\s\S]*?\.select\([\s\S]*?billing_interval, stripe_checkout_session_id, session_expires_at[\s\S]*?\.eq\("user_id", userId\)/,
+  /\.from\("billing_checkout_claims"\)[\s\S]*?\.select\([\s\S]*?billing_interval, trial_days, stripe_checkout_session_id, session_expires_at[\s\S]*?\.eq\("user_id", userId\)/,
   'pending Checkout recovery must load only the authenticated owner claim',
 );
 assert.match(
