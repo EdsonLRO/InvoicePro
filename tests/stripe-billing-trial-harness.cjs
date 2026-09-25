@@ -45,8 +45,8 @@ assert.match(checkout, /subscription_data\[trial_period_days\]", "7"/);
 assert.match(checkout, /trial_settings\]\[end_behavior\]\[missing_payment_method\][\s\S]*?"cancel"/);
 assert.match(checkout, /metadata\[trial_days\]", String\(trialDays\)/);
 assert.match(checkout, /String\(trialDays\),[\s\S]*?requestId/);
-assert.match(checkout, /claim\.trial_days[\s\S]*?!== trialDays/);
-assert.match(checkout, /session\?\.metadata\?\.trial_days[\s\S]*?String\(trialDays\)/);
+assert.match(checkout, /claimedTrialDays === trialDays/);
+assert.match(checkout, /session\?\.metadata\?\.trial_days[\s\S]*?String\(claimedTrialDays\)/);
 assert.doesNotMatch(checkout, /body\.(?:trial|trialDays|price|priceId|amount)/);
 
 assert.match(webhook, /"customer\.subscription\.trial_will_end"/);

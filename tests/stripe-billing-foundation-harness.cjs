@@ -195,18 +195,58 @@ assert.match(
 );
 assert.match(
   checkout,
-  /sessionCustomerId !== customerId[\s\S]*?client_reference_id[\s\S]*?tallyo_user_id[\s\S]*?billing_interval[\s\S]*?session\?\.livemode !== config\.liveMode/,
+  /sessionCustomerId !== customerId[\s\S]*?client_reference_id[\s\S]*?tallyo_user_id[\s\S]*?billing_interval[\s\S]*?claimedInterval[\s\S]*?trial_days[\s\S]*?claimedTrialDays[\s\S]*?session\?\.livemode !== config\.liveMode/,
   'a resumed Checkout must preserve customer, owner, plan and provider-mode binding',
 );
 assert.match(
   checkout,
-  /status === "open"[\s\S]*?checkoutUrl\.hostname !== "checkout\.stripe\.com"[\s\S]*?kind: "resume"/,
+  /status === "open"[\s\S]*?requestedCheckoutMatchesClaim[\s\S]*?checkoutUrl\.hostname !== "checkout\.stripe\.com"[\s\S]*?kind: "resume"/,
   'only an open Stripe-hosted Checkout URL may be resumed',
 );
 assert.match(
   checkout,
-  /status === "expired"[\s\S]*?"clear_stripe_billing_checkout_claim"[\s\S]*?kind: "retry"/,
+  /!requestedCheckoutMatchesClaim[\s\S]*?`checkout\/sessions\/\$\{sessionId\}\/expire`[\s\S]*?status \|\| ""\) !== "expired"[\s\S]*?clearPendingBillingCheckout\(admin, userId, sessionId\)[\s\S]*?kind: "retry"/,
+  'a different plan must be provider-expired before its claim is replaced',
+);
+assert.match(
+  checkout,
+  /status === "expired"[\s\S]*?clearPendingBillingCheckout\(admin, userId, sessionId\)[\s\S]*?kind: "retry"/,
   'only an authoritative expired Session may clear and replace the claim',
+);
+assert.match(
+  checkout,
+  /clearPendingBillingCheckout[\s\S]*?"clear_stripe_billing_checkout_claim"[\s\S]*?p_stripe_checkout_session_id: sessionId/,
+  'claim replacement must remain bound to the exact expired Session',
+);
+assert.match(
+  checkout,
+  /refreshedStatus === "complete"[\s\S]*?previous Checkout completed[\s\S]*?kind: "blocked"/,
+  'a completion race must block replacement rather than create a duplicate subscription',
+);
+assert.doesNotMatch(
+  checkout,
+  /let it expire before choosing another plan/,
+  'an abandoned different-plan Checkout must not force the customer to wait',
+);
+const expireOpenCheckout = checkout.indexOf(
+  '`checkout/sessions/${sessionId}/expire`',
+);
+const clearExpiredCheckout = checkout.indexOf(
+  'await clearPendingBillingCheckout(admin, userId, sessionId)',
+  expireOpenCheckout,
+);
+const retryCheckoutClaim = checkout.indexOf(
+  'claimResult = await claimBillingCheckout(',
+  clearExpiredCheckout,
+);
+assert.ok(expireOpenCheckout > -1, 'replacement must expire the open Session');
+assert.ok(
+  clearExpiredCheckout > expireOpenCheckout,
+  'the claim must clear only after provider expiration',
+);
+assert.ok(
+  retryCheckoutClaim > clearExpiredCheckout,
+  'the requested plan must claim only after the old Session and claim are closed',
 );
 assert.match(
   checkout,

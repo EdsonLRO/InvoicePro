@@ -26,6 +26,7 @@ The disabled implementation is isolated from customer invoice payments:
 - `create-billing-checkout` maps only `monthly` or `annual` to server-configured Price identifiers and requires confirmed Auth, current MFA assurance when enrolled, an explicit kill switch, exactly one test/live provider mode and a matching Stripe key;
 - when the separate trial gate is enabled, only an eligible monthly Checkout receives the server-fixed seven-day duration, mandatory card collection, cancel-on-missing-payment-method fail-safe and trial metadata; used trials fall back to direct paid Checkout rather than another trial;
 - a service-role-only per-account Checkout claim serialises different browser request IDs before Stripe is called, while same-request retries retain Stripe idempotency;
+- the current release candidate resumes a matching open Checkout, but when the authenticated owner chooses a different interval or the server-derived trial terms have changed, it first re-verifies the existing Session's account, Customer, plan, terms and provider mode, expires that open Session through Stripe, clears only the exact expired claim, re-checks for a non-terminal subscription and then creates the newly requested Checkout; a completed or unverified Session remains fail-closed;
 - Checkout also lists the mapped Customer's current provider-mode subscriptions and fails closed when any non-terminal subscription exists;
 - `create-billing-portal` resolves the Stripe Customer only from the authenticated account mapping and uses the same disabled and mutually exclusive provider-mode gates;
 - `stripe-billing-webhook` verifies the raw-body signature, accepts only the configured test/live event mode, refreshes current subscription state, checks the server Price allowlist and account mapping, then calls the atomic RPC and clears only a mode-matching Checkout claim for signed completion/expiration events;
@@ -51,18 +52,21 @@ PR #190 merged as `acbfc8616f687adcfca12c0e1e27508e6d0bd92f`. Migration `2026092
 
 Sandbox lifecycle acceptance covered the provider three-day event, conversion to the paid monthly subscription and cancellation before the trial ended with no charge. The production release did not create a real trial, charge or customer reminder. The Owner explicitly accepted the remaining legal and commercial risk and approved release without external professional review; the signed event, durable notification marker, provider idempotency key and privacy-minimised monitoring remain mandatory.
 
+The abandoned-Checkout recovery refinement is implemented in the repository but is not part of the current deployed `create-billing-checkout` v31 read back on 25 September 2026. It changes neither the offer nor trial rules. Production deployment requires a separately reviewed Owner approval because it changes subscription Checkout coordination.
+
 ## Trusted flow
 
 1. A confirmed signed-in account selects the approved billing interval.
 2. A trusted server maps that choice to an allowlisted Stripe Price identifier. The browser cannot submit an arbitrary price or amount.
 3. The server finds or creates a Stripe Customer mapped to the Tallyo account.
-4. An atomic database claim permits one active Checkout attempt for that account; a second request fails closed.
-5. The server verifies that Stripe has no non-terminal subscription for the mapped Customer, then creates one expiring subscription Checkout Session.
-6. Stripe-hosted Checkout collects payment details; Tallyo never receives full card details.
-7. A separate endpoint verifies signed subscription webhooks and processes events idempotently.
-8. An atomic database function updates subscription state and a privacy-minimised audit record; signed Checkout lifecycle handling clears the matching claim.
-9. Server/database boundaries derive entitlements from verified subscription state. A redirect or hidden button never grants access.
-10. The Stripe Customer Portal manages payment method, billing invoices and cancellation after separate approval.
+4. An atomic database claim permits one active Checkout attempt for that account. A matching retry resumes its verified open Stripe Session.
+5. If the owner requests a different plan, the server verifies there is no non-terminal subscription, confirms the existing Session's ownership and terms, expires that open Session through Stripe, clears only its exact claim and reacquires the claim. A completed or uncertain Session cannot be replaced.
+6. The server verifies again that Stripe has no non-terminal subscription for the mapped Customer, then creates one expiring subscription Checkout Session.
+7. Stripe-hosted Checkout collects payment details; Tallyo never receives full card details.
+8. A separate endpoint verifies signed subscription webhooks and processes events idempotently.
+9. An atomic database function updates subscription state and a privacy-minimised audit record; signed Checkout lifecycle handling clears the matching claim.
+10. Server/database boundaries derive entitlements from verified subscription state. A redirect or hidden button never grants access.
+11. The Stripe Customer Portal manages payment method, billing invoices and cancellation after separate approval.
 
 ## Repository data model
 

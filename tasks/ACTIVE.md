@@ -1,5 +1,24 @@
 # Active programme: COMM-001 commercial launch integration
 
+## BILLING-CHECKOUT-RECOVERY-001 — Replace abandoned Checkout sessions
+
+Task ID: BILLING-CHECKOUT-RECOVERY-001
+Title: Let an account switch plans immediately after leaving Stripe Checkout
+Priority: High
+Status: Implementation Complete
+Phase: Review
+Owner role: Product owner
+Risk level: High because this changes live Stripe Checkout and subscription-creation coordination
+Branch: `codex/checkout-plan-switch`
+Scope: preserve same-plan Checkout resumption; when the authenticated owner chooses a different plan or their trial terms have changed, verify the existing Stripe Checkout Session belongs to that owner and customer, expire an open Session through Stripe, clear only its exact server-side claim, re-check for any non-terminal Stripe subscription and create the newly requested Checkout without requiring the customer to wait for natural expiry
+Files locked: `supabase/functions/create-billing-checkout/index.ts`, `tests/stripe-billing-foundation-harness.cjs`, `tests/stripe-billing-trial-harness.cjs`, `docs/architecture/STRIPE_BILLING.md`, `tasks/ACTIVE.md`
+Security boundary: preserve authenticated owner and AAL checks, server-allowlisted prices and trial duration, provider-mode isolation, exact Customer/User/session metadata binding, service-role-only claim mutation, Stripe idempotency, atomic claim ownership and non-terminal subscription checks; never clear a claim until Stripe confirms the prior Session is expired
+Excluded: price, duration, reminder, cancellation, entitlement or webhook changes; migration, RLS, grant, provider-dashboard or secret changes; creating a real Checkout, subscription, charge, refund or customer communication during validation
+Acceptance: same-plan retries resume the existing verified Session; a different-plan retry safely expires and replaces an open verified Session in one user action; expired Sessions remain replaceable; completed Sessions never clear or create a duplicate subscription; provider or ownership uncertainty fails closed with a useful retry message; focused Billing, trial and function checks pass
+Approval boundary: repository implementation, tests, commit, push and pull request may proceed; stop before merge or production Edge Function deployment because subscription runtime changes require Owner approval
+Validation: focused Billing foundation, seven-day trial, client, server-entitlement and subscription-guidance harnesses pass; all 45 Node security-workflow commands pass, including the readiness harness after granting its temporary-worktree write; the changed Edge Function passes frozen Deno type-check and formatting; source contracts cover exact provider expiry, provider-confirmed status, exact-session claim clearing, same-plan resumption and completion-race blocking; a read-only production SQL probe returned successfully and live readback confirms the unchanged v31 function retains JWT verification and the old wait behavior; two unrelated Deno runtime tests hit the local Deno 2.9.1 Windows pipe panic and remain for the repository's pinned Linux CI; no database, Edge Function, Stripe object, subscription, charge, email or production state was changed
+Next action: complete full repository verification and independent diff review, then open the protected pull request for Owner review
+
 ## BILLING-TRIAL-001 — Seven-day Tallyo Pro trial
 
 Task ID: BILLING-TRIAL-001
