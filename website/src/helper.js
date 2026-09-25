@@ -19,6 +19,19 @@ if (knowledgeElement) {
     const aiAdapter = createPublicAiAdapter({ enabled: root.dataset.aiEnabled === "true" });
     let requestSequence = 0;
 
+    const serviceReplies = Object.freeze({
+      rate_limited: {
+        reason: "rate-limited",
+        answer: "You have asked several questions in a short time. Please wait a minute, then try again.",
+        links: [{ label: "Browse the Help Centre now", href: "/help/" }]
+      },
+      assistant_unavailable: {
+        reason: "unavailable",
+        answer: "Tallyo Helper cannot reach its answer service right now. Please try again shortly or use the Help Centre.",
+        links: [{ label: "Open the Help Centre", href: "/help/" }]
+      }
+    });
+
     const resolveHref = (href) => {
       if (href === "app:signup") return document.querySelector("[data-signup-link]")?.href || "/";
       if (href === "app:login") return document.querySelector("[data-login-link]")?.href || "/";
@@ -74,27 +87,32 @@ if (knowledgeElement) {
         form.setAttribute("aria-busy", "true");
         try {
           reply = await aiAdapter.answer(trimmed) || reply;
-        } catch {
-          reply = findHelperAnswer(knowledge, "");
+        } catch (error) {
+          reply = error?.publicAnswer
+            ? { reason: error.code || "boundary", answer: error.publicAnswer, links: error.publicLinks || [] }
+            : serviceReplies[error?.code] || serviceReplies.assistant_unavailable;
         } finally {
           submit.disabled = false;
           form.removeAttribute("aria-busy");
         }
       }
       if (sequence !== requestSequence) return;
-      if (reply.reason === "no-answer") trackEvent("helper_answer_not_found");
+      if (["no-answer", "unavailable", "rate-limited"].includes(reply.reason)) trackEvent("helper_answer_not_found");
       addMessage("assistant", reply.answer, reply.links || []);
-      setStatus(reply.reason === "ai"
-        ? "Tallyo Helper answered from reviewed public guidance."
-        : "Tallyo Helper answered using its reviewed guide.");
+      if (reply.reason === "ai") setStatus("Tallyo Helper answered from reviewed public guidance with AI.");
+      else if (reply.reason === "no-answer") setStatus("Tallyo Helper could not find enough reviewed guidance to answer.");
+      else if (reply.reason === "rate-limited") setStatus("Tallyo Helper is temporarily rate limited.");
+      else if (reply.reason === "unavailable") setStatus("Tallyo Helper is temporarily unavailable.");
+      else setStatus("Tallyo Helper answered using its reviewed guide.");
       input.focus();
     };
 
     if (suggestions) {
       const configuredLimit = Number.parseInt(root.dataset.helperSuggestionLimit || "", 10);
+      const suggestedEntries = (knowledge.entries || []).filter((entry) => entry.suggested === true);
       const entries = Number.isFinite(configuredLimit)
-        ? (knowledge.entries || []).slice(0, Math.max(0, configuredLimit))
-        : (knowledge.entries || []);
+        ? suggestedEntries.slice(0, Math.max(0, configuredLimit))
+        : suggestedEntries;
       for (const entry of entries) {
         const button = document.createElement("button");
         button.type = "button";

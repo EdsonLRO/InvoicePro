@@ -35,9 +35,46 @@ export const boundaryRules = Object.freeze([
 
 export const noAnswer = Object.freeze({
   reason: "no-answer",
-  answer: "I do not have a reviewed answer for that. Try one of the suggested questions or use the Help Centre. I will not guess about Tallyo features or your account.",
+  answer: "I could not find enough reviewed Tallyo guidance to answer that confidently. Try asking in a different way or use the Help Centre. I will not guess about features or your account.",
   links: [{ label: "Open the Help Centre", href: "/help/" }, { label: "Read common questions", href: "/faq/" }]
 });
+
+const retrievalStopWords = new Set([
+  "a", "about", "an", "and", "are", "can", "do", "does", "for", "from", "how", "i", "in", "is", "it",
+  "me", "my", "of", "on", "or", "that", "the", "this", "to", "tallyo", "what", "when", "where", "which",
+  "who", "why", "with", "you", "your"
+]);
+
+const retrievalTokens = (value) => normaliseQuestion(value)
+  .split(" ")
+  .filter((token) => token.length >= 3 && !retrievalStopWords.has(token));
+
+const retrievalText = (entry, field) => retrievalTokens(Array.isArray(entry?.[field])
+  ? entry[field].join(" ")
+  : entry?.[field]);
+
+export const findRelevantHelperEntries = (knowledge, question, limit = 8) => {
+  const entries = Array.isArray(knowledge?.entries) ? knowledge.entries : [];
+  const queryTokens = [...new Set(retrievalTokens(question))];
+  if (!queryTokens.length) return entries.filter((entry) => entry.essential).slice(0, limit);
+
+  return entries.map((entry, index) => {
+    const keywords = new Set(retrievalText(entry, "keywords"));
+    const title = new Set(retrievalText(entry, "question"));
+    const triggers = new Set(retrievalText(entry, "triggers"));
+    const answer = new Set(retrievalText(entry, "answer"));
+    const score = queryTokens.reduce((total, token) => total
+      + (keywords.has(token) ? 8 : 0)
+      + (title.has(token) ? 5 : 0)
+      + (triggers.has(token) ? 4 : 0)
+      + (answer.has(token) ? 1 : 0), entry.essential ? 1 : 0);
+    return { entry, index, score };
+  })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, Math.max(1, limit))
+    .map(({ entry }) => entry);
+};
 
 export const findHelperBoundary = (question) => {
   const normalised = normaliseQuestion(question);
@@ -92,9 +129,26 @@ export const createPublicAiAdapter = ({
         credentials: "same-origin",
         signal: controller.signal
       });
-      if (!response.ok) throw new Error("Tallyo Helper is unavailable.");
-      const payload = await response.json();
-      if (payload?.answered !== true || typeof payload.answer !== "string") return null;
+      let payload = null;
+      try {
+        payload = await response.json();
+      } catch {
+        // The caller receives a stable service state instead of provider detail.
+      }
+      if (!response.ok) {
+        const error = new Error("Tallyo Helper is unavailable.");
+        error.code = typeof payload?.code === "string" ? payload.code : "assistant_unavailable";
+        error.publicAnswer = typeof payload?.answer === "string" ? payload.answer : "";
+        error.publicLinks = Array.isArray(payload?.links) ? payload.links : [];
+        throw error;
+      }
+      if (payload?.answered !== true || typeof payload.answer !== "string") {
+        return {
+          ...noAnswer,
+          answer: typeof payload?.answer === "string" ? payload.answer : noAnswer.answer,
+          links: Array.isArray(payload?.links) ? payload.links : noAnswer.links
+        };
+      }
       return {
         reason: "ai",
         answer: payload.answer,

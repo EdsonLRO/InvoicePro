@@ -3,11 +3,17 @@
 ## Current state
 
 The Tallyo Helper has a same-origin Cloudflare Pages Function and browser
-adapter. Source remains disabled by default, but the Access-protected production
-website explicitly enables the reviewed AI path through Cloudflare production
+adapter. Source remains disabled by default, while the public production website
+explicitly enables the reviewed AI path through its approved Cloudflare
 configuration. The deterministic browser-local matcher remains first in the
 request path and continues to answer exact reviewed questions without an AI
 request.
+
+The reviewed catalogue now covers 44 current product and workflow topics. For
+an unmatched question, the server selects the most relevant reviewed entries by
+local keyword scoring and supplies only that bounded context to OpenAI. The
+model can paraphrase and combine those entries, but still must return
+`answered=false` when they do not support an answer.
 
 On 27 July 2026, one Owner-approved synthetic question was sent from the
 canonical Access-protected website to OpenAI. The Helper returned a bounded
@@ -35,12 +41,12 @@ An enabled browser build may send one question, limited to 240 characters, to
 - no account, Supabase, Stripe, Resend, payment or other tools;
 - `store: false`;
 - reviewed public knowledge embedded server-side rather than accepted from the
-  browser;
+  browser, with local relevance selection before the provider request;
 - strict JSON output and application-side validation;
 - no more than three links, each restricted to the reviewed public link
   allowlist;
-- a deterministic fallback for provider, parsing, validation or confidence
-  failure;
+- a deterministic no-answer response for insufficient reviewed guidance and
+  distinct visitor messages for rate limiting or temporary service failure;
 - no prompt or answer logging in application code.
 
 The selected implementation default is `gpt-5.6-terra` at low reasoning effort.
@@ -58,31 +64,23 @@ behaviour remains unchanged. When enabled in a reviewed preview:
 - only an unmatched general product question is sent to the same-origin
   endpoint;
 - the form exposes an accessible busy state;
-- provider failure returns the existing reviewed no-answer response;
+- insufficient guidance, rate limiting and temporary provider failure remain
+  visibly distinct without exposing provider detail;
 - clearing the conversation invalidates an in-flight answer;
 - the page explains that the question is sent securely to OpenAI and that
   Tallyo does not save the conversation.
 
-That visitor notice is implementation copy, not final legal publication. The
-provider terms, retention position, final public wording and external review
-remain release gates.
+The published Privacy Notice remains authoritative for the provider and
+retention position. The Helper copy must continue to state that the current
+question may be sent to OpenAI, the conversation is not intentionally saved by
+Tallyo, and the Helper has no account access or tools.
 
-## Public activation remains blocked
+## Current production gate
 
-The protected acceptance stage has completed the encrypted secret, rate-limiter
-binding, exact canonical Pages origin, production build gates and one synthetic
-paid-request check. Do not remove Access or publish the AI path for unrestricted
-visitors until the remaining items below are separately reviewed and approved:
-
-1. Final OpenAI project budget and usage-alert/limit disposition for unrestricted
-   traffic.
-2. The final public custom-domain origin in the server allowlist.
-3. Representative factuality, refusal, injection and unavailable-provider
-   evaluations.
-4. Final visitor notice, privacy data flow, retention position and provider
-   evidence.
-5. Owner approval for Access removal, the final provider configuration and
-   unrestricted public activation.
+Public activation was completed under exact Owner approval after the encrypted
+secret, service-bound rate limiter, exact public-domain origins, hard monthly
+budget and alerts, public notice/provider evidence and representative bounded
+evaluations were verified. Those controls remain release invariants.
 
 The build also fails closed unless `TALLYO_AI_PRIVATE_PREVIEW_APPROVED=true`
 accompanies an enabled preview. An enabled production build additionally
@@ -93,8 +91,7 @@ The adapter must not gain account, invoice, customer, support, payment or
 provider tools as part of activation. Any authenticated or tool-using assistant
 is a separate high-risk product.
 
-Cloudflare's current Pages documentation lists only a subset of bindings and
-does not list the native Rate Limiting binding. The prepared alternative is a
-preview-only service binding to a non-public Worker. The Worker receives only a
-SHA-256 rate key, fails closed, and has no provider key or question content.
-Its proposed threshold and namespace remain unactivated Owner-reviewed values.
+The production Pages Function reaches a non-public Worker through a service
+binding. That Worker receives only a SHA-256 rate key, fails closed, and has no
+provider key or question content. Its native rate limit remains three provider
+requests per connection key per minute.

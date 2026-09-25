@@ -1,5 +1,24 @@
 # Active programme: COMM-001 commercial launch integration
 
+## HELPER-GROUNDING-001 — Broader grounded public product answers
+
+Task ID: HELPER-GROUNDING-001
+Title: Let Tallyo Helper answer more current product questions without gaining account access
+Priority: Medium
+Status: Repository implementation complete; production release pending Owner approval
+Phase: Review
+Owner role: Product owner
+Risk level: High release boundary because the public feature sends an unmatched visitor question to an existing paid OpenAI API path; implementation itself is a bounded website and same-origin Function refinement
+Branch: `codex/helper-grounded-knowledge`
+Scope: expand the reviewed public knowledge catalogue from 18 to 44 current product and workflow topics; select the most relevant reviewed entries locally before each provider request; allow friendly paraphrased or combined answers only from those entries; distinguish insufficient knowledge, rate limiting and temporary unavailability; keep a focused suggestion list; update the public Helper explanation and focused mock-provider evaluations
+Privacy and security boundary: preserve the exact-origin gate, service-bound rate limiter, 240-character question limit, provider timeout, strict structured output, reviewed link allowlist, `store: false`, no application prompt/answer logging and no account, Supabase, Stripe, Resend, payment or other tools. Questions and answers are not added to analytics; the existing property-free answer-found/not-found events remain unchanged.
+Legal review: UK public website users and business users remain the affected groups. The existing current-question data flow to OpenAI is unchanged; relevance selection reduces the reviewed context sent with a question and adds no new vendor, data category, retention promise, automated decision, account access or private-record processing. Public wording continues to identify OpenAI, intentional non-storage by Tallyo and the no-account-access boundary. Disposition: Approved with conditions for repository implementation; release requires the published Privacy Notice and provider/budget controls to remain unchanged and a reviewed PR. No external professional review is required for this bounded refinement.
+Product accuracy: answers are grounded in released public behavior for quote acceptance and optional automatic invoice email, recurring invoices, opt-in reminders, deposits and balances, activity history, templates and branding, CSV customer import, percentage/fixed discounts, tax modes, installation, exports, subscription choices and account protection. Unreleased connected-card-payment wording still follows the existing commercial publication gate.
+Validation: the complete website suite passes for 26 routes plus 404; Helper fail-closed and mock-provider tests cover exact local answers, relevant-context selection, insufficient knowledge, rate limiting, provider failure, boundaries, prompt injection, strict output and link validation; Analytics gates and Free Invoice Maker conversion/consent checks pass. No paid OpenAI request or live provider/configuration change was made.
+Excluded: new OpenAI project/model/key, provider dashboard or budget change, real paid request, account or private-record access, tools, conversation memory, question/answer logging, Auth, database, migration, Supabase or Stripe change, email, payment, refund and unrelated website work
+Approval boundary: the Owner approved using the existing OpenAI key for repository implementation. Commit, push and PR preparation may proceed. Stop before merge and production publication because that would expand use of the already-active paid public Helper path.
+Next action: complete diff/security review, push the focused branch and open the reviewed pull request; request one bundled Owner approval for merge and normal website publication
+
 ## WEBSITE-NAV-001 — Refine the website navigation and footer
 
 Task ID: WEBSITE-NAV-001
