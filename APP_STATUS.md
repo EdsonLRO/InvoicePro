@@ -1,8 +1,8 @@
 # Tallyo current status
 
-## Seven-day trial candidate — repository/test mode only, 2026-09-25
+## Seven-day Tallyo Pro trial — released, 2026-09-25
 
-The Owner approved implementation of one card-required seven-day Tallyo Pro trial per account for the monthly plan. Candidate app build `2026.09.25.1` / cache `tallyo-shell-2026-09-25-1` adds an unapplied Supabase migration, fixed server-side Stripe Checkout trial terms, signed `trial_will_end` reconciliation, full access while `trialing`, a durable one-trial marker, and separate fail-closed server/app/website gates. The Free Invoice Maker remains account-free and card-free. No production migration, Function deployment, Stripe setting, public wording, real charge or customer communication is authorised. External professional review and explicit Owner approval remain required before live activation; see `docs/legal/TRIAL_SUBSCRIPTION_REVIEW.md`.
+The Owner approved and released one card-required seven-day Tallyo Pro trial per account for the £8 monthly plan, with the remaining legal and commercial risk explicitly accepted without external professional review. PR #190 merged as `acbfc8616f687adcfca12c0e1e27508e6d0bd92f`; migration `20260925110523_seven_day_billing_trial.sql` is applied; `create-billing-checkout` v30 and `stripe-billing-webhook` v29 are Active; and the live Stripe Billing destination is enabled for the required 11 events, including `customer.subscription.trial_will_end`. Server, app and website trial gates are enabled. Public readback confirms the trial offer and disclosures on Pricing and the Free Invoice Maker, while the Free Invoice Maker itself remains account-free and card-free. Sandbox lifecycle acceptance covered the three-day event, conversion and cancellation without charge; no real charge or customer reminder was sent during release validation. App build `2026.09.25.1` / cache `tallyo-shell-2026-09-25-1` is live through app deployment `10a5649b-f6ff-4e47-856a-faa4072889b8`, and website deployment `525f4cde-1b7e-48b9-ba0e-cab86afb58b9` is active.
 
 ## Product and deployment
 

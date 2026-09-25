@@ -6,7 +6,7 @@
 - Keep preview deployments protected by the retained wildcard Cloudflare Access applications.
 - Preserve the verified production gates, server-side subscription enforcement and documented rollback routes.
 - Preserve the documented separation between Tallyo subscriptions and independent-business customer payments.
-- Complete the gated repository and Stripe test-mode acceptance for the approved seven-day monthly-plan trial before any live activation decision.
+- Monitor the released seven-day monthly-plan trial, reminder delivery and trial-to-paid/cancelled lifecycle without inspecting customer content.
 
 ## Next
 
