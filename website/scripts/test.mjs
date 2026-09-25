@@ -506,6 +506,9 @@ for (const helperAsset of ["helper.js", "helper-core.mjs"]) {
 }
 const helperUiSource = read("assets/helper.js");
 assert.match(helperUiSource, /document\.querySelectorAll\("\[data-helper\]"\)/, "one Helper controller supports full and compact views");
+assert.match(helperUiSource, /MIN_RESPONSE_DELAY_MS = 1_000/, "Helper leaves a natural pause before local replies");
+assert.match(helperUiSource, /MAX_RESPONSE_DELAY_MS = 1_600/, "Helper response pause remains short and bounded");
+assert.match(helperUiSource, /Tallyo Helper is thinking…/, "Helper announces its brief thinking state");
 assert.match(helperUiSource, /event\.key === "Escape"/, "compact Helper supports Escape to close");
 assert.match(helperUiSource, /!widget\.contains\(event\.target\)/, "compact Helper closes when visitors click elsewhere");
 for (const moduleAsset of ["helper.js", "generator.js", "growth.js"]) {

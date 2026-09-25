@@ -2,6 +2,14 @@ import { createPublicAiAdapter, findHelperAnswer } from "/assets/helper-core.mjs
 import { trackEvent } from "/assets/growth.js?v=__TALLYO_ASSET_REVISION__";
 
 const knowledgeElement = document.getElementById("helper-knowledge");
+const MIN_RESPONSE_DELAY_MS = 1_000;
+const MAX_RESPONSE_DELAY_MS = 1_600;
+
+const waitForNaturalReply = async (startedAt, questionLength) => {
+  const targetDelay = Math.min(MAX_RESPONSE_DELAY_MS, MIN_RESPONSE_DELAY_MS + (questionLength * 6));
+  const remainingDelay = targetDelay - (Date.now() - startedAt);
+  if (remainingDelay > 0) await new Promise((resolve) => setTimeout(resolve, remainingDelay));
+};
 
 if (knowledgeElement) {
   const knowledge = JSON.parse(knowledgeElement.textContent || "{}");
@@ -76,36 +84,40 @@ if (knowledgeElement) {
     const ask = async (question, entryId = "") => {
       const trimmed = question.trim().slice(0, 240);
       if (!trimmed) return;
+      const startedAt = Date.now();
       const sequence = ++requestSequence;
       let reply = findHelperAnswer(knowledge, trimmed, entryId);
       if (reply.reason === "knowledge") trackEvent("helper_answer_found", { answer_key: reply.id });
       addMessage("user", reply.reason === "sensitive" ? "Sensitive information omitted" : trimmed);
       input.value = "";
-      if (reply.reason === "no-answer" && aiAdapter.enabled) {
-        setStatus("Tallyo Helper is checking reviewed public guidance.");
-        submit.disabled = true;
-        form.setAttribute("aria-busy", "true");
-        try {
-          reply = await aiAdapter.answer(trimmed) || reply;
-        } catch (error) {
-          reply = error?.publicAnswer
-            ? { reason: error.code || "boundary", answer: error.publicAnswer, links: error.publicLinks || [] }
-            : serviceReplies[error?.code] || serviceReplies.assistant_unavailable;
-        } finally {
-          submit.disabled = false;
-          form.removeAttribute("aria-busy");
+      setStatus("Tallyo Helper is thinking…");
+      submit.disabled = true;
+      form.setAttribute("aria-busy", "true");
+      try {
+        if (reply.reason === "no-answer" && aiAdapter.enabled) {
+          try {
+            reply = await aiAdapter.answer(trimmed) || reply;
+          } catch (error) {
+            reply = error?.publicAnswer
+              ? { reason: error.code || "boundary", answer: error.publicAnswer, links: error.publicLinks || [] }
+              : serviceReplies[error?.code] || serviceReplies.assistant_unavailable;
+          }
         }
+        await waitForNaturalReply(startedAt, trimmed.length);
+        if (sequence !== requestSequence) return;
+        if (["no-answer", "unavailable", "rate-limited"].includes(reply.reason)) trackEvent("helper_answer_not_found");
+        addMessage("assistant", reply.answer, reply.links || []);
+        if (reply.reason === "ai") setStatus("Tallyo Helper answered from reviewed public guidance with AI.");
+        else if (reply.reason === "no-answer") setStatus("Tallyo Helper needs a little more detail to answer.");
+        else if (reply.reason === "rate-limited") setStatus("Please wait a minute before asking another question.");
+        else if (reply.reason === "unavailable") setStatus("Tallyo Helper could not check that answer right now.");
+        else if (reply.reason === "conversation") setStatus("Tallyo Helper is ready for your question.");
+        else setStatus("Tallyo Helper answered using its reviewed guide.");
+        input.focus();
+      } finally {
+        submit.disabled = false;
+        form.removeAttribute("aria-busy");
       }
-      if (sequence !== requestSequence) return;
-      if (["no-answer", "unavailable", "rate-limited"].includes(reply.reason)) trackEvent("helper_answer_not_found");
-      addMessage("assistant", reply.answer, reply.links || []);
-      if (reply.reason === "ai") setStatus("Tallyo Helper answered from reviewed public guidance with AI.");
-      else if (reply.reason === "no-answer") setStatus("Tallyo Helper needs a little more detail to answer.");
-      else if (reply.reason === "rate-limited") setStatus("Please wait a minute before asking another question.");
-      else if (reply.reason === "unavailable") setStatus("Tallyo Helper could not check that answer right now.");
-      else if (reply.reason === "conversation") setStatus("Tallyo Helper is ready for your question.");
-      else setStatus("Tallyo Helper answered using its reviewed guide.");
-      input.focus();
     };
 
     if (suggestions) {
