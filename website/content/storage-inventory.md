@@ -11,7 +11,7 @@ This is an implementation inventory, not a public cookie notice.
 | Public-site service worker/cache | No public-site service worker | None | No |
 | Tallyo app PWA shell/cache | Existing app capability; outside public-site code | Necessary when app is used | Unchanged |
 | Free-generator draft | Generator deferred; no draft storage exists | Future preference only if opt-in | No |
-| Tallyo Helper conversation | Current-page DOM memory; cleared on reset/navigation; no storage API | Ephemeral necessary interaction | Yes, non-persistent |
+| Tallyo Helper conversation | Up to six recent exchanges in current-page JavaScript memory; sent with the next safe message for follow-up context; cleared on reset/reload/navigation; no storage API | Ephemeral necessary interaction | Yes, non-persistent |
 | UTM values | Not collected, persisted or transmitted | None | No |
 | Website preferences | No public-site preferences stored | Future preference | No |
 | Analytics identifiers | GA4 may set `_ga` and `_ga_*` for up to six months, but only after affirmative consent | Analytics | Source prepared; disabled by default |

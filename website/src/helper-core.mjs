@@ -4,6 +4,7 @@ export const normaliseQuestion = (value) => String(value || "")
   .replace(/[^a-z0-9£\s-]/g, " ")
   .replace(/\s+/g, " ")
   .trim()
+  .replace(/\brecurr+i+n+g\b/g, "recurring")
   .slice(0, 240);
 
 export const boundaryRules = Object.freeze([
@@ -35,9 +36,47 @@ export const boundaryRules = Object.freeze([
 
 export const noAnswer = Object.freeze({
   reason: "no-answer",
-  answer: "I could not find enough reviewed Tallyo guidance to answer that confidently. Try asking in a different way or use the Help Centre. I will not guess about features or your account.",
-  links: [{ label: "Open the Help Centre", href: "/help/" }, { label: "Read common questions", href: "/faq/" }]
+  answer: "I’m not quite sure what you mean yet, but I’d still like to help. Try asking about invoices, quotes, recurring invoices, reminders, payments or branding—or choose one of the guides below.",
+  links: [{ label: "See what Tallyo can do", href: "/features/" }, { label: "Browse the Help Centre", href: "/help/" }]
 });
+
+const conversationReplies = Object.freeze([
+  {
+    reason: "conversation",
+    pattern: /^(?:hi|hello|hey|hiya|good morning|good afternoon|good evening)(?: tallyo| there)?$/i,
+    answer: "Hi! I’m happy to help you explore Tallyo. You can ask how recurring invoices work, what happens when a quote is accepted, how to record a deposit, or anything else about the product. What would you like to know?",
+    links: [{ label: "See what Tallyo can do", href: "/features/" }, { label: "Browse popular questions", href: "/faq/" }]
+  },
+  {
+    reason: "conversation",
+    pattern: /^(?:thanks|thank you|thankyou|cheers|that helps|helpful)$/i,
+    answer: "You’re welcome! If you’d like to know anything else about Tallyo, just ask.",
+    links: []
+  },
+  {
+    reason: "conversation",
+    pattern: /^(?:that )?sounds? (?:good|great|helpful|interesting|useful)(?: to me)?$/i,
+    answer: "I’m glad it sounds useful. You can ask me to explain any part of it, what happens next, or how another Tallyo feature works alongside it.",
+    links: []
+  },
+  {
+    reason: "conversation",
+    pattern: /^(?:how are you|how are you doing|how is it going)$/i,
+    answer: "I’m doing well, thank you—and I’m ready to help with anything you’d like to know about Tallyo.",
+    links: []
+  },
+  {
+    reason: "conversation",
+    pattern: /^(?:bye|goodbye|see you|see you later)$/i,
+    answer: "Thanks for visiting. If another Tallyo question comes up, I’ll be here to help.",
+    links: []
+  }
+]);
+
+export const findConversationalReply = (question) => {
+  const normalised = normaliseQuestion(question);
+  return conversationReplies.find((reply) => reply.pattern.test(normalised)) || null;
+};
 
 const retrievalStopWords = new Set([
   "a", "about", "an", "and", "are", "can", "do", "does", "for", "from", "how", "i", "in", "is", "it",
@@ -88,6 +127,9 @@ export const findHelperAnswer = (knowledge, question, entryId = "") => {
   const boundary = findHelperBoundary(normalised);
   if (boundary) return boundary;
 
+  const conversation = findConversationalReply(normalised);
+  if (conversation) return conversation;
+
   if (entryId) {
     const selected = entries.find((entry) => entry.id === entryId);
     if (selected) return { ...selected, reason: "knowledge" };
@@ -115,7 +157,7 @@ export const createPublicAiAdapter = ({
 } = {}) => Object.freeze({
   enabled,
   provider: enabled ? "same-origin-server" : null,
-  async answer(question) {
+  async answer(question, history = []) {
     if (!enabled) throw new Error("The future public AI adapter is disabled.");
     if (typeof fetchImpl !== "function") throw new Error("Tallyo Helper is unavailable.");
 
@@ -125,7 +167,10 @@ export const createPublicAiAdapter = ({
       const response = await fetchImpl(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: normaliseQuestion(question) }),
+        body: JSON.stringify({
+          question: String(question || "").trim().slice(0, 240),
+          history: Array.isArray(history) ? history.slice(-12) : []
+        }),
         credentials: "same-origin",
         signal: controller.signal
       });

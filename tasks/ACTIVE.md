@@ -1,5 +1,23 @@
 # Active programme: COMM-001 commercial launch integration
 
+## HELPER-CONVERSATION-001 — Session-based public Helper conversation
+
+Task ID: HELPER-CONVERSATION-001
+Title: Replace the one-question lookup flow with a bounded multi-turn AI chat
+Priority: Medium
+Status: Implementation Complete
+Phase: Review
+Owner role: Product owner
+Risk level: Medium implementation with the existing high-risk public-AI release boundary unchanged
+Branch: `codex/helper-friendly-conversation`
+Scope: route every safe enabled-Helper turn through OpenAI; hold up to six recent exchanges only in page memory; provide the compact 44-topic reviewed catalogue on every provider turn so meaning is resolved across the full Tallyo knowledge set rather than browser keyword selection; let follow-up wording, greetings and spelling mistakes share one conversational path; allow general conversational reasoning for intent, context and plain-language explanation while keeping the reviewed catalogue as the sole source for Tallyo product claims and as the disabled/provider-failure fallback; update transparent public privacy wording and focused regression coverage
+Files locked: `website/src/helper-core.mjs`, `website/src/helper.js`, `website/functions/lib/public-helper.mjs`, `website/src/layout.mjs`, `website/src/legal-content.mjs`, `website/content/helper-knowledge.json`, `website/content/helper-ai-adapter.md`, `website/content/storage-inventory.md`, `website/scripts/test.mjs`, `website/scripts/test-public-helper.mjs`, `tasks/ACTIVE.md`
+Security and privacy boundary: preserve exact-origin and rate-limit controls, reviewed-only provider facts, strict output, `store: false`, no application prompt/answer logging, no persistent browser storage, no account/private-record access and no tools. Send at most six recent completed exchanges; validate roles, order, size and safety server-side; treat history as untrusted context rather than factual guidance.
+Legal disposition: the same provider and product-question purpose remain, but recent-turn transmission changes the disclosed data flow. Repository implementation may proceed; production publication of the updated Privacy Notice and Helper wording remains an Owner release boundary.
+Acceptance: “hi” receives a natural AI chat response in an enabled build; “how does recurrinng invoices work with tallyo” is understood; arbitrary short, incomplete, referential, misspelled or reaction-based follow-ups are resolved semantically from recent context rather than a fixed phrase list; a genuinely ambiguous message receives one conversational clarifying question; general conversational reasoning improves comprehension but does not become a source for Tallyo product claims; reset/reload/navigation clears the page-memory context; disabled and provider-failure paths retain useful local answers, including greetings and ordinary reactions such as “that sounds interesting”; safety boundaries and fail-closed behaviour remain intact; every reply keeps the short 1–1.6 second minimum cadence.
+Validation: complete website suite passes for 26 routes plus 404. Mock-provider coverage proves exact questions and greetings use the AI path, all 44 reviewed topics reach the provider for semantic selection, recent history resolves “Can I pause it?” against recurring-invoice guidance, more than six exchanges and malformed/unsafe history are rejected, `store: false` and strict output remain, and provider/rate-limit failures stay bounded. Local browser verification confirms the typoed recurring-invoice question reaches the reviewed fallback after the intended pause and Clear conversation removes the page-memory exchange. No live OpenAI request or provider/configuration change was made.
+Next action: update PR #189, then obtain one bundled approval for merge and normal website publication
+
 ## HELPER-GROUNDING-001 — Broader grounded public product answers
 
 Task ID: HELPER-GROUNDING-001

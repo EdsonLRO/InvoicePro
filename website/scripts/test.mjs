@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "no
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { helpArticles, notFoundPage, pages, productScenes } from "../src/pages.mjs";
-import { findHelperAnswer, findRelevantHelperEntries, futurePublicAiAdapter } from "../src/helper-core.mjs";
+import { findHelperAnswer, findRelevantHelperEntries, futurePublicAiAdapter, noAnswer } from "../src/helper-core.mjs";
 import { APPROVED_ANALYTICS_EVENTS, GA4_MEASUREMENT_ID } from "../../analytics-consent.mjs";
 import { calculateDocument, calculationPolicy, formatMoney, parseMoney, parsePercent, parseQuantity } from "../src/document-calculator.mjs";
 import {
@@ -266,7 +266,26 @@ assert.ok(findRelevantHelperEntries(helperKnowledge, "What happens after a clien
   .some((entry) => entry.id === "quote-acceptance"));
 assert.ok(findRelevantHelperEntries(helperKnowledge, "Can I schedule invoices and email them automatically?")
   .some((entry) => entry.id === "recurring-invoices"));
+for (const recurringQuestion of [
+  "how does recurrinng invoices work with tallyo",
+  "how do recurring invoice work",
+  "tell me about recurrring invoices"
+]) {
+  assert.equal(findHelperAnswer(helperKnowledge, recurringQuestion).id, "recurring-invoices", `typo-tolerant recurring answer for ${recurringQuestion}`);
+}
+for (const greeting of ["hi", "Hello", "hey there", "Good morning Tallyo"]) {
+  const reply = findHelperAnswer(helperKnowledge, greeting);
+  assert.equal(reply.reason, "conversation", `friendly local greeting for ${greeting}`);
+  assert.match(reply.answer, /happy to help/i);
+}
+assert.match(findHelperAnswer(helperKnowledge, "thank you").answer, /welcome/i);
+assert.match(findHelperAnswer(helperKnowledge, "that sound interesting").answer, /glad it sounds useful/i);
+assert.match(findHelperAnswer(helperKnowledge, "that sounds helpful").answer, /what happens next/i);
+assert.match(findHelperAnswer(helperKnowledge, "how are you?").answer, /doing well/i);
 assert.equal(findHelperAnswer(helperKnowledge, "Can you tell me the weather?").reason, "no-answer");
+assert.equal(findHelperAnswer(helperKnowledge, "Can you recommend a holiday destination?").reason, "no-answer");
+assert.match(noAnswer.answer, /I’d still like to help/);
+assert.doesNotMatch(noAnswer.answer, /reviewed guidance|I will not guess/i);
 assert.equal(findHelperAnswer(helperKnowledge, "My password is secret").reason, "sensitive");
 assert.equal(findHelperAnswer(helperKnowledge, "Can you inspect my invoice?").reason, "private-account");
 assert.equal(findHelperAnswer(helperKnowledge, "What tax rate should I use?").reason, "advice");
@@ -315,6 +334,8 @@ for (const [name, html] of [["Privacy Notice", privacy], ["Data Processing Terms
 assert.match(privacy, /Effective 31 July 2026/);
 assert.match(privacy, /main@tallyo\.co\.uk/);
 assert.match(privacy, /The public AI Helper answers questions about public Tallyo product information/);
+assert.match(privacy, /up to six recent exchanges from the same open page/);
+assert.match(privacy, /clears it when the visitor resets the Helper, reloads or leaves the page/);
 assert.match(privacy, /We do not promise a fixed closed-account deletion deadline/);
 assert.match(privacy, /href="\/data-processing-terms\/">Data Processing Terms<\/a>/);
 assert.match(privacy, /Google Analytics 4/);
@@ -498,6 +519,9 @@ for (const helperAsset of ["helper.js", "helper-core.mjs"]) {
 }
 const helperUiSource = read("assets/helper.js");
 assert.match(helperUiSource, /document\.querySelectorAll\("\[data-helper\]"\)/, "one Helper controller supports full and compact views");
+assert.match(helperUiSource, /MIN_RESPONSE_DELAY_MS = 1_000/, "Helper leaves a natural pause before local replies");
+assert.match(helperUiSource, /MAX_RESPONSE_DELAY_MS = 1_600/, "Helper response pause remains short and bounded");
+assert.match(helperUiSource, /Tallyo Helper is thinking…/, "Helper announces its brief thinking state");
 assert.match(helperUiSource, /event\.key === "Escape"/, "compact Helper supports Escape to close");
 assert.match(helperUiSource, /!widget\.contains\(event\.target\)/, "compact Helper closes when visitors click elsewhere");
 for (const moduleAsset of ["helper.js", "generator.js", "growth.js"]) {
