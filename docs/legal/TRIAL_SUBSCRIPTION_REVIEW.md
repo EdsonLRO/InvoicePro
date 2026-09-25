@@ -1,6 +1,6 @@
 # Seven-day subscription trial legal and operational review
 
-Status: Approved with conditions for repository and Stripe test-mode implementation. This review does not authorise live activation, public wording, provider configuration, production deployment or customer communication.
+Status: The implementation review is complete. On 25 September 2026 the Owner explicitly accepted the remaining legal and commercial risk, elected to proceed without external professional review and authorised the bounded live release, subject to the technical gates in this document and `RELEASE_READINESS.md`. See `TRIAL_SUBSCRIPTION_OWNER_RISK_ACCEPTANCE_2026-09-25.md`.
 
 ## 1. Jurisdiction and intended launch territory
 
@@ -16,7 +16,7 @@ The intended subscribers are sole traders, companies and their authorised employ
 - Tallyo creates a Stripe-hosted Checkout Session. Stripe collects the card; Tallyo does not receive or store full card details.
 - The Checkout page must disclose that the trial becomes an £8 monthly subscription after seven days unless cancelled before the trial ends.
 - Signed Stripe lifecycle events update the owner-scoped subscription and entitlement records. `trialing` grants full product access.
-- Stripe emits `customer.subscription.trial_will_end` approximately three days before the end. Live reminder delivery depends on separately reviewed provider configuration and is not activated by this repository change.
+- Stripe emits `customer.subscription.trial_will_end` approximately three days before the end. After signed reconciliation, Tallyo sends the account owner a transactional reminder through the existing Resend service. The request uses the Stripe event identifier as its provider idempotency key and records successful delivery submission on the Billing event.
 - If the user cancels during the trial, access continues until the trial end and no first subscription charge should be taken. Cancellation does not delete account or document data.
 - If the first charge fails, the existing bounded grace/read-only entitlement model applies. Refunds and disputes remain governed by the existing runbook.
 - The account may use the introductory trial once. An expired, uncompleted Checkout does not consume it; a created trial subscription does.
@@ -79,14 +79,14 @@ Store only Stripe customer/subscription identifiers, plan/status dates, lifecycl
 - Migration tests for RLS, grants, one-trial enforcement and `trialing` entitlement mapping.
 - Function tests for the fixed duration, monthly-only rule, card collection, live/test gates, allowlisted price, idempotency, pending-Session validation and signed `trial_will_end` handling.
 - UI/build tests proving the offer is hidden unless explicitly enabled and that required disclosure is present.
-- Stripe test-clock or equivalent sandbox evidence for trial creation, three-day event, cancellation before charge, conversion to active, payment failure and repeat-trial rejection.
+- Stripe test-clock or equivalent sandbox evidence for trial creation, three-day event, cancellation before charge, conversion to active, payment failure and repeat-trial rejection, or a recorded release decision explaining which deterministic function/database tests and provider readbacks substitute for an unavailable isolated test environment.
 - Billing Portal cancellation and support/runbook evidence.
 - No live provider change, real charge or customer message during repository validation.
 
 ## 12. Uncertainty and external-advice triggers
 
-External professional review is required before live activation or public legal/marketing publication because this change introduces an automatically renewing trial and cancellation obligations. Re-review is also required for consumer availability, another territory, a different trial duration or price, bank-debit collection, in-app cancellation changes, refunds, reminder timing changes or the commencement of the UK subscription-contract regime.
+External professional review was recommended because this change introduces an automatically renewing trial and cancellation obligations. The Owner explicitly elected to proceed without it for the bounded business-user release and accepted the residual risk in `TRIAL_SUBSCRIPTION_OWNER_RISK_ACCEPTANCE_2026-09-25.md`. Re-review is required for consumer-targeted availability, another territory, a different trial duration or price, bank-debit collection, in-app cancellation changes, refunds, reminder timing changes or the commencement of the UK subscription-contract regime.
 
 ## 13. Release disposition
 
-**Approved with conditions for repository and Stripe test-mode implementation. External professional review and explicit Owner approval are required before live activation, production migration/function deployment, provider configuration, public trial wording, customer email or merge into an auto-deploying release branch.**
+**Owner authorised for the bounded live release on 25 September 2026 with the remaining legal risk explicitly accepted. Technical deployment, provider, reminder, security, build and production-readback gates remain mandatory.**

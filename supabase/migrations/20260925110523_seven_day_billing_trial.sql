@@ -23,6 +23,9 @@ alter table public.billing_subscriptions
         ));
 
 alter table public.billing_events
+    add column customer_notification_sent_at timestamptz;
+
+alter table public.billing_events
     drop constraint billing_events_event_type_check,
     add constraint billing_events_event_type_check
         check (event_type in (

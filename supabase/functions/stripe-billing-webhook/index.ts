@@ -3,6 +3,9 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
 
+const FROM_EMAIL = Deno.env.get("FROM_EMAIL") ||
+  "Tallyo <invoices@mail.tallyo.co.uk>";
+
 const allowedEvents = new Set([
   "checkout.session.completed",
   "checkout.session.expired",
@@ -232,6 +235,101 @@ function subscriptionPrice(subscription: any): string {
   return String(items[0]?.price?.id || "");
 }
 
+function trialEndLabel(value: string | null): string {
+  const date = value ? new Date(value) : new Date(Number.NaN);
+  if (!Number.isFinite(date.getTime())) {
+    throw new Error("Trial ending reminder is missing a valid trial end");
+  }
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/London",
+    timeZoneName: "short",
+  }).format(date);
+}
+
+async function sendTrialEndingReminder(
+  admin: any,
+  userId: string,
+  eventId: string,
+  trialEnd: string | null,
+): Promise<void> {
+  const { data: existing, error: existingError } = await admin
+    .from("billing_events")
+    .select("event_type, customer_notification_sent_at")
+    .eq("stripe_event_id", eventId)
+    .maybeSingle();
+  if (existingError) throw new Error("Trial reminder state lookup failed");
+  if (existing?.event_type !== "customer.subscription.trial_will_end") {
+    throw new Error("Trial reminder event is not recorded");
+  }
+  if (existing.customer_notification_sent_at) return;
+
+  const { data: authResult, error: authError } = await admin.auth.admin
+    .getUserById(userId);
+  const recipient = String(authResult?.user?.email || "").trim();
+  if (
+    authError || recipient.length > 320 ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)
+  ) {
+    throw new Error("Trial reminder recipient is unavailable");
+  }
+
+  const resendKey = Deno.env.get("RESEND_API_KEY") || "";
+  if (!/^re_[A-Za-z0-9_]+$/.test(resendKey)) {
+    throw new Error("Trial reminder email is not configured");
+  }
+  const endsAt = trialEndLabel(trialEnd);
+  const subject = "Your Tallyo Pro trial ends in 3 days";
+  const text = [
+    "Your 7-day Tallyo Pro trial is nearly finished.",
+    "",
+    `It ends on ${endsAt}. Unless you cancel before it ends, your subscription will continue automatically at £8 per month.`,
+    "",
+    "You do not need to do anything to keep using Tallyo. To cancel or manage your subscription, sign in and open Billing.",
+    "",
+    "Manage your subscription: https://app.tallyo.co.uk",
+  ].join("\n");
+  const html = `
+    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827;max-width:620px;margin:auto">
+      <h1 style="font-size:24px;margin:0 0 16px">Your Tallyo Pro trial ends in 3 days</h1>
+      <p>Your 7-day Tallyo Pro trial is nearly finished.</p>
+      <p>It ends on <strong>${endsAt}</strong>. Unless you cancel before it ends, your subscription will continue automatically at <strong>£8 per month</strong>.</p>
+      <p>You do not need to do anything to keep using Tallyo. To cancel or manage your subscription, sign in and open Billing.</p>
+      <p><a href="https://app.tallyo.co.uk" style="color:#4059f5;font-weight:700">Manage your subscription</a></p>
+    </div>`;
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${resendKey}`,
+      "Content-Type": "application/json",
+      "Idempotency-Key": `billing-trial-ending/${eventId}`,
+    },
+    body: JSON.stringify({
+      from: FROM_EMAIL,
+      to: [recipient],
+      subject,
+      html,
+      text,
+    }),
+  });
+  if (!response.ok) {
+    await response.text().catch(() => "");
+    throw new Error("Trial reminder email delivery failed");
+  }
+
+  const { error: markError } = await admin
+    .from("billing_events")
+    .update({ customer_notification_sent_at: new Date().toISOString() })
+    .eq("stripe_event_id", eventId)
+    .eq("event_type", "customer.subscription.trial_will_end")
+    .is("customer_notification_sent_at", null);
+  if (markError) throw new Error("Trial reminder delivery was not recorded");
+}
+
 async function reconcile(
   admin: any,
   event: any,
@@ -317,6 +415,17 @@ async function reconcile(
   }
   if (!["applied", "duplicate", "stale"].includes(String(result))) {
     throw new Error("Billing reconciliation returned an invalid result");
+  }
+  if (
+    event.type === "customer.subscription.trial_will_end" &&
+    result !== "stale"
+  ) {
+    await sendTrialEndingReminder(
+      admin,
+      mapping.user_id,
+      event.id,
+      subscriptionPeriodEnd(subscription),
+    );
   }
   if (event.type === "checkout.session.completed") {
     await clearCheckoutClaim(admin, event, config);
