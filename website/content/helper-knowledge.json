@@ -1,60 +1,165 @@
 {
-  "version": 1,
+  "version": 2,
   "scope": "public-product-guidance-only",
   "entries": [
     {
       "id": "what-is-tallyo",
       "question": "What is Tallyo?",
       "triggers": ["what is tallyo", "tell me about tallyo", "what does tallyo do"],
-      "answer": "Tallyo is a straightforward invoicing and business-records workspace built around your business.",
-      "links": [{ "label": "About Tallyo", "href": "/about/" }]
+      "keywords": ["overview", "purpose", "invoicing", "business records"],
+      "answer": "Tallyo is a straightforward invoicing and business-records workspace. It keeps customers, quotes, invoices, payments and repeat invoicing together around your business.",
+      "links": [{ "label": "About Tallyo", "href": "/about/" }],
+      "suggested": true,
+      "essential": true
     },
     {
       "id": "who-is-it-for",
       "question": "Who is Tallyo for?",
       "triggers": ["who is tallyo for", "who can use tallyo", "is tallyo for me"],
-      "answer": "Tallyo is designed for sole traders, freelancers, consultants, tradespeople and service companies that create quotes and invoices.",
+      "keywords": ["business", "freelancer", "consultant", "tradesperson", "service company"],
+      "answer": "Tallyo is designed for sole traders, freelancers, consultants, tradespeople and service companies that create quotes and invoices. It is built around your business rather than one particular trade.",
       "links": [{ "label": "Explore features", "href": "/features/" }]
     },
     {
       "id": "features",
-      "question": "What features are available?",
+      "question": "What can I do with Tallyo?",
       "triggers": ["what features are available", "tallyo features", "what can tallyo do"],
-      "answer": "Tallyo supports invoices, quotes, credit notes, customers, saved items, branded PDFs, document email, payment tracking, recurring invoices, opt-in overdue reminders, exports and account-protection controls. __TALLYO_CONNECT_PAYMENT_AVAILABILITY__",
-      "links": [{ "label": "See all features", "href": "/features/" }, { "label": "Take the product tour", "href": "/product-tour/" }]
+      "keywords": ["features", "invoices", "quotes", "payments", "customers", "reminders", "recurring", "exports", "everyday", "admin"],
+      "answer": "Tallyo supports invoices, quotes, credit notes, saved customers and items, branded PDFs, document email, payment tracking, recurring invoices, chosen overdue reminders, activity history, exports and account-protection controls. __TALLYO_CONNECT_PAYMENT_AVAILABILITY__",
+      "links": [{ "label": "Explore features", "href": "/features/" }, { "label": "Take the product tour", "href": "/product-tour/" }],
+      "suggested": true,
+      "essential": true
+    },
+    {
+      "id": "create-document",
+      "question": "How do I create an invoice or quote?",
+      "triggers": ["create an invoice", "make an invoice", "create a quote", "new invoice", "new quote"],
+      "keywords": ["create", "invoice", "quote", "customer", "items", "dates", "download", "send"],
+      "answer": "Choose the document type, add or select the customer, set the dates, add products or services and review the totals. Save the document, check its PDF, then email or download it when it is ready.",
+      "links": [{ "label": "Create invoices, quotes and credit notes", "href": "/help/create-invoices-quotes-and-credit-notes/" }],
+      "suggested": true
     },
     {
       "id": "quote-vs-invoice",
       "question": "What is the difference between a quote and an invoice?",
       "triggers": ["difference between a quote and invoice", "quote vs invoice", "quote or invoice"],
-      "answer": "A quote sets out proposed work and prices before the work is agreed. An invoice requests payment for agreed or completed work. Tallyo can convert an accepted quote into an invoice.",
+      "keywords": ["quote", "invoice", "proposal", "request payment"],
+      "answer": "A quote sets out proposed work and prices before the customer agrees. An invoice requests payment for agreed or completed work. Tallyo can create an invoice when a customer accepts a quote.",
       "links": [{ "label": "Read the document guide", "href": "/help/create-invoices-quotes-and-credit-notes/" }]
+    },
+    {
+      "id": "quote-acceptance",
+      "question": "What happens when a customer accepts a quote?",
+      "triggers": ["quote accepted", "customer accepts quote", "accepted quote", "quote conversion"],
+      "keywords": ["acceptance", "quote", "invoice", "linked", "customer name", "time"],
+      "answer": "Tallyo keeps the accepted quote, records the confirmed customer name and acceptance time, and creates one linked invoice. The quote is not replaced or deleted.",
+      "links": [{ "label": "See the quote workflow", "href": "/product-tour/" }],
+      "suggested": true
+    },
+    {
+      "id": "quote-automatic-invoice-email",
+      "question": "Can Tallyo send the invoice after a quote is accepted?",
+      "triggers": ["automatically send invoice after quote", "invoice after quote accepted", "accepted quote email", "auto send quote invoice"],
+      "keywords": ["quote", "accepted", "automatic", "invoice", "email", "due period", "draft"],
+      "answer": "Yes, if automatic invoice email was selected before the quote was sent. You choose the due period and Tallyo uses the reviewed quote recipient. If automatic sending is off, or delivery fails, the linked invoice remains a Draft for you to review and send.",
+      "links": [{ "label": "See the quote workflow", "href": "/product-tour/" }]
     },
     {
       "id": "credit-note",
       "question": "What is a credit note?",
       "triggers": ["what is a credit note", "credit note explained", "when to use a credit note"],
+      "keywords": ["credit note", "reduce", "issued invoice", "adjustment"],
       "answer": "A credit note records a reduction to an issued invoice. It keeps the original invoice and the adjustment visible instead of treating the original document as if it never existed.",
       "links": [{ "label": "Read the document guide", "href": "/help/create-invoices-quotes-and-credit-notes/" }]
     },
     {
+      "id": "saved-items",
+      "question": "Can I save products and services?",
+      "triggers": ["save products", "save services", "saved items", "add new item", "reuse items"],
+      "keywords": ["products", "services", "items", "reuse", "description", "price"],
+      "answer": "Yes. Save products or services with their usual description and price, then reuse them on later documents. You can also create a new saved item while editing an invoice.",
+      "links": [{ "label": "Explore features", "href": "/features/" }]
+    },
+    {
+      "id": "customers",
+      "question": "Can I save customer details?",
+      "triggers": ["save customer", "customer records", "customer details", "add customer"],
+      "keywords": ["customers", "details", "balances", "documents", "schedules", "activity"],
+      "answer": "Yes. Saved customer records can be reused on documents. A customer page brings together balances, recent documents, recurring schedules and recent activity without turning Tallyo into a full CRM.",
+      "links": [{ "label": "See customer workflows", "href": "/product-tour/" }]
+    },
+    {
+      "id": "customer-csv-import",
+      "question": "Can I import customers from a CSV file?",
+      "triggers": ["import csv", "customer csv", "upload customers", "bulk import customers"],
+      "keywords": ["csv", "import", "customers", "preview", "duplicates", "spreadsheet"],
+      "answer": "Yes. The Customers page reads the CSV locally, shows a preview and asks for confirmation before adding valid rows. It skips invalid rows and duplicate email addresses and does not overwrite existing customers.",
+      "links": [{ "label": "Explore features", "href": "/features/" }]
+    },
+    {
+      "id": "discounts",
+      "question": "Can I add a percentage or fixed discount?",
+      "triggers": ["add discount", "percentage discount", "fixed discount", "exact discount amount"],
+      "keywords": ["discount", "percentage", "fixed", "amount", "total"],
+      "answer": "Yes. In the Tallyo app you can apply a percentage discount or enter a specific fixed amount, which is useful when you want the document total to reach an exact value.",
+      "links": [{ "label": "Explore features", "href": "/features/" }]
+    },
+    {
+      "id": "tax-modes",
+      "question": "How do the tax modes work?",
+      "triggers": ["tax mode", "prices include tax", "add tax on top", "inclusive tax"],
+      "keywords": ["tax", "inclusive", "included", "add on top", "line total"],
+      "answer": "Choose Add tax on top when the entered price is before tax. Choose Prices include tax when the entered price already contains tax. Tallyo then shows the line and document totals using that choice.",
+      "links": [{ "label": "Read the invoice guide", "href": "/invoice-guide/" }]
+    },
+    {
       "id": "recurring-invoices",
       "question": "How do recurring invoices work?",
-      "triggers": ["how do recurring invoices work", "recurring invoice", "repeat invoices"],
-      "answer": "You save an invoice schedule, choose when it runs and decide whether each generated invoice should be emailed automatically. You can review or change the schedule when the work changes.",
-      "links": [{ "label": "Set up recurring invoices", "href": "/help/recurring-invoices/" }]
+      "triggers": ["how do recurring invoices work", "recurring invoice", "repeat invoices", "regular invoices"],
+      "keywords": ["recurring", "repeat", "schedule", "weekly", "monthly", "quarterly", "yearly", "automatic email"],
+      "answer": "Save an invoice schedule, choose how often it runs, when it starts and ends, and whether each newly created invoice should be emailed automatically or left for review. You can pause or change the schedule when the work changes.",
+      "links": [{ "label": "Set up recurring invoices", "href": "/help/recurring-invoices/" }],
+      "suggested": true
     },
     {
       "id": "overdue-reminders",
       "question": "How do overdue reminders work?",
-      "triggers": ["how do overdue reminders work", "overdue reminder", "chase overdue invoice"],
-      "answer": "Overdue reminders are opt-in for each invoice. Tallyo schedules follow-up only after a saved invoice becomes overdue and you have enabled reminders for that document.",
-      "links": [{ "label": "Choose overdue reminders", "href": "/help/overdue-reminders/" }]
+      "triggers": ["how do overdue reminders work", "overdue reminder", "chase overdue invoice", "late invoice reminder"],
+      "keywords": ["overdue", "late", "reminder", "due date", "money owed", "opt in"],
+      "answer": "An invoice becomes overdue when its due date has passed and money is still owed. Tallyo sends reminders only for invoices where you turned reminders on; it does not email every overdue invoice automatically.",
+      "links": [{ "label": "Choose overdue reminders", "href": "/help/overdue-reminders/" }],
+      "suggested": true
+    },
+    {
+      "id": "manual-payments",
+      "question": "How do I record a payment?",
+      "triggers": ["record payment", "add payment", "payment received", "manual payment"],
+      "keywords": ["payment", "record", "bank transfer", "cash", "amount", "date", "note"],
+      "answer": "Open the invoice Payments section and add the amount, date and a short note for money received by bank transfer, cash or another agreed method. Tallyo updates the amount still left to pay.",
+      "links": [{ "label": "Record deposits and payments", "href": "/help/payment-links-and-deposits/" }]
+    },
+    {
+      "id": "deposits",
+      "question": "Can I record a deposit or part-payment?",
+      "triggers": ["record a deposit", "part payment", "partial payment", "invoice deposit"],
+      "keywords": ["deposit", "part payment", "partial", "balance", "remaining"],
+      "answer": "Yes. Add a deposit or part-payment to the invoice and Tallyo shows the amount paid and the balance still left. Add the remaining amount later to show the invoice as fully paid.",
+      "links": [{ "label": "Understand payment tracking", "href": "/help/payment-links-and-deposits/" }],
+      "suggested": true
+    },
+    {
+      "id": "payment-status",
+      "question": "How does Tallyo show what is paid and still due?",
+      "triggers": ["payment status", "amount still due", "outstanding balance", "fully paid", "paid invoice"],
+      "keywords": ["paid", "due", "overdue", "balance", "outstanding", "payment tracking"],
+      "answer": "Each recorded deposit, part-payment or final payment stays with the invoice. Tallyo shows the total paid, the amount still due and whether the invoice is paid, due or overdue.",
+      "links": [{ "label": "See what has been paid", "href": "/help/refunds-and-payment-status/" }]
     },
     {
       "id": "stripe-payments",
       "question": "Can customers pay by card?",
       "triggers": ["how do stripe card payments work", "stripe card payment", "pay by card", "card payment link"],
+      "keywords": ["card", "stripe", "checkout", "payment link", "payout"],
       "answer": "__TALLYO_CONNECT_PAYMENT_FAQ__ You can also record payments received through another agreed route.",
       "links": [{ "label": "Check payment availability", "href": "/help/payment-links-and-deposits/" }]
     },
@@ -62,41 +167,112 @@
       "id": "card-storage",
       "question": "Does Tallyo store card details?",
       "triggers": ["does tallyo store card details", "card details stored", "store my card"],
+      "keywords": ["card", "details", "storage", "stripe", "checkout"],
       "answer": "Tallyo does not store payment-card details. When card payments are available for your account, Stripe hosts checkout and handles the card information.",
       "links": [{ "label": "Read about payment security", "href": "/security/" }]
-    },
-    {
-      "id": "deposits",
-      "question": "Can Tallyo process deposits?",
-      "triggers": ["can tallyo process deposits", "request a deposit", "invoice deposit"],
-      "answer": "You can record a deposit as a part-payment against an invoice. When card payments are available for your account, you can create a Stripe card-payment link for an allowed part-payment.",
-      "links": [{ "label": "Understand payment tracking", "href": "/help/payment-links-and-deposits/" }]
     },
     {
       "id": "refunds",
       "question": "How do refunds work?",
       "triggers": ["how do refunds work", "refund a payment", "refund invoice"],
+      "keywords": ["refund", "stripe", "manual payment", "balance"],
       "answer": "For a Stripe card payment confirmed in Tallyo, use the invoice refund action; Tallyo asks Stripe to process the refund and updates the invoice after signed confirmation. For payments received another way, refund through that route and keep the invoice record consistent.",
       "links": [{ "label": "Understand payment status", "href": "/help/refunds-and-payment-status/" }]
     },
     {
+      "id": "activity-history",
+      "question": "What does activity history show?",
+      "triggers": ["activity history", "document history", "what happened", "invoice timeline"],
+      "keywords": ["activity", "history", "timeline", "created", "sent", "reminder", "payment"],
+      "answer": "Activity history shows when a document was created or sent, when reminders went out and when payments were recorded. It is a useful product record, not a tamper-proof compliance audit log.",
+      "links": [{ "label": "Read the activity guide", "href": "/help/activity-history/" }]
+    },
+    {
+      "id": "email-delivery",
+      "question": "Can I check whether a document email was delivered?",
+      "triggers": ["email delivery", "invoice email status", "was email delivered", "sent document"],
+      "keywords": ["email", "delivery", "accepted", "delivered", "failed", "activity"],
+      "answer": "Tallyo records the result returned by the email service and shows related events in the document activity. An accepted or delivered provider event helps with follow-up, but cannot guarantee that a person read the message.",
+      "links": [{ "label": "Check document email delivery", "href": "/help/email-delivery-status/" }]
+    },
+    {
+      "id": "branding",
+      "question": "Can I add my logo and brand colours?",
+      "triggers": ["add logo", "brand colour", "branding invoices", "customise pdf", "personalise invoice"],
+      "keywords": ["branding", "logo", "colour", "pdf", "preview", "position"],
+      "answer": "Yes. In Branding you can add your logo, choose its position and select your brand colour while a live document preview shows the result. Tallyo keeps headings and totals readable even when the chosen colour is light.",
+      "links": [{ "label": "See branding in the product tour", "href": "/product-tour/" }]
+    },
+    {
+      "id": "document-templates",
+      "question": "Which invoice templates can I choose?",
+      "triggers": ["invoice templates", "document layouts", "choose template", "basic modern professional tallyo"],
+      "keywords": ["template", "layout", "tallyo", "basic", "modern", "professional"],
+      "answer": "Tallyo includes four document layouts: Tallyo, Basic, Modern and Professional. Choose the style in Branding and use the live preview to see how it presents your business details, items and totals.",
+      "links": [{ "label": "Explore features", "href": "/features/" }]
+    },
+    {
+      "id": "alternating-rows",
+      "question": "Can I turn alternating item colours off?",
+      "triggers": ["alternating rows", "alternating item colours", "striped invoice items", "turn tint off"],
+      "keywords": ["alternating", "rows", "items", "colours", "tinted", "branding"],
+      "answer": "Yes. Branding includes a preference for alternating item-row colours. Leave it on for white and tinted rows, or turn it off for one consistent item background.",
+      "links": [{ "label": "Explore features", "href": "/features/" }]
+    },
+    {
+      "id": "exports",
+      "question": "Can I export my records?",
+      "triggers": ["export records", "download data", "excel export", "account export", "spreadsheet export"],
+      "keywords": ["export", "spreadsheet", "excel", "account data", "download"],
+      "answer": "Yes. Tallyo offers spreadsheet export for document lists and a structured account export for records associated with your account. Downloaded files are outside Tallyo's technical control, so store them appropriately.",
+      "links": [{ "label": "Explore features", "href": "/features/" }]
+    },
+    {
+      "id": "free-invoice-maker",
+      "question": "What can the Free Invoice Maker do?",
+      "triggers": ["free invoice maker", "free invoice generator", "invoice without account", "free quote generator"],
+      "keywords": ["free", "invoice", "quote", "browser", "pdf", "no account", "logo"],
+      "answer": "The Free Invoice Maker works in your browser without an account. Add business and customer details, line items, discounts, tax, payment details and a local logo, then preview, print or save the finished document as a PDF.",
+      "links": [{ "label": "Make a free invoice", "href": "/free-invoice-generator/" }]
+    },
+    {
+      "id": "free-maker-limits",
+      "question": "What is not included in the Free Invoice Maker?",
+      "triggers": ["free maker limits", "does free invoice save", "free generator account", "free invoice history"],
+      "keywords": ["free", "limits", "saved customers", "history", "recurring", "reminders", "payments"],
+      "answer": "The Free Invoice Maker does not save customer or service records to an account and does not include Tallyo email sending, document history, payment tracking, recurring invoices, reminders, cloud account storage, credit notes or online payments.",
+      "links": [{ "label": "Compare pricing", "href": "/pricing/" }]
+    },
+    {
       "id": "installation",
       "question": "Can I install Tallyo?",
-      "triggers": ["can i install tallyo", "install tallyo", "add tallyo to home screen"],
-      "answer": "Yes. On Chrome or Edge on a computer, look for the install or app symbol at the right end of the address bar. On Android Chrome, open the three-dot menu and choose Install and create shortcut. On iPhone or iPad Safari, use the Page or Share menu, then Add to Home Screen.",
+      "triggers": ["can i install tallyo", "install tallyo", "add tallyo to home screen", "install icon"],
+      "keywords": ["install", "chrome", "edge", "safari", "home screen", "address bar", "icon"],
+      "answer": "Yes. Open the Tallyo app by choosing Log in or Create account. On Chrome or Edge on a computer, look for the install or app symbol at the right end of the address bar. On Android Chrome use the three-dot menu. On iPhone or iPad Safari use the Page or Share menu, then Add to Home Screen.",
+      "links": [{ "label": "Installation guide", "href": "/help/install-tallyo/" }],
+      "suggested": true
+    },
+    {
+      "id": "devices",
+      "question": "Can I use Tallyo on different devices?",
+      "triggers": ["different devices", "phone tablet computer", "use on mobile", "supported browser"],
+      "keywords": ["devices", "phone", "tablet", "computer", "browser", "mobile"],
+      "answer": "Yes. Tallyo works in supported modern browsers on phone, tablet and computer and can be installed for quicker access. Authenticated business records still require an internet connection.",
       "links": [{ "label": "Installation guide", "href": "/help/install-tallyo/" }]
     },
     {
       "id": "offline",
       "question": "Does Tallyo work offline?",
       "triggers": ["does tallyo work offline", "use tallyo offline", "no internet"],
-      "answer": "The app shell can open offline, but an internet connection is required to sign in and access or update authenticated business records.",
+      "keywords": ["offline", "internet", "connection", "app shell", "records"],
+      "answer": "The app shell can open offline, but an internet connection is required to sign in and access or update authenticated business records. Recurring schedules and reminders rely on Tallyo's connected services.",
       "links": [{ "label": "Read installation guidance", "href": "/help/install-tallyo/" }]
     },
     {
       "id": "create-account",
       "question": "How do I create an account?",
       "triggers": ["how do i create an account", "create account", "sign up", "register for tallyo"],
+      "keywords": ["account", "signup", "register", "email confirmation"],
       "answer": "Choose Create account on the Tallyo website, enter your details in the Tallyo app and complete the email-confirmation step.",
       "links": [{ "label": "Create account", "href": "app:signup" }]
     },
@@ -104,27 +280,88 @@
       "id": "log-in",
       "question": "How do I log in?",
       "triggers": ["how do i log in", "log in to tallyo", "sign in to tallyo"],
+      "keywords": ["login", "sign in", "account", "authenticator"],
       "answer": "Choose Log in on the Tallyo website to open the app. Use your confirmed account and complete authenticator verification when you have enabled it.",
       "links": [{ "label": "Log in", "href": "app:login" }]
     },
     {
+      "id": "account-security",
+      "question": "How can I protect my Tallyo account?",
+      "triggers": ["protect account", "account security", "two factor authentication", "mfa", "authenticator app", "recovery codes"],
+      "keywords": ["security", "mfa", "authenticator", "recovery", "codes", "sign out", "sessions"],
+      "answer": "Confirm your email, use a strong unique password and optionally add authenticator-app multi-factor authentication. Keep one-time recovery codes safely away from your usual device and use the all-devices sign-out option if access may be at risk.",
+      "links": [{ "label": "Protect your account", "href": "/help/account-security/" }]
+    },
+    {
       "id": "pricing",
-      "question": "Where can I find pricing?",
+      "question": "How much does Tallyo cost?",
       "triggers": ["where can i find pricing", "tallyo pricing", "how much is tallyo", "tallyo plans"],
+      "keywords": ["pricing", "price", "cost", "monthly", "annual", "free"],
       "answer": "The Free Invoice Maker costs £0 and requires no account. Tallyo Pro is £8 per month or £80 per year for one business and one user. You can choose a monthly or annual subscription from Tallyo.",
       "links": [{ "label": "View pricing", "href": "/pricing/" }]
+    },
+    {
+      "id": "monthly-vs-annual",
+      "question": "Do monthly and annual plans have different features?",
+      "triggers": ["monthly or annual", "annual plan features", "monthly plan features", "billing options"],
+      "keywords": ["monthly", "annual", "features", "billing", "saving"],
+      "answer": "No. Monthly and annual Tallyo Pro subscriptions include the same features. Annual billing costs £80 upfront and saves £16 compared with twelve monthly payments.",
+      "links": [{ "label": "Compare pricing", "href": "/pricing/" }]
+    },
+    {
+      "id": "free-trial",
+      "question": "Is there a free trial?",
+      "triggers": ["free trial", "try tallyo", "trial period"],
+      "keywords": ["trial", "free", "monthly", "invoice maker"],
+      "answer": "Tallyo does not currently offer a full-feature free trial. You can use the Free Invoice Maker without an account, or choose monthly billing as the lower-commitment way to evaluate the saved Tallyo workspace.",
+      "links": [{ "label": "Compare pricing", "href": "/pricing/" }]
+    },
+    {
+      "id": "cancel-subscription",
+      "question": "What happens when I cancel Tallyo Pro?",
+      "triggers": ["cancel subscription", "cancel tallyo pro", "stop renewal", "what happens when i cancel"],
+      "keywords": ["cancel", "renewal", "access", "billing period", "records"],
+      "answer": "Cancelling stops future renewal. Paid access normally continues until the end of the billing period already paid for, and existing records are not immediately deleted. Use the Stripe Customer Portal from your Tallyo account to cancel future renewal.",
+      "links": [{ "label": "Read pricing and cancellation details", "href": "/pricing/" }]
+    },
+    {
+      "id": "account-access-boundary",
+      "question": "Does Tallyo Helper have private account access?",
+      "triggers": ["can helper see my account", "can helper change account", "helper account access", "helper tools"],
+      "keywords": ["helper", "account", "access", "records", "tools", "private"],
+      "answer": "No. Tallyo Helper is a public product guide. It cannot authenticate, inspect or change an account and has no access to Supabase, Stripe, Resend or private business records.",
+      "links": [{ "label": "Read the Helper boundaries", "href": "/helper/" }]
+    },
+    {
+      "id": "helper-privacy",
+      "question": "What happens to a question I ask Tallyo Helper?",
+      "triggers": ["helper privacy", "save helper conversation", "openai question", "helper data"],
+      "keywords": ["helper", "privacy", "question", "openai", "store", "conversation"],
+      "answer": "When the AI path is enabled, Tallyo sends only your current question and selected reviewed public guidance securely to OpenAI. Tallyo does not intentionally save the conversation, and the request uses store:false. Do not enter private business information or secrets.",
+      "links": [{ "label": "Read the Privacy Notice", "href": "/privacy/" }, { "label": "Read the Helper boundaries", "href": "/helper/" }]
+    },
+    {
+      "id": "accounting-boundary",
+      "question": "Does Tallyo replace accounting software?",
+      "triggers": ["replace accounting software", "is tallyo accounting software", "tax returns", "bookkeeping suite"],
+      "keywords": ["accounting", "bookkeeping", "tax return", "limitations"],
+      "answer": "No. Tallyo helps with invoicing and connected business records, but it is not a full accounting suite and does not prepare tax returns or provide legal, tax or accounting advice.",
+      "links": [{ "label": "Explore features", "href": "/features/" }]
     },
     {
       "id": "support",
       "question": "How do I get support?",
       "triggers": ["how do i get support", "contact support", "help with tallyo", "tallyo support"],
-      "answer": "Start with the reviewed Help Centre guides and common questions. If you still need help, email main@tallyo.co.uk and never include passwords, authenticator codes, recovery codes, card details or bank details.",
-      "links": [{ "label": "Open the Help Centre", "href": "/help/" }, { "label": "Read common questions", "href": "/faq/" }]
+      "keywords": ["support", "help", "contact", "email"],
+      "answer": "Start with the Help Centre guides and common questions. If you still need help, email main@tallyo.co.uk and never include passwords, authenticator codes, recovery codes, card details or bank details.",
+      "links": [{ "label": "Open the Help Centre", "href": "/help/" }, { "label": "Read common questions", "href": "/faq/" }],
+      "essential": true
     },
     {
       "id": "security",
       "question": "Where can I read about security?",
-      "triggers": ["where can i read about security", "tallyo security", "is tallyo secure", "account security"],
+      "triggers": ["where can i read about security", "tallyo security", "is tallyo secure", "security controls"],
+      "keywords": ["security", "controls", "limitations", "access", "data"],
       "answer": "The Security page describes Tallyo's current account, data-access, payment and browser controls together with honest limitations.",
       "links": [{ "label": "Read about security", "href": "/security/" }, { "label": "Protect your account", "href": "/help/account-security/" }]
     }

@@ -195,7 +195,7 @@ const enabledHtml = read("helper/index.html");
 assert.match(enabledHtml, /data-ai-enabled="true"/);
 assert.match(enabledHtml, /sent securely to OpenAI/);
 assert.match(enabledHtml, /has no account access or tools/);
-assert.match(read("help/index.html"), /Ask questions in your own words and get answers grounded in reviewed public Tallyo guidance/);
+assert.match(read("help/index.html"), /Ask questions in your own words and get answers grounded in current reviewed Tallyo features and guides/);
 assert.match(read("_headers"), /connect-src 'self'/);
 
 execFileSync(process.execPath, [buildScript], {
@@ -211,6 +211,7 @@ execFileSync(process.execPath, [buildScript], {
 
 const origin = "https://tallyo.co.uk";
 let providerCalls = 0;
+let lastProviderBody = null;
 const limiter = {
   async limit({ key }) {
     assert.match(key, /^[a-f0-9]{64}$/);
@@ -241,6 +242,7 @@ const provider = (value, ok = true) => async (url, options) => {
   assert.equal(options.method, "POST");
   assert.equal(options.headers.Authorization, "Bearer test-only-placeholder");
   const body = JSON.parse(options.body);
+  lastProviderBody = body;
   assert.equal(body.model, "gpt-5.6-terra");
   assert.deepEqual(body.reasoning, { effort: "low" });
   assert.equal(body.store, false);
@@ -432,9 +434,11 @@ assert.equal(response.status, 200);
 assert.deepEqual(await body(response), {
   answered: true,
   answer: "Tallyo keeps documents, payment tracking and repeat invoicing work together.",
-  links: [{ label: "See all features", href: "/features/" }],
+  links: [{ label: "Explore features", href: "/features/" }],
   source: "ai"
 });
+assert.match(lastProviderBody.input, /"id":"features"/, "retrieval supplies the relevant reviewed feature entry");
+assert.doesNotMatch(lastProviderBody.input, /"id":"stripe-payments"/, "retrieval omits unrelated reviewed entries");
 
 response = await run(
   request("Can Tallyo do something not in the reviewed guidance?"),
@@ -465,6 +469,34 @@ assert.deepEqual(await adapter.answer("What is Tallyo?"), {
   answer: "A bounded answer.",
   links: [{ label: "Features", href: "/features/" }]
 });
+
+const unansweredAdapter = createPublicAiAdapter({
+  enabled: true,
+  fetchImpl: async () => new Response(JSON.stringify({
+    answered: false,
+    answer: "Not enough reviewed guidance.",
+    links: [{ label: "Help", href: "/help/" }]
+  }), { status: 200, headers: { "Content-Type": "application/json" } })
+});
+assert.deepEqual(await unansweredAdapter.answer("An unsupported question"), {
+  reason: "no-answer",
+  answer: "Not enough reviewed guidance.",
+  links: [{ label: "Help", href: "/help/" }]
+});
+
+for (const code of ["rate_limited", "assistant_unavailable"]) {
+  const errorAdapter = createPublicAiAdapter({
+    enabled: true,
+    fetchImpl: async () => new Response(JSON.stringify({ answered: false, code }), {
+      status: code === "rate_limited" ? 429 : 503,
+      headers: { "Content-Type": "application/json" }
+    })
+  });
+  await assert.rejects(
+    () => errorAdapter.answer("A question"),
+    (error) => error.code === code
+  );
+}
 
 const functionSource = readFileSync(join(websiteRoot, "functions", "lib", "public-helper.mjs"), "utf8");
 const apiSource = readFileSync(join(websiteRoot, "functions", "api", "helper.js"), "utf8");

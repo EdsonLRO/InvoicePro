@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "no
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { helpArticles, notFoundPage, pages, productScenes } from "../src/pages.mjs";
-import { findHelperAnswer, futurePublicAiAdapter } from "../src/helper-core.mjs";
+import { findHelperAnswer, findRelevantHelperEntries, futurePublicAiAdapter } from "../src/helper-core.mjs";
 import { APPROVED_ANALYTICS_EVENTS, GA4_MEASUREMENT_ID } from "../../analytics-consent.mjs";
 import { calculateDocument, calculationPolicy, formatMoney, parseMoney, parsePercent, parseQuantity } from "../src/document-calculator.mjs";
 import {
@@ -250,15 +250,22 @@ const helperKnowledge = JSON.parse(applyConnectPaymentCopy(
   false
 ));
 assert.equal(helperKnowledge.scope, "public-product-guidance-only");
-assert.equal(helperKnowledge.entries.length, 18, "helper covers every required public question");
+assert.ok(helperKnowledge.entries.length >= 40, "helper covers the released public workflows");
 assert.equal(new Set(helperKnowledge.entries.map((entry) => entry.id)).size, helperKnowledge.entries.length, "helper knowledge IDs are unique");
+assert.ok(helperKnowledge.entries.filter((entry) => entry.suggested).length >= 6, "helper retains a focused suggestion set");
 for (const entry of helperKnowledge.entries) {
   assert.ok(entry.triggers.length > 0, `helper triggers for ${entry.id}`);
+  assert.ok(entry.keywords.length > 0, `helper retrieval keywords for ${entry.id}`);
   assert.equal(findHelperAnswer(helperKnowledge, entry.question).id, entry.id, `exact helper answer for ${entry.id}`);
   for (const link of entry.links) {
     assert.ok(link.href.startsWith("app:") || routeOutput.has(link.href), `reviewed public helper link ${link.href}`);
   }
 }
+assert.equal(findRelevantHelperEntries(helperKnowledge, "Can I choose a modern invoice layout?")[0].id, "document-templates");
+assert.ok(findRelevantHelperEntries(helperKnowledge, "What happens after a client agrees to my quote?")
+  .some((entry) => entry.id === "quote-acceptance"));
+assert.ok(findRelevantHelperEntries(helperKnowledge, "Can I schedule invoices and email them automatically?")
+  .some((entry) => entry.id === "recurring-invoices"));
 assert.equal(findHelperAnswer(helperKnowledge, "Can you tell me the weather?").reason, "no-answer");
 assert.equal(findHelperAnswer(helperKnowledge, "My password is secret").reason, "sensitive");
 assert.equal(findHelperAnswer(helperKnowledge, "Can you inspect my invoice?").reason, "private-account");
@@ -468,7 +475,7 @@ assert.match(styles, /\.plan-card:not\(\.plan-card-featured\) \.button \{ margin
 assert.match(styles, /\.helper-widget-panel \{[^}]*position: fixed;[^}]*bottom: 5rem;[^}]*backdrop-filter: blur\(22px\) saturate\(150%\)/, "compact Helper opens as a liquid-glass panel beside its icon");
 assert.match(styles, /\.helper-widget-panel\[hidden\] \{ display: none; \}/, "compact Helper remains absent from layout while closed");
 assert.match(styles, /@media \(max-width: 37\.99rem\) \{[^}]*\.helper-widget-panel \{[^}]*left: 1rem;[^}]*width: calc\(100vw - 2rem\)/s, "compact Helper keeps a full mobile inset inside narrow viewports");
-assert.ok(statSync(join(distRoot, "assets", "styles.css")).size < 90_000, "CSS baseline under 90 KB after compact Helper and navigation utility refinements");
+assert.ok(Buffer.byteLength(styles.replaceAll("\r\n", "\n"), "utf8") < 90_000, "CSS baseline under 90 KB after compact Helper and navigation utility refinements");
 assert.ok(statSync(join(distRoot, "assets", "site.js")).size < 10_000, "JS baseline under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper.js")).size < 10_000, "helper UI stays under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper-core.mjs")).size < 10_000, "helper matcher stays under 10 KB");

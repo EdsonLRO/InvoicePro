@@ -20,7 +20,7 @@ const subscriptionCta = siteConfig.subscriptionCheckoutEnabled
   ? '<a class="button button-primary" id="cta_pricing_create_account" data-analytics-placement="pricing" data-signup-link data-subscription-link href="#">Choose Tallyo Pro</a>'
   : `<button class="button button-primary" type="button" disabled>${commercialOffer.pro.availability}</button>`;
 const helperCardCopy = siteConfig.aiHelperEnabled
-  ? "Ask questions in your own words and get answers grounded in reviewed public Tallyo guidance, without account access."
+  ? "Ask questions in your own words and get answers grounded in current reviewed Tallyo features and guides, without account access."
   : "Get answers from reviewed public product guidance, without account access.";
 const pricingDescription = siteConfig.subscriptionCheckoutEnabled
   ? "Use the Free Invoice Maker without an account, or choose Tallyo Pro at £8 monthly or £80 annually."
@@ -180,7 +180,7 @@ const helper = `
       <p class="sr-only" data-helper-status role="status" aria-live="polite"></p>
     </div>
   </section>
-  <section class="section limitations" aria-labelledby="helper-limits-title"><div><p class="eyebrow">Clear limits</p><h2 id="helper-limits-title">A product guide, not an account assistant.</h2></div>${list(["The helper cannot authenticate, inspect or change an account.", "It never connects to Supabase, Stripe, Resend or private business records.", "__TALLYO_HELPER_PROVIDER_LIMIT__", "When reviewed knowledge does not answer a question, it says so and links to public help."])}</section>
+  <section class="section limitations" aria-labelledby="helper-limits-title"><div><p class="eyebrow">Clear limits</p><h2 id="helper-limits-title">A product guide, not an account assistant.</h2></div>${list(["The helper can explain current public Tallyo features and workflows in everyday language.", "It cannot authenticate, inspect or change an account.", "It never connects to Supabase, Stripe, Resend or private business records.", "__TALLYO_HELPER_PROVIDER_LIMIT__", "When reviewed knowledge does not answer a question, it says so instead of guessing."])}</section>
   <section class="section article-next" aria-label="More help"><a href="/help/">Browse the Help Centre</a><a href="mailto:main@tallyo.co.uk">Contact support</a></section>`;
 
 const help = `
