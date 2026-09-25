@@ -17,6 +17,12 @@ catalogue remains the sole source for claims about Tallyo features, behaviour,
 availability, prices and policies. This distinction lets the Helper converse
 normally without inventing product facts.
 
+Follow-up understanding is semantic rather than phrase-based. Short or
+incomplete questions, pronouns, reactions, clarification requests, requests for
+suggestions and next-step questions are interpreted from recent turns regardless
+of exact wording, grammar or spelling. When recent context still leaves a real
+ambiguity, the Helper asks one conversational clarifying question.
+
 The reviewed catalogue now covers 44 current product and workflow topics. For
 each question, the server selects the most relevant reviewed entries using the
 current message and recent user turns, then supplies only that bounded context
