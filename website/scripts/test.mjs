@@ -516,6 +516,13 @@ assert.ok(statSync(join(distRoot, "assets", "tallyo-mark.png")).size < 75_000, "
 assert.ok(statSync(join(distRoot, "assets", "tallyo-wordmark-white.png")).size < 50_000, "brand wordmark stays under 50 KB");
 assert.ok(existsSync(join(distRoot, "assets", "tallyo-social-card.webp")), "social card asset exists");
 assert.ok(statSync(join(distRoot, "assets", "tallyo-social-card.webp")).size < 100_000, "social card stays under 100 KB");
+assert.equal(existsSync(join(websiteRoot, "public", "assets", "App Screenshots")), false, "obsolete App Screenshots collection stays removed");
+for (const advertisingImage of ["01-free-invoice-maker.png", "02-finished-invoice.png", "03-quote-01-send.png", "04-quote-02-accepted.png", "05-quote-03-invoice-created.png", "06-quote-04-payment-tracked.png", "07-quote-05-follow-up.png", "08-recurring-setup.png", "09-recurring-overview.png", "10-dashboard-clarity.png", "11-deposits-and-balances.png", "12-overdue-reminders.png", "13-seven-day-trial.png", "14-cancel-online.png"]) {
+  assert.ok(existsSync(join(distRoot, "assets", "advertising", advertisingImage)), `refreshed advertising asset ${advertisingImage} exists`);
+}
+for (const socialImage of ["tallyo-x-profile-400.png", "tallyo-x-profile-800.png", "tallyo-x-header-1500x500.png"]) {
+  assert.ok(existsSync(join(distRoot, "assets", "social", socialImage)), `X social asset ${socialImage} exists`);
+}
 for (const helperAsset of ["helper.js", "helper-core.mjs"]) {
   const source = read(`assets/${helperAsset}`);
   assert.doesNotMatch(source, /fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage|indexedDB/, `${helperAsset} remains browser-local without persistence or network calls`);
