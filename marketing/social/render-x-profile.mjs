@@ -13,6 +13,7 @@ const officialMark = resolve(
   "website/public/assets/tallyo-mark.png",
 );
 const outputPath = resolve(scriptDirectory, "tallyo-x-profile-800.png");
+const uploadPath = resolve(scriptDirectory, "tallyo-x-profile-400.png");
 
 const size = 800;
 
@@ -63,4 +64,9 @@ await sharp(background)
   .png({ compressionLevel: 9, adaptiveFiltering: true })
   .toFile(outputPath);
 
-console.log(outputPath);
+await sharp(outputPath)
+  .resize({ width: 400, height: 400, fit: "fill" })
+  .png({ compressionLevel: 9, adaptiveFiltering: true })
+  .toFile(uploadPath);
+
+console.log(`${uploadPath}\n${outputPath}`);
