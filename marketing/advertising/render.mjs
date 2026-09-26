@@ -147,7 +147,7 @@ const logo = dataUrl(path.join(repoRoot, "website", "public", "assets", "tallyo-
 
 function recurringSetup() {
   return `<div class="product-mock recurring-mock">
-    <div class="mock-nav"><span class="mock-logo">T</span><strong>Edit invoice</strong><span>Account ↗</span></div>
+    <div class="mock-nav"><span class="mock-brand"><img src="${logo}" alt="Tallyo"></span><strong>Edit invoice</strong><span>Account ↗</span></div>
     <div class="mock-body">
       <div class="mock-sidebar"><strong>North &amp; Stone</strong><span>Overview</span><span>Invoices</span><span>Customers</span><span class="active">Recurring</span><span>Reminders</span></div>
       <div class="mock-content">
@@ -168,7 +168,7 @@ function recurringSetup() {
 
 function quoteSend() {
   return `<div class="product-mock quote-send-mock">
-    <div class="mock-nav"><span class="mock-logo">T</span><strong>Review &amp; send quote</strong><span>Account ↗</span></div>
+    <div class="mock-nav"><span class="mock-brand"><img src="${logo}" alt="Tallyo"></span><strong>Review &amp; send quote</strong><span>Account ↗</span></div>
     <div class="quote-send-body">
       <div class="quote-preview">
         <p class="mock-kicker">QUOTE</p><h3>Quote QUO-0217</h3>
@@ -191,7 +191,7 @@ function quoteSend() {
 
 function trialCard() {
   return `<div class="product-mock account-mock">
-    <div class="mock-nav"><span class="mock-logo">T</span><strong>Account</strong><span>+ New</span></div>
+    <div class="mock-nav"><span class="mock-brand"><img src="${logo}" alt="Tallyo"></span><strong>Account</strong><span>+ New</span></div>
     <div class="account-shell">
       <p class="mock-kicker">YOUR ACCOUNT</p>
       <div class="account-title"><div><h3>Tallyo Subscription</h3><p>Try every Tallyo Pro feature free for 7 days.</p></div><span class="status green">Free trial</span></div>
@@ -204,7 +204,7 @@ function trialCard() {
 
 function cancelCard() {
   return `<div class="product-mock cancel-mock">
-    <div class="portal-side"><span class="portal-mark">T</span><strong>Tallyo</strong><h3>Manage your Tallyo subscription.</h3><span>← Return to Tallyo</span></div>
+    <div class="portal-side"><span class="mock-brand portal-brand"><img src="${logo}" alt="Tallyo"></span><h3>Manage your Tallyo subscription.</h3><span>← Return to Tallyo</span></div>
     <div class="portal-main"><p class="mock-kicker">CURRENT SUBSCRIPTION</p><span class="status amber">Free trial ends 3 Oct</span><h3>Tallyo Pro</h3><h4>£8.00 per month</h4><p>After your free trial ends, your subscription continues automatically unless you cancel.</p><button>Cancel subscription</button><small>You can cancel online before the trial ends.</small></div>
   </div>`;
 }
@@ -248,7 +248,8 @@ function template(campaign) {
     .product-mock { width: 100%; height: 100%; border: 1px solid #dce3ef; border-radius: 18px; background: #f6f8fb; overflow: hidden; color: #15213a; }
     .mock-nav { height: 62px; padding: 0 28px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; background: white; border-bottom: 1px solid #dfe5ee; font-size: 15px; }
     .mock-nav > :last-child { justify-self: end; }
-    .mock-logo, .portal-mark { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; color: white; background: linear-gradient(135deg,#2f95ff,#57e0c0); font-weight: 900; }
+    .mock-brand { width: 116px; height: 40px; padding: 8px 12px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #111a31; }
+    .mock-brand img { display: block; width: 92px; height: auto; }
     .mock-body { height: calc(100% - 62px); display: grid; grid-template-columns: 180px 1fr; }
     .mock-sidebar { display: flex; flex-direction: column; gap: 20px; padding: 30px 22px; color: #dce4f5; background: #111a31; font-size: 14px; }
     .mock-sidebar strong { margin-bottom: 14px; color: white; }
@@ -299,7 +300,8 @@ function template(campaign) {
     .account-actions span { margin-top: 16px; color: #69758e; font-size: 13px; }
     .cancel-mock { display: grid; grid-template-columns: 36% 64%; background: white; }
     .portal-side { padding: 48px 36px; background: #f1f3f6; }
-    .portal-side > strong { margin-left: 10px; font-size: 18px; }
+    .portal-brand { width: 132px; height: 46px; }
+    .portal-brand img { width: 104px; }
     .portal-side h3 { margin: 90px 0 36px; max-width: 240px; font-size: 28px; line-height: 1.28; }
     .portal-side > span:last-child { color: #49546b; font-weight: 700; }
     .portal-main { padding: 55px 64px; }
