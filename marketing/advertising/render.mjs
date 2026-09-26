@@ -14,7 +14,6 @@ try {
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../..");
 const productRoot = path.join(repoRoot, "website", "public", "assets", "product");
-const screenshotRoot = path.join(repoRoot, "website", "public", "assets", "App Screenshots");
 const outputDir = path.join(here, "assets");
 const chromePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 
@@ -24,8 +23,7 @@ const campaigns = [
     eyebrow: "NO SIGN-UP. NO CARD.",
     headline: "Create one invoice free",
     supporting: "Add the details, check the preview and download a clear PDF in your browser.",
-    screenshot: path.join(screenshotRoot, "Free Invoice Generator.png"),
-    crop: "free-maker",
+    custom: "free-maker",
   },
   {
     slug: "02-finished-invoice",
@@ -145,6 +143,28 @@ function escapeHtml(value) {
 
 const logo = dataUrl(path.join(repoRoot, "website", "public", "assets", "tallyo-wordmark-white.png"));
 
+function freeMaker() {
+  return `<div class="product-mock free-maker-mock">
+    <div class="mock-nav"><span class="mock-brand"><img src="${logo}" alt="Tallyo"></span><strong>Free Invoice Maker</strong><span>No account needed</span></div>
+    <div class="free-maker-body">
+      <section class="free-form">
+        <p class="mock-kicker">DOCUMENT EDITOR</p><h3>Build your invoice</h3>
+        <div class="free-fields"><label>Your business<strong>North &amp; Stone</strong></label><label>Customer<strong>Willow &amp; Pine Studio</strong></label></div>
+        <div class="free-line"><span>Bathroom preparation</span><span>1</span><strong>£1,800.00</strong></div>
+        <div class="free-line"><span>Installation and finishing</span><span>1</span><strong>£5,000.00</strong></div>
+        <button>Download PDF</button>
+      </section>
+      <section class="free-preview">
+        <div class="preview-top"><span>INVOICE</span><strong>North &amp; Stone</strong></div>
+        <div class="preview-parties"><span><small>TO</small><strong>Willow &amp; Pine Studio</strong></span><span><small>INVOICE NUMBER</small><strong>INV-1048</strong></span></div>
+        <div class="preview-row"><span>Bathroom preparation</span><strong>£1,800.00</strong></div>
+        <div class="preview-row"><span>Installation and finishing</span><strong>£5,000.00</strong></div>
+        <div class="preview-total"><span>Total</span><strong>£6,800.00</strong></div>
+      </section>
+    </div>
+  </div>`;
+}
+
 function recurringSetup() {
   return `<div class="product-mock recurring-mock">
     <div class="mock-nav"><span class="mock-brand"><img src="${logo}" alt="Tallyo"></span><strong>Edit invoice</strong><span>Account ↗</span></div>
@@ -210,6 +230,7 @@ function cancelCard() {
 }
 
 function customMarkup(type) {
+  if (type === "free-maker") return freeMaker();
   if (type === "quote-send") return quoteSend();
   if (type === "recurring-setup") return recurringSetup();
   if (type === "trial") return trialCard();
@@ -243,13 +264,33 @@ function template(campaign) {
     .product-shot.payment { object-position: 43% center; }
     .product-shot.activity { object-position: 43% center; }
     .product-shot.quote-link { object-position: 52% top; }
-    .product-shot.free-maker { object-fit: fill; transform: scaleY(1.18) translateY(-34px); transform-origin: center; }
     .product-shot.phone { width: 420px; height: 100%; object-fit: cover; object-position: center 58%; border-radius: 30px; box-shadow: 0 10px 30px rgba(15,23,42,.12); }
     .product-mock { width: 100%; height: 100%; border: 1px solid #dce3ef; border-radius: 18px; background: #f6f8fb; overflow: hidden; color: #15213a; }
     .mock-nav { height: 62px; padding: 0 28px; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; background: white; border-bottom: 1px solid #dfe5ee; font-size: 15px; }
     .mock-nav > :last-child { justify-self: end; }
     .mock-brand { width: 116px; height: 40px; padding: 8px 12px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #111a31; }
     .mock-brand img { display: block; width: 92px; height: auto; }
+    .free-maker-body { height: calc(100% - 62px); display: grid; grid-template-columns: 52% 48%; gap: 18px; padding: 24px; background: #f4f7fb; }
+    .free-form, .free-preview { padding: 25px; border: 1px solid #dce3ed; border-radius: 15px; background: white; }
+    .free-form h3 { margin: 0 0 18px; font-size: 25px; }
+    .free-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+    .free-fields label { padding: 12px 13px; border: 1px solid #dce3ed; border-radius: 10px; color: #6c7790; font-size: 10px; }
+    .free-fields strong { display: block; margin-top: 5px; color: #1a243c; font-size: 13px; }
+    .free-line, .preview-row, .preview-total { display: grid; grid-template-columns: 1fr 38px 92px; gap: 10px; align-items: center; margin-top: 11px; padding: 12px 13px; border: 1px solid #e0e6ef; border-radius: 9px; font-size: 12px; }
+    .free-line strong { text-align: right; }
+    .free-form button { width: 100%; margin-top: 16px; padding: 13px; border: 0; border-radius: 9px; color: white; background: #5145e8; font-weight: 800; }
+    .free-preview { box-shadow: 0 12px 30px rgba(15,23,42,.10); }
+    .preview-top { display: flex; justify-content: space-between; align-items: center; padding-bottom: 19px; border-bottom: 2px solid #172139; }
+    .preview-top span { color: #5145e8; font-size: 12px; font-weight: 850; letter-spacing: .14em; }
+    .preview-top strong { font-size: 16px; }
+    .preview-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 17px 0; }
+    .preview-parties small, .preview-parties strong { display: block; }
+    .preview-parties small { color: #77839a; font-size: 9px; font-weight: 850; letter-spacing: .11em; }
+    .preview-parties strong { margin-top: 5px; font-size: 12px; }
+    .preview-row { grid-template-columns: 1fr 92px; margin-top: 0; border-width: 1px 0 0; border-radius: 0; }
+    .preview-row strong { text-align: right; }
+    .preview-total { grid-template-columns: 1fr 110px; margin-top: 16px; border: 0; border-top: 2px solid #172139; border-radius: 0; font-size: 16px; }
+    .preview-total strong { text-align: right; }
     .mock-body { height: calc(100% - 62px); display: grid; grid-template-columns: 180px 1fr; }
     .mock-sidebar { display: flex; flex-direction: column; gap: 20px; padding: 30px 22px; color: #dce4f5; background: #111a31; font-size: 14px; }
     .mock-sidebar strong { margin-bottom: 14px; color: white; }

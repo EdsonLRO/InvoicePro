@@ -5,6 +5,7 @@ This folder contains the current square advertising set for the refreshed Tallyo
 ## Deliverables
 
 All images are 1200 × 1200 PNG files in `assets/`.
+The approved exports are also mirrored in `website/public/assets/advertising/` so the repository's public asset library contains the current campaign rather than the retired app-card screenshots.
 
 1. Free Invoice Maker
 2. Finished invoice
@@ -24,7 +25,7 @@ The trial images state the current offer: seven days with every Tallyo Pro featu
 ## Source policy
 
 - Product captures come from `website/public/assets/product/` and use fictional businesses and customers.
-- The Free Invoice Maker capture is cropped to the editor and preview so the older navigation is not part of the creative.
+- The Free Invoice Maker view is a focused code-native recreation of the current editor and preview, so it does not depend on retired screenshots or expose document data.
 - The quote-send and recurring-setup views are focused code-native recreations of the released choices so the important wording remains readable at social-image size.
 - Trial and cancellation screens are clean code-native recreations of the released interface. They do not contain a test account, real email address, live Stripe session or changing trial date.
 - No live checkout, email, payment, customer record or provider action is used to render these images.
