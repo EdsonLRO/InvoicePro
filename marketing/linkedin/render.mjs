@@ -13,64 +13,57 @@ try {
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, "../..");
-const screenshotRoot = path.join(repoRoot, "website", "public", "assets", "App Screenshots");
-const curatedOutputDir = path.join(here, "assets");
-const libraryOutputDir = path.join(screenshotRoot, "LinkedIn Promos");
+const screenshotRoot = path.join(repoRoot, "website", "public", "assets", "product");
+const outputDir = path.join(repoRoot, "website", "public", "assets", "social", "linkedin");
 const chromePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 
 const campaigns = [
   {
     slug: "01-free-invoice-maker",
-    curatedSlug: "01-free-invoice-maker",
     eyebrow: "FREE INVOICE MAKER",
     headline: "Create an invoice for free",
     supporting: "No account required. Preview and download your PDF in the browser.",
-    screenshot: "Free Invoice Generator.png",
+    screenshot: "tallyo-free-invoice-maker.png",
     fit: "landscape",
   },
   {
     slug: "02-dashboard-clarity",
-    curatedSlug: "02-dashboard-clarity",
     eyebrow: "A CLEARER START TO THE DAY",
     headline: "Know what needs attention",
     supporting: "Outstanding, overdue and paid - at a glance.",
-    screenshot: "Dashboard Card.png",
+    screenshot: "tallyo-dashboard.jpg",
     fit: "wide",
   },
   {
     slug: "03-create-invoices",
-    curatedSlug: "03-create-invoices",
     eyebrow: "PROFESSIONAL DOCUMENTS",
     headline: "Create invoices without starting over",
     supporting: "Saved details. Clear totals. Professional PDFs.",
-    screenshot: "New Invoice Card.png",
+    screenshot: "tallyo-invoice-editor.jpg",
     fit: "tall",
   },
   {
     slug: "04-saved-items",
-    curatedSlug: "04-saved-items",
     eyebrow: "LESS REPEATED TYPING",
     headline: "Save it once. Reuse it next time.",
     supporting: "Keep commonly used products and services ready for the next invoice.",
-    screenshot: "Manage Saved Items Card.png",
+    screenshot: "tallyo-customers.jpg",
     fit: "wide",
   },
   {
     slug: "05-recurring-invoices",
-    curatedSlug: "05-recurring-invoices",
     eyebrow: "REPEAT WORK, LESS ADMIN",
     headline: "Plan recurring invoices",
     supporting: "Choose the schedule and decide whether generated invoices are emailed.",
-    screenshot: "Repeat this Invoice Card.png",
+    screenshot: "tallyo-recurring.jpg",
     fit: "standard",
   },
   {
     slug: "06-optional-online-payments",
-    curatedSlug: "06-optional-online-payments",
     eyebrow: "PAYMENT OPTIONS YOU CONTROL",
     headline: "Offer card payment when it suits the invoice",
     supporting: "Request the full balance or a predefined deposit. Stripe fees may apply.",
-    screenshot: "Payment Card Full Amount.png",
+    screenshot: "tallyo-payments.jpg",
     fit: "tall",
   },
   {
@@ -78,7 +71,7 @@ const campaigns = [
     eyebrow: "CUSTOMER DETAILS, READY",
     headline: "Save customer details for next time",
     supporting: "Keep repeat customer information organised and ready for the next document.",
-    screenshot: "Manage Customers Card.png",
+    screenshot: "tallyo-customers.jpg",
     fit: "wide",
   },
   {
@@ -86,7 +79,7 @@ const campaigns = [
     eyebrow: "KEEP RECORDS CURRENT",
     headline: "Update customer details in one place",
     supporting: "Edit the contact information used across future invoices and quotes.",
-    screenshot: "Edit Customer Card.png",
+    screenshot: "tallyo-customers.jpg",
     fit: "standard",
   },
   {
@@ -94,7 +87,7 @@ const campaigns = [
     eyebrow: "EVERY DOCUMENT, ONE VIEW",
     headline: "See invoice status without the guesswork",
     supporting: "Filter invoices, quotes and credit notes and see what is due, paid or overdue.",
-    screenshot: "My Invoices Card.png",
+    screenshot: "tallyo-overdue.jpg",
     fit: "landscape",
   },
   {
@@ -102,7 +95,7 @@ const campaigns = [
     eyebrow: "LESS REPETITIVE ADMIN",
     headline: "Handle several documents together",
     supporting: "Select multiple records when you need to duplicate, email, export or delete them.",
-    screenshot: "My Invoices Card - Bulk Options.png",
+    screenshot: "tallyo-overdue.jpg",
     fit: "landscape",
   },
   {
@@ -110,7 +103,7 @@ const campaigns = [
     eyebrow: "A CLEAR RECORD",
     headline: "Understand what happened",
     supporting: "Email, payment, refund and document activity stays attached to the relevant record.",
-    screenshot: "Activity History Card.png",
+    screenshot: "tallyo-activity.jpg",
     fit: "wide",
   },
   {
@@ -118,7 +111,7 @@ const campaigns = [
     eyebrow: "FLEXIBLE PAYMENT REQUESTS",
     headline: "Offer a predefined deposit",
     supporting: "Choose the deposit amount before sending and keep the remaining balance visible.",
-    screenshot: "Payment Card Deposit.png",
+    screenshot: "tallyo-payments.jpg",
     fit: "tall",
   },
   {
@@ -126,7 +119,7 @@ const campaigns = [
     eyebrow: "RECURRING WORK, ORGANISED",
     headline: "Manage recurring schedules together",
     supporting: "See the next invoice date, email choice and schedule status in one place.",
-    screenshot: "Recurring Invoices Card.png",
+    screenshot: "tallyo-recurring.jpg",
     fit: "wide",
   },
   {
@@ -134,7 +127,7 @@ const campaigns = [
     eyebrow: "STAY IN CONTROL",
     headline: "Change a recurring schedule when needed",
     supporting: "Adjust timing, email delivery or the next run without rebuilding the invoice.",
-    screenshot: "Edit Recurring Schedule Card.png",
+    screenshot: "tallyo-recurring.jpg",
     fit: "standard",
   },
   {
@@ -142,7 +135,7 @@ const campaigns = [
     eyebrow: "SEE WHAT WAS CREATED",
     headline: "Review recurring invoice history",
     supporting: "Keep each generated invoice and schedule result easy to trace.",
-    screenshot: "Recurring Schedule History Card.png",
+    screenshot: "tallyo-recurring.jpg",
     fit: "wide",
   },
   {
@@ -150,7 +143,7 @@ const campaigns = [
     eyebrow: "FOLLOW UP BY CHOICE",
     headline: "Set automatic overdue reminders",
     supporting: "Choose when reminders start, how often they repeat and when they stop.",
-    screenshot: "Automatic Reminders Card.png",
+    screenshot: "tallyo-overdue.jpg",
     fit: "wide",
   },
   {
@@ -158,7 +151,7 @@ const campaigns = [
     eyebrow: "YOUR BUSINESS, YOUR LOOK",
     headline: "Keep invoices recognisably yours",
     supporting: "Choose a brand colour and logo position, then preview the result before saving.",
-    screenshot: "Branding Card.png",
+    screenshot: "tallyo-branding.jpg",
     fit: "landscape",
   },
   {
@@ -166,7 +159,7 @@ const campaigns = [
     eyebrow: "BUSINESS DETAILS, READY",
     headline: "Keep company details in one place",
     supporting: "Save the information and logo you use across customer documents.",
-    screenshot: "Company Settings Card.png",
+    screenshot: "tallyo-branding.jpg",
     fit: "standard",
   },
   {
@@ -174,7 +167,7 @@ const campaigns = [
     eyebrow: "SET IT ONCE",
     headline: "Start each invoice with sensible defaults",
     supporting: "Choose common currency, tax, payment terms and document settings for faster setup.",
-    screenshot: "Company Settings  Defaults Card.png",
+    screenshot: "tallyo-invoice-editor.jpg",
     fit: "standard",
   },
   {
@@ -182,7 +175,7 @@ const campaigns = [
     eyebrow: "ACCOUNT CONTROLS",
     headline: "Manage your plan and card-payment setup",
     supporting: "See subscription access and connected Stripe payment readiness from your account.",
-    screenshot: "Account Card.png",
+    screenshot: "tallyo-security.jpg",
     fit: "landscape",
   },
   {
@@ -190,7 +183,7 @@ const campaigns = [
     eyebrow: "ACCOUNT SECURITY",
     headline: "Choose stronger sign-in protection",
     supporting: "Manage your password, authenticator app and account recovery controls.",
-    screenshot: "Change Password-Two Factor Authentication Card.png",
+    screenshot: "tallyo-security.jpg",
     fit: "standard",
   },
   {
@@ -198,15 +191,15 @@ const campaigns = [
     eyebrow: "YOUR DATA, YOUR SESSIONS",
     headline: "Export account data and manage sign-outs",
     supporting: "Download your records or sign out this device or every signed-in device.",
-    screenshot: "Data Export-Sign Out Card.png",
+    screenshot: "tallyo-security.jpg",
     fit: "standard",
   },
   {
     slug: "23-simple-pricing",
     eyebrow: "STRAIGHTFORWARD PRICING",
-    headline: "Choose monthly or annual Tallyo Pro",
+    headline: "Monthly or annual Tallyo Pro",
     supporting: "£8 monthly or £80 annually, with the core invoicing tools in one plan.",
-    screenshot: "Subscription Prices.png",
+    screenshot: "tallyo-pricing.png",
     fit: "landscape",
   },
   {
@@ -214,7 +207,7 @@ const campaigns = [
     eyebrow: "TALLYO ON YOUR DEVICE",
     headline: "Install Tallyo from your browser",
     supporting: "Add the app to supported desktop and mobile devices for quicker access.",
-    screenshot: "Tallyo App Installation Icon Search Bar.png",
+    screenshot: "tallyo-install-guide.png",
     fit: "wide",
   },
   {
@@ -222,7 +215,7 @@ const campaigns = [
     eyebrow: "QUESTIONS, ANSWERED",
     headline: "Get quick answers about Tallyo",
     supporting: "Use the public Helper for straightforward product and feature guidance.",
-    screenshot: "Tallyo Helper.png",
+    screenshot: "tallyo-helper.png",
     fit: "landscape",
   },
   {
@@ -230,7 +223,7 @@ const campaigns = [
     eyebrow: "WORK IN BATCHES",
     headline: "Keep busy invoice lists manageable",
     supporting: "Select the records you need and take the next action without losing context.",
-    screenshot: "Screenshot 2026-08-01 132337.png",
+    screenshot: "tallyo-overdue.jpg",
     fit: "landscape",
   },
   {
@@ -238,7 +231,7 @@ const campaigns = [
     eyebrow: "WHEN THE WORK IS ALREADY DONE",
     headline: "The invoice should not be the difficult part",
     supporting: "Bring the customer, line items, tax and total together before you send.",
-    screenshot: "New Invoice Card.png",
+    screenshot: "tallyo-invoice-editor.jpg",
     fit: "tall",
   },
   {
@@ -246,7 +239,7 @@ const campaigns = [
     eyebrow: "FOR THE CUSTOMERS WHO COME BACK",
     headline: "The next invoice can start with what you already know",
     supporting: "Keep familiar customer details ready instead of typing them again.",
-    screenshot: "Manage Customers Card.png",
+    screenshot: "tallyo-customers.jpg",
     fit: "wide",
   },
   {
@@ -254,7 +247,7 @@ const campaigns = [
     eyebrow: "WHEN THE WORK REPEATS",
     headline: "Put the next invoice on the schedule",
     supporting: "Set the timing once, then review, change or pause it whenever needed.",
-    screenshot: "Recurring Invoices Card.png",
+    screenshot: "tallyo-recurring.jpg",
     fit: "wide",
   },
   {
@@ -262,7 +255,7 @@ const campaigns = [
     eyebrow: "WHEN PAYMENT IS LATE",
     headline: "Follow up without rebuilding the context",
     supporting: "Choose if and when reminders are sent, while the invoice history stays together.",
-    screenshot: "Automatic Reminders Card.png",
+    screenshot: "tallyo-overdue.jpg",
     fit: "wide",
   },
   {
@@ -270,7 +263,7 @@ const campaigns = [
     eyebrow: "WHEN A JOB NEEDS A DEPOSIT",
     headline: "Ask for a deposit without losing sight of the balance",
     supporting: "Set the amount before sending and keep the remaining balance visible.",
-    screenshot: "Payment Card Deposit.png",
+    screenshot: "tallyo-payments.jpg",
     fit: "tall",
   },
   {
@@ -278,7 +271,7 @@ const campaigns = [
     eyebrow: "AFTER THE INVOICE IS SENT",
     headline: "Keep the invoice story in one place",
     supporting: "Email, payment, refund and document activity stays with the relevant record.",
-    screenshot: "Activity History Card.png",
+    screenshot: "tallyo-activity.jpg",
     fit: "wide",
   },
 ];
@@ -378,8 +371,7 @@ function template(campaign) {
   </html>`;
 }
 
-fs.mkdirSync(curatedOutputDir, { recursive: true });
-fs.mkdirSync(libraryOutputDir, { recursive: true });
+fs.mkdirSync(outputDir, { recursive: true });
 
 const browser = await chromium.launch({ headless: true, executablePath: chromePath });
 try {
@@ -406,20 +398,14 @@ try {
       window.scrollTo(0, 0);
     });
     await page.screenshot({
-      path: path.join(libraryOutputDir, `${campaign.slug}.png`),
+      path: path.join(outputDir, `${campaign.slug}.png`),
       type: "png",
       clip: { x: 0, y: 0, width: 1200, height: 1200 },
     });
-    if (campaign.curatedSlug) {
-      fs.copyFileSync(
-        path.join(libraryOutputDir, `${campaign.slug}.png`),
-        path.join(curatedOutputDir, `${campaign.curatedSlug}.png`),
-      );
-    }
     await page.close();
   }
 } finally {
   await browser.close();
 }
 
-console.log(`Rendered ${campaigns.length} LinkedIn campaign assets to ${libraryOutputDir}`);
+console.log(`Rendered ${campaigns.length} LinkedIn campaign assets to ${outputDir}`);

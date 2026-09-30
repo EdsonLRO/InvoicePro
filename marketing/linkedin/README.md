@@ -1,15 +1,14 @@
 # Tallyo LinkedIn campaign
 
-Six standalone organic LinkedIn posts, backed by a complete 26-image promotional
-library. Every graphic uses one real Tallyo product screenshot, the exact
-repository wordmark and the website's Inter font stack. Nothing in this folder
-publishes content or connects to LinkedIn.
+Thirty-two reusable organic LinkedIn graphics built from the current Tallyo
+product screenshots, the official repository wordmark and the website's Inter
+font stack. Nothing in this folder publishes content or connects to LinkedIn.
 
 Suggested cadence: two posts per week for three weeks, in the numbered order.
 
 ## 01 — Free Invoice Maker
 
-**Image:** `assets/01-free-invoice-maker.png`
+**Image:** `../../website/public/assets/social/linkedin/01-free-invoice-maker.png`
 
 Not every invoice needs another account or subscription.
 
@@ -27,7 +26,7 @@ preview, with the message that no account is required.
 
 ## 02 — Dashboard clarity
 
-**Image:** `assets/02-dashboard-clarity.png`
+**Image:** `../../website/public/assets/social/linkedin/02-dashboard-clarity.png`
 
 What's outstanding? What's overdue? What has been paid?
 
@@ -45,7 +44,7 @@ and draft invoice totals.
 
 ## 03 — Create invoices
 
-**Image:** `assets/03-create-invoices.png`
+**Image:** `../../website/public/assets/social/linkedin/03-create-invoices.png`
 
 Creating an invoice shouldn't turn into a long admin session.
 
@@ -63,7 +62,7 @@ details, one item and the invoice total.
 
 ## 04 — Saved items
 
-**Image:** `assets/04-saved-items.png`
+**Image:** `../../website/public/assets/social/linkedin/04-saved-items.png`
 
 The fastest invoice is the one you don't have to type from scratch.
 
@@ -81,7 +80,7 @@ and their default prices.
 
 ## 05 — Recurring invoices
 
-**Image:** `assets/05-recurring-invoices.png`
+**Image:** `../../website/public/assets/social/linkedin/05-recurring-invoices.png`
 
 Recurring work shouldn't create recurring admin.
 
@@ -100,7 +99,7 @@ the optional automatic-email setting.
 
 ## 06 — Optional online payments
 
-**Image:** `assets/06-optional-online-payments.png`
+**Image:** `../../website/public/assets/social/linkedin/06-optional-online-payments.png`
 
 Card payment should be an option, not something forced onto every invoice.
 
@@ -123,10 +122,9 @@ Run `render.mjs` with Node.js, Playwright available on `NODE_PATH`, and a local
 Chrome installation. The script produces deterministic 1200 by 1200 PNGs from
 the exact wordmark and screenshot sources; it does not call any external API.
 
-The six curated launch images are written to `marketing/linkedin/assets`. The
-complete library is written beside the source screenshots in
-`website/public/assets/App Screenshots/LinkedIn Promos`. Source screenshots are
-never overwritten.
+All campaign images are written to
+`website/public/assets/social/linkedin`. Source screenshots in
+`website/public/assets/product` are never overwritten.
 
 ## Practical invoice campaign
 
@@ -135,7 +133,7 @@ someone who understands day-to-day invoicing, rather than conventional ads.
 
 ### 27 — The invoice should not be the difficult part
 
-**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/27-invoice-without-the-admin-session.png`
+**Image:** `../../website/public/assets/social/linkedin/27-invoice-without-the-admin-session.png`
 
 Some invoices take longer to prepare than the work they describe.
 
@@ -154,7 +152,7 @@ fictional customer details, line items and a clear total.
 
 ### 28 — Repeat customer, less retyping
 
-**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/28-repeat-customer-less-retyping.png`
+**Image:** `../../website/public/assets/social/linkedin/28-repeat-customer-less-retyping.png`
 
 A repeat customer should not mean repeating the same typing.
 
@@ -173,7 +171,7 @@ records ready to reuse on future documents.
 
 ### 29 — Let the schedule remember
 
-**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/29-let-the-schedule-remember.png`
+**Image:** `../../website/public/assets/social/linkedin/29-let-the-schedule-remember.png`
 
 The monthly job may be familiar. The admin still turns up every month.
 
@@ -192,7 +190,7 @@ schedule, its next invoice date and status.
 
 ### 30 — Follow up with the context intact
 
-**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/30-overdue-with-context.png`
+**Image:** `../../website/public/assets/social/linkedin/30-overdue-with-context.png`
 
 No one enjoys deciding when to chase an overdue invoice.
 
@@ -211,7 +209,7 @@ maximum-reminder choices for an overdue invoice.
 
 ### 31 — A deposit without losing sight of the balance
 
-**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/31-deposit-and-balance.png`
+**Image:** `../../website/public/assets/social/linkedin/31-deposit-and-balance.png`
 
 A deposit can make the start of a job simpler for both sides.
 
@@ -230,7 +228,7 @@ payment and remaining invoice balance.
 
 ### 32 — What happened after the invoice was sent?
 
-**Image:** `../../website/public/assets/App Screenshots/LinkedIn Promos/32-after-the-invoice-is-sent.png`
+**Image:** `../../website/public/assets/social/linkedin/32-after-the-invoice-is-sent.png`
 
 Once an invoice has been sent, the useful question is usually: what happened
 next?
