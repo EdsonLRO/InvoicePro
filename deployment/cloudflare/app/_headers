@@ -14,6 +14,16 @@
 /config.js
   Cache-Control: no-store
 
+/quote
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow, noarchive
+
+/quote/*
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer
+  X-Robots-Tag: noindex, nofollow, noarchive
+
 /service-worker.js
   Cache-Control: no-cache
 

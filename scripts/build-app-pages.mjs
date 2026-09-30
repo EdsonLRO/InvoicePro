@@ -51,8 +51,10 @@ const publicSiteUrl = httpsUrl("TALLYO_PUBLIC_SITE_URL", String(process.env.TALL
 const stripeLiveMode = process.env.TALLYO_STRIPE_LIVE_MODE === "true";
 const billingTestEnabled = process.env.TALLYO_BILLING_TEST_ENABLED === "true";
 const billingLiveEnabled = process.env.TALLYO_BILLING_LIVE_ENABLED === "true";
+const billingTrialEnabled = process.env.TALLYO_BILLING_TRIAL_ENABLED === "true";
 const analyticsRequested = process.env.TALLYO_GA4_ENABLED === "true";
 const ga4MeasurementId = String(process.env.TALLYO_GA4_MEASUREMENT_ID || "").trim();
+const quoteAcceptanceRequested = process.env.TALLYO_QUOTE_ACCEPTANCE_ENABLED === "true";
 if (billingTestEnabled && billingLiveEnabled) {
   throw new Error("Only one Tallyo Billing browser mode may be enabled");
 }
@@ -65,11 +67,23 @@ if (billingLiveEnabled && !stripeLiveMode) {
 if (billingLiveEnabled && process.env.TALLYO_BILLING_PUBLIC_RELEASE_APPROVED !== "true") {
   throw new Error("Live Billing browser controls require explicit public-release approval");
 }
+if (billingTrialEnabled && !billingTestEnabled && !billingLiveEnabled) {
+  throw new Error("The Billing trial requires an enabled Billing browser mode");
+}
+if (
+  billingTrialEnabled && billingLiveEnabled &&
+  process.env.TALLYO_BILLING_TRIAL_PUBLIC_RELEASE_APPROVED !== "true"
+) {
+  throw new Error("The live Billing trial requires explicit public-release approval");
+}
 if (analyticsRequested && ga4MeasurementId !== "G-PZFZKCWZ7M") {
   throw new Error("The reviewed Tallyo GA4 Measurement ID is required when Analytics is enabled");
 }
 if (analyticsRequested && process.env.TALLYO_GA4_PUBLIC_RELEASE_APPROVED !== "true") {
   throw new Error("Analytics app controls require explicit public-release approval");
+}
+if (quoteAcceptanceRequested && process.env.TALLYO_QUOTE_ACCEPTANCE_PUBLIC_RELEASE_APPROVED !== "true") {
+  throw new Error("Quote acceptance controls require explicit public-release approval");
 }
 const configuration = [
   "// Generated during the Cloudflare Pages build. Do not commit this file.",
@@ -80,9 +94,11 @@ const configuration = [
   `window.STRIPE_LIVE_MODE = ${JSON.stringify(stripeLiveMode)};`,
   `window.TALLYO_BILLING_TEST_ENABLED = ${JSON.stringify(billingTestEnabled)};`,
   `window.TALLYO_BILLING_LIVE_ENABLED = ${JSON.stringify(billingLiveEnabled)};`,
+  `window.TALLYO_BILLING_TRIAL_ENABLED = ${JSON.stringify(billingTrialEnabled)};`,
   `window.TALLYO_PUBLIC_SITE_URL = ${JSON.stringify(publicSiteUrl)};`,
   `window.TALLYO_GA4_ENABLED = ${JSON.stringify(analyticsRequested)};`,
   `window.TALLYO_GA4_MEASUREMENT_ID = ${JSON.stringify(analyticsRequested ? ga4MeasurementId : "")};`,
+  `window.TALLYO_QUOTE_ACCEPTANCE_ENABLED = ${JSON.stringify(quoteAcceptanceRequested)};`,
   ""
 ].join("\n");
 
@@ -90,6 +106,7 @@ const appAssets = [
   "tailwind.css",
   "app-help-install.js",
   "app-user-messages.js",
+  "customer-csv-import.js",
   "manifest.json",
   "service-worker.js",
   "tallyo-mark.png",
@@ -100,6 +117,7 @@ const appAssets = [
 
 await rm(outputRoot, { recursive: true, force: true });
 await mkdir(outputRoot, { recursive: true });
+await mkdir(join(outputRoot, "quote"), { recursive: true });
 for (const asset of appAssets) await copyFile(join(repositoryRoot, asset), join(outputRoot, asset));
 for (const sharedAsset of ["analytics-consent.css", "analytics-consent.mjs", "analytics-app.js"]) {
   await copyFile(join(repositoryRoot, sharedAsset), join(outputRoot, sharedAsset));
@@ -117,6 +135,9 @@ const builtIndex = analyticsRequested
       )
   : appIndexSource;
 await writeFile(join(outputRoot, "index.html"), builtIndex, "utf8");
+for (const asset of ["index.html", "quote.css", "quote.js"]) {
+  await copyFile(join(repositoryRoot, "quote", asset), join(outputRoot, "quote", asset));
+}
 const headerTemplate = await readFile(join(repositoryRoot, "deployment", "cloudflare", "app", "_headers"), "utf8");
 const headers = headerTemplate
   .replace("{{ANALYTICS_SCRIPT_SRC}}", analyticsRequested ? " https://www.googletagmanager.com" : "")
@@ -126,7 +147,7 @@ await copyFile(join(repositoryRoot, "deployment", "cloudflare", "app", "_redirec
 await writeFile(join(outputRoot, "config.js"), configuration, "utf8");
 
 const assetBytes = {};
-for (const asset of ["index.html", ...appAssets, "analytics-consent.css", "analytics-consent.mjs", "analytics-app.js", "config.js", "_headers", "_redirects"]) {
+for (const asset of ["index.html", ...appAssets, "analytics-consent.css", "analytics-consent.mjs", "analytics-app.js", "config.js", "_headers", "_redirects", "quote/index.html", "quote/quote.css", "quote/quote.js"]) {
   assetBytes[asset] = (await stat(join(outputRoot, asset))).size;
 }
 const indexHtml = await readFile(join(outputRoot, "index.html"), "utf8");

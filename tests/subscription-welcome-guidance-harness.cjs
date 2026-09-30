@@ -13,7 +13,7 @@ assert.match(app, /£80 annually/);
 assert.match(app, /View subscription options/);
 assert.match(app, /@click="dismissSubscriptionWelcome"[^>]*>Not now</);
 
-const guidanceMethod = app.match(/maybeShowSubscriptionWelcome\(\) \{([\s\S]*?)\n\s*\},\n\s*dismissSubscriptionWelcome/)?.[1] || '';
+const guidanceMethod = app.match(/maybeShowSubscriptionWelcome\(\) \{([\s\S]*?)\r?\n\s*\},\r?\n\s*dismissSubscriptionWelcome/)?.[1] || '';
 assert.match(guidanceMethod, /this\.subscriptionWelcomeShown/);
 assert.match(guidanceMethod, /!this\.billing\.enabled/);
 assert.match(guidanceMethod, /!this\.billing\.loaded/);
@@ -21,6 +21,7 @@ assert.match(guidanceMethod, /this\.billing\.error/);
 assert.match(guidanceMethod, /this\.billing\.notice/);
 assert.match(guidanceMethod, /this\.billing\.subscription/);
 assert.match(guidanceMethod, /this\.billing\.entitlement/);
+assert.match(guidanceMethod, /this\.billing\.complimentaryAccess/);
 assert.match(guidanceMethod, /this\.subscriptionWelcomeOpen = true/);
 assert.doesNotMatch(guidanceMethod, /openBillingCheckout|functions\.invoke|window\.location/);
 

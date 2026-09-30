@@ -4,9 +4,12 @@ on:
   pull_request:
     branches:
       - main
+      - codex/tallyo-redesign
   push:
     branches:
       - main
+      - codex/tallyo-redesign
+      - codex/tallyo-redesign-*
   workflow_dispatch:
 
 permissions:
@@ -36,23 +39,42 @@ jobs:
 
       - name: Run focused security harnesses
         run: |
+          node tests/redesign-preview-harness.mjs
+          node tests/redesign-overview-harness.cjs
+          node tests/redesign-documents-harness.cjs
+          node tests/redesign-editor-harness.cjs
+          node tests/redesign-customers-harness.cjs
           node tests/account-data-export-harness.cjs
           node tests/analytics-consent-harness.cjs
           node tests/app-public-integration-harness.cjs
           node tests/brand-logo-harness.cjs
           node tests/auth-captcha-harness.cjs
           node tests/cloudflare-pages-readiness-harness.cjs
+          node tests/complimentary-access-harness.cjs
           node tests/core-lifecycle-harness.cjs
+          node tests/document-status-rules-spec-harness.cjs
+          deno test tests/invoice-status-rules-runtime-test.ts
           node tests/customer-item-validation-harness.cjs
+          node tests/customer-csv-import-harness.cjs
           node tests/dispute-lifecycle-visibility-harness.cjs
           node tests/email-status-accuracy-harness.cjs
           node tests/edge-dependency-pin-harness.cjs
           node tests/financial-action-audit-harness.cjs
           node tests/invoice-email-payment-option-harness.cjs
+          node tests/invoice-template-preferences-harness.cjs
+          deno run --allow-env tests/invoice-template-pdf-runtime-test.ts
           node tests/mfa-recovery-harness.cjs
           node tests/operational-health-harness.cjs
+          node tests/owner-console-harness.cjs
+          deno test --allow-read tests/owner-console-runtime-test.ts
           node tests/pwa-update-harness.cjs
           node tests/preview-acceptance-readiness-harness.cjs
+          node tests/quote-acceptance-runtime-harness.cjs
+          node tests/quote-acceptance-ui-harness.cjs
+          node tests/quote-auto-send-harness.cjs
+          deno run --allow-env tests/quote-auto-send-runtime-test.ts
+          node tests/quote-access-runtime-test.mjs
+          node tests/quote-email-acceptance-harness.cjs
           node tests/refund-consequence-preview-harness.cjs
           node tests/recurring-calendar-reliability-harness.cjs
           node tests/scale-accessibility-safety-harness.cjs
@@ -60,6 +82,7 @@ jobs:
           node tests/sensitive-reauth-captcha-harness.cjs
           node tests/session-expiry-harness.cjs
           node tests/stripe-billing-foundation-harness.cjs
+          node tests/stripe-billing-trial-harness.cjs
           node tests/subscription-welcome-guidance-harness.cjs
           node tests/stripe-connect-foundation-harness.cjs
           node tests/stripe-connect-payments-harness.cjs

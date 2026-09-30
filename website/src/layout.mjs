@@ -144,27 +144,47 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
     .replaceAll(
       "__TALLYO_HELPER_HERO_COPY__",
       siteConfig.aiHelperEnabled
-        ? "Ask a general question in your own words. The assistant answers from reviewed public Tallyo guidance and falls back safely when it is unsure."
+        ? "Ask a general question in your own words. The assistant uses current reviewed Tallyo features and guides, and says when that information is not enough."
         : "Ask about current Tallyo features, documents, payments, installation and account protection. Answers come from a reviewed public knowledge base in this browser."
     )
     .replaceAll(
       "__TALLYO_HELPER_MODE_NOTE__",
       siteConfig.aiHelperEnabled
-        ? "For questions that need a more flexible answer, your question is sent securely to OpenAI. Tallyo does not save this conversation."
+        ? "Your message and a recent part of this page’s conversation are sent securely to OpenAI with reviewed public Tallyo guidance. Tallyo does not intentionally save the conversation."
         : "Answers are matched in this browser and are not sent to an AI provider."
     )
     .replaceAll(
       "__TALLYO_HELPER_PROVIDER_LIMIT__",
       siteConfig.aiHelperEnabled
-        ? "The AI assistant receives only your current question and reviewed public Tallyo guidance. It has no account access or tools."
+        ? "The AI assistant receives your current message, up to six recent exchanges and the reviewed public Tallyo knowledge catalogue. It has no account access or tools."
         : "It does not retain user-specific memory or send prompts to a third party."
     ), siteConfig.connectPaymentsEnabled);
   const schema = applyConnectPaymentCopy(
     JSON.stringify(schemaFor({ ...page, description })),
     siteConfig.connectPaymentsEnabled
   );
-  const pageScripts = ["/assets/growth.js", ...(page.scripts || [])].map((src) => `<script type="module" src="${escapeAttribute(assetUrl(src))}"></script>`).join("\n  ");
-  const inlineScripts = [schema, ...(page.helper ? [helperKnowledgeJson] : [])];
+  const pageScripts = [...new Set(["/assets/growth.js", "/assets/helper.js", ...(page.scripts || [])])]
+    .map((src) => `<script type="module" src="${escapeAttribute(assetUrl(src))}"></script>`)
+    .join("\n  ");
+  const inlineScripts = [schema, helperKnowledgeJson];
+  const helperWidgetMarkup = page.helper ? "" : `
+  <aside class="helper-widget" data-helper-widget>
+    <section class="helper-widget-panel" id="tallyo-helper-widget" data-helper data-ai-enabled="${String(siteConfig.aiHelperEnabled)}" role="dialog" aria-modal="false" aria-labelledby="helper-widget-title" hidden>
+      <header class="helper-widget-header">
+        <div><span class="helper-widget-mark" aria-hidden="true">T</span><div><h2 id="helper-widget-title">Tallyo Helper</h2><p>Public product guidance</p></div></div>
+        <button class="helper-widget-close" type="button" data-helper-close aria-label="Close Tallyo Helper"><span aria-hidden="true">×</span></button>
+      </header>
+      <p class="helper-widget-boundary">Ask about Tallyo features and workflows. The Helper cannot see your account or records.</p>
+      <ol class="helper-conversation helper-widget-conversation" data-helper-conversation aria-label="Tallyo Helper conversation" aria-live="polite" aria-relevant="additions"></ol>
+      <form class="helper-form helper-widget-form" data-helper-form>
+        <label class="sr-only" for="helper-widget-question">Ask a general question about Tallyo</label>
+        <div><input id="helper-widget-question" data-helper-input name="question" type="text" maxlength="240" autocomplete="off" spellcheck="true" placeholder="Ask a question…" required><button class="button button-primary" type="submit">Send</button></div>
+      </form>
+      <div class="helper-widget-footer"><span>Do not share passwords or private business information.</span><a href="/helper/">Open full Helper</a></div>
+      <p class="sr-only" data-helper-status role="status" aria-live="polite"></p>
+    </section>
+    <button class="helper-fab" type="button" data-helper-toggle aria-expanded="false" aria-controls="tallyo-helper-widget" aria-label="Open Tallyo Helper"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 4.5h13A2.5 2.5 0 0 1 21 7v7a2.5 2.5 0 0 1-2.5 2.5h-7L7 20v-3.5H5.5A2.5 2.5 0 0 1 3 14V7a2.5 2.5 0 0 1 2.5-2.5Z"></path><circle cx="8" cy="10.5" r="1"></circle><circle cx="12" cy="10.5" r="1"></circle><circle cx="16" cy="10.5" r="1"></circle></svg><span class="helper-fab-label">Ask Tallyo</span></button>
+  </aside>`;
 
   return {
     html: `<!doctype html>
@@ -205,22 +225,26 @@ export const renderPage = (page, { helperKnowledgeJson = "", assetRevision = "" 
   <header class="site-header" data-header>
     <div class="header-inner">
       <a class="brand" href="/" aria-label="Tallyo home"><span class="brand-wordmark-dark" aria-hidden="true"><img class="brand-wordmark-dark-base" src="${assetUrl("/assets/tallyo-wordmark-white.png")}" alt=""><img class="brand-wordmark-dark-colour" src="${assetUrl("/assets/tallyo-wordmark-white.png")}" alt=""></span></a>
+      <a class="header-install-shortcut" href="/help/install-tallyo/" aria-label="Install Tallyo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10"></path><path d="m8.5 9.5 3.5 3.5 3.5-3.5"></path><path d="M5 16.5v2A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg><span>Install</span></a>
       <button class="menu-button" type="button" aria-expanded="false" aria-controls="primary-navigation" data-menu-button><span class="sr-only">Open main menu</span><i></i><i></i><i></i></button>
       <nav class="primary-nav" id="primary-navigation" aria-label="Main navigation" data-navigation>
-        <div class="nav-links">${navMarkup}</div>
+        <div class="nav-links"><button class="nav-cookie-settings" type="button" data-cookie-settings hidden aria-label="Cookie settings" title="Cookie settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 13.1A8.5 8.5 0 0 1 10.9 3.8 8.5 8.5 0 1 0 20.2 13.1Z"></path><circle cx="8.2" cy="12.1" r="1"></circle><circle cx="12.3" cy="16" r="1"></circle><circle cx="7.3" cy="17.2" r=".8"></circle></svg><span>Cookie settings</span></button>${navMarkup}</div>
+        <a class="nav-install-link" href="/help/install-tallyo/"${page.route === "/help/install-tallyo/" ? ' aria-current="page"' : ""}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10"></path><path d="m8.5 9.5 3.5 3.5 3.5-3.5"></path><path d="M5 16.5v2A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg><span>Install Tallyo</span></a>
         <div class="nav-actions"><a class="login-link" id="cta_login" data-login-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a class="button button-primary button-small" id="cta_header_create_account" data-signup-link data-analytics-placement="header" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a></div>
       </nav>
     </div>
   </header>
   <main id="main-content" tabindex="-1">${content}</main>
+  ${helperWidgetMarkup}
   <footer class="site-footer">
     <div class="footer-main">
-      <div class="footer-intro"><a class="brand brand-footer" href="/" aria-label="Tallyo home"><img class="brand-wordmark" src="${assetUrl("/assets/tallyo-wordmark-white.png")}" alt="" aria-hidden="true"><span class="sr-only">Tallyo</span></a><p>Professional invoices, clearer payment tracking and less repeated admin for UK small businesses.</p></div>
+      <div class="footer-group footer-account"><h2>Account</h2><a data-login-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/install-tallyo/">Install Tallyo</a></div>
       ${footerMarkup}
-      <div class="footer-group"><h2>Account</h2><a data-login-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.appUrl)}">Log in</a><a data-signup-link data-analytics-placement="footer" href="${escapeAttribute(siteConfig.signupUrl)}">Create account</a><a href="/help/#install">Install Tallyo</a></div>
+      <div class="footer-intro"><a class="brand brand-footer" href="/" aria-label="Tallyo home"><img class="brand-wordmark" src="${assetUrl("/assets/tallyo-wordmark-white.png")}" alt="" aria-hidden="true"><span class="sr-only">Tallyo</span></a><p>Professional invoices, clearer payment tracking and less repeated admin for your business.</p></div>
     </div>
-    <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo. <button class="cookie-settings-control" type="button" data-cookie-settings hidden>Cookie settings</button></p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
+    <div class="footer-bottom"><p>© <span data-current-year></span> Tallyo.</p><p>Tallyo is not a full accounting suite and does not provide legal, tax or accounting advice.</p></div>
   </footer>
+  <script type="application/json" id="helper-knowledge">${helperKnowledgeJson}</script>
   ${cookieConsentMarkup}
 </body>
 </html>`,

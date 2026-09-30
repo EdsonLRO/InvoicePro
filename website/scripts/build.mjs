@@ -31,6 +31,27 @@ const emailImageNames = [
   "overview-recurring-reminders.jpg",
   "overview-stripe-payments.jpg"
 ];
+const advertisingImageNames = [
+  "01-free-invoice-maker.png",
+  "02-finished-invoice.png",
+  "03-quote-01-send.png",
+  "04-quote-02-accepted.png",
+  "05-quote-03-invoice-created.png",
+  "06-quote-04-payment-tracked.png",
+  "07-quote-05-follow-up.png",
+  "08-recurring-setup.png",
+  "09-recurring-overview.png",
+  "10-dashboard-clarity.png",
+  "11-deposits-and-balances.png",
+  "12-overdue-reminders.png",
+  "13-seven-day-trial.png",
+  "14-cancel-online.png"
+];
+const socialImageNames = [
+  "tallyo-x-profile-400.png",
+  "tallyo-x-profile-800.png",
+  "tallyo-x-header-1500x500.png"
+];
 const assetSourcePaths = [
   ["src", "styles.css"],
   ["src", "site.js"],
@@ -55,7 +76,9 @@ const assetSourcePaths = [
   ["public", "assets", "product", "tallyo-branding.jpg"],
   ["public", "assets", "product", "tallyo-security.jpg"],
   ["public", "assets", "product", "tallyo-mobile-quote.jpg"],
-  ...emailImageNames.map((imageName) => ["public", "assets", "email", imageName])
+  ...emailImageNames.map((imageName) => ["public", "assets", "email", imageName]),
+  ...advertisingImageNames.map((imageName) => ["public", "assets", "advertising", imageName]),
+  ...socialImageNames.map((imageName) => ["public", "assets", "social", imageName])
 ];
 const assetRevisionHash = createHash("sha256");
 for (const pathParts of assetSourcePaths) {
@@ -114,6 +137,14 @@ await mkdir(join(distRoot, "assets", "email"), { recursive: true });
 for (const imageName of emailImageNames) {
   await copyFile(join(websiteRoot, "public", "assets", "email", imageName), join(distRoot, "assets", "email", imageName));
 }
+await mkdir(join(distRoot, "assets", "advertising"), { recursive: true });
+for (const imageName of advertisingImageNames) {
+  await copyFile(join(websiteRoot, "public", "assets", "advertising", imageName), join(distRoot, "assets", "advertising", imageName));
+}
+await mkdir(join(distRoot, "assets", "social"), { recursive: true });
+for (const imageName of socialImageNames) {
+  await copyFile(join(websiteRoot, "public", "assets", "social", imageName), join(distRoot, "assets", "social", imageName));
+}
 await copyFile(join(websiteRoot, "public", "_redirects"), join(distRoot, "_redirects"));
 
 const hashes = [...new Set(rendered.flatMap(({ inlineScripts }) => inlineScripts).filter(Boolean).map((inlineScript) => {
@@ -142,7 +173,7 @@ const robots = siteConfig.preview
   : `User-agent: *\nAllow: /\nSitemap: ${siteConfig.canonicalOrigin}/sitemap.xml\n`;
 await writeFile(join(distRoot, "robots.txt"), robots, "utf8");
 
-const assetFiles = ["assets/styles.css", "assets/analytics-consent.css", "assets/site.js", "assets/helper.js", "assets/helper-core.mjs", "assets/generator.js", "assets/document-calculator.mjs", "assets/marketing-overview.mjs", "assets/analytics-consent.mjs", "assets/analytics-config.mjs", "assets/growth.js", "assets/icon-192.png", "assets/tallyo-mark.png", "assets/tallyo-wordmark-white.png", "assets/tallyo-social-card.webp", "assets/product/tallyo-dashboard.jpg", "assets/product/tallyo-invoice-editor.jpg", "assets/product/tallyo-quote-editor.jpg", "assets/product/tallyo-customers.jpg", "assets/product/tallyo-recurring.jpg", "assets/product/tallyo-overdue.jpg", "assets/product/tallyo-payments.jpg", "assets/product/tallyo-activity.jpg", "assets/product/tallyo-branding.jpg", "assets/product/tallyo-security.jpg", "assets/product/tallyo-mobile-quote.jpg"];
+const assetFiles = ["assets/styles.css", "assets/analytics-consent.css", "assets/site.js", "assets/helper.js", "assets/helper-core.mjs", "assets/generator.js", "assets/document-calculator.mjs", "assets/marketing-overview.mjs", "assets/analytics-consent.mjs", "assets/analytics-config.mjs", "assets/growth.js", "assets/icon-192.png", "assets/tallyo-mark.png", "assets/tallyo-wordmark-white.png", "assets/tallyo-social-card.webp", "assets/product/tallyo-dashboard.jpg", "assets/product/tallyo-invoice-editor.jpg", "assets/product/tallyo-quote-editor.jpg", "assets/product/tallyo-customers.jpg", "assets/product/tallyo-recurring.jpg", "assets/product/tallyo-overdue.jpg", "assets/product/tallyo-payments.jpg", "assets/product/tallyo-activity.jpg", "assets/product/tallyo-branding.jpg", "assets/product/tallyo-security.jpg", "assets/product/tallyo-mobile-quote.jpg", ...emailImageNames.map((imageName) => `assets/email/${imageName}`), ...advertisingImageNames.map((imageName) => `assets/advertising/${imageName}`), ...socialImageNames.map((imageName) => `assets/social/${imageName}`)];
 const assetBytes = {};
 for (const file of assetFiles) assetBytes[file] = (await stat(join(distRoot, file))).size;
 await writeFile(join(distRoot, "build-report.json"), `${JSON.stringify({ mode: siteConfig.mode, routes: pages.length, externalOrigins: (siteConfig.analyticsEnabled ? 3 : 0) + (siteConfig.marketingOverviewEnabled ? 1 : 0), assetRevision, assetBytes }, null, 2)}\n`, "utf8");

@@ -64,6 +64,12 @@ verify_jwt = true
 import_map = "./functions/mfa-recovery/deno.json"
 entrypoint = "./functions/mfa-recovery/index.ts"
 
+[functions.owner-account-admin]
+enabled = true
+verify_jwt = true
+import_map = "./functions/owner-account-admin/deno.json"
+entrypoint = "./functions/owner-account-admin/index.ts"
+
 [functions.create-billing-checkout]
 enabled = true
 verify_jwt = true
@@ -111,3 +117,15 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/send-marketing-overview/deno.json"
 entrypoint = "./functions/send-marketing-overview/index.ts"
+
+[functions.manage-quote-access]
+enabled = true
+verify_jwt = true
+import_map = "./functions/manage-quote-access/deno.json"
+entrypoint = "./functions/manage-quote-access/index.ts"
+
+[functions.quote-public]
+enabled = true
+verify_jwt = false
+import_map = "./functions/quote-public/deno.json"
+entrypoint = "./functions/quote-public/index.ts"

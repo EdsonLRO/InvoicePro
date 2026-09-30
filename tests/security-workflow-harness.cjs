@@ -31,6 +31,10 @@ for (const harness of [
   'financial-action-audit-harness.cjs',
   'mfa-recovery-harness.cjs',
   'operational-health-harness.cjs',
+  'owner-console-harness.cjs',
+  'quote-acceptance-runtime-harness.cjs',
+  'quote-acceptance-ui-harness.cjs',
+  'quote-auto-send-harness.cjs',
   'refund-consequence-preview-harness.cjs',
   'recurring-calendar-reliability-harness.cjs',
   'scale-accessibility-safety-harness.cjs',
@@ -43,4 +47,12 @@ for (const harness of [
   assert.ok(workflow.includes(`node tests/${harness}`), `${harness} must run in CI`);
 }
 
+assert.match(workflow, /pull_request:\s+branches:\s+- main\s+- codex\/tallyo-redesign/, 'redesign integration PRs keep equivalent checks');
+assert.match(workflow, /push:\s+branches:\s+- main\s+- codex\/tallyo-redesign\s+- codex\/tallyo-redesign-\*/, 'redesign pushes run checks without removing main');
+assert.ok(workflow.includes('node tests/redesign-preview-harness.mjs'));
+assert.ok(workflow.includes('node tests/redesign-overview-harness.cjs'));
+assert.ok(workflow.includes('node tests/redesign-documents-harness.cjs'));
+assert.ok(workflow.includes('deno test tests/invoice-status-rules-runtime-test.ts'));
+assert.ok(workflow.includes('node tests/quote-access-runtime-test.mjs'));
+assert.ok(workflow.includes('deno run --allow-env tests/quote-auto-send-runtime-test.ts'));
 console.log('Security workflow harness passed.');

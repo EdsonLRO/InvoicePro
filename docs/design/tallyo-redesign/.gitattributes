@@ -1,0 +1,4 @@
+# Preserve frozen reference bytes across checkouts; hashes describe these files.
+*.html -text
+*.cjs -text
+README.md -text

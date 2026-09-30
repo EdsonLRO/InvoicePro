@@ -8,6 +8,7 @@
   const technicalDetailPattern = /row-level security|\brls\b|violates|constraint|duplicate key|permission denied|postgres|relation ["']|edge function|non-2xx|failed to fetch|network request failed|\bjwt\b|refresh token|supabase|\btable ["']/i;
 
   const contexts = [
+    { match: /could not import customers/i, title: 'Customers weren\'t imported', action: 'Check the CSV file and try again.' },
     { match: /could not save customer/i, title: 'Customer wasn\'t saved', action: 'Check the customer details and try again.' },
     { match: /could not save item/i, title: 'Saved item wasn\'t saved', action: 'Check the item details and try again.' },
     { match: /could not save settings/i, title: 'Settings weren\'t saved', action: 'Check your connection and try saving again.' },

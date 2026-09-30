@@ -121,6 +121,8 @@ async function run() {
         activityNote: 'Private activity note',
         mfa: { enabled: true, verifiedFactors: [{ id: 'factor' }], secret: 'private-totp' },
         mfaRecovery: { busy: false, pending: false, enrollmentVerified: false, code: 'PRIVATE-CODE', error: '', codes: ['PRIVATE-CODE'], codesGeneratedAt: '2026-07-16T00:00:00Z' },
+        ownerMfaRecovery: { token: 'a'.repeat(64), busy: true, requestSent: true, confirmed: true, error: 'private recovery error' },
+        ownerConsole: { available: true, busy: true, email: 'customer@example.test', accessDays: '365', account: { account_email: 'customer@example.test' }, error: 'private owner error', notice: 'private owner notice' },
         mfaPasswordConfirm: { visible: true, code: '123456' },
         sessionConfirm: { visible: true, password: 'private-password' },
         reauthChallenge: { visible: true, loading: false, widgetId: null, token: 'private-captcha-token', error: '', context: 'password_change' }
@@ -140,6 +142,11 @@ async function run() {
     assert.equal(app.mfa.secret, '');
     assert.equal(app.mfaRecovery.code, '');
     assert.equal(app.mfaRecovery.codes.length, 0);
+    assert.equal(app.ownerMfaRecovery.token, '');
+    assert.equal(app.ownerMfaRecovery.requestSent, false);
+    assert.equal(app.ownerConsole.available, false);
+    assert.equal(app.ownerConsole.email, '');
+    assert.equal(app.ownerConsole.account, null);
     assert.equal(app.mfaPasswordConfirm.code, '');
     assert.equal(app.sessionConfirm.password, '');
     assert.equal(app.reauthChallenge.token, '');

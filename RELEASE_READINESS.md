@@ -1,14 +1,143 @@
 # Tallyo Release Readiness Checklist
 
+## Abandoned subscription Checkout recovery — released and verified, 2026-09-25
+
+The Owner approved PR #192 and the focused production deployment. PR #192 merged through the protected workflow as `827a3628edac6474d138d78b7ed52df05ed69679`; both post-merge Security and Pages workflows passed. Only `create-billing-checkout` was deployed, advancing to v32 with JWT verification retained. Deployed source read-back exactly matches the merge, contains the reviewed Stripe Session-expiry path and no longer contains the wait-for-expiry message. A no-credential request returned HTTP 401 before Checkout logic.
+
+A matching verified open Checkout continues to resume. A different-plan or changed-server-trial request verifies the existing Session's account, Customer, plan, trial terms and provider mode, expires that open Session through Stripe, clears only its exact claim, reacquires the claim, re-checks for a non-terminal subscription and creates the selected Checkout. Provider-confirmed completion or any ownership/state uncertainty fails closed. No migration, RLS, grant, Stripe configuration, secret, price, trial, cancellation, entitlement or webhook behavior changed. Validation created no real Checkout, subscription, charge, refund or email.
+
+Rollback, if required, is to restore `create-billing-checkout` v31 source from pre-release `ee79df4` with JWT verification retained. Do not delete provider or database evidence manually.
+
+## Seven-day subscription trial — released and verified, 2026-09-25
+
+The Owner explicitly accepted the remaining legal and commercial risk, elected to proceed without external professional review and approved the bounded live release. PR #190 merged through the protected workflow as `acbfc8616f687adcfca12c0e1e27508e6d0bd92f`. A current scheduled backup was confirmed before change. Additive migration `20260925110523_seven_day_billing_trial.sql` is applied and its rollback-only production probes passed. `create-billing-checkout` v30 retains JWT verification and `stripe-billing-webhook` v29 retains raw-body Stripe-signature verification. The server trial gates are enabled.
+
+Stripe sandbox acceptance used only synthetic, non-email test customers. It covered a seven-day monthly trial, the three-day `customer.subscription.trial_will_end` event, conversion to an £8 paid month and cancellation before trial end with no charge. The live Stripe Billing destination `we_1TxR0wPQOTo2QZSI4T49N2fN` is enabled at the reviewed Supabase webhook URL with API version `2026-06-24.dahlia` and exactly 11 required events, including the trial-ending event. The reminder implementation uses the signed event, the authenticated account owner email, provider idempotency and a durable successful-submission marker.
+
+Production app and website build gates are enabled. App deployment `10a5649b-f6ff-4e47-856a-faa4072889b8` serves build `2026.09.25.1` / cache `tallyo-shell-2026-09-25-1`; website deployment `525f4cde-1b7e-48b9-ba0e-cab86afb58b9` is active. Public HTTP readback returned 200, confirmed the app trial flag, the seven-day/card/£8/three-day disclosures on Pricing and the separate trial action beside Download PDF. The same Free Invoice Maker page still states that no account is required. Empty unauthenticated Checkout and unsigned webhook requests remain rejected before Billing work. No real live trial, charge or customer reminder was created during release validation, and post-release Supabase error-log readback returned no matching errors.
+
+Rollback is to disable the website and app trial build gates, disable both server trial gates and rebuild the public surfaces. Signed lifecycle reconciliation should remain available for any trial already created; provider or database evidence must not be deleted manually.
+
+## Grounded public Helper answers — released and verified, 2026-09-25
+
+The Owner approved the reviewed release after confirming that the existing OpenAI key should remain in use. PR #187 merged through the protected workflow as `89a48e9394cde477c4c1828adc70f9a50ce1883e`. The public Helper catalogue now covers 44 current product and workflow topics, retrieves only the most relevant reviewed entries for an unmatched question and allows a friendly paraphrase or combination only from that supplied context. The interface separately explains insufficient guidance, rate limiting and temporary provider unavailability instead of presenting every case as the same no-answer response.
+
+The complete website suite passed across 26 routes plus 404, including local exact answers, relevance selection, fail-closed behavior, strict provider output, prompt injection, reviewed-link validation, Analytics gates and Free Invoice Maker conversion/consent checks. Main Security run `36116551144` and Pages run `36116550076` passed. Website deployment `50ee8b48-da6b-44fb-bca7-8b1354924c81` serves production asset revision `e5a2a6c426b9`. Bounded public checks returned HTTP 200 for Helper and Privacy, confirmed the version-2 knowledge catalogue and new live script markers, preserved `connect-src 'self'`, confirmed the Helper page is indexable and returned HTTP 405 for an unsupported API method without invoking OpenAI.
+
+The existing encrypted key, `gpt-5.6-terra` model, project budget controls, exact-origin allowlist, service-bound rate limiter, 240-character limit, timeout, strict structured output, reviewed-link allowlist, `store: false`, no prompt/answer application logging and no account or provider tools remain unchanged. No paid OpenAI request, real visitor communication, account/private-record access, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund, Stripe object, legal publication or unrelated change occurred. The normal workflow republished the unchanged app at deployment `535ded20-87ea-4057-8b29-ef57923a472d`; it remains build `2026.09.24.1` with 20 assets.
+
+Rollback was not required. The website rollback is deployment `3f10a974-8349-4bb9-9116-08984abfcda6`; the unchanged app rollback reference is deployment `35d6f8ba-8d01-432a-a57c-a65efc4e0c02`, both from source `7e2528b`. No backend/provider rollback is needed for this release.
+
+## Document templates and final website polish — released and verified, 2026-09-24
+
+The Owner approved the reviewed app and website candidates for production. PR #183 merged as `46bcc9ac2ca8ad3679dcb8fd1f5dc81e2f03fb88`; additive migration `20260924112357_invoice_template_preferences.sql` is applied; and only `send-document-email` was deployed, advancing from v59 to v60 with JWT verification retained. App build `2026.09.24.1` and service-worker cache `tallyo-shell-2026-09-24-1` were publicly verified at Cloudflare deployment `5f462120-7bdb-46ee-b0b8-ba2da7df2821`. Public readback returned HTTP 200, the template UI marker, the matching cache marker and all 20 expected assets. An empty unauthenticated function request returned 401 without entering email logic.
+
+Existing businesses default safely to the existing Tallyo layout with alternating rows enabled. The release adds only Basic, Modern and Professional as curated alternatives and one optional alternating-row setting. Focused browser, preference, PDF attachment, email, PWA, quote automatic-send and dependency-lock checks passed, followed by the protected CI and production checks. Migration history is synchronized. The post-migration advisor output is unchanged from the pre-migration output: it reports the existing intentionally authenticated `current_account_has_complimentary_access()` RPC warning, which this release does not alter.
+
+PR #182 then merged as `ef7d9122cb31d45c6b58065819938545bb33392e` and published the reviewed navigation, footer, spacing and rounded CTA-shadow refinements at website deployment `131e7366-51c3-4314-a23a-b5241e56fc98`. Main Security run `36001016296` and Pages run `36001015374` passed. Home, Features and Free Invoice Maker returned HTTP 200; production asset revision `642f9f9f2588` contains the expected Help → Install Tallyo → Log in structure, desktop navigation grid, standard final-section gap, contained CTA shadow and four-column footer.
+
+Rollback was not required. The app rollback is deployment `3b710daf-3ad4-4741-8393-95643fcef8a3` / build `2026.09.23.1` plus `send-document-email` v59 source from `3db4db9`; the additive migration may remain dormant. The website rollback is deployment `12413216-58b6-45c7-95dd-958686d49aeb`, which retains the app release while restoring the prior website presentation. No real email, payment, refund, Stripe object, Auth setting, secret, legal publication or unrelated provider change occurred.
+
+## Plain-language website and installation guidance — released and verified, 2026-09-24
+
+The Owner reviewed the accumulated local website candidate and approved all changes for publication. The focused release replaces repeated or compressed product wording with clear explanations, adds the concise `/invoice-guide/`, expands the quote-to-payment journey to five accurate steps, clarifies recurring invoices, overdue reminders, deposits, part-payments, final payments and activity history, and makes installation visible throughout the website with illustrated Chrome, Edge, Android and iPhone/iPad guidance.
+
+The complete website suite passes across 26 routes plus 404, including public Helper fail-closed and mock-provider coverage, Analytics activation gates, Free Invoice Maker conversion and one-email consent checks, structured data, links, accessibility and stylesheet budgets. Desktop, 390×844 and 320px visual checks passed for the installation action and guide; the invoice guide and five-step Features workflow passed desktop/mobile review; mobile horizontal movement and absence of page overflow were verified; no browser console error remains.
+
+PR #180 merged through the protected workflow as `87b3c9fa5f87fc8a0bec00ca8e2f0fe9be9fca9b`. Main Security run `35984477644` and Pages run `35984477034` passed. Website deployment `eafe8293-1b1e-4f3b-83cf-0a663dc102c1` serves production mode with asset revision `9e17660c8d45`. Bounded public checks returned HTTP 200 for the apex, `www`, Features, Invoice guide, Install Tallyo, Help and Free Invoice Maker routes; confirmed the five-step workflow, illustrated installation guidance, indexable metadata, sitemap entries and absence of a static Google tag before consent; and read back the published install styles.
+
+This release changes only public website source, content, SEO metadata, responsive presentation, tests and authoritative release records. Legal pages, the authenticated app, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund and Stripe objects are excluded. The normal workflow republished the unchanged app at deployment `ae316695-55eb-4d4c-9323-74981b7ac674`; its public shell, build `2026.09.23.1`, 20-asset report and service-worker cache `tallyo-shell-2026-09-23-1` passed. Rollback was not required. The website rollback is Cloudflare deployment `ee154bf5-929d-4621-90f9-e05391d66802` from main source `03aab6c`; backend and provider state remain unchanged.
+
+## Public website redesign — released and verified, 2026-09-23
+
+The Owner reviewed the local website and approved the complete redesign in PR #177, including the simplified route purposes and SEO copy, consistent section spacing, motion and responsive behaviour, the open section-based Free Invoice Maker, the compact site-wide Tallyo Helper, navigation-based Cookie settings and the refreshed Product Tour screenshots. All screenshot records are fictional; the deterministic capture harness blocked external requests.
+
+The complete website suite passed across 25 public routes plus the 404 page. Focused checks passed for the public Helper fail-closed and mock-provider paths, Analytics consent activation, free-generator conversion and one-email consent, redirects, links, accessibility, 390 px geometry, keyboard interaction and absence of horizontal overflow. The refreshed product assets were visually inspected at professional 1280×720 desktop and 390×844 customer-mobile sizes. Hosted Security and both Pages preview checks are green for commit `5a2f7c0243f9c9429258cc1eaa4e981aa5ccd801`.
+
+PR #177 merged through the protected workflow as `d85e2e671fba129e91b24ce88b0460b78dd03ce1`. Main Security and Pages workflows passed. Website deployment `ee4e8833-04ca-41de-8622-87d461b8e5d3` serves production mode with 25 routes and asset revision `734c852f0b38`. Bounded public checks returned HTTP 200 for the primary routes and all eleven refreshed product images, confirmed the revised Product Tour copy, Helper launcher, navigation Cookie settings, indexable metadata and retired-industry redirect, and confirmed no static Google tag loads before consent.
+
+The normal workflow also republished the unchanged app at deployment `187fdefa-28ab-4317-9427-fb5863df1099`; public readback remains build `2026.09.23.1`, 20 assets and service-worker cache `tallyo-shell-2026-09-23-1`. No app source/runtime, database, migration, Edge Function, Auth, provider configuration, secret, email, payment, refund, Stripe object, legal publication or unrelated change occurred. Rollback was not required. The retained website rollback is deployment `a7197370-ace3-4ffd-8861-06d1349ccdcb` from main source `13dfb04`; backend and provider state remain unchanged.
+
+## Invoice editor usability — approved release, 2026-09-23
+
+The Owner reviewed the local fictional preview and approved PR #176 and app build `2026.09.23.1`. The release adds one Expand all / Collapse all control across the editor, lets an owner create and select a Product or service while editing a line item, supports exact fixed-amount document discounts alongside percentages, makes tax-mode effects explicit in line totals, improves item-heading hierarchy, aligns the Discount and Shipping controls, and preserves readable PDF headings and totals when a light brand colour is selected.
+
+The complete repository release suite passed, including application, security, tenant-isolation, PWA, website and frozen Edge Function checks. The focused editor browser suite passed at 320–1440 px with keyboard/touch coverage, exact `£501 - £26 = £475` calculation evidence, inclusive/exclusive tax evidence, quick Product or service creation, multi-page PDF generation and no external requests. The generated light-brand PDF was rendered and visually inspected. `git diff --check` passed apart from expected checkout line-ending warnings.
+
+This is a frontend-only release with a service-worker cache update to `tallyo-shell-2026-09-23-1`. No database, migration, Edge Function, RLS, Auth, provider configuration, secret, email, payment, refund, Stripe object or website source changes. If bounded production validation fails, restore Cloudflare deployment `c0441aea-ceec-4725-89a3-7c9e3ab3e635` / build `2026.09.20.4` and leave backend/provider state unchanged.
+
+## Customer CSV import — released and verified, 2026-09-21
+
+The Owner approved the bounded release after confirming the local import flow worked. PR #174 merged feature commit `ffba867e24a3d0cb8dbf2fb61a85711c34062f09` as `7d5566d53ae9023fff4b291db2afef5da3d46602`. The Customers page accepts a maximum 1 MB / 500-row CSV, parses it locally, recognises only the seven existing customer fields, previews valid rows, explains skipped rows, rejects invalid email addresses and skips existing or in-file duplicate emails. Import requires explicit confirmation, uses one existing owner-scoped insert and does not overwrite existing customers.
+
+Parser, static integration, mobile/desktop browser, customer validation, public integration, PWA, Cloudflare Pages readiness, tenant-isolation, security-workflow and redesigned-customer regression checks passed. The browser preview used fictional data and made no external requests. Main Security checks `35580335856` and Pages workflow `35580334221` passed.
+
+App build `2026.09.20.4` is active at Cloudflare deployment `c0441aea-ceec-4725-89a3-7c9e3ab3e635`. The public shell, 20-asset build report, service-worker cache `tallyo-shell-2026-09-20-4` and published CSV helper returned the expected release markers. Rollback was not required; the retained app rollback is deployment `cb1cd9a0-8ca1-416c-b987-c1cb617b30eb` / build `2026.09.20.3`. No database, migration, Edge Function, RLS, Auth, provider, email, payment, website-source or unrelated change occurred.
+
+## Accepted-quote invoice follow-up — released and verified, 2026-09-20
+
+The Owner approved the bounded release after reviewing the automatic-delivery option. PR #172 merged as `86d358137f0bc296bef2c8414942af63638f9ecc`; additive migration `20260920110017_quote_acceptance_followup.sql` is applied; `send-document-email` advanced from v58 to v59 with JWT verification retained; and `quote-public` advanced from v1 to v2 with JWT verification disabled as reviewed. No other migration or function was applied or deployed.
+
+App build `2026.09.20.3` is active at Cloudflare deployment `2b9d901a-7567-432d-8d34-6ba3eb84273f`. The public shell, service-worker cache `tallyo-shell-2026-09-20-3`, 19-asset build report and `/quote/` route passed. Empty requests returned 401 from the JWT-protected email function and 404 from the public quote function without sending email or mutating data. The Owner subsequently confirmed the fictional end-to-end flow works: quote acceptance creates the linked invoice and, only when selected before sending the quote, emails it automatically with the chosen due period.
+
+Automatic delivery remains off by default and creates no online-payment link. Acceptance commits before the delivery attempt; provider or address failure leaves the invoice Draft and surfaces “Review & send invoice”. Rollback was not required. The retained rollback is Cloudflare deployment `08a69220-3035-43c4-b68f-eb03b7ed2f2e` / build `2026.09.20.2`, plus `quote-public` v1 and `send-document-email` v58 sources from `e0c8059`; the additive migration can remain dormant if the application and functions are rolled back. Codex sent no email during bounded release validation, and no payment, refund, Stripe object, secret, Auth setting, provider configuration or website source change occurred.
+
 This checklist tracks whether the current app is ready for real customer use. It is not a public-launch checklist for the future SaaS website.
+
+## Authenticated-app redesign — released, list-card follow-up approved, 2026-09-19
+
+PR #162 merged as `00191f703d430c7a1052848fa7c1e3c5a2e50fce` and published build `2026.09.19.1`. Cloudflare deployment `c7df1127-6a13-4ee7-a9e3-39b6e318b66c`, GitHub Pages, the public shell, 16-asset build report, service-worker cache `tallyo-shell-2026-09-19-1` and an isolated signed-out installed-PWA cache lifecycle all passed.
+
+PR #163 merged as `c918bfb` and published build `2026.09.19.2` at Cloudflare deployment `db056e05-2e12-46ec-b076-45215c707831`. On narrow screens the invoice editor flows from Notes to Summary, save guidance/action, Payments and Activity History.
+
+PR #164 merged as `06d718d` and published build `2026.09.19.3` at Cloudflare deployment `9690dc1c-2ab5-42ae-a88f-bbb79cab46a7`. The full printable invoice preview fits phone widths without horizontal scrolling, and the preview page and line-item heading retain complete rounded edges.
+
+The Owner approved PR #165 and build `2026.09.19.4` for one focused presentation correction: customer and Products & services records use individual rounded, outlined cards with matching expanded and compact colours. The approved release is limited to marking PR #165 ready, merging it into `main`, allowing the existing publication workflows to build it, and running bounded public shell, build-report, service-worker and installed-PWA checks. If validation fails, restore deployment `9690dc1c`, confirm build `2026.09.19.3`, and leave backend functions/configuration untouched.
+
+PR #165 commit `4adadde` passed the focused source, fictional preview-isolation, accessibility/safety and Chromium suites. The Owner visually reviewed multiple expanded and compact iterations before approval; the final compact cards use the exact expanded white/light-slate colours and complete contour. Hosted Security checks and both Pages preview checks passed before production approval. No real account, email, payment, provider or private data was used.
+
+## Document status rules — release candidate, 2026-09-19
+
+Draft PR #166 prepares app build `2026.09.19.5` and service-worker cache `tallyo-shell-2026-09-19-5`. It removes manual Paid selection, keeps Draft/Sent/Cancelled as user-controlled lifecycle states, derives invoice Paid/Partially Paid/Overdue from balance and due date, and preserves legacy stored Paid compatibility. The Owner and connected-account signed webhooks share the same stored lifecycle rule; the reminder job remains invoice-only and excludes Draft, Cancelled and legacy stored Paid rows.
+
+The only backend release candidates are `stripe-webhook`, `stripe-connect-webhook` and `send-overdue-reminders`. Current production versions are 43, 26 and 42, all intentionally `verify_jwt=false`; provider-signature and automation-secret validation remain unchanged. Rollback sources are merge `e900694`. The current app rollback is deployment `019a9e6e-19d4-4599-9628-baaa048cd2c9`, confirmed as build `2026.09.19.4`.
+
+No migration, database change, Auth, secret, provider configuration, subscription, entitlement, website, email send, payment or refund is included. Exact Owner approval is required before marking PR #166 ready, merging it, publishing the app or deploying the three functions.
+
+## Recovery link correction — deployed and verified, 2026-09-11
+
+The Owner reported a GitHub 404 from the confirmation email after PR #152. Its release smoke test did not exercise actual emailed destinations. Local tests reproduced the old-origin failure in the confirmation link and Owner password-reset redirect before the fix.
+
+The focused correction pins only Owner-assisted confirmation, password-reset return and recovery-ready links to `https://app.tallyo.co.uk`. Shared `APP_BASE_URL`, payment functions, Auth settings, JWT verification, MFA/Owner checks, expiry, HMAC-only storage and email rate limits are unchanged. No schema, dependency, frontend build, secret or provider-setting change is needed.
+
+Validation: eight mocked runtime tests pass, including two new tests across six legacy/current/missing/untrusted/local/lookalike base settings. Tests inspect the actual generated HTML/text confirmation link, password-reset `redirectTo`, and ready-email link. Existing Owner Console and MFA-recovery security harnesses pass; frozen Deno type checks pass for both functions. Test runtime has no network or environment permission. Public app GET returned HTTP 200 with both recovery routes present; no token URL was opened. No real email, confirmation token, account grant or factor/session reset was used. Supabase's [redirect guidance](https://supabase.com/docs/guides/auth/redirect-urls) was reviewed; no redirect-allowlist or Site URL change is included.
+
+The Owner approved release. PR #154 merged as `bd8b754c75517a8c64655221fbf00a7423c2c6b8`. Only `mfa-recovery` (now v35) and `owner-account-admin` (now v3) were deployed; the before/after function inventory confirms no other function version or JWT setting changed. Both are Active with JWT verification, their retrieved source exactly matches the merge and no longer reads shared `APP_BASE_URL`, and missing-JWT requests return HTTP 401. [Main security checks](https://github.com/EdsonLRO/InvoicePro/actions/runs/34632760142) and [Pages checks](https://github.com/EdsonLRO/InvoicePro/actions/runs/34632759112) passed. No app source/build marker, migration, shared configuration or payment change was made; normal main-branch publication checks ran automatically.
+
+Rollback was not needed. Approved rollback sources remain function versions 33 and 1 respectively; pre-deploy metadata reported v34/v2 with source verified unchanged from those earlier release sources, and both source snapshots were retained. No real email/recovery retest was performed or authorised. Already-issued links will still be wrong; request a fresh confirmation, respecting the existing 15-minute request limit and 30-minute expiry.
+
+## Owner Console original release — 2026-09-11
+
+The focused Owner Console was deployed under exact Owner approval. PR #152 merged at `0e98392033895523eb4fb4e8fe85bab73a989211`. Deployment source was verified identical to the tested branch for the migration, both functions and app release files.
+
+- Compared the existing complimentary-access migration SQL, then repaired its ledger timestamp from `20260909122037` to `20260909115547` without rerunning schema changes. Dry run showed only the approved new migration pending.
+- Applied only additive migration `20260911170410_owner_console.sql`. Catalog checks confirmed recovery-table RLS, no direct table privileges for browser/service roles, and seven RPCs executable only by service role rather than anon/authenticated.
+- Configured only protected `TALLYO_OWNER_USER_ID` for the confirmed, MFA-enabled Owner account; its value is not included in evidence.
+- Deployed `mfa-recovery` v33 and `owner-account-admin` v1, both active with JWT verification retained. Both reject live requests without a JWT with HTTP 401.
+- Published app build `2026.09.11.1`; live app returned HTTP 200. Cloudflare app deployment `9ee7120d-122b-44e8-8c43-0077feed8e39` completed successfully from the merge commit. Live AAL2 Owner access and exact-email lookup passed, including correct inactive complimentary-access status and disabled MFA approval without a confirmed request.
+- Six mocked-runtime tests passed locally and in CI: missing JWT/wrong origin, non-Owner/below-AAL2 denials, lookup minimisation, unconfirmed/self-reset rejection, recovery lock before factor deletion, and server-only reset links/hostile-link rejection. Deno checks, formatting and the relevant repository/browser harnesses passed before release. No high-risk tests were repeated after documentation-only edits.
+- Main-branch [Security checks](https://github.com/EdsonLRO/InvoicePro/actions/runs/34630339619) and [Pages build/deployment](https://github.com/EdsonLRO/InvoicePro/actions/runs/34630339319) passed. No unexpected new security advisor warning; the private recovery table's no-policy information is intentional deny-by-default.
+- No real complimentary grant/revocation, password-reset email, MFA reset, business-record inspection or Stripe change was performed. Non-Owner/AAL1 and mutation behaviour were mocked tests, not live two-account acceptance.
+
+Rollback if required: keep the additive table dormant, remove or disable the protected Owner identity setting/new function, restore `mfa-recovery` v32, and restore app build `2026.09.09.1` (Cloudflare deployment `03a9cd73-85d7-4ae0-a16f-ff27bf0a9ab7`). No rollback was needed. A controlled two-account recovery test still requires its own explicit Owner approval because it revokes factors and sessions and sends security email.
 
 Statuses: Planned, In Progress, Implemented, Verified, Blocked, Deferred, Not Applicable.
 
 ## Current Verdict
 
-**Status:** Verified for the approved initial UK-business public release.
+**Status:** Verified for the approved initial UK-business public release; app build `2026.09.20.4` is public and the bounded customer CSV import is Owner-verified.
 
-Tallyo's current invoicing-app scope is feature-complete and regression-verified. Controlled live Stripe invoice-payment, Tallyo Pro Billing, connected-account onboarding, one GBP 1 direct connected payment and one full refund completed bounded acceptance before launch. Build `2026.07.23.2` remains on GitHub Pages as the app rollback route. Release build `2026.07.28.2` is public at `https://app.tallyo.co.uk`; it corrects account-data export ordering for the singleton company-settings record while retaining authenticated RLS reads. The production website is public at `https://tallyo.co.uk` and `https://www.tallyo.co.uk`. The approved legal pages, subscription and connected-payment interfaces and bounded AI Helper are available. Final DNS, Auth Site URL, Access-removal and public smoke gates completed on 2026-07-28 without a Stripe transaction or customer communication.
+Tallyo's current invoicing-app scope is feature-complete and regression-verified. Build `2026.09.20.4` is public at `https://app.tallyo.co.uk` through Cloudflare deployment `c0441aea-ceec-4725-89a3-7c9e3ab3e635`; deployment `cb1cd9a0-8ca1-416c-b987-c1cb617b30eb` / build `2026.09.20.3` is the retained app rollback. The production website, legal pages, subscription and connected-payment interfaces, Owner Console and bounded AI Helper are unchanged by the customer-import release.
 
 ## Release Gates
 

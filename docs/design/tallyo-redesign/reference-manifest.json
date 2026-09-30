@@ -1,0 +1,179 @@
+{
+  "captured": "2026-09-12",
+  "sourceBaseline": "7429b2b74474493b81edd7e548bcd35bbe1c9b89",
+  "purpose": "Frozen design-only reference files; not production assets or implemented behaviour",
+  "files": [
+    {
+      "file": "desktop-accepted-quote.html",
+      "bytes": 16010,
+      "sha256": "1444fd6b0f1a3d5025b14a637113abc1d65e9e1352bef00eab0d0cf036fcbd6b"
+    },
+    {
+      "file": "desktop-accepted-quote.png",
+      "bytes": 446092,
+      "sha256": "81f8e52d3d736742100e9e7fc0ffc53da8184226be7b801dbeaa6407e1cb48e2",
+      "width": 3200,
+      "height": 2240
+    },
+    {
+      "file": "desktop-customer-detail.html",
+      "bytes": 15650,
+      "sha256": "92e261a0aa41bbc32b29e7d5ef48e4881952a85dd22a83d3f19153938306045c"
+    },
+    {
+      "file": "desktop-customer-detail.png",
+      "bytes": 331014,
+      "sha256": "5e5bd6d497a90cb3937d9dc8e655a24a862512c818d66a3b513df6cdae1b8035",
+      "width": 3200,
+      "height": 2080
+    },
+    {
+      "file": "desktop-invoice-editor-more.png",
+      "bytes": 11652,
+      "sha256": "1200af611b30fdfd044595f052daf69c246dc0303181d6a7730176402b3a9573",
+      "width": 424,
+      "height": 328
+    },
+    {
+      "file": "desktop-invoice-editor.html",
+      "bytes": 20608,
+      "sha256": "1f0a9a99ca1fb508b6c8af1dea7a4797f65ed87dd95a3543557a7955d73d9fd8"
+    },
+    {
+      "file": "desktop-invoice-editor.png",
+      "bytes": 406898,
+      "sha256": "658571ad66bb5551ff0a56a4975885aaf214ae760702885691b2e4c876aa7b94",
+      "width": 3200,
+      "height": 2240
+    },
+    {
+      "file": "desktop-overview.html",
+      "bytes": 17688,
+      "sha256": "2cd3d159581a17fa2ab2e73212a2641d3e26e77593a5695fb21fcf7b6ed1ee9a"
+    },
+    {
+      "file": "desktop-overview.png",
+      "bytes": 430962,
+      "sha256": "3e299582771fdbcd52966b8e024b9315a036b0be05175a603e3bb317c706d6f8",
+      "width": 3200,
+      "height": 2240
+    },
+    {
+      "file": "mobile-customer-quote-acceptance.html",
+      "bytes": 7592,
+      "sha256": "3909c8892ef301d60b838e42fdb22e51f24bb6dee43011f98e2ff7c2162829ff"
+    },
+    {
+      "file": "mobile-customer-quote-acceptance.png",
+      "bytes": 106864,
+      "sha256": "bad71a6a5829922b734ed75d3b67d176a991045435544bfcb4ffd3c897b2a613",
+      "width": 780,
+      "height": 1800
+    },
+    {
+      "file": "mobile-customer-quote-accepted.png",
+      "bytes": 117186,
+      "sha256": "d1c500ef454816374236ec9671c467f1cb5b9af6c658345dfe1073dd1ba7a44e",
+      "width": 780,
+      "height": 1800
+    },
+    {
+      "file": "mobile-documents.html",
+      "bytes": 12510,
+      "sha256": "c7da86afebd79f428d4fa1356f0c9df44fcae7baded74e7906657331ad44124a"
+    },
+    {
+      "file": "mobile-documents.png",
+      "bytes": 108906,
+      "sha256": "23a23a439d1221408cd129e0d95ec7b396e26507da12a6d669224ca60215c178",
+      "width": 780,
+      "height": 1720
+    },
+    {
+      "file": "mobile-edit-items.html",
+      "bytes": 10648,
+      "sha256": "1d3adb05fe6c47e593f75ecb511b3c89633a252be8d830749f541e4d43143f2e"
+    },
+    {
+      "file": "mobile-edit-items.png",
+      "bytes": 104686,
+      "sha256": "bde38278baf83ea2f9da3f6b38a45aad9d620bbd8b56c1ff4191477091c8cf07",
+      "width": 780,
+      "height": 1880
+    },
+    {
+      "file": "mobile-invoice-editor-sections.html",
+      "bytes": 8959,
+      "sha256": "5022129de975f7b1655a940dcf10d6b5252163e60b315763590d84bc69fbc871"
+    },
+    {
+      "file": "mobile-invoice-editor-sections.png",
+      "bytes": 120603,
+      "sha256": "5bf256eeb3031337376c82d0fcd14ad39d51956c72b14f3bf16b6e6db9adb1aa",
+      "width": 780,
+      "height": 1880
+    },
+    {
+      "file": "mobile-overview.html",
+      "bytes": 9489,
+      "sha256": "61a8fef9c938156137fc1d1503ee718b531eb5ca943f73f7f18bad922d13e7d1"
+    },
+    {
+      "file": "mobile-overview.png",
+      "bytes": 111757,
+      "sha256": "62288f681208c359503d158dffb0443831341fa14f04f5a17289615c8ccb7a07",
+      "width": 780,
+      "height": 1688
+    },
+    {
+      "file": "README.md",
+      "bytes": 19543,
+      "sha256": "6ca5626fa2e8f9f47406479a60a6bc2c40332cb926234d2d6b1097c75b5e4060"
+    },
+    {
+      "file": "render-accepted-quote.cjs",
+      "bytes": 2749,
+      "sha256": "8b2fe87f6500bc51dbb4e60e7825eaaad8d61ff645a6d78c7ba0154cedf6c23e"
+    },
+    {
+      "file": "render-customer-detail.cjs",
+      "bytes": 2583,
+      "sha256": "e0a5951079cf5137e19d0bd3065bd112973e4a73dbc1608ff9ba767771f8642d"
+    },
+    {
+      "file": "render-invoice-editor.cjs",
+      "bytes": 2709,
+      "sha256": "e3e15481b8c182f8f8cf4e05d5e821185a98de48c74ae30570f3c0645ddd4b62"
+    },
+    {
+      "file": "render-mobile-customer-quote.cjs",
+      "bytes": 3531,
+      "sha256": "2540028b23890be4155948292917cd9e480d073911543c11532a1edc12f4f4a9"
+    },
+    {
+      "file": "render-mobile-documents.cjs",
+      "bytes": 3931,
+      "sha256": "0f04c928d1d297680876f2ed8765c41937d4c68a3b0af81547100da60fe9612c"
+    },
+    {
+      "file": "render-mobile-edit-items.cjs",
+      "bytes": 3595,
+      "sha256": "c2b081dfa9072d7fd151f1eaed1b6e2f01c68703da584dace65e5e94d0d98c21"
+    },
+    {
+      "file": "render-mobile-invoice-sections.cjs",
+      "bytes": 3488,
+      "sha256": "4dbe75280a051e46616b9c3e4df5a86bdb20485b3cdbe9448d8f57bb1d625b58"
+    },
+    {
+      "file": "render-mobile-overview.cjs",
+      "bytes": 3302,
+      "sha256": "006e9e06239727d005f72f4c804edfc55a2193f545a401fdae11be455cc3c550"
+    },
+    {
+      "file": "render-overview.cjs",
+      "bytes": 2269,
+      "sha256": "3f60b53bcf8c67b63bad1b8eb3fd2fccd25bbd5fd04636f359f6164fab972353"
+    }
+  ]
+}

@@ -6,9 +6,11 @@
 - Keep preview deployments protected by the retained wildcard Cloudflare Access applications.
 - Preserve the verified production gates, server-side subscription enforcement and documented rollback routes.
 - Preserve the documented separation between Tallyo subscriptions and independent-business customer payments.
+- Monitor the released seven-day monthly-plan trial, reminder delivery and trial-to-paid/cancelled lifecycle without inspecting customer content.
 
 ## Next
 
+- Minimal Owner Console released under exact Owner approval on 2026-09-11; any controlled live account-recovery test requires separate approval.
 - Review bounded launch monitoring and support evidence without inspecting customer data.
 - Evaluate early UK-business onboarding feedback before expanding product scope.
 - Add customer statements, CSV customer import and improved onboarding.
@@ -25,5 +27,5 @@
 - Authenticated AI account access, private-record access, tools or autonomous account actions.
 - Full bookkeeping, bank reconciliation, payroll or tax filing.
 - Native mobile applications.
-- Multiple paid tiers, permanent free saved accounts, free trials, coupons or lifetime plans.
+- Multiple paid tiers, permanent free saved accounts, coupons or lifetime plans.
 - Major authenticated-frontend rewrite.

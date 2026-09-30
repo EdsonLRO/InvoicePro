@@ -4,6 +4,7 @@ const mode = process.env.TALLYO_SITE_MODE === "production" ? "production" : "pre
 const canonicalOrigin = trimSlash(process.env.TALLYO_CANONICAL_ORIGIN || "https://tallyo.co.uk");
 const appUrl = trimSlash(process.env.TALLYO_APP_URL || "https://edsonlro.github.io/InvoicePro/");
 const subscriptionCheckoutRequested = process.env.TALLYO_SUBSCRIPTIONS_ENABLED === "true";
+const subscriptionTrialRequested = process.env.TALLYO_SUBSCRIPTION_TRIAL_ENABLED === "true";
 const aiHelperRequested = process.env.TALLYO_PUBLIC_AI_HELPER_ENABLED === "true";
 const connectPaymentsRequested = process.env.TALLYO_CONNECT_PAYMENTS_ENABLED === "true";
 const analyticsRequested = process.env.TALLYO_GA4_ENABLED === "true";
@@ -40,6 +41,23 @@ if (
   process.env.TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED !== "true"
 ) {
   throw new Error("Subscription production build blocked until public release is approved");
+}
+if (subscriptionTrialRequested && !subscriptionCheckoutRequested) {
+  throw new Error("The subscription trial requires subscription Checkout to be enabled");
+}
+if (
+  subscriptionTrialRequested &&
+  mode !== "production" &&
+  process.env.TALLYO_SUBSCRIPTION_TRIAL_PRIVATE_PREVIEW_APPROVED !== "true"
+) {
+  throw new Error("Subscription trial preview build blocked until the reviewed private-preview scope is approved");
+}
+if (
+  subscriptionTrialRequested &&
+  mode === "production" &&
+  process.env.TALLYO_SUBSCRIPTION_TRIAL_PUBLIC_RELEASE_APPROVED !== "true"
+) {
+  throw new Error("Subscription trial production build blocked until public release is approved");
 }
 if (aiHelperRequested && process.env.TALLYO_AI_PRIVATE_PREVIEW_APPROVED !== "true") {
   throw new Error("AI Helper build blocked until the reviewed private-preview scope is approved");
@@ -107,9 +125,9 @@ export const siteConfig = Object.freeze({
   appUrl,
   signupUrl: trimSlash(process.env.TALLYO_SIGNUP_URL || appUrl),
   subscriptionUrl: trimSlash(process.env.TALLYO_SUBSCRIPTION_URL || `${appUrl}/#account`),
-  defaultTitle: "Tallyo — Professional invoices. Clearer payment tracking. Less admin.",
+  defaultTitle: "Tallyo — Professional invoices. Clear payment updates. Less admin.",
   defaultDescription:
-    "Create quotes and invoices, track payments, automate recurring work and keep customer transactions organised in one straightforward workspace.",
+    "Create quotes and invoices, record deposits and payments, repeat regular invoices and keep every update in one straightforward workspace.",
   locale: "en_GB",
   themeColor: "#111a31",
   socialImagePath: "/assets/tallyo-social-card.webp",
@@ -117,6 +135,7 @@ export const siteConfig = Object.freeze({
   bingSiteVerification: process.env.TALLYO_BING_SITE_VERIFICATION || "",
   aiHelperEnabled: aiHelperRequested,
   subscriptionCheckoutEnabled: subscriptionCheckoutRequested,
+  subscriptionTrialEnabled: subscriptionTrialRequested,
   connectPaymentsEnabled: connectPaymentsRequested,
   analyticsEnabled: analyticsRequested,
   ga4MeasurementId: analyticsRequested ? ga4MeasurementId : "",
@@ -131,7 +150,6 @@ export const navigation = Object.freeze([
   { label: "Product Tour", href: "/product-tour/" },
   { label: "Free Invoice Maker", href: "/free-invoice-generator/" },
   { label: "Pricing", href: "/pricing/" },
-  { label: "Security", href: "/security/" },
   { label: "Help", href: "/help/" }
 ]);
 
@@ -149,11 +167,12 @@ export const footerGroups = Object.freeze([
   {
     title: "Learn",
     links: [
+      { label: "Invoice guide", href: "/invoice-guide/" },
       { label: "Help Centre", href: "/help/" },
       { label: "Tallyo Helper", href: "/helper/" },
       { label: "FAQ", href: "/faq/" },
       { label: "About Tallyo", href: "/about/" },
-      { label: "Install Tallyo", href: "/help/#install" }
+      { label: "Install Tallyo", href: "/help/install-tallyo/" }
     ]
   },
   {

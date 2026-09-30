@@ -379,15 +379,6 @@ export function amountPaid(payments: unknown): number {
   );
 }
 
-export function statusAfterPaymentChange(inv: any, paid: number): string {
-  const total = Number(inv.grand_total) || 0;
-  if (inv.status === "Cancelled") return "Cancelled";
-  if (paid >= total - 0.001) return "Paid";
-  if (inv.status === "Paid") return "Sent";
-  if (inv.status === "Draft" && paid > 0.001) return "Sent";
-  return inv.status || "Sent";
-}
-
 export function formatMoney(code: string, amount: unknown) {
   const symbol = ({ GBP: "\u00A3", EUR: "\u20AC", USD: "$" } as Record<
     string,

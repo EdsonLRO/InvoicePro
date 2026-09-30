@@ -3,6 +3,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
 import { accountAllowsWrite } from "../_shared/account-entitlements.ts";
+import { storedInvoiceAllowsOverdueReminder } from "../_shared/invoice-status.ts";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 
@@ -269,7 +270,7 @@ Deno.serve(async (req) => {
       const repeatDays = Math.max(1, Number(inv.overdue_repeat_reminder_days) || Number(company.overdue_repeat_reminder_days) || 7);
       const maxReminders = Math.max(1, Number(inv.overdue_max_reminders) || Number(company.overdue_max_reminders) || 3);
 
-      if (inv.status === "Draft" || inv.status === "Paid" || inv.status === "Cancelled") {
+      if (!storedInvoiceAllowsOverdueReminder(inv)) {
         skipped++;
         continue;
       }

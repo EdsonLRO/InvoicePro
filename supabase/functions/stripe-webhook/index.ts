@@ -2,6 +2,10 @@
 // This function verifies Stripe's signature before updating invoice payments.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import {
+  isInvoiceFullyPaid,
+  storedInvoiceStatusAfterPaymentChange,
+} from "../_shared/invoice-status.ts";
 
 type InvoicePayment = {
   amount?: unknown;
@@ -38,15 +42,6 @@ function currencySymbol(code: string) {
 
 function formatMoney(code: string, amount: unknown) {
   return `${currencySymbol(code || "GBP")}${(Number(amount) || 0).toFixed(2)}`;
-}
-
-function statusAfterPaymentChange(inv: any, paid: number): string {
-  const total = Number(inv.grand_total) || 0;
-  if (inv.status === "Cancelled") return "Cancelled";
-  if (paid >= total - 0.001) return "Paid";
-  if (inv.status === "Paid") return "Sent";
-  if (inv.status === "Draft" && paid > 0.001) return "Sent";
-  return inv.status || "Sent";
 }
 
 function isUuid(value: string): boolean {
@@ -307,13 +302,14 @@ async function handleCheckoutCompleted(admin: any, event: any, attempt = 0): Pro
     providerPaymentIntentId: session.payment_intent || null,
     currency,
   };
+  const total = Number(inv.grand_total) || 0;
+  const previousPaid = amountPaid(payments);
   payments.push(payment);
 
-  const total = Number(inv.grand_total) || 0;
   const newPaid = amountPaid(payments);
-  const nextStatus = newPaid >= total - 0.001
-    ? "Paid"
-    : (inv.status === "Draft" ? "Sent" : inv.status);
+  const nextStatus = storedInvoiceStatusAfterPaymentChange(inv);
+  const becameFullyPaid = !isInvoiceFullyPaid(total, previousPaid) &&
+    isInvoiceFullyPaid(total, newPaid);
   const history = Array.isArray(inv.history) ? inv.history : [];
   history.push({
     ts: nowISO,
@@ -321,7 +317,7 @@ async function handleCheckoutCompleted(admin: any, event: any, attempt = 0): Pro
     text: `${paymentLabel} of ${formatMoney(currency, amount)} confirmed`,
     providerMarker: `stripe:${event.id}`,
   });
-  if (nextStatus === "Paid" && inv.status !== "Paid") {
+  if (becameFullyPaid) {
     history.push({
       ts: nowISO,
       type: "paid",
@@ -568,7 +564,7 @@ async function handleRefund(admin: any, event: any, attempt = 0): Promise<any> {
     });
   }
 
-  const nextStatus = statusAfterPaymentChange(inv, amountPaid(payments));
+  const nextStatus = storedInvoiceStatusAfterPaymentChange(inv);
   const result = await applyStripeInvoiceEvent(
     admin,
     inv,

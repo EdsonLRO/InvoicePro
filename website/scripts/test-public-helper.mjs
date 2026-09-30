@@ -50,6 +50,7 @@ assert.equal(publicHelperPolicy.store, false);
 assert.equal(publicHelperPolicy.tools, false);
 assert.equal(publicHelperPolicy.promptLogging, false);
 assert.equal(publicHelperPolicy.model, "gpt-5.6-terra");
+assert.equal(publicHelperPolicy.maxHistoryMessages, 12);
 
 const disabledHtml = read("helper/index.html");
 assert.match(disabledHtml, /data-ai-enabled="false"/);
@@ -176,7 +177,7 @@ const enabledConnectPricing = read("pricing/index.html");
 assert.match(enabledConnectPricing, /Customer card payments are available after you connect your own Stripe account/);
 assert.match(enabledConnectPricing, /Optional customer card payments through your connected Stripe account/);
 assert.match(enabledConnectPricing, /Tallyo does not add an application fee/);
-assert.match(read("security/index.html"), /Stripe handles card processing and payouts directly with your business/);
+assert.match(read("faq/index.html"), /Connect your own Stripe account in Account settings/);
 assert.match(read("helper/index.html"), /Connect your own Stripe account in Account settings/);
 assert.doesNotMatch(enabledConnectPricing, /__TALLYO_CONNECT_PAYMENT_/);
 
@@ -194,8 +195,9 @@ execFileSync(process.execPath, [buildScript], {
 const enabledHtml = read("helper/index.html");
 assert.match(enabledHtml, /data-ai-enabled="true"/);
 assert.match(enabledHtml, /sent securely to OpenAI/);
+assert.match(enabledHtml, /up to six recent exchanges/);
 assert.match(enabledHtml, /has no account access or tools/);
-assert.match(read("help/index.html"), /Ask questions in your own words and get answers grounded in reviewed public Tallyo guidance/);
+assert.match(read("help/index.html"), /Ask questions in your own words and get answers grounded in current reviewed Tallyo features and guides/);
 assert.match(read("_headers"), /connect-src 'self'/);
 
 execFileSync(process.execPath, [buildScript], {
@@ -211,6 +213,7 @@ execFileSync(process.execPath, [buildScript], {
 
 const origin = "https://tallyo.co.uk";
 let providerCalls = 0;
+let lastProviderBody = null;
 const limiter = {
   async limit({ key }) {
     assert.match(key, /^[a-f0-9]{64}$/);
@@ -233,7 +236,7 @@ const request = (question, options = {}) => new Request(`${origin}/api/helper`, 
   },
   body: (options.method || "POST") === "GET"
     ? undefined
-    : options.rawBody === undefined ? JSON.stringify({ question }) : options.rawBody
+    : options.rawBody === undefined ? JSON.stringify({ question, history: options.history || [] }) : options.rawBody
 });
 const provider = (value, ok = true) => async (url, options) => {
   providerCalls += 1;
@@ -241,6 +244,7 @@ const provider = (value, ok = true) => async (url, options) => {
   assert.equal(options.method, "POST");
   assert.equal(options.headers.Authorization, "Bearer test-only-placeholder");
   const body = JSON.parse(options.body);
+  lastProviderBody = body;
   assert.equal(body.model, "gpt-5.6-terra");
   assert.deepEqual(body.reasoning, { effort: "low" });
   assert.equal(body.store, false);
@@ -248,8 +252,16 @@ const provider = (value, ok = true) => async (url, options) => {
   assert.equal(body.max_output_tokens, 350);
   assert.match(body.instructions, /REVIEWED_PUBLIC_KNOWLEDGE/);
   assert.match(body.instructions, /Do not invent prices/);
+  assert.match(body.instructions, /Use general conversational knowledge/);
+  assert.match(body.instructions, /Resolve follow-ups semantically/);
+  assert.match(body.instructions, /regardless of their exact words, grammar or spelling/);
+  assert.match(body.instructions, /examples only, never a fixed trigger list/);
+  assert.match(body.instructions, /Do not ask the visitor to repeat a topic/);
+  assert.match(body.instructions, /ask one brief, natural clarifying question/);
+  assert.match(body.instructions, /Every claim about Tallyo's features/);
   assert.match(body.input, /REVIEWED_PUBLIC_KNOWLEDGE/);
-  assert.match(body.input, /VISITOR_QUESTION/);
+  assert.match(body.input, /RECENT_CONVERSATION/);
+  assert.match(body.input, /CURRENT_VISITOR_MESSAGE/);
   return new Response(ok ? JSON.stringify({ output_text: JSON.stringify(value) }) : "provider failed", {
     status: ok ? 200 : 500,
     headers: { "Content-Type": "application/json" }
@@ -281,7 +293,7 @@ assert.equal(response.status, 415);
 response = await run(request("", { rawBody: "{" }));
 assert.equal(response.status, 400);
 
-response = await run(request("x".repeat(1_100)));
+response = await run(request("x".repeat(8_300)));
 assert.equal(response.status, 413);
 
 response = await run(request("x".repeat(241)));
@@ -303,8 +315,36 @@ assert.equal(providerCalls, 0, "boundary responses never call the provider");
 
 response = await run(request(knowledge.entries[0].question));
 assert.equal(response.status, 200);
-assert.equal((await body(response)).source, "reviewed");
-assert.equal(providerCalls, 0, "exact reviewed answers never call the provider");
+assert.equal((await body(response)).source, "ai");
+assert.equal(providerCalls, 1, "exact reviewed questions use the conversational provider path");
+
+response = await run(request("Hi"));
+assert.equal(response.status, 200);
+const greetingReply = await body(response);
+assert.equal(greetingReply.source, "ai");
+assert.equal(providerCalls, 2, "greetings use the same conversational provider path");
+
+for (const rawBody of [
+  JSON.stringify({ question: "What is Tallyo?" }),
+  JSON.stringify({ question: "What is Tallyo?", history: [], extra: true }),
+  JSON.stringify({ question: "What is Tallyo?", history: [{ role: "assistant", content: "Wrong starting role" }] }),
+  JSON.stringify({ question: "What is Tallyo?", history: [{ role: "user", content: "Unpaired turn" }] }),
+  JSON.stringify({ question: "What is Tallyo?", history: [
+    { role: "user", content: "Question" },
+    { role: "assistant", content: "Answer", extra: true }
+  ] }),
+  JSON.stringify({ question: "What is Tallyo?", history: [
+    { role: "user", content: "My password is secret" },
+    { role: "assistant", content: "Do not include it." }
+  ] }),
+  JSON.stringify({ question: "What is Tallyo?", history: Array.from({ length: 14 }, (_, index) => ({
+    role: index % 2 === 0 ? "user" : "assistant",
+    content: `Turn ${index + 1}`
+  })) })
+]) {
+  response = await run(request("", { rawBody }));
+  assert.equal(response.status, 400);
+}
 
 response = await run(request("How does Tallyo make everyday admin easier?"), {
   ...baseEnv,
@@ -432,9 +472,30 @@ assert.equal(response.status, 200);
 assert.deepEqual(await body(response), {
   answered: true,
   answer: "Tallyo keeps documents, payment tracking and repeat invoicing work together.",
-  links: [{ label: "See all features", href: "/features/" }],
+  links: [{ label: "Explore features", href: "/features/" }],
   source: "ai"
 });
+assert.match(lastProviderBody.input, /"id":"features"/, "provider receives the reviewed feature entry");
+assert.match(lastProviderBody.input, /"id":"stripe-payments"/, "provider receives the complete reviewed catalogue for semantic selection");
+
+const recurringHistory = [
+  { role: "user", content: "How do recurring invoices work?" },
+  { role: "assistant", content: "You can set a schedule and choose whether Tallyo emails each invoice automatically." }
+];
+response = await run(
+  request("Can I pause it?", { history: recurringHistory }),
+  baseEnv,
+  provider({
+    answered: true,
+    answer: "Yes. You can pause a recurring schedule when you do not want it to create the next invoice.",
+    links: [{ label: "Recurring invoices", href: "/help/recurring-invoices/" }]
+  })
+);
+assert.equal(response.status, 200);
+assert.equal((await body(response)).source, "ai");
+assert.match(lastProviderBody.input, /How do recurring invoices work\?/);
+assert.match(lastProviderBody.input, /Can I pause it\?/);
+assert.match(lastProviderBody.input, /"id":"recurring-invoices"/, "recent user context selects recurring-invoice guidance for a follow-up");
 
 response = await run(
   request("Can Tallyo do something not in the reviewed guidance?"),
@@ -452,7 +513,13 @@ const adapter = createPublicAiAdapter({
   fetchImpl: async (url, options) => {
     assert.equal(url, "/api/helper");
     assert.equal(options.credentials, "same-origin");
-    assert.equal(JSON.parse(options.body).question, "what is tallyo");
+    assert.deepEqual(JSON.parse(options.body), {
+      question: "What is Tallyo?",
+      history: [
+        { role: "user", content: "How do quotes work?" },
+        { role: "assistant", content: "A quote can become an invoice after acceptance." }
+      ]
+    });
     return new Response(JSON.stringify({
       answered: true,
       answer: "A bounded answer.",
@@ -460,17 +527,55 @@ const adapter = createPublicAiAdapter({
     }), { status: 200, headers: { "Content-Type": "application/json" } });
   }
 });
-assert.deepEqual(await adapter.answer("What is Tallyo?"), {
+assert.deepEqual(await adapter.answer("What is Tallyo?", [
+  { role: "user", content: "How do quotes work?" },
+  { role: "assistant", content: "A quote can become an invoice after acceptance." }
+]), {
   reason: "ai",
   answer: "A bounded answer.",
   links: [{ label: "Features", href: "/features/" }]
 });
+
+const unansweredAdapter = createPublicAiAdapter({
+  enabled: true,
+  fetchImpl: async () => new Response(JSON.stringify({
+    answered: false,
+    answer: "Not enough reviewed guidance.",
+    links: [{ label: "Help", href: "/help/" }]
+  }), { status: 200, headers: { "Content-Type": "application/json" } })
+});
+assert.deepEqual(await unansweredAdapter.answer("An unsupported question"), {
+  reason: "no-answer",
+  answer: "Not enough reviewed guidance.",
+  links: [{ label: "Help", href: "/help/" }]
+});
+
+for (const code of ["rate_limited", "assistant_unavailable"]) {
+  const errorAdapter = createPublicAiAdapter({
+    enabled: true,
+    fetchImpl: async () => new Response(JSON.stringify({ answered: false, code }), {
+      status: code === "rate_limited" ? 429 : 503,
+      headers: { "Content-Type": "application/json" }
+    })
+  });
+  await assert.rejects(
+    () => errorAdapter.answer("A question"),
+    (error) => error.code === code
+  );
+}
 
 const functionSource = readFileSync(join(websiteRoot, "functions", "lib", "public-helper.mjs"), "utf8");
 const apiSource = readFileSync(join(websiteRoot, "functions", "api", "helper.js"), "utf8");
 assert.doesNotMatch(functionSource, /\bsk-(?:proj-)?[A-Za-z0-9_-]{16,}\b/);
 assert.doesNotMatch(functionSource, /console\.(?:log|info|warn|error)/);
 assert.match(functionSource, /store: false/);
+assert.match(functionSource, /RECENT_CONVERSATION/);
+assert.match(functionSource, /untrusted conversation text/);
+assert.match(functionSource, /general conversational knowledge/);
+assert.match(functionSource, /Resolve follow-ups semantically/);
+assert.match(functionSource, /never a fixed trigger list/);
+assert.match(functionSource, /sound like a helpful person, not a manual or policy notice/);
+assert.match(functionSource, /usually two or three sentences/);
 assert.doesNotMatch(functionSource, /SUPABASE|STRIPE|RESEND|service_role/i);
 assert.match(apiSource, /applyConnectPaymentCopy/);
 assert.match(apiSource, /connectPaymentsPublished/);

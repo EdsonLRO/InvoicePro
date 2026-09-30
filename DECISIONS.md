@@ -6,8 +6,11 @@
 | Tallyo has one paid plan at launch | Approved | Avoids artificial complexity before usage evidence exists. |
 | Monthly price is £8 | Approved | Fits the focused UK invoicing position. |
 | Annual price is £80 | Approved | Saves £16 versus twelve monthly payments without “free month” language. |
-| No full-feature free trial | Approved | Reduces repeated-email trial abuse; the free maker and monthly plan provide evaluation routes. |
+| One seven-day full-feature trial for the monthly plan | Approved and released 2026-09-25, PR #190 | One card-required trial per account gives a clear evaluation period, then continues at £8 monthly unless cancelled online. Stripe's three-day trial-ending event triggers the Tallyo reminder. The Free Invoice Maker remains separate, free and account/card-free. The Owner explicitly accepted the remaining legal and commercial risk and approved release without external professional review. |
 | No permanent free saved account at launch | Approved | Keeps ongoing storage, automation and support within the paid product. |
+| Owner-granted complimentary access | Approved for occasional accounts | The Owner may grant or revoke full app access for an existing confirmed account by email without creating a Stripe subscription, voucher system or permanent public free tier. |
+| Minimal Owner Console | Approved and released 2026-09-11, PR #152 | The Owner may search one exact registered email, grant or revoke complimentary access, send a password-reset email, and approve an MFA reset only after the account holder signs in with the password and confirms a short-lived link sent to the registered mailbox. No impersonation, bulk administration or business-record access is included. |
+| Accepted-quote invoice delivery | Approved for focused repository candidate; production activation pending | Quote acceptance always preserves the quote and creates one linked invoice. Automatic invoice email is optional and off by default; when selected, the sender chooses the due period before sending the quote. The automatic email uses the exact recipient reviewed when the quote is sent, includes no online-payment link, makes one claimed attempt and leaves a Draft for manual review if delivery fails. |
 | No lifetime deal | Approved | Infrastructure and support costs continue. |
 | One business and one user | Approved | Matches the current verified implementation. |
 | Teams are deferred | Approved | Multi-user workspace and role isolation are not implemented. |

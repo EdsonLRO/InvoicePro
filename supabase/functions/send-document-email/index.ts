@@ -8,6 +8,7 @@ import {
   createOptionalInvoicePaymentLinks,
   stripeConnectReady,
 } from "../_shared/invoice-payment-options.mjs";
+import { prepareQuoteEmailAccess } from "../_shared/quote-email-access.mjs";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 
@@ -36,6 +37,12 @@ type PaymentLink = {
   url: string;
   amount: number;
   kind: string;
+};
+
+type QuoteAccess = {
+  link: string;
+  expiresAt: string;
+  tokenHash: string;
 };
 
 function json(body: Record<string, unknown>, status = 200) {
@@ -77,6 +84,17 @@ function formatMoneyAscii(code: string, amount: unknown) {
 function brandColor(company: any): string {
   const color = String(company?.brand_color || "#4f46e5").trim();
   return /^#[0-9a-f]{6}$/i.test(color) ? color : "#4f46e5";
+}
+
+const DOCUMENT_TEMPLATES = new Set(["tallyo", "basic", "modern", "professional"]);
+
+function documentTemplate(company: any): string {
+  const template = String(company?.invoice_template || "tallyo").trim().toLowerCase();
+  return DOCUMENT_TEMPLATES.has(template) ? template : "tallyo";
+}
+
+function usesAlternatingItemRows(company: any): boolean {
+  return company?.alternate_item_rows !== false;
 }
 
 function amountPaid(payments: unknown): number {
@@ -138,7 +156,12 @@ function calcTotals(inv: any) {
   return { subtotal, globalDiscountAmt, taxAmt, taxByRate, shipping, mode, grandTotal };
 }
 
-function buildEmail(inv: any, company: any, paymentLinks: PaymentLink[] = []) {
+function buildEmail(
+  inv: any,
+  company: any,
+  paymentLinks: PaymentLink[] = [],
+  quoteAccess: QuoteAccess | null = null,
+) {
   const noun = docTypeNoun(inv.doc_type);
   const currency = inv.currency || "GBP";
   const color = brandColor(company);
@@ -191,6 +214,14 @@ function buildEmail(inv: any, company: any, paymentLinks: PaymentLink[] = []) {
   if (paymentLinks.length) {
     textLines.push("", "Pay online:");
     paymentLinks.forEach((link) => textLines.push(`- ${link.label}: ${link.url}`));
+  }
+  if (quoteAccess) {
+    textLines.push(
+      "",
+      "View and respond to this quote:",
+      quoteAccess.link,
+      "Open the quote to accept or decline it.",
+    );
   }
 
   if (inv.notes) textLines.push("", "Notes:", String(inv.notes));
@@ -252,6 +283,7 @@ function buildEmail(inv: any, company: any, paymentLinks: PaymentLink[] = []) {
         </tbody>
       </table>
       ${paymentLinks.length ? `<div style="margin:22px 0;text-align:center;">${paymentLinks.map((link) => `<a href="${escapeHtml(link.url)}" style="display:inline-block;background:${escapeHtml(color)};color:#ffffff;text-decoration:none;font-weight:700;border-radius:8px;padding:12px 18px;margin:4px;">${escapeHtml(link.label)}</a>`).join("")}</div>` : ""}
+      ${quoteAccess ? `<div style="margin:24px 0;padding:18px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;text-align:center;"><p style="margin:0 0 14px;color:#334155;">Open the quote to accept or decline it.</p><a href="${escapeHtml(quoteAccess.link)}" style="display:inline-block;background:${escapeHtml(color)};color:#ffffff;text-decoration:none;font-weight:700;border-radius:8px;padding:12px 18px;">View and respond to quote</a></div>` : ""}
       ${inv.notes ? `<h2 style="font-size:16px;margin-top:20px;">Notes</h2><p>${escapeHtml(inv.notes).replaceAll("\n", "<br>")}</p>` : ""}
       ${inv.terms ? `<h2 style="font-size:16px;margin-top:20px;">Terms</h2><p>${escapeHtml(inv.terms).replaceAll("\n", "<br>")}</p>` : ""}
       ${company?.payment_details ? `<h2 style="font-size:16px;margin-top:20px;">Payment details</h2><p>${escapeHtml(company.payment_details).replaceAll("\n", "<br>")}</p>` : ""}
@@ -345,7 +377,7 @@ function customerLines(customer: any): string[] {
   ].filter((line) => String(line || "").trim()).map((line) => String(line));
 }
 
-function buildPdfBase64(inv: any, company: any): string {
+export function buildPdfBase64(inv: any, company: any): string {
   const noun = docTypeNoun(inv.doc_type);
   const currency = inv.currency || "GBP";
   const totals = calcTotals(inv);
@@ -353,11 +385,18 @@ function buildPdfBase64(inv: any, company: any): string {
   const customer = inv.customer_snapshot || {};
   const companyName = company?.name || "Tallyo";
   const brand = hexToPdfRgb(brandColor(company));
+  const template = documentTemplate(company);
+  const alternateRows = usesAlternatingItemRows(company);
   const text = "0.070 0.090 0.150";
   const muted = "0.390 0.455 0.560";
   const faint = "0.875 0.900 0.965";
   const veryFaint = "0.965 0.973 0.984";
   const border = "0.820 0.850 0.900";
+  const slate = "0.118 0.161 0.231";
+  const tableFill = template === "basic" ? "1 1 1" : template === "professional" ? slate : template === "modern" ? veryFaint : brand;
+  const tableText = template === "basic" || template === "modern" ? text : "1 1 1";
+  const summaryFill = template === "basic" ? "1 1 1" : veryFaint;
+  const summaryRule = template === "basic" ? text : brand;
   const pages: string[][] = [];
   let commands: string[] = [];
   const footerText = company?.invoice_footer || "Thank you for your business.";
@@ -372,15 +411,16 @@ function buildPdfBase64(inv: any, company: any): string {
     commands = [];
   };
   const addTableHeader = (target: string[], headerY: number) => {
-    target.push(pdfRect(tableX, headerY, 515, 32, brand));
-    target.push(pdfText("ITEM / DESCRIPTION", 50, headerY + 12, 8, "1 1 1", "F2"));
-    target.push(pdfText("QTY / UNIT", 235, headerY + 12, 8, "1 1 1", "F2"));
-    target.push(pdfText("PRICE", 338, headerY + 12, 8, "1 1 1", "F2"));
-    target.push(pdfText("DISC", 405, headerY + 17, 8, "1 1 1", "F2"));
-    target.push(pdfText("(%)", 412, headerY + 7, 8, "1 1 1", "F2"));
-    target.push(pdfText("TAX", 455, headerY + 17, 8, "1 1 1", "F2"));
-    target.push(pdfText("(%)", 461, headerY + 7, 8, "1 1 1", "F2"));
-    target.push(pdfText("TOTAL", 510, headerY + 12, 8, "1 1 1", "F2"));
+    target.push(pdfRect(tableX, headerY, 515, 32, tableFill, template === "basic" ? text : null));
+    if (template === "professional") target.push(pdfRect(tableX, headerY, 5, 32, brand));
+    target.push(pdfText("ITEM / DESCRIPTION", 50, headerY + 12, 8, tableText, "F2"));
+    target.push(pdfText("QTY / UNIT", 235, headerY + 12, 8, tableText, "F2"));
+    target.push(pdfText("PRICE", 338, headerY + 12, 8, tableText, "F2"));
+    target.push(pdfText("DISC", 405, headerY + 17, 8, tableText, "F2"));
+    target.push(pdfText("(%)", 412, headerY + 7, 8, tableText, "F2"));
+    target.push(pdfText("TAX", 455, headerY + 17, 8, tableText, "F2"));
+    target.push(pdfText("(%)", 461, headerY + 7, 8, tableText, "F2"));
+    target.push(pdfText("TOTAL", 510, headerY + 12, 8, tableText, "F2"));
   };
 
   commands.push(pdfText(companyName, 40, 780, 13, text, "F2"));
@@ -388,10 +428,12 @@ function buildPdfBase64(inv: any, company: any): string {
     commands.push(pdfText(shorten(line, 42), 40, 762 - index * 13, 8, muted));
   });
 
-  commands.push(pdfText(noun.toUpperCase(), 425, 775, 24, faint, "F2"));
+  const titleColor = template === "basic" || template === "professional" ? text : template === "modern" ? brand : faint;
+  commands.push(pdfText(noun.toUpperCase(), template === "professional" ? 400 : 425, 775, template === "professional" ? 20 : 24, titleColor, "F2"));
   commands.push(pdfText(`${noun} #:`, 425, 755, 9, text, "F2"));
   commands.push(pdfText(inv.number || "", 478, 755, 9, text));
-  commands.push(pdfRect(40, 716, 515, 1.2, border));
+  commands.push(pdfRect(40, 716, 515, template === "professional" ? 4 : 1.2, template === "basic" ? text : template === "professional" ? slate : border));
+  if (template === "professional") commands.push(pdfRect(40, 716, 515, 1, brand));
 
   commands.push(pdfText("BILL TO", 40, 686, 8, faint, "F2"));
   commands.push(pdfText(customer.name || "Customer", 40, 670, 11, text, "F2"));
@@ -431,7 +473,7 @@ function buildPdfBase64(inv: any, company: any): string {
     const discount = Number(item.discount) || 0;
     const tax = Number(item.tax) || 0;
     const lineTotal = qty * price * (1 - discount / 100);
-    if (itemIndex % 2 === 0) commands.push(pdfRect(tableX, y - 9, 515, 30, "0.985 0.988 0.992"));
+    if (alternateRows && itemIndex % 2 === 1) commands.push(pdfRect(tableX, y - 9, 515, 30, template === "modern" ? "0.945 0.965 0.985" : "0.985 0.988 0.992"));
     commands.push(pdfText(shorten(item.name || "Item", 44), 50, y, 8, text));
     commands.push(pdfText(`${qty}${unit}`, 250, y, 8, text));
     commands.push(pdfText(formatMoneyAscii(currency, price), 332, y, 8, text));
@@ -476,16 +518,16 @@ function buildPdfBase64(inv: any, company: any): string {
   const totalBoxHeight = 120;
   const totalBoxBottom = totalBoxTop - totalBoxHeight;
   let summaryY = (totalBoxTop + totalBoxBottom + (summaryRows.length * 19) + 24) / 2;
-  commands.push(pdfRect(365, totalBoxBottom, 190, totalBoxHeight, veryFaint, border));
+  commands.push(pdfRect(365, totalBoxBottom, 190, totalBoxHeight, summaryFill, border));
   summaryRows.forEach(([label, amount]) => {
     commands.push(pdfText(label, 392, summaryY, 8, muted));
     commands.push(pdfText(formatMoneyAscii(currency, amount), 470, summaryY, 8, amount < 0 ? muted : text, "F2"));
     summaryY -= 19;
   });
-  commands.push(pdfRect(385, summaryY + 5, 150, 1.2, brand));
+  commands.push(pdfRect(385, summaryY + 5, 150, 1.2, summaryRule));
   summaryY -= 24;
   commands.push(pdfText("Total", 402, summaryY, 12, text, "F2"));
-  commands.push(pdfText(formatMoneyAscii(currency, total), 460, summaryY, 12, brand, "F2"));
+  commands.push(pdfText(formatMoneyAscii(currency, total), 460, summaryY, 12, template === "basic" || template === "professional" ? text : brand, "F2"));
 
   finishPage();
   return buildPdfFromPages(pages);
@@ -537,6 +579,151 @@ async function resendIdempotencyKey(parts: string[]): Promise<string> {
     byte.toString(16).padStart(2, "0")
   ).join("");
   return `tallyo-document-email-${hex}`;
+}
+
+type AcceptedQuoteInvoiceDelivery = {
+  admin: any;
+  invoice: any;
+  ownerUserId: string;
+  to: string;
+  fetcher?: typeof fetch;
+  now?: Date;
+  resendKey?: string;
+};
+
+/**
+ * Send the invoice created from an accepted quote. This is deliberately a
+ * single-purpose server-side path: it never creates payment links and it only
+ * moves a still-Draft, quote-linked invoice to Sent after Resend accepts it.
+ */
+export async function sendAcceptedQuoteInvoice({
+  admin,
+  invoice,
+  ownerUserId,
+  to,
+  fetcher = fetch,
+  now = new Date(),
+  resendKey = Deno.env.get("RESEND_API_KEY") || "",
+}: AcceptedQuoteInvoiceDelivery) {
+  const recipient = String(to || "").trim();
+  if (!resendKey) throw new Error("Email service is not configured");
+  if (!validEmail(recipient)) throw new Error("Accepted quote has no valid customer email address");
+  if (!invoice || invoice.user_id !== ownerUserId) throw new Error("Generated invoice does not belong to the quote owner");
+  if (invoice.doc_type !== "invoice" || invoice.status !== "Draft" || !invoice.source_quote_id) {
+    throw new Error("Generated invoice is not available for automatic delivery");
+  }
+
+  const { data: company, error: companyError } = await admin
+    .from("company_settings")
+    .select("*")
+    .eq("user_id", ownerUserId)
+    .maybeSingle();
+  if (companyError) throw new Error("Business details could not be loaded");
+
+  const email = buildEmail(invoice, company || {}, [], null);
+  const filenameNumber = String(invoice.number || "invoice").replace(/[^a-z0-9_-]+/gi, "-");
+  const resendRequestKey = await resendIdempotencyKey([
+    String(invoice.id),
+    ownerUserId,
+    recipient.toLowerCase(),
+    "accepted_quote_auto_send",
+  ]);
+  let resendResponse: Response;
+  try {
+    resendResponse = await fetcher("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendKey}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": resendRequestKey,
+      },
+      body: JSON.stringify({
+        from: FROM_EMAIL,
+        to: [recipient],
+        subject: email.subject,
+        html: email.html,
+        text: email.text,
+        attachments: [{
+          filename: `Invoice-${filenameNumber}.pdf`,
+          content: buildPdfBase64(invoice, company || {}),
+        }],
+        tags: [
+          { name: "category", value: "document_email" },
+          { name: "document_id", value: String(invoice.id) },
+          { name: "user_id", value: ownerUserId },
+        ],
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+  } catch (error) {
+    const timedOut = error instanceof DOMException && error.name === "TimeoutError";
+    await insertAuditEvent(admin, {
+      user_id: ownerUserId,
+      actor_user_id: null,
+      event_type: "email_send_failed",
+      object_type: "invoice",
+      object_id: invoice.id,
+      source: "system",
+      provider: "resend",
+      metadata: {
+        channel: "accepted_quote_auto_send",
+        reason: timedOut ? "provider_timeout" : "provider_request_failed",
+      },
+    });
+    throw new Error(timedOut ? "Email provider timed out" : "Email provider could not be reached");
+  }
+
+  const resendBody = await resendResponse.json().catch(() => ({}));
+  if (!resendResponse.ok) {
+    await insertAuditEvent(admin, {
+      user_id: ownerUserId,
+      actor_user_id: null,
+      event_type: "email_send_failed",
+      object_type: "invoice",
+      object_id: invoice.id,
+      source: "system",
+      provider: "resend",
+      metadata: {
+        channel: "accepted_quote_auto_send",
+        status: resendResponse.status,
+        reason: "provider_rejected_request",
+      },
+    });
+    throw new Error(String(resendBody?.message || "Email could not be sent"));
+  }
+
+  const nowISO = now.toISOString();
+  const history = Array.isArray(invoice.history) ? [...invoice.history] : [];
+  history.push({
+    ts: nowISO,
+    type: "sent",
+    text: `Sent automatically after quote acceptance to ${recipient}`,
+  });
+  const { data: updated, error: updateError } = await admin
+    .from("invoices")
+    .update({ history, status: "Sent", updated_at: nowISO })
+    .eq("id", invoice.id)
+    .eq("user_id", ownerUserId)
+    .eq("doc_type", "invoice")
+    .eq("status", "Draft")
+    .eq("source_quote_id", invoice.source_quote_id)
+    .select("*")
+    .maybeSingle();
+  if (updateError) throw new Error("Automatic email was accepted but the invoice status could not be updated");
+  if (!updated) throw new Error("Generated invoice changed before automatic delivery completed");
+
+  await insertAuditEvent(admin, {
+    user_id: ownerUserId,
+    actor_user_id: null,
+    event_type: "document_email_sent",
+    object_type: "invoice",
+    object_id: invoice.id,
+    source: "system",
+    provider: "resend",
+    provider_event_id: resendBody?.id || null,
+    metadata: { channel: "accepted_quote_auto_send" },
+  });
+  return { invoice: updated, emailId: resendBody?.id || null };
 }
 
 async function createStripeCheckoutUrl(inv: any, userId: string, to: string, admin: any, amount: number, kind: string): Promise<string | null> {
@@ -729,7 +916,7 @@ async function createPaymentLinks(
   });
 }
 
-Deno.serve(async (req) => {
+export async function handleDocumentEmailRequest(req: Request) {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
@@ -772,6 +959,14 @@ Deno.serve(async (req) => {
   }
   const includeOnlinePayment = body.includeOnlinePayment === true;
   const paymentKind = includeOnlinePayment ? String(body.paymentKind || "") : "";
+  if (
+    body.autoSendOnAcceptance !== undefined &&
+    typeof body.autoSendOnAcceptance !== "boolean"
+  ) {
+    return json({ error: "Automatic invoice delivery selection must be true or false" }, 400);
+  }
+  const autoSendOnAcceptance = body.autoSendOnAcceptance === true;
+  const autoSendDueDays = Number(body.autoSendDueDays);
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(documentId)) {
     return json({ error: "Invalid document ID" }, 400);
   }
@@ -785,23 +980,80 @@ Deno.serve(async (req) => {
       400,
     );
   }
+  if (autoSendOnAcceptance && ![7, 14, 30, 60].includes(autoSendDueDays)) {
+    return json({ error: "Choose when the automatically created invoice will be due" }, 400);
+  }
 
   const { data: inv, error: invError } = await admin.from("invoices").select("*").eq("id", documentId).maybeSingle();
   if (invError) return json({ error: invError.message }, 500);
   if (!inv || inv.user_id !== userData.user.id) return json({ error: "Document not found" }, 404);
   if (inv.status === "Cancelled") return json({ error: "Cancelled documents cannot be emailed" }, 400);
 
+  let emailDocument = inv;
+  let quoteAccess: QuoteAccess | null = null;
+  if (inv.doc_type === "quote") {
+    try {
+      const { data: quoteWithDeliveryChoice, error: choiceError } = await admin
+        .from("invoices")
+        .update({
+          quote_auto_send_invoice: autoSendOnAcceptance,
+          quote_auto_send_due_days: autoSendOnAcceptance ? autoSendDueDays : null,
+          quote_auto_send_recipient: autoSendOnAcceptance ? to : null,
+          quote_auto_send_status: null,
+          quote_auto_send_attempted_at: null,
+          quote_auto_send_sent_at: null,
+        })
+        .eq("id", documentId)
+        .eq("user_id", userData.user.id)
+        .eq("doc_type", "quote")
+        .is("quote_response", null)
+        .select("*")
+        .maybeSingle();
+      if (choiceError) throw new Error("Automatic delivery choice could not be saved");
+      if (!quoteWithDeliveryChoice) throw new Error("This quote can no longer be sent");
+      const prepared = await prepareQuoteEmailAccess({
+        quote: quoteWithDeliveryChoice,
+        userId: userData.user.id,
+        admin,
+      });
+      if (!prepared) {
+        throw new Error("The secure quote response link could not be prepared.");
+      }
+      emailDocument = prepared.invoice;
+      quoteAccess = {
+        link: prepared.link,
+        expiresAt: prepared.expiresAt,
+        tokenHash: prepared.tokenHash,
+      };
+      await insertRequiredAuditEvent(admin, {
+        user_id: userData.user.id,
+        actor_user_id: userData.user.id,
+        event_type: "quote_link_created",
+        object_type: "quote",
+        object_id: documentId,
+        source: "edge_function",
+        metadata: { channel: "document_email" },
+      });
+    } catch (error) {
+      return json({
+        error: error instanceof Error
+          ? error.message
+          : "The secure quote response link could not be prepared.",
+      }, 409);
+    }
+  }
+
   const { data: company } = await admin.from("company_settings").select("*").eq("user_id", userData.user.id).maybeSingle();
   const paymentLinks = await createPaymentLinks(
-    inv,
+    emailDocument,
     userData.user.id,
     admin,
     authHeader,
     includeOnlinePayment,
     paymentKind,
   );
-  const email = buildEmail(inv, company || {}, paymentLinks);
-  const filenameNumber = String(inv.number || "invoice").replace(/[^a-z0-9_-]+/gi, "-");
+  const email = buildEmail(emailDocument, company || {}, paymentLinks, quoteAccess);
+  const filenameNumber = String(emailDocument.number || "invoice").replace(/[^a-z0-9_-]+/gi, "-");
   const resendPayload = {
     from: FROM_EMAIL,
     to: [to],
@@ -810,8 +1062,8 @@ Deno.serve(async (req) => {
     text: email.text,
     attachments: [
       {
-        filename: `${docTypeNoun(inv.doc_type).replaceAll(" ", "-")}-${filenameNumber}.pdf`,
-        content: buildPdfBase64(inv, company || {}),
+        filename: `${docTypeNoun(emailDocument.doc_type).replaceAll(" ", "-")}-${filenameNumber}.pdf`,
+        content: buildPdfBase64(emailDocument, company || {}),
       },
     ],
     tags: [
@@ -825,7 +1077,8 @@ Deno.serve(async (req) => {
     documentId,
     userData.user.id,
     to.toLowerCase(),
-    String(inv.updated_at || inv.created_at || ""),
+    String(emailDocument.updated_at || emailDocument.created_at || ""),
+    quoteAccess?.tokenHash || "no_quote_response_link",
     paymentLinks.length
       ? paymentLinks.map((link) => `${link.kind}:${link.amount}`).join(",")
       : "no_online_payment",
@@ -854,7 +1107,10 @@ Deno.serve(async (req) => {
       provider: "resend",
       metadata: { reason: timedOut ? "provider_timeout" : "provider_request_failed" },
     });
-    return json({ error: timedOut ? "Email provider timed out; it is safe to retry" : "Email provider could not be reached" }, timedOut ? 504 : 502);
+    const quoteRetryNote = quoteAccess
+      ? " The secure quote response link is ready; it is safe to retry."
+      : "";
+    return json({ error: timedOut ? `Email provider timed out; it is safe to retry.${quoteRetryNote}` : `Email provider could not be reached.${quoteRetryNote}` }, timedOut ? 504 : 502);
   }
   const resendBody = await resendResponse.json().catch(() => ({}));
   if (!resendResponse.ok) {
@@ -868,25 +1124,53 @@ Deno.serve(async (req) => {
       provider: "resend",
       metadata: { status: resendResponse.status, reason: "provider_rejected_request" },
     });
-    return json({ error: resendBody?.message || "Email could not be sent" }, 502);
+    return json({
+      error: `${resendBody?.message || "Email could not be sent"}${
+        quoteAccess
+          ? " The secure quote response link is ready; it is safe to retry."
+          : ""
+      }`,
+    }, 502);
   }
 
   const nowISO = new Date().toISOString();
-  const history = Array.isArray(inv.history) ? inv.history : [];
+  const history = Array.isArray(emailDocument.history) ? emailDocument.history : [];
   history.push({
     ts: nowISO,
     type: "sent",
     text: `Sent to email provider for delivery to ${to}`,
   });
 
-  const nextStatus = inv.status === "Draft" ? "Sent" : inv.status;
-  const { data: updated, error: updateError } = await admin.from("invoices")
+  const nextStatus = emailDocument.status === "Draft" ? "Sent" : emailDocument.status;
+  let updateQuery = admin.from("invoices")
     .update({ history, status: nextStatus, updated_at: nowISO })
     .eq("id", documentId)
-    .eq("user_id", userData.user.id)
+    .eq("user_id", userData.user.id);
+  if (emailDocument.doc_type === "quote") {
+    updateQuery = updateQuery.is("quote_response", null);
+  }
+  const { data: updatedAfterSend, error: updateError } = await updateQuery
     .select("*")
-    .single();
+    .maybeSingle();
   if (updateError) return json({ error: updateError.message }, 500);
+
+  let updated = updatedAfterSend;
+  if (!updated && emailDocument.doc_type === "quote") {
+    const { data: respondedQuote, error: respondedQuoteError } = await admin
+      .from("invoices")
+      .select("*")
+      .eq("id", documentId)
+      .eq("user_id", userData.user.id)
+      .not("quote_response", "is", null)
+      .maybeSingle();
+    if (respondedQuoteError) {
+      return json({ error: respondedQuoteError.message }, 500);
+    }
+    updated = respondedQuote;
+  }
+  if (!updated) {
+    return json({ error: "Document changed while the email was being sent" }, 409);
+  }
 
   await insertAuditEvent(admin, {
     user_id: userData.user.id,
@@ -900,5 +1184,14 @@ Deno.serve(async (req) => {
     metadata: {},
   });
 
-  return json({ ok: true, emailId: resendBody?.id || null, invoice: updated });
-});
+  return json({
+    ok: true,
+    emailId: resendBody?.id || null,
+    invoice: updated,
+    ...(quoteAccess
+      ? { quoteAccess: { link: quoteAccess.link, expiresAt: quoteAccess.expiresAt } }
+      : {}),
+  });
+}
+
+if (import.meta.main) Deno.serve(handleDocumentEmailRequest);

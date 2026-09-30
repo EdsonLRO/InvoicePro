@@ -1,6 +1,13 @@
 ﻿# SUPABASE_HANDOFF.md — Tallyo (code name: InvoicePro)
 
+> Seven-day trial released (2026-09-25, PR #190): `20260925110523_seven_day_billing_trial.sql` is applied. `create-billing-checkout` v30 retains JWT verification; `stripe-billing-webhook` v29 retains provider-signature verification. The live Stripe destination listens to the reviewed 11 events, including `customer.subscription.trial_will_end`, and both server trial gates are enabled. The public app and website gates are also enabled. Do not change duration, reminder timing, price, provider mode or cancellation behavior without a new reviewed release. See `docs/legal/TRIAL_SUBSCRIPTION_REVIEW.md` and `RELEASE_READINESS.md`.
+>
+> Abandoned Checkout recovery released (2026-09-25, PR #192): `create-billing-checkout` v32 retains JWT verification. A verified matching open Session resumes; a verified different-plan open Session is expired through Stripe before its exact claim is cleared and the requested plan is created. Completed or uncertain Sessions remain fail-closed. No migration, RLS, grant, secret, provider configuration, price, trial, entitlement or webhook change was made. See `docs/architecture/STRIPE_BILLING.md` and `RELEASE_READINESS.md`.
+>
+> Owner Console released under exact approval (2026-09-11, PR #152): migration `20260911170410` is applied; `owner-account-admin` v1 and `mfa-recovery` v33 retain JWT verification; app build `2026.09.11.1` is live. The protected `TALLYO_OWNER_USER_ID` is configured and its value must never be committed or shown in evidence. Identical complimentary-access migration history was repaired from `20260909122037` to `20260909115547` without rerunning schema changes. See `RELEASE_READINESS.md` for verification limits and rollback.
+>
 > How Supabase is used in this app. For another developer or AI coding agent.
+> Recovery destination correction deployed under exact approval (PR #154, 2026-09-11): `mfa-recovery` v35 and `owner-account-admin` v3 pin recovery links to `https://app.tallyo.co.uk`, with JWT verification retained and live source readback verified. Shared `APP_BASE_URL` was not changed because unrelated payment/email functions also consume it. Existing mailed links are not rewritten. See `RELEASE_READINESS.md` for evidence and limits.
 > Read before touching auth, the database, RLS, the Edge Function, or the scheduler.
 > Also read `AUTOMATION_MODEL_ORCHESTRATION.md` for Backend/Supabase ownership, Sol review boundaries, task locks, and handoffs. Supabase changes affecting personal data, retention, deletion, exports, vendors, transfers, incidents, or public launch also require the active review defined in `TALLYO_LEGAL_COMPLIANCE_AGENT.md`. Dashboard inspection or change follows `AGENT_HIERARCHY_AND_COMPUTER_USE.md`.
 > The public app brand is now **Tallyo**. The original **InvoicePro** name remains in the repo/URL context and some historical/internal references.
@@ -48,7 +55,7 @@
 - The app also has an in-app **"Change Password"** feature for a signed-in user. Its box asks for the user's **Current Password**, with the note *"Please enter your current password to confirm it's you."* — keep this wording consistent with the field.
 - When MFA is enabled, Change Password prompts for and verifies a fresh TOTP code after the current-password reauth. Supabase requires an AAL2 session before password updates on MFA accounts.
 - The logged-out reset flow is wired in `index.html` with masked new-password and confirmation fields. It must successfully list verified factors before enabling the update and requires a selected TOTP factor when MFA exists.
-- Email recovery is not an MFA bypass. If factor discovery fails, the app stops recovery. If every authenticator is lost, there is no self-service shortcut; see `MFA_RECOVERY_RUNBOOK.md`.
+- Email recovery is not an MFA bypass. If factor discovery fails, the app stops recovery. The deployed Owner Console adds a separately gated password-session plus registered-email confirmation and AAL2 Owner-approval path when every authenticator and saved recovery code is lost; see `MFA_RECOVERY_RUNBOOK.md`. Live factor/session-reset acceptance was not part of the release smoke test.
 
 ---
 
@@ -84,6 +91,16 @@ Draft PR #103 adds migration `20260725014434_enforce_subscription_write_entitlem
 
 Applied Stripe Connect foundation tables: `stripe_connected_accounts`, `stripe_connect_events`, and private `stripe_connect_checkout_claims`. Migrations `20260724174500_stripe_connect_foundation.sql` and `20260724175920_stripe_connect_payments.sql` were applied on 2026-07-24. Authenticated users receive owner-scoped SELECT only on their connected-account state. Connect events and Checkout claims have no browser policy or grant. All provider-derived writes remain service-role-only.
 
+Candidate migration `20260909115547_complimentary_access_by_email.sql` adds occasional complimentary full access without changing Stripe. After the migration is separately approved and applied, run the following only as the database owner in the Supabase SQL Editor:
+
+```sql
+select private.grant_complimentary_access_by_email('confirmed-account@example.com');
+select private.grant_complimentary_access_by_email('confirmed-account@example.com', now() + interval '30 days');
+select private.revoke_complimentary_access_by_email('confirmed-account@example.com');
+```
+
+The address must already belong to a confirmed Auth account. The private grant table stores the Auth `user_id`, timestamps and optional expiry, not a duplicate email. Browser roles and the service role cannot grant or revoke. No Edge Function, secret or Stripe configuration is involved.
+
 ---
 
 ## 7. Per-table details
@@ -93,7 +110,8 @@ Applied Stripe Connect foundation tables: `stripe_connected_accounts`, `stripe_c
 ### `company_settings`
 - **Purpose:** one row per user holding their business profile and defaults.
 - **Owner field:** `user_id` (uuid, **primary key**, NOT NULL). One-to-one with the auth user.
-- **Columns:** `user_id` (uuid, PK), `name`, `address`, `phone`, `mobile`, `email`, `tax_id`, `additional_info`, `logo_url` (all text), `invoice_prefix` (text, default `''`), `quote_prefix` (text, default `'QUO-'`), `credit_prefix` (text, default `'CN-'`), `default_currency` (text, default `'GBP'`), `payment_details`, `default_notes`, `default_terms`, `invoice_footer` (text), `updated_at` (timestamptz, default `now()`), `brand_color` (text, default `'#4f46e5'`), `logo_position` (text, default `'left'`).
+- **Document appearance:** `invoice_template` stores one of `tallyo`, `basic`, `modern`, or `professional`; `alternate_item_rows` controls the optional tinted rows in line-item tables.
+- **Columns:** `user_id` (uuid, PK), `name`, `address`, `phone`, `mobile`, `email`, `tax_id`, `additional_info`, `logo_url` (all text), `invoice_prefix` (text, default `''`), `quote_prefix` (text, default `'QUO-'`), `credit_prefix` (text, default `'CN-'`), `default_currency` (text, default `'GBP'`), `payment_details`, `default_notes`, `default_terms`, `invoice_footer` (text), `updated_at` (timestamptz, default `now()`), `brand_color` (text, default `'#4f46e5'`), `logo_position` (text, default `'left'`), `invoice_template` (text, default `'tallyo'`, constrained to the four supported layouts), `alternate_item_rows` (boolean, default `true`).
 - **Relationships:** one-to-one with the auth user; `invoice_prefix` is used when generating invoice numbers.
 - **RLS:** select/insert/update/delete only where `auth.uid() = user_id`.
 - **Note:** a live signup trigger auto-creates an empty row for each new user. Its helper was hardened with an empty search path and trigger-only execution privileges on 2026-07-13. A confirmed fresh signup created one matching `company_settings` row on 2026-07-14, with aggregate counts matched and no missing/orphan settings rows.
@@ -302,6 +320,7 @@ Names only — never commit real values.
 - `AUTOMATION_SECRET`
 - `APP_BASE_URL`
 - `MFA_RECOVERY_PEPPER` - required by the deployed `mfa-recovery` Edge Function; server-side only, never display, log, or commit its value.
+- `TALLYO_OWNER_USER_ID` - configured for the Owner Console; protected server-side identifier for the one authorised Owner Auth user, never browser-side or recorded with its value.
 
 **Configured protected-sandbox Stripe Billing settings (names only):**
 - `STRIPE_BILLING_ENABLED`

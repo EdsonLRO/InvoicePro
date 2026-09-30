@@ -4,8 +4,8 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { helpArticles, industries, notFoundPage, pages, productScenes } from "../src/pages.mjs";
-import { findHelperAnswer, futurePublicAiAdapter } from "../src/helper-core.mjs";
+import { helpArticles, notFoundPage, pages, productScenes } from "../src/pages.mjs";
+import { findHelperAnswer, findRelevantHelperEntries, futurePublicAiAdapter, noAnswer } from "../src/helper-core.mjs";
 import { APPROVED_ANALYTICS_EVENTS, GA4_MEASUREMENT_ID } from "../../analytics-consent.mjs";
 import { calculateDocument, calculationPolicy, formatMoney, parseMoney, parsePercent, parseQuantity } from "../src/document-calculator.mjs";
 import {
@@ -23,6 +23,9 @@ const cleanBuildEnvironment = {
   TALLYO_SUBSCRIPTIONS_ENABLED: "",
   TALLYO_SUBSCRIPTION_PRIVATE_PREVIEW_APPROVED: "",
   TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED: "",
+  TALLYO_SUBSCRIPTION_TRIAL_ENABLED: "",
+  TALLYO_SUBSCRIPTION_TRIAL_PRIVATE_PREVIEW_APPROVED: "",
+  TALLYO_SUBSCRIPTION_TRIAL_PUBLIC_RELEASE_APPROVED: "",
   TALLYO_PUBLIC_AI_HELPER_ENABLED: "",
   TALLYO_AI_PRIVATE_PREVIEW_APPROVED: "",
   TALLYO_AI_PUBLIC_RELEASE_APPROVED: "",
@@ -92,13 +95,27 @@ for (const page of [...pages, notFoundPage]) {
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, `one h1 for ${page.route}`);
   assert.match(html, /class="skip-link" href="#main-content"/, `skip link for ${page.route}`);
   assert.match(html, /aria-expanded="false" aria-controls="primary-navigation"/, `mobile menu semantics for ${page.route}`);
+  assert.match(html, /class="header-install-shortcut" href="\/help\/install-tallyo\/" aria-label="Install Tallyo"/, `installation shortcut stays visible beside the collapsed navigation for ${page.route}`);
+  assert.match(html, /class="nav-install-link" href="\/help\/install-tallyo\/"/, `prominent installation route for ${page.route}`);
+  assert.match(html, /class="nav-install-link"[\s\S]{0,500}<span>Install Tallyo<\/span>/, `installation action is visibly labelled for ${page.route}`);
+  assert.match(html, /<div class="nav-links">[\s\S]*>Help<\/a>[\s\S]*<\/div>\s*<a class="nav-install-link"[\s\S]*<\/a>\s*<div class="nav-actions"><a class="login-link"/, `Install Tallyo sits independently between Help and Log in for ${page.route}`);
+  assert.match(html, /type="module" src="\/assets\/helper\.js\?v=[a-f0-9]{12}"/, `Helper behaviour loads for ${page.route}`);
+  assert.equal((html.match(/id="helper-knowledge"/g) || []).length, 1, `one reviewed Helper knowledge source for ${page.route}`);
+  if (page.helper) {
+    assert.match(html, /class="section section-soft helper-shell" data-helper/, "full Helper remains the dedicated expanded experience");
+    assert.doesNotMatch(html, /data-helper-widget/, "full Helper page does not duplicate the compact panel");
+  } else {
+    assert.match(html, /class="helper-widget" data-helper-widget/, `compact Helper is available for ${page.route}`);
+    assert.match(html, /role="dialog" aria-modal="false" aria-labelledby="helper-widget-title" hidden/, `compact Helper starts closed for ${page.route}`);
+    assert.match(html, /data-helper-toggle aria-expanded="false" aria-controls="tallyo-helper-widget" aria-label="Open Tallyo Helper"/, `compact Helper control has disclosure semantics for ${page.route}`);
+  }
   const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
   assert.equal(new Set(ids).size, ids.length, `unique element IDs for ${page.route}`);
   assert.match(html, /property="og:title"/, `Open Graph title for ${page.route}`);
   assert.match(html, /property="og:image" content="https:\/\/tallyo\.co\.uk\/assets\/tallyo-social-card\.webp\?v=[a-f0-9]{12}"/, `Open Graph image for ${page.route}`);
   assert.match(html, /name="twitter:card" content="summary_large_image"/, `large social card for ${page.route}`);
   assert.match(html, /type="module" src="\/assets\/growth\.js\?v=[a-f0-9]{12}"/, `provider-neutral growth module for ${page.route}`);
-  for (const assetName of ["styles.css", "site.js", "growth.js"]) {
+  for (const assetName of ["styles.css", "site.js", "growth.js", "helper.js"]) {
     const revision = html.match(new RegExp(`/assets/${assetName.replace(".", "\\.")}\\?v=([a-f0-9]{12})`))?.[1];
     assert.ok(revision, `versioned ${assetName} for ${page.route}`);
     seenAssetRevisions.add(revision);
@@ -125,20 +142,29 @@ for (const page of [...pages, notFoundPage]) {
 const home = read("index.html");
 assert.equal(seenAssetRevisions.size, 1, "all rendered pages and core assets share one content revision");
 const assetRevision = [...seenAssetRevisions][0];
-assert.doesNotMatch(home, /(?:href|src)="\/assets\/(?:styles\.css|site\.js|growth\.js)"/, "core assets are never referenced without a revision");
+assert.doesNotMatch(home, /(?:href|src)="\/assets\/(?:styles\.css|site\.js|growth\.js|helper\.js)"/, "core assets are never referenced without a revision");
 for (const id of ["cta_header_create_account", "cta_hero_create_account", "cta_hero_free_invoice", "cta_footer_create_account", "cta_login"]) {
   assert.match(home, new RegExp(`id="${id}"`), `missing CTA id ${id}`);
 }
 assert.match(home, /Northstar Home Services/);
 assert.match(home, /Willow &amp; Pine Studio/);
-assert.equal((home.match(/class="product-demo /g) || []).length, 3, "home shows three product-tour previews");
-assert.match(home, /Set up your business[\s\S]*Automate recurring work/, "home shows the complete six-step workflow");
-for (const densityHook of ["home-benefits", "home-how", "home-product-tour", "faq-preview"]) {
+assert.match(home, /one calm workspace with quotes, repeat invoices/, "homepage hero uses the approved punctuation-free wording");
+assert.doesNotMatch(home, /workspace\s+—/, "homepage hero does not restore the removed dash");
+assert.match(home, /footer-group footer-account[\s\S]*?<h2>Product<\/h2>[\s\S]*?<h2>Learn<\/h2>[\s\S]*?<h2>Legal<\/h2>[\s\S]*?footer-intro/, "footer places the four evenly spaced link groups before the brand block");
+assert.equal((home.match(/class="product-demo /g) || []).length, 0, "home does not duplicate the full product tour");
+assert.match(home, /Set up your business[\s\S]*Repeat regular invoices/, "home shows the complete six-step workflow in plain language");
+assert.equal((home.match(/class="capability-marquee-group"/g) || []).length, 2, "home duplicates the capability set for a seamless running strip");
+assert.match(home, /class="capability-marquee-group" aria-hidden="true"/, "the repeated capability set stays hidden from assistive technology");
+for (const densityHook of ["home-benefits", "home-how", "home-decision-panel", "faq-preview"]) {
   assert.match(home, new RegExp(`class="[^"]*${densityHook}[^"]*"`), `home retains ${densityHook} density hook`);
 }
+assert.doesNotMatch(home, /id="industries"|Use Tallyo your way|Built around real invoicing work/, "home avoids duplicate industry, installation and feature inventories");
 
 const productTour = read("product-tour/index.html");
 assert.equal((productTour.match(/class="product-demo /g) || []).length, productScenes.length, "product tour covers every supported scene");
+assert.equal((productTour.match(/class="tour-index"/g) || []).length, 1, "product tour provides one compact workflow index");
+assert.equal((productTour.match(/role="tab"/g) || []).length, 5, "product tour groups screens into five selectable workflows");
+assert.equal((productTour.match(/role="tabpanel"/g) || []).length, 5, "each product workflow has one accessible panel");
 for (const scene of productScenes) {
   assert.match(productTour, new RegExp(`id="${scene.id}"`), `product scene ${scene.id}`);
 }
@@ -149,16 +175,38 @@ for (const screenshotName of ["tallyo-dashboard.jpg", "tallyo-invoice-editor.jpg
   assert.match(productTour, new RegExp(`/assets/product/${screenshotName.replace(".", "\\.")}\\?v=[a-f0-9]{12}`), `product tour includes versioned ${screenshotName}`);
   assert.deepEqual([...readFileSync(join(distRoot, "assets", "product", screenshotName)).subarray(0, 3)], [255, 216, 255], `${screenshotName} is encoded as JPEG`);
 }
-assert.doesNotMatch(productTour, /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|acct_|cs_(?:test|live)_|eyJ[A-Za-z0-9_-]{10,}/, "product tour has no emails, provider IDs or JWT-like data");
+const productTourVisibleHtml = productTour.replace(/<script type="application\/json" id="helper-knowledge">[\s\S]*?<\/script>/, "");
+assert.doesNotMatch(productTourVisibleHtml, /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|acct_|cs_(?:test|live)_|eyJ[A-Za-z0-9_-]{10,}/, "product tour has no visible emails, provider IDs or JWT-like data");
+
+const featuresPage = read("features/index.html");
+assert.match(featuresPage, /data-horizontal-flow/, "features page includes the scroll-driven connected workflow");
+assert.equal((featuresPage.match(/class="workflow-outcome-step"/g) || []).length, 5, "quote-to-payment workflow renders all five focused steps");
+assert.match(featuresPage, /Send the quote[\s\S]*Quote accepted[\s\S]*Invoice created[\s\S]*Payment tracked[\s\S]*Follow-up stays clear/, "quote-to-payment workflow follows the real order");
+assert.match(featuresPage, /If you chose automatic sending before emailing the quote/, "automatic invoice email is described as an owner choice");
+
+const invoiceGuide = read("invoice-guide/index.html");
+assert.match(invoiceGuide, /What is an invoice, and how does it work\?/);
+assert.match(invoiceGuide, /Agree the work[\s\S]*Send the invoice[\s\S]*Record what arrives[\s\S]*Follow up if needed/, "invoice guide explains the basic journey");
+for (const topic of ["Quotes", "Invoices", "Recurring invoices", "Overdue reminders", "Deposits and part-payments", "Activity history"]) {
+  assert.match(invoiceGuide, new RegExp(`>${topic}<`), `invoice guide explains ${topic}`);
+}
+assert.match(invoiceGuide, /https:\/\/www\.gov\.uk\/invoicing-and-taking-payment-from-customers\/invoices-what-they-must-include/);
+assert.match(home, /href="\/invoice-guide\/">Read the simple invoice guide/);
+assert.match(read("help/index.html"), /href="\/invoice-guide\/">Read the invoice guide/);
+assert.match(read("free-invoice-generator/index.html"), /href="\/invoice-guide\/">Read the simple invoice guide/);
 
 const generatorPageHtml = read("free-invoice-generator/index.html");
-assert.match(generatorPageHtml, /role="region" aria-label="Scrollable live document preview" tabindex="0"/, "mobile document preview is keyboard reachable");
-assert.match(generatorPageHtml, /Swipe sideways to view the full document\./, "mobile document preview explains horizontal navigation");
+assert.match(generatorPageHtml, /role="region" aria-label="Live document preview" tabindex="0"/, "document preview is keyboard reachable");
+assert.doesNotMatch(generatorPageHtml, /Swipe sideways/, "mobile document preview no longer requires horizontal navigation");
+assert.equal((generatorPageHtml.match(/class="generator-section"/g) || []).length, 6, "invoice maker groups the open editor into six clear sections");
+assert.doesNotMatch(generatorPageHtml, /<details class="generator-section"/, "invoice maker keeps every editing section visible");
 assert.match(generatorPageHtml, /href="\/privacy\/">Privacy Notice<\/a>/, "free document form clearly links the Privacy Notice");
 assert.match(generatorPageHtml, /data-generator-conversion/, "invoice maker includes the pre-download conversion dialog");
 assert.match(generatorPageHtml, /Continue download/, "invoice maker keeps a clear download action");
+assert.doesNotMatch(generatorPageHtml, /cta_generator_start_trial/, "invoice maker hides the trial action while the trial release gate is off");
 assert.doesNotMatch(read("free-quote-generator/index.html"), /data-generator-conversion/, "quote maker keeps its existing direct PDF flow");
-assert.match(read("assets/styles.css"), /\.generator-preview-wrap \{ overflow-x: auto;/, "mobile document preview scrolls inside its own region");
+assert.match(read("assets/styles.css"), /\.generator-preview table \{ display: block; min-width: 0;/, "mobile document preview reflows without a wide fixed table");
+assert.match(read("assets/styles.css"), /content: attr\(data-label\)/, "mobile preview preserves labels when table rows become cards");
 
 for (const article of helpArticles) {
   const route = `/help/${article.slug}/`;
@@ -172,14 +220,19 @@ for (const article of helpArticles) {
   assert.ok(breadcrumb, `breadcrumb schema for ${route}`);
 }
 
-const publishedIndustryPages = pages.filter((page) => page.route.startsWith("/industries/"));
-assert.equal(publishedIndustryPages.length, 6, "six distinct industry landing pages are intentionally published");
-for (const page of publishedIndustryPages) {
-  const html = read(page.output);
-  assert.match(html, /specialist trade or accounting software/, `honest industry boundary for ${page.route}`);
-  assert.match(html, /aria-label="Breadcrumb"/, `industry breadcrumbs for ${page.route}`);
+assert.equal(pages.filter((page) => page.route.startsWith("/industries/")).length, 0, "thin industry landing pages are not published");
+const redirects = read("_redirects");
+for (const slug of ["freelancers", "consultants", "cleaners", "electricians", "photographers", "sole-traders"]) {
+  assert.match(redirects, new RegExp(`/industries/${slug}/ /features/ 301`), `retired ${slug} page redirects to the relevant product information`);
 }
-assert.ok(industries.length >= publishedIndustryPages.length, "homepage can show broader factual industry examples");
+
+const installGuide = read("help/install-tallyo/index.html");
+assert.match(installGuide, /data-install-guide/, "installation article includes a visual browser guide");
+assert.equal((installGuide.match(/class="install-device-card"/g) || []).length, 4, "installation guide covers four common browser and device paths");
+assert.match(installGuide, /Chrome on a computer[\s\S]*Microsoft Edge[\s\S]*Android Chrome[\s\S]*iPhone or iPad/, "installation device choices are clearly separated");
+assert.match(installGuide, /Look at the right end of the address bar\./, "desktop guide points to the install icon location");
+assert.match(installGuide, /Install and create shortcut[\s\S]*Add to Home Screen/, "mobile guide shows the exact browser actions");
+assert.match(installGuide, /support\.google\.com\/chrome[\s\S]*support\.microsoft\.com\/en-us\/edge[\s\S]*support\.apple\.com\/guide\/iphone/, "installation guide links to current browser-owner instructions");
 
 const pricing = read("pricing/index.html");
 assert.match(pricing, /Free Invoice Maker/);
@@ -201,16 +254,42 @@ const helperKnowledge = JSON.parse(applyConnectPaymentCopy(
   false
 ));
 assert.equal(helperKnowledge.scope, "public-product-guidance-only");
-assert.equal(helperKnowledge.entries.length, 18, "helper covers every required public question");
+assert.ok(helperKnowledge.entries.length >= 40, "helper covers the released public workflows");
 assert.equal(new Set(helperKnowledge.entries.map((entry) => entry.id)).size, helperKnowledge.entries.length, "helper knowledge IDs are unique");
+assert.ok(helperKnowledge.entries.filter((entry) => entry.suggested).length >= 6, "helper retains a focused suggestion set");
 for (const entry of helperKnowledge.entries) {
   assert.ok(entry.triggers.length > 0, `helper triggers for ${entry.id}`);
+  assert.ok(entry.keywords.length > 0, `helper retrieval keywords for ${entry.id}`);
   assert.equal(findHelperAnswer(helperKnowledge, entry.question).id, entry.id, `exact helper answer for ${entry.id}`);
   for (const link of entry.links) {
     assert.ok(link.href.startsWith("app:") || routeOutput.has(link.href), `reviewed public helper link ${link.href}`);
   }
 }
+assert.equal(findRelevantHelperEntries(helperKnowledge, "Can I choose a modern invoice layout?")[0].id, "document-templates");
+assert.ok(findRelevantHelperEntries(helperKnowledge, "What happens after a client agrees to my quote?")
+  .some((entry) => entry.id === "quote-acceptance"));
+assert.ok(findRelevantHelperEntries(helperKnowledge, "Can I schedule invoices and email them automatically?")
+  .some((entry) => entry.id === "recurring-invoices"));
+for (const recurringQuestion of [
+  "how does recurrinng invoices work with tallyo",
+  "how do recurring invoice work",
+  "tell me about recurrring invoices"
+]) {
+  assert.equal(findHelperAnswer(helperKnowledge, recurringQuestion).id, "recurring-invoices", `typo-tolerant recurring answer for ${recurringQuestion}`);
+}
+for (const greeting of ["hi", "Hello", "hey there", "Good morning Tallyo"]) {
+  const reply = findHelperAnswer(helperKnowledge, greeting);
+  assert.equal(reply.reason, "conversation", `friendly local greeting for ${greeting}`);
+  assert.match(reply.answer, /happy to help/i);
+}
+assert.match(findHelperAnswer(helperKnowledge, "thank you").answer, /welcome/i);
+assert.match(findHelperAnswer(helperKnowledge, "that sound interesting").answer, /glad it sounds useful/i);
+assert.match(findHelperAnswer(helperKnowledge, "that sounds helpful").answer, /what happens next/i);
+assert.match(findHelperAnswer(helperKnowledge, "how are you?").answer, /doing well/i);
 assert.equal(findHelperAnswer(helperKnowledge, "Can you tell me the weather?").reason, "no-answer");
+assert.equal(findHelperAnswer(helperKnowledge, "Can you recommend a holiday destination?").reason, "no-answer");
+assert.match(noAnswer.answer, /I’d still like to help/);
+assert.doesNotMatch(noAnswer.answer, /reviewed guidance|I will not guess/i);
 assert.equal(findHelperAnswer(helperKnowledge, "My password is secret").reason, "sensitive");
 assert.equal(findHelperAnswer(helperKnowledge, "Can you inspect my invoice?").reason, "private-account");
 assert.equal(findHelperAnswer(helperKnowledge, "What tax rate should I use?").reason, "advice");
@@ -234,12 +313,18 @@ for (const html of [generator, quoteGenerator]) {
   assert.match(html, /data-generator/);
   assert.match(html, /type="module" src="\/assets\/generator\.js\?v=[a-f0-9]{12}"/);
   assert.match(html, /does not save this document automatically/);
-  assert.match(html, /does not provide tax, legal or accounting advice/);
-  assert.match(html, /https:\/\/www\.gov\.uk\/invoicing-and-taking-payment-from-customers\/invoices-what-they-must-include/);
   for (const field of ["documentType", "currency", "reference", "issueDate", "supplyDate", "dueDate", "senderName", "senderAddress", "customerName", "customerAddress", "additionalCost", "additionalTaxRate", "notes", "paymentInstructions"]) assert.match(html, new RegExp(`name="${field}"`));
 }
 assert.match(generator, /data-default-type="Invoice"/);
 assert.match(quoteGenerator, /data-default-type="Quote"/);
+assert.match(generator, /does not provide tax, legal or accounting advice/);
+assert.match(generator, /https:\/\/www\.gov\.uk\/invoicing-and-taking-payment-from-customers\/invoices-what-they-must-include/);
+assert.match(generator, /Use a unique number[\s\S]*Make the dates clear[\s\S]*Check tax and payment details/, "invoice guidance matches invoice intent");
+assert.match(quoteGenerator, /Define the scope[\s\S]*Set a validity date[\s\S]*Record what happens next/, "quote guidance matches quote intent");
+assert.match(generator, /<title>Free invoice generator for your business \| Tallyo<\/title>/);
+assert.match(quoteGenerator, /<title>Free quote generator for your business \| Tallyo<\/title>/);
+const audiencePositioning = [home, read("about/index.html"), read("faq/index.html"), invoiceGuide, generator, quoteGenerator].join("\n");
+assert.doesNotMatch(audiencePositioning, /UK small[- ]business|small[- ]business(?:es)?/i, "public marketing describes Tallyo around the customer's business rather than a UK small-business segment");
 
 const privacy = read("privacy/index.html");
 const cookies = read("cookies/index.html");
@@ -253,6 +338,8 @@ for (const [name, html] of [["Privacy Notice", privacy], ["Data Processing Terms
 assert.match(privacy, /Effective 31 July 2026/);
 assert.match(privacy, /main@tallyo\.co\.uk/);
 assert.match(privacy, /The public AI Helper answers questions about public Tallyo product information/);
+assert.match(privacy, /up to six recent exchanges from the same open page/);
+assert.match(privacy, /clears it when the visitor resets the Helper, reloads or leaves the page/);
 assert.match(privacy, /We do not promise a fixed closed-account deletion deadline/);
 assert.match(privacy, /href="\/data-processing-terms\/">Data Processing Terms<\/a>/);
 assert.match(privacy, /Google Analytics 4/);
@@ -345,7 +432,9 @@ assert.match(home, /data-cookie-reject>Reject analytics<\/button>/);
 assert.match(home, /data-cookie-settings>Manage preferences<\/button>/);
 const bannerMarkup = home.match(/<section class="cookie-banner"[\s\S]+?<\/section>/)?.[0] || "";
 assert.equal((bannerMarkup.match(/class="cookie-choice" type="button" data-cookie-(?:accept|reject|settings)/g) || []).length, 3, "banner choices use the same visible control class");
-assert.match(home, /data-cookie-settings hidden>Cookie settings<\/button>/, "persistent settings control is rendered");
+assert.match(home, /class="nav-cookie-settings"[^>]+data-cookie-settings hidden/, "Cookie settings is available from the main navigation menu");
+const footerBottomMarkup = home.match(/<div class="footer-bottom">[\s\S]+?<\/div>/)?.[0] || "";
+assert.doesNotMatch(footerBottomMarkup, /data-cookie-settings/, "Cookie settings is removed from the page footer");
 assert.doesNotMatch(home, /<script[^>]+src="https:\/\/www\.googletagmanager\.com/i, "no static Google tag is rendered");
 
 assert.equal(read("robots.txt"), "User-agent: *\nDisallow: /\n");
@@ -366,16 +455,52 @@ assert.match(read("_headers"), /\/sitemap\.xml\s+! Content-Security-Policy\s+Con
 assert.ok(existsSync(join(distRoot, "404.html")));
 assert.match(read("_redirects"), /\/\* \/404\.html 404/);
 const styles = read("assets/styles.css");
-assert.match(styles, /\.section \{ padding: clamp\(1\.75rem, 3\.2vw, 3rem\) 0; \}/, "shared sections retain the reduced spacing baseline");
+assert.match(styles, /--layout-gap: 1\.25rem;/, "top-level panels use the approved 20px spacing token");
+assert.match(styles, /--space-section: 0\.625rem;/, "specialised components retain the compact internal spacing token");
+assert.match(styles, /\.section \{ padding: 0; \}/, "top-level section edges do not add hidden spacing to the shared gap");
+assert.match(styles, /main > \.section \{ margin-top: var\(--layout-gap\); \}/, "every top-level website section uses the approved 20px panel gap");
+assert.match(styles, /\.benefit-grid, \.feature-grid, \.industry-grid, \.security-grid, \.help-grid, \.install-grid, \.plan-grid \{ display: grid; gap: var\(--layout-gap\); \}/, "shared card grids use the approved 20px gap");
+assert.match(styles, /\.faq-list \{ display: grid; gap: var\(--layout-gap\);/, "FAQ cards use the approved 20px gap");
+assert.match(styles, /\.generator-shell \{[^}]*gap: var\(--layout-gap\);/, "generator panels use the approved 20px gap");
+assert.match(styles, /\.generator-shell \{[^}]*margin: 0 auto;/, "the generator does not add a larger page-section gap before its guidance cards");
+assert.match(styles, /\.generator-item-list \{ display: grid; gap: var\(--layout-gap\);/, "generator item cards use the approved 20px gap");
+assert.match(styles, /\.generator-explainer > div:last-child \{ display: grid; gap: var\(--layout-gap\); \}/, "generator explainer cards use the approved 20px gap");
 assert.match(styles, /\.section-soft, \.section-dark, \.section-cta \{[^}]*padding: clamp\(1\.5rem, 2\.6vw, 2\.5rem\)/, "large panels retain reduced internal spacing");
-assert.match(styles, /\.home-how \.section-heading \{ margin-bottom: 0\.65rem; \}/, "home workflow heading stays close to its first step");
+assert.match(styles, /\.home-how \{[^}]*display: grid;[^}]*border-radius: 2rem;/, "home workflow uses the spacious timeline panel");
+assert.match(styles, /\.motion-ready \.home-how \.workflow-steps li\[data-active\] \{ opacity: 1;/, "home workflow gives the current scroll step full emphasis");
 assert.match(styles, /\.faq-preview \{ padding-block: clamp\(1\.35rem, 2vw, 1\.8rem\); \}/, "FAQ preview remains compact");
-assert.match(styles, /\.section-cta \{[^}]*margin-top: clamp\(0\.75rem, 1\.4vw, 1\.1rem\)/, "final CTA stays visually separate from the preceding panel");
+assert.match(styles, /\.section-cta \{[^}]*margin-top: var\(--layout-gap\)/, "final CTA uses the same approved panel gap");
+assert.match(styles, /\.section-cta \{[^}]*backdrop-filter: blur\(24px\) saturate\(155%\)/, "final CTA uses the liquid-glass treatment");
+assert.match(styles, /\.section-cta \{[^}]*box-shadow: 0 16px 34px -26px/, "blue CTA cards use a contained rounded shadow without a square bottom strip");
 assert.match(styles, /\.workflow-outcome \.section-heading \{ max-width: none; \}/, "feature workflow uses the available panel width");
+assert.match(styles, /\.feature-hero-summary p::before \{[^}]*translateX\(-102%\)/, "feature summary rows include the reference-style hover wash");
+assert.match(styles, /\.workflow-outcome-step \{[^}]*box-shadow: 0 6px 16px/, "connected workflow cards keep an individual soft shadow");
+assert.match(styles, /@media \(max-width: 71\.99rem\) \{[\s\S]*?\.workflow-outcome \{ min-height: 0 !important;/, "connected workflow switches to manual scrolling below the full desktop layout");
+assert.match(styles, /\.tour-index \{ position: relative;/, "product tour index scrolls away with the page");
+assert.match(styles, /\.primary-nav\{[^}]*display:grid;[^}]*grid-template-columns:4fr auto 1fr auto 1fr auto;/, "desktop navigation preserves the centred option group while balancing the spaces around the installation link");
+assert.match(styles, /\.nav-links\{grid-column:2;[^}]*\}[\s\S]*\.nav-install-link\{grid-column:4\}[\s\S]*\.nav-actions\{grid-column:6;/, "desktop navigation centres Install Tallyo between Help and Log in");
+assert.match(styles, /\.header-inner \{[^}]*width: min\(80rem, calc\(100% - 2rem\)\)/, "desktop navigation pill uses the wider approved frame");
+assert.match(styles, /\.nav-links, \.nav-actions \{[^}]*flex-wrap: nowrap;[^}]*white-space: nowrap;/, "desktop navigation groups cannot wrap while scrolling");
+assert.match(styles, /\.nav-links a,\.nav-install-link,\.login-link\{[^}]*white-space:nowrap/, "desktop navigation labels stay on one line");
+assert.match(styles, /\.nav-install-link\{[^}]*display:inline-flex;[^}]*color:var\(--blue-600\);/, "installation action remains a proportional icon-and-text link");
+assert.doesNotMatch(styles, /\.nav-install-link\s*\{[^}]*(?:border|background):/, "installation link has no persistent button treatment");
+assert.match(styles, /#cta_header_create_account\{[^}]*padding:\.78rem \.1rem;[^}]*border:0;[^}]*color:var\(--slate-700\);[^}]*font-size:\.92rem;[^}]*font-weight:680/, "Create account matches the navigation height, typography and colour");
+assert.doesNotMatch(styles, /#cta_header_create_account\{[^}]*border-bottom/, "Create account has no underline treatment");
+assert.match(styles, /@media \(max-width: 71\.99rem\) \{[^}]*\.nav-actions\{align-items:flex-start\}[\s\S]*?\.nav-actions #cta_header_create_account\{padding:\.78rem \.85rem\}/, "collapsed navigation aligns Create account directly below Log in");
+assert.match(styles, /@media \(max-width: 22rem\) \{[^}]*\.header-inner \{ gap: 0\.5rem; \}/s, "very narrow headers preserve separate install and menu touch targets");
+assert.match(styles, /\.install-device-grid \{ display: grid; gap: var\(--layout-gap\); \}/, "installation device cards use the approved spacing");
+assert.match(styles, /\.browser-install-target\s*\{[^}]*background:\s*var\(--blue-100\);/, "installation symbol is visibly highlighted in browser illustrations");
+assert.match(styles, /\.site-header\.is-condensed \.header-inner \{ width: min\(77rem, calc\(100% - 2\.5rem\)\); \}/, "scrolled navigation shrinks subtly without crowding its labels");
 assert.match(styles, /\.plan-card \.button \+ \.plan-note \{ margin-top: 0\.75rem; \}/, "pricing note cannot collide with the subscription action");
-assert.match(styles, /\.page-hero \+ \.section \{ padding-top: clamp\(0\.4rem, 0\.8vw, 0\.75rem\); \}/, "page headings do not double the next section spacing");
-assert.match(styles, /\.plan-grid \{ align-items: start; \}/, "pricing cards do not stretch and create empty space");
-assert.ok(statSync(join(distRoot, "assets", "styles.css")).size < 60_000, "CSS baseline under 60 KB");
+assert.doesNotMatch(styles, /\.page-hero \+ \.section \{[^}]*padding-top:/, "page headings do not add a second section gap");
+assert.match(styles, /main > \.section:last-of-type\{margin-bottom:var\(--layout-gap\)\}/, "the final page section keeps the standard gap before the footer even when a hidden dialog follows it");
+assert.match(styles, /\.plan-card \{[^}]*height: 100%;[^}]*flex-direction: column;/, "pricing cards fill the shared row height");
+assert.match(styles, /\.plan-grid \{ align-items: stretch; \}/, "pricing cards use equal heights");
+assert.match(styles, /\.plan-card:not\(\.plan-card-featured\) \.button \{ margin-top: 0; \}/, "the free-plan action remains in the natural reading flow");
+assert.match(styles, /\.helper-widget-panel \{[^}]*position: fixed;[^}]*bottom: 5rem;[^}]*backdrop-filter: blur\(22px\) saturate\(150%\)/, "compact Helper opens as a liquid-glass panel beside its icon");
+assert.match(styles, /\.helper-widget-panel\[hidden\] \{ display: none; \}/, "compact Helper remains absent from layout while closed");
+assert.match(styles, /@media \(max-width: 37\.99rem\) \{[^}]*\.helper-widget-panel \{[^}]*left: 1rem;[^}]*width: calc\(100vw - 2rem\)/s, "compact Helper keeps a full mobile inset inside narrow viewports");
+assert.ok(Buffer.byteLength(styles.replaceAll("\r\n", "\n"), "utf8") < 90_000, "CSS baseline under 90 KB after compact Helper and navigation utility refinements");
 assert.ok(statSync(join(distRoot, "assets", "site.js")).size < 10_000, "JS baseline under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper.js")).size < 10_000, "helper UI stays under 10 KB");
 assert.ok(statSync(join(distRoot, "assets", "helper-core.mjs")).size < 10_000, "helper matcher stays under 10 KB");
@@ -391,11 +516,25 @@ assert.ok(statSync(join(distRoot, "assets", "tallyo-mark.png")).size < 75_000, "
 assert.ok(statSync(join(distRoot, "assets", "tallyo-wordmark-white.png")).size < 50_000, "brand wordmark stays under 50 KB");
 assert.ok(existsSync(join(distRoot, "assets", "tallyo-social-card.webp")), "social card asset exists");
 assert.ok(statSync(join(distRoot, "assets", "tallyo-social-card.webp")).size < 100_000, "social card stays under 100 KB");
+assert.equal(existsSync(join(websiteRoot, "public", "assets", "App Screenshots")), false, "obsolete App Screenshots collection stays removed");
+for (const advertisingImage of ["01-free-invoice-maker.png", "02-finished-invoice.png", "03-quote-01-send.png", "04-quote-02-accepted.png", "05-quote-03-invoice-created.png", "06-quote-04-payment-tracked.png", "07-quote-05-follow-up.png", "08-recurring-setup.png", "09-recurring-overview.png", "10-dashboard-clarity.png", "11-deposits-and-balances.png", "12-overdue-reminders.png", "13-seven-day-trial.png", "14-cancel-online.png"]) {
+  assert.ok(existsSync(join(distRoot, "assets", "advertising", advertisingImage)), `refreshed advertising asset ${advertisingImage} exists`);
+}
+for (const socialImage of ["tallyo-x-profile-400.png", "tallyo-x-profile-800.png", "tallyo-x-header-1500x500.png"]) {
+  assert.ok(existsSync(join(distRoot, "assets", "social", socialImage)), `X social asset ${socialImage} exists`);
+}
 for (const helperAsset of ["helper.js", "helper-core.mjs"]) {
   const source = read(`assets/${helperAsset}`);
   assert.doesNotMatch(source, /fetch\s*\(|XMLHttpRequest|WebSocket|EventSource|localStorage|sessionStorage|indexedDB/, `${helperAsset} remains browser-local without persistence or network calls`);
   assert.doesNotMatch(source, /https?:\/\//, `${helperAsset} has no provider endpoint`);
 }
+const helperUiSource = read("assets/helper.js");
+assert.match(helperUiSource, /document\.querySelectorAll\("\[data-helper\]"\)/, "one Helper controller supports full and compact views");
+assert.match(helperUiSource, /MIN_RESPONSE_DELAY_MS = 1_000/, "Helper leaves a natural pause before local replies");
+assert.match(helperUiSource, /MAX_RESPONSE_DELAY_MS = 1_600/, "Helper response pause remains short and bounded");
+assert.match(helperUiSource, /Tallyo Helper is thinking…/, "Helper announces its brief thinking state");
+assert.match(helperUiSource, /event\.key === "Escape"/, "compact Helper supports Escape to close");
+assert.match(helperUiSource, /!widget\.contains\(event\.target\)/, "compact Helper closes when visitors click elsewhere");
 for (const moduleAsset of ["helper.js", "generator.js", "growth.js"]) {
   const source = read(`assets/${moduleAsset}`);
   assert.doesNotMatch(source, /__TALLYO_ASSET_REVISION__/, `${moduleAsset} resolves the asset revision`);

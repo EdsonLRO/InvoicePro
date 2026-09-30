@@ -3,11 +3,32 @@
 ## Current state
 
 The Tallyo Helper has a same-origin Cloudflare Pages Function and browser
-adapter. Source remains disabled by default, but the Access-protected production
-website explicitly enables the reviewed AI path through Cloudflare production
-configuration. The deterministic browser-local matcher remains first in the
-request path and continues to answer exact reviewed questions without an AI
-request.
+adapter. Source remains disabled by default, while the public production website
+explicitly enables the reviewed AI path through its approved Cloudflare
+configuration. The deterministic browser-local matcher remains as an offline
+and provider-failure fallback. In an enabled build, every safe conversational
+turn goes to the same-origin AI endpoint so the assistant can understand
+ordinary wording, spelling mistakes and follow-up questions instead of
+behaving like a search box.
+
+The model may use its general conversational ability to understand intent,
+maintain context and explain ordinary concepts naturally. The reviewed Tallyo
+catalogue remains the sole source for claims about Tallyo features, behaviour,
+availability, prices and policies. This distinction lets the Helper converse
+normally without inventing product facts.
+
+Follow-up understanding is semantic rather than phrase-based. Short or
+incomplete questions, pronouns, reactions, clarification requests, requests for
+suggestions and next-step questions are interpreted from recent turns regardless
+of exact wording, grammar or spelling. When recent context still leaves a real
+ambiguity, the Helper asks one conversational clarifying question.
+
+The reviewed catalogue now covers 44 current product and workflow topics. Its
+compact question, answer and approved-link fields are supplied together on each
+provider turn, allowing the model to find relevant meaning across the complete
+catalogue rather than depending on browser keyword selection. The model can
+paraphrase and combine those entries, but still must return `answered=false`
+when they do not support an answer.
 
 On 27 July 2026, one Owner-approved synthetic question was sent from the
 canonical Access-protected website to OpenAI. The Helper returned a bounded
@@ -18,8 +39,9 @@ it, and application code uses `store: false`.
 
 ## Request boundary
 
-An enabled browser build may send one question, limited to 240 characters, to
-`/api/helper`. The Pages Function independently enforces:
+An enabled browser build may send one current message, limited to 240
+characters, plus up to six recent user-and-assistant exchanges from the same
+open page to `/api/helper`. The Pages Function independently enforces:
 
 - `POST` with a small JSON body;
 - an exact approved HTTPS `Origin`;
@@ -30,17 +52,18 @@ An enabled browser build may send one question, limited to 240 characters, to
   which owns the native `RATE_LIMITER` binding;
 - deterministic rejection of secrets, credentials, payment information,
   private-account requests, advice requests and internal-prompt requests;
-- local answers for exact reviewed questions, avoiding an AI request;
+- strict role, order, length and body-shape validation for recent turns;
+- independent safety checks for the current message and every recent user turn;
 - a short provider timeout and a small output-token limit;
 - no account, Supabase, Stripe, Resend, payment or other tools;
 - `store: false`;
-- reviewed public knowledge embedded server-side rather than accepted from the
-  browser;
+- the compact reviewed public knowledge catalogue embedded server-side rather
+  than accepted from the browser and supplied in full for semantic selection;
 - strict JSON output and application-side validation;
 - no more than three links, each restricted to the reviewed public link
   allowlist;
-- a deterministic fallback for provider, parsing, validation or confidence
-  failure;
+- a deterministic no-answer response for insufficient reviewed guidance and
+  distinct visitor messages for rate limiting or temporary service failure;
 - no prompt or answer logging in application code.
 
 The selected implementation default is `gpt-5.6-terra` at low reasoning effort.
@@ -54,35 +77,33 @@ The generated helper page declares whether the AI path is enabled. When it is
 disabled, no AI endpoint call is attempted and the current browser-local
 behaviour remains unchanged. When enabled in a reviewed preview:
 
-- exact reviewed answers and safety boundaries still resolve locally;
-- only an unmatched general product question is sent to the same-origin
-  endpoint;
+- safety boundaries still resolve locally and never reach the provider;
+- every safe turn is sent to the same-origin endpoint so greetings, natural
+  questions and follow-ups share the same conversational path;
+- up to six completed exchanges are held only in page memory and accompany
+  the next safe message;
 - the form exposes an accessible busy state;
-- provider failure returns the existing reviewed no-answer response;
-- clearing the conversation invalidates an in-flight answer;
-- the page explains that the question is sent securely to OpenAI and that
-  Tallyo does not save the conversation.
+- insufficient guidance, rate limiting and temporary provider failure remain
+  visibly distinct without exposing provider detail, using helpful visitor
+  language rather than provider or policy terminology;
+- clearing the conversation invalidates an in-flight answer and clears recent
+  page memory;
+- the page explains that the current message and a small recent part of the
+  conversation are sent securely to OpenAI and are not intentionally stored by
+  Tallyo.
 
-That visitor notice is implementation copy, not final legal publication. The
-provider terms, retention position, final public wording and external review
-remain release gates.
+The published Privacy Notice remains authoritative for the provider and
+retention position. The Helper copy must continue to state that the current
+message and up to six recent exchanges may be sent to OpenAI, the conversation
+is not intentionally stored by Tallyo, and the Helper has no account access or
+tools.
 
-## Public activation remains blocked
+## Current production gate
 
-The protected acceptance stage has completed the encrypted secret, rate-limiter
-binding, exact canonical Pages origin, production build gates and one synthetic
-paid-request check. Do not remove Access or publish the AI path for unrestricted
-visitors until the remaining items below are separately reviewed and approved:
-
-1. Final OpenAI project budget and usage-alert/limit disposition for unrestricted
-   traffic.
-2. The final public custom-domain origin in the server allowlist.
-3. Representative factuality, refusal, injection and unavailable-provider
-   evaluations.
-4. Final visitor notice, privacy data flow, retention position and provider
-   evidence.
-5. Owner approval for Access removal, the final provider configuration and
-   unrestricted public activation.
+Public activation was completed under exact Owner approval after the encrypted
+secret, service-bound rate limiter, exact public-domain origins, hard monthly
+budget and alerts, public notice/provider evidence and representative bounded
+evaluations were verified. Those controls remain release invariants.
 
 The build also fails closed unless `TALLYO_AI_PRIVATE_PREVIEW_APPROVED=true`
 accompanies an enabled preview. An enabled production build additionally
@@ -93,8 +114,7 @@ The adapter must not gain account, invoice, customer, support, payment or
 provider tools as part of activation. Any authenticated or tool-using assistant
 is a separate high-risk product.
 
-Cloudflare's current Pages documentation lists only a subset of bindings and
-does not list the native Rate Limiting binding. The prepared alternative is a
-preview-only service binding to a non-public Worker. The Worker receives only a
-SHA-256 rate key, fails closed, and has no provider key or question content.
-Its proposed threshold and namespace remain unactivated Owner-reviewed values.
+The production Pages Function reaches a non-public Worker through a service
+binding. That Worker receives only a SHA-256 rate key, fails closed, and has no
+provider key or question content. Its native rate limit remains three provider
+requests per connection key per minute.

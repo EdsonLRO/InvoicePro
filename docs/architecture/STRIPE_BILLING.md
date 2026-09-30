@@ -1,6 +1,6 @@
 # Stripe Billing architecture
 
-Status: The foundation and live-readiness migrations are applied. Stripe sandbox and live Prices, signed Billing destinations and Customer Portal are configured. Protected synthetic acceptance and one bounded live monthly subscription acceptance passed. Public subscription controls and the private write-enforcement switch remain off pending the final release decision.
+Status: The Billing foundation and separately gated seven-day monthly-plan trial are live. The trial migration is applied, reviewed Edge Function versions are active, the Stripe event destination includes the trial-ending event, and the server/app/website gates were enabled under explicit Owner approval on 25 September 2026.
 
 ## Boundary
 
@@ -11,18 +11,22 @@ Approved offer:
 - £8 monthly or £80 annually;
 - identical features for both billing intervals;
 - one business and one user;
-- no full-feature trial or permanent free saved account at launch;
+- one card-required seven-day trial per account for the monthly plan, converting to £8 monthly unless cancelled before the trial ends;
+- no permanent free saved account;
 - cancellation stops future renewal and normally preserves access through the paid period.
 
-The approved sandbox and live Products with GBP 8 monthly/GBP 80 annual Prices exist. One synthetic sandbox monthly subscription and one bounded live monthly subscription produced signed provider-derived full entitlements. No coupon, trial, public Checkout or real customer subscription exists.
+The Free Invoice Maker remains outside Billing and requires no account or card. The approved sandbox and live Products with GBP 8 monthly/GBP 80 annual Prices exist. The trial uses the existing monthly Price and creates no new Product or Price.
 
 ## Repository foundation
 
 The disabled implementation is isolated from customer invoice payments:
 
 - `20260724111312_stripe_billing_test_foundation.sql` defines owner-scoped read RLS, service-role-only writes, atomic event reconciliation, delayed-event protection and provider-derived entitlements;
+- applied migration `20260925110523_seven_day_billing_trial.sql` records one trial per account, binds trial terms to the private Checkout claim, accepts `trialing` and `customer.subscription.trial_will_end`, maps the verified trial end to full-access entitlement expiry, and records successful reminder submission durably;
 - `create-billing-checkout` maps only `monthly` or `annual` to server-configured Price identifiers and requires confirmed Auth, current MFA assurance when enrolled, an explicit kill switch, exactly one test/live provider mode and a matching Stripe key;
+- when the separate trial gate is enabled, only an eligible monthly Checkout receives the server-fixed seven-day duration, mandatory card collection, cancel-on-missing-payment-method fail-safe and trial metadata; used trials fall back to direct paid Checkout rather than another trial;
 - a service-role-only per-account Checkout claim serialises different browser request IDs before Stripe is called, while same-request retries retain Stripe idempotency;
+- the released flow resumes a matching open Checkout, but when the authenticated owner chooses a different interval or the server-derived trial terms have changed, it first re-verifies the existing Session's account, Customer, plan, terms and provider mode, expires that open Session through Stripe, clears only the exact expired claim, re-checks for a non-terminal subscription and then creates the newly requested Checkout; a completed or unverified Session remains fail-closed;
 - Checkout also lists the mapped Customer's current provider-mode subscriptions and fails closed when any non-terminal subscription exists;
 - `create-billing-portal` resolves the Stripe Customer only from the authenticated account mapping and uses the same disabled and mutually exclusive provider-mode gates;
 - `stripe-billing-webhook` verifies the raw-body signature, accepts only the configured test/live event mode, refreshes current subscription state, checks the server Price allowlist and account mapping, then calls the atomic RPC and clears only a mode-matching Checkout claim for signed completion/expiration events;
@@ -42,18 +46,27 @@ During cancellation testing, Stripe represented the Portal request with `cancel_
 
 Under exact Owner approval, one synthetic live monthly Checkout completed. Privacy-safe provider-derived reconciliation shows an active monthly subscription with full access, two applied Billing events, one correctly ignored stale event and no period-end cancellation. The public app and website Billing controls remain fail closed until their explicit production gates are enabled, and `subscription_write_enforcement` remains `false` pending the final existing-account impact decision.
 
+## Seven-day trial release
+
+PR #190 merged as `acbfc8616f687adcfca12c0e1e27508e6d0bd92f`. Migration `20260925110523_seven_day_billing_trial.sql` is applied; `create-billing-checkout` v30 and `stripe-billing-webhook` v29 are Active; and both server trial gates are enabled. The live Stripe destination `we_1TxR0wPQOTo2QZSI4T49N2fN` uses API version `2026-06-24.dahlia`, is enabled at the reviewed Supabase URL and listens to the exact 11-event Billing set including `customer.subscription.trial_will_end`. App and website build gates are enabled and public HTTP readback confirms the trial disclosures while preserving the account-free, card-free Free Invoice Maker.
+
+Sandbox lifecycle acceptance covered the provider three-day event, conversion to the paid monthly subscription and cancellation before the trial ended with no charge. The production release did not create a real trial, charge or customer reminder. The Owner explicitly accepted the remaining legal and commercial risk and approved release without external professional review; the signed event, durable notification marker, provider idempotency key and privacy-minimised monitoring remain mandatory.
+
+The abandoned-Checkout recovery refinement was released under explicit Owner approval in PR #192. `create-billing-checkout` v32 is Active with JWT verification retained and deployed source read-back exactly matching merge `827a3628edac6474d138d78b7ed52df05ed69679`. It changes neither the offer nor trial rules.
+
 ## Trusted flow
 
 1. A confirmed signed-in account selects the approved billing interval.
 2. A trusted server maps that choice to an allowlisted Stripe Price identifier. The browser cannot submit an arbitrary price or amount.
 3. The server finds or creates a Stripe Customer mapped to the Tallyo account.
-4. An atomic database claim permits one active Checkout attempt for that account; a second request fails closed.
-5. The server verifies that Stripe has no non-terminal subscription for the mapped Customer, then creates one expiring subscription Checkout Session.
-6. Stripe-hosted Checkout collects payment details; Tallyo never receives full card details.
-7. A separate endpoint verifies signed subscription webhooks and processes events idempotently.
-8. An atomic database function updates subscription state and a privacy-minimised audit record; signed Checkout lifecycle handling clears the matching claim.
-9. Server/database boundaries derive entitlements from verified subscription state. A redirect or hidden button never grants access.
-10. The Stripe Customer Portal manages payment method, billing invoices and cancellation after separate approval.
+4. An atomic database claim permits one active Checkout attempt for that account. A matching retry resumes its verified open Stripe Session.
+5. If the owner requests a different plan, the server verifies there is no non-terminal subscription, confirms the existing Session's ownership and terms, expires that open Session through Stripe, clears only its exact claim and reacquires the claim. A completed or uncertain Session cannot be replaced.
+6. The server verifies again that Stripe has no non-terminal subscription for the mapped Customer, then creates one expiring subscription Checkout Session.
+7. Stripe-hosted Checkout collects payment details; Tallyo never receives full card details.
+8. A separate endpoint verifies signed subscription webhooks and processes events idempotently.
+9. An atomic database function updates subscription state and a privacy-minimised audit record; signed Checkout lifecycle handling clears the matching claim.
+10. Server/database boundaries derive entitlements from verified subscription state. A redirect or hidden button never grants access.
+11. The Stripe Customer Portal manages payment method, billing invoices and cancellation after separate approval.
 
 ## Repository data model
 
@@ -68,12 +81,18 @@ The applied migration adds:
 
 RLS must keep every mapping account-scoped. Stripe identifiers must never substitute for the Tallyo ownership check. Service-role writes must use reviewed functions and grants.
 
+## Complimentary access
+
+Migration `20260909115547_complimentary_access_by_email.sql` is a focused, unapplied candidate for occasional Owner-granted access. A database-owner-only command resolves an existing confirmed Supabase Auth account by normalised email, then stores only its `user_id`, grant time, optional expiry and revocation time in `private.complimentary_access_grants`. Authenticated and service roles cannot grant or revoke access. The account can read only its own active yes/no result through an identity-bound function; existing RLS and server entitlement helpers accept that active grant in addition to provider-derived `full` or `grace` access.
+
+This path does not create or modify a Stripe Customer, subscription, Checkout Session, payment, coupon or entitlement row. It is not a public voucher, free tier or browser-admin feature. Revocation or expiry stops future writes under the existing enforcement boundary while preserving owner-scoped reads and export.
+
 ## State machine
 
 | State | Access |
 |---|---|
 | `incomplete` | No paid access. |
-| `trialing` | Reserved for a possible future decision; unused at launch. |
+| `trialing` | Full access through the verified trial end; `trial_used_at` is recorded atomically. |
 | `active` | Full Tallyo Pro access. |
 | `past_due` | Recommended seven-day grace period while Stripe retries and the user can update billing. |
 | `unpaid` | Restricted/read-only state after grace. |
@@ -83,16 +102,16 @@ RLS must keep every mapping account-scoped. Stripe identifiers must never substi
 
 Restricted/read-only means existing records remain viewable and exportable while new documents, recurring generation, automated email/reminders and new payment actions are paused. Records are not immediately deleted. Final retention remains a separate approved decision.
 
-## Proposed webhook scope
+## Webhook scope
 
-The implementation review should select the smallest official event set needed for:
+The live destination uses the smallest reviewed event set needed for:
 
 - completed and expired subscription Checkout;
 - subscription created, updated, paused/resumed and deleted;
 - invoice paid, payment failed and payment action required;
-- trial events only if trials are later approved.
+- `customer.subscription.trial_will_end` for the provider-derived three-day reminder boundary and durable lifecycle evidence.
 
-The exact Stripe event names and API version must be verified against current official Stripe documentation during the later High-risk implementation. Unknown or unrelated events must be acknowledged without mutating entitlement state.
+The live API version and exact 11 event names were read back after configuration. Unknown or unrelated events are acknowledged without mutating entitlement state.
 
 ## Required acceptance tests
 
@@ -103,6 +122,7 @@ The exact Stripe event names and API version must be verified against current of
 - duplicate, replayed, delayed and out-of-order events;
 - atomic state/audit updates and rollback on partial failure;
 - active, past-due/grace, unpaid, period-end cancellation, reactivation and provider-outage paths;
+- trial creation, one-trial enforcement, trial cancellation before charge, `trial_will_end`, conversion to active and failed first payment;
 - Customer Portal ownership and safe return URLs;
 - browser UI unable to grant paid access;
 - invoice-payment webhooks unable to alter subscription entitlements;
@@ -118,13 +138,16 @@ The exact Stripe event names and API version must be verified against current of
 6. Reconcile with the configured Stripe provider mode before retrying a failed deployment.
 7. Rotate secrets or change production provider configuration only with exact Owner approval.
 
+## Trial release gates
+
+The additive migration, two reviewed Billing Functions, Stripe event configuration, sandbox lifecycle acceptance, public wording review and explicit Owner approval were completed before activation. The source remains fail closed: server, app and website trial gates must all be true, and live mode requires its separate live approval. Disabling new Checkout creation does not erase or replace signed lifecycle reconciliation for an already-created trial.
+
 ## Later Owner actions
 
-- approve the Stripe Billing product and two prices;
-- approve tax presentation and final customer-facing subscription wording;
-- approve the grace/restricted-state and retention policy;
-- approve test-mode provider configuration and controlled acceptance;
-- approve production secrets, webhook destination, Customer Portal and live activation;
-- approve the production release separately.
+- approve any change to the £8 monthly or £80 annual offer;
+- approve any change to the seven-day duration, three-day reminder, payment-method requirement or cancellation behavior;
+- review the grace/restricted-state and retention policy before changing it;
+- approve consumer targeting, another territory, bank-debit trials or other payment methods separately;
+- reconsider external professional review if the legal regime, intended users or commercial model changes.
 
-The foundation passed High review, merged, and was applied/deployed in a later disabled-only stage. Configuring Stripe sandbox objects/secrets, connecting app write policies, making a test Checkout and enabling any public control remain separate Owner-gated actions.
+The Billing foundation and seven-day trial are live. Connected customer-payment onboarding, subscription write-enforcement expansion and unrelated commercial capabilities retain their own approval boundaries.

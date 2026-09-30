@@ -136,6 +136,8 @@ Edge Function runtime / Supabase secrets:
 - `STRIPE_WEBHOOK_SECRET`
 - `AUTOMATION_SECRET`
 - `APP_BASE_URL`
+- `MFA_RECOVERY_PEPPER`
+- `TALLYO_OWNER_USER_ID`
 
 Supabase Vault secret names:
 
