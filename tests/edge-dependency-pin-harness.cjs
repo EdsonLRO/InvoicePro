@@ -4,7 +4,7 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const functionsRoot = path.join(root, 'supabase', 'functions');
-const expectedVersion = '2.110.1';
+const expectedVersion = '2.117.2';
 const expectedImport = `https://esm.sh/@supabase/supabase-js@${expectedVersion}`;
 const expectedLockVersion = '4';
 

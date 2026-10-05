@@ -1,7 +1,7 @@
 // mfa-recovery - server-side one-time recovery codes for lost TOTP factors.
 // Raw codes are returned once to an AAL2 session and are never stored or logged.
 
-import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 
 const APP_ORIGINS = new Set([
   "https://edsonlro.github.io",

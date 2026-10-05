@@ -1,7 +1,7 @@
 // Signed Stripe Billing lifecycle reconciliation for one explicit provider mode.
 // This endpoint is separate from Tallyo's customer invoice-payment webhook.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") ||
   "Tallyo <invoices@mail.tallyo.co.uk>";

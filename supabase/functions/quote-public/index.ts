@@ -1,7 +1,7 @@
 // Public quote read/respond endpoint. The sole customer authority is a scoped,
 // high-entropy token; the database stores only its SHA-256 hash.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 import {
   browserOriginAllowed,
   corsHeaders,

@@ -1,7 +1,7 @@
 // Tallyo Pro subscription Checkout.
 // Disabled unless Billing and exactly one reviewed provider mode are enabled.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",

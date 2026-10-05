@@ -1,7 +1,7 @@
 // Public one-time Tallyo overview request. This function accepts only an
 // explicit, versioned opt-in from the free invoice generator.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 import {
   buildOverviewEmail,
   CONSENT_VERSION,

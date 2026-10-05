@@ -7,8 +7,8 @@ const workflowPath = path.join(root, '.github', 'workflows', 'security-checks.ym
 const workflow = fs.readFileSync(workflowPath, 'utf8');
 
 const expectedActions = [
-  'actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955',
-  'denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282',
+  'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1',
+  'denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed',
 ];
 
 for (const action of expectedActions) {
