@@ -62,6 +62,8 @@ URLs.
   ratio.
 - `social/x/first-post-overview.png` - first-post overview creative.
 - `social/x/free-invoice-maker-ad.png` - Free Invoice Maker advert.
+- `social/x/recurring-invoices-ad.png` - recurring-invoices advert using the
+  current application screen and official Tallyo wordmark.
 - `social/x/quote-process/01-create-quote.png`
 - `social/x/quote-process/02-send-quote.png`
 - `social/x/quote-process/03-customer-accepts.png`
