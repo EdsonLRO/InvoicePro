@@ -7,5 +7,7 @@ tmp/
 private-backups/
 website/dist/
 app-dist/
+.wrangler/
+.codex-remote-attachments/
 *.backup
 *.dump

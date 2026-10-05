@@ -16,12 +16,12 @@ It is designed to be simple, mobile-friendly, and security-conscious. It suits f
 
 ## 2. Current status
 
-- The authenticated one-business, one-user app is feature-complete for its current scope and public build `2026.07.23.2` is deployed on GitHub Pages.
-- The separate public website is implemented and privately previewed, but is not published on `tallyo.co.uk`.
-- The approved launch direction is a browser-only Free Invoice Maker plus one Tallyo Pro plan at £8 monthly or £80 annually.
-- Subscription checkout is not active.
-- The current live Stripe invoice-payment path is controlled for the Owner's account and is not a public multi-business merchant architecture. Independent business payment accounts require a later Stripe Connect programme.
-- The bounded public AI Helper is preserved in draft PR #91, privately tested and disabled by default; merge and production activation remain separate Owner decisions.
+- The authenticated one-business, one-user app is feature-complete for its current scope. Build `2026.09.25.1` is public at `https://app.tallyo.co.uk`; GitHub Pages retains build `2026.09.11.1` as a secondary fallback route.
+- The public website is live at `https://tallyo.co.uk` and `https://www.tallyo.co.uk` with the approved legal pages and consent-controlled analytics.
+- The commercial offer is an account-free, card-free Free Invoice Maker plus Tallyo Pro at £8 monthly or £80 annually. The monthly plan includes one card-required seven-day trial per account and continues at £8 monthly unless cancelled online.
+- Stripe Billing subscription Checkout and the Customer Portal are active. Tallyo subscriptions remain separate from independent-business customer invoice payments through Stripe Connect.
+- Secure customer quote acceptance, linked-invoice creation, optional automatic invoice delivery, customer CSV import and four selectable document layouts are released.
+- The bounded public AI Helper is active with a reviewed 44-topic Tallyo catalogue, exact-origin and rate-limit controls, no account access or tools, and `store: false`.
 
 Start with `AGENTS.md`, `APP_STATUS.md`, `ROADMAP.md`, `DECISIONS.md`, `docs/INDEX.md` and `tasks/ACTIVE.md`. Specialist and historical documents are routed from `docs/INDEX.md`; archived records are not default context.
 
@@ -29,18 +29,18 @@ Start with `AGENTS.md`, `APP_STATUS.md`, `ROADMAP.md`, `DECISIONS.md`, `docs/IND
 
 ## 3. Features
 
-- Invoices, quotes, and credit notes; convert a quote to an invoice in place.
+- Invoices, quotes, and credit notes; secure customer quote acceptance preserves the quote and creates exactly one linked invoice.
 - Line items with saved-item autocomplete, custom units, and time-based billing (`hrs` entered as `h:m`).
 - Per-line tax with a per-invoice tax-exclusive / tax-inclusive toggle; global discount and shipping.
 - Manual payment recording with automatic status updates.
 - Stripe Checkout payment links for full balance and seller-approved deposits.
-- Customer address book and reusable saved-item catalogue.
+- Customer address book with bounded CSV import, plus a reusable saved-item catalogue.
 - Recurring invoices: weekly, monthly, quarterly, yearly, or custom "every N days/weeks/months"; end-of-month clamping and catch-up handling; managed from a dedicated page.
 - Recurring invoice auto-email, enabled per schedule.
 - Overdue tracking with manual reminder email and per-invoice automatic reminder settings.
 - Per-document and per-schedule activity history.
 - Provider-backed `audit_events` for email and Stripe events.
-- Branding: brand colour, logo upload or URL, logo position; branded PDF export and email PDF attachment.
+- Branding: brand colour, logo upload or URL, logo position, Tallyo/Basic/Modern/Professional document layouts and optional alternating item rows; branded PDF export and email PDF attachment.
 - XLSX export of the document list.
 - Progressive Web App, installable with mobile-tuned layouts.
 
@@ -54,7 +54,7 @@ Start with `AGENTS.md`, `APP_STATUS.md`, `ROADMAP.md`, `DECISIONS.md`, `docs/IND
 - **Email:** Resend through Supabase Edge Functions and signed webhooks.
 - **Payments:** Stripe Checkout through Supabase Edge Functions and signed webhooks.
 - **Client-side export:** jsPDF + html2canvas for PDFs; SheetJS/xlsx for spreadsheets.
-- **Hosting:** static site on GitHub Pages. PWA via `manifest.json` and `service-worker.js`.
+- **Hosting:** the production app and public website use Cloudflare Pages with custom domains; GitHub Pages remains the authenticated-app fallback. PWA support uses `manifest.json` and `service-worker.js`.
 - **Automation:** Supabase Edge Functions plus daily cron jobs.
 
 ---
@@ -82,8 +82,8 @@ Honest limitations:
 - Activity history is useful, but not a tamper-proof audit log.
 - Append-only audit logging now covers provider events and selected sensitive app actions, but it is not yet a complete security monitoring or compliance audit system.
 - Supabase Pro daily backups and a recovery runbook are in place; current-backup evidence is verified and a timed restore test remains required.
-- Supabase does not provide native recovery codes. Tallyo supports a second authenticator and blocks email-only MFA recovery. A server-managed all-factors-lost candidate is implemented and locally tested with HMAC-only code storage, attempt locking, global factor/session cleanup, restrictive RLS, and forced TOTP re-enrolment. Production remains deny-by-default until backend-first deployment and live acceptance pass.
-- Stripe refund requests plus refund, dispute, chargeback, and failed-payment lifecycle handling are deployed and subscribed in the sandbox webhook destination, but still need broader replay testing and live-mode readiness before real customer use.
+- Supabase does not provide native recovery codes. Tallyo supports a second authenticator, blocks email-only MFA recovery and provides a tightly bounded Owner-assisted recovery route that requires password sign-in, registered-email confirmation and explicit approval before factor/session reset. Any controlled live recovery test remains separately approval-gated.
+- Stripe refund, dispute, chargeback and failed-payment handling has sandbox coverage, and controlled live Owner-route and connected-account payment/refund acceptance has passed. Broader dispute operations, customer communications and any new live transaction or refund remain separately controlled.
 - CSP still has a documented permissive setting because of the current single-file Vue structure.
 
 For the full plain-English security narrative, see `SECURITY_STORY.md`.
@@ -172,10 +172,11 @@ For full details, see `SUPABASE_HANDOFF.md`.
 ## 9. Current roadmap
 
 The compact current roadmap is maintained in [`ROADMAP.md`](ROADMAP.md).
-The immediate programme is repository simplification and commercial-launch
-preparation for the Free Invoice Maker and one-business, one-user Tallyo Pro.
-Subscription checkout, Stripe Billing/Connect runtime changes, DNS cutover and
-public release remain separately reviewed and Owner-gated.
+The approved initial public release is active. Current work focuses on bounded
+monitoring, trial and subscription lifecycle evidence, customer statements,
+improved onboarding and retention workflows. New live transactions, provider
+changes, destructive operations and material public claims remain separately
+reviewed and Owner-gated.
 
 ---
 
