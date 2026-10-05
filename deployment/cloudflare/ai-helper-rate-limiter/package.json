@@ -1,0 +1,17 @@
+{
+  "name": "@tallyo/ai-helper-rate-limiter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.19.0",
+  "scripts": {
+    "check": "node --check src/index.mjs && wrangler deploy --dry-run --config wrangler.example.jsonc",
+    "deploy": "wrangler deploy --config wrangler.example.jsonc"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "wrangler": "4.147.0"
+  }
+}

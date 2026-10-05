@@ -663,6 +663,8 @@ assert.doesNotMatch(rateWorkerSource, /console\.(?:log|info|warn|error)/);
 assert.doesNotMatch(rateWorkerSource, /OPENAI|SUPABASE|STRIPE|RESEND|service_role/i);
 
 const rateWorkerConfig = JSON.parse(readFileSync(join(rateWorkerRoot, "wrangler.example.jsonc"), "utf8"));
+const rateWorkerPackage = JSON.parse(readFileSync(join(rateWorkerRoot, "package.json"), "utf8"));
+const rateWorkerPnpmConfig = readFileSync(join(rateWorkerRoot, "pnpm-workspace.yaml"), "utf8");
 assert.equal(rateWorkerConfig.name, "tallyo-ai-helper-rate-limiter");
 assert.equal(rateWorkerConfig.workers_dev, false);
 assert.equal(rateWorkerConfig.preview_urls, false);
@@ -675,6 +677,13 @@ assert.equal(rateWorkerConfig.ratelimits[0].name, "RATE_LIMITER");
 assert.equal(rateWorkerConfig.ratelimits[0].simple.limit, 3);
 assert.equal(rateWorkerConfig.ratelimits[0].simple.period, 60);
 assert.equal("routes" in rateWorkerConfig, false);
+assert.equal(rateWorkerPackage.private, true);
+assert.equal(rateWorkerPackage.packageManager, "pnpm@11.19.0");
+assert.equal(rateWorkerPackage.engines.node, ">=22");
+assert.equal(rateWorkerPackage.devDependencies.wrangler, "4.147.0");
+assert.match(rateWorkerPackage.scripts.check, /wrangler deploy --dry-run --config wrangler\.example\.jsonc/);
+assert.equal(rateWorkerPackage.scripts.deploy, "wrangler deploy --config wrangler.example.jsonc");
+assert.match(rateWorkerPnpmConfig, /allowBuilds:\s+[\s\S]*esbuild: true\s+[\s\S]*workerd: true/);
 
 const subscriptionReadiness = JSON.parse(readFileSync(join(websiteRoot, "content", "subscription-readiness.json"), "utf8"));
 assert.equal(subscriptionReadiness.status, "sandbox-billing-and-connect-accepted-public-release-pending");

@@ -1,5 +1,18 @@
 # Tallyo current status
 
+## AI Helper Worker build repair — released 2026-10-05
+
+The Owner approved the production Workers Builds repair after the approved
+branch cleanup exposed a stale build command that fetched the deleted
+`codex/website-ai-subscription-readiness` branch. Cloudflare now builds the
+rate-limiter directly from `main` within its component directory, validates the
+source with `node --check`, deploys only when that directory changes and keeps
+previews disabled. Controlled build `d0aa82f2-7270-4418-bbb0-43326de0de55`
+passed and deployed version `abe523bb-f033-4414-8f48-4ce87e471b98` at 100%.
+The Worker source, three-per-minute native binding, private-route posture,
+Pages service binding and public Helper behaviour were unchanged. Wrangler
+`4.147.0`, the exact successful release, is now pinned in the component.
+
 ## Abandoned subscription Checkout recovery — released 2026-09-25
 
 The Owner approved PR #192 and the focused production function deployment. `create-billing-checkout` v32 is Active with JWT verification retained and its read-back source exactly matches merge `827a3628edac6474d138d78b7ed52df05ed69679`. A matching open Checkout still resumes. When the authenticated owner chooses a different billing interval or the server-derived trial terms changed, Tallyo verifies the existing Stripe Session, expires it through Stripe, clears only that exact expired claim, checks again for a non-terminal subscription and creates the newly selected Checkout without waiting for natural expiry. Completed or uncertain Sessions remain fail-closed. No price, trial, cancellation, entitlement, webhook, migration, provider setting or secret changed, and release validation created no Checkout, subscription, charge or email.
