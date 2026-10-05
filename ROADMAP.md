@@ -10,10 +10,10 @@
 
 ## Next
 
-- Minimal Owner Console released under exact Owner approval on 2026-09-11; any controlled live account-recovery test requires separate approval.
+- Any controlled live account-recovery test requires separate approval.
 - Review bounded launch monitoring and support evidence without inspecting customer data.
 - Evaluate early UK-business onboarding feedback before expanding product scope.
-- Add customer statements, CSV customer import and improved onboarding.
+- Add customer statements and improved onboarding. Bounded customer CSV import is already released.
 - Implement retention, failed-payment and post-cancellation workflows.
 
 ## Later
