@@ -1,12 +1,31 @@
 # Active programme: COMM-001 commercial launch integration
 
+## AI-HELPER-WORKER-BUILD-001 — Repair the private rate-limiter build
+
+Task ID: AI-HELPER-WORKER-BUILD-001
+Title: Remove the deleted-branch dependency from the production Worker build
+Priority: High
+Status: Released and verified
+Phase: Repository reconciliation
+Owner role: Product owner
+Risk level: High because this repairs production provider deployment settings for the public Helper's fail-closed rate limiter
+Branch: `codex/worker-build-repair`
+Scope: build the existing private Worker directly from `main`; use its component directory as the build root; validate source syntax; trigger builds only for component changes; pin the exact verified Wrangler release; preserve all runtime behaviour and bindings
+Security boundary: preserve the non-public Worker, `RATE_LIMITER` binding and namespace, three requests per 60 seconds, no prompt or answer content, no account/provider tools, no application logging, exact Pages service binding, `store: false` and all public Helper release gates
+Excluded: Worker source behaviour, compatibility-date change, new routes, preview URLs, observability, OpenAI key/model/budget, paid Helper request, Pages binding change, Auth, database, Stripe, email or customer communication
+Approval boundary: the Owner explicitly approved the production build repair after the read-only investigation identified the stale deleted-branch checkout
+Validation: controlled Workers build `d0aa82f2-7270-4418-bbb0-43326de0de55` passed from `main`, preserved the native binding and deployed version `abe523bb-f033-4414-8f48-4ce87e471b98` at 100%; focused local and repository checks must pass before reconciliation merge
+Rollback: previous identical deployment `6854fa31-58cc-49d0-8e2c-7a0130bc772f` / version `40d6a5d2-e5cb-4e9e-ba14-127773b88203`; restore the recorded prior provider settings only if the repaired configuration itself must be reversed
+Pull request: #201 (`codex/worker-build-repair`)
+Next action: merge the repository pin, regression assertion and authoritative records through the protected pull-request workflow
+
 ## DEPENDENCY-MAINTENANCE-001 — Refresh pinned build and Edge dependencies
 
 Task ID: DEPENDENCY-MAINTENANCE-001
 Title: Update immutable CI actions and the exact Supabase Edge client pin
 Priority: High
-Status: Verified
-Phase: Merge approval required
+Status: Merged and verified
+Phase: Complete for repository source
 Owner role: Backend / Supabase Agent
 Assigned specialist: Security and Payments review
 Model/work mode: Sol review with scoped Terra implementation
@@ -19,7 +38,8 @@ Approval boundary: the Owner approved branch cleanup and dependency implementati
 Lock state: acquired for the affected workflows, Edge dependency imports/locks, harnesses and authoritative dependency records
 Branch: `codex/dependency-maintenance`
 Validation: official Supabase and GitHub release review completed; all 21 lockfiles contain only the exact reviewed dependency and were regenerated with checksum-verified Deno 2.2.15; all 21 frozen Edge checks, 45 Node security harnesses, four Deno runtime tests and the complete 26-route-plus-404 website suite pass; diff hygiene passes and no secret or unrelated change is present; PR #200 protected `verify` run `37357196588`, database run `37357196673` and both Cloudflare Pages checks passed
-Next action: obtain the separate high-risk merge decision for PR #200; production Edge Function deployment remains excluded and requires a later, separately approved release
+Pull request: #200, merged as `bf9613bbfa4fb12102d3164fa091ea03f266cd7a`
+Next action: production Edge Function deployment remains excluded and requires a later, separately approved release
 
 ## BILLING-CHECKOUT-RECOVERY-001 — Replace abandoned Checkout sessions
 
