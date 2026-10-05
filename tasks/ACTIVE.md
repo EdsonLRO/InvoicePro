@@ -16,6 +16,7 @@ Excluded: Worker source behaviour, compatibility-date change, new routes, previe
 Approval boundary: the Owner explicitly approved the production build repair after the read-only investigation identified the stale deleted-branch checkout
 Validation: controlled Workers build `d0aa82f2-7270-4418-bbb0-43326de0de55` passed from `main`, preserved the native binding and deployed version `abe523bb-f033-4414-8f48-4ce87e471b98` at 100%; focused local and repository checks must pass before reconciliation merge
 Rollback: previous identical deployment `6854fa31-58cc-49d0-8e2c-7a0130bc772f` / version `40d6a5d2-e5cb-4e9e-ba14-127773b88203`; restore the recorded prior provider settings only if the repaired configuration itself must be reversed
+Pull request: #201 (`codex/worker-build-repair`)
 Next action: merge the repository pin, regression assertion and authoritative records through the protected pull-request workflow
 
 ## DEPENDENCY-MAINTENANCE-001 — Refresh pinned build and Edge dependencies
