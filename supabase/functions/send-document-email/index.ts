@@ -2,7 +2,7 @@
 // The browser asks to send a saved document; this function authenticates the
 // caller, verifies document ownership, sends the email, and records history.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 import { accountAllowsWrite, readOnlyAccountMessage } from "../_shared/account-entitlements.ts";
 import {
   createOptionalInvoicePaymentLinks,

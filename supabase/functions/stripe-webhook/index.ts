@@ -1,7 +1,7 @@
 // stripe-webhook - trusted payment event receiver.
 // This function verifies Stripe's signature before updating invoice payments.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 import {
   isInvoiceFullyPaid,
   storedInvoiceStatusAfterPaymentChange,

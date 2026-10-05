@@ -1,7 +1,7 @@
 // send-overdue-reminders - scheduled Edge Function
 // Sends overdue payment reminders only for invoices explicitly opted in to automation.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 import { accountAllowsWrite } from "../_shared/account-entitlements.ts";
 import { storedInvoiceAllowsOverdueReminder } from "../_shared/invoice-status.ts";
 

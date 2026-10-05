@@ -2,7 +2,7 @@
 // The browser never receives the service key, reset links, MFA factor IDs, or
 // any customer, invoice, payment, or business data.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 
 const APP_ORIGINS = new Set([
   "https://edsonlro.github.io",

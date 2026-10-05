@@ -2,7 +2,7 @@
 // The browser may request a payment link, but it cannot mark an invoice as paid.
 // Payment state is updated only by the signed Stripe webhook.
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.110.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 import { accountAllowsWrite, readOnlyAccountMessage } from "../_shared/account-entitlements.ts";
 
 const corsHeaders = {
