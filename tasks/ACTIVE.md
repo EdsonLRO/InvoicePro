@@ -5,8 +5,8 @@
 Task ID: DEPENDENCY-MAINTENANCE-001
 Title: Update immutable CI actions and the exact Supabase Edge client pin
 Priority: High
-Status: Implementation Complete
-Phase: Protected pull-request verification pending
+Status: Verified
+Phase: Merge approval required
 Owner role: Backend / Supabase Agent
 Assigned specialist: Security and Payments review
 Model/work mode: Sol review with scoped Terra implementation
@@ -18,8 +18,8 @@ Acceptance criteria: official release and changelog review completed; all 21 loc
 Approval boundary: the Owner approved branch cleanup and dependency implementation. This source task excludes Edge Function deployment, provider/configuration changes, live transactions, emails and production mutation. Merge remains a separate high-risk review decision.
 Lock state: acquired for the affected workflows, Edge dependency imports/locks, harnesses and authoritative dependency records
 Branch: `codex/dependency-maintenance`
-Validation: official Supabase and GitHub release review completed; all 21 lockfiles contain only the exact reviewed dependency and were regenerated with checksum-verified Deno 2.2.15; all 21 frozen Edge checks, 45 Node security harnesses, four Deno runtime tests and the complete 26-route-plus-404 website suite pass; diff hygiene passes and no secret or unrelated change is present
-Next action: open the protected pull request, require hosted `verify` and Pages checks, then obtain the separate high-risk merge decision; deployment remains excluded
+Validation: official Supabase and GitHub release review completed; all 21 lockfiles contain only the exact reviewed dependency and were regenerated with checksum-verified Deno 2.2.15; all 21 frozen Edge checks, 45 Node security harnesses, four Deno runtime tests and the complete 26-route-plus-404 website suite pass; diff hygiene passes and no secret or unrelated change is present; PR #200 protected `verify` run `37357196588`, database run `37357196673` and both Cloudflare Pages checks passed
+Next action: obtain the separate high-risk merge decision for PR #200; production Edge Function deployment remains excluded and requires a later, separately approved release
 
 ## BILLING-CHECKOUT-RECOVERY-001 — Replace abandoned Checkout sessions
 
