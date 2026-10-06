@@ -7,13 +7,13 @@
 - Preserve the verified production gates, server-side subscription enforcement and documented rollback routes.
 - Preserve the documented separation between Tallyo subscriptions and independent-business customer payments.
 - Monitor the released seven-day monthly-plan trial, reminder delivery and trial-to-paid/cancelled lifecycle without inspecting customer content.
+- Monitor the released Income insights and local Income Pack using public/build evidence only. Preserve the income-recorded-in-Tallyo, separate-currency and non-tax/non-HMRC boundaries.
 
 ## Next
 
 - Any controlled live account-recovery test requires separate approval.
 - Review bounded launch monitoring and support evidence without inspecting customer data.
 - Evaluate early UK-business onboarding feedback before expanding product scope.
-- Complete the approved Income insights Phase 6 release candidate. Phases 0-5 are Owner-approved; Phase 6 hardening is in progress on build `2026.10.06.1`. The checked-in feature gate remains disabled until the exact candidate receives separate merge and production-publication approval. Expenses, bank feeds, profit, tax calculation and HMRC submission remain excluded.
 - Add customer statements and improved onboarding. Bounded customer CSV import is already released.
 - Implement retention, failed-payment and post-cancellation workflows.
 

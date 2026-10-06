@@ -1,5 +1,11 @@
 # Tallyo current status
 
+## Income insights and Income Pack - released 2026-10-06
+
+The Owner approved exact Phase 6 candidate `2910b8d`; PR #209 merged as `f94eea755032dcc709207c3fbeb89024a634076b`. Production app deployment `ebb5a0af-5904-4150-ac2c-5a6ae778c7b1` serves build `2026.10.06.1` with cache `tallyo-shell-2026-10-06-1` and the reviewed Income insights gate enabled. The app now provides accessible customer and business Finances views, a traceable income-record ledger, optional UK income-period organisation and a local Income Pack with reconciled CSV, manifest and PDF files.
+
+All figures remain explicitly limited to income recorded in Tallyo, currencies stay separate, and the interface and exports exclude expenses, other income, profit, tax calculation, VAT liability, bookkeeping and HMRC submission. Main Security and Pages workflows passed, the full local release suite passed, and public readback returned HTTP 200 with the exact build, cache and enabled feature markers. Validation inspected no customer record and created no payment, refund, email, database, Auth, Stripe or other provider event. Rollback is production deployment `7a277ae3-062f-496d-9d39-3fda9b359ad7` with the Income insights gate disabled.
+
 ## AI Helper Worker build repair — released 2026-10-05
 
 The Owner approved the production Workers Builds repair after the approved

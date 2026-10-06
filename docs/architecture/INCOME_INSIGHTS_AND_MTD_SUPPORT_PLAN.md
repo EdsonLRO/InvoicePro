@@ -1,6 +1,6 @@
 # Income insights and MTD-supporting records plan
 
-Status: Phases 0-5 are Owner-approved. Phase 6 release hardening is in progress on app build `2026.10.06.1`; the checked-in feature gate remains disabled and no public activation is approved.
+Status: Phases 0-6 are Owner-approved. Phase 6 is released and verified on app build `2026.10.06.1`; the checked-in feature gate remains fail-closed while the separately approved production variables enable the feature.
 
 Last reviewed: 6 October 2026.
 
@@ -427,9 +427,9 @@ Implementation state: Owner-approved on 6 October 2026 through PR #208. Public a
 
 ### Phase 6 — Release hardening and controlled publication
 
-Implementation state: Owner authorised Phase 6 preparation on 6 October 2026. The release candidate is frontend-only and preserves the fail-closed build gate. Merge and production publication remain separately reserved for approval of the exact validated candidate.
+Implementation state: Owner approved exact candidate `2910b8d` on 6 October 2026. PR #209 merged as `f94eea7` and production deployment `ebb5a0af-5904-4150-ac2c-5a6ae778c7b1` serves build `2026.10.06.1` with the separately approved production feature variables enabled. The checked-in configuration remains fail-closed.
 
-Validation state: the complete Node, website, Deno and frozen-lock Edge Function suites pass. Eleven isolated-Chrome app suites pass with fictional data and blocked non-loopback traffic; the Phase 6 Finances acceptance covers all four views at 320-1440 px, accessible exact values, keyboard focus, invalid/empty/mixed-currency states and real local export downloads. The candidate wording preserves every reviewed limitation and makes no tax, accounting, compliance or HMRC-submission claim.
+Validation state: the complete Node, website, Deno and frozen-lock Edge Function suites pass. Eleven isolated-Chrome app suites pass with fictional data and blocked non-loopback traffic; the Phase 6 Finances acceptance covers all four views at 320-1440 px, accessible exact values, keyboard focus, invalid/empty/mixed-currency states and real local export downloads. Post-merge Security and Pages workflows pass. Public readback confirms the exact build, cache and enabled feature markers without inspecting customer records. The released wording preserves every reviewed limitation and makes no tax, accounting, compliance or HMRC-submission claim.
 
 Deliverables:
 
