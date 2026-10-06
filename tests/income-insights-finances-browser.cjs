@@ -129,7 +129,7 @@ const path = require('node:path');
         assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `page has no horizontal overflow for ${view} at ${width}`);
         if ([390, 1440].includes(width)) {
           await page.locator('#main-content').evaluate(el => { el.scrollTop = 0; });
-          await page.screenshot({ path: path.join(root, `tmp/redesign-evidence/phase5-${view}-${width}.png`) });
+          await page.screenshot({ path: path.join(root, `tmp/redesign-evidence/phase6-${view}-${width}.png`) });
         }
       }
     }
@@ -154,7 +154,7 @@ const path = require('node:path');
     await finances.getByRole('heading', { name: 'No income records to show for this period' }).waitFor();
     assert.deepEqual(outside, []);
     assert.deepEqual(errors, []);
-    console.log('Phase 5 Finances browser passed: direct desktop/mobile navigation, canonical values, filtered records, UK periods, CSV/manifest/PDF downloads, keyboard exact values, period errors, separate currencies, empty state, all four views at 320-1440px and zero external requests.');
+    console.log('Phase 6 Finances release acceptance passed: direct desktop/mobile navigation, canonical values, filtered records, UK periods, CSV/manifest/PDF downloads, keyboard exact values, period errors, separate currencies, empty state, all four views at 320-1440px and zero external requests.');
   } finally {
     await context.close();
     await browser.close();

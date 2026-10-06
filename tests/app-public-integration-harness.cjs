@@ -59,6 +59,6 @@ assert.match(workerSource, /'\.\/income-insights\.js'/, 'income insights module 
 assert.match(appBuildSource, /"income-insights\.js"/, 'Cloudflare Pages must publish the income insights module');
 assert.match(workerSource, /'\.\/income-pack-export\.js'/, 'Income Pack module must be part of the offline app shell');
 assert.match(appBuildSource, /"income-pack-export\.js"/, 'Cloudflare Pages must publish the Income Pack module');
-assert.match(workerSource, /tallyo-shell-2026-09-25-1/, 'service-worker cache marker must match this build');
+assert.match(workerSource, /tallyo-shell-2026-10-06-1/, 'service-worker cache marker must match this build');
 
 console.log('App public integration harness passed.');
