@@ -25,10 +25,10 @@ Task ID: FIN-INSIGHTS-001
 Title: Build shared income calculations from data Tallyo already records
 Priority: Medium
 Status: Owner review
-Phase: Phase 2 - customer financial visuals
+Phase: Phase 3 - business Finances overview
 Owner role: Product owner
 Risk level: Medium implementation with financially material read-only calculations requiring focused review; no write, provider or production-release path
-Branch: `codex/income-insights-phase2`
+Branch: `codex/income-insights-phase3`
 Scope: extend the released Overview and customer financial context with an accessible Finances area, customer visuals, income ledger, UK period presentation and income-only exports derived from existing invoices, dated manual and Stripe-confirmed payments, refunds, recurring origin and accepted-quote linkage
 Product boundary: always say income recorded in Tallyo; keep currencies separate; exclude quotes, Draft/Cancelled invoices and unsupported records according to the reviewed calculation contract; preserve refunds as explicit adjustments
 Excluded: expenses, receipt capture, bank feeds, bookkeeping, profit, tax estimates, VAT liability, HMRC APIs/submission, compliance claims, migrations, RLS changes, Stripe/provider changes, live transactions, customer communications and production publication
@@ -38,9 +38,11 @@ Phase 0 approval: Owner approved the wording, layouts, calculation examples and 
 Phase 1 implementation: `income-insights.js` supplies one pure canonical result grouped by period, currency, customer and workflow source, plus exact ledger and readiness records; Phase 1 merged without loading it in the application
 Phase 1 approval: Owner approved PR #204; it merged as `ed638d054d5ed471536cc804a0b723f2ed148731` with Security and both Pages checks passing
 Phase 2 implementation: the gated customer detail area consumes the shared module and shows six exact figures, monthly receipts with a written-value table, labelled payment position, workflow source and recent money activity; public configuration remains disabled and the build requires separate release approval before enablement
-Acceptance for this phase: only the selected customer ID contributes; historical snapshots are never rewritten; currencies stay separate; exact values do not depend on colour or chart interpretation; no new data collection, migration, write path, provider call or third-party chart request
-Validation: focused calculation, customer UI, customer context, PWA and Cloudflare build-readiness harnesses pass; the fictional browser acceptance passes keyboard interaction and 320/390/768/1024/1440 px layouts with all external requests blocked
-Next action: obtain focused Owner review of the Phase 2 customer visuals before Phase 3 business-level Finances overview begins
+Phase 2 approval: Owner approved PR #205; it merged as `bfbec4421b53bb93d25fdf95ba7684de7c6c48db` with Security and both Pages checks passing
+Phase 3 implementation: the gated first-level Finances destination consumes the shared module and adds period/currency controls, six exact summaries, five accessible visuals, grouped record-readiness issues and plain-language calculation boundaries; mobile keeps direct Finances navigation and the existing More menu
+Acceptance for this phase: exact values remain available without interpreting charts; currencies never combine; invalid periods fail clearly; the empty and needs-review states preserve uncertainty; no migration, write path, provider call, new data collection or third-party chart request is added
+Validation: focused calculation, Phase 2 customer, Phase 3 Finances, Overview, navigation and security harnesses pass; fictional browser acceptance passes desktop/mobile routing, keyboard exact values, invalid-period recovery, separate currencies, empty state and 320/390/768/1024/1440 px layouts with all external requests blocked
+Next action: obtain focused Owner review of the Phase 3 business Finances overview before Phase 4 income records and period presentation begins
 
 ## DEPENDENCY-MAINTENANCE-001 — Refresh pinned build and Edge dependencies
 

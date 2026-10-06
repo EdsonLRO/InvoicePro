@@ -14,6 +14,7 @@ protectedMethods = protectedMethods.replace(/\r?\n\s*this\.resetQuoteAcceptance\
 protectedMethods = protectedMethods.replace(/\r?\n\s*this\.documentEmailModal = \{ open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance',[^\n]+/, '');
 protectedMethods = protectedMethods.replace(/\r?\n\s*trialEnabled: window\.TALLYO_BILLING_TRIAL_ENABLED === true,/, '');
 protectedMethods = protectedMethods.replace(/\r?\n\s*trialAvailable: false,/, '');
+protectedMethods = protectedMethods.replace(/\r?\n\s*finances: 'M4 19V9 M10 19V5 M16 19v-7 M22 19H2 M19 8l-3-3-4 4-3-3-5 5',/, '');
 const accountExportStart = protectedMethods.indexOf('            async exportAccountData()');
 const accountExportEnd = protectedMethods.indexOf('            cloneCompanyForAudit(', accountExportStart);
 assert.ok(accountExportStart >= 0 && accountExportEnd > accountExportStart, 'reviewed account export redaction must remain bounded');

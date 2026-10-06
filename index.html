@@ -316,7 +316,7 @@
         .shell-header { flex-shrink: 0; z-index: 20; background: #fff; border-bottom: 1px solid #e2e8f0; }
         .shell-topbar { height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 28px; }
         .shell-mobile-brand { width: 110px; }
-        .shell-mobile-activity { display: none; }
+        .shell-mobile-activity, .shell-mobile-more { display: none; }
         .shell-page-title { font-size: 15px; font-weight: 600; }
         .shell-top-actions { display: flex; align-items: center; gap: 20px; }
         .shell-account { font-size: 14px; color: #475569; }
@@ -404,6 +404,86 @@
         .overview-step { display: grid; place-items: center; border: 1px solid #cbd5e1; border-radius: 50%; width: 20px; height: 20px; flex-shrink: 0; font-size: 11px; }
         .overview-methods { margin-top: 22px; color: #64748b; font-size: 12px; line-height: 1.7; }
         .overview-methods summary { cursor: pointer; padding: 10px 0; }
+        /* Phase 3: read-only business finances overview. */
+        .finances-page { max-width:1400px; margin:auto; min-width:0; }
+        .finances-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:18px; }
+        .finances-eyebrow { color:#4f46e5; font-size:12px; font-weight:750; letter-spacing:.12em; }
+        .finances-heading h1 { margin-top:6px; color:#0f172a; font-size:34px; line-height:1.15; font-weight:700; }
+        .finances-heading-copy { margin-top:8px; max-width:700px; color:#64748b; font-size:15px; }
+        .finances-controls { display:flex; align-items:flex-end; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+        .finances-control { display:grid; gap:5px; min-width:168px; color:#475569; font-size:12px; font-weight:650; }
+        .finances-control select, .finances-control input { min-height:44px; min-width:0; border:1px solid #cbd5e1; border-radius:9px; background:#fff; padding:8px 34px 8px 11px; color:#0f172a; font-size:14px; font-weight:600; }
+        .finances-custom-dates { width:100%; display:flex; justify-content:flex-end; gap:10px; flex-wrap:wrap; }
+        .finances-custom-dates .finances-control { min-width:150px; }
+        .finances-scope { display:flex; gap:10px; margin-bottom:16px; padding:12px 14px; border:1px solid #c7d2fe; border-radius:12px; background:#eef2ff; color:#3730a3; font-size:13px; line-height:1.55; }
+        .finances-scope::before { content:'i'; flex:0 0 20px; height:20px; border:1px solid currentColor; border-radius:50%; text-align:center; font-weight:700; line-height:18px; }
+        .finances-period-note { margin:-5px 0 15px; color:#64748b; font-size:12px; }
+        .finances-kpis { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; margin-bottom:16px; }
+        .finances-kpi { min-width:0; padding:15px; border:1px solid #dce4ef; border-radius:12px; background:#fff; }
+        .finances-kpi dt { color:#64748b; font-size:12px; font-weight:650; }
+        .finances-kpi dd { margin-top:5px; color:#0f172a; font-size:22px; font-weight:750; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+        .finances-kpi small { display:block; margin-top:5px; color:#64748b; font-size:11px; line-height:1.35; }
+        .finances-kpi.is-received { border-color:#bbf7d0; background:#f0fdf4; }
+        .finances-kpi.is-refund { border-color:#fde68a; background:#fffbeb; }
+        .finances-kpi.is-overdue { border-color:#fecaca; background:#fff7f7; }
+        .finances-grid-main { display:grid; grid-template-columns:minmax(0,1.45fr) minmax(310px,.75fr); gap:14px; align-items:stretch; }
+        .finances-grid-three { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; margin-top:14px; }
+        .finances-card { min-width:0; padding:18px; border:1px solid #dce4ef; border-radius:13px; background:#fff; }
+        .finances-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+        .finances-card h2 { color:#0f172a; font-size:17px; font-weight:700; }
+        .finances-card-head p { margin-top:4px; color:#64748b; font-size:12px; line-height:1.45; }
+        .finances-card-head > span { flex-shrink:0; color:#64748b; font-size:11px; font-weight:700; letter-spacing:.05em; }
+        .finances-money-chart { display:flex; align-items:flex-end; gap:8px; height:210px; padding:18px 6px 0; border-bottom:1px solid #cbd5e1; background:repeating-linear-gradient(to bottom,#fff 0,#fff 51px,#eef2f7 52px); }
+        .finances-month { display:flex; flex:1 1 0; min-width:0; height:100%; flex-direction:column; justify-content:flex-end; align-items:center; gap:7px; }
+        .finances-bar-pair { display:flex; align-items:flex-end; justify-content:center; gap:3px; width:100%; flex:1; }
+        .finances-bar { width:min(22px,38%); min-height:3px; border-radius:6px 6px 2px 2px; background:#cbd5e1; }
+        .finances-bar.is-received { background:linear-gradient(180deg,#6366f1,#4338ca); }
+        .finances-bar.is-negative { background:repeating-linear-gradient(135deg,#f59e0b 0 5px,#fbbf24 5px 10px); }
+        .finances-month > span { color:#64748b; font-size:10px; white-space:nowrap; }
+        .finances-legend { display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; color:#64748b; font-size:11px; }
+        .finances-legend span { display:inline-flex; align-items:center; gap:6px; }
+        .finances-legend i { width:9px; height:9px; border-radius:3px; background:#cbd5e1; }
+        .finances-legend .is-received i { background:#4f46e5; }
+        .finances-exact-values { margin-top:10px; border-top:1px solid #edf1f6; }
+        .finances-exact-values summary { min-height:44px; display:flex; align-items:center; cursor:pointer; color:#4338ca; font-size:13px; font-weight:650; }
+        .finances-exact-values table { width:100%; border-collapse:collapse; font-size:12px; }
+        .finances-exact-values th, .finances-exact-values td { padding:8px 4px; border-top:1px solid #edf1f6; text-align:left; }
+        .finances-exact-values th:not(:first-child), .finances-exact-values td:not(:first-child) { text-align:right; font-variant-numeric:tabular-nums; }
+        .finances-position-layout { display:grid; place-items:center; gap:16px; }
+        .finances-donut { display:grid; place-items:center; width:166px; aspect-ratio:1; border-radius:50%; }
+        .finances-donut::before { content:''; grid-area:1/1; width:102px; aspect-ratio:1; border-radius:50%; background:#fff; }
+        .finances-donut > span { grid-area:1/1; z-index:1; text-align:center; color:#64748b; font-size:11px; }
+        .finances-donut strong { display:block; color:#0f172a; font-size:18px; font-variant-numeric:tabular-nums; }
+        .finances-position-list, .finances-rank-list, .finances-source-list, .finances-review-list { width:100%; }
+        .finances-position-list li { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:9px; padding:8px 0; border-top:1px solid #edf1f6; font-size:13px; }
+        .finances-position-list i { width:9px; height:9px; border-radius:50%; background:#22c55e; }
+        .finances-position-list .is-due i { background:#f59e0b; }
+        .finances-position-list .is-overdue i { background:#ef4444; }
+        .finances-position-list strong { font-variant-numeric:tabular-nums; }
+        .finances-footnote { margin-top:10px; color:#64748b; font-size:11px; line-height:1.5; }
+        .finances-rank-list li, .finances-source-list li { padding:9px 0; border-top:1px solid #edf1f6; }
+        .finances-rank-row, .finances-source-row { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; color:#334155; font-size:13px; }
+        .finances-rank-row span, .finances-source-row span { min-width:0; overflow-wrap:anywhere; }
+        .finances-rank-row strong, .finances-source-row strong { flex-shrink:0; color:#0f172a; font-variant-numeric:tabular-nums; }
+        .finances-rank-track { height:6px; margin-top:7px; overflow:hidden; border-radius:999px; background:#eef2f7; }
+        .finances-rank-track i { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#4f46e5,#818cf8); }
+        .finances-source-list small { display:block; margin-top:3px; color:#64748b; font-size:11px; }
+        .finances-readiness { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:18px; }
+        .finances-progress { display:grid; place-items:center; width:112px; aspect-ratio:1; border-radius:50%; }
+        .finances-progress::before { content:''; grid-area:1/1; width:70px; aspect-ratio:1; border-radius:50%; background:#fff; }
+        .finances-progress > span { grid-area:1/1; z-index:1; text-align:center; color:#64748b; font-size:10px; }
+        .finances-progress strong { display:block; color:#0f172a; font-size:16px; font-variant-numeric:tabular-nums; }
+        .finances-review-summary { color:#92400e; font-size:13px; line-height:1.5; }
+        .finances-review-panel { margin-top:14px; border-color:#fde68a; background:#fffbeb; }
+        .finances-review-list li { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; padding:10px 0; border-top:1px solid #fde68a; color:#78350f; font-size:13px; }
+        .finances-review-list strong { font-variant-numeric:tabular-nums; }
+        .finances-state { padding:36px 20px; border:1px dashed #cbd5e1; border-radius:13px; background:#fff; text-align:center; }
+        .finances-state h2 { color:#0f172a; font-size:20px; font-weight:700; }
+        .finances-state p { max-width:560px; margin:8px auto 0; color:#64748b; font-size:14px; line-height:1.55; }
+        .finances-state[role="alert"] { border-color:#fecaca; background:#fff7f7; }
+        .finances-methods { margin-top:18px; padding-top:2px; color:#64748b; font-size:12px; line-height:1.65; }
+        .finances-methods summary { min-height:44px; display:flex; align-items:center; cursor:pointer; color:#4338ca; font-weight:650; }
+        .finances-methods p + p { margin-top:8px; }
         @media (min-width: 1100px) {
             .shell-topbar { margin-left: 224px; }
             .shell-main { margin-left: 224px; margin-right: 0; width: calc(100% - 224px); max-width: none; }
@@ -411,7 +491,8 @@
         }
         @media (max-width: 1099px) {
             body:has(.shell-bottom-nav) .app-cookie-settings { bottom: calc(82px + env(safe-area-inset-bottom)); }
-            .shell-mobile-activity { display: grid; place-items: center; width: 44px; height: 44px; }
+            .shell-mobile-activity, .shell-mobile-more { display: grid; place-items: center; width: 44px; height: 44px; }
+            .shell-mobile-more { margin-left: -8px; }
             .shell-sidebar, .shell-page-title, .shell-top-actions { display: none; }
             .shell-topbar { background: #0f172a; color: #fff; padding: 0 20px; height: 62px; }
             .shell-main { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
@@ -423,6 +504,30 @@
             .shell-sheet { width: 100%; max-width: 500px; max-height: calc(100dvh - 120px); }
             .help-dialog { padding:20px; }
             .overview-grid { grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr); gap: 16px; }
+            .finances-kpis { grid-template-columns:repeat(3,minmax(0,1fr)); }
+            .finances-grid-three { grid-template-columns:repeat(2,minmax(0,1fr)); }
+            .finances-grid-three .finances-card:last-child { grid-column:1/-1; }
+        }
+        @media (max-width: 699px) {
+            .finances-heading { align-items:flex-start; gap:14px; }
+            .finances-heading h1 { font-size:28px; }
+            .finances-controls, .finances-custom-dates { width:100%; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+            .finances-control { min-width:0; }
+            .finances-custom-dates { grid-column:1/-1; }
+            .finances-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+            .finances-kpi { padding:13px; }
+            .finances-kpi dd { font-size:20px; }
+            .finances-grid-main, .finances-grid-three { grid-template-columns:minmax(0,1fr); gap:10px; }
+            .finances-grid-three .finances-card:last-child { grid-column:auto; }
+            .finances-card { padding:15px; }
+            .finances-money-chart { height:180px; gap:4px; padding-left:2px; padding-right:2px; }
+            .finances-month > span { font-size:9px; }
+            .finances-readiness { grid-template-columns:minmax(0,1fr); justify-items:center; text-align:center; }
+            .finances-exact-values { overflow-x:auto; }
+        }
+        @media (max-width: 359px) {
+            .finances-controls, .finances-custom-dates { grid-template-columns:minmax(0,1fr); }
+            .finances-kpis { grid-template-columns:minmax(0,1fr); }
         }
         @media (max-width: 699px) {
             .overview h1 { font-size: 27px; }
@@ -1143,6 +1248,7 @@
             <div class="shell-topbar">
                 <img src="./tallyo-wordmark-white.png" alt="Tallyo" class="shell-mobile-brand">
                 <button @click="overviewOpenActivity" class="shell-mobile-activity" aria-label="Recent activity"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('reminder')"/></svg></button>
+                <button v-if="incomeInsightsEnabled" @click="openOverviewMenu('more', $event)" class="shell-mobile-more" aria-label="More in Tallyo" aria-haspopup="dialog" :aria-expanded="overviewMenu === 'more'"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('more')"/></svg></button>
                 <span class="shell-page-title">{{ overviewPageTitle }}</span>
                 <div class="shell-top-actions">
                     <button @click="openOverviewMenu('new', $event)" class="shell-button shell-button-primary" aria-haspopup="dialog">＋ New</button>
@@ -1155,7 +1261,8 @@
             <button @click="navigateTo('invoices')" :aria-current="['invoices','create','edit'].includes(activeTab) ? 'page' : null"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('documents')"/></svg>Invoices</button>
             <button @click="openOverviewMenu('new', $event)" aria-label="New" aria-haspopup="dialog"><span class="shell-new-icon" aria-hidden="true">+</span></button>
             <button @click="navigateTo('customers')" :aria-current="activeTab === 'customers' ? 'page' : null"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('customers')"/></svg>Customers</button>
-            <button @click="openOverviewMenu('more', $event)" aria-haspopup="dialog" :aria-expanded="overviewMenu === 'more'"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('more')"/></svg>More</button>
+            <button v-if="incomeInsightsEnabled" @click="navigateTo('finances')" :aria-current="activeTab === 'finances' ? 'page' : null"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('finances')"/></svg>Finances</button>
+            <button v-else @click="openOverviewMenu('more', $event)" aria-haspopup="dialog" :aria-expanded="overviewMenu === 'more'"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('more')"/></svg>More</button>
         </nav>
         <div v-if="overviewMenu" class="shell-sheet-backdrop" @click.self="closeOverviewMenu">
             <section ref="overviewMenuPanel" class="shell-sheet" role="dialog" aria-modal="true" aria-labelledby="overview-menu-title" tabindex="-1" @keydown.esc.stop.prevent="closeOverviewMenu" @keydown.tab="trapOverviewMenuFocus">
@@ -1674,6 +1781,118 @@
                     <p>Outstanding uses invoice totals less recorded payments, excluding Draft and Cancelled. Paid this month uses dated payment records, including negative refund entries, not invoices marked Paid without a payment record. Historical manually Paid invoices remain Paid until a later payment or refund change; quotes and credit notes do not use payment or overdue states.</p>
                     <p>Recurring this week counts active schedules with their next run between Monday and Sunday, including ones still due earlier this week. It is not a count of invoices already generated or every future occurrence. Attention and activity include all currencies.</p>
                 </details>
+            </section>
+
+            <section v-if="incomeInsightsEnabled" v-show="activeTab === 'finances'" class="finances-page" aria-labelledby="finances-title">
+                <div class="finances-heading">
+                    <div>
+                        <p class="finances-eyebrow">INCOME RECORDED IN TALLYO</p>
+                        <h1 id="finances-title">Your finances</h1>
+                        <p class="finances-heading-copy">See what you invoiced, what customers paid and what still needs attention.</p>
+                    </div>
+                    <div class="finances-controls" aria-label="Finances filters">
+                        <label class="finances-control">Period
+                            <select v-model="financesPeriodChoice" aria-label="Finances period">
+                                <option value="this_month">This month</option>
+                                <option value="this_quarter">This quarter</option>
+                                <option value="this_tax_year">This tax year</option>
+                                <option value="previous_tax_year">Previous tax year</option>
+                                <option value="custom">Custom dates</option>
+                            </select>
+                        </label>
+                        <label class="finances-control">Currency
+                            <select v-model="financesCurrency" aria-label="Finances currency"><option v-for="currency in financesCurrencies" :key="currency" :value="currency">{{ currency }}</option></select>
+                        </label>
+                        <div v-if="financesPeriodChoice === 'custom'" class="finances-custom-dates">
+                            <label class="finances-control">From<input v-model="financesCustomFrom" type="date" aria-label="Finances custom start date"></label>
+                            <label class="finances-control">To<input v-model="financesCustomTo" type="date" aria-label="Finances custom end date"></label>
+                        </div>
+                    </div>
+                </div>
+                <p class="finances-scope" role="note">These figures cover invoices and payments recorded in Tallyo. Income received elsewhere and business expenses are not included.</p>
+                <p class="finances-period-note">{{ financesPeriodDescription }}<template v-if="financesCalculation?.currencyMode === 'separate'"> Each currency stays separate and is never added into a combined total.</template></p>
+
+                <div v-if="financesCalculationError" class="finances-state" role="alert">
+                    <h2>We could not calculate these figures</h2>
+                    <p>Your invoices and payment records are still safe. Check the selected dates and try again.</p>
+                </div>
+                <div v-else-if="!financesHasRecords" class="finances-state">
+                    <h2>No income records to show for this period</h2>
+                    <p>Issued invoices and dated payments in {{ financesCurrency }} will appear here. Income received outside Tallyo will not appear.</p>
+                </div>
+                <template v-else>
+                    <dl class="finances-kpis" aria-label="Finances summary">
+                        <div class="finances-kpi"><dt>Invoiced</dt><dd>{{ overviewMoney(financesSummary.invoiced, financesCurrency) }}</dd><small>{{ financesSummary.issuedInvoiceCount }} issued invoice{{ financesSummary.issuedInvoiceCount === 1 ? '' : 's' }}</small></div>
+                        <div class="finances-kpi is-received"><dt>Received</dt><dd>{{ overviewMoney(financesSummary.received, financesCurrency) }}</dd><small>Positive dated payments</small></div>
+                        <div class="finances-kpi is-refund"><dt>Refunds</dt><dd>{{ overviewMoney(financesSummary.refunds, financesCurrency) }}</dd><small>Shown separately</small></div>
+                        <div class="finances-kpi is-received"><dt>Net received</dt><dd>{{ overviewMoney(financesSummary.netReceived, financesCurrency) }}</dd><small>Received less refunds</small></div>
+                        <div class="finances-kpi"><dt>Still to be paid</dt><dd>{{ overviewMoney(financesSummary.outstanding, financesCurrency) }}</dd><small>Across {{ financesSummary.outstandingInvoiceCount }} invoice{{ financesSummary.outstandingInvoiceCount === 1 ? '' : 's' }}</small></div>
+                        <div class="finances-kpi is-overdue"><dt>Overdue</dt><dd>{{ overviewMoney(financesSummary.overdue, financesCurrency) }}</dd><small>Part of still to be paid</small></div>
+                    </dl>
+
+                    <div class="finances-grid-main">
+                        <section class="finances-card" aria-labelledby="finances-money-title">
+                            <div class="finances-card-head"><div><h2 id="finances-money-title">Money received over time</h2><p>Issued invoice value compared with net recorded receipts.</p></div><span>{{ financesCurrency }}</span></div>
+                            <div class="finances-money-chart" role="img" :aria-label="financesChartLabel">
+                                <div v-for="month in financesMonths" :key="month.month" class="finances-month" aria-hidden="true">
+                                    <div class="finances-bar-pair"><i class="finances-bar" :style="{height: financesBarHeight(month.invoiced)}"></i><i class="finances-bar is-received" :class="{'is-negative': month.netReceived < 0}" :style="{height: financesBarHeight(month.netReceived)}"></i></div>
+                                    <span>{{ financesMonthLabel(month.month) }}</span>
+                                </div>
+                            </div>
+                            <div class="finances-legend" aria-hidden="true"><span><i></i>Invoiced</span><span class="is-received"><i></i>Net received</span></div>
+                            <details class="finances-exact-values"><summary>View exact monthly values</summary>
+                                <table><caption class="sr-only">Monthly invoice and receipt values</caption><thead><tr><th>Month</th><th>Invoiced</th><th>Received</th><th>Refunds</th><th>Net received</th></tr></thead><tbody><tr v-for="month in financesMonths" :key="'exact-' + month.month"><td>{{ financesMonthLongLabel(month.month) }}</td><td>{{ overviewMoney(month.invoiced, financesCurrency) }}</td><td>{{ overviewMoney(month.received, financesCurrency) }}</td><td>{{ overviewMoney(month.refunds, financesCurrency) }}</td><td>{{ overviewMoney(month.netReceived, financesCurrency) }}</td></tr></tbody></table>
+                            </details>
+                        </section>
+                        <section class="finances-card" aria-labelledby="finances-position-title">
+                            <div class="finances-card-head"><div><h2 id="finances-position-title">Payment position</h2><p>Issued invoices in the selected period.</p></div><span>{{ financesCurrency }}</span></div>
+                            <div class="finances-position-layout">
+                                <div class="finances-donut" :style="financesPosition.style" role="img" :aria-label="financesPosition.label"><span><strong>{{ overviewMoney(financesSummary.invoiced, financesCurrency) }}</strong>invoiced</span></div>
+                                <ul class="finances-position-list" aria-label="Payment position exact values">
+                                    <li><i></i><span>Recorded as paid</span><strong>{{ overviewMoney(financesPosition.covered, financesCurrency) }}</strong></li>
+                                    <li class="is-due"><i></i><span>Due</span><strong>{{ overviewMoney(financesPosition.due, financesCurrency) }}</strong></li>
+                                    <li class="is-overdue"><i></i><span>Overdue</span><strong>{{ overviewMoney(financesPosition.overdue, financesCurrency) }}</strong></li>
+                                </ul>
+                            </div>
+                            <p class="finances-footnote">Overdue is part of the amount still to be paid, not an additional amount.</p>
+                        </section>
+                    </div>
+
+                    <div class="finances-grid-three">
+                        <section class="finances-card" aria-labelledby="finances-customers-title">
+                            <div class="finances-card-head"><div><h2 id="finances-customers-title">Income by customer</h2><p>Net recorded receipts, highest first.</p></div><span>{{ financesCustomers.length }} customer{{ financesCustomers.length === 1 ? '' : 's' }}</span></div>
+                            <p v-if="!financesCustomers.length" class="finances-footnote">No customer receipts are recorded in this period.</p>
+                            <ol v-else class="finances-rank-list">
+                                <li v-for="customer in financesCustomers.slice(0, 5)" :key="customer.key"><div class="finances-rank-row"><span>{{ customer.customerName }}</span><strong>{{ overviewMoney(customer.netReceived, financesCurrency) }}</strong></div><div class="finances-rank-track" aria-hidden="true"><i :style="{width: financesCustomerWidth(customer.netReceived)}"></i></div></li>
+                            </ol>
+                            <details v-if="financesCustomers.length > 5" class="finances-exact-values"><summary>View all customer values</summary><table><caption class="sr-only">Net receipts by customer</caption><thead><tr><th>Customer</th><th>Net received</th></tr></thead><tbody><tr v-for="customer in financesCustomers" :key="'customer-' + customer.key"><td>{{ customer.customerName }}</td><td>{{ overviewMoney(customer.netReceived, financesCurrency) }}</td></tr></tbody></table></details>
+                        </section>
+                        <section class="finances-card" aria-labelledby="finances-sources-title">
+                            <div class="finances-card-head"><div><h2 id="finances-sources-title">Where the income came from</h2><p>How the invoice started, not a tax category.</p></div></div>
+                            <ul class="finances-source-list"><li v-for="source in financesSources" :key="source.source"><div class="finances-source-row"><span>{{ financesSourceLabel(source.source) }}<small>{{ source.recordCount }} payment or refund record{{ source.recordCount === 1 ? '' : 's' }}</small></span><strong>{{ overviewMoney(source.netReceived, financesCurrency) }}</strong></div><div class="finances-rank-track" aria-hidden="true"><i :style="{width: financesSourceWidth(source.netReceived)}"></i></div></li></ul>
+                            <p class="finances-footnote">All sources are sales from invoices. One-off, recurring and accepted-quote describe the Tallyo workflow only.</p>
+                        </section>
+                        <section class="finances-card" aria-labelledby="finances-readiness-title">
+                            <div class="finances-card-head"><div><h2 id="finances-readiness-title">Records organised</h2><p>Clear record checks, not a compliance score.</p></div></div>
+                            <div class="finances-readiness">
+                                <div class="finances-progress" :style="financesReadinessStyle" role="img" :aria-label="financesReadinessLabel"><span><strong>{{ financesReadiness.ready }}/{{ financesReadiness.total }}</strong>ready</span></div>
+                                <div><p v-if="financesReadiness.needsReview" class="finances-review-summary">{{ financesReadiness.needsReview }} record{{ financesReadiness.needsReview === 1 ? '' : 's' }} need{{ financesReadiness.needsReview === 1 ? 's' : '' }} review before the figures can be treated as complete.</p><p v-else class="finances-review-summary" style="color:#166534">All records in this view passed the available checks.</p><p class="finances-footnote">{{ financesReadiness.excludedFromTotals }} excluded from period totals.</p></div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <section v-if="financesReviewGroups.length" class="finances-card finances-review-panel" aria-labelledby="finances-review-title">
+                        <div class="finances-card-head"><div><h2 id="finances-review-title">Some records need review</h2><p>Valid records stay visible. Uncertain amounts are kept out of totals where needed.</p></div><span>{{ financesReviewGroups.reduce((sum, item) => sum + item.count, 0) }}</span></div>
+                        <ul class="finances-review-list"><li v-for="issue in financesReviewGroups" :key="issue.code"><span>{{ issue.message }}</span><strong>{{ issue.count }}</strong></li></ul>
+                        <p class="finances-footnote">Open Invoices to correct the affected records. A detailed income-record view is planned for the next phase.</p>
+                    </section>
+
+                    <details class="finances-methods"><summary>How these figures work</summary>
+                        <p>Invoiced value uses issued invoices dated in the selected period. Received income uses valid dated payments in that period. Refunds stay visible and net received is received less refunds.</p>
+                        <p>Draft and Cancelled invoices and quotes do not count as income. A Paid label without a dated payment does not count as received. Still to be paid and overdue use the saved invoice balance for invoices issued in the selected period.</p>
+                        <p>Figures use records currently loaded in Tallyo, dates use UTC and currencies are never added together. Tax shown on an invoice is context only; this page does not calculate tax due, expenses or profit and does not submit anything to HMRC.</p>
+                    </details>
+                </template>
             </section>
 
             <div v-show="activeTab === 'create' || activeTab === 'edit' || isExportingPDF" :class="{'pdf-export-surface': isExportingPDF && activeTab !== 'create' && activeTab !== 'edit'}">
@@ -3480,6 +3699,10 @@
                 // App State
                 activeTab: 'dashboard',
                 overviewCurrencyChoice: '',
+                financesCurrencyChoice: '',
+                financesPeriodChoice: 'this_tax_year',
+                financesCustomFrom: new Date().toISOString().slice(0, 8) + '01',
+                financesCustomTo: new Date().toISOString().slice(0, 10),
                 overviewMenu: '',
                 overviewMenuTrigger: null,
                 mobileMenuOpen: false,
@@ -3674,13 +3897,114 @@
                 });
                 return entries.sort((a, b) => Date.parse(b.ts) - Date.parse(a.ts)).slice(0, 6);
             },
+            financesPeriod() {
+                return this.financesPeriodRange(this.financesPeriodChoice);
+            },
+            financesCalculationState() {
+                if (!this.incomeInsightsEnabled || !window.TallyoIncomeInsights) return { result: null, error: '' };
+                try {
+                    return {
+                        result: window.TallyoIncomeInsights.calculateIncomeInsights(this.invoices, {
+                            from: this.financesPeriod.from,
+                            to: this.financesPeriod.to,
+                            today: new Date().toISOString().slice(0, 10)
+                        }),
+                        error: ''
+                    };
+                } catch (error) {
+                    return { result: null, error: String(error?.message || 'The selected period is not valid.') };
+                }
+            },
+            financesCalculation() { return this.financesCalculationState.result; },
+            financesCalculationError() { return this.financesCalculationState.error; },
+            financesCurrencies() {
+                const values = (this.financesCalculation?.currencies || []).map(report => report.currency);
+                return values.length ? values : [this.company.defaultCurrency || 'GBP'];
+            },
+            financesCurrency: {
+                get() {
+                    if (this.financesCurrencies.includes(this.financesCurrencyChoice)) return this.financesCurrencyChoice;
+                    const preferred = this.company.defaultCurrency || 'GBP';
+                    return this.financesCurrencies.includes(preferred) ? preferred : this.financesCurrencies[0];
+                },
+                set(value) { this.financesCurrencyChoice = value; }
+            },
+            financesReport() {
+                return this.financesCalculation?.currencies.find(report => report.currency === this.financesCurrency) || null;
+            },
+            financesSummary() {
+                return this.financesReport?.summary || {
+                    invoiced: 0, received: 0, refunds: 0, netReceived: 0, outstanding: 0, overdue: 0,
+                    issuedInvoiceCount: 0, outstandingInvoiceCount: 0, overdueInvoiceCount: 0, customerCount: 0, incomeRecordCount: 0
+                };
+            },
+            financesHasRecords() {
+                return Boolean(this.financesReport && (this.financesSummary.issuedInvoiceCount || this.financesSummary.incomeRecordCount || this.financesReport.readiness.total));
+            },
+            financesMonths() {
+                const months = (this.financesReport?.timeSeries || []).filter(month => Math.abs(month.invoiced) > 0.001 || Math.abs(month.netReceived) > 0.001);
+                return months.slice(-12);
+            },
+            financesChartMax() {
+                return Math.max(1, ...this.financesMonths.flatMap(month => [Math.abs(month.invoiced), Math.abs(month.netReceived)]));
+            },
+            financesChartLabel() {
+                if (!this.financesMonths.length) return 'No dated invoices, payments or refunds to chart.';
+                return 'Monthly invoiced and net received values: ' + this.financesMonths.map(month => `${this.financesMonthLongLabel(month.month)}, ${this.overviewMoney(month.invoiced, this.financesCurrency)} invoiced and ${this.overviewMoney(month.netReceived, this.financesCurrency)} net received`).join('; ') + '.';
+            },
+            financesPosition() {
+                const invoiced = Math.max(0, Number(this.financesSummary.invoiced) || 0);
+                const overdue = Math.min(invoiced, Math.max(0, Number(this.financesSummary.overdue) || 0));
+                const due = Math.min(Math.max(0, invoiced - overdue), Math.max(0, (Number(this.financesSummary.outstanding) || 0) - overdue));
+                const covered = Math.max(0, invoiced - due - overdue);
+                const scale = invoiced || 1;
+                const coveredEnd = covered / scale * 100;
+                const dueEnd = (covered + due) / scale * 100;
+                return {
+                    covered, due, overdue,
+                    style: { background: invoiced ? `conic-gradient(#22c55e 0 ${coveredEnd}%, #f59e0b ${coveredEnd}% ${dueEnd}%, #ef4444 ${dueEnd}% 100%)` : '#e2e8f0' },
+                    label: `${this.overviewMoney(covered, this.financesCurrency)} recorded as paid, ${this.overviewMoney(due, this.financesCurrency)} due and ${this.overviewMoney(overdue, this.financesCurrency)} overdue.`
+                };
+            },
+            financesCustomers() {
+                return (this.financesReport?.customers || []).filter(customer => customer.invoiceCount || customer.recordCount);
+            },
+            financesCustomerMax() {
+                return Math.max(1, ...this.financesCustomers.map(customer => Math.abs(customer.netReceived)));
+            },
+            financesSources() {
+                return (this.financesReport?.sources || []).filter(source => Math.abs(source.invoiced) > 0.001 || source.recordCount > 0);
+            },
+            financesSourceMax() {
+                return Math.max(1, ...this.financesSources.map(source => Math.abs(source.netReceived)));
+            },
+            financesReadiness() {
+                return this.financesReport?.readiness || { ready: 0, total: 0, needsReview: 0, excludedFromTotals: 0, issues: [], byReason: {} };
+            },
+            financesReadinessStyle() {
+                const percent = this.financesReadiness.total ? this.financesReadiness.ready / this.financesReadiness.total * 100 : 0;
+                return { background: this.financesReadiness.total ? `conic-gradient(#22c55e 0 ${percent}%, #f59e0b ${percent}% 100%)` : '#e2e8f0' };
+            },
+            financesReadinessLabel() {
+                return `${this.financesReadiness.ready} of ${this.financesReadiness.total} income records ready; ${this.financesReadiness.needsReview} need review.`;
+            },
+            financesReviewGroups() {
+                const messages = new Map((this.financesReadiness.issues || []).map(issue => [issue.code, issue.message]));
+                return Object.entries(this.financesReadiness.byReason || {}).map(([code, count]) => ({ code, count, message: messages.get(code) || 'This record needs review.' })).sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
+            },
+            financesPeriodDescription() {
+                const from = this.financesDateLabel(this.financesPeriod.from), to = this.financesDateLabel(this.financesPeriod.to);
+                return `${this.financesPeriodName(this.financesPeriodChoice)}: ${from} to ${to} · ${this.financesCurrency}.`;
+            },
             overviewNavigation() {
-                return [
-                    { label: 'SALES', items: [
+                const sales = [
                         { label: 'Invoices', tab: 'invoices', icon: 'documents' },
                         { label: 'Customers', tab: 'customers', icon: 'customers' },
                         { label: 'Products & services', tab: 'items', icon: 'items' }
-                    ] },
+                    ];
+                if (this.incomeInsightsEnabled) sales.push({ label: 'Finances', tab: 'finances', icon: 'finances' });
+                return [
+                    { label: 'SALES', items: sales },
                     { label: 'AUTOMATION', items: [
                         { label: 'Recurring', tab: 'recurring', icon: 'recurring' },
                         { label: 'Reminders', tab: 'invoices', icon: 'reminder', reminders: true }
@@ -3693,7 +4017,7 @@
                 ];
             },
             overviewPageTitle() {
-                return { dashboard: 'Overview', invoices: 'Invoices', create: 'Create document', edit: 'Edit document', customers: 'Customers', items: 'Products & services', recurring: 'Recurring', settings: 'Business settings', branding: 'Branding', account: 'Account', owner: 'Owner Console' }[this.activeTab] || 'Tallyo';
+                return { dashboard: 'Overview', finances: 'Finances', invoices: 'Invoices', create: 'Create document', edit: 'Edit document', customers: 'Customers', items: 'Products & services', recurring: 'Recurring', settings: 'Business settings', branding: 'Branding', account: 'Account', owner: 'Owner Console' }[this.activeTab] || 'Tallyo';
             },
             overviewGreeting() {
                 const hour = new Date().getHours();
@@ -4132,6 +4456,7 @@
                     documents: 'M8 3h9l4 4v14H8z M17 3v5h4 M4 7v14h1 M11 12h7 M11 16h5',
                     customers: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8 M18 8a3 3 0 0 1 0 6 M22 21v-2a4 4 0 0 0-3-4',
                     items: 'M12 3 3 7v10l9 4 9-4V7z M3 7l9 4 9-4 M12 11v10',
+                    finances: 'M4 19V9 M10 19V5 M16 19v-7 M22 19H2 M19 8l-3-3-4 4-3-3-5 5',
                     recurring: 'M4 7h13l-3-3 M20 17H7l3 3 M4 7v6 M20 17v-6',
                     reminder: 'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9 M10 21h4',
                     settings: 'M3 6h18 M3 12h18 M3 18h18 M8 3v6 M16 9v6 M9 15v6',
@@ -4171,6 +4496,45 @@
                 const date = new Date(`${value}T00:00:00Z`);
                 return Number.isFinite(date.getTime()) ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : value;
             },
+            financesPeriodRange(choice) {
+                const today = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z');
+                const todayKey = today.toISOString().slice(0, 10);
+                if (choice === 'custom') return { from: this.financesCustomFrom, to: this.financesCustomTo };
+                if (choice === 'this_month') return { from: todayKey.slice(0, 8) + '01', to: todayKey };
+                if (choice === 'this_quarter') {
+                    const quarterMonth = Math.floor(today.getUTCMonth() / 3) * 3;
+                    return { from: new Date(Date.UTC(today.getUTCFullYear(), quarterMonth, 1)).toISOString().slice(0, 10), to: todayKey };
+                }
+                const afterTaxYearStart = today.getUTCMonth() > 3 || (today.getUTCMonth() === 3 && today.getUTCDate() >= 6);
+                const currentStartYear = today.getUTCFullYear() - (afterTaxYearStart ? 0 : 1);
+                if (choice === 'previous_tax_year') return {
+                    from: `${currentStartYear - 1}-04-06`,
+                    to: `${currentStartYear}-04-05`
+                };
+                return { from: `${currentStartYear}-04-06`, to: todayKey };
+            },
+            financesPeriodName(choice) {
+                return { this_month: 'This month', this_quarter: 'This quarter', this_tax_year: 'This tax year', previous_tax_year: 'Previous tax year', custom: 'Custom period' }[choice] || 'Selected period';
+            },
+            financesDateLabel(value) {
+                const date = new Date(`${value}T00:00:00Z`);
+                return Number.isFinite(date.getTime()) ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : (value || 'Choose a date');
+            },
+            financesMonthLabel(month) { return this.customerFinanceMonthLabel(month); },
+            financesMonthLongLabel(month) { return this.customerFinanceMonthLongLabel(month); },
+            financesBarHeight(value) {
+                const amount = Math.abs(Number(value) || 0);
+                return `${Math.max(amount > 0 ? 4 : 0, amount / this.financesChartMax * 100)}%`;
+            },
+            financesCustomerWidth(value) {
+                const amount = Math.abs(Number(value) || 0);
+                return `${Math.max(amount > 0 ? 3 : 0, amount / this.financesCustomerMax * 100)}%`;
+            },
+            financesSourceWidth(value) {
+                const amount = Math.abs(Number(value) || 0);
+                return `${Math.max(amount > 0 ? 3 : 0, amount / this.financesSourceMax * 100)}%`;
+            },
+            financesSourceLabel(source) { return this.customerFinanceSourceLabel(source); },
             overviewTime(ts) {
                 const value = new Date(ts);
                 const day = value.toISOString().slice(0, 10);
@@ -4361,6 +4725,7 @@
             },
             routeTabs() {
                 const tabs = ['dashboard', 'create', 'edit', 'invoices', 'customers', 'items', 'branding', 'recurring', 'settings', 'account'];
+                if (this.incomeInsightsEnabled) tabs.push('finances');
                 if (this.ownerConsole.available) tabs.push('owner');
                 return tabs;
             },
