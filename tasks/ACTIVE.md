@@ -24,7 +24,7 @@ Next action: merge the repository pin, regression assertion and authoritative re
 Task ID: FIN-INSIGHTS-001
 Title: Build shared income calculations from data Tallyo already records
 Priority: Medium
-Status: Owner review
+Status: Phase 5 Owner-approved; public release remains disabled
 Phase: Phase 5 - Income Pack exports
 Owner role: Product owner
 Risk level: Medium implementation with financially material read-only calculations requiring focused review; no write, provider or production-release path
@@ -46,7 +46,8 @@ Phase 4 approval: Owner approved PR #207; it merged as `24071ff3800a203ed98c872a
 Phase 5 implementation: the gated Prepare income records view creates six versioned spreadsheet-safe CSVs, a versioned manifest and a readable PDF summary entirely on the trusted device; the shared calculation now exposes a canonical invoice index so every summary amount reconciles to exported income or invoice rows
 Acceptance for this phase: export rows reconcile before any file is created; currencies remain separate; formulas are neutralised; file order and decimals are deterministic; the pack repeats the income-only/non-filing boundary; no database query, provider call, storage write, customer contact detail, migration, tax calculation or public activation is added
 Validation: focused export, calculation, ledger, account-export, tenant-isolation, financial-audit, scale and UI harnesses pass; a 2,005-record pack remains exact; browser acceptance produces real CSV, manifest and PDF files, tests all four Finances views from 320-1440 px and makes no external request; the fictional PDF renders cleanly through Poppler with no clipping or overlap
-Next action: obtain focused Owner review of Phase 5 before Phase 6 release hardening and controlled publication begins
+Phase 5 approval: Owner approved the Income Pack exports and redesigned PDF on 6 October 2026. PR #208 remains fail-closed for public release and does not activate the feature.
+Next action: Phase 6 release hardening and controlled publication remain separate work requiring explicit Owner approval.
 
 ## DEPENDENCY-MAINTENANCE-001 — Refresh pinned build and Edge dependencies
 

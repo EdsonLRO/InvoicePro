@@ -1,6 +1,6 @@
 # Income insights and MTD-supporting records plan
 
-Status: Phases 0-4 are approved and merged. Phase 5 Income Pack exports are implemented behind the same fail-closed public-release gate for focused review; no public activation is approved.
+Status: Phases 0-5 are Owner-approved. Phase 5 Income Pack exports remain behind the same fail-closed public-release gate; no public activation is approved.
 
 Last reviewed: 6 October 2026.
 
@@ -423,7 +423,7 @@ Exit criteria:
 - owner isolation and account-export behaviour pass regression checks;
 - an accountant can understand the income-only boundary without product guidance.
 
-Implementation state: complete for focused Owner review. Public activation remains reserved for Phase 6 release hardening and approval.
+Implementation state: Owner-approved on 6 October 2026 through PR #208. Public activation remains reserved for Phase 6 release hardening and separate approval.
 
 ### Phase 6 — Release hardening and controlled publication
 
