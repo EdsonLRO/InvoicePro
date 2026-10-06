@@ -24,14 +24,14 @@ Next action: merge the repository pin, regression assertion and authoritative re
 Task ID: FIN-INSIGHTS-001
 Title: Build shared income calculations from data Tallyo already records
 Priority: Medium
-Status: Phase 6 release candidate in progress; public release remains disabled
+Status: Released and verified
 Phase: Phase 6 - Release hardening and controlled publication
 Owner role: Product owner
-Risk level: Medium implementation with financially material read-only calculations requiring focused review; no write, provider or production-release path
-Branch: `codex/income-insights-phase6`
+Risk level: Medium implementation with financially material read-only calculations, followed by an Owner-approved high-risk production feature-gate change; no financial write path
+Branch: `codex/income-insights-phase6-release-record`
 Scope: extend the released Overview and customer financial context with an accessible Finances area, customer visuals, income ledger, UK period presentation and income-only exports derived from existing invoices, dated manual and Stripe-confirmed payments, refunds, recurring origin and accepted-quote linkage
 Product boundary: always say income recorded in Tallyo; keep currencies separate; exclude quotes, Draft/Cancelled invoices and unsupported records according to the reviewed calculation contract; preserve refunds as explicit adjustments
-Excluded: expenses, receipt capture, bank feeds, bookkeeping, profit, tax estimates, VAT liability, HMRC APIs/submission, compliance claims, migrations, RLS changes, Stripe/provider changes, live transactions, customer communications and production publication
+Excluded: expenses, receipt capture, bank feeds, bookkeeping, profit, tax estimates, VAT liability, HMRC APIs/submission, compliance claims, migrations, RLS changes, Stripe/payment-provider changes, live transactions and customer communications
 Authoritative design: `docs/architecture/INCOME_INSIGHTS_AND_MTD_SUPPORT_PLAN.md`
 Phase 0 review artifacts: `docs/design/income-insights-phase0/README.md`, with desktop/mobile business and customer Finances references plus loading, empty, error, mixed-currency and needs-review states
 Phase 0 approval: Owner approved the wording, layouts, calculation examples and review states; PR #203 merged at `668a32d22ac51bcea7381a1469bf1cb90637e894`
@@ -46,10 +46,12 @@ Phase 4 approval: Owner approved PR #207; it merged as `24071ff3800a203ed98c872a
 Phase 5 implementation: the gated Prepare income records view creates six versioned spreadsheet-safe CSVs, a versioned manifest and a readable PDF summary entirely on the trusted device; the shared calculation now exposes a canonical invoice index so every summary amount reconciles to exported income or invoice rows
 Acceptance for this phase: export rows reconcile before any file is created; currencies remain separate; formulas are neutralised; file order and decimals are deterministic; the pack repeats the income-only/non-filing boundary; no database query, provider call, storage write, customer contact detail, migration, tax calculation or public activation is added
 Validation: focused export, calculation, ledger, account-export, tenant-isolation, financial-audit, scale and UI harnesses pass; a 2,005-record pack remains exact; browser acceptance produces real CSV, manifest and PDF files, tests all four Finances views from 320-1440 px and makes no external request; the fictional PDF renders cleanly through Poppler with no clipping or overlap
-Phase 5 approval: Owner approved the Income Pack exports and redesigned PDF on 6 October 2026. PR #208 remains fail-closed for public release and does not activate the feature.
-Phase 6 candidate: app build `2026.10.06.1` / cache `tallyo-shell-2026-10-06-1` is being hardened through the full application, accessibility, responsive, security, export and fictional-data acceptance suites. The checked-in feature flag remains false and the build continues to reject an enabled feature unless the separate public-release approval variable is also true.
+Phase 5 approval: Owner approved the Income Pack exports and redesigned PDF on 6 October 2026. PR #208 itself remained fail-closed and did not activate the feature.
+Phase 6 candidate: app build `2026.10.06.1` / cache `tallyo-shell-2026-10-06-1` completed the full application, accessibility, responsive, security, export and fictional-data acceptance suites. The checked-in feature flag remains false and the build rejects an enabled feature unless the separate public-release approval variable is also true.
 Phase 6 validation: all 51 Node application/security harnesses, the complete website suite, four Deno runtime suites, all 21 frozen-lock Edge Function checks and 11 isolated-Chrome app suites pass. The fictional Finances walkthrough covers every view from 320-1440 px, keyboard/accessibility behavior and real local export downloads with zero external requests or uncaught page errors. The current public wording remains explicitly income-only, keeps currencies separate and makes no tax, accounting, compliance or HMRC-submission claim.
-Next action: publish the pull request and obtain explicit Owner approval of the exact candidate before merge and production publication.
+Phase 6 approval and release: the Owner approved exact candidate `2910b8d`; PR #209 merged as `f94eea755032dcc709207c3fbeb89024a634076b`. Post-merge Security and Pages workflows passed. Deployment `ebb5a0af-5904-4150-ac2c-5a6ae778c7b1` serves build `2026.10.06.1` / cache `tallyo-shell-2026-10-06-1` with the production Income insights gate enabled. Public readback confirmed HTTP 200 and exact build, cache and feature markers without inspecting customer records.
+Rollback: restore deployment `7a277ae3-062f-496d-9d39-3fda9b359ad7` or disable the Income insights production gate and rebuild. Do not delete financial/provider evidence or customer data.
+Next action: bounded monitoring through public/build evidence only; broader reporting, expenses, bank feeds, profit, tax calculation and HMRC submission remain outside scope.
 
 ## DEPENDENCY-MAINTENANCE-001 — Refresh pinned build and Edge dependencies
 
