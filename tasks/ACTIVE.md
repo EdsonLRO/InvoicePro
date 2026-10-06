@@ -25,10 +25,10 @@ Task ID: FIN-INSIGHTS-001
 Title: Build shared income calculations from data Tallyo already records
 Priority: Medium
 Status: Owner review
-Phase: Phase 4 - income records and UK period presentation
+Phase: Phase 5 - Income Pack exports
 Owner role: Product owner
 Risk level: Medium implementation with financially material read-only calculations requiring focused review; no write, provider or production-release path
-Branch: `codex/income-insights-phase4`
+Branch: `codex/income-insights-phase5`
 Scope: extend the released Overview and customer financial context with an accessible Finances area, customer visuals, income ledger, UK period presentation and income-only exports derived from existing invoices, dated manual and Stripe-confirmed payments, refunds, recurring origin and accepted-quote linkage
 Product boundary: always say income recorded in Tallyo; keep currencies separate; exclude quotes, Draft/Cancelled invoices and unsupported records according to the reviewed calculation contract; preserve refunds as explicit adjustments
 Excluded: expenses, receipt capture, bank feeds, bookkeeping, profit, tax estimates, VAT liability, HMRC APIs/submission, compliance claims, migrations, RLS changes, Stripe/provider changes, live transactions, customer communications and production publication
@@ -42,9 +42,11 @@ Phase 2 approval: Owner approved PR #205; it merged as `bfbec4421b53bb93d25fdf95
 Phase 3 implementation: the gated first-level Finances destination consumes the shared module and adds period/currency controls, six exact summaries, five accessible visuals, grouped record-readiness issues and plain-language calculation boundaries; mobile keeps direct Finances navigation and the existing More menu
 Phase 3 approval: Owner approved PR #206; it merged as `f71c95d0732d8513a4f466908bcabb46a974c485` with Security and both Pages checks passing
 Phase 4 implementation: the gated Income records view adds a traceable filterable ledger, the UK income-period view separates three-month activity from cumulative tax-year-to-date figures, and Overview/period visuals link to the exact supporting records; a duplicate review-row edge case for Paid invoices without dated payment evidence is corrected without changing totals
-Acceptance for this phase: filtered and period totals reconcile to the canonical ledger; currencies remain separate; the page repeats the income-only and non-filing boundary; no HMRC credential, API, filing or compatible-software claim is added; no migration, write path, provider call, new data collection or third-party request is added
-Validation: focused calculation, customer, Finances overview and Phase 4 ledger/period harnesses pass; fictional browser acceptance passes direct desktop/mobile routing, filters, exact period links, keyboard behaviour, invalid-period recovery, separate currencies, empty state and all three Finances views at 320/390/768/1024/1440 px with all external requests blocked; standard UK dates and deadlines were rechecked against current HMRC guidance on 6 October 2026
-Next action: obtain focused Owner review of Phase 4 before Phase 5 Income Pack exports begin
+Phase 4 approval: Owner approved PR #207; it merged as `24071ff3800a203ed98c872af2904cd6d553e271` with Security and both Pages checks passing
+Phase 5 implementation: the gated Prepare income records view creates six versioned spreadsheet-safe CSVs, a versioned manifest and a readable PDF summary entirely on the trusted device; the shared calculation now exposes a canonical invoice index so every summary amount reconciles to exported income or invoice rows
+Acceptance for this phase: export rows reconcile before any file is created; currencies remain separate; formulas are neutralised; file order and decimals are deterministic; the pack repeats the income-only/non-filing boundary; no database query, provider call, storage write, customer contact detail, migration, tax calculation or public activation is added
+Validation: focused export, calculation, ledger, account-export, tenant-isolation, financial-audit, scale and UI harnesses pass; a 2,005-record pack remains exact; browser acceptance produces real CSV, manifest and PDF files, tests all four Finances views from 320-1440 px and makes no external request; the fictional PDF renders cleanly through Poppler with no clipping or overlap
+Next action: obtain focused Owner review of Phase 5 before Phase 6 release hardening and controlled publication begins
 
 ## DEPENDENCY-MAINTENANCE-001 — Refresh pinned build and Edge dependencies
 

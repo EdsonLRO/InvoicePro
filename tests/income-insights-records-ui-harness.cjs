@@ -79,7 +79,7 @@ vm.financesPeriodChoice = 'custom';
 for (const text of ['Income records', 'Payments and refunds', 'UK income periods', 'Activity records', 'Tax year to date', 'Nothing is filed with or sent to HMRC']) assert.ok(app.includes(text), `${text} remains visible`);
 for (const filter of ['Income records customer', 'Income records type', 'Income records payment kind', 'Income records payment source', 'Income records workflow', 'Income records readiness']) assert.ok(app.includes(filter), `${filter} remains available`);
 assert.match(app, /openFinancesRecords\(\)/, 'summary visuals link directly to supporting records');
-assert.match(app, /financesView = key === 'finances-records' \? 'records' : key === 'finances-periods' \? 'periods' : 'overview'/, 'history routes restore the exact Finances subview');
+assert.match(app, /financesView = key === 'finances-records' \? 'records' : key === 'finances-periods' \? 'periods' : key === 'finances-exports' \? 'exports' : 'overview'/, 'history routes restore the exact Finances subview');
 assert.match(app, /!financesHasRecords && financesView === 'overview'/, 'an empty overview does not hide the ledger or UK period views');
 assert.doesNotMatch(app, /Submit to HMRC|File with HMRC|MTD compliant/i);
 

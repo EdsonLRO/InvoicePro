@@ -13,7 +13,7 @@
 - Any controlled live account-recovery test requires separate approval.
 - Review bounded launch monitoring and support evidence without inspecting customer data.
 - Evaluate early UK-business onboarding feedback before expanding product scope.
-- Continue the approved staged Income insights work. Phases 0-3 are approved and merged; Phase 4 income records and UK period presentation are in focused review behind a disabled public-release gate. Phase 5 adds income-only exports. Expenses, bank feeds, profit, tax calculation and HMRC submission remain excluded.
+- Continue the approved staged Income insights work. Phases 0-4 are approved and merged; Phase 5 Income Pack exports are in focused review behind a disabled public-release gate. Phase 6 covers release hardening and separately approved publication. Expenses, bank feeds, profit, tax calculation and HMRC submission remain excluded.
 - Add customer statements and improved onboarding. Bounded customer CSV import is already released.
 - Implement retention, failed-payment and post-cancellation workflows.
 

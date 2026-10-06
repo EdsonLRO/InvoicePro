@@ -40,6 +40,7 @@
     <script src="./app-user-messages.js"></script>
     <script src="./customer-csv-import.js"></script>
     <script src="./income-insights.js"></script>
+    <script src="./income-pack-export.js"></script>
     <script type="module" src="./analytics-app.js"></script>
 
     <style>
@@ -516,6 +517,20 @@
         .uk-period-card dt { color:#64748b; font-size:10px; }
         .uk-period-card dd { margin-top:3px; color:#0f172a; font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
         .uk-period-card footer { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+        .income-pack-intro { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(240px,.5fr); gap:14px; margin-bottom:14px; }
+        .income-pack-notice { padding:16px; border:1px solid #c7d2fe; border-radius:12px; background:#eef2ff; color:#3730a3; font-size:13px; line-height:1.6; }
+        .income-pack-status { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+        .income-pack-status div { padding:12px; border:1px solid #dce4ef; border-radius:10px; background:#fff; }
+        .income-pack-status dt { color:#64748b; font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
+        .income-pack-status dd { margin-top:4px; color:#0f172a; font-size:16px; font-weight:700; overflow-wrap:anywhere; }
+        .income-pack-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+        .income-pack-card { display:flex; min-width:0; min-height:176px; flex-direction:column; align-items:flex-start; padding:16px; border:1px solid #dce4ef; border-radius:12px; background:#fff; }
+        .income-pack-card h3 { color:#0f172a; font-size:15px; font-weight:700; }
+        .income-pack-card p { margin:6px 0 14px; color:#64748b; font-size:12px; line-height:1.55; }
+        .income-pack-card button { min-height:42px; margin-top:auto; padding:8px 12px; border:1px solid #c7d2fe; border-radius:8px; color:#4338ca; font-size:12px; font-weight:700; }
+        .income-pack-card button:disabled { opacity:.45; }
+        .income-pack-limitations { margin-top:16px; padding:14px 16px; border:1px solid #e2e8f0; border-radius:12px; background:#f8fafc; color:#475569; font-size:12px; line-height:1.6; }
+        .income-pack-limitations ul { margin:8px 0 0 18px; list-style:disc; }
         @media (min-width: 1100px) {
             .shell-topbar { margin-left: 224px; }
             .shell-main { margin-left: 224px; margin-right: 0; width: calc(100% - 224px); max-width: none; }
@@ -541,7 +556,7 @@
             .finances-grid-three .finances-card:last-child { grid-column:1/-1; }
         }
         @media (max-width: 699px) {
-            .finances-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); overflow:visible; }
+            .finances-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); overflow:visible; }
             .finances-tabs button { min-width:0; padding:8px 6px; white-space:normal; font-size:11px; line-height:1.3; }
             .finances-heading { align-items:flex-start; gap:14px; }
             .finances-heading h1 { font-size:28px; }
@@ -560,6 +575,8 @@
             .finances-exact-values { overflow-x:auto; }
             .income-record-filters { grid-template-columns:repeat(2,minmax(0,1fr)); }
             .uk-period-grid { grid-template-columns:minmax(0,1fr); }
+            .income-pack-intro, .income-pack-grid { grid-template-columns:minmax(0,1fr); }
+            .income-pack-card { min-height:0; }
         }
         @media (max-width: 480px) {
             .income-record-filters { grid-template-columns:minmax(0,1fr); }
@@ -1854,6 +1871,7 @@
                     <button @click="openFinancesView('overview')" :aria-current="financesView === 'overview' ? 'page' : null">Overview</button>
                     <button @click="openFinancesView('records')" :aria-current="financesView === 'records' ? 'page' : null">Income records</button>
                     <button @click="openFinancesView('periods')" :aria-current="financesView === 'periods' ? 'page' : null">UK income periods</button>
+                    <button @click="openFinancesView('exports')" :aria-current="financesView === 'exports' ? 'page' : null">Prepare records</button>
                 </nav>
 
                 <div v-if="financesCalculationError" class="finances-state" role="alert">
@@ -1968,7 +1986,7 @@
                         <p class="finances-footnote">This ledger is derived from records already in Tallyo. It is not a bank statement, tax return or HMRC submission.</p>
                     </section>
                 </template>
-                <template v-else>
+                <template v-else-if="financesView === 'periods'">
                     <section aria-labelledby="uk-periods-title">
                         <div class="finances-card-head"><div><h2 id="uk-periods-title" style="font-size:22px">UK income periods</h2><p>{{ financesTaxYearLabel }} · {{ financesCurrency }} · income recorded in Tallyo only</p></div></div>
                         <p class="uk-period-notice" role="note"><strong>Organising view only.</strong> These periods show Tallyo's income side. They exclude expenses and income received elsewhere. Nothing is filed with or sent to HMRC.</p>
@@ -1980,6 +1998,22 @@
                             </article>
                         </div>
                         <details class="finances-methods"><summary>How UK income periods work</summary><p>Each activity figure covers only that three-month period. Tax year to date starts on 6 April and grows cumulatively through the selected period. The dates shown use the standard UK update periods in the approved plan.</p><p>Tallyo does not calculate expenses, profit or tax due and does not connect to HMRC. Current dates and official interpretation must be checked again before any public release.</p></details>
+                    </section>
+                </template>
+                <template v-else>
+                    <section aria-labelledby="income-pack-title">
+                        <div class="finances-card-head"><div><h2 id="income-pack-title" style="font-size:22px">Prepare income records</h2><p>Download clear, separate files for {{ financesPeriodDescription }}</p></div></div>
+                        <div class="income-pack-intro">
+                            <p class="income-pack-notice"><strong>Income records from Tallyo only.</strong> This pack does not include expenses or income received outside Tallyo and is not an HMRC submission. Files are prepared on this device only when you choose a download.</p>
+                            <dl class="income-pack-status"><div><dt>Income rows</dt><dd>{{ financesSummary.incomeRecordCount }}</dd></div><div><dt>Need review</dt><dd>{{ financesReadiness.needsReview }}</dd></div><div><dt>Currency</dt><dd>{{ financesCurrency }}</dd></div><div><dt>Calculation</dt><dd>{{ financesCalculation?.calculationVersion || '-' }}</dd></div></dl>
+                        </div>
+                        <div v-if="!financesCanExport" class="finances-state"><h2>No income pack to prepare</h2><p>Choose a period and currency containing Tallyo invoice records.</p></div>
+                        <div v-else class="income-pack-grid">
+                            <article v-for="file in financesIncomePackFiles" :key="file.key" class="income-pack-card"><h3>{{ file.filename }}</h3><p>{{ file.description }}</p><button @click="downloadIncomePackCsv(file.key)">Download CSV</button></article>
+                            <article class="income-pack-card"><h3>income-pack-manifest.json</h3><p>Pack version, calculation version, selected scope, totals, limitations and included-file list.</p><button @click="downloadIncomePackManifest">Download manifest</button></article>
+                            <article class="income-pack-card"><h3>income-summary.pdf</h3><p>A readable summary of the selected income, record checks and important limitations.</p><button @click="downloadIncomePackPdf">Download PDF</button></article>
+                        </div>
+                        <div class="income-pack-limitations"><strong>Before sharing these files</strong><ul><li>They do not include expenses, bank activity, profit or tax due.</li><li>Tax shown is invoice context, not a tax or VAT calculation.</li><li>Review warnings are record checks, not a compliance assessment.</li><li>Downloads contain business and customer information. Keep them on a trusted device.</li></ul></div>
                     </section>
                 </template>
             </section>
@@ -4134,6 +4168,8 @@
                     cumulative: this.financesPeriodTotals(`${year}-04-06`, period.cumulativeTo)
                 }));
             },
+            financesCanExport() { return Boolean(this.financesReport && window.TallyoIncomePack); },
+            financesIncomePackFiles() { return window.TallyoIncomePack?.CSV_DEFINITIONS || []; },
             financesPeriodDescription() {
                 const from = this.financesDateLabel(this.financesPeriod.from), to = this.financesDateLabel(this.financesPeriod.to);
                 return `${this.financesPeriodName(this.financesPeriodChoice)}: ${from} to ${to} · ${this.financesCurrency}.`;
@@ -4678,7 +4714,7 @@
             },
             financesSourceLabel(source) { return this.customerFinanceSourceLabel(source); },
             openFinancesView(view) {
-                const next = ['overview', 'records', 'periods'].includes(view) ? view : 'overview';
+                const next = ['overview', 'records', 'periods', 'exports'].includes(view) ? view : 'overview';
                 this.financesView = next;
                 this.setRouteKey(next === 'overview' ? 'finances' : `finances-${next}`);
             },
@@ -4721,6 +4757,92 @@
                 this.financesCustomTo = cumulative ? period.cumulativeTo : period.activityTo;
                 this.financesRecordFilters = { customer: '', type: 'all', paymentKind: 'all', paymentSource: 'all', workflow: 'all', readiness: 'all' };
                 this.openFinancesRecords();
+            },
+            buildIncomePack() {
+                if (!this.financesCanExport) throw new Error('There are no income records to prepare for this period and currency.');
+                return window.TallyoIncomePack.buildIncomePack(this.financesCalculation, {
+                    currency: this.financesCurrency,
+                    businessName: this.company.name,
+                    generatedAt: new Date().toISOString()
+                });
+            },
+            confirmIncomePackDownload() {
+                return confirm('This download contains business and customer information. Continue only on a trusted device.');
+            },
+            downloadIncomePackBlob(filename, content, mime) {
+                const blob = content instanceof Blob ? content : new Blob([content], { type: mime });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url; link.download = filename; link.type = mime; link.rel = 'noopener';
+                document.body.appendChild(link); link.click(); link.remove();
+                window.setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
+            },
+            downloadIncomePackCsv(key) {
+                if (!this.confirmIncomePackDownload()) return;
+                try {
+                    const file = this.buildIncomePack().csvFiles.find(item => item.key === key);
+                    if (!file) throw new Error('That income file is not available.');
+                    this.downloadIncomePackBlob(file.filename, file.content, file.mime);
+                } catch (error) {
+                    console.error('Income CSV export failed:', error);
+                    alert(error?.message || 'The income file could not be prepared.');
+                }
+            },
+            downloadIncomePackManifest() {
+                if (!this.confirmIncomePackDownload()) return;
+                try {
+                    const file = this.buildIncomePack().manifestFile;
+                    this.downloadIncomePackBlob(file.filename, file.content, file.mime);
+                } catch (error) {
+                    console.error('Income manifest export failed:', error);
+                    alert(error?.message || 'The income manifest could not be prepared.');
+                }
+            },
+            downloadIncomePackPdf() {
+                if (!this.confirmIncomePackDownload()) return;
+                try {
+                    const model = this.buildIncomePack().pdf;
+                    const Pdf = window.jspdf?.jsPDF;
+                    if (!Pdf) throw new Error('The PDF creator is not available.');
+                    const pdf = new Pdf('p', 'mm', 'a4');
+                    const pageWidth = pdf.internal.pageSize.getWidth(), pageHeight = pdf.internal.pageSize.getHeight();
+                    const left = 18, right = 18, contentWidth = pageWidth - left - right;
+                    let y = 18;
+                    const ensureSpace = height => { if (y + height <= pageHeight - 18) return; pdf.addPage(); y = 18; };
+                    const writeLines = (text, size = 9, color = [71, 85, 105], gap = 4.5) => {
+                        pdf.setFontSize(size); pdf.setTextColor(...color);
+                        const lines = pdf.splitTextToSize(String(text), contentWidth);
+                        ensureSpace(lines.length * gap + 3); pdf.text(lines, left, y); y += lines.length * gap + 3;
+                    };
+                    const money = value => new Intl.NumberFormat('en-GB', { style: 'currency', currency: model.metadata.currency }).format(Number(value) || 0);
+                    const heading = text => { ensureSpace(12); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(13); pdf.setTextColor(15, 23, 42); pdf.text(text, left, y); pdf.setFont('helvetica', 'normal'); y += 8; };
+                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(20); pdf.setTextColor(15, 23, 42); pdf.text(model.title, left, y); y += 9;
+                    pdf.setFont('helvetica', 'normal'); writeLines(model.notice, 9, [55, 48, 163], 4.2);
+                    writeLines(`${model.metadata.businessName || 'Business name not recorded'} | ${model.metadata.currency} | ${model.metadata.period.from || 'All dates'} to ${model.metadata.period.to || 'All dates'} | Export ${model.metadata.exportVersion} | Calculation ${model.metadata.calculationVersion} | Generated ${model.metadata.generatedAt}`, 8, [100, 116, 139], 4);
+                    heading('Selected-period summary');
+                    for (const [label, value] of [['Invoiced', model.summary.invoiced], ['Received', model.summary.received], ['Refunds', model.summary.refunds], ['Net received', model.summary.netReceived], ['Outstanding', model.summary.outstanding], ['Overdue', model.summary.overdue], ['Tax shown on invoices', model.summary.taxShown]]) {
+                        ensureSpace(7); pdf.setFontSize(9); pdf.setTextColor(71, 85, 105); pdf.text(label, left, y); pdf.setFont('helvetica', 'bold'); pdf.setTextColor(15, 23, 42); pdf.text(money(value), pageWidth - right, y, { align: 'right' }); pdf.setFont('helvetica', 'normal'); y += 6;
+                    }
+                    y += 3; heading('Record checks');
+                    writeLines(`${model.readiness.ready} of ${model.readiness.total} records are organised. ${model.readiness.needsReview} need review and ${model.readiness.excludedFromTotals} are excluded from totals.`, 9);
+                    for (const group of model.readiness.groups) writeLines(`${group.count} - ${group.message}`, 8);
+                    heading('Net received by customer');
+                    for (const customer of model.customers.slice(0, 10)) writeLines(`${customer.name}: ${money(customer.netReceived)}`, 8);
+                    if (model.customers.length > 10) writeLines(`${model.customers.length - 10} more customers are listed in customer-income-summary.csv.`, 8);
+                    heading('Net received by month');
+                    const activePeriods = model.periods.filter(period => Math.abs(period.netReceived) > 0.001);
+                    if (!activePeriods.length) writeLines('No dated payments or refunds were recorded in the selected period.', 8);
+                    for (const period of activePeriods.slice(0, 12)) writeLines(`${period.month}: ${money(period.netReceived)}`, 8);
+                    if (activePeriods.length > 12) writeLines(`${activePeriods.length - 12} more months are listed in income-by-period.csv.`, 8);
+                    heading('Important limitations');
+                    for (const limitation of model.limitations) writeLines(`- ${limitation}`, 8);
+                    const pages = pdf.getNumberOfPages();
+                    for (let page = 1; page <= pages; page += 1) { pdf.setPage(page); pdf.setFontSize(7); pdf.setTextColor(100, 116, 139); pdf.text(`Tallyo income summary | Page ${page} of ${pages}`, left, pageHeight - 8); }
+                    this.downloadPdfFile(pdf, model.filename);
+                } catch (error) {
+                    console.error('Income PDF export failed:', error);
+                    alert(error?.message || 'The income summary could not be prepared.');
+                }
             },
             overviewTime(ts) {
                 const value = new Date(ts);
@@ -4981,7 +5103,7 @@
                 this.mobileMenuOpen = false;
                 const key = routeKey || nextTab;
                 this.editorPreview = ['create-preview', 'edit-preview'].includes(key) && ['create', 'edit'].includes(nextTab);
-                if (nextTab === 'finances') this.financesView = key === 'finances-records' ? 'records' : key === 'finances-periods' ? 'periods' : 'overview';
+                if (nextTab === 'finances') this.financesView = key === 'finances-records' ? 'records' : key === 'finances-periods' ? 'periods' : key === 'finances-exports' ? 'exports' : 'overview';
                 if (nextTab === 'customers') {
                     const keepForm = key === 'customers-form' && this.customerView === 'form';
                     const keepDetail = key === 'customers-detail' && this.customerContext;

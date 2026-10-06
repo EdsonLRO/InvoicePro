@@ -113,6 +113,7 @@ const appAssets = [
   "app-user-messages.js",
   "customer-csv-import.js",
   "income-insights.js",
+  "income-pack-export.js",
   "manifest.json",
   "service-worker.js",
   "tallyo-mark.png",
