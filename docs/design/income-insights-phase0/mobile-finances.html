@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tallyo Finances mobile - Phase 0 design reference</title>
+<link rel="stylesheet" href="shared.css">
+</head>
+<body class="mobile-body">
+<div class="mobile-shell">
+  <header class="mobile-top"><img src="../../../tallyo-wordmark-white.png" alt="Tallyo"><button aria-label="Open account menu"><i data-lucide="circle-user-round"></i></button></header>
+  <main class="mobile-main">
+    <div class="mobile-eyebrow">INCOME RECORDED IN TALLYO</div>
+    <div class="mobile-heading"><div><h1>Your finances</h1><p>See what you invoiced, what customers paid and what still needs attention.</p></div></div>
+    <button class="mobile-filter">Tax year 2026/27 · GBP<i data-lucide="chevron-down"></i></button>
+    <nav class="mobile-tabs" aria-label="Finances sections"><button class="active" aria-current="page">Overview</button><button>Income records</button><button>Customers</button><button>Periods</button></nav>
+    <div class="mobile-scope" role="note"><i data-lucide="info"></i><span>These figures cover invoices and payments recorded in Tallyo. Income received elsewhere and business expenses are not included.</span></div>
+    <section class="mobile-kpis" aria-label="Income summary">
+      <div class="mobile-kpi"><span>Invoiced</span><strong>£18,420</strong><small>Issued invoices</small></div>
+      <div class="mobile-kpi good"><span>Received</span><strong>£15,560</strong><small>Positive payments</small></div>
+      <div class="mobile-kpi warn"><span>Refunds</span><strong>£180</strong><small>Shown separately</small></div>
+      <div class="mobile-kpi good"><span>Net received</span><strong>£15,380</strong><small>Received less refunds</small></div>
+      <div class="mobile-kpi"><span>Still to be paid</span><strong>£3,040</strong><small>Across 7 invoices</small></div>
+      <div class="mobile-kpi danger"><span>Overdue</span><strong>£620</strong><small>Part of still to be paid</small></div>
+    </section>
+    <section class="mobile-card" aria-labelledby="mobile-money-title">
+      <div class="mobile-card-head"><div><h2 id="mobile-money-title">Money received over time</h2><p>Invoiced compared with net received.</p></div><span>APR–SEP</span></div>
+      <div class="money-chart mobile-money-chart" role="img" aria-label="From April to September, issued invoices total £18,420 and net receipts total £15,380. September is the strongest month.">
+        <div class="chart-grid" aria-hidden="true"><div class="gridline"><span>£5k</span></div><div class="gridline"><span>£3.75k</span></div><div class="gridline"><span>£2.5k</span></div><div class="gridline"><span>£1.25k</span></div><div class="gridline"><span>£0</span></div></div>
+        <div class="chart-bars" aria-hidden="true">
+          <div class="month"><div class="bar-pair" style="--max:100;--invoice:44;--received:38"><i class="bar invoice"></i><i class="bar received"></i></div><span class="month-label">Apr</span></div>
+          <div class="month"><div class="bar-pair" style="--max:100;--invoice:56;--received:49"><i class="bar invoice"></i><i class="bar received"></i></div><span class="month-label">May</span></div>
+          <div class="month"><div class="bar-pair" style="--max:100;--invoice:46;--received:42"><i class="bar invoice"></i><i class="bar received"></i></div><span class="month-label">Jun</span></div>
+          <div class="month"><div class="bar-pair" style="--max:100;--invoice:70;--received:60.4"><i class="bar invoice"></i><i class="bar received"></i></div><span class="month-label">Jul</span></div>
+          <div class="month"><div class="bar-pair" style="--max:100;--invoice:62;--received:52"><i class="bar invoice"></i><i class="bar received"></i></div><span class="month-label">Aug</span></div>
+          <div class="month"><div class="bar-pair" style="--max:100;--invoice:90.4;--received:66.2"><i class="bar invoice"></i><i class="bar received"></i></div><span class="month-label">Sep</span></div>
+        </div>
+      </div>
+      <div class="chart-legend mobile-chart-legend"><span class="legend-key"><i class="legend-dot invoice"></i>Invoiced</span><span class="legend-key"><i class="legend-dot"></i>Net received</span></div>
+      <table class="sr-only"><caption>Monthly invoice and net receipt values</caption><thead><tr><th>Month</th><th>Invoiced</th><th>Net received</th></tr></thead><tbody><tr><td>April</td><td>£2,200</td><td>£1,900</td></tr><tr><td>May</td><td>£2,800</td><td>£2,450</td></tr><tr><td>June</td><td>£2,300</td><td>£2,100</td></tr><tr><td>July</td><td>£3,500</td><td>£3,020</td></tr><tr><td>August</td><td>£3,100</td><td>£2,600</td></tr><tr><td>September</td><td>£4,520</td><td>£3,310</td></tr></tbody></table>
+    </section>
+    <section class="mobile-card" aria-labelledby="mobile-position-title">
+      <div class="mobile-card-head"><div><h2 id="mobile-position-title">Payment position</h2><p>Issued invoices for this tax year.</p></div><span>GBP</span></div>
+      <div class="mobile-donut-layout"><div class="donut mobile-donut" role="img" aria-label="£15,380 paid, £2,420 due and £620 overdue"><div class="donut-center"><strong>£18,420</strong><span>invoiced</span></div></div><ul class="legend-list"><li><i></i><span>Paid</span><strong>£15,380</strong></li><li class="due"><i></i><span>Due</span><strong>£2,420</strong></li><li class="late"><i></i><span>Overdue</span><strong>£620</strong></li></ul></div>
+      <div class="panel-foot">Overdue is part of the £3,040 still to be paid.</div>
+    </section>
+    <section class="mobile-card" aria-labelledby="mobile-customer-title"><div class="mobile-card-head"><div><h2 id="mobile-customer-title">Income by customer</h2><p>Net receipts, highest first.</p></div><span>VIEW ALL</span></div><ol class="customer-bars"><li><div class="customer-row"><span>Willow &amp; Pine Studio</span><strong>£4,500</strong></div><div class="customer-track"><i style="--w:100%"></i></div></li><li><div class="customer-row"><span>Harbour &amp; Field</span><strong>£3,840</strong></div><div class="customer-track"><i style="--w:85%"></i></div></li><li><div class="customer-row"><span>North &amp; Stone</span><strong>£2,940</strong></div><div class="customer-track"><i style="--w:65%"></i></div></li></ol></section>
+    <section class="mobile-card" aria-labelledby="mobile-source-title"><div class="mobile-card-head"><div><h2 id="mobile-source-title">Where the income came from</h2><p>Workflow source, not a tax category.</p></div></div><ul class="mobile-list"><li><span>One-off invoices</span><strong>£9,840</strong></li><li><span>Recurring invoices</span><strong>£3,740</strong></li><li><span>Accepted quotes</span><strong>£1,800</strong></li></ul><div class="panel-foot">All three sources export as Sales from invoices.</div></section>
+    <section class="mobile-card" aria-labelledby="mobile-ready-title"><div class="mobile-card-head"><div><h2 id="mobile-ready-title">Records organised</h2><p>Data quality, not a compliance score.</p></div></div><div class="mobile-progress"><div class="progress-ring" role="img" aria-label="46 of 49 income records ready"><div><strong>46/49</strong><span>ready</span></div></div><div><ul class="review-list"><li><i data-lucide="triangle-alert"></i><span>2 payments need a date</span></li><li><i data-lucide="triangle-alert"></i><span>1 credit note needs review</span></li></ul><button class="review-action">Review 3 records →</button></div></div></section>
+    <div class="disclosure"><span>Fictional reconciled data · no bank connection</span></div>
+  </main>
+  <nav class="mobile-bottom" aria-label="Primary navigation"><button><i data-lucide="layout-dashboard"></i>Overview</button><button><i data-lucide="files"></i>Documents</button><button class="new"><i data-lucide="plus"></i><span>New</span></button><button><i data-lucide="users-round"></i>Customers</button><button class="active"><i data-lucide="chart-no-axes-combined"></i>Finances</button></nav>
+</div>
+</body>
+</html>
