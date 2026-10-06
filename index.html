@@ -4806,38 +4806,129 @@
                     if (!Pdf) throw new Error('The PDF creator is not available.');
                     const pdf = new Pdf('p', 'mm', 'a4');
                     const pageWidth = pdf.internal.pageSize.getWidth(), pageHeight = pdf.internal.pageSize.getHeight();
-                    const left = 18, right = 18, contentWidth = pageWidth - left - right;
-                    let y = 18;
-                    const ensureSpace = height => { if (y + height <= pageHeight - 18) return; pdf.addPage(); y = 18; };
-                    const writeLines = (text, size = 9, color = [71, 85, 105], gap = 4.5) => {
-                        pdf.setFontSize(size); pdf.setTextColor(...color);
-                        const lines = pdf.splitTextToSize(String(text), contentWidth);
-                        ensureSpace(lines.length * gap + 3); pdf.text(lines, left, y); y += lines.length * gap + 3;
+                    const left = 16, right = 16, contentWidth = pageWidth - left - right;
+                    const colours = {
+                        navy: [15, 23, 42], ink: [30, 41, 59], muted: [100, 116, 139], line: [226, 232, 240],
+                        indigo: [79, 70, 229], blue: [59, 130, 246], mint: [45, 212, 191],
+                        indigoPale: [238, 242, 255], slatePale: [248, 250, 252], amberPale: [255, 251, 235], amber: [180, 83, 9], white: [255, 255, 255]
                     };
+                    let y = 16;
                     const money = value => new Intl.NumberFormat('en-GB', { style: 'currency', currency: model.metadata.currency }).format(Number(value) || 0);
-                    const heading = text => { ensureSpace(12); pdf.setFont('helvetica', 'bold'); pdf.setFontSize(13); pdf.setTextColor(15, 23, 42); pdf.text(text, left, y); pdf.setFont('helvetica', 'normal'); y += 8; };
-                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(20); pdf.setTextColor(15, 23, 42); pdf.text(model.title, left, y); y += 9;
-                    pdf.setFont('helvetica', 'normal'); writeLines(model.notice, 9, [55, 48, 163], 4.2);
-                    writeLines(`${model.metadata.businessName || 'Business name not recorded'} | ${model.metadata.currency} | ${model.metadata.period.from || 'All dates'} to ${model.metadata.period.to || 'All dates'} | Export ${model.metadata.exportVersion} | Calculation ${model.metadata.calculationVersion} | Generated ${model.metadata.generatedAt}`, 8, [100, 116, 139], 4);
-                    heading('Selected-period summary');
-                    for (const [label, value] of [['Invoiced', model.summary.invoiced], ['Received', model.summary.received], ['Refunds', model.summary.refunds], ['Net received', model.summary.netReceived], ['Outstanding', model.summary.outstanding], ['Overdue', model.summary.overdue], ['Tax shown on invoices', model.summary.taxShown]]) {
-                        ensureSpace(7); pdf.setFontSize(9); pdf.setTextColor(71, 85, 105); pdf.text(label, left, y); pdf.setFont('helvetica', 'bold'); pdf.setTextColor(15, 23, 42); pdf.text(money(value), pageWidth - right, y, { align: 'right' }); pdf.setFont('helvetica', 'normal'); y += 6;
+                    const continuationHeader = () => {
+                        pdf.setFillColor(...colours.navy); pdf.rect(0, 0, pageWidth, 12, 'F');
+                        pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8); pdf.setTextColor(...colours.white); pdf.text('Tallyo', left, 7.8);
+                        pdf.setFont('helvetica', 'normal'); pdf.setTextColor(203, 213, 225); pdf.text('Income summary', pageWidth - right, 7.8, { align: 'right' });
+                        y = 22;
+                    };
+                    const ensureSpace = height => { if (y + height <= pageHeight - 17) return; pdf.addPage(); continuationHeader(); };
+                    const writeLines = (text, size = 8.5, color = colours.muted, gap = 4.2, width = contentWidth, x = left) => {
+                        pdf.setFont('helvetica', 'normal'); pdf.setFontSize(size); pdf.setTextColor(...color);
+                        const lines = pdf.splitTextToSize(String(text), width);
+                        ensureSpace(lines.length * gap + 2); pdf.text(lines, x, y); y += lines.length * gap + 2;
+                    };
+                    const sectionHeading = (title, eyebrow = '') => {
+                        ensureSpace(15);
+                        if (eyebrow) { pdf.setFont('helvetica', 'bold'); pdf.setFontSize(6.8); pdf.setTextColor(...colours.indigo); pdf.text(eyebrow.toUpperCase(), left, y); y += 4.5; }
+                        pdf.setFont('helvetica', 'bold'); pdf.setFontSize(12.5); pdf.setTextColor(...colours.navy); pdf.text(title, left, y); y += 7;
+                    };
+                    const metricCard = (x, top, width, label, value, accent) => {
+                        pdf.setFillColor(...colours.slatePale); pdf.setDrawColor(...colours.line); pdf.roundedRect(x, top, width, 16, 2.5, 2.5, 'FD');
+                        pdf.setFillColor(...accent); pdf.roundedRect(x, top, 2.3, 16, 1.2, 1.2, 'F');
+                        pdf.setFont('helvetica', 'normal'); pdf.setFontSize(6.8); pdf.setTextColor(...colours.muted); pdf.text(label.toUpperCase(), x + 5, top + 5.4);
+                        pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10.5); pdf.setTextColor(...colours.navy); pdf.text(value, x + 5, top + 12);
+                    };
+                    const table = (title, rows, emptyMessage, note = '') => {
+                        sectionHeading(title, 'Breakdown');
+                        if (!rows.length) {
+                            pdf.setFillColor(...colours.slatePale); pdf.roundedRect(left, y, contentWidth, 13, 2.5, 2.5, 'F');
+                            y += 5.5; writeLines(emptyMessage, 8, colours.muted, 4, contentWidth - 10, left + 5); y += 2;
+                            return;
+                        }
+                        for (let index = 0; index < rows.length; index += 1) {
+                            ensureSpace(9);
+                            if (index % 2 === 0) { pdf.setFillColor(...colours.slatePale); pdf.roundedRect(left, y - 4.8, contentWidth, 8, 1.5, 1.5, 'F'); }
+                            const label = pdf.splitTextToSize(String(rows[index][0]), contentWidth - 58)[0];
+                            pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8); pdf.setTextColor(...colours.ink); pdf.text(label, left + 4, y);
+                            pdf.setFont('helvetica', 'bold'); pdf.setTextColor(...colours.navy); pdf.text(String(rows[index][1]), pageWidth - right - 4, y, { align: 'right' });
+                            y += 8;
+                        }
+                        if (note) writeLines(note, 7.5, colours.muted, 3.8);
+                        y += 2;
+                    };
+
+                    pdf.setFillColor(...colours.navy); pdf.roundedRect(left, y, contentWidth, 42, 4, 4, 'F');
+                    pdf.setFillColor(...colours.blue); pdf.roundedRect(left + 8, y + 8, 11, 3.5, 1.2, 1.2, 'F');
+                    pdf.setFillColor(...colours.mint); pdf.roundedRect(left + 13, y + 11, 3.5, 9, 1.2, 1.2, 'F');
+                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(11); pdf.setTextColor(...colours.white); pdf.text('Tallyo', left + 23, y + 14);
+                    pdf.setFillColor(...colours.indigo); pdf.roundedRect(pageWidth - right - 35, y + 8, 27, 9, 4.5, 4.5, 'F');
+                    pdf.setFontSize(6.5); pdf.text('INCOME ONLY', pageWidth - right - 21.5, y + 13.8, { align: 'center' });
+                    pdf.setFontSize(20); pdf.text('Income summary', left + 8, y + 29);
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8.5); pdf.setTextColor(203, 213, 225); pdf.text(model.metadata.businessName || 'Business name not recorded', left + 8, y + 36);
+                    pdf.text(`${model.metadata.currency} | ${model.metadata.period.from || 'All dates'} to ${model.metadata.period.to || 'All dates'}`, pageWidth - right - 8, y + 36, { align: 'right' });
+                    y += 48;
+
+                    pdf.setFillColor(...colours.indigoPale); pdf.setDrawColor(199, 210, 254); pdf.roundedRect(left, y, contentWidth, 16, 3, 3, 'FD');
+                    pdf.setFillColor(...colours.indigo); pdf.circle(left + 7, y + 8, 2.2, 'F');
+                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(7); pdf.setTextColor(...colours.white); pdf.text('i', left + 7, y + 9.2, { align: 'center' });
+                    const noticeLines = pdf.splitTextToSize(model.notice, contentWidth - 20);
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8); pdf.setTextColor(55, 48, 163); pdf.text(noticeLines, left + 13, y + 6.2);
+                    y += 21;
+
+                    sectionHeading('Selected-period summary', 'At a glance');
+                    const metrics = [
+                        ['Invoiced', model.summary.invoiced, colours.blue], ['Received', model.summary.received, colours.mint],
+                        ['Refunds', model.summary.refunds, colours.indigo], ['Net received', model.summary.netReceived, colours.mint],
+                        ['Outstanding', model.summary.outstanding, colours.blue], ['Overdue', model.summary.overdue, colours.amber],
+                        ['Tax shown', model.summary.taxShown, colours.indigo]
+                    ];
+                    const cardGap = 3, cardWidth = (contentWidth - cardGap * 3) / 4;
+                    for (let index = 0; index < metrics.length; index += 1) {
+                        const row = Math.floor(index / 4), column = index % 4;
+                        metricCard(left + column * (cardWidth + cardGap), y + row * 19, cardWidth, metrics[index][0], money(metrics[index][1]), metrics[index][2]);
                     }
-                    y += 3; heading('Record checks');
-                    writeLines(`${model.readiness.ready} of ${model.readiness.total} records are organised. ${model.readiness.needsReview} need review and ${model.readiness.excludedFromTotals} are excluded from totals.`, 9);
-                    for (const group of model.readiness.groups) writeLines(`${group.count} - ${group.message}`, 8);
-                    heading('Net received by customer');
-                    for (const customer of model.customers.slice(0, 10)) writeLines(`${customer.name}: ${money(customer.netReceived)}`, 8);
-                    if (model.customers.length > 10) writeLines(`${model.customers.length - 10} more customers are listed in customer-income-summary.csv.`, 8);
-                    heading('Net received by month');
+                    y += 39;
+
+                    sectionHeading('Record checks', 'Confidence');
+                    ensureSpace(26);
+                    pdf.setFillColor(...colours.slatePale); pdf.setDrawColor(...colours.line); pdf.roundedRect(left, y, contentWidth, 22, 3, 3, 'FD');
+                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(11); pdf.setTextColor(...colours.navy); pdf.text(`${model.readiness.ready} of ${model.readiness.total}`, left + 6, y + 9);
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7); pdf.setTextColor(...colours.muted); pdf.text('records organised', left + 6, y + 15);
+                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(9); pdf.setTextColor(...colours.amber); pdf.text(`${model.readiness.needsReview}`, left + 62, y + 9);
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7); pdf.setTextColor(...colours.muted); pdf.text('need review', left + 62, y + 15);
+                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(9); pdf.setTextColor(...colours.ink); pdf.text(`${model.readiness.excludedFromTotals}`, left + 105, y + 9);
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7); pdf.setTextColor(...colours.muted); pdf.text('excluded from totals', left + 105, y + 15);
+                    const progress = model.readiness.total ? Math.max(0, Math.min(1, model.readiness.ready / model.readiness.total)) : 0;
+                    pdf.setFillColor(226, 232, 240); pdf.roundedRect(left + 6, y + 17.5, contentWidth - 12, 2.4, 1.2, 1.2, 'F');
+                    if (progress) { pdf.setFillColor(...colours.mint); pdf.roundedRect(left + 6, y + 17.5, (contentWidth - 12) * progress, 2.4, 1.2, 1.2, 'F'); }
+                    y += 27;
+                    for (const group of model.readiness.groups) writeLines(`${group.count} record${group.count === 1 ? '' : 's'}: ${group.message}`, 7.8, colours.muted, 4);
+
+                    const customers = model.customers.slice(0, 10).map(customer => [customer.name, money(customer.netReceived)]);
+                    table('Net received by customer', customers, 'No customer receipts were recorded in this period.', model.customers.length > 10 ? `${model.customers.length - 10} more customers are included in customer-income-summary.csv.` : '');
                     const activePeriods = model.periods.filter(period => Math.abs(period.netReceived) > 0.001);
-                    if (!activePeriods.length) writeLines('No dated payments or refunds were recorded in the selected period.', 8);
-                    for (const period of activePeriods.slice(0, 12)) writeLines(`${period.month}: ${money(period.netReceived)}`, 8);
-                    if (activePeriods.length > 12) writeLines(`${activePeriods.length - 12} more months are listed in income-by-period.csv.`, 8);
-                    heading('Important limitations');
-                    for (const limitation of model.limitations) writeLines(`- ${limitation}`, 8);
+                    table('Net received by month', activePeriods.slice(0, 12).map(period => [period.month, money(period.netReceived)]), 'No dated payments or refunds were recorded in the selected period.', activePeriods.length > 12 ? `${activePeriods.length - 12} more months are included in income-by-period.csv.` : '');
+
+                    const limitationLines = model.limitations.flatMap(limitation => pdf.splitTextToSize(limitation, contentWidth - 16));
+                    const limitationHeight = limitationLines.length * 3.9 + model.limitations.length * 3 + 5;
+                    ensureSpace(limitationHeight + 15);
+                    sectionHeading('Important limitations', 'Before you share');
+                    pdf.setFillColor(...colours.amberPale); pdf.setDrawColor(253, 230, 138); pdf.roundedRect(left, y, contentWidth, limitationHeight, 3, 3, 'FD');
+                    let limitationY = y + 6;
+                    for (const limitation of model.limitations) {
+                        const lines = pdf.splitTextToSize(limitation, contentWidth - 16);
+                        pdf.setFillColor(...colours.amber); pdf.circle(left + 6, limitationY - 1, 1.1, 'F');
+                        pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7.6); pdf.setTextColor(...colours.ink); pdf.text(lines, left + 10, limitationY);
+                        limitationY += lines.length * 3.9 + 3;
+                    }
+                    y += limitationHeight + 4;
+
                     const pages = pdf.getNumberOfPages();
-                    for (let page = 1; page <= pages; page += 1) { pdf.setPage(page); pdf.setFontSize(7); pdf.setTextColor(100, 116, 139); pdf.text(`Tallyo income summary | Page ${page} of ${pages}`, left, pageHeight - 8); }
+                    for (let page = 1; page <= pages; page += 1) {
+                        pdf.setPage(page); pdf.setDrawColor(...colours.line); pdf.line(left, pageHeight - 13, pageWidth - right, pageHeight - 13);
+                        pdf.setFont('helvetica', 'normal'); pdf.setFontSize(6.8); pdf.setTextColor(...colours.muted);
+                        pdf.text(`Export ${model.metadata.exportVersion} | Calculation ${model.metadata.calculationVersion} | Generated ${model.metadata.generatedAt}`, left, pageHeight - 8);
+                        pdf.text(`Page ${page} of ${pages}`, pageWidth - right, pageHeight - 8, { align: 'right' });
+                    }
                     this.downloadPdfFile(pdf, model.filename);
                 } catch (error) {
                     console.error('Income PDF export failed:', error);
