@@ -25,20 +25,22 @@ Task ID: FIN-INSIGHTS-001
 Title: Build shared income calculations from data Tallyo already records
 Priority: Medium
 Status: Owner review
-Phase: Phase 1 - shared read-only calculation module
+Phase: Phase 2 - customer financial visuals
 Owner role: Product owner
 Risk level: Medium implementation with financially material read-only calculations requiring focused review; no write, provider or production-release path
-Branch: `codex/income-insights-phase1`
+Branch: `codex/income-insights-phase2`
 Scope: extend the released Overview and customer financial context with an accessible Finances area, customer visuals, income ledger, UK period presentation and income-only exports derived from existing invoices, dated manual and Stripe-confirmed payments, refunds, recurring origin and accepted-quote linkage
 Product boundary: always say income recorded in Tallyo; keep currencies separate; exclude quotes, Draft/Cancelled invoices and unsupported records according to the reviewed calculation contract; preserve refunds as explicit adjustments
 Excluded: expenses, receipt capture, bank feeds, bookkeeping, profit, tax estimates, VAT liability, HMRC APIs/submission, compliance claims, migrations, RLS changes, Stripe/provider changes, live transactions, customer communications and production publication
 Authoritative design: `docs/architecture/INCOME_INSIGHTS_AND_MTD_SUPPORT_PLAN.md`
 Phase 0 review artifacts: `docs/design/income-insights-phase0/README.md`, with desktop/mobile business and customer Finances references plus loading, empty, error, mixed-currency and needs-review states
 Phase 0 approval: Owner approved the wording, layouts, calculation examples and review states; PR #203 merged at `668a32d22ac51bcea7381a1469bf1cb90637e894`
-Phase 1 implementation: `income-insights.js` supplies one pure canonical result grouped by period, currency, customer and workflow source, plus exact ledger and readiness records; it is not loaded by the production application in this phase
-Acceptance for this phase: full, partial, deposit and refunded invoices reconcile; quote/Draft/Cancelled/standalone-credit rules follow the contract; current Overview semantics remain characterised; no migration, write path or provider call
-Validation: `income-insights-harness.cjs` passes the full Phase 1 fixture matrix; focused Overview, customer, document-status, refund-consequence and financial-audit regressions pass; the security workflow runs the new harness
-Next action: obtain focused Owner review of the Phase 1 calculation module before Phase 2 customer financial visuals begin
+Phase 1 implementation: `income-insights.js` supplies one pure canonical result grouped by period, currency, customer and workflow source, plus exact ledger and readiness records; Phase 1 merged without loading it in the application
+Phase 1 approval: Owner approved PR #204; it merged as `ed638d054d5ed471536cc804a0b723f2ed148731` with Security and both Pages checks passing
+Phase 2 implementation: the gated customer detail area consumes the shared module and shows six exact figures, monthly receipts with a written-value table, labelled payment position, workflow source and recent money activity; public configuration remains disabled and the build requires separate release approval before enablement
+Acceptance for this phase: only the selected customer ID contributes; historical snapshots are never rewritten; currencies stay separate; exact values do not depend on colour or chart interpretation; no new data collection, migration, write path, provider call or third-party chart request
+Validation: focused calculation, customer UI, customer context, PWA and Cloudflare build-readiness harnesses pass; the fictional browser acceptance passes keyboard interaction and 320/390/768/1024/1440 px layouts with all external requests blocked
+Next action: obtain focused Owner review of the Phase 2 customer visuals before Phase 3 business-level Finances overview begins
 
 ## DEPENDENCY-MAINTENANCE-001 — Refresh pinned build and Edge dependencies
 
