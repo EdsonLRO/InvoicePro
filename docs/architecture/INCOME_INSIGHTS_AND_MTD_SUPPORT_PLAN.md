@@ -1,6 +1,6 @@
 # Income insights and MTD-supporting records plan
 
-Status: Phases 0-5 are Owner-approved. Phase 5 Income Pack exports remain behind the same fail-closed public-release gate; no public activation is approved.
+Status: Phases 0-5 are Owner-approved. Phase 6 release hardening is in progress on app build `2026.10.06.1`; the checked-in feature gate remains disabled and no public activation is approved.
 
 Last reviewed: 6 October 2026.
 
@@ -14,7 +14,7 @@ The customer-facing name is **Finances**. The page describes its figures as **in
 
 ## Phase 1 implementation reference
 
-`income-insights.js` is the single pure calculation module for the future Overview, Customer and Finances consumers. It accepts only the invoice documents already loaded for the authenticated owner and performs no database query, provider request, write, payment action, email, analytics or browser-storage access.
+`income-insights.js` is the single pure calculation module used by the Overview, Customer and Finances consumers. It accepts only the invoice documents already loaded for the authenticated owner and performs no database query, provider request, write, payment action, email, analytics or browser-storage access.
 
 Its canonical result contains:
 
@@ -369,7 +369,7 @@ Exit criteria:
 - all currencies remain separated;
 - no new data collection.
 
-Implementation state: complete for focused Owner review. Public activation remains reserved for Phase 6 release hardening and approval.
+Implementation state: Owner-approved through PR #205. Public activation remains reserved for Phase 6 release hardening and separate approval.
 
 ### Phase 3 — Finances overview
 
@@ -388,7 +388,7 @@ Exit criteria:
 - calculations match the shared module and CSV fixtures;
 - no chart library or third-party network request unless separately approved.
 
-Implementation state: complete for focused Owner review. Public activation remains reserved for Phase 6 release hardening and approval.
+Implementation state: Owner-approved through PR #206. Public activation remains reserved for Phase 6 release hardening and separate approval.
 
 ### Phase 4 — Income records and period view
 
@@ -405,7 +405,7 @@ Exit criteria:
 - current HMRC dates and cumulative-period interpretation are rechecked before release;
 - no HMRC credentials, API, filing or compatibility claim.
 
-Implementation state: complete for focused Owner review. Public activation remains reserved for Phase 6 release hardening and approval.
+Implementation state: Owner-approved through PR #207. Public activation remains reserved for Phase 6 release hardening and separate approval.
 
 ### Phase 5 — Income Pack exports
 
@@ -426,6 +426,10 @@ Exit criteria:
 Implementation state: Owner-approved on 6 October 2026 through PR #208. Public activation remains reserved for Phase 6 release hardening and separate approval.
 
 ### Phase 6 — Release hardening and controlled publication
+
+Implementation state: Owner authorised Phase 6 preparation on 6 October 2026. The release candidate is frontend-only and preserves the fail-closed build gate. Merge and production publication remain separately reserved for approval of the exact validated candidate.
+
+Validation state: the complete Node, website, Deno and frozen-lock Edge Function suites pass. Eleven isolated-Chrome app suites pass with fictional data and blocked non-loopback traffic; the Phase 6 Finances acceptance covers all four views at 320-1440 px, accessible exact values, keyboard focus, invalid/empty/mixed-currency states and real local export downloads. The candidate wording preserves every reviewed limitation and makes no tax, accounting, compliance or HMRC-submission claim.
 
 Deliverables:
 
@@ -468,4 +472,4 @@ At minimum, fixtures cover:
 
 Planning and fictional-data design are Medium risk. Calculation logic becomes financially material and requires focused review before merge. Any migration, server aggregation, RLS change, Stripe runtime change, live transaction, public tax claim, HMRC integration or production release is separately gated.
 
-This plan does not authorise implementation, deployment or public claims. Phase 0 design work is the next proposed action.
+This plan records the implemented and Owner-approved Phases 0-5 and the validated Phase 6 release candidate. It does not by itself authorise merge, production publication, provider changes or any broader tax, accounting, compliance or HMRC claim.

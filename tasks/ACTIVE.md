@@ -24,11 +24,11 @@ Next action: merge the repository pin, regression assertion and authoritative re
 Task ID: FIN-INSIGHTS-001
 Title: Build shared income calculations from data Tallyo already records
 Priority: Medium
-Status: Phase 5 Owner-approved; public release remains disabled
-Phase: Phase 5 - Income Pack exports
+Status: Phase 6 release candidate in progress; public release remains disabled
+Phase: Phase 6 - Release hardening and controlled publication
 Owner role: Product owner
 Risk level: Medium implementation with financially material read-only calculations requiring focused review; no write, provider or production-release path
-Branch: `codex/income-insights-phase5`
+Branch: `codex/income-insights-phase6`
 Scope: extend the released Overview and customer financial context with an accessible Finances area, customer visuals, income ledger, UK period presentation and income-only exports derived from existing invoices, dated manual and Stripe-confirmed payments, refunds, recurring origin and accepted-quote linkage
 Product boundary: always say income recorded in Tallyo; keep currencies separate; exclude quotes, Draft/Cancelled invoices and unsupported records according to the reviewed calculation contract; preserve refunds as explicit adjustments
 Excluded: expenses, receipt capture, bank feeds, bookkeeping, profit, tax estimates, VAT liability, HMRC APIs/submission, compliance claims, migrations, RLS changes, Stripe/provider changes, live transactions, customer communications and production publication
@@ -47,7 +47,9 @@ Phase 5 implementation: the gated Prepare income records view creates six versio
 Acceptance for this phase: export rows reconcile before any file is created; currencies remain separate; formulas are neutralised; file order and decimals are deterministic; the pack repeats the income-only/non-filing boundary; no database query, provider call, storage write, customer contact detail, migration, tax calculation or public activation is added
 Validation: focused export, calculation, ledger, account-export, tenant-isolation, financial-audit, scale and UI harnesses pass; a 2,005-record pack remains exact; browser acceptance produces real CSV, manifest and PDF files, tests all four Finances views from 320-1440 px and makes no external request; the fictional PDF renders cleanly through Poppler with no clipping or overlap
 Phase 5 approval: Owner approved the Income Pack exports and redesigned PDF on 6 October 2026. PR #208 remains fail-closed for public release and does not activate the feature.
-Next action: Phase 6 release hardening and controlled publication remain separate work requiring explicit Owner approval.
+Phase 6 candidate: app build `2026.10.06.1` / cache `tallyo-shell-2026-10-06-1` is being hardened through the full application, accessibility, responsive, security, export and fictional-data acceptance suites. The checked-in feature flag remains false and the build continues to reject an enabled feature unless the separate public-release approval variable is also true.
+Phase 6 validation: all 51 Node application/security harnesses, the complete website suite, four Deno runtime suites, all 21 frozen-lock Edge Function checks and 11 isolated-Chrome app suites pass. The fictional Finances walkthrough covers every view from 320-1440 px, keyboard/accessibility behavior and real local export downloads with zero external requests or uncaught page errors. The current public wording remains explicitly income-only, keeps currencies separate and makes no tax, accounting, compliance or HMRC-submission claim.
+Next action: publish the pull request and obtain explicit Owner approval of the exact candidate before merge and production publication.
 
 ## DEPENDENCY-MAINTENANCE-001 — Refresh pinned build and Edge dependencies
 
