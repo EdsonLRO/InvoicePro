@@ -121,6 +121,7 @@ assert.equal(qualityGbp.summary.customerCount, 1, 'missing customer metadata nev
 assert.equal(qualityUnknown.summary.received, 0);
 assert.equal(qualityUnknown.summary.invoiced, 0, 'invalid currency records never produce a labelled monetary total');
 assert.ok(quality.readiness.issues.some(issue => issue.code === 'paid_without_dated_payment'));
+assert.equal(qualityGbp.records.filter(record => record.invoiceId === 'PAID-NO-EVIDENCE' && record.recordType === 'review').length, 1, 'one unsupported Paid invoice produces one review ledger row');
 assert.ok(quality.readiness.issues.some(issue => issue.code === 'missing_payment_date' && issue.affectsTotals));
 assert.ok(quality.readiness.issues.some(issue => issue.code === 'payment_exceeds_invoice_total' && !issue.affectsTotals));
 assert.ok(quality.readiness.issues.some(issue => issue.code === 'payment_currency_mismatch' && issue.affectsTotals));

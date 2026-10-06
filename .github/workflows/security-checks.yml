@@ -64,6 +64,7 @@ jobs:
           node tests/income-insights-harness.cjs
           node tests/income-insights-customer-ui-harness.cjs
           node tests/income-insights-finances-ui-harness.cjs
+          node tests/income-insights-records-ui-harness.cjs
           node tests/invoice-template-preferences-harness.cjs
           deno run --allow-env tests/invoice-template-pdf-runtime-test.ts
           node tests/mfa-recovery-harness.cjs

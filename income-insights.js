@@ -354,6 +354,7 @@
       for (const code of context.documentIssueCodes) addIssue(issues, code, { affectsTotals: code === 'invalid_currency' || code === 'missing_issue_date', documentId, invoiceReference: reference });
 
       const paymentResult = canonicalPaymentRows(document, context);
+      let reviewRecordAdded = false;
       const allPayments = Array.isArray(document.payments) ? document.payments : [];
       const allNetPaid = roundMoney(allPayments.reduce((sum, payment) => sum + (finiteNumber(payment && payment.amount) || 0), 0));
       const issued = !['Draft', 'Cancelled'].includes(status);
@@ -382,10 +383,13 @@
       if (status === 'Paid' && !datedPositive && issueApplies(date, period)) {
         addIssue(issues, 'paid_without_dated_payment', { affectsTotals: true, documentId, invoiceReference: reference });
         context.documentIssueCodes.push('paid_without_dated_payment');
-        if (!paymentResult.rows.length) records.push(makeReviewRecord(document, context, context.documentIssueCodes, 'paid-without-payment'));
+        if (!paymentResult.rows.length) {
+          records.push(makeReviewRecord(document, context, context.documentIssueCodes, 'paid-without-payment'));
+          reviewRecordAdded = true;
+        }
       }
 
-      if (paymentResult.rows.length === 0 && context.documentIssueCodes.length && issuedInPeriod) {
+      if (paymentResult.rows.length === 0 && context.documentIssueCodes.length && issuedInPeriod && !reviewRecordAdded) {
         records.push(makeReviewRecord(document, context, context.documentIssueCodes, 'invoice'));
       }
 

@@ -52,6 +52,27 @@ const path = require('node:path');
     assert.ok(await monthly.locator('table').isVisible(), 'exact monthly values are keyboard accessible');
     assert.ok(await monthly.locator('tbody tr').count() > 0);
 
+    await finances.getByRole('button', { name: 'View records', exact: true }).first().click();
+    await page.waitForURL('**/#finances-records');
+    assert.ok(await finances.getByRole('heading', { name: 'Income records', exact: true }).isVisible());
+    assert.ok(await finances.locator('.income-record-table tbody tr').count() > 0);
+    await finances.getByLabel('Income records readiness').selectOption('ready');
+    assert.ok(await finances.locator('.income-record-table tbody tr').count() > 0);
+    await finances.getByLabel('Income records readiness').selectOption('all');
+    await page.goBack(); await page.waitForURL('**/#finances');
+    assert.ok(await finances.getByRole('heading', { name: 'Money received over time' }).isVisible());
+    await finances.getByRole('button', { name: 'UK income periods', exact: true }).click();
+    await page.waitForURL('**/#finances-periods');
+    assert.equal(await finances.locator('.uk-period-card').count(), 4);
+    assert.match(await finances.innerText(), /Nothing is filed with or sent to HMRC/);
+    await finances.locator('.uk-period-card').nth(1).getByRole('button', { name: 'View period records', exact: true }).click();
+    await page.waitForURL('**/#finances-records');
+    assert.equal(await finances.getByLabel('Finances period').inputValue(), 'custom');
+    assert.equal(await finances.getByLabel('Finances custom start date').inputValue(), '2026-07-06');
+    assert.equal(await finances.getByLabel('Finances custom end date').inputValue(), '2026-10-05');
+    await finances.getByRole('button', { name: 'Overview', exact: true }).click();
+    await page.waitForURL('**/#finances');
+
     await finances.getByLabel('Finances period').selectOption('custom');
     await finances.getByLabel('Finances custom start date').fill('2026-10-02');
     await finances.getByLabel('Finances custom end date').fill('2026-10-01');
@@ -78,11 +99,14 @@ const path = require('node:path');
     await mkdir(path.join(root, 'tmp/redesign-evidence'), { recursive: true });
     for (const width of [320, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
-      assert.ok(await finances.evaluate(el => el.scrollWidth <= el.clientWidth + 1), 'Finances has no horizontal scrolling at ' + width);
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'page has no horizontal overflow at ' + width);
-      if ([390, 1440].includes(width)) {
-        await page.locator('#main-content').evaluate(el => { el.scrollTop = 0; });
-        await page.screenshot({ path: path.join(root, `tmp/redesign-evidence/phase3-finances-${width}.png`) });
+      for (const view of ['overview', 'records', 'periods']) {
+        await page.evaluate(view => { document.querySelector('#app').__vue_app__._container._vnode.component.proxy.financesView = view; }, view);
+        assert.ok(await finances.evaluate(el => el.scrollWidth <= el.clientWidth + 1), `${view} has no horizontal scrolling at ${width}`);
+        assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `page has no horizontal overflow for ${view} at ${width}`);
+        if ([390, 1440].includes(width)) {
+          await page.locator('#main-content').evaluate(el => { el.scrollTop = 0; });
+          await page.screenshot({ path: path.join(root, `tmp/redesign-evidence/phase4-${view}-${width}.png`) });
+        }
       }
     }
 
@@ -101,11 +125,12 @@ const path = require('node:path');
       vm.invoices = [];
       vm.financesPeriodChoice = 'this_tax_year';
       vm.financesCurrencyChoice = '';
+      vm.financesView = 'overview';
     });
     await finances.getByRole('heading', { name: 'No income records to show for this period' }).waitFor();
     assert.deepEqual(outside, []);
     assert.deepEqual(errors, []);
-    console.log('Phase 3 Finances browser passed: direct desktop/mobile navigation, canonical values, five accessible visuals, keyboard exact values, period errors, separate currencies, empty state, 320-1440px layouts and zero external requests.');
+    console.log('Phase 4 Finances browser passed: direct desktop/mobile navigation, canonical values, filtered income records, UK period routes, keyboard exact values, period errors, separate currencies, empty state, all three views at 320-1440px and zero external requests.');
   } finally {
     await context.close();
     await browser.close();

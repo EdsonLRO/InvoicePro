@@ -25,10 +25,10 @@ Task ID: FIN-INSIGHTS-001
 Title: Build shared income calculations from data Tallyo already records
 Priority: Medium
 Status: Owner review
-Phase: Phase 3 - business Finances overview
+Phase: Phase 4 - income records and UK period presentation
 Owner role: Product owner
 Risk level: Medium implementation with financially material read-only calculations requiring focused review; no write, provider or production-release path
-Branch: `codex/income-insights-phase3`
+Branch: `codex/income-insights-phase4`
 Scope: extend the released Overview and customer financial context with an accessible Finances area, customer visuals, income ledger, UK period presentation and income-only exports derived from existing invoices, dated manual and Stripe-confirmed payments, refunds, recurring origin and accepted-quote linkage
 Product boundary: always say income recorded in Tallyo; keep currencies separate; exclude quotes, Draft/Cancelled invoices and unsupported records according to the reviewed calculation contract; preserve refunds as explicit adjustments
 Excluded: expenses, receipt capture, bank feeds, bookkeeping, profit, tax estimates, VAT liability, HMRC APIs/submission, compliance claims, migrations, RLS changes, Stripe/provider changes, live transactions, customer communications and production publication
@@ -40,9 +40,11 @@ Phase 1 approval: Owner approved PR #204; it merged as `ed638d054d5ed471536cc804
 Phase 2 implementation: the gated customer detail area consumes the shared module and shows six exact figures, monthly receipts with a written-value table, labelled payment position, workflow source and recent money activity; public configuration remains disabled and the build requires separate release approval before enablement
 Phase 2 approval: Owner approved PR #205; it merged as `bfbec4421b53bb93d25fdf95ba7684de7c6c48db` with Security and both Pages checks passing
 Phase 3 implementation: the gated first-level Finances destination consumes the shared module and adds period/currency controls, six exact summaries, five accessible visuals, grouped record-readiness issues and plain-language calculation boundaries; mobile keeps direct Finances navigation and the existing More menu
-Acceptance for this phase: exact values remain available without interpreting charts; currencies never combine; invalid periods fail clearly; the empty and needs-review states preserve uncertainty; no migration, write path, provider call, new data collection or third-party chart request is added
-Validation: focused calculation, Phase 2 customer, Phase 3 Finances, Overview, navigation and security harnesses pass; fictional browser acceptance passes desktop/mobile routing, keyboard exact values, invalid-period recovery, separate currencies, empty state and 320/390/768/1024/1440 px layouts with all external requests blocked
-Next action: obtain focused Owner review of the Phase 3 business Finances overview before Phase 4 income records and period presentation begins
+Phase 3 approval: Owner approved PR #206; it merged as `f71c95d0732d8513a4f466908bcabb46a974c485` with Security and both Pages checks passing
+Phase 4 implementation: the gated Income records view adds a traceable filterable ledger, the UK income-period view separates three-month activity from cumulative tax-year-to-date figures, and Overview/period visuals link to the exact supporting records; a duplicate review-row edge case for Paid invoices without dated payment evidence is corrected without changing totals
+Acceptance for this phase: filtered and period totals reconcile to the canonical ledger; currencies remain separate; the page repeats the income-only and non-filing boundary; no HMRC credential, API, filing or compatible-software claim is added; no migration, write path, provider call, new data collection or third-party request is added
+Validation: focused calculation, customer, Finances overview and Phase 4 ledger/period harnesses pass; fictional browser acceptance passes direct desktop/mobile routing, filters, exact period links, keyboard behaviour, invalid-period recovery, separate currencies, empty state and all three Finances views at 320/390/768/1024/1440 px with all external requests blocked; standard UK dates and deadlines were rechecked against current HMRC guidance on 6 October 2026
+Next action: obtain focused Owner review of Phase 4 before Phase 5 Income Pack exports begin
 
 ## DEPENDENCY-MAINTENANCE-001 — Refresh pinned build and Edge dependencies
 
