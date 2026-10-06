@@ -39,6 +39,7 @@
     <script src="./config.js"></script>
     <script src="./app-user-messages.js"></script>
     <script src="./customer-csv-import.js"></script>
+    <script src="./income-insights.js"></script>
     <script type="module" src="./analytics-app.js"></script>
 
     <style>
@@ -605,6 +606,56 @@
         .customer-document:focus-visible { outline:2px solid #818cf8; outline-offset:-2px; }
         .customer-schedule { padding:14px 0; border-top:1px solid #edf1f6; }
         .customer-schedule p { font-size:13px; color:#64748b; margin:6px 0; }
+        .customer-finances { margin:16px 0 24px; }
+        .customer-finances-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px; }
+        .customer-finances-heading h3 { font-size:21px; font-weight:650; color:#0f172a; }
+        .customer-finances-heading p { margin-top:5px; color:#64748b; font-size:14px; }
+        .customer-finance-scope { display:flex; gap:10px; padding:12px 14px; border:1px solid #c7d2fe; border-radius:12px; background:#eef2ff; color:#3730a3; font-size:13px; line-height:1.55; }
+        .customer-finance-scope::before { content:'i'; flex:0 0 20px; height:20px; border:1px solid currentColor; border-radius:50%; text-align:center; font-weight:700; line-height:18px; }
+        .customer-finance-kpis { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:14px 0; }
+        .customer-finance-kpis > div { min-width:0; padding:16px; border:1px solid #dce4ef; border-radius:12px; background:#fff; }
+        .customer-finance-kpis dt { color:#64748b; font-size:12px; font-weight:650; }
+        .customer-finance-kpis dd { margin-top:5px; color:#0f172a; font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+        .customer-finance-kpis small { display:block; margin-top:4px; color:#64748b; font-size:11px; line-height:1.35; }
+        .customer-finance-kpis .is-positive { border-color:#bbf7d0; background:#f0fdf4; }
+        .customer-finance-kpis .is-refund { border-color:#fde68a; background:#fffbeb; }
+        .customer-finance-kpis .is-overdue { border-color:#fecaca; background:#fff7f7; }
+        .customer-finance-empty { padding:26px; border:1px dashed #cbd5e1; border-radius:12px; background:#fff; text-align:center; color:#64748b; }
+        .customer-finance-empty strong { display:block; margin-bottom:6px; color:#0f172a; font-size:16px; }
+        .customer-finance-visuals, .customer-finance-supporting { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(260px,.65fr); gap:14px; margin-top:14px; }
+        .customer-finance-card { min-width:0; padding:18px; border:1px solid #dce4ef; border-radius:12px; background:#fff; }
+        .customer-finance-card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+        .customer-finance-card h4 { color:#0f172a; font-size:16px; font-weight:650; }
+        .customer-finance-card-head p { margin-top:4px; color:#64748b; font-size:12px; }
+        .customer-finance-card-head > span { color:#64748b; font-size:11px; font-weight:700; letter-spacing:.06em; }
+        .customer-receipts-chart { display:flex; align-items:flex-end; gap:10px; height:180px; padding:16px 6px 0; border-bottom:1px solid #cbd5e1; background:repeating-linear-gradient(to bottom,#fff 0,#fff 44px,#eef2f7 45px); }
+        .customer-receipts-column { display:flex; flex:1 1 0; min-width:0; height:100%; flex-direction:column; justify-content:flex-end; align-items:center; gap:7px; }
+        .customer-receipts-bar { width:min(34px,70%); min-height:3px; border-radius:7px 7px 2px 2px; background:linear-gradient(180deg,#6366f1,#4338ca); }
+        .customer-receipts-bar.is-negative { background:repeating-linear-gradient(135deg,#f59e0b 0 6px,#fbbf24 6px 12px); }
+        .customer-receipts-column span { color:#64748b; font-size:11px; white-space:nowrap; }
+        .customer-exact-values { margin-top:12px; border-top:1px solid #edf1f6; }
+        .customer-exact-values summary { min-height:44px; display:flex; align-items:center; cursor:pointer; color:#4338ca; font-size:13px; font-weight:650; }
+        .customer-exact-values table { width:100%; border-collapse:collapse; font-size:12px; }
+        .customer-exact-values th, .customer-exact-values td { padding:8px 4px; border-top:1px solid #edf1f6; text-align:left; }
+        .customer-exact-values th:last-child, .customer-exact-values td:last-child { text-align:right; font-variant-numeric:tabular-nums; }
+        .customer-position-layout { display:grid; place-items:center; gap:16px; }
+        .customer-position-donut { display:grid; place-items:center; width:154px; aspect-ratio:1; border-radius:50%; }
+        .customer-position-donut::before { content:''; grid-area:1/1; width:94px; aspect-ratio:1; border-radius:50%; background:#fff; }
+        .customer-position-donut > span { grid-area:1/1; z-index:1; text-align:center; color:#64748b; font-size:11px; }
+        .customer-position-donut strong { display:block; color:#0f172a; font-size:18px; font-variant-numeric:tabular-nums; }
+        .customer-position-list, .customer-source-list, .customer-money-activity { width:100%; }
+        .customer-position-list li, .customer-source-list li { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:9px; padding:8px 0; border-top:1px solid #edf1f6; font-size:13px; }
+        .customer-position-list i { width:9px; height:9px; border-radius:50%; background:#22c55e; }
+        .customer-position-list .is-due i { background:#f59e0b; }
+        .customer-position-list .is-overdue i { background:#ef4444; }
+        .customer-position-list strong, .customer-source-list strong { font-variant-numeric:tabular-nums; }
+        .customer-source-list li { grid-template-columns:minmax(0,1fr) auto; }
+        .customer-source-list small { display:block; margin-top:3px; color:#64748b; font-size:11px; }
+        .customer-money-activity li { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:12px; padding:10px 0; border-top:1px solid #edf1f6; }
+        .customer-money-activity strong { display:block; color:#0f172a; font-size:13px; }
+        .customer-money-activity small { display:block; margin-top:3px; color:#64748b; font-size:11px; }
+        .customer-money-activity time { color:#0f172a; font-size:13px; font-weight:650; font-variant-numeric:tabular-nums; }
+        .customer-finance-review { margin-top:12px; color:#92400e; font-size:12px; }
         .customer-table, .schedule-table { width:100%; table-layout:fixed; text-align:left; }
         .customer-table td, .schedule-table td { vertical-align:middle; overflow-wrap:anywhere; }
         .customer-table th:first-child { width:64px; }
@@ -639,6 +690,14 @@
             .customer-heading { gap:14px; }
             .customer-heading h2 { font-size:25px; }
             .customer-context-grid > section { padding:18px; }
+            .customer-finances-heading { align-items:flex-start; }
+            .customer-finance-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+            .customer-finance-kpis > div { padding:13px; }
+            .customer-finance-kpis dd { font-size:20px; }
+            .customer-finance-visuals, .customer-finance-supporting { grid-template-columns:minmax(0,1fr); gap:10px; }
+            .customer-finance-card { padding:15px; }
+            .customer-receipts-chart { gap:5px; height:160px; }
+            .customer-receipts-column span { font-size:10px; }
             .customer-table, .customer-table tbody { display:block; }
             .customer-table thead { display:none; }
             .customer-table .customer-record { display:grid; grid-template-columns:44px minmax(0,1fr); padding:12px; }
@@ -2569,13 +2628,52 @@
                         <div><h2 ref="customerContextHeading" tabindex="-1">{{ customerContext.name }}</h2><p v-if="customerContext.email">{{ customerContext.email }}</p><p v-if="customerContext.phone || customerContext.mobile">{{ customerContext.phone }} {{ customerContext.mobile }}</p><p v-if="customerContext.address">{{ customerContext.address }}</p></div>
                         <div class="customer-heading-actions"><button class="overview-button" @click="editCustomer(customerContext)">Edit customer</button><button class="overview-button primary" @click="goToCreate">Open document editor</button></div>
                     </div>
-                    <label v-if="customerContextCurrencies.length > 1" class="overview-currency">Figures in <select v-model="customerContextCurrency" aria-label="Customer summary currency"><option v-for="currency in customerContextCurrencies" :key="currency" :value="currency">{{ currency }}</option></select></label>
-                    <dl class="customer-summary">
-                        <div><dt>Outstanding · {{ customerContextCurrency }}</dt><dd>{{ overviewMoney(customerContextSummary.outstanding, customerContextCurrency) }}</dd></div>
-                        <div><dt>Payments recorded · {{ customerContextCurrency }}</dt><dd>{{ overviewMoney(customerContextSummary.paid, customerContextCurrency) }}</dd></div>
-                        <div><dt>Documents · all currencies</dt><dd>{{ customerContextDocuments.length }}</dd></div>
-                    </dl>
-                    <p class="customer-context-note">Invoice figures only, excluding quotes and credit notes. Payments include recorded refunds.</p>
+                    <section v-if="incomeInsightsEnabled" class="customer-finances" aria-labelledby="customer-finances-title">
+                        <div class="customer-finances-heading">
+                            <div><h3 id="customer-finances-title">Income recorded in Tallyo</h3><p>Invoice figures for this customer, shown separately by currency.</p></div>
+                            <label class="overview-currency">Figures in <select v-model="customerContextCurrency" aria-label="Customer finances currency"><option v-for="currency in customerContextCurrencies" :key="currency" :value="currency">{{ currency }}</option></select></label>
+                        </div>
+                        <p class="customer-finance-scope" role="note">These figures cover this customer's invoices and payments recorded in Tallyo. Income received elsewhere and business expenses are not included.</p>
+                        <div v-if="!customerIncomeHasRecords" class="customer-finance-empty"><strong>No invoice income to show in {{ customerContextCurrency }}</strong><span>Issued invoices and dated payments for this customer will appear here.</span></div>
+                        <template v-else>
+                            <dl class="customer-finance-kpis" aria-label="Customer income summary">
+                                <div><dt>Invoiced</dt><dd>{{ overviewMoney(customerIncomeSummary.invoiced, customerContextCurrency) }}</dd><small>{{ customerIncomeSummary.issuedInvoiceCount }} issued invoice{{ customerIncomeSummary.issuedInvoiceCount === 1 ? '' : 's' }}</small></div>
+                                <div class="is-positive"><dt>Received</dt><dd>{{ overviewMoney(customerIncomeSummary.received, customerContextCurrency) }}</dd><small>Positive dated payments</small></div>
+                                <div class="is-refund"><dt>Refunds</dt><dd>{{ overviewMoney(customerIncomeSummary.refunds, customerContextCurrency) }}</dd><small>Shown separately</small></div>
+                                <div class="is-positive"><dt>Net received</dt><dd>{{ overviewMoney(customerIncomeSummary.netReceived, customerContextCurrency) }}</dd><small>Received less refunds</small></div>
+                                <div><dt>Still to be paid</dt><dd>{{ overviewMoney(customerIncomeSummary.outstanding, customerContextCurrency) }}</dd><small>{{ customerIncomeSummary.outstandingInvoiceCount }} invoice{{ customerIncomeSummary.outstandingInvoiceCount === 1 ? '' : 's' }} with a balance</small></div>
+                                <div class="is-overdue"><dt>Overdue</dt><dd>{{ overviewMoney(customerIncomeSummary.overdue, customerContextCurrency) }}</dd><small>Part of still to be paid</small></div>
+                            </dl>
+                            <div class="customer-finance-visuals">
+                                <section class="customer-finance-card" aria-labelledby="customer-receipts-title">
+                                    <div class="customer-finance-card-head"><div><h4 id="customer-receipts-title">Net receipts over time</h4><p>Grouped by payment or refund date.</p></div><span>{{ customerContextCurrency }}</span></div>
+                                    <div v-if="customerIncomeMonths.length" class="customer-receipts-chart" role="img" :aria-label="customerIncomeChartLabel">
+                                        <div v-for="month in customerIncomeMonths" :key="month.month" class="customer-receipts-column" aria-hidden="true"><i class="customer-receipts-bar" :class="{'is-negative': month.netReceived < 0}" :style="{height: customerFinanceBarHeight(month.netReceived)}"></i><span>{{ customerFinanceMonthLabel(month.month) }}</span></div>
+                                    </div>
+                                    <p v-else class="customer-context-note">No dated payments or refunds to chart yet.</p>
+                                    <details v-if="customerIncomeMonths.length" class="customer-exact-values"><summary>View exact monthly values</summary><table><caption class="sr-only">Exact monthly net receipts for this customer</caption><thead><tr><th>Month</th><th>Net received</th></tr></thead><tbody><tr v-for="month in customerIncomeMonths" :key="month.month + '-value'"><td>{{ customerFinanceMonthLongLabel(month.month) }}</td><td>{{ overviewMoney(month.netReceived, customerContextCurrency) }}</td></tr></tbody></table></details>
+                                </section>
+                                <section class="customer-finance-card" aria-labelledby="customer-position-title">
+                                    <div class="customer-finance-card-head"><div><h4 id="customer-position-title">Payment position</h4><p>Where issued invoice value stands.</p></div><span>{{ customerContextCurrency }}</span></div>
+                                    <div class="customer-position-layout"><div class="customer-position-donut" :style="customerIncomePosition.style" role="img" :aria-label="customerIncomePosition.label"><span><strong>{{ overviewMoney(customerIncomeSummary.invoiced, customerContextCurrency) }}</strong>invoiced</span></div><ul class="customer-position-list" aria-label="Payment position exact values"><li><i></i><span>Recorded as paid</span><strong>{{ overviewMoney(customerIncomePosition.covered, customerContextCurrency) }}</strong></li><li class="is-due"><i></i><span>Due</span><strong>{{ overviewMoney(customerIncomePosition.due, customerContextCurrency) }}</strong></li><li class="is-overdue"><i></i><span>Overdue</span><strong>{{ overviewMoney(customerIncomePosition.overdue, customerContextCurrency) }}</strong></li></ul></div>
+                                </section>
+                            </div>
+                            <div class="customer-finance-supporting">
+                                <section class="customer-finance-card" aria-labelledby="customer-source-title"><div class="customer-finance-card-head"><div><h4 id="customer-source-title">How the invoices started</h4><p>Workflow context, not financial categories.</p></div></div><ul class="customer-source-list"><li v-for="source in customerIncomeSources" :key="source.source"><span>{{ customerFinanceSourceLabel(source.source) }}<small>{{ source.recordCount }} payment or refund record{{ source.recordCount === 1 ? '' : 's' }}</small></span><strong>{{ overviewMoney(source.netReceived, customerContextCurrency) }}</strong></li></ul></section>
+                                <section class="customer-finance-card" aria-labelledby="customer-money-activity-title"><div class="customer-finance-card-head"><div><h4 id="customer-money-activity-title">Recent money activity</h4><p>Payments and refunds saved in Tallyo.</p></div></div><p v-if="!customerIncomeMoneyActivity.length" class="customer-context-note">No dated money activity yet.</p><ul v-else class="customer-money-activity"><li v-for="record in customerIncomeMoneyActivity" :key="record.id"><span><strong>{{ record.recordType === 'refund' ? 'Refund' : 'Payment' }} · {{ record.invoiceReference || 'Invoice reference missing' }}</strong><small>{{ customerFinancePaymentSourceLabel(record.paymentSource) }} · {{ customerFinanceDateLabel(record.date) }}<template v-if="!record.ready"> · Needs review</template></small></span><time :datetime="record.date || undefined">{{ overviewMoney(record.amount, customerContextCurrency) }}</time></li></ul></section>
+                            </div>
+                            <p v-if="customerIncomeReport.readiness.needsReview" class="customer-finance-review">{{ customerIncomeReport.readiness.needsReview }} record{{ customerIncomeReport.readiness.needsReview === 1 ? '' : 's' }} need{{ customerIncomeReport.readiness.needsReview === 1 ? 's' : '' }} review before every figure can be included confidently.</p>
+                        </template>
+                    </section>
+                    <template v-else>
+                        <label v-if="customerContextCurrencies.length > 1" class="overview-currency">Figures in <select v-model="customerContextCurrency" aria-label="Customer summary currency"><option v-for="currency in customerContextCurrencies" :key="currency" :value="currency">{{ currency }}</option></select></label>
+                        <dl class="customer-summary">
+                            <div><dt>Outstanding · {{ customerContextCurrency }}</dt><dd>{{ overviewMoney(customerContextSummary.outstanding, customerContextCurrency) }}</dd></div>
+                            <div><dt>Payments recorded · {{ customerContextCurrency }}</dt><dd>{{ overviewMoney(customerContextSummary.paid, customerContextCurrency) }}</dd></div>
+                            <div><dt>Documents · all currencies</dt><dd>{{ customerContextDocuments.length }}</dd></div>
+                        </dl>
+                        <p class="customer-context-note">Invoice figures only, excluding quotes and credit notes. Payments include recorded refunds.</p>
+                    </template>
                     <div class="customer-context-grid">
                         <section aria-labelledby="customer-documents-title"><h3 id="customer-documents-title">Recent documents</h3>
                             <p v-if="!customerContextDocuments.length" class="customer-context-note">No linked documents yet.</p>
@@ -3442,6 +3540,7 @@
                 customerView: 'list',
                 customerContextId: '',
                 customerContextCurrencyChoice: '',
+                incomeInsightsEnabled: window.TALLYO_INCOME_INSIGHTS_ENABLED === true && Boolean(window.TallyoIncomeInsights),
                 customerPage: 1,
                 selectedCustomers: [],
                 customerBulkBusy: false,
@@ -3492,9 +3591,16 @@
                 return this.invoices.filter(inv => inv.customer?.id === this.customerContext.id)
                     .slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(b.number).localeCompare(String(a.number)));
             },
-            customerContextCurrencies() { return [...new Set([this.company.defaultCurrency || 'GBP', ...this.customerContextDocuments.map(inv => inv.currency || 'GBP')])].sort(); },
+            customerContextCurrencies() {
+                const documentCurrencies = [...new Set(this.customerContextDocuments.map(inv => inv.currency || 'GBP'))].sort();
+                return documentCurrencies.length ? documentCurrencies : [this.company.defaultCurrency || 'GBP'];
+            },
             customerContextCurrency: {
-                get() { return this.customerContextCurrencies.includes(this.customerContextCurrencyChoice) ? this.customerContextCurrencyChoice : (this.company.defaultCurrency || 'GBP'); },
+                get() {
+                    if (this.customerContextCurrencies.includes(this.customerContextCurrencyChoice)) return this.customerContextCurrencyChoice;
+                    const preferred = this.company.defaultCurrency || 'GBP';
+                    return this.customerContextCurrencies.includes(preferred) ? preferred : this.customerContextCurrencies[0];
+                },
                 set(value) { this.customerContextCurrencyChoice = value; }
             },
             customerContextSummary() {
@@ -3504,6 +3610,56 @@
                     sum.paid += (inv.payments || []).reduce((paid, payment) => paid + (Number(payment.amount) || 0), 0);
                     return sum;
                 }, { outstanding: 0, paid: 0 });
+            },
+            customerIncomeInsights() {
+                if (!this.incomeInsightsEnabled || !this.customerContext || !window.TallyoIncomeInsights) return null;
+                return window.TallyoIncomeInsights.calculateIncomeInsights(this.invoices, {
+                    customerId: this.customerContext.id,
+                    today: new Date().toISOString().slice(0, 10)
+                });
+            },
+            customerIncomeReport() {
+                return this.customerIncomeInsights?.currencies.find(report => report.currency === this.customerContextCurrency) || null;
+            },
+            customerIncomeSummary() {
+                return this.customerIncomeReport?.summary || {
+                    invoiced: 0, received: 0, refunds: 0, netReceived: 0, outstanding: 0, overdue: 0,
+                    issuedInvoiceCount: 0, outstandingInvoiceCount: 0, overdueInvoiceCount: 0, incomeRecordCount: 0
+                };
+            },
+            customerIncomeHasRecords() {
+                return Boolean(this.customerIncomeReport && (this.customerIncomeSummary.issuedInvoiceCount || this.customerIncomeSummary.incomeRecordCount || this.customerIncomeReport.readiness.total));
+            },
+            customerIncomeMonths() {
+                return (this.customerIncomeReport?.timeSeries || []).filter(month => Math.abs(month.invoiced) > 0.001 || Math.abs(month.netReceived) > 0.001).slice(-6);
+            },
+            customerIncomeChartMax() {
+                return Math.max(1, ...this.customerIncomeMonths.map(month => Math.abs(month.netReceived)));
+            },
+            customerIncomeChartLabel() {
+                if (!this.customerIncomeMonths.length) return 'No dated payments or refunds to chart.';
+                const values = this.customerIncomeMonths.map(month => `${this.customerFinanceMonthLongLabel(month.month)} ${this.overviewMoney(month.netReceived, this.customerContextCurrency)}`).join(', ');
+                return `Monthly net receipts for this customer: ${values}.`;
+            },
+            customerIncomePosition() {
+                const invoiced = Math.max(0, Number(this.customerIncomeSummary.invoiced) || 0);
+                const overdue = Math.min(invoiced, Math.max(0, Number(this.customerIncomeSummary.overdue) || 0));
+                const due = Math.min(Math.max(0, invoiced - overdue), Math.max(0, (Number(this.customerIncomeSummary.outstanding) || 0) - overdue));
+                const covered = Math.max(0, invoiced - due - overdue);
+                const scale = invoiced || 1;
+                const coveredEnd = covered / scale * 100;
+                const dueEnd = (covered + due) / scale * 100;
+                return {
+                    covered, due, overdue,
+                    style: { background: `conic-gradient(#22c55e 0 ${coveredEnd}%, #f59e0b ${coveredEnd}% ${dueEnd}%, #ef4444 ${dueEnd}% 100%)` },
+                    label: `${this.overviewMoney(covered, this.customerContextCurrency)} recorded as paid, ${this.overviewMoney(due, this.customerContextCurrency)} due and ${this.overviewMoney(overdue, this.customerContextCurrency)} overdue.`
+                };
+            },
+            customerIncomeSources() {
+                return (this.customerIncomeReport?.sources || []).filter(source => Math.abs(source.invoiced) > 0.001 || source.recordCount > 0);
+            },
+            customerIncomeMoneyActivity() {
+                return (this.customerIncomeReport?.records || []).filter(record => ['payment', 'refund'].includes(record.recordType)).slice().reverse().slice(0, 5);
             },
             customerContextSchedules() { return this.customerContext ? this.recurringTemplates.filter(schedule => schedule.customer?.id === this.customerContext.id) : []; },
             customerContextActivity() {
@@ -3991,6 +4147,29 @@
             overviewMoney(value, currency = this.overviewStat.currency) {
                 try { return new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(value); }
                 catch { return String(currency) + ' ' + Number(value || 0).toFixed(2); }
+            },
+            customerFinanceMonthLabel(month) {
+                const date = new Date(`${month}-01T00:00:00Z`);
+                return Number.isFinite(date.getTime()) ? date.toLocaleDateString('en-GB', { month: 'short', timeZone: 'UTC' }) : month;
+            },
+            customerFinanceMonthLongLabel(month) {
+                const date = new Date(`${month}-01T00:00:00Z`);
+                return Number.isFinite(date.getTime()) ? date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : month;
+            },
+            customerFinanceBarHeight(value) {
+                const amount = Math.abs(Number(value) || 0);
+                return `${Math.max(amount > 0 ? 5 : 0, amount / this.customerIncomeChartMax * 100)}%`;
+            },
+            customerFinanceSourceLabel(source) {
+                return { one_off: 'One-off invoices', recurring: 'Recurring invoices', accepted_quote: 'Invoices from accepted quotes' }[source] || 'Other invoice workflow';
+            },
+            customerFinancePaymentSourceLabel(source) {
+                return source === 'stripe_confirmed' ? 'Card payment confirmed' : 'Manually recorded';
+            },
+            customerFinanceDateLabel(value) {
+                if (!value) return 'Date needs review';
+                const date = new Date(`${value}T00:00:00Z`);
+                return Number.isFinite(date.getTime()) ? date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : value;
             },
             overviewTime(ts) {
                 const value = new Date(ts);

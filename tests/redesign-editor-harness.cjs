@@ -66,6 +66,10 @@ const billingStart = protectedMethods.indexOf('            async loadBillingStat
 const billingEnd = protectedMethods.indexOf('            async openBillingCheckout(', billingStart);
 assert.ok(billingStart >= 0 && billingEnd > billingStart, 'reviewed subscription trial state must remain bounded');
 protectedMethods = protectedMethods.slice(0, billingStart) + '            /* subscription state and trial guidance reviewed separately */\n' + protectedMethods.slice(billingEnd);
+const customerIncomeMethodsStart = protectedMethods.indexOf('            customerFinanceMonthLabel(month)');
+const customerIncomeMethodsEnd = protectedMethods.indexOf('            overviewTime(ts)', customerIncomeMethodsStart);
+assert.ok(customerIncomeMethodsStart >= 0 && customerIncomeMethodsEnd > customerIncomeMethodsStart, 'reviewed customer income presentation methods must remain bounded');
+protectedMethods = protectedMethods.slice(0, customerIncomeMethodsStart) + protectedMethods.slice(customerIncomeMethodsEnd);
 protectedMethods = protectedMethods.replace(/\r?\n\s*window\.(addEventListener|removeEventListener)\('popstate', this\.handlePopState\);/g, '');
 assert.equal(hash(protectedMethods), '2395c29d83d9eba6ad88747bac57b5b82f5cf2b78c3d183b18125bff78a1b342', 'all reviewed methods/startup must remain unchanged');
 const canvasStart = app.indexOf('\n', app.indexOf('<div id="invoice-canvas"'));

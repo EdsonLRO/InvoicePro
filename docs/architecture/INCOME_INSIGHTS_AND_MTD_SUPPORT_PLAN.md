@@ -1,6 +1,6 @@
 # Income insights and MTD-supporting records plan
 
-Status: Phase 0 design approved. The Phase 1 read-only calculation module is implemented for focused review; no Finances UI or production release is approved.
+Status: Phase 0 design and Phase 1 shared calculations are approved and merged. Phase 2 customer financial visuals are implemented behind a fail-closed public-release gate for focused review; no public activation is approved.
 
 Last reviewed: 6 October 2026.
 
@@ -26,7 +26,13 @@ Its canonical result contains:
 - payment-time context only where dated records establish full payment;
 - records-organised readiness totals and explicit issue codes.
 
-The module is UMD-compatible so focused Node tests and the later browser integration use the same source. It is deliberately not loaded by `index.html` in Phase 1, so the released Overview and customer interface remain unchanged. `tests/income-insights-harness.cjs` covers the minimum financial fixture matrix and characterises compatibility with the released Overview semantics.
+The module is UMD-compatible so focused Node tests and browser integration use the same source. During Phase 1 it was deliberately not loaded by `index.html`, so that phase left the released Overview and customer interface unchanged. `tests/income-insights-harness.cjs` covers the minimum financial fixture matrix and characterises compatibility with the released Overview semantics.
+
+## Phase 2 implementation reference
+
+The customer detail view now has a gated **Income recorded in Tallyo** area powered directly by the Phase 1 module. It adds six exact summary values, a native CSS monthly net-receipts chart with a keyboard-accessible written-value table, a payment-position doughnut with repeated labelled values, workflow-source context and recent payment/refund activity. It collects no new data and makes no database, provider, payment, email, analytics or storage request.
+
+`TALLYO_INCOME_INSIGHTS_ENABLED` remains false in the checked-in public configuration and generated builds require `TALLYO_INCOME_INSIGHTS_PUBLIC_RELEASE_APPROVED=true` before the feature can be enabled. The isolated fictional redesign preview enables it for browser acceptance only. `tests/income-insights-customer-ui-harness.cjs` verifies exact customer-ID scope, retained snapshots, separate currencies, canonical totals, accessible equivalents and the fail-closed release boundary.
 
 ## Existing product baseline
 
@@ -334,6 +340,8 @@ Exit criteria:
 - customer snapshots remain historical evidence and are not silently rewritten;
 - all currencies remain separated;
 - no new data collection.
+
+Implementation state: complete for focused Owner review. Public activation remains reserved for Phase 6 release hardening and approval.
 
 ### Phase 3 — Finances overview
 

@@ -55,6 +55,7 @@ const billingTrialEnabled = process.env.TALLYO_BILLING_TRIAL_ENABLED === "true";
 const analyticsRequested = process.env.TALLYO_GA4_ENABLED === "true";
 const ga4MeasurementId = String(process.env.TALLYO_GA4_MEASUREMENT_ID || "").trim();
 const quoteAcceptanceRequested = process.env.TALLYO_QUOTE_ACCEPTANCE_ENABLED === "true";
+const incomeInsightsRequested = process.env.TALLYO_INCOME_INSIGHTS_ENABLED === "true";
 if (billingTestEnabled && billingLiveEnabled) {
   throw new Error("Only one Tallyo Billing browser mode may be enabled");
 }
@@ -85,6 +86,9 @@ if (analyticsRequested && process.env.TALLYO_GA4_PUBLIC_RELEASE_APPROVED !== "tr
 if (quoteAcceptanceRequested && process.env.TALLYO_QUOTE_ACCEPTANCE_PUBLIC_RELEASE_APPROVED !== "true") {
   throw new Error("Quote acceptance controls require explicit public-release approval");
 }
+if (incomeInsightsRequested && process.env.TALLYO_INCOME_INSIGHTS_PUBLIC_RELEASE_APPROVED !== "true") {
+  throw new Error("Income insights controls require explicit public-release approval");
+}
 const configuration = [
   "// Generated during the Cloudflare Pages build. Do not commit this file.",
   `window.SUPABASE_URL = ${JSON.stringify(supabaseUrl)};`,
@@ -99,6 +103,7 @@ const configuration = [
   `window.TALLYO_GA4_ENABLED = ${JSON.stringify(analyticsRequested)};`,
   `window.TALLYO_GA4_MEASUREMENT_ID = ${JSON.stringify(analyticsRequested ? ga4MeasurementId : "")};`,
   `window.TALLYO_QUOTE_ACCEPTANCE_ENABLED = ${JSON.stringify(quoteAcceptanceRequested)};`,
+  `window.TALLYO_INCOME_INSIGHTS_ENABLED = ${JSON.stringify(incomeInsightsRequested)};`,
   ""
 ].join("\n");
 
@@ -107,6 +112,7 @@ const appAssets = [
   "app-help-install.js",
   "app-user-messages.js",
   "customer-csv-import.js",
+  "income-insights.js",
   "manifest.json",
   "service-worker.js",
   "tallyo-mark.png",

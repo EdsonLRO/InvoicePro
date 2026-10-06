@@ -52,6 +52,7 @@
   window.SUPABASE_ANON_KEY = 'fictional-preview-not-a-key';
   window.STRIPE_LIVE_MODE = false;
   window.TALLYO_GA4_ENABLED = false;
+  window.TALLYO_INCOME_INSIGHTS_ENABLED = true;
   function query(table) {
     if (!Object.hasOwn(tables, table)) throw new Error(`Unsupported preview table: ${table}`);
     let filters = [], order = [], start = 0, end = Infinity, one = false, action = 'read', payload;

@@ -14,6 +14,7 @@ const APP_SHELL = [
   './analytics-app.js',
   './app-user-messages.js',
   './customer-csv-import.js',
+  './income-insights.js',
   './config.js',
   './app-help-install.js',
   './manifest.json',
