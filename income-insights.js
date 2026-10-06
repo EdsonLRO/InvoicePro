@@ -299,6 +299,7 @@
   function buildCurrencyReport(currency, documents, period) {
     const summary = emptySummary();
     const records = [];
+    const invoiceIndex = [];
     const issues = [];
     const customers = new Map();
     const sources = new Map(['one_off', 'recurring', 'accepted_quote'].map(key => [key, { source: key, invoiced: 0, received: 0, refunds: 0, netReceived: 0, recordCount: 0 }]));
@@ -393,6 +394,30 @@
         records.push(makeReviewRecord(document, context, context.documentIssueCodes, 'invoice'));
       }
 
+      if (issuedInPeriod) {
+        const reviewReasons = [...new Set([
+          ...context.documentIssueCodes,
+          ...paymentResult.rows.flatMap(row => row.reviewReasons || [])
+        ])];
+        invoiceIndex.push({
+          invoiceId: documentId || null,
+          invoiceReference: reference || null,
+          issueDate: date || null,
+          dueDate: due || null,
+          customerId: customer.id || null,
+          customerName: customer.name || 'Customer not recorded',
+          status,
+          workflowSource: source,
+          grossTotal: total,
+          taxShown,
+          recordedPayments: allNetPaid,
+          outstanding: balance,
+          overdue: due && due < period.today && balance > 0.001 ? balance : 0,
+          ready: reviewReasons.length === 0,
+          reviewReasons
+        });
+      }
+
       for (const row of paymentResult.rows) {
         records.push(row);
         for (const code of row.reviewReasons) {
@@ -454,6 +479,7 @@
       sources: [...sources.values()],
       paymentTime: { sampleSize: paymentDays.length, averageDays: paymentDays.length ? roundMoney(paymentDays.reduce((sum, days) => sum + days, 0) / paymentDays.length) : null },
       records: orderedRecords,
+      invoiceIndex: invoiceIndex.sort((a, b) => String(a.issueDate || '').localeCompare(String(b.issueDate || '')) || String(a.invoiceReference || '').localeCompare(String(b.invoiceReference || ''))),
       readiness
     };
   }

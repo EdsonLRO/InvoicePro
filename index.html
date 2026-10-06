@@ -40,6 +40,7 @@
     <script src="./app-user-messages.js"></script>
     <script src="./customer-csv-import.js"></script>
     <script src="./income-insights.js"></script>
+    <script src="./income-pack-export.js"></script>
     <script type="module" src="./analytics-app.js"></script>
 
     <style>
@@ -516,6 +517,20 @@
         .uk-period-card dt { color:#64748b; font-size:10px; }
         .uk-period-card dd { margin-top:3px; color:#0f172a; font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
         .uk-period-card footer { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+        .income-pack-intro { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(240px,.5fr); gap:14px; margin-bottom:14px; }
+        .income-pack-notice { padding:16px; border:1px solid #c7d2fe; border-radius:12px; background:#eef2ff; color:#3730a3; font-size:13px; line-height:1.6; }
+        .income-pack-status { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+        .income-pack-status div { padding:12px; border:1px solid #dce4ef; border-radius:10px; background:#fff; }
+        .income-pack-status dt { color:#64748b; font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
+        .income-pack-status dd { margin-top:4px; color:#0f172a; font-size:16px; font-weight:700; overflow-wrap:anywhere; }
+        .income-pack-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+        .income-pack-card { display:flex; min-width:0; min-height:176px; flex-direction:column; align-items:flex-start; padding:16px; border:1px solid #dce4ef; border-radius:12px; background:#fff; }
+        .income-pack-card h3 { color:#0f172a; font-size:15px; font-weight:700; }
+        .income-pack-card p { margin:6px 0 14px; color:#64748b; font-size:12px; line-height:1.55; }
+        .income-pack-card button { min-height:42px; margin-top:auto; padding:8px 12px; border:1px solid #c7d2fe; border-radius:8px; color:#4338ca; font-size:12px; font-weight:700; }
+        .income-pack-card button:disabled { opacity:.45; }
+        .income-pack-limitations { margin-top:16px; padding:14px 16px; border:1px solid #e2e8f0; border-radius:12px; background:#f8fafc; color:#475569; font-size:12px; line-height:1.6; }
+        .income-pack-limitations ul { margin:8px 0 0 18px; list-style:disc; }
         @media (min-width: 1100px) {
             .shell-topbar { margin-left: 224px; }
             .shell-main { margin-left: 224px; margin-right: 0; width: calc(100% - 224px); max-width: none; }
@@ -541,7 +556,7 @@
             .finances-grid-three .finances-card:last-child { grid-column:1/-1; }
         }
         @media (max-width: 699px) {
-            .finances-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); overflow:visible; }
+            .finances-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); overflow:visible; }
             .finances-tabs button { min-width:0; padding:8px 6px; white-space:normal; font-size:11px; line-height:1.3; }
             .finances-heading { align-items:flex-start; gap:14px; }
             .finances-heading h1 { font-size:28px; }
@@ -560,6 +575,8 @@
             .finances-exact-values { overflow-x:auto; }
             .income-record-filters { grid-template-columns:repeat(2,minmax(0,1fr)); }
             .uk-period-grid { grid-template-columns:minmax(0,1fr); }
+            .income-pack-intro, .income-pack-grid { grid-template-columns:minmax(0,1fr); }
+            .income-pack-card { min-height:0; }
         }
         @media (max-width: 480px) {
             .income-record-filters { grid-template-columns:minmax(0,1fr); }
@@ -1854,6 +1871,7 @@
                     <button @click="openFinancesView('overview')" :aria-current="financesView === 'overview' ? 'page' : null">Overview</button>
                     <button @click="openFinancesView('records')" :aria-current="financesView === 'records' ? 'page' : null">Income records</button>
                     <button @click="openFinancesView('periods')" :aria-current="financesView === 'periods' ? 'page' : null">UK income periods</button>
+                    <button @click="openFinancesView('exports')" :aria-current="financesView === 'exports' ? 'page' : null">Prepare records</button>
                 </nav>
 
                 <div v-if="financesCalculationError" class="finances-state" role="alert">
@@ -1968,7 +1986,7 @@
                         <p class="finances-footnote">This ledger is derived from records already in Tallyo. It is not a bank statement, tax return or HMRC submission.</p>
                     </section>
                 </template>
-                <template v-else>
+                <template v-else-if="financesView === 'periods'">
                     <section aria-labelledby="uk-periods-title">
                         <div class="finances-card-head"><div><h2 id="uk-periods-title" style="font-size:22px">UK income periods</h2><p>{{ financesTaxYearLabel }} · {{ financesCurrency }} · income recorded in Tallyo only</p></div></div>
                         <p class="uk-period-notice" role="note"><strong>Organising view only.</strong> These periods show Tallyo's income side. They exclude expenses and income received elsewhere. Nothing is filed with or sent to HMRC.</p>
@@ -1980,6 +1998,22 @@
                             </article>
                         </div>
                         <details class="finances-methods"><summary>How UK income periods work</summary><p>Each activity figure covers only that three-month period. Tax year to date starts on 6 April and grows cumulatively through the selected period. The dates shown use the standard UK update periods in the approved plan.</p><p>Tallyo does not calculate expenses, profit or tax due and does not connect to HMRC. Current dates and official interpretation must be checked again before any public release.</p></details>
+                    </section>
+                </template>
+                <template v-else>
+                    <section aria-labelledby="income-pack-title">
+                        <div class="finances-card-head"><div><h2 id="income-pack-title" style="font-size:22px">Prepare income records</h2><p>Download clear, separate files for {{ financesPeriodDescription }}</p></div></div>
+                        <div class="income-pack-intro">
+                            <p class="income-pack-notice"><strong>Income records from Tallyo only.</strong> This pack does not include expenses or income received outside Tallyo and is not an HMRC submission. Files are prepared on this device only when you choose a download.</p>
+                            <dl class="income-pack-status"><div><dt>Income rows</dt><dd>{{ financesSummary.incomeRecordCount }}</dd></div><div><dt>Need review</dt><dd>{{ financesReadiness.needsReview }}</dd></div><div><dt>Currency</dt><dd>{{ financesCurrency }}</dd></div><div><dt>Calculation</dt><dd>{{ financesCalculation?.calculationVersion || '-' }}</dd></div></dl>
+                        </div>
+                        <div v-if="!financesCanExport" class="finances-state"><h2>No income pack to prepare</h2><p>Choose a period and currency containing Tallyo invoice records.</p></div>
+                        <div v-else class="income-pack-grid">
+                            <article v-for="file in financesIncomePackFiles" :key="file.key" class="income-pack-card"><h3>{{ file.filename }}</h3><p>{{ file.description }}</p><button @click="downloadIncomePackCsv(file.key)">Download CSV</button></article>
+                            <article class="income-pack-card"><h3>income-pack-manifest.json</h3><p>Pack version, calculation version, selected scope, totals, limitations and included-file list.</p><button @click="downloadIncomePackManifest">Download manifest</button></article>
+                            <article class="income-pack-card"><h3>income-summary.pdf</h3><p>A readable summary of the selected income, record checks and important limitations.</p><button @click="downloadIncomePackPdf">Download PDF</button></article>
+                        </div>
+                        <div class="income-pack-limitations"><strong>Before sharing these files</strong><ul><li>They do not include expenses, bank activity, profit or tax due.</li><li>Tax shown is invoice context, not a tax or VAT calculation.</li><li>Review warnings are record checks, not a compliance assessment.</li><li>Downloads contain business and customer information. Keep them on a trusted device.</li></ul></div>
                     </section>
                 </template>
             </section>
@@ -4134,6 +4168,8 @@
                     cumulative: this.financesPeriodTotals(`${year}-04-06`, period.cumulativeTo)
                 }));
             },
+            financesCanExport() { return Boolean(this.financesReport && window.TallyoIncomePack); },
+            financesIncomePackFiles() { return window.TallyoIncomePack?.CSV_DEFINITIONS || []; },
             financesPeriodDescription() {
                 const from = this.financesDateLabel(this.financesPeriod.from), to = this.financesDateLabel(this.financesPeriod.to);
                 return `${this.financesPeriodName(this.financesPeriodChoice)}: ${from} to ${to} · ${this.financesCurrency}.`;
@@ -4678,7 +4714,7 @@
             },
             financesSourceLabel(source) { return this.customerFinanceSourceLabel(source); },
             openFinancesView(view) {
-                const next = ['overview', 'records', 'periods'].includes(view) ? view : 'overview';
+                const next = ['overview', 'records', 'periods', 'exports'].includes(view) ? view : 'overview';
                 this.financesView = next;
                 this.setRouteKey(next === 'overview' ? 'finances' : `finances-${next}`);
             },
@@ -4721,6 +4757,205 @@
                 this.financesCustomTo = cumulative ? period.cumulativeTo : period.activityTo;
                 this.financesRecordFilters = { customer: '', type: 'all', paymentKind: 'all', paymentSource: 'all', workflow: 'all', readiness: 'all' };
                 this.openFinancesRecords();
+            },
+            buildIncomePack() {
+                if (!this.financesCanExport) throw new Error('There are no income records to prepare for this period and currency.');
+                return window.TallyoIncomePack.buildIncomePack(this.financesCalculation, {
+                    currency: this.financesCurrency,
+                    businessName: this.company.name,
+                    generatedAt: new Date().toISOString()
+                });
+            },
+            confirmIncomePackDownload() {
+                return confirm('This download contains business and customer information. Continue only on a trusted device.');
+            },
+            downloadIncomePackBlob(filename, content, mime) {
+                const blob = content instanceof Blob ? content : new Blob([content], { type: mime });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url; link.download = filename; link.type = mime; link.rel = 'noopener';
+                document.body.appendChild(link); link.click(); link.remove();
+                window.setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
+            },
+            downloadIncomePackCsv(key) {
+                if (!this.confirmIncomePackDownload()) return;
+                try {
+                    const file = this.buildIncomePack().csvFiles.find(item => item.key === key);
+                    if (!file) throw new Error('That income file is not available.');
+                    this.downloadIncomePackBlob(file.filename, file.content, file.mime);
+                } catch (error) {
+                    console.error('Income CSV export failed:', error);
+                    alert(error?.message || 'The income file could not be prepared.');
+                }
+            },
+            downloadIncomePackManifest() {
+                if (!this.confirmIncomePackDownload()) return;
+                try {
+                    const file = this.buildIncomePack().manifestFile;
+                    this.downloadIncomePackBlob(file.filename, file.content, file.mime);
+                } catch (error) {
+                    console.error('Income manifest export failed:', error);
+                    alert(error?.message || 'The income manifest could not be prepared.');
+                }
+            },
+            downloadIncomePackPdf() {
+                if (!this.confirmIncomePackDownload()) return;
+                try {
+                    const model = this.buildIncomePack().pdf;
+                    const Pdf = window.jspdf?.jsPDF;
+                    if (!Pdf) throw new Error('The PDF creator is not available.');
+                    const pdf = new Pdf('p', 'mm', 'a4');
+                    const pageWidth = pdf.internal.pageSize.getWidth(), pageHeight = pdf.internal.pageSize.getHeight();
+                    const left = 16, right = 16, contentWidth = pageWidth - left - right;
+                    const colours = {
+                        navy: [15, 23, 42], ink: [30, 41, 59], muted: [100, 116, 139], line: [226, 232, 240],
+                        indigo: [79, 70, 229], blue: [59, 130, 246], mint: [45, 212, 191],
+                        indigoPale: [238, 242, 255], slatePale: [248, 250, 252], amberPale: [255, 251, 235], amber: [180, 83, 9], white: [255, 255, 255]
+                    };
+                    const logo = document.querySelector('.shell-brand');
+                    if (!logo?.complete || !logo.naturalWidth) throw new Error('The original Tallyo logo is not available yet. Please try the download again.');
+                    const sourceLogoCanvas = document.createElement('canvas');
+                    sourceLogoCanvas.width = logo.naturalWidth; sourceLogoCanvas.height = logo.naturalHeight;
+                    const sourceLogoContext = sourceLogoCanvas.getContext('2d');
+                    sourceLogoContext.drawImage(logo, 0, 0);
+                    const logoPixels = sourceLogoContext.getImageData(0, 0, logo.naturalWidth, logo.naturalHeight).data;
+                    let logoLeft = logo.naturalWidth, logoTop = logo.naturalHeight, logoRight = -1, logoBottom = -1;
+                    for (let pixelY = 0; pixelY < logo.naturalHeight; pixelY += 1) {
+                        for (let pixelX = 0; pixelX < logo.naturalWidth; pixelX += 1) {
+                            if (logoPixels[(pixelY * logo.naturalWidth + pixelX) * 4 + 3] < 8) continue;
+                            logoLeft = Math.min(logoLeft, pixelX); logoRight = Math.max(logoRight, pixelX);
+                            logoTop = Math.min(logoTop, pixelY); logoBottom = Math.max(logoBottom, pixelY);
+                        }
+                    }
+                    if (logoRight < logoLeft || logoBottom < logoTop) throw new Error('The original Tallyo logo could not be read.');
+                    const logoCanvas = document.createElement('canvas');
+                    logoCanvas.width = logoRight - logoLeft + 1; logoCanvas.height = logoBottom - logoTop + 1;
+                    logoCanvas.getContext('2d').drawImage(logo, logoLeft, logoTop, logoCanvas.width, logoCanvas.height, 0, 0, logoCanvas.width, logoCanvas.height);
+                    const logoData = logoCanvas.toDataURL('image/png');
+                    const logoAspect = logoCanvas.width / logoCanvas.height;
+                    let y = 16;
+                    const money = value => new Intl.NumberFormat('en-GB', { style: 'currency', currency: model.metadata.currency }).format(Number(value) || 0);
+                    const continuationHeader = () => {
+                        pdf.setFillColor(...colours.navy); pdf.rect(0, 0, pageWidth, 12, 'F');
+                        const continuationLogoWidth = 18.5;
+                        pdf.addImage(logoData, 'PNG', left, 3.6, continuationLogoWidth, continuationLogoWidth / logoAspect, undefined, 'FAST');
+                        pdf.setFont('helvetica', 'normal'); pdf.setTextColor(203, 213, 225); pdf.text('Income summary', pageWidth - right, 7.8, { align: 'right' });
+                        y = 22;
+                    };
+                    const ensureSpace = height => { if (y + height <= pageHeight - 17) return; pdf.addPage(); continuationHeader(); };
+                    const writeLines = (text, size = 8.5, color = colours.muted, gap = 4.2, width = contentWidth, x = left) => {
+                        pdf.setFont('helvetica', 'normal'); pdf.setFontSize(size); pdf.setTextColor(...color);
+                        const lines = pdf.splitTextToSize(String(text), width);
+                        ensureSpace(lines.length * gap + 2); pdf.text(lines, x, y); y += lines.length * gap + 2;
+                    };
+                    const sectionHeading = (title, eyebrow = '') => {
+                        ensureSpace(15);
+                        if (eyebrow) { pdf.setFont('helvetica', 'bold'); pdf.setFontSize(6.8); pdf.setTextColor(...colours.indigo); pdf.text(eyebrow.toUpperCase(), left, y); y += 4.5; }
+                        pdf.setFont('helvetica', 'bold'); pdf.setFontSize(12.5); pdf.setTextColor(...colours.navy); pdf.text(title, left, y); y += 7;
+                    };
+                    const metricCard = (x, top, width, label, value, accent) => {
+                        pdf.setFillColor(...colours.slatePale); pdf.setDrawColor(...colours.line); pdf.roundedRect(x, top, width, 16, 2.5, 2.5, 'FD');
+                        pdf.setFillColor(...accent); pdf.roundedRect(x, top, 2.3, 16, 1.2, 1.2, 'F');
+                        pdf.setFont('helvetica', 'normal'); pdf.setFontSize(6.8); pdf.setTextColor(...colours.muted); pdf.text(label.toUpperCase(), x + 5, top + 5.4);
+                        pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10.5); pdf.setTextColor(...colours.navy); pdf.text(value, x + 5, top + 12);
+                    };
+                    const table = (title, rows, emptyMessage, note = '') => {
+                        sectionHeading(title, 'Breakdown');
+                        if (!rows.length) {
+                            pdf.setFillColor(...colours.slatePale); pdf.roundedRect(left, y, contentWidth, 13, 2.5, 2.5, 'F');
+                            y += 5.5; writeLines(emptyMessage, 8, colours.muted, 4, contentWidth - 10, left + 5); y += 2;
+                            return;
+                        }
+                        for (let index = 0; index < rows.length; index += 1) {
+                            ensureSpace(9);
+                            if (index % 2 === 0) { pdf.setFillColor(...colours.slatePale); pdf.roundedRect(left, y - 4.8, contentWidth, 8, 1.5, 1.5, 'F'); }
+                            const label = pdf.splitTextToSize(String(rows[index][0]), contentWidth - 58)[0];
+                            pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8); pdf.setTextColor(...colours.ink); pdf.text(label, left + 4, y);
+                            pdf.setFont('helvetica', 'bold'); pdf.setTextColor(...colours.navy); pdf.text(String(rows[index][1]), pageWidth - right - 4, y, { align: 'right' });
+                            y += 8;
+                        }
+                        if (note) writeLines(note, 7.5, colours.muted, 3.8);
+                        y += 2;
+                    };
+
+                    pdf.setFillColor(...colours.navy); pdf.roundedRect(left, y, contentWidth, 42, 4, 4, 'F');
+                    const headerLogoWidth = 31;
+                    pdf.addImage(logoData, 'PNG', left + 8, y + 8, headerLogoWidth, headerLogoWidth / logoAspect, undefined, 'FAST');
+                    pdf.setFillColor(...colours.indigo); pdf.roundedRect(pageWidth - right - 35, y + 8, 27, 9, 4.5, 4.5, 'F');
+                    pdf.setTextColor(...colours.white); pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(6.5); pdf.text('INCOME ONLY', pageWidth - right - 21.5, y + 13.8, { align: 'center' });
+                    pdf.setFontSize(20); pdf.text('Income summary', left + 8, y + 29);
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8.5); pdf.setTextColor(203, 213, 225); pdf.text(model.metadata.businessName || 'Business name not recorded', left + 8, y + 36);
+                    pdf.text(`${model.metadata.currency} | ${model.metadata.period.from || 'All dates'} to ${model.metadata.period.to || 'All dates'}`, pageWidth - right - 8, y + 36, { align: 'right' });
+                    y += 48;
+
+                    pdf.setFillColor(...colours.indigoPale); pdf.setDrawColor(199, 210, 254); pdf.roundedRect(left, y, contentWidth, 16, 3, 3, 'FD');
+                    pdf.setFillColor(...colours.indigo); pdf.circle(left + 7, y + 8, 2.2, 'F');
+                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(7); pdf.setTextColor(...colours.white); pdf.text('i', left + 7, y + 9.2, { align: 'center' });
+                    const noticeLines = pdf.splitTextToSize(model.notice, contentWidth - 20);
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(8); pdf.setTextColor(55, 48, 163); pdf.text(noticeLines, left + 13, y + 6.2);
+                    y += 21;
+
+                    sectionHeading('Selected-period summary', 'At a glance');
+                    const metrics = [
+                        ['Invoiced', model.summary.invoiced, colours.blue], ['Received', model.summary.received, colours.mint],
+                        ['Refunds', model.summary.refunds, colours.indigo], ['Net received', model.summary.netReceived, colours.mint],
+                        ['Outstanding', model.summary.outstanding, colours.blue], ['Overdue', model.summary.overdue, colours.amber],
+                        ['Tax shown', model.summary.taxShown, colours.indigo]
+                    ];
+                    const cardGap = 3, cardWidth = (contentWidth - cardGap * 3) / 4;
+                    for (let index = 0; index < metrics.length; index += 1) {
+                        const row = Math.floor(index / 4), column = index % 4;
+                        metricCard(left + column * (cardWidth + cardGap), y + row * 19, cardWidth, metrics[index][0], money(metrics[index][1]), metrics[index][2]);
+                    }
+                    y += 39;
+
+                    sectionHeading('Record checks', 'Confidence');
+                    ensureSpace(26);
+                    pdf.setFillColor(...colours.slatePale); pdf.setDrawColor(...colours.line); pdf.roundedRect(left, y, contentWidth, 22, 3, 3, 'FD');
+                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(11); pdf.setTextColor(...colours.navy); pdf.text(`${model.readiness.ready} of ${model.readiness.total}`, left + 6, y + 9);
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7); pdf.setTextColor(...colours.muted); pdf.text('records organised', left + 6, y + 15);
+                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(9); pdf.setTextColor(...colours.amber); pdf.text(`${model.readiness.needsReview}`, left + 62, y + 9);
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7); pdf.setTextColor(...colours.muted); pdf.text('need review', left + 62, y + 15);
+                    pdf.setFont('helvetica', 'bold'); pdf.setFontSize(9); pdf.setTextColor(...colours.ink); pdf.text(`${model.readiness.excludedFromTotals}`, left + 105, y + 9);
+                    pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7); pdf.setTextColor(...colours.muted); pdf.text('excluded from totals', left + 105, y + 15);
+                    const progress = model.readiness.total ? Math.max(0, Math.min(1, model.readiness.ready / model.readiness.total)) : 0;
+                    pdf.setFillColor(226, 232, 240); pdf.roundedRect(left + 6, y + 17.5, contentWidth - 12, 2.4, 1.2, 1.2, 'F');
+                    if (progress) { pdf.setFillColor(...colours.mint); pdf.roundedRect(left + 6, y + 17.5, (contentWidth - 12) * progress, 2.4, 1.2, 1.2, 'F'); }
+                    y += 27;
+                    for (const group of model.readiness.groups) writeLines(`${group.count} record${group.count === 1 ? '' : 's'}: ${group.message}`, 7.8, colours.muted, 4);
+
+                    const customers = model.customers.slice(0, 10).map(customer => [customer.name, money(customer.netReceived)]);
+                    table('Net received by customer', customers, 'No customer receipts were recorded in this period.', model.customers.length > 10 ? `${model.customers.length - 10} more customers are included in customer-income-summary.csv.` : '');
+                    const activePeriods = model.periods.filter(period => Math.abs(period.netReceived) > 0.001);
+                    table('Net received by month', activePeriods.slice(0, 12).map(period => [period.month, money(period.netReceived)]), 'No dated payments or refunds were recorded in the selected period.', activePeriods.length > 12 ? `${activePeriods.length - 12} more months are included in income-by-period.csv.` : '');
+
+                    const limitationLines = model.limitations.flatMap(limitation => pdf.splitTextToSize(limitation, contentWidth - 16));
+                    const limitationHeight = limitationLines.length * 3.9 + model.limitations.length * 3 + 5;
+                    ensureSpace(limitationHeight + 15);
+                    sectionHeading('Important limitations', 'Before you share');
+                    pdf.setFillColor(...colours.amberPale); pdf.setDrawColor(253, 230, 138); pdf.roundedRect(left, y, contentWidth, limitationHeight, 3, 3, 'FD');
+                    let limitationY = y + 6;
+                    for (const limitation of model.limitations) {
+                        const lines = pdf.splitTextToSize(limitation, contentWidth - 16);
+                        pdf.setFillColor(...colours.amber); pdf.circle(left + 6, limitationY - 1, 1.1, 'F');
+                        pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7.6); pdf.setTextColor(...colours.ink); pdf.text(lines, left + 10, limitationY);
+                        limitationY += lines.length * 3.9 + 3;
+                    }
+                    y += limitationHeight + 4;
+
+                    const pages = pdf.getNumberOfPages();
+                    for (let page = 1; page <= pages; page += 1) {
+                        pdf.setPage(page); pdf.setDrawColor(...colours.line); pdf.line(left, pageHeight - 13, pageWidth - right, pageHeight - 13);
+                        pdf.setFont('helvetica', 'normal'); pdf.setFontSize(6.8); pdf.setTextColor(...colours.muted);
+                        pdf.text(`Export ${model.metadata.exportVersion} | Calculation ${model.metadata.calculationVersion} | Generated ${model.metadata.generatedAt}`, left, pageHeight - 8);
+                        pdf.text(`Page ${page} of ${pages}`, pageWidth - right, pageHeight - 8, { align: 'right' });
+                    }
+                    this.downloadPdfFile(pdf, model.filename);
+                } catch (error) {
+                    console.error('Income PDF export failed:', error);
+                    alert(error?.message || 'The income summary could not be prepared.');
+                }
             },
             overviewTime(ts) {
                 const value = new Date(ts);
@@ -4981,7 +5216,7 @@
                 this.mobileMenuOpen = false;
                 const key = routeKey || nextTab;
                 this.editorPreview = ['create-preview', 'edit-preview'].includes(key) && ['create', 'edit'].includes(nextTab);
-                if (nextTab === 'finances') this.financesView = key === 'finances-records' ? 'records' : key === 'finances-periods' ? 'periods' : 'overview';
+                if (nextTab === 'finances') this.financesView = key === 'finances-records' ? 'records' : key === 'finances-periods' ? 'periods' : key === 'finances-exports' ? 'exports' : 'overview';
                 if (nextTab === 'customers') {
                     const keepForm = key === 'customers-form' && this.customerView === 'form';
                     const keepDetail = key === 'customers-detail' && this.customerContext;

@@ -44,7 +44,7 @@ const build = spawnSync(process.execPath, [buildScript], { cwd: root, env: synth
 assert.equal(build.status, 0, build.stderr || build.stdout);
 assert.doesNotMatch(build.stdout, /synthetic_preview_key|public-preview\.example/, 'build output must never log public configuration values');
 
-const expectedAssets = ['_headers', '_redirects', 'analytics-app.js', 'analytics-consent.css', 'analytics-consent.mjs', 'app-help-install.js', 'app-user-messages.js', 'build-report.json', 'config.js', 'customer-csv-import.js', 'icon-192.png', 'icon-512.png', 'income-insights.js', 'index.html', 'manifest.json', 'quote', 'service-worker.js', 'tailwind.css', 'tallyo-mark.png', 'tallyo-wordmark-white.png'];
+const expectedAssets = ['_headers', '_redirects', 'analytics-app.js', 'analytics-consent.css', 'analytics-consent.mjs', 'app-help-install.js', 'app-user-messages.js', 'build-report.json', 'config.js', 'customer-csv-import.js', 'icon-192.png', 'icon-512.png', 'income-insights.js', 'income-pack-export.js', 'index.html', 'manifest.json', 'quote', 'service-worker.js', 'tailwind.css', 'tallyo-mark.png', 'tallyo-wordmark-white.png'];
 assert.deepEqual(fs.readdirSync(output).sort(), expectedAssets, 'app Pages output must use a strict public-file allowlist');
 assert.deepEqual(fs.readdirSync(path.join(output, 'quote')).sort(), ['index.html', 'quote.css', 'quote.js']);
 const generatedConfig = fs.readFileSync(path.join(output, 'config.js'), 'utf8');
@@ -144,7 +144,7 @@ const manifest = JSON.parse(fs.readFileSync(path.join(output, 'manifest.json'), 
 assert.equal(manifest.start_url, './');
 assert.equal(manifest.scope, './');
 const worker = fs.readFileSync(path.join(output, 'service-worker.js'), 'utf8');
-for (const asset of ['./index.html', './config.js', './analytics-app.js', './analytics-consent.mjs', './analytics-consent.css', './app-help-install.js', './income-insights.js', './manifest.json', './tallyo-mark.png', './tallyo-wordmark-white.png']) assert.ok(worker.includes(asset), `worker shell missing ${asset}`);
+for (const asset of ['./index.html', './config.js', './analytics-app.js', './analytics-consent.mjs', './analytics-consent.css', './app-help-install.js', './income-insights.js', './income-pack-export.js', './manifest.json', './tallyo-mark.png', './tallyo-wordmark-white.png']) assert.ok(worker.includes(asset), `worker shell missing ${asset}`);
 assert.match(worker, /requestUrl\.pathname === '\/quote'[\s\S]*?requestUrl\.pathname\.startsWith\('\/quote\/'\)/, 'public quote pages must bypass the authenticated app cache');
 
 const migrationMap = fs.readFileSync(path.join(root, 'deployment', 'cloudflare', 'domain-migration-map.md'), 'utf8');

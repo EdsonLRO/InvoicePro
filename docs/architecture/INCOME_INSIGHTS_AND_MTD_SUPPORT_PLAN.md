@@ -1,6 +1,6 @@
 # Income insights and MTD-supporting records plan
 
-Status: Phases 0-3 are approved and merged. Phase 4 income records and UK period presentation are implemented behind the same fail-closed public-release gate for focused review; no public activation is approved.
+Status: Phases 0-5 are Owner-approved. Phase 5 Income Pack exports remain behind the same fail-closed public-release gate; no public activation is approved.
 
 Last reviewed: 6 October 2026.
 
@@ -51,6 +51,16 @@ The gated **Income records** view exposes the shared module's traceable payment,
 The gated **UK income periods** view separates activity in each three-month window from cumulative tax-year-to-date income recorded in Tallyo. Each period links directly to the exact supporting ledger rows and repeats the income-only, non-filing boundary. The standard 6 April tax-year dates and 7 August, 7 November, 7 February and 7 May deadlines were rechecked against current HMRC guidance on 6 October 2026. Tallyo still does not send anything to HMRC or claim compatible-software status.
 
 The shared calculation module also now emits only one review row for a Paid invoice that has no dated payment evidence. This removes duplicate review evidence without changing any financial total. `tests/income-insights-records-ui-harness.cjs` verifies the ledger/filter/period contract and reconciliation, while the expanded browser acceptance covers all three Finances views at 320-1440 px with no external requests.
+
+Phase 4 was approved and merged through PR #207 as `24071ff3800a203ed98c872af2904cd6d553e271` with Security and both Pages checks passing.
+
+## Phase 5 implementation reference
+
+The gated **Prepare income records** view creates files locally from the same owner-loaded, currency-specific calculation used by Finances. `income-pack-export.js` is a pure browser/Node-compatible formatter with no database, provider, storage, analytics or network access. It refuses to build a pack unless receipt, refund, invoice, outstanding, overdue and tax-context totals reconcile exactly with the canonical exported rows.
+
+The pack provides `income-records.csv`, `invoice-index.csv`, `customer-income-summary.csv`, `income-by-period.csv`, `refunds-and-credit-notes.csv`, `readiness-report.csv`, `income-pack-manifest.json` and `income-summary.pdf`. Every CSV has a UTF-8 byte-order mark, deterministic column order, exact decimal formatting, export/calculation versions, generated timestamp, period, currency, business and scope metadata. Text cells beginning with spreadsheet formula characters are neutralised before CSV encoding. The manifest repeats the totals, limitations, readiness counts and file list. The PDF begins with the required income-only/non-HMRC notice and provides selected-period totals, record checks, customers, monthly receipts and limitations.
+
+Downloads require the existing trusted-device confirmation and contain only customer names and invoice references needed to understand the income rows; they do not include customer contact details. Browser acceptance verifies real CSV, JSON and PDF downloads. The generated fictional PDF was rendered through Poppler and inspected for clipping, overlap, page numbering and legibility. Scale tests cover 2,005 invoices/records, and account-data export plus tenant-isolation regressions remain unchanged.
 
 ## Existing product baseline
 
@@ -412,6 +422,8 @@ Exit criteria:
 - CSV formula injection and malformed-data cases are neutralised;
 - owner isolation and account-export behaviour pass regression checks;
 - an accountant can understand the income-only boundary without product guidance.
+
+Implementation state: Owner-approved on 6 October 2026 through PR #208. Public activation remains reserved for Phase 6 release hardening and separate approval.
 
 ### Phase 6 — Release hardening and controlled publication
 

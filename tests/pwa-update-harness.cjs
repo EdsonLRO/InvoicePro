@@ -115,7 +115,7 @@ function fetchEvent(request) {
   const cacheNames = await harness.cacheApi.keys();
   assert.deepEqual(cacheNames, ['tallyo-shell-2026-09-25-1']);
   const shellStore = harness.stores.get(cacheNames[0]);
-  for (const asset of ['./', './index.html', './tailwind.css', './analytics-consent.css', './analytics-consent.mjs', './analytics-app.js', './app-user-messages.js', './customer-csv-import.js', './income-insights.js', './config.js', './app-help-install.js', './manifest.json', './tallyo-mark.png', './tallyo-wordmark-white.png', './icon-192.png', './icon-512.png']) {
+  for (const asset of ['./', './index.html', './tailwind.css', './analytics-consent.css', './analytics-consent.mjs', './analytics-app.js', './app-user-messages.js', './customer-csv-import.js', './income-insights.js', './income-pack-export.js', './config.js', './app-help-install.js', './manifest.json', './tallyo-mark.png', './tallyo-wordmark-white.png', './icon-192.png', './icon-512.png']) {
     assert(shellStore.has(cacheKey(asset)), `missing app-shell asset: ${asset}`);
   }
 
