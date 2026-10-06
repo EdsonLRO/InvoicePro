@@ -484,6 +484,38 @@
         .finances-methods { margin-top:18px; padding-top:2px; color:#64748b; font-size:12px; line-height:1.65; }
         .finances-methods summary { min-height:44px; display:flex; align-items:center; cursor:pointer; color:#4338ca; font-weight:650; }
         .finances-methods p + p { margin-top:8px; }
+        .finances-tabs { display:flex; gap:6px; margin:0 0 16px; overflow-x:auto; scrollbar-width:thin; }
+        .finances-tabs button { min-height:42px; flex:0 0 auto; padding:8px 14px; border:1px solid #dce4ef; border-radius:9px; background:#fff; color:#475569; font-size:13px; font-weight:650; }
+        .finances-tabs button[aria-current="page"] { border-color:#818cf8; background:#eef2ff; color:#3730a3; }
+        .finances-link-button { min-height:36px; flex-shrink:0; padding:7px 10px; border:1px solid #c7d2fe; border-radius:8px; color:#4338ca; font-size:12px; font-weight:650; }
+        .income-record-filters { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:14px; }
+        .income-record-filters .finances-control { min-width:0; }
+        .income-record-table-wrap { overflow-x:auto; border:1px solid #dce4ef; border-radius:12px; background:#fff; }
+        .income-record-table { width:100%; min-width:980px; border-collapse:collapse; font-size:12px; }
+        .income-record-table th { padding:11px 10px; background:#f8fafc; color:#475569; text-align:left; font-size:11px; letter-spacing:.03em; }
+        .income-record-table td { padding:11px 10px; border-top:1px solid #edf1f6; color:#334155; vertical-align:top; }
+        .income-record-table td:last-child, .income-record-table th:last-child { text-align:right; font-variant-numeric:tabular-nums; }
+        .income-record-table button { color:#4338ca; font-weight:650; text-align:left; }
+        .income-record-table small { display:block; margin-top:3px; color:#64748b; }
+        .income-record-status { display:inline-flex; padding:3px 7px; border-radius:999px; background:#dcfce7; color:#166534; font-size:10px; font-weight:700; }
+        .income-record-status.needs-review { background:#fef3c7; color:#92400e; }
+        .income-record-refund { color:#b45309; font-weight:700; }
+        .income-record-pagination { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-top:12px; color:#64748b; font-size:12px; }
+        .income-record-pagination button { min-height:40px; padding:7px 12px; border:1px solid #cbd5e1; border-radius:8px; background:#fff; color:#4338ca; font-weight:650; }
+        .income-record-pagination button:disabled { opacity:.45; }
+        .uk-period-notice { margin-bottom:14px; padding:14px; border:1px solid #bae6fd; border-radius:12px; background:#f0f9ff; color:#075985; font-size:13px; line-height:1.55; }
+        .uk-period-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+        .uk-period-card { min-width:0; padding:18px; border:1px solid #dce4ef; border-radius:13px; background:#fff; }
+        .uk-period-card header { display:flex; justify-content:space-between; gap:12px; margin-bottom:12px; }
+        .uk-period-card header > div:last-child { text-align:right; }
+        .uk-period-card header strong, .uk-period-card header time { display:block; }
+        .uk-period-card h2 { color:#0f172a; font-size:17px; font-weight:700; }
+        .uk-period-card header p, .uk-period-card header time { margin-top:4px; color:#64748b; font-size:11px; }
+        .uk-period-card dl { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+        .uk-period-card dl div { padding:10px; border-radius:9px; background:#f8fafc; }
+        .uk-period-card dt { color:#64748b; font-size:10px; }
+        .uk-period-card dd { margin-top:3px; color:#0f172a; font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+        .uk-period-card footer { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
         @media (min-width: 1100px) {
             .shell-topbar { margin-left: 224px; }
             .shell-main { margin-left: 224px; margin-right: 0; width: calc(100% - 224px); max-width: none; }
@@ -509,6 +541,8 @@
             .finances-grid-three .finances-card:last-child { grid-column:1/-1; }
         }
         @media (max-width: 699px) {
+            .finances-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); overflow:visible; }
+            .finances-tabs button { min-width:0; padding:8px 6px; white-space:normal; font-size:11px; line-height:1.3; }
             .finances-heading { align-items:flex-start; gap:14px; }
             .finances-heading h1 { font-size:28px; }
             .finances-controls, .finances-custom-dates { width:100%; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
@@ -524,6 +558,11 @@
             .finances-month > span { font-size:9px; }
             .finances-readiness { grid-template-columns:minmax(0,1fr); justify-items:center; text-align:center; }
             .finances-exact-values { overflow-x:auto; }
+            .income-record-filters { grid-template-columns:repeat(2,minmax(0,1fr)); }
+            .uk-period-grid { grid-template-columns:minmax(0,1fr); }
+        }
+        @media (max-width: 480px) {
+            .income-record-filters { grid-template-columns:minmax(0,1fr); }
         }
         @media (max-width: 359px) {
             .finances-controls, .finances-custom-dates { grid-template-columns:minmax(0,1fr); }
@@ -1811,16 +1850,21 @@
                 </div>
                 <p class="finances-scope" role="note">These figures cover invoices and payments recorded in Tallyo. Income received elsewhere and business expenses are not included.</p>
                 <p class="finances-period-note">{{ financesPeriodDescription }}<template v-if="financesCalculation?.currencyMode === 'separate'"> Each currency stays separate and is never added into a combined total.</template></p>
+                <nav class="finances-tabs" aria-label="Finances sections">
+                    <button @click="openFinancesView('overview')" :aria-current="financesView === 'overview' ? 'page' : null">Overview</button>
+                    <button @click="openFinancesView('records')" :aria-current="financesView === 'records' ? 'page' : null">Income records</button>
+                    <button @click="openFinancesView('periods')" :aria-current="financesView === 'periods' ? 'page' : null">UK income periods</button>
+                </nav>
 
                 <div v-if="financesCalculationError" class="finances-state" role="alert">
                     <h2>We could not calculate these figures</h2>
                     <p>Your invoices and payment records are still safe. Check the selected dates and try again.</p>
                 </div>
-                <div v-else-if="!financesHasRecords" class="finances-state">
+                <div v-else-if="!financesHasRecords && financesView === 'overview'" class="finances-state">
                     <h2>No income records to show for this period</h2>
                     <p>Issued invoices and dated payments in {{ financesCurrency }} will appear here. Income received outside Tallyo will not appear.</p>
                 </div>
-                <template v-else>
+                <template v-else-if="financesView === 'overview'">
                     <dl class="finances-kpis" aria-label="Finances summary">
                         <div class="finances-kpi"><dt>Invoiced</dt><dd>{{ overviewMoney(financesSummary.invoiced, financesCurrency) }}</dd><small>{{ financesSummary.issuedInvoiceCount }} issued invoice{{ financesSummary.issuedInvoiceCount === 1 ? '' : 's' }}</small></div>
                         <div class="finances-kpi is-received"><dt>Received</dt><dd>{{ overviewMoney(financesSummary.received, financesCurrency) }}</dd><small>Positive dated payments</small></div>
@@ -1832,7 +1876,7 @@
 
                     <div class="finances-grid-main">
                         <section class="finances-card" aria-labelledby="finances-money-title">
-                            <div class="finances-card-head"><div><h2 id="finances-money-title">Money received over time</h2><p>Issued invoice value compared with net recorded receipts.</p></div><span>{{ financesCurrency }}</span></div>
+                            <div class="finances-card-head"><div><h2 id="finances-money-title">Money received over time</h2><p>Issued invoice value compared with net recorded receipts.</p></div><button class="finances-link-button" @click="openFinancesRecords()">View records</button></div>
                             <div class="finances-money-chart" role="img" :aria-label="financesChartLabel">
                                 <div v-for="month in financesMonths" :key="month.month" class="finances-month" aria-hidden="true">
                                     <div class="finances-bar-pair"><i class="finances-bar" :style="{height: financesBarHeight(month.invoiced)}"></i><i class="finances-bar is-received" :class="{'is-negative': month.netReceived < 0}" :style="{height: financesBarHeight(month.netReceived)}"></i></div>
@@ -1860,7 +1904,7 @@
 
                     <div class="finances-grid-three">
                         <section class="finances-card" aria-labelledby="finances-customers-title">
-                            <div class="finances-card-head"><div><h2 id="finances-customers-title">Income by customer</h2><p>Net recorded receipts, highest first.</p></div><span>{{ financesCustomers.length }} customer{{ financesCustomers.length === 1 ? '' : 's' }}</span></div>
+                            <div class="finances-card-head"><div><h2 id="finances-customers-title">Income by customer</h2><p>Net recorded receipts, highest first.</p></div><button class="finances-link-button" @click="openFinancesRecords()">View records</button></div>
                             <p v-if="!financesCustomers.length" class="finances-footnote">No customer receipts are recorded in this period.</p>
                             <ol v-else class="finances-rank-list">
                                 <li v-for="customer in financesCustomers.slice(0, 5)" :key="customer.key"><div class="finances-rank-row"><span>{{ customer.customerName }}</span><strong>{{ overviewMoney(customer.netReceived, financesCurrency) }}</strong></div><div class="finances-rank-track" aria-hidden="true"><i :style="{width: financesCustomerWidth(customer.netReceived)}"></i></div></li>
@@ -1868,7 +1912,7 @@
                             <details v-if="financesCustomers.length > 5" class="finances-exact-values"><summary>View all customer values</summary><table><caption class="sr-only">Net receipts by customer</caption><thead><tr><th>Customer</th><th>Net received</th></tr></thead><tbody><tr v-for="customer in financesCustomers" :key="'customer-' + customer.key"><td>{{ customer.customerName }}</td><td>{{ overviewMoney(customer.netReceived, financesCurrency) }}</td></tr></tbody></table></details>
                         </section>
                         <section class="finances-card" aria-labelledby="finances-sources-title">
-                            <div class="finances-card-head"><div><h2 id="finances-sources-title">Where the income came from</h2><p>How the invoice started, not a tax category.</p></div></div>
+                            <div class="finances-card-head"><div><h2 id="finances-sources-title">Where the income came from</h2><p>How the invoice started, not a tax category.</p></div><button class="finances-link-button" @click="openFinancesRecords()">View records</button></div>
                             <ul class="finances-source-list"><li v-for="source in financesSources" :key="source.source"><div class="finances-source-row"><span>{{ financesSourceLabel(source.source) }}<small>{{ source.recordCount }} payment or refund record{{ source.recordCount === 1 ? '' : 's' }}</small></span><strong>{{ overviewMoney(source.netReceived, financesCurrency) }}</strong></div><div class="finances-rank-track" aria-hidden="true"><i :style="{width: financesSourceWidth(source.netReceived)}"></i></div></li></ul>
                             <p class="finances-footnote">All sources are sales from invoices. One-off, recurring and accepted-quote describe the Tallyo workflow only.</p>
                         </section>
@@ -1884,7 +1928,7 @@
                     <section v-if="financesReviewGroups.length" class="finances-card finances-review-panel" aria-labelledby="finances-review-title">
                         <div class="finances-card-head"><div><h2 id="finances-review-title">Some records need review</h2><p>Valid records stay visible. Uncertain amounts are kept out of totals where needed.</p></div><span>{{ financesReviewGroups.reduce((sum, item) => sum + item.count, 0) }}</span></div>
                         <ul class="finances-review-list"><li v-for="issue in financesReviewGroups" :key="issue.code"><span>{{ issue.message }}</span><strong>{{ issue.count }}</strong></li></ul>
-                        <p class="finances-footnote">Open Invoices to correct the affected records. A detailed income-record view is planned for the next phase.</p>
+                        <p class="finances-footnote">Open Income records to trace these checks to the affected invoice records.</p>
                     </section>
 
                     <details class="finances-methods"><summary>How these figures work</summary>
@@ -1892,6 +1936,51 @@
                         <p>Draft and Cancelled invoices and quotes do not count as income. A Paid label without a dated payment does not count as received. Still to be paid and overdue use the saved invoice balance for invoices issued in the selected period.</p>
                         <p>Figures use records currently loaded in Tallyo, dates use UTC and currencies are never added together. Tax shown on an invoice is context only; this page does not calculate tax due, expenses or profit and does not submit anything to HMRC.</p>
                     </details>
+                </template>
+                <template v-else-if="financesView === 'records'">
+                    <section aria-labelledby="income-records-title">
+                        <div class="finances-card-head"><div><h2 id="income-records-title" style="font-size:22px">Income records</h2><p>Payments, refunds and records needing review for {{ financesPeriodDescription }}</p></div><span>{{ financesFilteredRecords.length }} record{{ financesFilteredRecords.length === 1 ? '' : 's' }}</span></div>
+                        <div class="income-record-filters" aria-label="Income record filters">
+                            <label class="finances-control">Customer<select v-model="financesRecordFilters.customer" @change="resetFinancesRecordPage" aria-label="Income records customer"><option value="">All customers</option><option v-for="customer in financesRecordCustomers" :key="customer.key" :value="customer.key">{{ customer.name }}</option></select></label>
+                            <label class="finances-control">Record<select v-model="financesRecordFilters.type" @change="resetFinancesRecordPage" aria-label="Income records type"><option value="all">Payments and refunds</option><option value="payment">Payments</option><option value="refund">Refunds</option><option value="review">Needs-review records</option></select></label>
+                            <label class="finances-control">Payment amount<select v-model="financesRecordFilters.paymentKind" @change="resetFinancesRecordPage" aria-label="Income records payment kind"><option value="all">Full and part payments</option><option value="full">Full payments</option><option value="part">Deposits and part-payments</option></select></label>
+                            <label class="finances-control">Recorded by<select v-model="financesRecordFilters.paymentSource" @change="resetFinancesRecordPage" aria-label="Income records payment source"><option value="all">All sources</option><option value="stripe_confirmed">Card-confirmed</option><option value="manual">Manually recorded</option></select></label>
+                            <label class="finances-control">Invoice origin<select v-model="financesRecordFilters.workflow" @change="resetFinancesRecordPage" aria-label="Income records workflow"><option value="all">All invoice origins</option><option value="one_off">One-off invoices</option><option value="recurring">Recurring invoices</option><option value="accepted_quote">Accepted quotes</option></select></label>
+                            <label class="finances-control">Record check<select v-model="financesRecordFilters.readiness" @change="resetFinancesRecordPage" aria-label="Income records readiness"><option value="all">Ready and needs review</option><option value="ready">Ready</option><option value="review">Needs review</option></select></label>
+                        </div>
+                        <div v-if="!financesFilteredRecords.length" class="finances-state"><h2>No matching income records</h2><p>Change a filter or choose another period or currency.</p></div>
+                        <template v-else>
+                            <div class="income-record-table-wrap" tabindex="0" aria-label="Scrollable income records table">
+                                <table class="income-record-table"><caption class="sr-only">Income records for the selected period and currency</caption><thead><tr><th>Date</th><th>Customer and invoice</th><th>Record</th><th>Category and origin</th><th>Tax shown</th><th>Check</th><th>Amount</th></tr></thead><tbody>
+                                    <tr v-for="record in financesPaginatedRecords" :key="record.id">
+                                        <td>{{ financesDateLabel(record.date) }}</td>
+                                        <td><strong>{{ record.customerName }}</strong><small><button v-if="record.invoiceId" @click="openFinancesRecordInvoice(record)">{{ record.invoiceReference || 'Invoice needs a reference' }}</button><span v-else>{{ record.invoiceReference || 'Invoice needs a reference' }}</span> · issued {{ financesDateLabel(record.invoiceIssueDate) }}</small></td>
+                                        <td>{{ financesRecordTypeLabel(record) }}<small>{{ financesPaymentSourceLabel(record.paymentSource) }}</small></td>
+                                        <td>{{ record.categoryLabel || 'Review separately' }}<small>{{ financesSourceLabel(record.workflowSource) }}</small></td>
+                                        <td>{{ overviewMoney(record.taxShown, financesCurrency) }}</td>
+                                        <td><span class="income-record-status" :class="{'needs-review': !record.ready}">{{ record.ready ? 'Ready' : 'Needs review' }}</span><small v-if="record.reviewReasons?.length">{{ financesRecordReasons(record) }}</small></td>
+                                        <td :class="{'income-record-refund': record.recordType === 'refund'}">{{ record.recordType === 'review' ? '—' : overviewMoney(record.amount, financesCurrency) }}</td>
+                                    </tr>
+                                </tbody></table>
+                            </div>
+                            <div class="income-record-pagination"><span>Page {{ financesRecordCurrentPage }} of {{ financesRecordTotalPages }}</span><button @click="financesRecordPage = financesRecordCurrentPage - 1" :disabled="financesRecordCurrentPage <= 1">Previous</button><button @click="financesRecordPage = financesRecordCurrentPage + 1" :disabled="financesRecordCurrentPage >= financesRecordTotalPages">Next</button></div>
+                        </template>
+                        <p class="finances-footnote">This ledger is derived from records already in Tallyo. It is not a bank statement, tax return or HMRC submission.</p>
+                    </section>
+                </template>
+                <template v-else>
+                    <section aria-labelledby="uk-periods-title">
+                        <div class="finances-card-head"><div><h2 id="uk-periods-title" style="font-size:22px">UK income periods</h2><p>{{ financesTaxYearLabel }} · {{ financesCurrency }} · income recorded in Tallyo only</p></div></div>
+                        <p class="uk-period-notice" role="note"><strong>Organising view only.</strong> These periods show Tallyo's income side. They exclude expenses and income received elsewhere. Nothing is filed with or sent to HMRC.</p>
+                        <div class="uk-period-grid">
+                            <article v-for="period in financesUkPeriods" :key="period.id" class="uk-period-card">
+                                <header><div><h2>{{ period.label }}</h2><p>{{ financesDateLabel(period.activityFrom) }} to {{ financesDateLabel(period.activityTo) }}</p></div><div><strong>Deadline</strong><time :datetime="period.deadline">{{ financesDateLabel(period.deadline) }}</time></div></header>
+                                <dl><div><dt>Activity records</dt><dd>{{ period.activity.recordCount }}</dd></div><div><dt>Activity net received</dt><dd>{{ overviewMoney(period.activity.netReceived, financesCurrency) }}</dd></div><div><dt>Tax year to date</dt><dd>{{ overviewMoney(period.cumulative.netReceived, financesCurrency) }}</dd></div><div><dt>Records needing review</dt><dd>{{ period.cumulative.needsReview }}</dd></div></dl>
+                                <footer><button class="finances-link-button" @click="openFinancesPeriodRecords(period, false)">View period records</button><button class="finances-link-button" @click="openFinancesPeriodRecords(period, true)">View tax-year-to-date records</button></footer>
+                            </article>
+                        </div>
+                        <details class="finances-methods"><summary>How UK income periods work</summary><p>Each activity figure covers only that three-month period. Tax year to date starts on 6 April and grows cumulatively through the selected period. The dates shown use the standard UK update periods in the approved plan.</p><p>Tallyo does not calculate expenses, profit or tax due and does not connect to HMRC. Current dates and official interpretation must be checked again before any public release.</p></details>
+                    </section>
                 </template>
             </section>
 
@@ -3703,6 +3792,9 @@
                 financesPeriodChoice: 'this_tax_year',
                 financesCustomFrom: new Date().toISOString().slice(0, 8) + '01',
                 financesCustomTo: new Date().toISOString().slice(0, 10),
+                financesView: 'overview',
+                financesRecordFilters: { customer: '', type: 'all', paymentKind: 'all', paymentSource: 'all', workflow: 'all', readiness: 'all' },
+                financesRecordPage: 1,
                 overviewMenu: '',
                 overviewMenuTrigger: null,
                 mobileMenuOpen: false,
@@ -3991,6 +4083,56 @@
             financesReviewGroups() {
                 const messages = new Map((this.financesReadiness.issues || []).map(issue => [issue.code, issue.message]));
                 return Object.entries(this.financesReadiness.byReason || {}).map(([code, count]) => ({ code, count, message: messages.get(code) || 'This record needs review.' })).sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
+            },
+            financesRecords() {
+                return (this.financesReport?.records || []).slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || String(a.invoiceReference || '').localeCompare(String(b.invoiceReference || '')));
+            },
+            financesRecordCustomers() {
+                const customers = new Map();
+                this.financesRecords.forEach(record => {
+                    const key = this.financesRecordCustomerKey(record);
+                    if (!customers.has(key)) customers.set(key, { key, name: record.customerName || 'Customer not recorded' });
+                });
+                return [...customers.values()].sort((a, b) => a.name.localeCompare(b.name));
+            },
+            financesFilteredRecords() {
+                const filters = this.financesRecordFilters;
+                return this.financesRecords.filter(record => {
+                    if (filters.customer && this.financesRecordCustomerKey(record) !== filters.customer) return false;
+                    if (filters.type !== 'all' && record.recordType !== filters.type) return false;
+                    if (filters.paymentKind !== 'all' && record.paymentKind !== filters.paymentKind) return false;
+                    if (filters.paymentSource !== 'all' && record.paymentSource !== filters.paymentSource) return false;
+                    if (filters.workflow !== 'all' && record.workflowSource !== filters.workflow) return false;
+                    if (filters.readiness === 'ready' && !record.ready) return false;
+                    if (filters.readiness === 'review' && record.ready) return false;
+                    return true;
+                });
+            },
+            financesRecordTotalPages() { return Math.max(1, Math.ceil(this.financesFilteredRecords.length / 50)); },
+            financesRecordCurrentPage() { return Math.min(Math.max(this.financesRecordPage, 1), this.financesRecordTotalPages); },
+            financesPaginatedRecords() {
+                return this.financesFilteredRecords.slice((this.financesRecordCurrentPage - 1) * 50, this.financesRecordCurrentPage * 50);
+            },
+            financesTaxYearStartYear() {
+                const selectedDate = /^\d{4}-\d{2}-\d{2}$/.test(this.financesPeriod?.from || '') ? this.financesPeriod.from : new Date().toISOString().slice(0, 10);
+                const [year, month, day] = selectedDate.split('-').map(Number);
+                return year - (month > 4 || (month === 4 && day >= 6) ? 0 : 1);
+            },
+            financesTaxYearLabel() { return `Tax year ${this.financesTaxYearStartYear}/${String(this.financesTaxYearStartYear + 1).slice(-2)}`; },
+            financesUkPeriods() {
+                const year = this.financesTaxYearStartYear;
+                const definitions = [
+                    { id: 1, label: 'Period 1', activityFrom: `${year}-04-06`, activityTo: `${year}-07-05`, cumulativeTo: `${year}-07-05`, deadline: `${year}-08-07` },
+                    { id: 2, label: 'Period 2', activityFrom: `${year}-07-06`, activityTo: `${year}-10-05`, cumulativeTo: `${year}-10-05`, deadline: `${year}-11-07` },
+                    { id: 3, label: 'Period 3', activityFrom: `${year}-10-06`, activityTo: `${year + 1}-01-05`, cumulativeTo: `${year + 1}-01-05`, deadline: `${year + 1}-02-07` },
+                    { id: 4, label: 'Period 4', activityFrom: `${year + 1}-01-06`, activityTo: `${year + 1}-04-05`, cumulativeTo: `${year + 1}-04-05`, deadline: `${year + 1}-05-07` }
+                ];
+                return definitions.map(period => ({
+                    ...period,
+                    cumulativeFrom: `${year}-04-06`,
+                    activity: this.financesPeriodTotals(period.activityFrom, period.activityTo),
+                    cumulative: this.financesPeriodTotals(`${year}-04-06`, period.cumulativeTo)
+                }));
             },
             financesPeriodDescription() {
                 const from = this.financesDateLabel(this.financesPeriod.from), to = this.financesDateLabel(this.financesPeriod.to);
@@ -4535,6 +4677,51 @@
                 return `${Math.max(amount > 0 ? 3 : 0, amount / this.financesSourceMax * 100)}%`;
             },
             financesSourceLabel(source) { return this.customerFinanceSourceLabel(source); },
+            openFinancesView(view) {
+                const next = ['overview', 'records', 'periods'].includes(view) ? view : 'overview';
+                this.financesView = next;
+                this.setRouteKey(next === 'overview' ? 'finances' : `finances-${next}`);
+            },
+            openFinancesRecords() {
+                this.financesRecordPage = 1;
+                this.openFinancesView('records');
+            },
+            resetFinancesRecordPage() { this.financesRecordPage = 1; },
+            financesRecordCustomerKey(record) {
+                return record.customerId ? `id:${record.customerId}` : `name:${String(record.customerName || '').trim().toLowerCase()}`;
+            },
+            financesRecordTypeLabel(record) {
+                if (record.recordType === 'refund') return 'Refund';
+                if (record.recordType === 'review') return 'Review record';
+                return record.paymentKind === 'full' ? 'Full payment' : 'Deposit or part-payment';
+            },
+            financesPaymentSourceLabel(source) {
+                if (source === 'stripe_confirmed') return 'Card payment confirmed';
+                if (source === 'manual') return 'Manually recorded';
+                return 'No payment source';
+            },
+            financesRecordReasons(record) {
+                const messages = new Map((this.financesReadiness.issues || []).map(issue => [issue.code, issue.message]));
+                return (record.reviewReasons || []).map(code => messages.get(code) || 'Needs review').join(' ');
+            },
+            openFinancesRecordInvoice(record) {
+                const invoice = this.invoices.find(item => item.id === record.invoiceId);
+                if (invoice) this.loadInvoice(invoice);
+            },
+            financesPeriodTotals(from, to) {
+                try {
+                    const result = window.TallyoIncomeInsights.calculateIncomeInsights(this.invoices, { from, to, today: new Date().toISOString().slice(0, 10) });
+                    const report = result.currencies.find(item => item.currency === this.financesCurrency);
+                    return report ? { recordCount: report.summary.incomeRecordCount, received: report.summary.received, refunds: report.summary.refunds, netReceived: report.summary.netReceived, needsReview: report.readiness.needsReview } : { recordCount: 0, received: 0, refunds: 0, netReceived: 0, needsReview: 0 };
+                } catch { return { recordCount: 0, received: 0, refunds: 0, netReceived: 0, needsReview: 0 }; }
+            },
+            openFinancesPeriodRecords(period, cumulative) {
+                this.financesPeriodChoice = 'custom';
+                this.financesCustomFrom = cumulative ? period.cumulativeFrom : period.activityFrom;
+                this.financesCustomTo = cumulative ? period.cumulativeTo : period.activityTo;
+                this.financesRecordFilters = { customer: '', type: 'all', paymentKind: 'all', paymentSource: 'all', workflow: 'all', readiness: 'all' };
+                this.openFinancesRecords();
+            },
             overviewTime(ts) {
                 const value = new Date(ts);
                 const day = value.toISOString().slice(0, 10);
@@ -4794,6 +4981,7 @@
                 this.mobileMenuOpen = false;
                 const key = routeKey || nextTab;
                 this.editorPreview = ['create-preview', 'edit-preview'].includes(key) && ['create', 'edit'].includes(nextTab);
+                if (nextTab === 'finances') this.financesView = key === 'finances-records' ? 'records' : key === 'finances-periods' ? 'periods' : 'overview';
                 if (nextTab === 'customers') {
                     const keepForm = key === 'customers-form' && this.customerView === 'form';
                     const keepDetail = key === 'customers-detail' && this.customerContext;

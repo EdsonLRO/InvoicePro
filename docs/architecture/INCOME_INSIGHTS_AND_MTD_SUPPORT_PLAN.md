@@ -1,6 +1,6 @@
 # Income insights and MTD-supporting records plan
 
-Status: Phases 0-2 are approved and merged. Phase 3 business-level Finances overview is implemented behind the same fail-closed public-release gate for focused review; no public activation is approved.
+Status: Phases 0-3 are approved and merged. Phase 4 income records and UK period presentation are implemented behind the same fail-closed public-release gate for focused review; no public activation is approved.
 
 Last reviewed: 6 October 2026.
 
@@ -41,6 +41,16 @@ Phase 2 was approved and merged through PR #205 as `bfbec4421b53bb93d25fdf95ba76
 The gated **Finances** destination now consumes the same shared module for a business-level view. It provides period and explicit currency controls, six exact summary figures, monthly invoiced/receipt columns, payment position, income by customer, workflow source, records-organised readiness and a grouped needs-review panel. Native HTML and CSS provide all visuals, and every visual has exact written values or a keyboard-accessible table or list.
 
 Desktop navigation places Finances under Sales. The mobile bottom navigation provides a direct Finances action while preserving the existing More menu in the top bar. The page handles empty, invalid-period, mixed-currency and needs-review states without replacing uncertainty with zeroes or combining currencies. `tests/income-insights-finances-ui-harness.cjs` verifies the canonical computed contract and release boundary; `tests/income-insights-finances-browser.cjs` covers desktop/mobile routing, keyboard exact values, period validation, currency separation, empty state, 320-1440 px layouts and zero third-party requests.
+
+Phase 3 was approved and merged through PR #206 as `f71c95d0732d8513a4f466908bcabb46a974c485` with Security and both Pages checks passing.
+
+## Phase 4 implementation reference
+
+The gated **Income records** view exposes the shared module's traceable payment, refund and review rows as a filterable ledger. Customer, record type, payment kind, payment source, workflow origin and readiness filters refine the same canonical records without recalculating their amounts. Each row retains its customer, invoice, date, category, source and review explanation, and links back to the supporting invoice where one exists.
+
+The gated **UK income periods** view separates activity in each three-month window from cumulative tax-year-to-date income recorded in Tallyo. Each period links directly to the exact supporting ledger rows and repeats the income-only, non-filing boundary. The standard 6 April tax-year dates and 7 August, 7 November, 7 February and 7 May deadlines were rechecked against current HMRC guidance on 6 October 2026. Tallyo still does not send anything to HMRC or claim compatible-software status.
+
+The shared calculation module also now emits only one review row for a Paid invoice that has no dated payment evidence. This removes duplicate review evidence without changing any financial total. `tests/income-insights-records-ui-harness.cjs` verifies the ledger/filter/period contract and reconciliation, while the expanded browser acceptance covers all three Finances views at 320-1440 px with no external requests.
 
 ## Existing product baseline
 
@@ -384,6 +394,8 @@ Exit criteria:
 - period totals reconcile exactly with the ledger;
 - current HMRC dates and cumulative-period interpretation are rechecked before release;
 - no HMRC credentials, API, filing or compatibility claim.
+
+Implementation state: complete for focused Owner review. Public activation remains reserved for Phase 6 release hardening and approval.
 
 ### Phase 5 — Income Pack exports
 
