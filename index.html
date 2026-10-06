@@ -4814,15 +4814,31 @@
                     };
                     const logo = document.querySelector('.shell-brand');
                     if (!logo?.complete || !logo.naturalWidth) throw new Error('The original Tallyo logo is not available yet. Please try the download again.');
+                    const sourceLogoCanvas = document.createElement('canvas');
+                    sourceLogoCanvas.width = logo.naturalWidth; sourceLogoCanvas.height = logo.naturalHeight;
+                    const sourceLogoContext = sourceLogoCanvas.getContext('2d');
+                    sourceLogoContext.drawImage(logo, 0, 0);
+                    const logoPixels = sourceLogoContext.getImageData(0, 0, logo.naturalWidth, logo.naturalHeight).data;
+                    let logoLeft = logo.naturalWidth, logoTop = logo.naturalHeight, logoRight = -1, logoBottom = -1;
+                    for (let pixelY = 0; pixelY < logo.naturalHeight; pixelY += 1) {
+                        for (let pixelX = 0; pixelX < logo.naturalWidth; pixelX += 1) {
+                            if (logoPixels[(pixelY * logo.naturalWidth + pixelX) * 4 + 3] < 8) continue;
+                            logoLeft = Math.min(logoLeft, pixelX); logoRight = Math.max(logoRight, pixelX);
+                            logoTop = Math.min(logoTop, pixelY); logoBottom = Math.max(logoBottom, pixelY);
+                        }
+                    }
+                    if (logoRight < logoLeft || logoBottom < logoTop) throw new Error('The original Tallyo logo could not be read.');
                     const logoCanvas = document.createElement('canvas');
-                    logoCanvas.width = logo.naturalWidth; logoCanvas.height = logo.naturalHeight;
-                    logoCanvas.getContext('2d').drawImage(logo, 0, 0);
+                    logoCanvas.width = logoRight - logoLeft + 1; logoCanvas.height = logoBottom - logoTop + 1;
+                    logoCanvas.getContext('2d').drawImage(logo, logoLeft, logoTop, logoCanvas.width, logoCanvas.height, 0, 0, logoCanvas.width, logoCanvas.height);
                     const logoData = logoCanvas.toDataURL('image/png');
+                    const logoAspect = logoCanvas.width / logoCanvas.height;
                     let y = 16;
                     const money = value => new Intl.NumberFormat('en-GB', { style: 'currency', currency: model.metadata.currency }).format(Number(value) || 0);
                     const continuationHeader = () => {
                         pdf.setFillColor(...colours.navy); pdf.rect(0, 0, pageWidth, 12, 'F');
-                        pdf.addImage(logoData, 'PNG', left, 2.7, 18.5, 6.5, undefined, 'FAST');
+                        const continuationLogoWidth = 18.5;
+                        pdf.addImage(logoData, 'PNG', left, 3.6, continuationLogoWidth, continuationLogoWidth / logoAspect, undefined, 'FAST');
                         pdf.setFont('helvetica', 'normal'); pdf.setTextColor(203, 213, 225); pdf.text('Income summary', pageWidth - right, 7.8, { align: 'right' });
                         y = 22;
                     };
@@ -4863,7 +4879,8 @@
                     };
 
                     pdf.setFillColor(...colours.navy); pdf.roundedRect(left, y, contentWidth, 42, 4, 4, 'F');
-                    pdf.addImage(logoData, 'PNG', left + 8, y + 7, 30, 10.5, undefined, 'FAST');
+                    const headerLogoWidth = 31;
+                    pdf.addImage(logoData, 'PNG', left + 8, y + 8, headerLogoWidth, headerLogoWidth / logoAspect, undefined, 'FAST');
                     pdf.setFillColor(...colours.indigo); pdf.roundedRect(pageWidth - right - 35, y + 8, 27, 9, 4.5, 4.5, 'F');
                     pdf.setTextColor(...colours.white); pdf.setFont('helvetica', 'bold');
                     pdf.setFontSize(6.5); pdf.text('INCOME ONLY', pageWidth - right - 21.5, y + 13.8, { align: 'center' });
