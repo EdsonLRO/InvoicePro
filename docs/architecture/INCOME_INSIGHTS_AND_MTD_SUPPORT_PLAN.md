@@ -1,6 +1,6 @@
 # Income insights and MTD-supporting records plan
 
-Status: Owner-approved planning direction. Design and implementation are not yet approved for production release.
+Status: Phase 0 design approved. The Phase 1 read-only calculation module is implemented for focused review; no Finances UI or production release is approved.
 
 Last reviewed: 6 October 2026.
 
@@ -11,6 +11,22 @@ Use information Tallyo already records to give each business a clear visual view
 This scope does not add expenses, bank feeds, bookkeeping, tax calculation or HMRC submission. It must not imply that Tallyo knows the business's complete income, expenses, profit, tax liability or bank balance.
 
 The customer-facing name is **Finances**. The page describes its figures as **income recorded in Tallyo**.
+
+## Phase 1 implementation reference
+
+`income-insights.js` is the single pure calculation module for the future Overview, Customer and Finances consumers. It accepts only the invoice documents already loaded for the authenticated owner and performs no database query, provider request, write, payment action, email, analytics or browser-storage access.
+
+Its canonical result contains:
+
+- calculation version, scope notice, selected period and customer filter;
+- one independent report per currency, with no combined cross-currency total;
+- issued value, positive dated payments, refunds, net received, outstanding, overdue and invoice tax context;
+- exact monthly, customer and workflow-source breakdowns;
+- payment/refund ledger rows with traceable invoice and customer references;
+- payment-time context only where dated records establish full payment;
+- records-organised readiness totals and explicit issue codes.
+
+The module is UMD-compatible so focused Node tests and the later browser integration use the same source. It is deliberately not loaded by `index.html` in Phase 1, so the released Overview and customer interface remain unchanged. `tests/income-insights-harness.cjs` covers the minimum financial fixture matrix and characterises compatibility with the released Overview semantics.
 
 ## Existing product baseline
 

@@ -22,21 +22,23 @@ Next action: merge the repository pin, regression assertion and authoritative re
 ## FIN-INSIGHTS-001 - Income insights and MTD-supporting records
 
 Task ID: FIN-INSIGHTS-001
-Title: Design visual income reporting from data Tallyo already records
+Title: Build shared income calculations from data Tallyo already records
 Priority: Medium
 Status: Owner review
-Phase: Phase 0 - calculation contract and design specification
+Phase: Phase 1 - shared read-only calculation module
 Owner role: Product owner
-Risk level: Medium for the documentation and fictional-data design; later calculation logic is financially material and must receive focused review
-Branch: `codex/income-insights-phase0`
+Risk level: Medium implementation with financially material read-only calculations requiring focused review; no write, provider or production-release path
+Branch: `codex/income-insights-phase1`
 Scope: extend the released Overview and customer financial context with an accessible Finances area, customer visuals, income ledger, UK period presentation and income-only exports derived from existing invoices, dated manual and Stripe-confirmed payments, refunds, recurring origin and accepted-quote linkage
 Product boundary: always say income recorded in Tallyo; keep currencies separate; exclude quotes, Draft/Cancelled invoices and unsupported records according to the reviewed calculation contract; preserve refunds as explicit adjustments
 Excluded: expenses, receipt capture, bank feeds, bookkeeping, profit, tax estimates, VAT liability, HMRC APIs/submission, compliance claims, migrations, RLS changes, Stripe/provider changes, live transactions, customer communications and production publication
 Authoritative design: `docs/architecture/INCOME_INSIGHTS_AND_MTD_SUPPORT_PLAN.md`
 Phase 0 review artifacts: `docs/design/income-insights-phase0/README.md`, with desktop/mobile business and customer Finances references plus loading, empty, error, mixed-currency and needs-review states
-Acceptance for this phase: documented existing-data inventory, shared calculation definitions, customer/Finances information architecture, accessible visual specification, MTD-supporting income boundary, delivery phases, test matrix and later approval gates; no runtime change
-Validation: fictional business and customer examples reconcile through `phase0-harness.cjs`; five isolated references render with the official logo, blocked network access, chart text alternatives, exact hidden tables for time-series visuals, no detected clipping and successful visual inspection
-Next action: obtain Owner approval of the Phase 0 wording, information hierarchy, visual treatment and calculation examples before beginning Phase 1 calculation implementation
+Phase 0 approval: Owner approved the wording, layouts, calculation examples and review states; PR #203 merged at `668a32d22ac51bcea7381a1469bf1cb90637e894`
+Phase 1 implementation: `income-insights.js` supplies one pure canonical result grouped by period, currency, customer and workflow source, plus exact ledger and readiness records; it is not loaded by the production application in this phase
+Acceptance for this phase: full, partial, deposit and refunded invoices reconcile; quote/Draft/Cancelled/standalone-credit rules follow the contract; current Overview semantics remain characterised; no migration, write path or provider call
+Validation: `income-insights-harness.cjs` passes the full Phase 1 fixture matrix; focused Overview, customer, document-status, refund-consequence and financial-audit regressions pass; the security workflow runs the new harness
+Next action: obtain focused Owner review of the Phase 1 calculation module before Phase 2 customer financial visuals begin
 
 ## DEPENDENCY-MAINTENANCE-001 — Refresh pinned build and Edge dependencies
 
