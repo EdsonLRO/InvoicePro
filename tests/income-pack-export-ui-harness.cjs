@@ -19,6 +19,8 @@ const methods = app.slice(app.indexOf('            buildIncomePack()'), app.inde
 assert.ok(methods.length > 0);
 assert.doesNotMatch(methods, /supabaseClient|fetch\(|\.from\(|functions\.invoke/);
 assert.match(methods, /window\.TallyoIncomePack\.buildIncomePack\(this\.financesCalculation/);
+assert.match(methods, /document\.querySelector\('\.shell-brand'\)/, 'PDF must use the original Tallyo wordmark already loaded by the app');
+assert.match(methods, /pdf\.addImage\(logoData, 'PNG'/, 'PDF must embed the original Tallyo logo rather than recreate it');
 assert.match(methods, /downloadPdfFile\(pdf, model\.filename\)/);
 assert.match(build, /"income-pack-export\.js"/);
 assert.match(worker, /'\.\/income-pack-export\.js'/);
