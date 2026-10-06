@@ -1,6 +1,6 @@
 # Income insights and MTD-supporting records plan
 
-Status: Phase 0 design and Phase 1 shared calculations are approved and merged. Phase 2 customer financial visuals are implemented behind a fail-closed public-release gate for focused review; no public activation is approved.
+Status: Phases 0-2 are approved and merged. Phase 3 business-level Finances overview is implemented behind the same fail-closed public-release gate for focused review; no public activation is approved.
 
 Last reviewed: 6 October 2026.
 
@@ -33,6 +33,14 @@ The module is UMD-compatible so focused Node tests and browser integration use t
 The customer detail view now has a gated **Income recorded in Tallyo** area powered directly by the Phase 1 module. It adds six exact summary values, a native CSS monthly net-receipts chart with a keyboard-accessible written-value table, a payment-position doughnut with repeated labelled values, workflow-source context and recent payment/refund activity. It collects no new data and makes no database, provider, payment, email, analytics or storage request.
 
 `TALLYO_INCOME_INSIGHTS_ENABLED` remains false in the checked-in public configuration and generated builds require `TALLYO_INCOME_INSIGHTS_PUBLIC_RELEASE_APPROVED=true` before the feature can be enabled. The isolated fictional redesign preview enables it for browser acceptance only. `tests/income-insights-customer-ui-harness.cjs` verifies exact customer-ID scope, retained snapshots, separate currencies, canonical totals, accessible equivalents and the fail-closed release boundary.
+
+Phase 2 was approved and merged through PR #205 as `bfbec4421b53bb93d25fdf95ba7684de7c6c48db` with Security and both Pages checks passing.
+
+## Phase 3 implementation reference
+
+The gated **Finances** destination now consumes the same shared module for a business-level view. It provides period and explicit currency controls, six exact summary figures, monthly invoiced/receipt columns, payment position, income by customer, workflow source, records-organised readiness and a grouped needs-review panel. Native HTML and CSS provide all visuals, and every visual has exact written values or a keyboard-accessible table or list.
+
+Desktop navigation places Finances under Sales. The mobile bottom navigation provides a direct Finances action while preserving the existing More menu in the top bar. The page handles empty, invalid-period, mixed-currency and needs-review states without replacing uncertainty with zeroes or combining currencies. `tests/income-insights-finances-ui-harness.cjs` verifies the canonical computed contract and release boundary; `tests/income-insights-finances-browser.cjs` covers desktop/mobile routing, keyboard exact values, period validation, currency separation, empty state, 320-1440 px layouts and zero third-party requests.
 
 ## Existing product baseline
 
@@ -359,6 +367,8 @@ Exit criteria:
 - mobile charts have no horizontal page overflow;
 - calculations match the shared module and CSV fixtures;
 - no chart library or third-party network request unless separately approved.
+
+Implementation state: complete for focused Owner review. Public activation remains reserved for Phase 6 release hardening and approval.
 
 ### Phase 4 — Income records and period view
 

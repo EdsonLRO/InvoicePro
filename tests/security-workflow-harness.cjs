@@ -51,6 +51,7 @@ assert.match(workflow, /pull_request:\s+branches:\s+- main\s+- codex\/tallyo-red
 assert.match(workflow, /push:\s+branches:\s+- main\s+- codex\/tallyo-redesign\s+- codex\/tallyo-redesign-\*/, 'redesign pushes run checks without removing main');
 assert.ok(workflow.includes('node tests/redesign-preview-harness.mjs'));
 assert.ok(workflow.includes('node tests/redesign-overview-harness.cjs'));
+assert.ok(workflow.includes('node tests/income-insights-finances-ui-harness.cjs'));
 assert.ok(workflow.includes('node tests/redesign-documents-harness.cjs'));
 assert.ok(workflow.includes('deno test tests/invoice-status-rules-runtime-test.ts'));
 assert.ok(workflow.includes('node tests/quote-access-runtime-test.mjs'));

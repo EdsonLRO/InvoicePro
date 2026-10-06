@@ -102,7 +102,7 @@ const path = require('node:path');
     await page.goto(origin + '/#owner'); await page.locator('#preview-warning').waitFor();
     assert.equal(await page.getByRole('heading', { name: 'Owner Console', exact: true }).isVisible(), false, 'no Owner access added');
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.getByRole('button', { name: 'More', exact: true }).click();
+    await page.getByRole('button', { name: 'More in Tallyo', exact: true }).click();
     await page.getByRole('button', { name: 'Help & support', exact: true }).filter({ visible: true }).click();
     const help = page.getByRole('dialog', { name: 'Help & install Tallyo' });
     assert.ok(await help.isVisible());
