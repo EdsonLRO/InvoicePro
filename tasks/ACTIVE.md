@@ -19,6 +19,23 @@ Rollback: previous identical deployment `6854fa31-58cc-49d0-8e2c-7a0130bc772f` /
 Pull request: #201 (`codex/worker-build-repair`)
 Next action: merge the repository pin, regression assertion and authoritative records through the protected pull-request workflow
 
+## FIN-INSIGHTS-001 - Income insights and MTD-supporting records
+
+Task ID: FIN-INSIGHTS-001
+Title: Plan visual income reporting from data Tallyo already records
+Priority: Medium
+Status: Planning
+Phase: Phase 0 - calculation contract and design specification
+Owner role: Product owner
+Risk level: Medium for the documentation and fictional-data design; later calculation logic is financially material and must receive focused review
+Branch: `codex/income-insights-plan`
+Scope: extend the released Overview and customer financial context with an accessible Finances area, customer visuals, income ledger, UK period presentation and income-only exports derived from existing invoices, dated manual and Stripe-confirmed payments, refunds, recurring origin and accepted-quote linkage
+Product boundary: always say income recorded in Tallyo; keep currencies separate; exclude quotes, Draft/Cancelled invoices and unsupported records according to the reviewed calculation contract; preserve refunds as explicit adjustments
+Excluded: expenses, receipt capture, bank feeds, bookkeeping, profit, tax estimates, VAT liability, HMRC APIs/submission, compliance claims, migrations, RLS changes, Stripe/provider changes, live transactions, customer communications and production publication
+Authoritative design: `docs/architecture/INCOME_INSIGHTS_AND_MTD_SUPPORT_PLAN.md`
+Acceptance for this phase: documented existing-data inventory, shared calculation definitions, customer/Finances information architecture, accessible visual specification, MTD-supporting income boundary, delivery phases, test matrix and later approval gates; no runtime change
+Next action: create desktop and mobile Phase 0 designs with fictional reconciled data and exact chart/table equivalents, then obtain Owner approval before calculation implementation
+
 ## DEPENDENCY-MAINTENANCE-001 — Refresh pinned build and Edge dependencies
 
 Task ID: DEPENDENCY-MAINTENANCE-001

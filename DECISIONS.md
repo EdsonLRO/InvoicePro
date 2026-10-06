@@ -14,6 +14,7 @@
 | No lifetime deal | Approved | Infrastructure and support costs continue. |
 | One business and one user | Approved | Matches the current verified implementation. |
 | Teams are deferred | Approved | Multi-user workspace and role isolation are not implemented. |
+| Income insights and MTD-supporting income records | Approved planning direction, 2026-10-06 | Extend the released Overview and customer summaries using only existing invoice, dated payment, refund, customer, recurring and quote-link data. Describe figures as income recorded in Tallyo; keep currencies separate; provide accessible visuals and income-only period/export preparation. Expenses, bank feeds, profit, tax calculation, VAT liability, HMRC filing and compliance claims remain excluded. Implementation and production release require later phase-specific approval. |
 | OpenAI public product Helper implementation | Approved | The bounded public-information Helper is built and privately tested; preserve the work. |
 | Public AI Helper repository merge | Approved and merged | PR #91 merged the capability while keeping it disabled by default. |
 | Public AI Helper production activation | Approved and active | The Owner approved the public-domain allowlist, rate-limited production configuration, public notice/provider evidence and one paid synthetic acceptance request. Source remains fail-closed by default and the provider project has a hard spend limit with 50%, 80% and 100% alerts. |

@@ -13,6 +13,7 @@
 - Any controlled live account-recovery test requires separate approval.
 - Review bounded launch monitoring and support evidence without inspecting customer data.
 - Evaluate early UK-business onboarding feedback before expanding product scope.
+- Complete Phase 0 design and calculation examples for Income insights and MTD-supporting income records. The approved planning boundary uses only existing invoice, payment, refund, customer and document-origin data; it excludes expenses, bank feeds, profit, tax calculation and HMRC submission.
 - Add customer statements and improved onboarding. Bounded customer CSV import is already released.
 - Implement retention, failed-payment and post-cancellation workflows.
 
@@ -20,7 +21,7 @@
 
 - Evaluate Helper usage and unanswered public questions without collecting private content.
 - Incrementally modularise the authenticated frontend.
-- Add team workspaces, accountant collaboration and advanced reporting only after tenant and role architecture is verified.
+- Add team workspaces and accountant collaboration only after tenant and role architecture is verified. Broader reporting beyond the approved income-only plan remains later work.
 
 ## Not planned for launch
 
