@@ -280,6 +280,40 @@
             line-height: 1.5;
             text-align: center;
         }
+        .auth-provider-stack { display: grid; gap: 0.7rem; }
+        .auth-provider-button {
+            display: flex;
+            width: 100%;
+            min-height: 2.75rem;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+            padding: 0.65rem 1rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.65rem;
+            color: #0f172a;
+            background: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+        }
+        .auth-provider-button:hover:not(:disabled) { border-color: #818cf8; background: #f8fafc; box-shadow: 0 1px 2px rgb(15 23 42 / 0.06); }
+        .auth-provider-button:focus-visible { outline: 3px solid rgb(99 102 241 / 0.28); outline-offset: 2px; }
+        .auth-provider-button:disabled { cursor: wait; opacity: 0.58; }
+        .auth-provider-button svg { width: 1.15rem; height: 1.15rem; flex: 0 0 auto; }
+        .auth-provider-divider {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            color: #94a3b8;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .auth-provider-divider::before,
+        .auth-provider-divider::after { height: 1px; flex: 1; background: #e2e8f0; content: ""; }
+        .auth-provider-error { margin: 0; color: #b91c1c; font-size: 0.8rem; line-height: 1.45; text-align: center; }
         .auth-legal-copy a, .auth-page-footer a { color: #4338ca; font-weight: 700; }
         .auth-page-footer {
             display: flex;
@@ -1122,6 +1156,21 @@
                 <div v-if="ownerMfaRecovery.token" class="bg-blue-50 text-blue-800 text-sm p-4 rounded-lg border border-blue-100" role="status">
                     Sign in with the account email and password to confirm the authenticator recovery request.
                 </div>
+                <template v-if="socialAuth.googleEnabled || socialAuth.appleEnabled">
+                    <div class="auth-provider-stack" aria-label="Sign in with another account">
+                        <button v-if="socialAuth.googleEnabled" type="button" class="auth-provider-button" @click="signInWithProvider('google')" :disabled="authBusy || Boolean(socialAuth.busyProvider)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.35 12.24c0-.71-.06-1.23-.2-1.78H12v3.32h5.37a4.62 4.62 0 0 1-1.99 2.96l-.02.11 2.89 2.24.2.02c1.83-1.69 2.9-4.18 2.9-6.87Z"/><path fill="#34A853" d="M12 21.75c2.62 0 4.82-.86 6.43-2.64l-3.07-2.37c-.82.55-1.91.94-3.36.94-2.52 0-4.66-1.7-5.43-4.05l-.1.01-3 2.32-.03.1A9.72 9.72 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.57 13.63A5.84 5.84 0 0 1 6.25 12c0-.57.11-1.12.31-1.63v-.11L3.53 7.9l-.1.05A9.75 9.75 0 0 0 2.25 12c0 1.46.34 2.84 1.19 4.05l3.13-2.42Z"/><path fill="#EA4335" d="M12 6.32c1.82 0 3.05.78 3.75 1.43l2.74-2.67C16.81 3.52 14.62 2.25 12 2.25a9.72 9.72 0 0 0-8.56 5.7l3.12 2.42C7.34 8.02 9.48 6.32 12 6.32Z"/></svg>
+                            <span>{{ socialAuth.busyProvider === 'google' ? 'Opening Google...' : 'Continue with Google' }}</span>
+                        </button>
+                        <button v-if="socialAuth.appleEnabled" type="button" class="auth-provider-button" @click="signInWithProvider('apple')" :disabled="authBusy || Boolean(socialAuth.busyProvider)">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.05 12.54c.03 3.1 2.72 4.13 2.75 4.15-.02.08-.43 1.48-1.42 2.92-.86 1.24-1.75 2.48-3.16 2.51-1.38.03-1.83-.81-3.41-.81-1.59 0-2.08.78-3.39.84-1.36.05-2.4-1.36-3.27-2.6-1.78-2.57-3.14-7.27-1.31-10.45a5.07 5.07 0 0 1 4.3-2.61c1.34-.03 2.61.9 3.42.9.8 0 2.31-1.12 3.9-.96.66.03 2.52.27 3.71 2.01-.1.06-2.22 1.29-2.12 4.1ZM14.42 4.76c.72-.87 1.21-2.09 1.08-3.3-1.04.04-2.3.69-3.05 1.56-.67.77-1.26 2.01-1.1 3.2 1.16.09 2.35-.59 3.07-1.46Z"/></svg>
+                            <span>{{ socialAuth.busyProvider === 'apple' ? 'Opening Apple...' : 'Continue with Apple' }}</span>
+                        </button>
+                    </div>
+                    <p v-if="socialAuth.error" class="auth-provider-error" role="alert">{{ socialAuth.error }}</p>
+                    <p v-if="publicSiteUrl" class="auth-legal-copy">By continuing, you agree to the <a :href="publicSiteLink('terms/')" target="_blank" rel="noopener">Tallyo Terms of Service</a>, including the <a :href="publicSiteLink('data-processing-terms/')" target="_blank" rel="noopener">Business-User Data Processing Terms</a>, and acknowledge the <a :href="publicSiteLink('privacy/')" target="_blank" rel="noopener">Privacy Notice</a> and <a :href="publicSiteLink('cookies/')" target="_blank" rel="noopener">Cookie Notice</a>.</p>
+                    <div class="auth-provider-divider"><span>or sign in with email</span></div>
+                </template>
                 <div>
                     <label class="block text-sm font-medium mb-1">Email Address</label>
                     <input type="email" v-model="auth.username" @keyup.enter="login" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
@@ -1138,7 +1187,7 @@
                     <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" role="status" aria-live="polite">Loading security check...</p>
                     <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" role="alert">{{ turnstile.error }} <button type="button" @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry security check</button></p>
                 </div>
-                <button @click="login" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Signing in...' : 'Sign In' }}</button>
+                <button @click="login" :disabled="authBusy || Boolean(socialAuth.busyProvider) || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Signing in...' : 'Sign In' }}</button>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     Don't have an account? <button @click="authMode = 'register'" class="text-indigo-600 hover:underline font-medium">Create one</button>
                 </div>
@@ -1146,6 +1195,21 @@
 
             <div v-if="authMode === 'register'" class="space-y-5">
                 <h2 class="text-xl font-semibold">Create Account</h2>
+                <template v-if="socialAuth.googleEnabled || socialAuth.appleEnabled">
+                    <div class="auth-provider-stack" aria-label="Create an account with another service">
+                        <button v-if="socialAuth.googleEnabled" type="button" class="auth-provider-button" @click="signInWithProvider('google')" :disabled="authBusy || Boolean(socialAuth.busyProvider)">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.35 12.24c0-.71-.06-1.23-.2-1.78H12v3.32h5.37a4.62 4.62 0 0 1-1.99 2.96l-.02.11 2.89 2.24.2.02c1.83-1.69 2.9-4.18 2.9-6.87Z"/><path fill="#34A853" d="M12 21.75c2.62 0 4.82-.86 6.43-2.64l-3.07-2.37c-.82.55-1.91.94-3.36.94-2.52 0-4.66-1.7-5.43-4.05l-.1.01-3 2.32-.03.1A9.72 9.72 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.57 13.63A5.84 5.84 0 0 1 6.25 12c0-.57.11-1.12.31-1.63v-.11L3.53 7.9l-.1.05A9.75 9.75 0 0 0 2.25 12c0 1.46.34 2.84 1.19 4.05l3.13-2.42Z"/><path fill="#EA4335" d="M12 6.32c1.82 0 3.05.78 3.75 1.43l2.74-2.67C16.81 3.52 14.62 2.25 12 2.25a9.72 9.72 0 0 0-8.56 5.7l3.12 2.42C7.34 8.02 9.48 6.32 12 6.32Z"/></svg>
+                            <span>{{ socialAuth.busyProvider === 'google' ? 'Opening Google...' : 'Continue with Google' }}</span>
+                        </button>
+                        <button v-if="socialAuth.appleEnabled" type="button" class="auth-provider-button" @click="signInWithProvider('apple')" :disabled="authBusy || Boolean(socialAuth.busyProvider)">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.05 12.54c.03 3.1 2.72 4.13 2.75 4.15-.02.08-.43 1.48-1.42 2.92-.86 1.24-1.75 2.48-3.16 2.51-1.38.03-1.83-.81-3.41-.81-1.59 0-2.08.78-3.39.84-1.36.05-2.4-1.36-3.27-2.6-1.78-2.57-3.14-7.27-1.31-10.45a5.07 5.07 0 0 1 4.3-2.61c1.34-.03 2.61.9 3.42.9.8 0 2.31-1.12 3.9-.96.66.03 2.52.27 3.71 2.01-.1.06-2.22 1.29-2.12 4.1ZM14.42 4.76c.72-.87 1.21-2.09 1.08-3.3-1.04.04-2.3.69-3.05 1.56-.67.77-1.26 2.01-1.1 3.2 1.16.09 2.35-.59 3.07-1.46Z"/></svg>
+                            <span>{{ socialAuth.busyProvider === 'apple' ? 'Opening Apple...' : 'Continue with Apple' }}</span>
+                        </button>
+                    </div>
+                    <p v-if="socialAuth.error" class="auth-provider-error" role="alert">{{ socialAuth.error }}</p>
+                    <p v-if="publicSiteUrl" class="auth-legal-copy">By continuing, you agree to the <a :href="publicSiteLink('terms/')" target="_blank" rel="noopener">Tallyo Terms of Service</a>, including the <a :href="publicSiteLink('data-processing-terms/')" target="_blank" rel="noopener">Business-User Data Processing Terms</a>, and acknowledge the <a :href="publicSiteLink('privacy/')" target="_blank" rel="noopener">Privacy Notice</a> and <a :href="publicSiteLink('cookies/')" target="_blank" rel="noopener">Cookie Notice</a>.</p>
+                    <div class="auth-provider-divider"><span>or create with email</span></div>
+                </template>
                 <div class="bg-blue-50 text-blue-800 text-xs p-3 rounded-lg border border-blue-100">
                     <strong>Before you start:</strong> Use an email address you can access. We’ll send you a confirmation link before you sign in.
                 </div>
@@ -1167,7 +1231,7 @@
                     <p v-if="turnstile.loading" class="text-xs text-slate-500 mt-2" role="status" aria-live="polite">Loading security check...</p>
                     <p v-if="turnstile.error" class="text-xs text-red-600 mt-2" role="alert">{{ turnstile.error }} <button type="button" @click="retryTurnstile" class="text-indigo-600 hover:underline font-medium">Retry security check</button></p>
                 </div>
-                <button @click="register" :disabled="authBusy || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Creating account...' : 'Create Account' }}</button>
+                <button @click="register" :disabled="authBusy || Boolean(socialAuth.busyProvider) || (turnstile.enabled && !turnstile.token)" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ authBusy ? 'Creating account...' : 'Create Account' }}</button>
                 <p v-if="publicSiteUrl" class="auth-legal-copy">By creating an account, you agree to the <a :href="publicSiteLink('terms/')" target="_blank" rel="noopener">Tallyo Terms of Service</a>, including the <a :href="publicSiteLink('data-processing-terms/')" target="_blank" rel="noopener">Business-User Data Processing Terms</a>, and acknowledge the <a :href="publicSiteLink('privacy/')" target="_blank" rel="noopener">Privacy Notice</a> and <a :href="publicSiteLink('cookies/')" target="_blank" rel="noopener">Cookie Notice</a>.</p>
                 <div class="text-center text-sm text-slate-500 pt-4 border-t">
                     Already registered? <button @click="authMode = 'login'" class="text-indigo-600 hover:underline font-medium">Sign in</button>
@@ -1180,6 +1244,25 @@
                     We've sent a confirmation link to <strong>{{ pendingEmail }}</strong>. Open that email and click the link to activate your account, then come back here and sign in. (Check your spam folder if you don't see it within a minute.)
                 </div>
                 <button @click="authMode = 'login'" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm">Back to Sign In</button>
+            </div>
+
+            <div v-if="authMode === 'social-password-setup'" class="space-y-5">
+                <h2 class="text-xl font-semibold">Secure your Tallyo account</h2>
+                <div class="bg-blue-50 text-blue-800 text-sm p-4 rounded-lg border border-blue-100" role="status">
+                    Your Google or Apple sign-in is connected. Create a Tallyo backup password once so account recovery and security checks continue to work if you cannot use that provider.
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Backup password</label>
+                    <input type="password" autocomplete="new-password" v-model="socialPassword.new" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <p class="text-xs text-slate-400 mt-1">Use at least 12 characters and choose a password that is unique to Tallyo.</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Confirm backup password</label>
+                    <input type="password" autocomplete="new-password" v-model="socialPassword.confirm" @keyup.enter="completeSocialPasswordSetup" class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <p v-if="socialPassword.error" class="text-sm text-red-600" role="alert">{{ socialPassword.error }}</p>
+                <button type="button" @click="completeSocialPasswordSetup" :disabled="socialPassword.busy" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 font-medium transition shadow-sm disabled:opacity-50">{{ socialPassword.busy ? 'Securing account...' : 'Save password and continue' }}</button>
+                <button type="button" @click="cancelSocialPasswordSetup" :disabled="socialPassword.busy" class="w-full text-sm text-slate-600 hover:text-slate-900 disabled:opacity-50">Sign out instead</button>
             </div>
 
             <div v-if="authMode === 'mfa'" class="space-y-5">
@@ -3857,7 +3940,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.10.11.3';
+    const APP_BUILD = '2026.10.11.4';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -3877,6 +3960,13 @@
                 currentUser: null,
                 pendingEmail: '',
                 authBusy: false,
+                socialAuth: {
+                    googleEnabled: window.TALLYO_GOOGLE_AUTH_ENABLED === true,
+                    appleEnabled: window.TALLYO_APPLE_AUTH_ENABLED === true,
+                    busyProvider: '',
+                    error: ''
+                },
+                socialPassword: { new: '', confirm: '', busy: false, error: '' },
                 authSignOutRequested: false,
                 authSessionVersion: 0,
                 dataLoading: false,
@@ -5535,6 +5625,119 @@
                 if (!this.turnstile.token) throw new Error('Complete the security check before continuing.');
                 return this.turnstile.token;
             },
+            socialProviderEnabled(provider) {
+                const enabled = {
+                    google: this.socialAuth.googleEnabled,
+                    apple: this.socialAuth.appleEnabled
+                };
+                return Object.prototype.hasOwnProperty.call(enabled, provider) && enabled[provider] === true;
+            },
+            socialProviderLabel(provider) {
+                return provider === 'google' ? 'Google' : provider === 'apple' ? 'Apple' : 'Account';
+            },
+            oauthRedirectUrl() {
+                const protocol = String(window.location.protocol || '');
+                const hostname = String(window.location.hostname || '');
+                const local = hostname === 'localhost' || hostname === '127.0.0.1';
+                if (protocol !== 'https:' && !(local && protocol === 'http:')) {
+                    throw new Error('Social sign-in requires a secure Tallyo address.');
+                }
+                const path = String(window.location.pathname || '/');
+                return new URL(path, window.location.origin).href;
+            },
+            socialAuthErrorMessage(error, provider = '') {
+                const message = String(error && error.message ? error.message : error || '').toLowerCase();
+                const label = this.socialProviderLabel(provider);
+                if (/cancel|access_denied|denied|closed|abort/.test(message)) return `${label} sign-in was cancelled. You can try again.`;
+                if (/rate|too many|over_request/.test(message)) return 'There have been too many sign-in attempts. Wait a moment and try again.';
+                if (/network|fetch|offline|connection|timeout/.test(message)) return 'Tallyo could not reach the sign-in service. Check your connection and try again.';
+                if (/provider.*(disabled|not enabled)|unsupported provider|not available/.test(message)) return `${label} sign-in is not available right now. Use email and password instead.`;
+                if (/secure tallyo address/.test(message)) return 'Google and Apple sign-in is available only from a secure Tallyo address.';
+                return `${label} sign-in could not be completed. Try again or use email and password.`;
+            },
+            async signInWithProvider(provider) {
+                const selected = String(provider || '').toLowerCase();
+                this.socialAuth.error = '';
+                if (!this.socialProviderEnabled(selected)) {
+                    this.socialAuth.error = this.socialAuthErrorMessage('provider disabled', selected);
+                    return;
+                }
+                if (this.authMode !== 'login' && this.authMode !== 'register') return;
+                this.socialAuth.busyProvider = selected;
+                try {
+                    const { error } = await supabaseClient.auth.signInWithOAuth({
+                        provider: selected,
+                        options: { redirectTo: this.oauthRedirectUrl() }
+                    });
+                    if (error) throw error;
+                } catch (error) {
+                    this.socialAuth.error = this.socialAuthErrorMessage(error, selected);
+                } finally {
+                    this.socialAuth.busyProvider = '';
+                }
+            },
+            consumeAuthCallbackError() {
+                const search = new URLSearchParams(String(window.location.search || '').replace(/^\?/, ''));
+                const hash = new URLSearchParams(String(window.location.hash || '').replace(/^#/, ''));
+                const code = search.get('error_code') || search.get('error') || hash.get('error_code') || hash.get('error');
+                if (!code) return false;
+                const description = search.get('error_description') || hash.get('error_description') || code;
+                this.socialAuth.error = this.socialAuthErrorMessage(description);
+                window.history.replaceState(null, '', String(window.location.pathname || '/'));
+                return true;
+            },
+            userHasPasswordIdentity(user) {
+                const identities = Array.isArray(user && user.identities) ? user.identities : [];
+                const metadataProviders = Array.isArray(user && user.app_metadata && user.app_metadata.providers)
+                    ? user.app_metadata.providers
+                    : [];
+                const providers = new Set([
+                    ...identities.map(identity => String(identity && identity.provider || '').toLowerCase()),
+                    ...metadataProviders.map(provider => String(provider || '').toLowerCase())
+                ].filter(Boolean));
+                if (providers.size) return providers.has('email');
+                const primary = String(user && user.app_metadata && user.app_metadata.provider || '').toLowerCase();
+                return primary !== 'google' && primary !== 'apple';
+            },
+            beginSocialPasswordSetup(user) {
+                this.removeTurnstileWidget();
+                this.isLoggedIn = false;
+                this.currentUser = user;
+                this.userProfileEmail = String(user && user.email || '');
+                this.socialPassword = { new: '', confirm: '', busy: false, error: '' };
+                this.authMode = 'social-password-setup';
+            },
+            async completeSocialPasswordSetup() {
+                const passwordIssue = this.passwordPolicyMessage(this.socialPassword.new, this.userProfileEmail);
+                if (passwordIssue) {
+                    this.socialPassword.error = passwordIssue;
+                    return;
+                }
+                if (this.socialPassword.new !== this.socialPassword.confirm) {
+                    this.socialPassword.error = 'Passwords do not match.';
+                    return;
+                }
+                this.socialPassword.busy = true;
+                this.socialPassword.error = '';
+                try {
+                    const { data, error } = await supabaseClient.auth.updateUser({ password: this.socialPassword.new });
+                    if (error) throw error;
+                    const user = data && data.user;
+                    if (!user || !this.userHasPasswordIdentity(user)) throw new Error('Password sign-in was not added.');
+                    this.socialPassword = { new: '', confirm: '', busy: false, error: '' };
+                    await this.routeAfterAuth(user);
+                } catch (error) {
+                    this.socialPassword.error = 'Tallyo could not add the backup password. Try again, or sign out and use email registration.';
+                } finally {
+                    this.socialPassword.busy = false;
+                }
+            },
+            async cancelSocialPasswordSetup() {
+                if (this.socialPassword.busy) return;
+                this.authSignOutRequested = true;
+                try { await supabaseClient.auth.signOut({ scope: 'local' }); }
+                finally { this.clearSignedOutState(); }
+            },
             async renderReauthTurnstile() {
                 if (!this.turnstile.enabled || !this.reauthChallenge.visible || this.reauthChallenge.loading || this.reauthChallenge.widgetId !== null) return;
                 const container = this.$refs.reauthTurnstileContainer;
@@ -6089,6 +6292,10 @@
                         this.authMode = 'mfa';
                         return;
                     }
+                    if (!this.userHasPasswordIdentity(user)) {
+                        this.beginSocialPasswordSetup(user);
+                        return;
+                    }
                     await this.onSignedIn(user);
                 } catch (e) {
                     console.warn('Account security verification could not be completed.');
@@ -6209,7 +6416,7 @@
                 this.mfa.loginFactors = [];
                 this.mfa.loginFactorId = null;
                 this.authMode = 'login';
-                await this.onSignedIn(user);
+                await this.routeAfterAuth(user);
             },
             verifiedTotpFactors(data) {
                 return ((data && data.totp) || []).filter(factor => factor.status === 'verified');
@@ -6429,6 +6636,9 @@
                 this.userProfileEmail = '';
                 this.authBusy = false;
                 this.auth = { username: '', password: '', confirm: '', code: '' };
+                this.socialAuth.busyProvider = '';
+                this.socialAuth.error = '';
+                this.socialPassword = { new: '', confirm: '', busy: false, error: '' };
                 this.authMode = 'login';
                 this.activeTab = 'dashboard';
                 this.mobileMenuOpen = false;
@@ -9607,6 +9817,7 @@
             window.addEventListener('hashchange', this.handleHashChange);
             window.addEventListener('popstate', this.handlePopState);
             this.ownerMfaRecovery.token = this.ownerRecoveryTokenFromHash();
+            this.consumeAuthCallbackError();
             this.beforeInstallPromptHandler = (event) => {
                 event.preventDefault();
                 this.installPromptEvent = event;

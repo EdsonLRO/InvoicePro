@@ -12,6 +12,7 @@
 
 ## Next
 
+- Complete the Owner-controlled Google and Apple sign-in release: create and review each provider application, keep secrets only in provider/Supabase settings, update provider/privacy records before activation, test one provider at a time with a dedicated account in a protected preview, verify existing-account linking plus new-account backup-password setup, and enable the explicit app release gates only after exact approval. Schedule Apple client-secret rotation at least every six months.
 - After separate Owner approval, evaluate an official LinkedIn company-page API connection for publishing and aggregate analytics, with credential handling, privacy/legal review, explicit per-post approval, audit history, rate limits and an immediate kill switch.
 - Review the first guarded weekday production refresh and continue monitoring candidate quality. Facebook and X remain later channels and require their own provider reviews.
 - Any controlled live account-recovery test requires separate approval.

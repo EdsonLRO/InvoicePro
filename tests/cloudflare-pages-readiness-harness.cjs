@@ -27,7 +27,10 @@ const syntheticEnv = {
   TALLYO_QUOTE_ACCEPTANCE_ENABLED: 'false',
   TALLYO_QUOTE_ACCEPTANCE_PUBLIC_RELEASE_APPROVED: 'false',
   TALLYO_INCOME_INSIGHTS_ENABLED: 'false',
-  TALLYO_INCOME_INSIGHTS_PUBLIC_RELEASE_APPROVED: 'false'
+  TALLYO_INCOME_INSIGHTS_PUBLIC_RELEASE_APPROVED: 'false',
+  TALLYO_GOOGLE_AUTH_ENABLED: 'false',
+  TALLYO_APPLE_AUTH_ENABLED: 'false',
+  TALLYO_SOCIAL_AUTH_PUBLIC_RELEASE_APPROVED: 'false'
 };
 const failClosedSentinel = path.join(output, 'fail-closed-sentinel.txt');
 fs.mkdirSync(output, { recursive: true });
@@ -58,6 +61,8 @@ assert.match(generatedConfig, /window\.TALLYO_GA4_ENABLED = false/);
 assert.match(generatedConfig, /window\.TALLYO_GA4_MEASUREMENT_ID = ""/);
 assert.match(generatedConfig, /window\.TALLYO_QUOTE_ACCEPTANCE_ENABLED = false/);
 assert.match(generatedConfig, /window\.TALLYO_INCOME_INSIGHTS_ENABLED = false/);
+assert.match(generatedConfig, /window\.TALLYO_GOOGLE_AUTH_ENABLED = false/);
+assert.match(generatedConfig, /window\.TALLYO_APPLE_AUTH_ENABLED = false/);
 assert.doesNotMatch(generatedConfig, /service[_-]?role|sb_secret_|private[_-]?key/i);
 
 const rejectedLiveBillingTest = spawnSync(process.execPath, [buildScript], {
@@ -89,6 +94,31 @@ const rejectedSecret = spawnSync(process.execPath, [buildScript], {
 assert.notEqual(rejectedSecret.status, 0, 'secret-like Supabase credentials must fail the build');
 assert.match(rejectedSecret.stderr, /browser-publishable key/);
 assert.doesNotMatch(rejectedSecret.stderr, /sb_secret_never_browser_side/, 'rejected values must not be echoed');
+
+for (const providerVariable of ['TALLYO_GOOGLE_AUTH_ENABLED', 'TALLYO_APPLE_AUTH_ENABLED']) {
+  const rejectedSocialAuth = spawnSync(process.execPath, [buildScript], {
+    cwd: root,
+    env: { ...syntheticEnv, [providerVariable]: 'true' },
+    encoding: 'utf8'
+  });
+  assert.notEqual(rejectedSocialAuth.status, 0, `${providerVariable} must fail closed before public-release approval`);
+  assert.match(rejectedSocialAuth.stderr, /sign-in controls require explicit public-release approval/);
+}
+
+const approvedSocialAuth = spawnSync(process.execPath, [buildScript], {
+  cwd: root,
+  env: {
+    ...syntheticEnv,
+    TALLYO_GOOGLE_AUTH_ENABLED: 'true',
+    TALLYO_APPLE_AUTH_ENABLED: 'true',
+    TALLYO_SOCIAL_AUTH_PUBLIC_RELEASE_APPROVED: 'true'
+  },
+  encoding: 'utf8'
+});
+assert.equal(approvedSocialAuth.status, 0, approvedSocialAuth.stderr || approvedSocialAuth.stdout);
+const approvedSocialConfig = fs.readFileSync(path.join(output, 'config.js'), 'utf8');
+assert.match(approvedSocialConfig, /window\.TALLYO_GOOGLE_AUTH_ENABLED = true/);
+assert.match(approvedSocialConfig, /window\.TALLYO_APPLE_AUTH_ENABLED = true/);
 
 assert.equal(projectConfig.status, 'access-protected-deployments-awaiting-authenticated-acceptance');
 assert.equal(projectConfig.githubIntegration.connected, true);

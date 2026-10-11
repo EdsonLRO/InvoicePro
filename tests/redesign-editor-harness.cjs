@@ -8,7 +8,8 @@ const hash = source => createHash('sha256').update(source.replace(/\r\n/g, '\n')
 // The reviewed interaction refinements change the contiguous route/history block,
 // its popstate listeners, the bounded Overview schedule action, and the source-gated
 // quote-access/export blocks. Keep every other method/startup byte frozen and
-// exercise each reviewed block separately.
+// exercise each reviewed block separately. The Google/Apple Auth boundary is
+// normalised below and covered by social-auth-harness.cjs.
 let protectedMethods = app.slice(app.indexOf('        methods: {'));
 protectedMethods = protectedMethods.replace(/\r?\n\s*this\.resetQuoteAcceptance\(\);/, '');
 protectedMethods = protectedMethods.replace(/\r?\n\s*this\.documentEmailModal = \{ open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance',[^\n]+/, '');
@@ -63,6 +64,14 @@ const navigationStart = protectedMethods.indexOf('            routeTabs()');
 const navigationEnd = protectedMethods.indexOf('            ownerRecoveryTokenFromHash()', navigationStart);
 assert.ok(navigationStart >= 0 && navigationEnd > navigationStart, 'reviewed navigation block must remain bounded');
 protectedMethods = protectedMethods.slice(0, navigationStart) + '            /* navigation methods reviewed separately */\n' + protectedMethods.slice(navigationEnd);
+const socialAuthStart = protectedMethods.indexOf('            socialProviderEnabled(provider)');
+const socialAuthEnd = protectedMethods.indexOf('            async renderReauthTurnstile()', socialAuthStart);
+assert.ok(socialAuthStart >= 0 && socialAuthEnd > socialAuthStart, 'reviewed social Auth methods must remain bounded');
+protectedMethods = protectedMethods.slice(0, socialAuthStart) + protectedMethods.slice(socialAuthEnd);
+protectedMethods = protectedMethods.replace(/\r?\n\s*if \(!this\.userHasPasswordIdentity\(user\)\) \{\r?\n\s*this\.beginSocialPasswordSetup\(user\);\r?\n\s*return;\r?\n\s*\}/, '');
+protectedMethods = protectedMethods.replace(/\r?\n\s*this\.socialAuth\.busyProvider = '';\r?\n\s*this\.socialAuth\.error = '';\r?\n\s*this\.socialPassword = \{ new: '', confirm: '', busy: false, error: '' \};/, '');
+protectedMethods = protectedMethods.replace(/                await this\.routeAfterAuth\(user\);\r?\n            },\r?\n            verifiedTotpFactors/, '                await this.onSignedIn(user);\n            },\n            verifiedTotpFactors');
+protectedMethods = protectedMethods.replace(/\r?\n\s*this\.consumeAuthCallbackError\(\);/, '');
 const billingStart = protectedMethods.indexOf('            async loadBillingState()');
 const billingEnd = protectedMethods.indexOf('            async openBillingCheckout(', billingStart);
 assert.ok(billingStart >= 0 && billingEnd > billingStart, 'reviewed subscription trial state must remain bounded');

@@ -40,6 +40,7 @@ for (const harness of [
   'scale-accessibility-safety-harness.cjs',
   'security-workflow-harness.cjs',
   'session-expiry-harness.cjs',
+  'social-auth-harness.cjs',
   'stripe-payment-integrity-harness.cjs',
   'stripe-connect-foundation-harness.cjs',
   'tenant-isolation-attribution-harness.cjs',

@@ -26,7 +26,7 @@ Read the compact authority first: `AGENTS.md`, `APP_STATUS.md`, `ROADMAP.md`, `D
 | Trigger | Read |
 |---|---|
 | Ordinary public website, copy, SEO or accessibility | `CODEX.md`, affected website source and tests |
-| Auth, MFA, sessions, recovery, authorization or RLS | `TALLYO_SECURITY_SAAS_MASTER_PLAN.md`, `AUTOMATION_MODEL_ORCHESTRATION.md`, `SUPABASE_HANDOFF.md`, affected source/evidence and `RELEASE_READINESS.md` |
+| Auth, MFA, sessions, recovery, authorization or RLS | `TALLYO_SECURITY_SAAS_MASTER_PLAN.md`, `AUTOMATION_MODEL_ORCHESTRATION.md`, `SUPABASE_HANDOFF.md`, `docs/architecture/SOCIAL_SIGN_IN.md` when identity providers are involved, affected source/evidence and `RELEASE_READINESS.md` |
 | Supabase backend, privileged functions or migrations | `SUPABASE_HANDOFF.md`, relevant schema/function files; add the security and orchestration policies for secrets, authorization or destructive work |
 | Stripe invoice payments, refunds, Billing, Connect or entitlements | `ROADMAP_EMAIL_PAYMENTS.md`, `PAYMENT_OPERATIONS_RUNBOOK.md`, `docs/architecture/STRIPE_BILLING.md` or `docs/architecture/STRIPE_CONNECT.md`, security policy and release gates |
 | Income insights, customer financial summaries, reporting or MTD-supporting exports | `docs/architecture/INCOME_INSIGHTS_AND_MTD_SUPPORT_PLAN.md`, affected calculation/UI/export source and tests; add security, Supabase, legal or release policies only when those boundaries are triggered |
