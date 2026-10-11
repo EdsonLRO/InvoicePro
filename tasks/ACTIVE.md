@@ -5,13 +5,14 @@
 Task ID: AUTH-005
 Title: Add fail-closed Google and Apple sign-in through Supabase Auth
 Priority: High
-Status: Candidate complete; awaiting protected pull-request review and separate Owner provider-activation approval
+Status: Candidate complete; PR #217 checks pass; awaiting Owner review/merge and separate provider-activation approval
 Phase: Repository candidate closure
 Owner role: Backend / Supabase Agent
 Assigned specialists: Frontend, Security, QA and Legal review, performed sequentially by the same Codex process
 Model/work mode: Sol / High-risk Auth boundary
 Risk level: High because this adds identity providers and changes account entry, identity linking and session establishment
 Branch: `codex/google-apple-sign-in`, from `origin/main` at `2e5ed01c6933863a0455c919188c2d3b98fa2102`
+Pull request: #217; protected Security run `38172947870` and both app and website Pages previews pass. Auth policy prohibits automatic merge.
 Scope/lock: signed-out Google and Apple controls, Supabase browser OAuth initiation and callback/session handling, explicit fail-closed build gates, focused Auth/MFA/session/accessibility tests, provider setup guidance and authoritative status records. Lock acquired 2026-10-11 for `index.html`, `config.js`, `scripts/build-app-pages.mjs`, `service-worker.js`, affected Auth/build tests and the focused Auth records.
 Security boundary: use Supabase-hosted OAuth exchange; accept only the allowlisted `google` and `apple` provider values; return only to the current Tallyo app path; preserve automatic verified-email identity linking, existing MFA/AAL routing, global/local sign-out, recovery, Turnstile-protected password flows, RLS and tenant isolation; never place provider secrets or tokens in browser code or logs.
 Legal materiality: material. Google or Apple may provide a verified email, provider subject identifier, display/profile metadata and, for Apple, a private relay email. Public activation requires reviewed provider/privacy wording and the existing Terms/Data Processing links must remain visible at account creation.
