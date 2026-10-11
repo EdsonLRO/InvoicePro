@@ -4,6 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { audienceSegments, brandAssets, channelDefinitions, claimGuardrails, initialState } from "../src/data.js";
+import { emptyDiscovery, normaliseDiscovery } from "../src/discovery.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -26,8 +27,30 @@ test("audience strategy stores no personal profile fields", () => {
   const prohibited = new Set(["nameOfPerson", "profileUrl", "email", "phone", "message"]);
   for (const segment of audienceSegments) {
     for (const field of Object.keys(segment)) assert.equal(prohibited.has(field), false);
-    assert.ok(segment.search.length > 20);
+    assert.ok(segment.signals.length >= 3);
   }
+});
+
+test("public-business discovery is enabled while LinkedIn people automation remains disabled", () => {
+  const capabilities = channelDefinitions.linkedin.capabilities;
+  assert.equal(capabilities.discoverPublicBusinesses, true);
+  assert.equal(capabilities.searchPeople, false);
+  assert.equal(capabilities.sendMessages, false);
+  assert.equal(capabilities.sendConnections, false);
+});
+
+test("discovery records require public HTTPS evidence and contain no contact fields", () => {
+  const result = normaliseDiscovery({
+    generatedAt: "2026-10-11T08:30:00+01:00",
+    candidates: [
+      { id: "example", company: "Example Studio", website: "https://example.com", sourceUrl: "https://example.com/services", fitScore: 130, email: "not-allowed@example.com" },
+      { id: "unsafe", company: "Unsafe URL", sourceUrl: "http://example.com" }
+    ]
+  });
+  assert.equal(result.candidates.length, 1);
+  assert.equal(result.candidates[0].fitScore, 100);
+  assert.equal("email" in result.candidates[0], false);
+  assert.equal(emptyDiscovery.candidates.length, 0);
 });
 
 test("every post has review state, audience, asset, caption, and alt text", () => {
@@ -41,20 +64,24 @@ test("every post has review state, audience, asset, caption, and alt text", () =
   assert.ok(claimGuardrails.length >= 4);
 });
 
-test("application CSP blocks network connections and code makes none", async () => {
+test("application CSP allows same-origin discovery only and contains no external request URLs", async () => {
   const [html, app] = await Promise.all([
     readFile(path.join(root, "src", "index.html"), "utf8"),
     readFile(path.join(root, "src", "app.js"), "utf8")
   ]);
-  assert.match(html, /connect-src 'none'/);
+  assert.match(html, /connect-src 'self'/);
   assert.doesNotMatch(html, /style=/);
   assert.doesNotMatch(app, /style=/);
-  assert.doesNotMatch(app, /\b(fetch|XMLHttpRequest|WebSocket)\s*\(/);
+  assert.doesNotMatch(app, /fetch\(["']https?:/);
+  assert.doesNotMatch(app, /\b(XMLHttpRequest|WebSocket)\s*\(/);
+  assert.doesNotMatch(app, /manual LinkedIn search|copy-search/);
 });
 
 test("build contains approved Tallyo brand and campaign assets", async () => {
   const expected = [
     "dist/index.html",
+    "dist/discovery.js",
+    "dist/discovery.json",
     "dist/assets/tallyo-wordmark-white.png",
     "dist/assets/tallyo-mark.png",
     ...brandAssets.map((asset) => `dist/assets/linkedin/${asset.file}`)

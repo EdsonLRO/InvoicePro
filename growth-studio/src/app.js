@@ -1,10 +1,12 @@
 import { audienceSegments, brandAssets, channelDefinitions, claimGuardrails, contentTemplates, initialState } from "./data.js";
+import { emptyDiscovery, normaliseDiscovery } from "./discovery.js";
 
 const storageKey = "tallyo-growth-studio-v1";
 const workspace = document.querySelector("#workspace");
 const toast = document.querySelector("#toast");
 let view = "overview";
 let state = loadState();
+let discovery = structuredClone(emptyDiscovery);
 
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
 function loadState() {
@@ -23,6 +25,28 @@ function escapeHtml(value = "") {
 function assetFor(id) { return brandAssets.find((asset) => asset.id === id) || brandAssets[0]; }
 function segmentFor(id) { return audienceSegments.find((segment) => segment.id === id) || audienceSegments[0]; }
 function selectedPost() { return state.posts.find((post) => post.id === state.selectedPostId) || state.posts[0]; }
+function candidateFor(id) { return discovery.candidates.find((candidate) => candidate.id === id); }
+function formattedResearchTime() {
+  if (!discovery.generatedAt) return "Awaiting first automated run";
+  const date = new Date(discovery.generatedAt);
+  if (Number.isNaN(date.valueOf())) return discovery.generatedAt;
+  return new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(date);
+}
+async function loadDiscovery(showFeedback = false) {
+  try {
+    let response = await fetch("api/discovery", { cache: "no-store" });
+    if (!response.ok || !response.headers.get("content-type")?.includes("application/json")) {
+      response = await fetch("discovery.json", { cache: "no-store" });
+    }
+    if (!response.ok) throw new Error("Discovery feed unavailable");
+    discovery = normaliseDiscovery(await response.json());
+    if (showFeedback) showToast(`${discovery.candidates.length} researched businesses loaded.`);
+  } catch {
+    discovery = structuredClone(emptyDiscovery);
+    if (showFeedback) showToast("Discovery feed is not available yet.");
+  }
+  if (["overview", "discover"].includes(view)) render();
+}
 function showToast(message) {
   toast.textContent = message;
   toast.classList.add("show");
@@ -37,6 +61,8 @@ function renderChannelSwitcher() {
 
 function renderOverview() {
   const statusCount = (status) => state.posts.filter((post) => post.status === status).length;
+  const activeCandidates = discovery.candidates.filter((candidate) => !state.dismissedCandidateIds.includes(candidate.id));
+  const highFitCandidates = activeCandidates.filter((candidate) => candidate.fitScore >= 85);
   return `${pageHeading("Command centre", "Good morning, Edson.", "Plan a consistent LinkedIn presence, keep every claim reviewable, and make the next action obvious.", '<span class="pill mint">● Local workspace ready</span>')}
     <div class="grid metrics-grid">
       ${[["Profile views", state.metrics.profileViews, "+12% demo"], ["Follower growth", `+${state.metrics.followerGrowth}`, "Last 30 days · demo"], ["Engagement rate", `${state.metrics.engagementRate}%`, "+0.8 pts · demo"], ["Drafts ready", state.posts.length, "Awaiting your review"]].map(([label,value,delta]) => `<article class="card metric-card"><span class="metric-label">${label}</span><strong class="metric-value">${value}</strong><span class="metric-delta">${delta}</span></article>`).join("")}
@@ -59,24 +85,40 @@ function renderOverview() {
       </div>
       <div class="grid">
         <article class="card">
-          <div class="section-head"><div><h2>Daily research brief</h2><p>${state.lastResearchAt ? `Refreshed ${escapeHtml(state.lastResearchAt)}` : "Ready to prepare"}</p></div><span class="pill">Private</span></div>
+          <div class="section-head"><div><h2>Automated discovery</h2><p>${escapeHtml(formattedResearchTime())}</p></div><span class="pill mint">Weekdays · 08:30</span></div>
           <div class="activity-list">
-            <div class="activity-item"><div><p>Independent consultants</p><small>Lead with protecting billable time</small></div><strong>High fit</strong></div>
-            <div class="activity-item"><div><p>Owner-operated trades</p><small>Make mobile admin the practical hook</small></div><strong>High fit</strong></div>
-            <div class="activity-item"><div><p>Small agencies</p><small>Explore retained-work workflows</small></div><strong>Test</strong></div>
+            ${activeCandidates.slice(0, 3).map((candidate) => `<div class="activity-item"><div><p>${escapeHtml(candidate.company)}</p><small>${escapeHtml(candidate.sector)} · ${escapeHtml(candidate.signal)}</small></div><strong>${candidate.fitScore}</strong></div>`).join("") || '<div class="activity-item"><div><p>First research run pending</p><small>The Discovery Agent will populate this automatically.</small></div></div>'}
           </div>
-          <button class="button secondary" data-action="run-research">Prepare today's brief</button>
+          <button class="button secondary" data-view="discover">Review ${highFitCandidates.length} high-fit candidates</button>
         </article>
-        <div class="notice"><strong>Human-in-the-loop by design.</strong><br>Research creates audience hypotheses and search strings. It never collects profile data or contacts people.</div>
+        <div class="notice"><strong>Research runs without manual searching.</strong><br>The agent evaluates public business evidence and saves candidate companies. It does not scrape LinkedIn, collect personal contact details, or contact anyone.</div>
       </div>
     </div>`;
 }
 
 function renderDiscover() {
-  const items = state.segmentFilter === "all" ? audienceSegments : audienceSegments.filter((segment) => segment.id === state.segmentFilter);
-  return `${pageHeading("Discover", "Find the right conversations—not a list to spam.", "Define audiences from business problems, prepare manual LinkedIn searches, and turn useful observations into respectful content ideas.")}
-    <article class="card spaced-card"><div class="section-head"><div><h2>Audience map</h2><p>No names, profile URLs, or personal data are stored.</p></div><select id="segment-filter" class="compact-select" aria-label="Filter audience"><option value="all">All segments</option>${audienceSegments.map((segment) => `<option value="${segment.id}" ${state.segmentFilter === segment.id ? "selected" : ""}>${escapeHtml(segment.name)}</option>`).join("")}</select></div></article>
-    <div class="grid segment-grid">${items.map((segment) => `<article class="card segment-card"><div><span class="meta">${escapeHtml(segment.market)}</span><h2>${escapeHtml(segment.name)}</h2></div><dl><dt>Problem</dt><dd>${escapeHtml(segment.pain)}</dd><dt>Tallyo fit</dt><dd>${escapeHtml(segment.fit)}</dd></dl><div><label>Suggested manual LinkedIn search</label><div class="search-box">${escapeHtml(segment.search)}</div></div><div class="chip-row">${segment.angles.map((angle) => `<span class="chip">${escapeHtml(angle)}</span>`).join("")}</div><div class="form-actions"><button class="button secondary" data-action="copy-search" data-segment="${segment.id}">Copy search</button><button class="button primary" data-action="draft-from-segment" data-segment="${segment.id}">Create draft</button></div></article>`).join("")}</div>`;
+  const candidates = discovery.candidates
+    .filter((candidate) => !state.dismissedCandidateIds.includes(candidate.id))
+    .filter((candidate) => state.discoveryFilter === "high" ? candidate.fitScore >= 85 : state.discoveryFilter === "saved" ? state.savedCandidateIds.includes(candidate.id) : true)
+    .sort((first, second) => second.fitScore - first.fitScore);
+  const highFit = discovery.candidates.filter((candidate) => candidate.fitScore >= 85 && !state.dismissedCandidateIds.includes(candidate.id)).length;
+  return `${pageHeading("Automated discovery", "The agent searches. You decide what deserves attention.", "Every weekday the Discovery Agent researches public UK business sources, identifies evidence of product fit, removes duplicates, and explains why each candidate may benefit from Tallyo.", '<span class="pill mint">● Scheduled · 08:30 Europe/London</span>')}
+    <div class="grid metrics-grid discovery-metrics">
+      <article class="card metric-card"><span class="metric-label">Candidates found</span><strong class="metric-value">${discovery.candidates.length}</strong><span class="metric-delta">Latest research cycle</span></article>
+      <article class="card metric-card"><span class="metric-label">High fit</span><strong class="metric-value">${highFit}</strong><span class="metric-delta">Score 85 or higher</span></article>
+      <article class="card metric-card"><span class="metric-label">Saved</span><strong class="metric-value">${state.savedCandidateIds.length}</strong><span class="metric-delta">For campaign planning</span></article>
+      <article class="card metric-card"><span class="metric-label">Last researched</span><strong class="metric-value metric-date">${escapeHtml(discovery.generatedAt ? new Date(discovery.generatedAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" }) : "Pending")}</strong><span class="metric-delta">Weekday automation</span></article>
+    </div>
+    <article class="card spaced-card discovery-summary"><div><span class="pill">Evidence policy</span><h2>${escapeHtml(discovery.sourcePolicy)}</h2><p>${escapeHtml(discovery.searchSummary)}</p></div><div><label for="discovery-filter">Show</label><select id="discovery-filter" class="compact-select"><option value="all" ${state.discoveryFilter === "all" ? "selected" : ""}>All active</option><option value="high" ${state.discoveryFilter === "high" ? "selected" : ""}>High fit</option><option value="saved" ${state.discoveryFilter === "saved" ? "selected" : ""}>Saved</option></select></div></article>
+    <div class="grid discovery-grid">${candidates.map((candidate) => `<article class="card candidate-card">
+      <div class="candidate-head"><div><span class="meta">${escapeHtml(candidate.sector)} · ${escapeHtml(candidate.location)}</span><h2>${escapeHtml(candidate.company)}</h2></div><div class="fit-score"><strong>${candidate.fitScore}</strong><span>fit score</span></div></div>
+      <div class="evidence-block"><span>Public signal</span><p>${escapeHtml(candidate.signal)}</p></div>
+      <div class="candidate-detail"><span>Why Tallyo fits</span><p>${escapeHtml(candidate.fitReason)}</p></div>
+      <div class="candidate-detail"><span>Likely decision role</span><p>${escapeHtml(candidate.decisionRole)}</p></div>
+      <div class="candidate-detail"><span>Recommended content angle</span><p>${escapeHtml(candidate.contentAngle)}</p></div>
+      <a class="source-link" href="${escapeHtml(candidate.sourceUrl)}" target="_blank" rel="noreferrer">View public evidence ↗</a>
+      <div class="form-actions"><button class="button secondary" data-action="toggle-save-candidate" data-candidate="${candidate.id}">${state.savedCandidateIds.includes(candidate.id) ? "Saved ✓" : "Save candidate"}</button><button class="button secondary" data-action="dismiss-candidate" data-candidate="${candidate.id}">Dismiss</button><button class="button primary" data-action="draft-from-candidate" data-candidate="${candidate.id}">Create campaign draft</button></div>
+    </article>`).join("") || '<article class="card empty-state"><div class="icon">◎</div><h2>No candidates in this view</h2><p class="lede centered-lede">The weekday Discovery Agent will add new evidence-backed businesses automatically. Try another filter if candidates have already been saved or dismissed.</p></article>'}</div>`;
 }
 
 function renderContent() {
@@ -126,12 +168,12 @@ function renderBrand() {
 
 function renderAutomations() {
   return `${pageHeading("Automations", "Automate preparation, retain judgement.", "Cadences generate private briefs and drafts in the workspace. They do not operate a LinkedIn account or contact anyone.")}
-    <div class="notice warning spaced-card"><strong>Current mode: local planning.</strong> Enabled switches describe the intended schedule and persist locally; no background scheduler is running.</div><article class="card">${state.automations.map((automation) => `<div class="automation-row"><div><strong>${escapeHtml(automation.name)}</strong><small>${escapeHtml(automation.mode)}</small></div><div><span class="muted">Cadence</span><small>${escapeHtml(automation.cadence)}</small></div><div><span class="pill ${automation.enabled ? "mint" : ""}">${automation.enabled ? "Planned on" : "Planned off"}</span></div><button class="switch ${automation.enabled ? "on" : ""}" data-action="toggle-automation" data-automation="${automation.id}" aria-label="Toggle ${escapeHtml(automation.name)}" aria-pressed="${automation.enabled}"></button></div>`).join("")}</article>`;
+    <div class="notice spaced-card"><strong>Discovery is connected to a weekday scheduler.</strong> It updates local research data from public sources. Content preparation and reminders remain proposed until their separate schedules are enabled.</div><article class="card">${state.automations.map((automation) => `<div class="automation-row"><div><strong>${escapeHtml(automation.name)}</strong><small>${escapeHtml(automation.mode)}</small></div><div><span class="muted">Cadence</span><small>${escapeHtml(automation.cadence)}</small></div><div><span class="pill ${automation.connected ? "mint" : automation.enabled ? "" : "amber"}">${automation.connected ? "Connected" : automation.enabled ? "Planned on" : "Planned off"}</span></div><button class="switch ${automation.enabled ? "on" : ""}" data-action="toggle-automation" data-automation="${automation.id}" aria-label="Toggle ${escapeHtml(automation.name)}" aria-pressed="${automation.enabled}" ${automation.connected ? "disabled" : ""}></button></div>`).join("")}</article>`;
 }
 
 function renderSettings() {
   const capabilities = channelDefinitions.linkedin.capabilities;
-  const labels = { generateDrafts: "Generate content drafts", renderAssets: "Prepare branded visuals", publish: "Publish to LinkedIn", readAnalytics: "Read live analytics", searchPeople: "Automate people search", sendMessages: "Send direct messages", sendConnections: "Send connection requests", reactToPosts: "React to other posts" };
+  const labels = { discoverPublicBusinesses: "Research public business sources", generateDrafts: "Generate content drafts", renderAssets: "Prepare branded visuals", publish: "Publish to LinkedIn", readAnalytics: "Read live analytics", searchPeople: "Scrape or automate LinkedIn people search", sendMessages: "Send direct messages", sendConnections: "Send connection requests", reactToPosts: "React to other posts" };
   return `${pageHeading("Settings", "Clear boundaries before connection.", "The first milestone deliberately separates useful preparation from actions that affect external accounts or people.")}
     <div class="grid dashboard-grid"><article class="card"><div class="section-head"><div><h2>LinkedIn capability matrix</h2><p>Enforced in the application data model.</p></div><span class="pill">Draft-only</span></div><div class="settings-list">${Object.entries(capabilities).map(([key,enabled]) => `<div class="setting-row"><span>${escapeHtml(labels[key])}</span><span class="capability ${enabled ? "yes" : "no"}">${enabled ? "Available" : "Not permitted"}</span></div>`).join("")}</div></article><div class="grid"><article class="card"><h2>Connection requirements</h2><ul class="check-list"><li>Approved LinkedIn developer access and supported API product</li><li>Owner-provided credentials stored outside browser code</li><li>Privacy and marketing review for live data processing</li><li>Explicit publish approvals, audit history, and kill switch</li></ul></article><article class="card"><h2>Local data</h2><p class="muted">Only draft copy, aggregate segments, preferences, and demo metrics are stored in this browser.</p><button class="button secondary" data-action="reset-local">Reset local workspace</button></article></div></div>`;
 }
@@ -160,10 +202,7 @@ document.addEventListener("click", async (event) => {
   const actionTarget = event.target.closest("[data-action]");
   if (!actionTarget) return;
   const action = actionTarget.dataset.action;
-  if (action === "run-research") {
-    state.lastResearchAt = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit", day: "numeric", month: "short" }).format(new Date());
-    saveState("Research brief prepared locally"); showToast("Audience brief refreshed—no profiles collected."); render();
-  }
+  if (action === "refresh-discovery") await loadDiscovery(true);
   if (action === "generate-pack") {
     const template = contentTemplates[state.posts.length % contentTemplates.length];
     const id = `post-${Date.now()}`;
@@ -172,15 +211,27 @@ document.addEventListener("click", async (event) => {
     state.posts.push({ id, title: template.label, status: "Draft", scheduledFor: "Unscheduled", templateId: template.id, segmentId: segment.id, assetId: asset.id, caption: `${template.hook}\n\n${template.body}\n\n${template.cta}\n\n#SmallBusiness #Tallyo`, alt: asset.alt });
     state.selectedPostId = id; saveState("New draft saved locally"); view = "content"; showToast("A new draft is ready for review."); render();
   }
-  if (action === "copy-search") {
-    const segment = segmentFor(actionTarget.dataset.segment);
-    try { await navigator.clipboard.writeText(segment.search); showToast("Search copied. Run it manually in LinkedIn."); } catch { showToast("Copy unavailable; select the search text manually."); }
+  if (action === "toggle-save-candidate") {
+    const candidateId = actionTarget.dataset.candidate;
+    state.savedCandidateIds = state.savedCandidateIds.includes(candidateId) ? state.savedCandidateIds.filter((id) => id !== candidateId) : [...state.savedCandidateIds, candidateId];
+    saveState("Candidate preference saved locally"); showToast(state.savedCandidateIds.includes(candidateId) ? "Candidate saved for campaign planning." : "Candidate removed from saved list."); render();
   }
-  if (action === "draft-from-segment") {
-    const segment = segmentFor(actionTarget.dataset.segment);
+  if (action === "dismiss-candidate") {
+    const candidateId = actionTarget.dataset.candidate;
+    state.dismissedCandidateIds = [...new Set([...state.dismissedCandidateIds, candidateId])];
+    state.savedCandidateIds = state.savedCandidateIds.filter((id) => id !== candidateId);
+    saveState("Candidate dismissed locally"); showToast("Candidate dismissed. The source remains in the research record."); render();
+  }
+  if (action === "draft-from-candidate") {
+    const candidate = candidateFor(actionTarget.dataset.candidate);
+    if (!candidate) return;
+    const sector = candidate.sector.toLowerCase();
+    const segment = sector.includes("agency") ? segmentFor("agencies") : sector.includes("assistant") ? segmentFor("consultants") : sector.includes("web") ? segmentFor("creatives") : segmentFor("contractors");
     const template = contentTemplates[0]; const asset = assetFor(template.assetId); const id = `post-${Date.now()}`;
-    state.posts.push({ id, title: `${segment.name}: ${segment.angles[0]}`, status: "Draft", scheduledFor: "Unscheduled", templateId: template.id, segmentId: segment.id, assetId: asset.id, caption: `${template.hook}\n\n${segment.pain} Tallyo is designed to help with ${segment.fit.toLowerCase()}\n\n${template.cta}\n\n#SmallBusiness #Tallyo`, alt: asset.alt });
-    state.selectedPostId = id; saveState(); navigate("content"); showToast("Segment-based draft created.");
+    const caption = `${candidate.contentAngle}\n\nService businesses often balance project work, recurring work, and follow-up at the same time. Tallyo brings quotes, invoices, expenses, recurring billing, and income visibility into one focused workspace.\n\nHow do you keep recurring and one-off work organised?\n\n#SmallBusiness #ServiceBusiness #Tallyo`;
+    state.posts.push({ id, title: `${candidate.sector}: ${candidate.contentAngle}`, status: "Draft", scheduledFor: "Unscheduled", templateId: template.id, segmentId: segment.id, assetId: asset.id, caption, alt: asset.alt, researchCandidateId: candidate.id });
+    if (!state.savedCandidateIds.includes(candidate.id)) state.savedCandidateIds.push(candidate.id);
+    state.selectedPostId = id; saveState("Campaign draft saved locally"); navigate("content"); showToast("Research-backed campaign draft created.");
   }
   if (action === "approve-post") { const post = selectedPost(); post.status = "Approved"; saveState("Approval saved locally"); showToast("Approved locally. Nothing was published."); render(); }
   if (action === "toggle-automation") { const automation = state.automations.find((item) => item.id === actionTarget.dataset.automation); automation.enabled = !automation.enabled; saveState(); showToast("Planning preference saved. No scheduler was started."); render(); }
@@ -188,7 +239,7 @@ document.addEventListener("click", async (event) => {
 });
 
 document.addEventListener("change", (event) => {
-  if (event.target.id === "segment-filter") { state.segmentFilter = event.target.value; saveState(); render(); }
+  if (event.target.id === "discovery-filter") { state.discoveryFilter = event.target.value; saveState(); render(); }
 });
 
 document.addEventListener("submit", (event) => {
@@ -201,3 +252,4 @@ document.addEventListener("submit", (event) => {
 
 document.querySelector("#mobile-menu").addEventListener("click", () => document.querySelector(".sidebar").classList.toggle("open"));
 render();
+loadDiscovery();

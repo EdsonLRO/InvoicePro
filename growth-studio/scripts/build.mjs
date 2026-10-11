@@ -18,7 +18,7 @@ const linkedInAssets = [
 await rm(destination, { recursive: true, force: true });
 await mkdir(path.join(destination, "assets", "linkedin"), { recursive: true });
 
-for (const file of ["index.html", "styles.css", "app.js", "data.js"]) {
+for (const file of ["index.html", "styles.css", "app.js", "data.js", "discovery.js", "discovery.json"]) {
   await cp(path.join(source, file), path.join(destination, file));
 }
 

@@ -922,9 +922,9 @@ The Owner approved and completed a second synthetic GBP 8 monthly sandbox subscr
 
 ## GROWTH-003 — Draft-first Tallyo Growth Studio foundation
 
-Status: review candidate in PR #211 on `codex/growth-studio-foundation`; focused local validation and all required remote checks pass.
+Status: automated-discovery review candidate in PR #211 on `codex/growth-studio-foundation`; focused local validation passes and the weekday research automation is active.
 
-Objective: build a separate owner-facing visual workspace for Tallyo's organic social planning, beginning with LinkedIn and preserving an extensible channel model for Facebook and X.
+Objective: build a separate owner-facing visual workspace for Tallyo's organic social planning, with automated public-business discovery, a draft-first LinkedIn workflow, and an extensible channel model for Facebook and X.
 
 Implementation lock acquired 2026-10-11:
 
@@ -934,12 +934,13 @@ Implementation lock acquired 2026-10-11:
 
 Approved repository scope:
 
-- aggregate audience segments and suggested searches for manual use;
+- aggregate audience segments plus scheduled research of public business sources;
+- evidence-backed company candidates, fit scoring, deduplication, local save/dismiss decisions and research-derived campaign drafts;
 - content drafting, LinkedIn preview, alt text, brand asset selection, local approval state and calendar planning;
 - local-only automation cadence preferences and clearly labelled illustrative analytics;
 - dependency-free static build, focused tests and local responsive validation.
 
-Legal/privacy disposition: approved with conditions. This milestone stores no social credentials, personal profile data or outreach records; performs no scraping, messages, connection requests, reactions, publication, ad buying or tracking; and limits claims to verified Tallyo product workflows. Every post retains a human approval requirement.
+Legal/privacy disposition: approved with conditions. This milestone stores no social credentials, personal profile/contact data or outreach records; performs no LinkedIn scraping, messages, connection requests, reactions, publication, ad buying or tracking; uses public business evidence with source URLs; and limits claims to verified Tallyo product workflows. Every post retains a human approval requirement.
 
 Owner actions reserved: approve any social developer application; provide credentials privately; approve privacy/legal changes for live processing; approve production deployment; approve any public post, paid spend or real-customer communication.
 

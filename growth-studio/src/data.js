@@ -3,28 +3,28 @@ export const channelDefinitions = {
     label: "LinkedIn",
     status: "Planning active",
     description: "Draft, review, schedule-plan, and measure manually imported results.",
-    capabilities: { generateDrafts: true, renderAssets: true, publish: false, readAnalytics: false, searchPeople: false, sendMessages: false, sendConnections: false, reactToPosts: false }
+    capabilities: { discoverPublicBusinesses: true, generateDrafts: true, renderAssets: true, publish: false, readAnalytics: false, searchPeople: false, sendMessages: false, sendConnections: false, reactToPosts: false }
   },
   facebook: {
     label: "Facebook",
     status: "Later",
     description: "Reserved for a future approved integration.",
-    capabilities: { generateDrafts: false, renderAssets: false, publish: false, readAnalytics: false, searchPeople: false, sendMessages: false, sendConnections: false, reactToPosts: false }
+    capabilities: { discoverPublicBusinesses: false, generateDrafts: false, renderAssets: false, publish: false, readAnalytics: false, searchPeople: false, sendMessages: false, sendConnections: false, reactToPosts: false }
   },
   x: {
     label: "X",
     status: "Later",
     description: "Reserved for a future approved integration.",
-    capabilities: { generateDrafts: false, renderAssets: false, publish: false, readAnalytics: false, searchPeople: false, sendMessages: false, sendConnections: false, reactToPosts: false }
+    capabilities: { discoverPublicBusinesses: false, generateDrafts: false, renderAssets: false, publish: false, readAnalytics: false, searchPeople: false, sendMessages: false, sendConnections: false, reactToPosts: false }
   }
 };
 
 export const audienceSegments = [
-  { id: "consultants", name: "Independent consultants", market: "UK service businesses", pain: "Admin interrupts billable work and follow-up.", fit: "Clear quotes, professional invoices, recurring billing, and income visibility.", search: "consultant OR advisor AND (freelance OR independent) AND United Kingdom", angles: ["Protect billable time", "Turn accepted work into an invoice", "See income without a spreadsheet"] },
-  { id: "creatives", name: "Freelance creatives", market: "Design, video, writing", pain: "Quoting, revisions, and payment follow-up live in different tools.", fit: "A focused quote-to-payment workflow designed for small service businesses.", search: "freelance AND (designer OR videographer OR copywriter) AND United Kingdom", angles: ["Keep client work moving", "Professional documents in minutes", "One view from quote to paid"] },
-  { id: "trades", name: "Owner-operated trades", market: "Local trade services", pain: "Paperwork waits until the working day is over.", fit: "Mobile-friendly quoting, invoicing, customer records, and payment status.", search: "owner OR director AND (electrician OR plumber OR builder) AND United Kingdom", angles: ["Finish the paperwork before leaving site", "Know what is outstanding", "Make every document look consistent"] },
-  { id: "agencies", name: "Small agencies", market: "2–15 person service teams", pain: "Recurring work and overdue follow-up become operational noise.", fit: "Recurring invoices, shared financial visibility, and repeatable client workflows.", search: "founder OR managing director AND agency AND United Kingdom", angles: ["Repeatable billing for retained work", "A calmer month-end", "Visibility without finance-tool complexity"] },
-  { id: "contractors", name: "Independent contractors", market: "Technology and professional services", pain: "Income planning is disconnected from invoices and expenses.", fit: "Invoices, expenses, recurring work, and income insights in one workspace.", search: "contractor AND (software OR IT OR project) AND United Kingdom", angles: ["Plan from real business activity", "Spend less time reconciling", "Keep evidence organised"] }
+  { id: "consultants", name: "Independent consultants", market: "UK service businesses", pain: "Admin interrupts billable work and follow-up.", fit: "Clear quotes, professional invoices, recurring billing, and income visibility.", signals: ["Advisory services", "Project and retainer work", "Small UK practice"], angles: ["Protect billable time", "Turn accepted work into an invoice", "See income without a spreadsheet"] },
+  { id: "creatives", name: "Freelance creatives", market: "Design, video, writing", pain: "Quoting, revisions, and payment follow-up live in different tools.", fit: "A focused quote-to-payment workflow designed for small service businesses.", signals: ["Creative services", "Project pricing", "Maintenance or retainer packages"], angles: ["Keep client work moving", "Professional documents in minutes", "One view from quote to paid"] },
+  { id: "trades", name: "Owner-operated trades", market: "Local trade services", pain: "Paperwork waits until the working day is over.", fit: "Mobile-friendly quoting, invoicing, customer records, and payment status.", signals: ["Local UK coverage", "Quoted jobs", "Owner-operated service"], angles: ["Finish the paperwork before leaving site", "Know what is outstanding", "Make every document look consistent"] },
+  { id: "agencies", name: "Small agencies", market: "2–15 person service teams", pain: "Recurring work and overdue follow-up become operational noise.", fit: "Recurring invoices, shared financial visibility, and repeatable client workflows.", signals: ["Small agency", "Monthly retainers", "Recurring client delivery"], angles: ["Repeatable billing for retained work", "A calmer month-end", "Visibility without finance-tool complexity"] },
+  { id: "contractors", name: "Independent contractors", market: "Technology and professional services", pain: "Income planning is disconnected from invoices and expenses.", fit: "Invoices, expenses, recurring work, and income insights in one workspace.", signals: ["Independent services", "Quoted projects", "UK business audience"], angles: ["Plan from real business activity", "Spend less time reconciling", "Keep evidence organised"] }
 ];
 
 export const brandAssets = [
@@ -53,7 +53,9 @@ export const claimGuardrails = [
 export const initialState = {
   selectedChannel: "linkedin",
   selectedPostId: "post-1",
-  segmentFilter: "all",
+  discoveryFilter: "all",
+  dismissedCandidateIds: [],
+  savedCandidateIds: [],
   lastResearchAt: null,
   metrics: { profileViews: 248, followerGrowth: 18, engagementRate: 4.7, draftsReady: 3 },
   posts: [
@@ -62,7 +64,7 @@ export const initialState = {
     { id: "post-3", title: "A calmer view of income", status: "Draft", scheduledFor: "Unscheduled", templateId: "insight", segmentId: "contractors", assetId: "income", caption: "Revenue on paper is not the same as knowing what is happening in your business.\n\nTallyo helps bring invoices, payment status, and expenses into one view so small business owners can plan with more context.\n\nWhich number do you check first when planning the month ahead?\n\n#BusinessFinance #Contractors #Tallyo", alt: "Tallyo graphic about the workflow after an invoice is sent." }
   ],
   automations: [
-    { id: "research", name: "Audience research brief", cadence: "Weekdays · 08:30", enabled: true, mode: "Generates a private brief" },
+    { id: "research", name: "Public-business Discovery Agent", cadence: "Weekdays · 08:30 Europe/London", enabled: true, connected: true, mode: "Searches public sources and updates Discover" },
     { id: "drafts", name: "Content draft pack", cadence: "Mon & Thu · 09:00", enabled: true, mode: "Creates drafts for approval" },
     { id: "review", name: "Approval reminder", cadence: "Weekdays · 15:30", enabled: false, mode: "Local reminder only" },
     { id: "report", name: "Weekly performance recap", cadence: "Fri · 16:00", enabled: false, mode: "Uses manually entered metrics" }
