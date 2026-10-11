@@ -4,7 +4,7 @@ import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { audienceSegments, brandAssets, channelDefinitions, claimGuardrails, initialState } from "../src/data.js";
-import { emptyDiscovery, normaliseDiscovery } from "../src/discovery.js";
+import { emptyDiscovery, normaliseDiscovery, validateDiscoveryPayload } from "../src/discovery.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -51,6 +51,27 @@ test("discovery records require public HTTPS evidence and contain no contact fie
   assert.equal(result.candidates[0].fitScore, 100);
   assert.equal("email" in result.candidates[0], false);
   assert.equal(emptyDiscovery.candidates.length, 0);
+});
+
+test("production discovery validation rejects personal contact fields and duplicate candidates", () => {
+  const candidate = {
+    id: "example",
+    company: "Example Studio",
+    website: "https://example.com/",
+    fitScore: 80,
+    sourceUrl: "https://example.com/services"
+  };
+  const payload = {
+    schemaVersion: 1,
+    generatedAt: "2026-10-11T08:30:00+01:00",
+    sourcePolicy: "Public business websites only",
+    searchSummary: "Validated public evidence.",
+    candidates: [candidate]
+  };
+
+  assert.equal(validateDiscoveryPayload(payload).candidates.length, 1);
+  assert.throws(() => validateDiscoveryPayload({ ...payload, candidates: [{ ...candidate, email: "owner@example.com" }] }), /Unexpected candidate field: email/);
+  assert.throws(() => validateDiscoveryPayload({ ...payload, candidates: [candidate, candidate] }), /Duplicate discovery candidate id/);
 });
 
 test("every post has review state, audience, asset, caption, and alt text", () => {

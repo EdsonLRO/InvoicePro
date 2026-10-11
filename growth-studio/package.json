@@ -4,10 +4,12 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "check": "node --check src/app.js && node --check src/data.js && node --check scripts/build.mjs && node --check scripts/serve.mjs",
+    "check": "node --check src/app.js && node --check src/data.js && node --check src/discovery.js && node --check scripts/build.mjs && node --check scripts/serve.mjs && node --check scripts/validate-runtime.mjs",
     "deploy": "npm run build && wrangler deploy",
     "deploy:dry-run": "npm run build && wrangler deploy --dry-run",
+    "deploy:scheduled": "npm run refresh:validate && npm run verify && npm run deploy",
     "test": "node --test tests/*.test.mjs",
+    "refresh:validate": "node scripts/validate-runtime.mjs",
     "verify": "npm run check && npm run build && npm test",
     "dev": "node scripts/serve.mjs"
   },

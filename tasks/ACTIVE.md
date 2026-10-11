@@ -922,7 +922,7 @@ The Owner approved and completed a second synthetic GBP 8 monthly sandbox subscr
 
 ## GROWTH-003 — Draft-first Tallyo Growth Studio foundation
 
-Status: foundation merged in PR #211; owner-approved private deployment is active at `growth.tallyo.co.uk` on Worker version `b55c4912-e319-4f0c-81f7-26b99ded2232`, and the Owner Dashboard link release is prepared on `codex/private-growth-studio-deployment`.
+Status: foundation merged in PR #211; private Worker deployment and the Owner Dashboard link merged in PR #212 and are active at `growth.tallyo.co.uk` on Worker version `b55c4912-e319-4f0c-81f7-26b99ded2232`. The authenticated Owner completed the first Cloudflare Access sign-in. Guarded weekday production refresh is in implementation on `codex/growth-studio-production-refresh`.
 
 Objective: build a separate owner-facing visual workspace for Tallyo's organic social planning, with automated public-business discovery, a draft-first LinkedIn workflow, and an extensible channel model for Facebook and X.
 
@@ -933,6 +933,14 @@ Implementation lock acquired 2026-10-11:
 - existing approved assets under `website/public/assets/` are read-only source inputs;
 - `index.html` and `tests/owner-console-harness.cjs` for the Owner-gated dashboard link;
 - `APP_STATUS.md`, `ROADMAP.md`, `DECISIONS.md` and `tasks/ACTIVE.md` only for authoritative state changes.
+
+Production-refresh scope added 2026-10-11:
+
+- validate and normalise every deployed discovery snapshot against the public-business-only schema;
+- reject personal contact fields, unknown fields, duplicate candidate IDs and non-HTTPS evidence;
+- require a clean dedicated checkout at the exact `origin/main` commit before scheduled deployment;
+- run the complete Growth Studio verification suite before each production refresh;
+- preserve draft-only mode and every LinkedIn/social-action prohibition.
 
 Approved repository scope:
 

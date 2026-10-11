@@ -1,6 +1,7 @@
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { validateDiscoveryPayload } from "../src/discovery.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repository = path.resolve(root, "..");
@@ -19,18 +20,20 @@ const linkedInAssets = [
 await rm(destination, { recursive: true, force: true });
 await mkdir(path.join(destination, "assets", "linkedin"), { recursive: true });
 
-for (const file of ["index.html", "styles.css", "app.js", "data.js", "discovery.js", "discovery.json"]) {
+for (const file of ["index.html", "styles.css", "app.js", "data.js", "discovery.js"]) {
   await cp(path.join(source, file), path.join(destination, file));
 }
 
+let discoverySource = path.join(source, "discovery.json");
 try {
-  const liveDiscovery = await readFile(runtimeDiscovery, "utf8");
-  const parsedDiscovery = JSON.parse(liveDiscovery);
-  if (!Array.isArray(parsedDiscovery.candidates)) throw new Error("Discovery candidates must be an array.");
-  await writeFile(path.join(destination, "discovery.json"), `${JSON.stringify(parsedDiscovery, null, 2)}\n`);
+  await readFile(runtimeDiscovery, "utf8");
+  discoverySource = runtimeDiscovery;
 } catch (error) {
   if (error?.code !== "ENOENT") throw error;
 }
+const discoveryPayload = JSON.parse(await readFile(discoverySource, "utf8"));
+const validatedDiscovery = validateDiscoveryPayload(discoveryPayload);
+await writeFile(path.join(destination, "discovery.json"), `${JSON.stringify(validatedDiscovery, null, 2)}\n`);
 
 for (const file of ["tallyo-wordmark-white.png", "tallyo-mark.png"]) {
   await cp(path.join(repository, "website", "public", "assets", file), path.join(destination, "assets", file));
