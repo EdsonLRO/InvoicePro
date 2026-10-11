@@ -42,8 +42,11 @@ export async function artifact() {
     .replace('<link rel="manifest" href="./manifest.json">', '')
     .replace('<body', '<body data-redesign-preview="fictional"');
   if (/<script[^>]+src="https?:/.test(html)) throw new Error('Unexpected external script; preview fails closed');
-  for (const name of ['tailwind.css', 'analytics-consent.css', 'app-user-messages.js', 'customer-csv-import.js', 'income-insights.js', 'income-pack-export.js', 'app-help-install.js', 'tallyo-wordmark-white.png', 'icon-192.png']) {
+  for (const name of ['tailwind.css', 'analytics-consent.css', 'app-user-messages.js', 'customer-csv-import.js', 'income-insights.js', 'income-pack-export.js', 'growth-studio-app.js', 'app-help-install.js', 'tallyo-wordmark-white.png', 'icon-192.png']) {
     files.set(`/${name}`, { bytes: await readFile(resolve(root, name)), type: name.endsWith('.png') ? 'image/png' : name.endsWith('.css') ? 'text/css' : 'text/javascript' });
+  }
+  for (const name of ['growth-studio/src/discovery.json', 'website/public/assets/social/linkedin/01-free-invoice-maker.png', 'website/public/assets/social/linkedin/02-dashboard-clarity.png', 'website/public/assets/social/linkedin/03-create-invoices.png', 'website/public/assets/social/linkedin/05-recurring-invoices.png', 'website/public/assets/social/linkedin/30-overdue-with-context.png', 'website/public/assets/social/linkedin/32-after-the-invoice-is-sent.png']) {
+    files.set(`/${name}`, { bytes: await readFile(resolve(root, name)), type: name.endsWith('.json') ? 'application/json' : 'image/png' });
   }
   files.set('/fixture.js', { bytes: await readFile(resolve(root, 'dev/redesign/fixture.js')), type: 'text/javascript' });
   files.set('/', { bytes: Buffer.from(html), type: 'text/html; charset=utf-8' });
@@ -60,7 +63,8 @@ export function serve(snapshot, port = 4173) {
         res.writeHead(403); return res.end();
       }
       if (!['GET', 'HEAD'].includes(req.method)) { res.writeHead(405); return res.end(); }
-      const file = snapshot.files.get(req.url);
+      const requestPath = new URL(req.url, `http://${expectedHost}`).pathname;
+      const file = snapshot.files.get(requestPath);
       if (!file) { res.writeHead(404); return res.end(); }
       res.writeHead(200, {
         'Content-Type': file.type, 'Content-Security-Policy': csp,

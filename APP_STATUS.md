@@ -10,6 +10,8 @@ The source-controlled production-refresh command validates a clean dedicated che
 
 Desktop cache remediation build `2026.10.11.2` versions the native Growth Studio module URL and advances the application-shell cache. This prevents a previously cached Pages fallback document from continuing to occupy the module URL after release; existing authenticated sessions receive the real module on the next application refresh without changing Owner authorization or any social-action boundary.
 
+Mobile remediation build `2026.10.11.3` gives the native workspace explicit production-safe styling instead of relying on unavailable generated utility classes. The phone layout uses a high-contrast hero, a complete three-column section switcher, a horizontally compact content queue, touch-sized controls and a reduced privacy control positioned above the persistent app navigation.
+
 ## Income insights and Income Pack - released 2026-10-06
 
 The Owner approved exact Phase 6 candidate `2910b8d`; PR #209 merged as `f94eea755032dcc709207c3fbeb89024a634076b`. Production app deployment `ebb5a0af-5904-4150-ac2c-5a6ae778c7b1` serves build `2026.10.06.1` with cache `tallyo-shell-2026-10-06-1` and the reviewed Income insights gate enabled. The app now provides accessible customer and business Finances views, a traceable income-record ledger, optional UK income-period organisation and a local Income Pack with reconciled CSV, manifest and PDF files.
