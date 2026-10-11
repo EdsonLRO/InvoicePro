@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#151f45">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+    <title>Tallyo Growth Studio</title>
+    <link rel="icon" href="assets/tallyo-mark.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-lockup">
+          <img src="assets/tallyo-wordmark-white.png" alt="Tallyo">
+          <span>Growth Studio</span>
+        </div>
+        <nav aria-label="Primary navigation" id="primary-nav">
+          <button class="nav-item active" data-view="overview"><span>⌂</span>Overview</button>
+          <button class="nav-item" data-view="discover"><span>◎</span>Discover</button>
+          <button class="nav-item" data-view="content"><span>✦</span>Content Studio</button>
+          <button class="nav-item" data-view="calendar"><span>□</span>Calendar</button>
+          <button class="nav-item" data-view="engagement"><span>↗</span>Engagement</button>
+          <button class="nav-item" data-view="audience"><span>◉</span>Audience</button>
+          <button class="nav-item" data-view="analytics"><span>⌁</span>Analytics</button>
+          <button class="nav-item" data-view="brand"><span>◇</span>Brand Library</button>
+          <button class="nav-item" data-view="automations"><span>⚙</span>Automations</button>
+          <button class="nav-item" data-view="settings"><span>···</span>Settings</button>
+        </nav>
+        <div class="sidebar-foot">
+          <span class="status-dot"></span>
+          <div><strong>Draft-only mode</strong><small>No social account connected</small></div>
+        </div>
+      </aside>
+      <main>
+        <header class="topbar">
+          <button class="mobile-menu" id="mobile-menu" aria-label="Toggle menu">☰</button>
+          <div class="channel-switcher" id="channel-switcher" aria-label="Channel"></div>
+          <div class="topbar-actions">
+            <span class="saved-state" id="saved-state">Saved locally</span>
+            <button class="button secondary" data-action="refresh-discovery">Refresh discoveries</button>
+            <button class="button primary" data-action="generate-pack">Generate draft pack</button>
+          </div>
+        </header>
+        <section class="workspace" id="workspace" aria-live="polite"></section>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

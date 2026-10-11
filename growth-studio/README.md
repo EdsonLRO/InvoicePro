@@ -1,0 +1,29 @@
+# Tallyo Growth Studio
+
+An owner-facing, draft-first workspace for planning Tallyo's organic social growth. The first milestone provides automated public-business discovery plus a functional LinkedIn content and audience-planning workflow using Tallyo's existing brand assets.
+
+## Safety boundary
+
+This milestone does not connect to LinkedIn or any other social platform. It does not store credentials or personal profile data, scrape people, send messages or connection requests, react to content, publish posts, buy ads, or alter production systems. Content approval and publishing remain local planning states only.
+
+The Discovery Agent searches public business sources on a weekday schedule, records evidence-backed company candidates without personal contact details, and writes the latest result to ignored local runtime data. The UI reads that feed from the local server. Search sources, evidence URLs, scores, and reasons remain visible for review.
+
+Facebook and X are represented as future channels so the information architecture can expand without redesigning the product.
+
+## Run locally
+
+```powershell
+npm run verify
+npm run dev
+```
+
+Open `http://127.0.0.1:4397`. The app uses browser local storage for demo preferences and draft changes.
+
+## Architecture
+
+- `src/` contains a dependency-free HTML/CSS/JavaScript application.
+- `scripts/build.mjs` creates a static `dist/` directory and copies only approved Tallyo assets from the main website.
+- `runtime/discovery.json` is ignored local data maintained by the scheduled Discovery Agent.
+- `tests/` enforces the draft-only channel capabilities, public-source discovery boundary, content guardrails, CSP, and build output.
+
+Any future platform connection requires an approved API integration, owner-provided credentials, privacy/legal review, and a separate production release decision.
