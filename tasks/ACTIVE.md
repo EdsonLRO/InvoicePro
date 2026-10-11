@@ -922,7 +922,7 @@ The Owner approved and completed a second synthetic GBP 8 monthly sandbox subscr
 
 ## GROWTH-003 — Draft-first Tallyo Growth Studio foundation
 
-Status: implementation candidate on `codex/growth-studio-foundation`.
+Status: review candidate in PR #211 on `codex/growth-studio-foundation`; focused local validation and all required remote checks pass.
 
 Objective: build a separate owner-facing visual workspace for Tallyo's organic social planning, beginning with LinkedIn and preserving an extensible channel model for Facebook and X.
 
