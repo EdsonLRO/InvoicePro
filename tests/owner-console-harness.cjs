@@ -16,6 +16,8 @@ const recovery = fs.readFileSync(
   'utf8',
 );
 const app = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const growthModule = fs.readFileSync(path.join(root, 'growth-studio-app.js'), 'utf8');
+const growthDiscovery = JSON.parse(fs.readFileSync(path.join(root, 'growth-studio', 'src', 'discovery.json'), 'utf8'));
 const config = fs.readFileSync(path.join(root, 'supabase', 'config.toml'), 'utf8');
 const envExample = fs.readFileSync(path.join(root, '.env.example'), 'utf8');
 
@@ -101,8 +103,18 @@ assert.match(app, /Approve confirmed MFA reset/);
 assert.match(app, /This console cannot open invoices, customer records or sign in as another user/);
 assert.match(app, /loadOwnerConsoleAccess\(\)/);
 assert.match(app, /ownerConsole\.available/);
-assert.match(app, /v-if="ownerConsole\.available" href="https:\/\/growth\.tallyo\.co\.uk\/"/);
-assert.equal((app.match(/>Growth Studio <span aria-hidden="true">↗<\/span><\/a>/g) || []).length, 2);
+assert.equal((app.match(/@click="navigateTo\('growth'\)[^"]*"[^>]*class="primary-navigation-item">Growth Studio<\/button>/g) || []).length, 2);
+assert.match(app, /v-show="activeTab === 'growth' && ownerConsole\.available && growthStudioReady"/);
+assert.match(app, /<script src="\.\/growth-studio-app\.js"><\/script>/);
+assert.match(app, /connect-src[^;]*https:\/\/growth\.tallyo\.co\.uk/);
+assert.doesNotMatch(app, /href="https:\/\/growth\.tallyo\.co\.uk\/"/);
+assert.match(app, /People search, messages, connection requests, and reactions are disabled/);
+assert.match(growthModule, /window\.TallyoGrowthStudio = Object\.freeze/);
+assert.doesNotMatch(growthModule, /searchPeople\s*:\s*true|sendMessages\s*:\s*true|publish\s*:\s*true/);
+for (const candidate of growthDiscovery.candidates) {
+  for (const prohibited of ['email', 'phone', 'profileUrl', 'personName', 'message']) assert.equal(prohibited in candidate, false, `discovery candidate exposes ${prohibited}`);
+  assert.match(candidate.sourceUrl, /^https:\/\//);
+}
 assert.doesNotMatch(app, /ownerConsole[\s\S]{0,200}(?:impersonat|bulk)/i);
 
 assert.match(config, /\[functions\.owner-account-admin\][\s\S]*?verify_jwt = true/);
@@ -110,7 +122,7 @@ assert.match(config, /\[functions\.mfa-recovery\][\s\S]*?verify_jwt = true/);
 assert.match(envExample, /^TALLYO_OWNER_USER_ID=\s*$/m);
 assert.doesNotMatch(envExample, /^TALLYO_OWNER_USER_ID=.+$/m, 'Owner identifier must not be committed');
 
-for (const [name, source] of Object.entries({ migration, edge, recovery, app })) {
+for (const [name, source] of Object.entries({ migration, edge, recovery, app, growthModule })) {
   assert.doesNotMatch(source, /(?:service_role|anon)_key\s*[:=]\s*["'][A-Za-z0-9._-]{20,}/i, `${name} contains a credential`);
   assert.doesNotMatch(source, /sk_(?:live|test)_[A-Za-z0-9]{16,}/, `${name} contains a Stripe secret`);
   assert.doesNotMatch(source, /whsec_[A-Za-z0-9]{16,}/, `${name} contains a webhook secret`);

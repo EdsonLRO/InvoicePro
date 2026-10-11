@@ -109,6 +109,7 @@ const configuration = [
 
 const appAssets = [
   "tailwind.css",
+  "growth-studio-app.js",
   "app-help-install.js",
   "app-user-messages.js",
   "customer-csv-import.js",
@@ -125,7 +126,20 @@ const appAssets = [
 await rm(outputRoot, { recursive: true, force: true });
 await mkdir(outputRoot, { recursive: true });
 await mkdir(join(outputRoot, "quote"), { recursive: true });
+await mkdir(join(outputRoot, "growth-studio", "src"), { recursive: true });
+await mkdir(join(outputRoot, "website", "public", "assets", "social", "linkedin"), { recursive: true });
 for (const asset of appAssets) await copyFile(join(repositoryRoot, asset), join(outputRoot, asset));
+await copyFile(join(repositoryRoot, "growth-studio", "src", "discovery.json"), join(outputRoot, "growth-studio", "src", "discovery.json"));
+for (const asset of [
+  "01-free-invoice-maker.png",
+  "02-dashboard-clarity.png",
+  "03-create-invoices.png",
+  "05-recurring-invoices.png",
+  "30-overdue-with-context.png",
+  "32-after-the-invoice-is-sent.png"
+]) {
+  await copyFile(join(repositoryRoot, "website", "public", "assets", "social", "linkedin", asset), join(outputRoot, "website", "public", "assets", "social", "linkedin", asset));
+}
 for (const sharedAsset of ["analytics-consent.css", "analytics-consent.mjs", "analytics-app.js"]) {
   await copyFile(join(repositoryRoot, sharedAsset), join(outputRoot, sharedAsset));
 }
@@ -137,8 +151,8 @@ const builtIndex = analyticsRequested
         "https://challenges.cloudflare.com https://www.googletagmanager.com; style-src"
       )
       .replace(
-        "https://cdn.jsdelivr.net; frame-src",
-        "https://cdn.jsdelivr.net https://www.google-analytics.com https://region1.google-analytics.com; frame-src"
+        "https://cdn.jsdelivr.net https://growth.tallyo.co.uk; frame-src",
+        "https://cdn.jsdelivr.net https://growth.tallyo.co.uk https://www.google-analytics.com https://region1.google-analytics.com; frame-src"
       )
   : appIndexSource;
 await writeFile(join(outputRoot, "index.html"), builtIndex, "utf8");

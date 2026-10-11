@@ -1,12 +1,12 @@
 # Tallyo current status
 
-## Growth Studio — private deployment released 2026-10-11
+## Growth Studio — native Owner workspace released 2026-10-11
 
-The Owner approved a private deployment at `https://growth.tallyo.co.uk/`. Cloudflare Worker version `b55c4912-e319-4f0c-81f7-26b99ded2232` serves the static Growth Studio build with both the production `workers.dev` hostname and preview URLs disabled. A self-hosted Cloudflare Access application was created before the custom domain was attached; its reusable allow policy is restricted to the exact Owner mailbox. A cookie-free request returns HTTP 302 to Cloudflare Access with no-store headers, and the browser shows the named “Log in to Tallyo Growth Studio” boundary.
+Growth Studio is implemented directly inside the authenticated Tallyo app as an Owner-only route. It appears below Owner Console in desktop and mobile navigation and opens inside the existing application shell; there is no user-facing link to a separate studio. The workspace provides public-business discovery, content drafting and approval, calendar planning, audience segments, illustrative analytics, approved brand assets, automation status and channel guardrails.
 
-The authenticated Tallyo Owner Dashboard exposes a Growth Studio link immediately below Owner Console in desktop and mobile navigation, using the existing `ownerConsole.available` gate. The deployed studio remains draft-only: it stores planning state in the current browser, includes the latest public-business discovery snapshot, and performs no LinkedIn scraping, personal-profile collection, outreach, publication, paid advertising or social credential handling. Future LinkedIn API publishing remains separately approval-gated.
+The private Cloudflare Worker at `https://growth.tallyo.co.uk/` remains Access-protected and is now a discovery-feed and rollback surface rather than the primary interface. Its discovery response allows credentialed cross-origin reads only from `https://app.tallyo.co.uk`; the app falls back to a source-controlled approved snapshot if the live feed is unavailable. The studio remains draft-only and browser-local: it performs no LinkedIn scraping, personal-profile collection, outreach, publication, paid advertising or social credential handling. Future LinkedIn API publishing remains separately approval-gated.
 
-The approved weekday discovery automation now refreshes production only when it finds useful new public-business candidates. It deploys from a dedicated detached worktree pinned to the exact `origin/main` commit. A source-controlled guard rejects tracked changes, non-production commits, empty or malformed feeds, duplicate IDs, unknown fields, non-HTTPS evidence and personal contact fields before the normal verification suite and Worker deployment can run.
+The source-controlled production-refresh command validates a clean dedicated checkout at the exact `origin/main` commit and rejects malformed feeds, duplicate IDs, unknown fields, non-HTTPS evidence and personal contact fields before deployment. The current weekday research automation remains local-only until its native-app feed refresh is separately enabled and verified.
 
 ## Income insights and Income Pack - released 2026-10-06
 
