@@ -37,7 +37,14 @@
   Object.values(tables).forEach(rows => rows.forEach(row => { row.user_id = uid; row.created_at ||= at(-12, '09:00'); row.updated_at = row.created_at; }));
   const blocked = () => ({ data: null, error: { message: 'Unavailable in this fictional preview. No email, payment or account action was performed.' } });
   // Deny all transports as defence in depth in addition to the server CSP.
-  window.fetch = async () => { throw new Error('Preview blocks network requests'); };
+  const previewFetch = typeof window.fetch === 'function' ? window.fetch.bind(window) : null;
+  window.fetch = async (input, options = {}) => {
+    if (!previewFetch || typeof URL !== 'function') throw new Error('Preview blocks network requests');
+    const url = new URL(typeof input === 'string' ? input : input.url, location.href);
+    const method = String(options.method || (typeof input === 'string' ? 'GET' : input.method) || 'GET').toUpperCase();
+    if (url.origin === location.origin && method === 'GET') return previewFetch(input, options);
+    throw new Error('Preview blocks network requests');
+  };
   window.XMLHttpRequest = class { constructor() { throw new Error('Preview blocks network requests'); } };
   window.WebSocket = class { constructor() { throw new Error('Preview blocks network requests'); } };
   window.EventSource = class { constructor() { throw new Error('Preview blocks network requests'); } };
@@ -96,7 +103,12 @@
     getUser: async () => ({ data: { user: clone(user) }, error: null }),
     getSession: async () => ({ data: { session: null }, error: null }),
   }, { get: (target, key) => key in target ? target[key] : async () => blocked() });
-  window.supabase = { createClient: () => ({ from: query, auth, rpc: async () => blocked(), functions: { invoke: async () => blocked() } }) };
+  window.supabase = { createClient: () => ({
+    from: query,
+    auth,
+    rpc: async () => blocked(),
+    functions: { invoke: async (name, options = {}) => name === 'owner-account-admin' && options.body?.action === 'status' ? { data: { owner: true }, error: null } : blocked() }
+  }) };
   const createApp = Vue.createApp;
   Vue.createApp = options => {
     // The real sign-in lifecycle is intentionally NOT exercised by this UI fixture.
@@ -105,6 +117,7 @@
       this.userProfileEmail = user.email;
       this.isLoggedIn = true;
       await this.loadAllData();
+      await this.loadOwnerConsoleAccess();
       this.bindAccessibleLabels();
       this.accessibleLabelObserver = new MutationObserver(() => this.bindAccessibleLabels());
       this.accessibleLabelObserver.observe(document.getElementById('app'), { childList: true, subtree: true });

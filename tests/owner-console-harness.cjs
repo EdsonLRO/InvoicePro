@@ -109,6 +109,11 @@ assert.match(app, /<script src="\.\/growth-studio-app\.js\?v=2026\.10\.11\.2"><\
 assert.match(app, /connect-src[^;]*https:\/\/growth\.tallyo\.co\.uk/);
 assert.doesNotMatch(app, /href="https:\/\/growth\.tallyo\.co\.uk\/"/);
 assert.match(app, /People search, messages, connection requests, and reactions are disabled/);
+assert.match(app, /class="growth-hero rounded-2xl overflow-hidden"/);
+assert.match(app, /\.growth-hero \{[^}]*background:linear-gradient\(135deg,#0f172a/);
+assert.match(app, /\.growth-section-tabs \{ display:grid; grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+assert.match(app, /\.growth-content-queue-items \{ display:grid; grid-auto-flow:column; grid-auto-columns:minmax\(220px,82%\)/);
+assert.match(app, /\.app-cookie-settings::before \{ content:'Privacy'/);
 assert.match(growthModule, /window\.TallyoGrowthStudio = Object\.freeze/);
 assert.doesNotMatch(growthModule, /searchPeople\s*:\s*true|sendMessages\s*:\s*true|publish\s*:\s*true/);
 for (const candidate of growthDiscovery.candidates) {
