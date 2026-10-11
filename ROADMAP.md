@@ -2,7 +2,7 @@
 
 ## Now
 
-- Review the repository-only Tallyo Growth Studio foundation for automated public-business discovery, draft-first LinkedIn content creation, local approvals, calendar planning, brand assets and illustrative analytics. Keep LinkedIn scraping, social credentials, personal profile/contact data, outreach, publishing, paid advertising and production deployment outside this milestone.
+- Operate the privately deployed Tallyo Growth Studio at `growth.tallyo.co.uk`, reached from the gated Owner Dashboard link, for automated public-business discovery, draft-first LinkedIn content creation, local approvals, calendar planning, brand assets and illustrative analytics. Keep LinkedIn scraping, social credentials, personal profile/contact data, outreach, publishing and paid advertising outside this milestone.
 - Monitor the approved initial UK-business public release across the website, app, Auth, bounded AI Helper, Billing interface and connected-payment interface.
 - Keep preview deployments protected by the retained wildcard Cloudflare Access applications.
 - Preserve the verified production gates, server-side subscription enforcement and documented rollback routes.

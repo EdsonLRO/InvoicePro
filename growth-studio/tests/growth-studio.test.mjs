@@ -91,3 +91,13 @@ test("build contains approved Tallyo brand and campaign assets", async () => {
   assert.equal(manifest.mode, "draft-only");
   assert.deepEqual(manifest.channels, ["linkedin"]);
 });
+
+test("Cloudflare deployment exposes only the Access-protected custom domain", async () => {
+  const config = JSON.parse(await readFile(path.join(root, "wrangler.jsonc"), "utf8"));
+  assert.equal(config.workers_dev, false);
+  assert.equal(config.preview_urls, false);
+  assert.equal(config.assets.directory, "./dist");
+  assert.equal(config.assets.not_found_handling, "single-page-application");
+  assert.equal(config.observability.redact_query_string, true);
+  assert.deepEqual(config.routes, [{ pattern: "growth.tallyo.co.uk", custom_domain: true }]);
+});

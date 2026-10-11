@@ -101,6 +101,8 @@ assert.match(app, /Approve confirmed MFA reset/);
 assert.match(app, /This console cannot open invoices, customer records or sign in as another user/);
 assert.match(app, /loadOwnerConsoleAccess\(\)/);
 assert.match(app, /ownerConsole\.available/);
+assert.match(app, /v-if="ownerConsole\.available" href="https:\/\/growth\.tallyo\.co\.uk\/"/);
+assert.equal((app.match(/>Growth Studio <span aria-hidden="true">↗<\/span><\/a>/g) || []).length, 2);
 assert.doesNotMatch(app, /ownerConsole[\s\S]{0,200}(?:impersonat|bulk)/i);
 
 assert.match(config, /\[functions\.owner-account-admin\][\s\S]*?verify_jwt = true/);

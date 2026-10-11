@@ -19,11 +19,23 @@ npm run dev
 
 Open `http://127.0.0.1:4397`. The app uses browser local storage for demo preferences and draft changes.
 
+## Private deployment
+
+The production build is deployed as a Cloudflare Worker with Static Assets. `workers_dev` and preview URLs are disabled so a deployment has no public Worker hostname. The only configured route is `https://growth.tallyo.co.uk/`, protected by a Cloudflare Access self-hosted application and an exact-email Owner allow policy created before the custom domain was attached.
+
+```powershell
+npm run deploy:dry-run
+npm run deploy
+```
+
+The build uses `runtime/discovery.json` when the scheduled Discovery Agent has produced a current validated snapshot, otherwise it falls back to `src/discovery.json`. Browser planning state remains local to the browser in this release; no social credentials or customer data are stored by the Worker.
+
 ## Architecture
 
 - `src/` contains a dependency-free HTML/CSS/JavaScript application.
 - `scripts/build.mjs` creates a static `dist/` directory and copies only approved Tallyo assets from the main website.
 - `runtime/discovery.json` is ignored local data maintained by the scheduled Discovery Agent.
+- `wrangler.jsonc` disables public Worker and preview hostnames, records the Access-protected custom domain, and packages only the built static assets.
 - `tests/` enforces the draft-only channel capabilities, public-source discovery boundary, content guardrails, CSP, and build output.
 
 Any future platform connection requires an approved API integration, owner-provided credentials, privacy/legal review, and a separate production release decision.
