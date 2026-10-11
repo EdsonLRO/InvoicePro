@@ -105,7 +105,7 @@ assert.match(app, /loadOwnerConsoleAccess\(\)/);
 assert.match(app, /ownerConsole\.available/);
 assert.equal((app.match(/@click="navigateTo\('growth'\)[^"]*"[^>]*class="primary-navigation-item">Growth Studio<\/button>/g) || []).length, 2);
 assert.match(app, /v-show="activeTab === 'growth' && ownerConsole\.available && growthStudioReady"/);
-assert.match(app, /<script src="\.\/growth-studio-app\.js"><\/script>/);
+assert.match(app, /<script src="\.\/growth-studio-app\.js\?v=2026\.10\.11\.2"><\/script>/);
 assert.match(app, /connect-src[^;]*https:\/\/growth\.tallyo\.co\.uk/);
 assert.doesNotMatch(app, /href="https:\/\/growth\.tallyo\.co\.uk\/"/);
 assert.match(app, /People search, messages, connection requests, and reactions are disabled/);
