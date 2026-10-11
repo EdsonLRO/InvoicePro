@@ -919,3 +919,28 @@ The Owner approved and completed a second synthetic GBP 8 monthly sandbox subscr
 - **Validation:** Connect payment, Connect foundation and payment-integrity harnesses pass; both affected Edge Functions pass frozen-lock Deno checks; formatting, diff hygiene and focused sensitive-value scanning pass. Review confirms normalisation, exact owner/account update binding, persistence before rejection, indexed retrieval, unchanged active behaviour and no disconnected-state mutation.
 - **Deployment evidence:** both functions remain active with JWT verification; existing live Checkout v26, refund v23 and document-email v41 were unchanged. Rollback source remains `c647746`.
 - **Excluded:** no migration, provider account deletion, reconnection design, secret/configuration change, new payment/refund, live mode or public release. Stripe documents that stricter verification tokens cannot safely downgrade these already-completed sandbox accounts and that test mode might not enforce inactive capabilities, so destructive provider-state testing is not used.
+
+## GROWTH-003 — Draft-first Tallyo Growth Studio foundation
+
+Status: implementation candidate on `codex/growth-studio-foundation`.
+
+Objective: build a separate owner-facing visual workspace for Tallyo's organic social planning, beginning with LinkedIn and preserving an extensible channel model for Facebook and X.
+
+Implementation lock acquired 2026-10-11:
+
+- `growth-studio/**`;
+- existing approved assets under `website/public/assets/` are read-only source inputs;
+- `ROADMAP.md`, `DECISIONS.md` and `tasks/ACTIVE.md` only for authoritative state changes.
+
+Approved repository scope:
+
+- aggregate audience segments and suggested searches for manual use;
+- content drafting, LinkedIn preview, alt text, brand asset selection, local approval state and calendar planning;
+- local-only automation cadence preferences and clearly labelled illustrative analytics;
+- dependency-free static build, focused tests and local responsive validation.
+
+Legal/privacy disposition: approved with conditions. This milestone stores no social credentials, personal profile data or outreach records; performs no scraping, messages, connection requests, reactions, publication, ad buying or tracking; and limits claims to verified Tallyo product workflows. Every post retains a human approval requirement.
+
+Owner actions reserved: approve any social developer application; provide credentials privately; approve privacy/legal changes for live processing; approve production deployment; approve any public post, paid spend or real-customer communication.
+
+Release condition: focused build/tests, browser accessibility and responsive checks, full diff review, no secret/private-data findings, and a reviewable pull request. Production publication is excluded.

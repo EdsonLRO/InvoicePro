@@ -2,6 +2,7 @@
 
 | Decision | Status | Rationale |
 |---|---|---|
+| Separate Tallyo Growth Studio with a draft-first LinkedIn milestone | Approved for repository implementation, 2026-10-11 | The Owner approved autonomous development of an owner-facing organic-growth workspace. The first milestone may define aggregate audience segments, manual LinkedIn search strings, create content drafts from existing Tallyo brand assets, record local approvals and schedule plans, and display clearly labelled illustrative analytics. It must not connect social accounts, store credentials or personal profile data, scrape people, send connections or messages, react to posts, publish content, buy ads, deploy to production or make public claims beyond verified Tallyo capabilities. Every future provider connection and public release remains a separate Owner action. |
 | Free Invoice Maker remains free without an account | Approved | Provides useful acquisition value without subsidising saved workspaces. |
 | Tallyo has one paid plan at launch | Approved | Avoids artificial complexity before usage evidence exists. |
 | Monthly price is £8 | Approved | Fits the focused UK invoicing position. |
