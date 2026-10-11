@@ -49,6 +49,10 @@ logs or documentation:
 - `TALLYO_TURNSTILE_SITE_KEY`: public site key; required only when enabled
 - `TALLYO_STRIPE_LIVE_MODE`: keep `false` for an unapproved preview
 - `TALLYO_PUBLIC_SITE_URL`: optional reviewed public-site base URL
+- `TALLYO_GOOGLE_AUTH_ENABLED` and `TALLYO_APPLE_AUTH_ENABLED`: keep both `false`
+  until the matching provider, redirect, privacy and Auth review is complete
+- `TALLYO_SOCIAL_AUTH_PUBLIC_RELEASE_APPROVED`: set `true` only for the exact
+  Owner-approved social-sign-in release; it does not replace either provider flag
 - `TALLYO_CLOUDFLARE_ACCESS_CONFIRMED=true`: set only after both required
   Cloudflare Access policies are visibly enabled
 

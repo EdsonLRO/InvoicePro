@@ -56,6 +56,8 @@ const analyticsRequested = process.env.TALLYO_GA4_ENABLED === "true";
 const ga4MeasurementId = String(process.env.TALLYO_GA4_MEASUREMENT_ID || "").trim();
 const quoteAcceptanceRequested = process.env.TALLYO_QUOTE_ACCEPTANCE_ENABLED === "true";
 const incomeInsightsRequested = process.env.TALLYO_INCOME_INSIGHTS_ENABLED === "true";
+const googleAuthRequested = process.env.TALLYO_GOOGLE_AUTH_ENABLED === "true";
+const appleAuthRequested = process.env.TALLYO_APPLE_AUTH_ENABLED === "true";
 if (billingTestEnabled && billingLiveEnabled) {
   throw new Error("Only one Tallyo Billing browser mode may be enabled");
 }
@@ -89,6 +91,9 @@ if (quoteAcceptanceRequested && process.env.TALLYO_QUOTE_ACCEPTANCE_PUBLIC_RELEA
 if (incomeInsightsRequested && process.env.TALLYO_INCOME_INSIGHTS_PUBLIC_RELEASE_APPROVED !== "true") {
   throw new Error("Income insights controls require explicit public-release approval");
 }
+if ((googleAuthRequested || appleAuthRequested) && process.env.TALLYO_SOCIAL_AUTH_PUBLIC_RELEASE_APPROVED !== "true") {
+  throw new Error("Google and Apple sign-in controls require explicit public-release approval");
+}
 const configuration = [
   "// Generated during the Cloudflare Pages build. Do not commit this file.",
   `window.SUPABASE_URL = ${JSON.stringify(supabaseUrl)};`,
@@ -104,6 +109,8 @@ const configuration = [
   `window.TALLYO_GA4_MEASUREMENT_ID = ${JSON.stringify(analyticsRequested ? ga4MeasurementId : "")};`,
   `window.TALLYO_QUOTE_ACCEPTANCE_ENABLED = ${JSON.stringify(quoteAcceptanceRequested)};`,
   `window.TALLYO_INCOME_INSIGHTS_ENABLED = ${JSON.stringify(incomeInsightsRequested)};`,
+  `window.TALLYO_GOOGLE_AUTH_ENABLED = ${JSON.stringify(googleAuthRequested)};`,
+  `window.TALLYO_APPLE_AUTH_ENABLED = ${JSON.stringify(appleAuthRequested)};`,
   ""
 ].join("\n");
 

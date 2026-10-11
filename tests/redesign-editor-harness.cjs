@@ -8,7 +8,8 @@ const hash = source => createHash('sha256').update(source.replace(/\r\n/g, '\n')
 // The reviewed interaction refinements change the contiguous route/history block,
 // its popstate listeners, the bounded Overview schedule action, and the source-gated
 // quote-access/export blocks. Keep every other method/startup byte frozen and
-// exercise each reviewed block separately.
+// exercise each reviewed block separately. The Google/Apple Auth boundary is
+// normalised below and covered by social-auth-harness.cjs.
 let protectedMethods = app.slice(app.indexOf('        methods: {'));
 protectedMethods = protectedMethods.replace(/\r?\n\s*this\.resetQuoteAcceptance\(\);/, '');
 protectedMethods = protectedMethods.replace(/\r?\n\s*this\.documentEmailModal = \{ open: false, inv: null, to: '', includeOnlinePayment: false, paymentKind: 'full_balance',[^\n]+/, '');
@@ -63,6 +64,14 @@ const navigationStart = protectedMethods.indexOf('            routeTabs()');
 const navigationEnd = protectedMethods.indexOf('            ownerRecoveryTokenFromHash()', navigationStart);
 assert.ok(navigationStart >= 0 && navigationEnd > navigationStart, 'reviewed navigation block must remain bounded');
 protectedMethods = protectedMethods.slice(0, navigationStart) + '            /* navigation methods reviewed separately */\n' + protectedMethods.slice(navigationEnd);
+const socialAuthStart = protectedMethods.indexOf('            socialProviderEnabled(provider)');
+const socialAuthEnd = protectedMethods.indexOf('            async renderReauthTurnstile()', socialAuthStart);
+assert.ok(socialAuthStart >= 0 && socialAuthEnd > socialAuthStart, 'reviewed social Auth methods must remain bounded');
+protectedMethods = protectedMethods.slice(0, socialAuthStart) + protectedMethods.slice(socialAuthEnd);
+protectedMethods = protectedMethods.replace(/\r?\n\s*if \(!this\.userHasPasswordIdentity\(user\)\) \{\r?\n\s*this\.beginSocialPasswordSetup\(user\);\r?\n\s*return;\r?\n\s*\}/, '');
+protectedMethods = protectedMethods.replace(/\r?\n\s*this\.socialAuth\.busyProvider = '';\r?\n\s*this\.socialAuth\.error = '';\r?\n\s*this\.socialPassword = \{ new: '', confirm: '', busy: false, error: '' \};/, '');
+protectedMethods = protectedMethods.replace('                await this.routeAfterAuth(user);\n            },\n            verifiedTotpFactors', '                await this.onSignedIn(user);\n            },\n            verifiedTotpFactors');
+protectedMethods = protectedMethods.replace(/\r?\n\s*this\.consumeAuthCallbackError\(\);/, '');
 const billingStart = protectedMethods.indexOf('            async loadBillingState()');
 const billingEnd = protectedMethods.indexOf('            async openBillingCheckout(', billingStart);
 assert.ok(billingStart >= 0 && billingEnd > billingStart, 'reviewed subscription trial state must remain bounded');
@@ -77,7 +86,7 @@ const growthStudioMethodsEnd = protectedMethods.indexOf('            ownerRecove
 assert.ok(growthStudioMethodsStart >= 0 && growthStudioMethodsEnd > growthStudioMethodsStart, 'native Growth Studio methods must remain bounded');
 protectedMethods = protectedMethods.slice(0, growthStudioMethodsStart) + protectedMethods.slice(growthStudioMethodsEnd);
 protectedMethods = protectedMethods.replace(/\r?\n\s*window\.(addEventListener|removeEventListener)\('popstate', this\.handlePopState\);/g, '');
-assert.equal(hash(protectedMethods), '2395c29d83d9eba6ad88747bac57b5b82f5cf2b78c3d183b18125bff78a1b342', 'all reviewed methods/startup must remain unchanged');
+assert.equal(hash(protectedMethods), '95ee5c9df6bb8980d7db3870cfb6df18281fdc32b13437d48cfbcccce4366e2a', 'all reviewed methods/startup must remain unchanged');
 const canvasStart = app.indexOf('\n', app.indexOf('<div id="invoice-canvas"'));
 const canvasEnd = app.indexOf('\n                </div>', app.indexOf('company.invoiceFooter', canvasStart)) + 23;
 assert.equal(hash(app.slice(canvasStart, canvasEnd)), 'eefab2c82f9725e7668d835b67ff679499bf2e8748a293106f541a9167dcdfee', 'reviewed printable document and template bindings must remain unchanged');

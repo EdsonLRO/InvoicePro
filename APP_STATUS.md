@@ -1,5 +1,13 @@
 # Tallyo current status
 
+## Google and Apple sign-in — repository candidate, not active
+
+Google and Apple sign-in is implemented as a fail-closed Supabase Auth candidate on `codex/google-apple-sign-in`. App build `2026.10.11.3` keeps both providers disabled in checked-in configuration, hides their controls while disabled and rejects any enabled build unless the separate public-release approval gate is also present. No provider application, credential, redirect setting, Supabase production setting, privacy publication or real-account OAuth test has been changed or performed.
+
+When separately activated, signed-out users can continue with Google or Apple through Supabase-hosted OAuth. Only those exact providers are accepted, the return URL is constrained to the current secure Tallyo app path, verified-email identities use Supabase identity linking, and every callback still passes through the existing MFA and session routing. A new social-only account must set one backup password before Tallyo loads business data because the current sensitive reauthentication, recovery and global-sign-out controls depend on password capability. Provider tokens and secrets are not stored in browser configuration or application logs.
+
+The complete 52-test Node security/application suite, the 26-route-plus-404 website suite, four Deno runtime suites, all 21 frozen-lock Edge Function checks, Growth Studio verification and deployment dry-run pass. Production activation remains an Owner-controlled high-risk release requiring provider configuration, privacy/vendor review, a protected real-account acceptance test, exact flag approval and rollback verification. Apple web OAuth also requires a scheduled client-secret rotation at least every six months.
+
 ## Growth Studio — native Owner workspace released 2026-10-11
 
 Growth Studio is implemented directly inside the authenticated Tallyo app as an Owner-only route. It appears below Owner Console in desktop and mobile navigation and opens inside the existing application shell; there is no user-facing link to a separate studio. The workspace provides public-business discovery, content drafting and approval, calendar planning, audience segments, illustrative analytics, approved brand assets, automation status and channel guardrails.
