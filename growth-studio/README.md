@@ -30,11 +30,14 @@ npm run deploy
 
 The build uses `runtime/discovery.json` when the scheduled Discovery Agent has produced a current validated snapshot, otherwise it falls back to `src/discovery.json`. Browser planning state remains local to the browser in this release; no social credentials or customer data are stored by the Worker.
 
+The weekday production refresh runs from a dedicated detached worktree at the exact `origin/main` commit. `npm run deploy:scheduled` refuses to deploy with tracked changes, a non-production commit, an invalid feed, duplicate candidate IDs, unknown fields, non-HTTPS evidence, or an empty candidate list. This keeps research data refreshes independent from in-progress source branches and prevents personal contact fields from entering the production asset bundle.
+
 ## Architecture
 
 - `src/` contains a dependency-free HTML/CSS/JavaScript application.
 - `scripts/build.mjs` creates a static `dist/` directory and copies only approved Tallyo assets from the main website.
 - `runtime/discovery.json` is ignored local data maintained by the scheduled Discovery Agent.
+- `scripts/validate-runtime.mjs` enforces the clean-production-checkout and discovery-data boundary before any scheduled deployment.
 - `wrangler.jsonc` disables public Worker and preview hostnames, records the Access-protected custom domain, and packages only the built static assets.
 - `tests/` enforces the draft-only channel capabilities, public-source discovery boundary, content guardrails, CSP, and build output.
 
