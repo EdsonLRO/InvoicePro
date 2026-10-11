@@ -71,6 +71,11 @@ const customerIncomeMethodsStart = protectedMethods.indexOf('            custome
 const customerIncomeMethodsEnd = protectedMethods.indexOf('            overviewTime(ts)', customerIncomeMethodsStart);
 assert.ok(customerIncomeMethodsStart >= 0 && customerIncomeMethodsEnd > customerIncomeMethodsStart, 'reviewed customer income presentation methods must remain bounded');
 protectedMethods = protectedMethods.slice(0, customerIncomeMethodsStart) + protectedMethods.slice(customerIncomeMethodsEnd);
+protectedMethods = protectedMethods.replace(/\r?\n\s*if \(this\.ownerConsole\.available(?: && this\.growthStudioReady)?\) await this\.loadGrowthDiscovery\(\);/, '');
+const growthStudioMethodsStart = protectedMethods.indexOf('            growthSetSection(section)');
+const growthStudioMethodsEnd = protectedMethods.indexOf('            ownerRecoveryStatusLabel(status)', growthStudioMethodsStart);
+assert.ok(growthStudioMethodsStart >= 0 && growthStudioMethodsEnd > growthStudioMethodsStart, 'native Growth Studio methods must remain bounded');
+protectedMethods = protectedMethods.slice(0, growthStudioMethodsStart) + protectedMethods.slice(growthStudioMethodsEnd);
 protectedMethods = protectedMethods.replace(/\r?\n\s*window\.(addEventListener|removeEventListener)\('popstate', this\.handlePopState\);/g, '');
 assert.equal(hash(protectedMethods), '2395c29d83d9eba6ad88747bac57b5b82f5cf2b78c3d183b18125bff78a1b342', 'all reviewed methods/startup must remain unchanged');
 const canvasStart = app.indexOf('\n', app.indexOf('<div id="invoice-canvas"'));

@@ -47,5 +47,11 @@ const html = await readFile(path.join(destination, "index.html"), "utf8");
 if (!html.includes("Tallyo Growth Studio")) throw new Error("Built document title is missing.");
 
 await writeFile(path.join(destination, "build-manifest.json"), `${JSON.stringify({ product: "Tallyo Growth Studio", mode: "draft-only", channels: ["linkedin"], generatedAt: new Date().toISOString() }, null, 2)}\n`);
+await writeFile(path.join(destination, "_headers"), `/discovery.json
+  Access-Control-Allow-Origin: https://app.tallyo.co.uk
+  Access-Control-Allow-Credentials: true
+  Cache-Control: private, no-store
+  Vary: Origin
+`);
 await writeFile(path.join(destination, ".assetsignore"), "build-manifest.json\n.assetsignore\n");
 console.log(`Built Growth Studio at ${destination}`);

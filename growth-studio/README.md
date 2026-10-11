@@ -1,6 +1,6 @@
 # Tallyo Growth Studio
 
-An owner-facing, draft-first workspace for planning Tallyo's organic social growth. The first milestone provides automated public-business discovery plus a functional LinkedIn content and audience-planning workflow using Tallyo's existing brand assets.
+An owner-facing, draft-first workspace for planning Tallyo's organic social growth. The primary interface is the native Owner-only Growth Studio route in the Tallyo app. This package builds the private discovery-feed and rollback surface used by that route.
 
 ## Safety boundary
 
@@ -19,9 +19,9 @@ npm run dev
 
 Open `http://127.0.0.1:4397`. The app uses browser local storage for demo preferences and draft changes.
 
-## Private deployment
+## Private discovery-feed deployment
 
-The production build is deployed as a Cloudflare Worker with Static Assets. `workers_dev` and preview URLs are disabled so a deployment has no public Worker hostname. The only configured route is `https://growth.tallyo.co.uk/`, protected by a Cloudflare Access self-hosted application and an exact-email Owner allow policy created before the custom domain was attached.
+The production build is deployed as a Cloudflare Worker with Static Assets. `workers_dev` and preview URLs are disabled so a deployment has no public Worker hostname. The only configured route is `https://growth.tallyo.co.uk/`, protected by a Cloudflare Access self-hosted application and an exact-email Owner allow policy. The Tallyo app reads only `/discovery.json`, whose CORS policy permits the exact `https://app.tallyo.co.uk` origin with credentials. Owners use the native app route; the standalone build is retained for feed operations and rollback.
 
 ```powershell
 npm run deploy:dry-run

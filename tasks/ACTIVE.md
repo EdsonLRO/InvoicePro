@@ -922,16 +922,16 @@ The Owner approved and completed a second synthetic GBP 8 monthly sandbox subscr
 
 ## GROWTH-003 — Draft-first Tallyo Growth Studio foundation
 
-Status: foundation merged in PR #211; private Worker deployment and the Owner Dashboard link merged in PR #212 and are active at `growth.tallyo.co.uk` on Worker version `b55c4912-e319-4f0c-81f7-26b99ded2232`. The authenticated Owner completed the first Cloudflare Access sign-in. Guarded weekday production refresh is in implementation on `codex/growth-studio-production-refresh`.
+Status: foundation merged in PR #211; private Worker deployment and the original dashboard link merged in PR #212; guarded refresh validation merged in PR #213. The current objective replaces the separate-link experience with an Owner-only native Tallyo route while retaining the Access-protected Worker as a restricted discovery feed and rollback surface.
 
-Objective: build a separate owner-facing visual workspace for Tallyo's organic social planning, with automated public-business discovery, a draft-first LinkedIn workflow, and an extensible channel model for Facebook and X.
+Objective: operate an owner-facing visual workspace inside the Tallyo app for organic social planning, with automated public-business discovery, a draft-first LinkedIn workflow, and an extensible channel model for Facebook and X.
 
 Implementation lock acquired 2026-10-11:
 
 - `growth-studio/**`;
 - `.github/workflows/security-checks.yml` for repeatable install, build, test and Wrangler dry-run validation;
 - existing approved assets under `website/public/assets/` are read-only source inputs;
-- `index.html` and `tests/owner-console-harness.cjs` for the Owner-gated dashboard link;
+- `index.html`, `growth-studio-app.js`, `service-worker.js` and focused harnesses for the Owner-gated native route;
 - `APP_STATUS.md`, `ROADMAP.md`, `DECISIONS.md` and `tasks/ACTIVE.md` only for authoritative state changes.
 
 Production-refresh scope added 2026-10-11:
@@ -954,4 +954,4 @@ Legal/privacy disposition: approved with conditions. This milestone stores no so
 
 Owner actions reserved: approve any social developer application; provide credentials privately; approve privacy/legal changes for live processing; approve any public post, paid spend or real-customer communication. The Owner approved the exact private Cloudflare deployment and exact-email Access policy on 2026-10-11.
 
-Private-release evidence: `workers.dev` production and preview hostnames are disabled; only `growth.tallyo.co.uk` is attached; anonymous readback returns the Access HTTP 302 boundary; the dashboard link is rendered only when `ownerConsole.available` is true. Focused build/tests, Wrangler dry-run, owner-console security harness, diff review and repository checks must pass before the link release merges.
+Private-release evidence: `workers.dev` production and preview hostnames are disabled; only `growth.tallyo.co.uk` is attached; anonymous readback returns the Access HTTP 302 boundary. The native app route is listed and rendered only when `ownerConsole.available` is true, and no dashboard link opens the standalone Worker. Focused build/tests, Wrangler dry-run, owner-console security harness, diff review and repository checks must pass before release.

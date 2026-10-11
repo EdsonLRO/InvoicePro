@@ -8,7 +8,7 @@
          connections may load from, limiting the impact of any injected content.
          MUST stay on one line (newlines in a meta CSP can drop directives).
          'unsafe-eval' is required because Vue compiles templates in the browser. -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net; frame-src https://challenges.cloudflare.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://growth.tallyo.co.uk; frame-src https://challenges.cloudflare.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
 
     <title>Tallyo</title>
 
@@ -1298,7 +1298,7 @@
                         <button v-for="item in group.items" :key="item.label" @click="overviewNavigate(item)" :aria-current="overviewNavCurrent(item) ? 'page' : null" class="primary-navigation-item"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon(item.icon)"/></svg>{{ item.label }}</button>
                     </div>
                     <button v-if="ownerConsole.available" @click="navigateTo('owner')" :aria-current="activeTab === 'owner' ? 'page' : null" class="primary-navigation-item">Owner Console</button>
-                    <a v-if="ownerConsole.available" href="https://growth.tallyo.co.uk/" target="_blank" rel="noopener" class="primary-navigation-item">Growth Studio <span aria-hidden="true">↗</span></a>
+                    <button v-if="ownerConsole.available && growthStudioReady" @click="navigateTo('growth')" :aria-current="activeTab === 'growth' ? 'page' : null" class="primary-navigation-item">Growth Studio</button>
                 </nav>
                 <div class="shell-help"><button ref="helpPanelTrigger" type="button" @click.stop="openHelpPanel" class="primary-navigation-item"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('help')"/></svg>Help &amp; support</button></div>
             </aside>
@@ -1336,7 +1336,7 @@
                         <button v-for="item in group.items" :key="item.label" @click="overviewNavigate(item); closeOverviewMenu()" class="primary-navigation-item">{{ item.label }}</button>
                     </div>
                     <button v-if="ownerConsole.available" @click="navigateTo('owner'); closeOverviewMenu()" class="primary-navigation-item">Owner Console</button>
-                    <a v-if="ownerConsole.available" href="https://growth.tallyo.co.uk/" target="_blank" rel="noopener" class="primary-navigation-item">Growth Studio <span aria-hidden="true">↗</span></a>
+                    <button v-if="ownerConsole.available && growthStudioReady" @click="navigateTo('growth'); closeOverviewMenu()" class="primary-navigation-item">Growth Studio</button>
                     <button @click="closeOverviewMenu(); openHelpPanel()" class="primary-navigation-item">Help &amp; support</button>
                 </template>
             </section>
@@ -1738,6 +1738,97 @@
                     </div>
                 </template>
             </div>
+
+            <section v-show="activeTab === 'growth' && ownerConsole.available && growthStudioReady" class="max-w-7xl mx-auto space-y-6" aria-labelledby="growth-studio-title">
+                <div class="rounded-2xl bg-slate-950 px-5 py-6 sm:px-8 sm:py-8 text-white overflow-hidden">
+                    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+                        <div class="max-w-3xl">
+                            <div class="flex flex-wrap items-center gap-2 mb-3">
+                                <span class="text-xs font-bold uppercase tracking-widest text-indigo-300">Owner workspace</span>
+                                <span class="rounded-full border border-amber-300/40 bg-amber-300/10 px-2.5 py-1 text-xs font-semibold text-amber-200">Draft-first · LinkedIn</span>
+                            </div>
+                            <h2 id="growth-studio-title" class="text-3xl sm:text-4xl font-semibold tracking-tight">Tallyo Growth Studio</h2>
+                            <p class="mt-3 max-w-2xl text-sm sm:text-base text-slate-300">Research public business signals, turn them into useful content, and manage Tallyo's organic growth plan without leaving the Owner dashboard.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button type="button" @click="loadGrowthDiscovery(true)" :disabled="growthDiscoveryLoading" class="rounded-lg border border-slate-600 px-4 py-2.5 text-sm font-semibold hover:bg-slate-800 disabled:opacity-50">{{ growthDiscoveryLoading ? 'Refreshing…' : 'Refresh research' }}</button>
+                            <button type="button" @click="growthGenerateDraft" class="rounded-lg bg-indigo-500 px-4 py-2.5 text-sm font-semibold hover:bg-indigo-400">Create draft</button>
+                        </div>
+                    </div>
+                </div>
+
+                <nav class="flex gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-white p-2 shadow-sm" aria-label="Growth Studio sections">
+                    <button v-for="section in growthStudioConfig.sections" :key="section.id" type="button" @click="growthSetSection(section.id)" :aria-current="growthStudio.section === section.id ? 'page' : null" :class="growthStudio.section === section.id ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'" class="whitespace-nowrap rounded-lg px-3.5 py-2 text-sm font-semibold transition">{{ section.label }}</button>
+                </nav>
+
+                <p v-if="growthStudioNotice" class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">{{ growthStudioNotice }}</p>
+                <p v-if="growthDiscoveryError" class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900" role="alert">Live research is temporarily unavailable. Tallyo is showing the approved built-in snapshot. {{ growthDiscoveryError }}</p>
+
+                <div v-show="growthStudio.section === 'overview'" class="space-y-6">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wider text-slate-500">Active prospects</p><p class="mt-2 text-3xl font-semibold text-slate-900">{{ growthCandidates.length }}</p><p class="mt-1 text-xs text-slate-500">Public businesses only</p></article>
+                        <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wider text-slate-500">High fit</p><p class="mt-2 text-3xl font-semibold text-slate-900">{{ growthHighFitCount }}</p><p class="mt-1 text-xs text-slate-500">Score of 90 or more</p></article>
+                        <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wider text-slate-500">In review</p><p class="mt-2 text-3xl font-semibold text-slate-900">{{ growthStatusCount('In review') }}</p><p class="mt-1 text-xs text-slate-500">Awaiting owner decision</p></article>
+                        <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wider text-slate-500">Approved</p><p class="mt-2 text-3xl font-semibold text-slate-900">{{ growthStatusCount('Approved') }}</p><p class="mt-1 text-xs text-slate-500">Ready to publish manually</p></article>
+                    </div>
+                    <div class="grid lg:grid-cols-3 gap-6">
+                        <article class="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+                            <div class="flex items-center justify-between gap-4 mb-5"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Next actions</p><h3 class="text-xl font-semibold">Owner review queue</h3></div><button type="button" @click="growthSetSection('content')" class="text-sm font-semibold text-indigo-700 hover:text-indigo-900">Open studio →</button></div>
+                            <div class="space-y-3">
+                                <button v-for="post in growthStudio.posts.slice(0, 4)" :key="post.id" type="button" @click="growthStudio.selectedPostId = post.id; growthSetSection('content')" class="w-full rounded-lg border border-slate-200 p-4 text-left hover:border-indigo-300 hover:bg-indigo-50/40 transition">
+                                    <div class="flex items-start justify-between gap-4"><div><p class="font-semibold text-slate-900">{{ post.title }}</p><p class="mt-1 text-sm text-slate-500">{{ growthSegmentFor(post.segmentId).name }} · {{ post.scheduledFor }}</p></div><span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">{{ post.status }}</span></div>
+                                </button>
+                            </div>
+                        </article>
+                        <aside class="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm">
+                            <p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Research status</p><h3 class="mt-1 text-xl font-semibold">Public-business Discovery</h3>
+                            <p class="mt-3 text-sm text-slate-600">{{ growthDiscovery.searchSummary }}</p>
+                            <dl class="mt-5 space-y-3 text-sm"><div><dt class="font-semibold text-slate-800">Last refresh</dt><dd class="text-slate-500">{{ growthFormatResearchTime() }}</dd></div><div><dt class="font-semibold text-slate-800">Evidence policy</dt><dd class="text-slate-500">{{ growthDiscovery.sourcePolicy }}</dd></div></dl>
+                            <button type="button" @click="growthSetSection('discover')" class="mt-5 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800">Review candidates</button>
+                        </aside>
+                    </div>
+                </div>
+
+                <div v-show="growthStudio.section === 'discover'" class="space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Discover</p><h3 class="text-2xl font-semibold text-slate-900">Businesses showing Tallyo-fit signals</h3><p class="mt-1 text-sm text-slate-600">Evidence comes from public business websites. No people scraping, private contact collection, or automated outreach.</p></div><div class="flex rounded-lg border border-slate-200 bg-white p-1"><button v-for="filter in [{id:'all',label:'All'},{id:'high-fit',label:'High fit'},{id:'saved',label:'Saved'}]" :key="filter.id" type="button" @click="growthStudio.discoveryFilter = filter.id; saveGrowthStudio()" :class="growthStudio.discoveryFilter === filter.id ? 'bg-slate-900 text-white' : 'text-slate-600'" class="rounded-md px-3 py-2 text-sm font-semibold">{{ filter.label }}</button></div></div>
+                    <p v-if="growthDiscoveryLoading" class="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500">Refreshing the approved discovery feed…</p>
+                    <p v-else-if="!growthFilteredCandidates.length" class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">No businesses match this view yet.</p>
+                    <div v-else class="grid xl:grid-cols-2 gap-4">
+                        <article v-for="candidate in growthFilteredCandidates" :key="candidate.id" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                            <div class="flex items-start justify-between gap-4"><div><div class="flex flex-wrap items-center gap-2"><h4 class="text-lg font-semibold text-slate-900">{{ candidate.company }}</h4><span class="rounded-full bg-indigo-50 px-2 py-1 text-xs font-bold text-indigo-700">{{ candidate.fitScore }} fit</span><span class="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">{{ candidate.confidence }}</span></div><p class="mt-1 text-sm text-slate-500">{{ candidate.sector }} · {{ candidate.location }}</p></div><button type="button" @click="growthToggleSave(candidate.id)" class="text-sm font-semibold text-indigo-700">{{ growthStudio.savedCandidateIds.includes(candidate.id) ? 'Saved ✓' : 'Save' }}</button></div>
+                            <div class="mt-4 rounded-lg bg-slate-50 p-4"><p class="text-xs font-bold uppercase tracking-wider text-slate-500">Public signal</p><p class="mt-1 text-sm text-slate-700">{{ candidate.signal }}</p></div>
+                            <p class="mt-4 text-sm text-slate-700"><strong>Why it fits:</strong> {{ candidate.fitReason }}</p><p class="mt-2 text-sm text-slate-700"><strong>Useful angle:</strong> {{ candidate.contentAngle }}</p>
+                            <div class="mt-5 flex flex-wrap items-center gap-3"><button type="button" @click="growthDraftFromCandidate(candidate)" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700">Create useful draft</button><a :href="candidate.sourceUrl" target="_blank" rel="noopener" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Review evidence ↗</a><button type="button" @click="growthDismiss(candidate.id)" class="ml-auto text-sm font-medium text-slate-500 hover:text-red-700">Dismiss</button></div>
+                        </article>
+                    </div>
+                </div>
+
+                <div v-show="growthStudio.section === 'content'" class="grid xl:grid-cols-[320px_minmax(0,1fr)] gap-6">
+                    <aside class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div class="flex items-center justify-between gap-3 mb-4"><h3 class="font-semibold text-slate-900">Content queue</h3><button type="button" @click="growthGenerateDraft" class="text-sm font-semibold text-indigo-700">＋ Draft</button></div>
+                        <div class="space-y-2"><button v-for="post in growthStudio.posts" :key="post.id" type="button" @click="growthStudio.selectedPostId = post.id; saveGrowthStudio()" :class="growthStudio.selectedPostId === post.id ? 'border-indigo-400 bg-indigo-50' : 'border-slate-200'" class="w-full rounded-lg border p-3 text-left"><p class="font-semibold text-sm text-slate-900">{{ post.title }}</p><p class="mt-1 text-xs text-slate-500">{{ post.status }} · {{ post.scheduledFor }}</p></button></div>
+                    </aside>
+                    <article v-if="growthSelectedPost" class="rounded-xl border border-slate-200 bg-white p-5 sm:p-7 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Content Studio</p><h3 class="text-2xl font-semibold text-slate-900">Edit LinkedIn draft</h3></div><span class="self-start rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">{{ growthSelectedPost.status }}</span></div>
+                        <div class="mt-6 grid md:grid-cols-2 gap-4"><label class="text-sm font-semibold text-slate-700">Audience<select v-model="growthSelectedPost.segmentId" @change="growthUpdateSelectedPost" class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal"><option v-for="segment in growthStudioConfig.audienceSegments" :key="segment.id" :value="segment.id">{{ segment.name }}</option></select></label><label class="text-sm font-semibold text-slate-700">Brand visual<select v-model="growthSelectedPost.assetId" @change="growthUpdateSelectedPost" class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal"><option v-for="asset in growthStudioConfig.brandAssets" :key="asset.id" :value="asset.id">{{ asset.label }}</option></select></label></div>
+                        <div class="mt-5 grid lg:grid-cols-[minmax(0,1fr)_280px] gap-5"><div><label class="block text-sm font-semibold text-slate-700">Post copy<textarea v-model="growthSelectedPost.caption" rows="13" class="mt-2 w-full rounded-lg border border-slate-300 p-3 text-sm leading-6 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></label><label class="mt-4 block text-sm font-semibold text-slate-700">Image description<input v-model="growthSelectedPost.alt" class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal"></label></div><figure class="rounded-xl border border-slate-200 bg-slate-50 p-3"><img :src="growthAssetUrl(growthSelectedPost.assetId)" :alt="growthSelectedPost.alt" class="w-full rounded-lg border border-slate-200 bg-white"><figcaption class="mt-3 text-xs text-slate-500">{{ growthSelectedAsset.label }} · {{ growthSelectedAsset.tone }} tone</figcaption></figure></div>
+                        <div class="mt-6 flex flex-wrap gap-3"><button type="button" @click="growthUpdateSelectedPost" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Save changes</button><button type="button" @click="growthApprovePost" class="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">{{ growthSelectedPost.status === 'Approved' ? 'Return to review' : 'Approve for manual publishing' }}</button></div>
+                        <p class="mt-4 text-xs text-slate-500">Growth Studio does not publish, message, connect, or react on LinkedIn. Approval records your decision in this browser only.</p>
+                    </article>
+                </div>
+
+                <div v-show="growthStudio.section === 'calendar'" class="rounded-xl border border-slate-200 bg-white p-5 sm:p-7 shadow-sm"><div class="flex items-center justify-between gap-4 mb-6"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Calendar</p><h3 class="text-2xl font-semibold">Publishing plan</h3></div><span class="text-sm text-slate-500">Europe/London</span></div><div class="space-y-3"><article v-for="post in growthStudio.posts" :key="post.id" class="grid sm:grid-cols-[150px_minmax(0,1fr)_120px] gap-3 items-center rounded-lg border border-slate-200 p-4"><input v-model="post.scheduledFor" @change="saveGrowthStudio('Publishing plan updated.')" aria-label="Planned publishing time" class="rounded-md border border-slate-300 px-2 py-2 text-sm"><div><p class="font-semibold text-slate-900">{{ post.title }}</p><p class="text-sm text-slate-500">{{ growthSegmentFor(post.segmentId).name }}</p></div><span class="justify-self-start sm:justify-self-end rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold">{{ post.status }}</span></article></div><p class="mt-5 text-sm text-slate-500">These are planning times, not an automated publishing schedule.</p></div>
+
+                <div v-show="growthStudio.section === 'audience'" class="space-y-5"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Audience</p><h3 class="text-2xl font-semibold">Who Tallyo can help</h3><p class="mt-1 text-sm text-slate-600">Use segments and problems—not lists of personal profiles—to shape useful organic content.</p></div><div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"><article v-for="segment in growthStudioConfig.audienceSegments" :key="segment.id" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-xs font-bold uppercase tracking-wider text-slate-500">{{ segment.market }}</p><h4 class="mt-2 text-lg font-semibold">{{ segment.name }}</h4><p class="mt-2 text-sm text-slate-600">{{ segment.fit }}</p><ul class="mt-4 space-y-2 text-sm text-slate-700"><li v-for="angle in segment.angles" :key="angle">• {{ angle }}</li></ul></article></div></div>
+
+                <div v-show="growthStudio.section === 'analytics'" class="space-y-5"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Analytics</p><h3 class="text-2xl font-semibold">Performance workspace</h3></div><div class="grid sm:grid-cols-3 gap-4"><article v-for="metric in [{label:'Profile views',value:growthStudio.metrics.profileViews},{label:'Follower growth',value:'+' + growthStudio.metrics.followerGrowth},{label:'Engagement rate',value:growthStudio.metrics.engagementRate + '%'}]" :key="metric.label" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm text-slate-500">{{ metric.label }}</p><p class="mt-2 text-3xl font-semibold">{{ metric.value }}</p></article></div><div class="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900"><strong>Demo planning data.</strong> Live LinkedIn analytics are not connected. These figures stay clearly labelled until Tallyo receives approved analytics access.</div></div>
+
+                <div v-show="growthStudio.section === 'brand'" class="space-y-5"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Brand Library</p><h3 class="text-2xl font-semibold">Approved Tallyo campaign visuals</h3><p class="mt-1 text-sm text-slate-600">Original Tallyo artwork and visual direction, ready to pair with reviewed copy.</p></div><div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4"><figure v-for="asset in growthStudioConfig.brandAssets" :key="asset.id" class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"><img :src="growthAssetUrl(asset.id)" :alt="asset.alt" class="w-full rounded-lg border border-slate-100"><figcaption class="px-2 pb-2 pt-4"><p class="font-semibold text-slate-900">{{ asset.label }}</p><p class="mt-1 text-sm text-slate-500">{{ asset.tone }} tone</p></figcaption></figure></div></div>
+
+                <div v-show="growthStudio.section === 'automations'" class="space-y-5"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Automations</p><h3 class="text-2xl font-semibold">Controlled growth workflows</h3><p class="mt-1 text-sm text-slate-600">Research can refresh the workspace. Account actions remain off until supported by approved APIs and an owner decision.</p></div><div class="space-y-3"><article v-for="automation in growthStudio.automations" :key="automation.id" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div><div class="flex flex-wrap items-center gap-2"><h4 class="font-semibold text-slate-900">{{ automation.name }}</h4><span :class="automation.enabled ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'" class="rounded-full px-2.5 py-1 text-xs font-bold">{{ automation.enabled ? 'Enabled' : 'Off' }}</span></div><p class="mt-1 text-sm text-slate-600">{{ automation.mode }}</p><p class="mt-1 text-xs text-slate-500">{{ automation.cadence }}</p></div><button v-if="automation.id !== 'research'" type="button" @click="growthToggleAutomation(automation)" class="self-start rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">{{ automation.enabled ? 'Pause' : 'Enable' }}</button><span v-else class="text-xs font-semibold text-slate-500">Managed research feed</span></article></div></div>
+
+                <div v-show="growthStudio.section === 'settings'" class="grid lg:grid-cols-2 gap-6"><article class="rounded-xl border border-slate-200 bg-white p-5 sm:p-7 shadow-sm"><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Channel policy</p><h3 class="mt-1 text-xl font-semibold">LinkedIn · draft-first</h3><ul class="mt-5 space-y-3 text-sm text-slate-700"><li>✓ Generate and edit owner-review drafts</li><li>✓ Use approved Tallyo campaign visuals</li><li>✓ Research public business websites</li><li>— Publishing and account analytics are not connected</li><li>— People search, messages, connection requests, and reactions are disabled</li></ul></article><article class="rounded-xl border border-slate-200 bg-white p-5 sm:p-7 shadow-sm"><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Content guardrails</p><h3 class="mt-1 text-xl font-semibold">Every draft must stay useful and accurate</h3><ul class="mt-5 space-y-3 text-sm text-slate-700"><li v-for="guardrail in growthStudioConfig.claimGuardrails" :key="guardrail">• {{ guardrail }}</li></ul><p class="mt-5 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">Facebook and X can be added later behind separate channel permissions without changing the Owner workspace structure.</p></article></div>
+            </section>
 
             <div v-if="sessionConfirm.visible" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4">
                 <div class="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md p-6">
@@ -3654,6 +3745,7 @@
     </section>
 </div>
 
+<script src="./growth-studio-app.js"></script>
 <script src="./app-help-install.js"></script>
 <script>
     // =========================================================================
@@ -3729,7 +3821,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.10.06.1';
+    const APP_BUILD = '2026.10.11.1';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -3820,6 +3912,12 @@
                     error: '',
                     notice: ''
                 },
+                growthStudioReady: Boolean(window.TallyoGrowthStudio),
+                growthStudio: window.TallyoGrowthStudio ? window.TallyoGrowthStudio.loadState() : { section: 'overview', selectedPostId: '', discoveryFilter: 'all', dismissedCandidateIds: [], savedCandidateIds: [], metrics: { profileViews: 0, followerGrowth: 0, engagementRate: 0 }, posts: [], automations: [] },
+                growthDiscovery: window.TallyoGrowthStudio ? JSON.parse(JSON.stringify(window.TallyoGrowthStudio.emptyDiscovery)) : { schemaVersion: 1, generatedAt: null, sourcePolicy: 'Public business websites only', searchSummary: 'Growth Studio is unavailable.', candidates: [] },
+                growthDiscoveryLoading: false,
+                growthDiscoveryError: '',
+                growthStudioNotice: '',
 
                 // App State
                 activeTab: 'dashboard',
@@ -4197,7 +4295,32 @@
                 ];
             },
             overviewPageTitle() {
-                return { dashboard: 'Overview', finances: 'Finances', invoices: 'Invoices', create: 'Create document', edit: 'Edit document', customers: 'Customers', items: 'Products & services', recurring: 'Recurring', settings: 'Business settings', branding: 'Branding', account: 'Account', owner: 'Owner Console' }[this.activeTab] || 'Tallyo';
+                return { dashboard: 'Overview', finances: 'Finances', invoices: 'Invoices', create: 'Create document', edit: 'Edit document', customers: 'Customers', items: 'Products & services', recurring: 'Recurring', settings: 'Business settings', branding: 'Branding', account: 'Account', owner: 'Owner Console', growth: 'Growth Studio' }[this.activeTab] || 'Tallyo';
+            },
+            growthStudioConfig() {
+                return window.TallyoGrowthStudio || { sections: [], audienceSegments: [], brandAssets: [], templates: [], claimGuardrails: [] };
+            },
+            growthCandidates() {
+                const dismissed = new Set(this.growthStudio.dismissedCandidateIds || []);
+                return (this.growthDiscovery.candidates || []).filter(candidate => !dismissed.has(candidate.id));
+            },
+            growthFilteredCandidates() {
+                const saved = new Set(this.growthStudio.savedCandidateIds || []);
+                if (this.growthStudio.discoveryFilter === 'saved') return this.growthCandidates.filter(candidate => saved.has(candidate.id));
+                if (this.growthStudio.discoveryFilter === 'high-fit') return this.growthCandidates.filter(candidate => candidate.fitScore >= 90);
+                return this.growthCandidates;
+            },
+            growthHighFitCount() {
+                return this.growthCandidates.filter(candidate => candidate.fitScore >= 90).length;
+            },
+            growthSelectedPost() {
+                return this.growthStudio.posts.find(post => post.id === this.growthStudio.selectedPostId) || this.growthStudio.posts[0] || null;
+            },
+            growthSelectedAsset() {
+                return this.growthAssetFor(this.growthSelectedPost?.assetId);
+            },
+            growthSelectedSegment() {
+                return this.growthSegmentFor(this.growthSelectedPost?.segmentId);
             },
             overviewGreeting() {
                 const hour = new Date().getHours();
@@ -5151,6 +5274,7 @@
                 const tabs = ['dashboard', 'create', 'edit', 'invoices', 'customers', 'items', 'branding', 'recurring', 'settings', 'account'];
                 if (this.incomeInsightsEnabled) tabs.push('finances');
                 if (this.ownerConsole.available) tabs.push('owner');
+                if (this.ownerConsole.available && this.growthStudioReady) tabs.push('growth');
                 return tabs;
             },
             routeKeyFromHash() {
@@ -5219,6 +5343,7 @@
                 const key = routeKey || nextTab;
                 this.editorPreview = ['create-preview', 'edit-preview'].includes(key) && ['create', 'edit'].includes(nextTab);
                 if (nextTab === 'finances') this.financesView = key === 'finances-records' ? 'records' : key === 'finances-periods' ? 'periods' : key === 'finances-exports' ? 'exports' : 'overview';
+                if (nextTab === 'growth' && !this.growthDiscovery.generatedAt && !this.growthDiscoveryLoading) this.loadGrowthDiscovery();
                 if (nextTab === 'customers') {
                     const keepForm = key === 'customers-form' && this.customerView === 'form';
                     const keepDetail = key === 'customers-detail' && this.customerContext;
@@ -5659,9 +5784,124 @@
                 try {
                     const result = await this.invokeOwnerConsole('status');
                     this.ownerConsole.available = result.owner === true;
+                    if (this.ownerConsole.available && this.growthStudioReady) await this.loadGrowthDiscovery();
                 } catch (_) {
                     this.ownerConsole.available = false;
                 }
+            },
+            growthSetSection(section) {
+                if (!this.growthStudioConfig.sections.some(item => item.id === section)) return;
+                this.growthStudio.section = section;
+                this.saveGrowthStudio();
+            },
+            saveGrowthStudio(message = '') {
+                window.TallyoGrowthStudio.saveState(this.growthStudio);
+                this.growthStudioNotice = message;
+                if (message) window.setTimeout(() => { if (this.growthStudioNotice === message) this.growthStudioNotice = ''; }, 3500);
+            },
+            async loadGrowthDiscovery(showFeedback = false) {
+                if (!this.ownerConsole.available || this.growthDiscoveryLoading) return;
+                this.growthDiscoveryLoading = true;
+                this.growthDiscoveryError = '';
+                const sources = [
+                    { url: 'https://growth.tallyo.co.uk/discovery.json', options: { credentials: 'include', cache: 'no-store' } },
+                    { url: './growth-studio/src/discovery.json', options: { cache: 'no-store' } }
+                ];
+                let lastError = null;
+                for (const source of sources) {
+                    try {
+                        const response = await fetch(source.url, source.options);
+                        if (!response.ok) throw new Error(`Discovery source returned ${response.status}.`);
+                        const contentType = response.headers.get('content-type') || '';
+                        if (!contentType.toLowerCase().includes('json')) throw new Error('Discovery source did not return JSON.');
+                        this.growthDiscovery = window.TallyoGrowthStudio.normaliseDiscovery(await response.json());
+                        if (showFeedback) this.growthStudioNotice = 'Discovery list refreshed.';
+                        this.growthDiscoveryLoading = false;
+                        return;
+                    } catch (error) {
+                        lastError = error;
+                    }
+                }
+                this.growthDiscoveryError = lastError?.message || 'Discovery could not be loaded.';
+                this.growthDiscoveryLoading = false;
+            },
+            growthFormatResearchTime() {
+                if (!this.growthDiscovery.generatedAt) return 'Waiting for first research cycle';
+                const date = new Date(this.growthDiscovery.generatedAt);
+                return Number.isNaN(date.getTime()) ? 'Research time unavailable' : date.toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+            },
+            growthAssetFor(id) {
+                return this.growthStudioConfig.brandAssets.find(asset => asset.id === id) || this.growthStudioConfig.brandAssets[0];
+            },
+            growthAssetUrl(id) {
+                return `./website/public/assets/social/linkedin/${this.growthAssetFor(id).file}`;
+            },
+            growthSegmentFor(id) {
+                return this.growthStudioConfig.audienceSegments.find(segment => segment.id === id) || this.growthStudioConfig.audienceSegments[0];
+            },
+            growthStatusCount(status) {
+                return this.growthStudio.posts.filter(post => post.status === status).length;
+            },
+            growthToggleSave(candidateId) {
+                const saved = new Set(this.growthStudio.savedCandidateIds || []);
+                if (saved.has(candidateId)) saved.delete(candidateId); else saved.add(candidateId);
+                this.growthStudio.savedCandidateIds = [...saved];
+                this.saveGrowthStudio(saved.has(candidateId) ? 'Business saved for planning.' : 'Business removed from saved list.');
+            },
+            growthDismiss(candidateId) {
+                if (!this.growthStudio.dismissedCandidateIds.includes(candidateId)) this.growthStudio.dismissedCandidateIds.push(candidateId);
+                this.saveGrowthStudio('Business dismissed from this workspace.');
+            },
+            growthDraftFromCandidate(candidate) {
+                const post = {
+                    id: `post-${Date.now()}`,
+                    title: candidate.contentAngle || `A useful workflow for ${candidate.sector}`,
+                    status: 'Draft',
+                    scheduledFor: 'Unscheduled',
+                    segmentId: 'agencies',
+                    assetId: 'system',
+                    caption: `${candidate.contentAngle || candidate.fitReason}\n\n${candidate.signal}\n\nTallyo helps small service businesses keep quotes, invoices, recurring work, expenses, and income visibility in one focused workspace.\n\n#SmallBusiness #BusinessAdmin #Tallyo`,
+                    alt: this.growthAssetFor('system').alt
+                };
+                this.growthStudio.posts.unshift(post);
+                this.growthStudio.selectedPostId = post.id;
+                this.growthStudio.section = 'content';
+                this.saveGrowthStudio('Draft created from public business evidence.');
+            },
+            growthGenerateDraft() {
+                const template = this.growthStudioConfig.templates[this.growthStudio.posts.length % this.growthStudioConfig.templates.length];
+                const segment = this.growthStudioConfig.audienceSegments[this.growthStudio.posts.length % this.growthStudioConfig.audienceSegments.length];
+                const asset = this.growthAssetFor(template.assetId);
+                const post = {
+                    id: `post-${Date.now()}`,
+                    title: template.label,
+                    status: 'Draft',
+                    scheduledFor: 'Unscheduled',
+                    segmentId: segment.id,
+                    assetId: asset.id,
+                    caption: `${template.hook}\n\n${template.body}\n\n${template.cta}\n\n#SmallBusiness #Invoicing #Tallyo`,
+                    alt: asset.alt
+                };
+                this.growthStudio.posts.unshift(post);
+                this.growthStudio.selectedPostId = post.id;
+                this.growthStudio.section = 'content';
+                this.saveGrowthStudio('New owner-review draft created.');
+            },
+            growthApprovePost() {
+                if (!this.growthSelectedPost) return;
+                this.growthSelectedPost.status = this.growthSelectedPost.status === 'Approved' ? 'In review' : 'Approved';
+                this.saveGrowthStudio(this.growthSelectedPost.status === 'Approved' ? 'Draft approved for manual publishing.' : 'Draft returned to review.');
+            },
+            growthUpdateSelectedPost() {
+                if (!this.growthSelectedPost) return;
+                const asset = this.growthAssetFor(this.growthSelectedPost.assetId);
+                this.growthSelectedPost.alt = asset.alt;
+                this.saveGrowthStudio('Draft changes saved on this device.');
+            },
+            growthToggleAutomation(automation) {
+                if (automation.id === 'research') return;
+                automation.enabled = !automation.enabled;
+                this.saveGrowthStudio(`${automation.name} ${automation.enabled ? 'enabled' : 'paused'} locally.`);
             },
             ownerRecoveryStatusLabel(status) {
                 return ({

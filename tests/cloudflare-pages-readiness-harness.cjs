@@ -44,7 +44,7 @@ const build = spawnSync(process.execPath, [buildScript], { cwd: root, env: synth
 assert.equal(build.status, 0, build.stderr || build.stdout);
 assert.doesNotMatch(build.stdout, /synthetic_preview_key|public-preview\.example/, 'build output must never log public configuration values');
 
-const expectedAssets = ['_headers', '_redirects', 'analytics-app.js', 'analytics-consent.css', 'analytics-consent.mjs', 'app-help-install.js', 'app-user-messages.js', 'build-report.json', 'config.js', 'customer-csv-import.js', 'icon-192.png', 'icon-512.png', 'income-insights.js', 'income-pack-export.js', 'index.html', 'manifest.json', 'quote', 'service-worker.js', 'tailwind.css', 'tallyo-mark.png', 'tallyo-wordmark-white.png'];
+const expectedAssets = ['_headers', '_redirects', 'analytics-app.js', 'analytics-consent.css', 'analytics-consent.mjs', 'app-help-install.js', 'app-user-messages.js', 'build-report.json', 'config.js', 'customer-csv-import.js', 'growth-studio', 'growth-studio-app.js', 'icon-192.png', 'icon-512.png', 'income-insights.js', 'income-pack-export.js', 'index.html', 'manifest.json', 'quote', 'service-worker.js', 'tailwind.css', 'tallyo-mark.png', 'tallyo-wordmark-white.png', 'website'];
 assert.deepEqual(fs.readdirSync(output).sort(), expectedAssets, 'app Pages output must use a strict public-file allowlist');
 assert.deepEqual(fs.readdirSync(path.join(output, 'quote')).sort(), ['index.html', 'quote.css', 'quote.js']);
 const generatedConfig = fs.readFileSync(path.join(output, 'config.js'), 'utf8');
@@ -142,6 +142,13 @@ assert.equal(fs.readFileSync(path.join(output, '_redirects'), 'utf8').replace(/\
 
 const manifest = JSON.parse(fs.readFileSync(path.join(output, 'manifest.json'), 'utf8'));
 assert.equal(manifest.start_url, './');
+for (const nativeGrowthAsset of [
+  'growth-studio-app.js',
+  'growth-studio/src/discovery.json',
+  'website/public/assets/social/linkedin/01-free-invoice-maker.png',
+  'website/public/assets/social/linkedin/32-after-the-invoice-is-sent.png'
+]) assert.ok(fs.existsSync(path.join(output, nativeGrowthAsset)), `missing native Growth Studio asset: ${nativeGrowthAsset}`);
+assert.match(headers, /connect-src[^;]*https:\/\/growth\.tallyo\.co\.uk/, 'app CSP must allow the restricted discovery feed');
 assert.equal(manifest.scope, './');
 const worker = fs.readFileSync(path.join(output, 'service-worker.js'), 'utf8');
 for (const asset of ['./index.html', './config.js', './analytics-app.js', './analytics-consent.mjs', './analytics-consent.css', './app-help-install.js', './income-insights.js', './income-pack-export.js', './manifest.json', './tallyo-mark.png', './tallyo-wordmark-white.png']) assert.ok(worker.includes(asset), `worker shell missing ${asset}`);

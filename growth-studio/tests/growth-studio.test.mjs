@@ -113,6 +113,15 @@ test("build contains approved Tallyo brand and campaign assets", async () => {
   assert.deepEqual(manifest.channels, ["linkedin"]);
 });
 
+test("discovery feed permits only the Tallyo app origin", async () => {
+  const headers = await readFile(path.join(root, "dist", "_headers"), "utf8");
+  assert.match(headers, /^\/discovery\.json$/m);
+  assert.match(headers, /Access-Control-Allow-Origin: https:\/\/app\.tallyo\.co\.uk/);
+  assert.match(headers, /Access-Control-Allow-Credentials: true/);
+  assert.match(headers, /Cache-Control: private, no-store/);
+  assert.doesNotMatch(headers, /Access-Control-Allow-Origin:\s*\*/);
+});
+
 test("Cloudflare deployment exposes only the Access-protected custom domain", async () => {
   const config = JSON.parse(await readFile(path.join(root, "wrangler.jsonc"), "utf8"));
   assert.equal(config.workers_dev, false);
