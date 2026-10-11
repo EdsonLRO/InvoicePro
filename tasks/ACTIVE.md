@@ -922,15 +922,17 @@ The Owner approved and completed a second synthetic GBP 8 monthly sandbox subscr
 
 ## GROWTH-003 — Draft-first Tallyo Growth Studio foundation
 
-Status: automated-discovery review candidate in PR #211 on `codex/growth-studio-foundation`; focused local validation passes and the weekday research automation is active.
+Status: foundation merged in PR #211; owner-approved private deployment is active at `growth.tallyo.co.uk` on Worker version `b55c4912-e319-4f0c-81f7-26b99ded2232`, and the Owner Dashboard link release is prepared on `codex/private-growth-studio-deployment`.
 
 Objective: build a separate owner-facing visual workspace for Tallyo's organic social planning, with automated public-business discovery, a draft-first LinkedIn workflow, and an extensible channel model for Facebook and X.
 
 Implementation lock acquired 2026-10-11:
 
 - `growth-studio/**`;
+- `.github/workflows/security-checks.yml` for repeatable install, build, test and Wrangler dry-run validation;
 - existing approved assets under `website/public/assets/` are read-only source inputs;
-- `ROADMAP.md`, `DECISIONS.md` and `tasks/ACTIVE.md` only for authoritative state changes.
+- `index.html` and `tests/owner-console-harness.cjs` for the Owner-gated dashboard link;
+- `APP_STATUS.md`, `ROADMAP.md`, `DECISIONS.md` and `tasks/ACTIVE.md` only for authoritative state changes.
 
 Approved repository scope:
 
@@ -942,6 +944,6 @@ Approved repository scope:
 
 Legal/privacy disposition: approved with conditions. This milestone stores no social credentials, personal profile/contact data or outreach records; performs no LinkedIn scraping, messages, connection requests, reactions, publication, ad buying or tracking; uses public business evidence with source URLs; and limits claims to verified Tallyo product workflows. Every post retains a human approval requirement.
 
-Owner actions reserved: approve any social developer application; provide credentials privately; approve privacy/legal changes for live processing; approve production deployment; approve any public post, paid spend or real-customer communication.
+Owner actions reserved: approve any social developer application; provide credentials privately; approve privacy/legal changes for live processing; approve any public post, paid spend or real-customer communication. The Owner approved the exact private Cloudflare deployment and exact-email Access policy on 2026-10-11.
 
-Release condition: focused build/tests, browser accessibility and responsive checks, full diff review, no secret/private-data findings, and a reviewable pull request. Production publication is excluded.
+Private-release evidence: `workers.dev` production and preview hostnames are disabled; only `growth.tallyo.co.uk` is attached; anonymous readback returns the Access HTTP 302 boundary; the dashboard link is rendered only when `ownerConsole.available` is true. Focused build/tests, Wrangler dry-run, owner-console security harness, diff review and repository checks must pass before the link release merges.

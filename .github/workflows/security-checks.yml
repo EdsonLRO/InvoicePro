@@ -99,6 +99,13 @@ jobs:
         working-directory: website
         run: npm test
 
+      - name: Build and test private Growth Studio
+        working-directory: growth-studio
+        run: |
+          npm ci
+          npm run verify
+          npm run deploy:dry-run
+
       - name: Type-check Edge Functions with frozen locks
         shell: bash
         run: |

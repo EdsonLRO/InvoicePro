@@ -1,5 +1,11 @@
 # Tallyo current status
 
+## Growth Studio — private deployment released 2026-10-11
+
+The Owner approved a private deployment at `https://growth.tallyo.co.uk/`. Cloudflare Worker version `b55c4912-e319-4f0c-81f7-26b99ded2232` serves the static Growth Studio build with both the production `workers.dev` hostname and preview URLs disabled. A self-hosted Cloudflare Access application was created before the custom domain was attached; its reusable allow policy is restricted to the exact Owner mailbox. A cookie-free request returns HTTP 302 to Cloudflare Access with no-store headers, and the browser shows the named “Log in to Tallyo Growth Studio” boundary.
+
+The authenticated Tallyo Owner Dashboard exposes a Growth Studio link immediately below Owner Console in desktop and mobile navigation, using the existing `ownerConsole.available` gate. The deployed studio remains draft-only: it stores planning state in the current browser, includes the latest public-business discovery snapshot, and performs no LinkedIn scraping, personal-profile collection, outreach, publication, paid advertising or social credential handling. Future LinkedIn API publishing remains separately approval-gated.
+
 ## Income insights and Income Pack - released 2026-10-06
 
 The Owner approved exact Phase 6 candidate `2910b8d`; PR #209 merged as `f94eea755032dcc709207c3fbeb89024a634076b`. Production app deployment `ebb5a0af-5904-4150-ac2c-5a6ae778c7b1` serves build `2026.10.06.1` with cache `tallyo-shell-2026-10-06-1` and the reviewed Income insights gate enabled. The app now provides accessible customer and business Finances views, a traceable income-record ledger, optional UK income-period organisation and a local Income Pack with reconciled CSV, manifest and PDF files.

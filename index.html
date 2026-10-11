@@ -1298,6 +1298,7 @@
                         <button v-for="item in group.items" :key="item.label" @click="overviewNavigate(item)" :aria-current="overviewNavCurrent(item) ? 'page' : null" class="primary-navigation-item"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon(item.icon)"/></svg>{{ item.label }}</button>
                     </div>
                     <button v-if="ownerConsole.available" @click="navigateTo('owner')" :aria-current="activeTab === 'owner' ? 'page' : null" class="primary-navigation-item">Owner Console</button>
+                    <a v-if="ownerConsole.available" href="https://growth.tallyo.co.uk/" target="_blank" rel="noopener" class="primary-navigation-item">Growth Studio <span aria-hidden="true">↗</span></a>
                 </nav>
                 <div class="shell-help"><button ref="helpPanelTrigger" type="button" @click.stop="openHelpPanel" class="primary-navigation-item"><svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true"><path :d="overviewIcon('help')"/></svg>Help &amp; support</button></div>
             </aside>
@@ -1335,6 +1336,7 @@
                         <button v-for="item in group.items" :key="item.label" @click="overviewNavigate(item); closeOverviewMenu()" class="primary-navigation-item">{{ item.label }}</button>
                     </div>
                     <button v-if="ownerConsole.available" @click="navigateTo('owner'); closeOverviewMenu()" class="primary-navigation-item">Owner Console</button>
+                    <a v-if="ownerConsole.available" href="https://growth.tallyo.co.uk/" target="_blank" rel="noopener" class="primary-navigation-item">Growth Studio <span aria-hidden="true">↗</span></a>
                     <button @click="closeOverviewMenu(); openHelpPanel()" class="primary-navigation-item">Help &amp; support</button>
                 </template>
             </section>
