@@ -117,7 +117,7 @@ const documents = Array.from({ length: 2000 }, (_, index) => ({
     'the signed-out website link must use the validated public-site configuration');
   assert.doesNotMatch(app, /auth-scroll-shell flex-1 flex justify-center bg-slate-900/,
     'the legacy centred-card Auth shell must not return');
-  assert.match(app, /@media \(max-width: 39\.99rem\) \{[\s\S]*?\.auth-benefit-grid \{ display: none; \}/,
+  assert.match(app, /@media \(max-width: 39\.99rem\) \{[\s\S]*?\.auth-workspace-preview \{ display: none; \}/,
     'the signed-out form must remain the primary action on narrow phones');
   assert.match(app, /class="shell-bottom-nav" aria-label="Mobile navigation"/,
     'narrow layouts must retain labelled, touch-friendly navigation');
