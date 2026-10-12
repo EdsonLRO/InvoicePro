@@ -35,6 +35,9 @@ const path = require('node:path');
     await page.keyboard.press('Enter');
     assert.ok(await finances.locator('.customer-exact-values table').isVisible(), 'exact chart values are keyboard accessible');
     assert.equal(await finances.locator('.customer-position-list li').count(), 3);
+    const customerDocuments = detail.getByRole('list', { name: 'Customer documents' });
+    assert.equal(await customerDocuments.evaluate(el => el.scrollTop), 0, 'customer documents start at the first row');
+    assert.equal(await detail.locator('.customer-context-grid').evaluate(el => getComputedStyle(el).alignItems), 'start', 'customer cards size to their own content');
     await mkdir(path.join(root, 'tmp/redesign-evidence'), { recursive: true });
     for (const width of [320, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
@@ -50,6 +53,7 @@ const path = require('node:path');
         await page.locator('#main-content').evaluate(el => { el.scrollTop = 0; });
         await page.screenshot({ path: path.join(root, `tmp/redesign-evidence/step5-customer-${width}.png`) });
       }
+      if (width === 1440) await detail.locator('.customer-context-grid').screenshot({ path: path.join(root, 'tmp/redesign-evidence/step5-customer-context-1440.png') });
     }
     await detail.getByRole('button', { name: 'Edit customer', exact: true }).click();
     await customers.getByLabel('Name / Company *', { exact: true }).fill('Renamed fictional studio');
@@ -62,7 +66,14 @@ const path = require('node:path');
     assert.match(await page.locator('.editor-header').innerText(), /INV-1042/);
     await page.goBack(); await page.waitForURL('**/#customers-detail');
     await detail.getByRole('heading', { name: 'Renamed fictional studio' }).waitFor();
+    await customerDocuments.evaluate(el => { el.scrollTop = el.scrollHeight; });
+    assert.ok(await customerDocuments.evaluate(el => el.scrollTop) > 0, 'document list can be scrolled');
+    await detail.getByRole('button', { name: /INV-/ }).last().click();
+    await page.waitForURL('**/#edit');
+    await page.goBack(); await page.waitForURL('**/#customers-detail');
+    await detail.getByRole('heading', { name: 'Renamed fictional studio' }).waitFor();
     assert.equal(await detail.locator('h2').evaluate(el => el === document.activeElement), true, 'Back restores the exact customer detail');
+    assert.equal(await customerDocuments.evaluate(el => el.scrollTop), 0, 'Back restores the document list at the first row');
     await page.goto(origin + '/#customers'); await page.locator('#preview-warning').waitFor();
     await customers.locator('.customer-name').click();
     await detail.getByRole('button', { name: 'Open document editor', exact: true }).click();

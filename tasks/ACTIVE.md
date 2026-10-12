@@ -1,5 +1,20 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UI-CUSTOMERS-001 — Recent documents layout correction
+
+Task ID: UI-CUSTOMERS-001
+Title: Keep the first recent document visible and remove stretched empty card space
+Priority: Medium
+Status: Candidate complete; focused source and isolated-browser checks pass
+Phase: Repository candidate
+Owner role: Frontend / QA
+Risk level: Medium routine application UI; no sensitive domain or Owner-only boundary is triggered
+Branch: `codex/customer-recent-documents-layout`, from `origin/main` at `41ac3f0ea4e0b73a35f135382585534a50931c79`
+Scope: make customer-context cards size to their own content; restore the Recent documents list at its first row when customer detail opens or returns through browser history; advance the PWA shell marker so installed clients receive the correction; add focused source and fictional-browser regression coverage
+Security boundary: preserve customer joins, invoice snapshots, finance calculations, Auth, MFA, sessions, RLS, tenant isolation, provider integrations and all write paths
+Validation: customer source contracts, PWA update, public-app integration and Cloudflare Pages readiness pass; the isolated Chromium customer suite passes at 320, 390, 768, 1024 and 1440 px with all non-loopback traffic blocked, zero page errors, natural card height and first-row scroll restoration
+Approval boundary: branch, tests and pull request are permitted under standing autonomy. Public deployment or any unrelated production/provider change remains outside this task.
+
 ## AUTH-005 — Google and Apple sign-in
 
 Task ID: AUTH-005
