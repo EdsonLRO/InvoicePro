@@ -1,5 +1,11 @@
 # Tallyo current status
 
+## Tallyo email presentation system — production activated 2026-10-12
+
+The Owner approved and completed the staged production rollout of the source-controlled Tallyo email presentation system from merged main revision `bd2156d8be5ad7a1d864e9a1bdefc81e0cf93307`. Seven Edge Functions are active with exact source read-back: `mfa-recovery` v37, `owner-account-admin` v5, `stripe-billing-webhook` v31, `send-document-email` v62, `send-reminder-email` v44, `generate-recurring` v50 and `send-overdue-reminders` v45. Their JWT, custom automation-secret and Stripe-signature boundaries are unchanged; unauthenticated or invalid-signature probes returned HTTP 401. The billing webhook change remains presentation-only apart from the previously approved and fully tested Supabase client pin, with no payment, price, trial, subscription or entitlement behaviour changed.
+
+The reviewed confirmation, magic-link, email-change, password-reset and reauthentication templates are active in Supabase Auth and read back from the production dashboard. Custom SMTP remains enabled with sender name Tallyo through the existing Resend host; no SMTP credential, redirect allowlist, Auth session/rate-limit/provider setting or secret changed. The one approved password-reset delivery probe to `main@tallyo.co.uk` returned HTTP 400 before confirmed delivery and was not repeated; no reset link was opened. Supabase's browser preview blocks the official logo because the public asset returns `Cross-Origin-Resource-Policy: same-origin`, although the asset itself returns HTTP 200; received-email rendering therefore remains to be checked. End-to-end Auth email delivery and an independent Resend click-tracking read-back remain pending bounded acceptance. No customer communication or financial event was created.
+
 ## Google and Apple sign-in — repository candidate, not active
 
 Google and Apple sign-in is implemented as a fail-closed Supabase Auth candidate in PR #217. App build `2026.10.11.4` keeps both providers disabled in checked-in configuration, hides their controls while disabled and rejects any enabled build unless the separate public-release approval gate is also present. No provider application, credential, redirect setting, Supabase production setting, privacy publication or real-account OAuth test has been changed or performed.
