@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tallyo subscription Checkout — design reference</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page">
+    <section class="summary" aria-label="Tallyo Pro trial summary">
+      <div class="brand"><img src="../../../website/public/assets/tallyo-mark.png" alt="">Tallyo</div>
+      <div class="summary-copy">
+        <p class="eyebrow">Tallyo Pro</p>
+        <h1>Try every Tallyo feature free for 7 days.</h1>
+        <p class="lead">Create invoices and quotes, organise recurring work, follow payments and send reminders from one clear workspace.</p>
+        <div class="price"><strong>£8</strong><span>per month after your trial</span></div>
+        <ul class="summary-list">
+          <li><span class="check">✓</span>No charge today</li>
+          <li><span class="check">✓</span>Reminder 3 days before the trial ends</li>
+          <li><span class="check">✓</span>Cancel online before renewal</li>
+        </ul>
+      </div>
+      <div class="summary-note"><span class="lock">✓</span>Stripe securely handles your card details. Tallyo never stores them.</div>
+    </section>
+    <section class="payment" aria-label="Card details form preview">
+      <div class="payment-card">
+        <div class="mobile-brand"><img src="../../../website/public/assets/tallyo-mark.png" alt="">Tallyo</div>
+        <h2>Start your 7-day free trial</h2>
+        <p class="intro">Add a card to begin. You will not be charged today.</p>
+        <div class="field"><label>Email</label><div class="input">you@example.com</div></div>
+        <div class="field"><label>Card information</label><div class="input split"><span>1234 1234 1234 1234</span><span>MM / YY</span><span>CVC</span></div></div>
+        <div class="field"><label>Name on card</label><div class="input">Your name</div></div>
+        <div class="field"><label>Country or region</label><div class="input">United Kingdom</div></div>
+        <div class="trial-note"><strong>What happens next?</strong><br>Your trial lasts 7 days. Unless you cancel first, it then continues at £8 per month.</div>
+        <button class="primary">Start 7-day free trial</button>
+        <p class="legal">By continuing, you agree to Tallyo’s terms and acknowledge the privacy notice.</p>
+      </div>
+      <div class="stripe-footer">Powered by Stripe</div>
+    </section>
+  </main>
+</body>
+</html>

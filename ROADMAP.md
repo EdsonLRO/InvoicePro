@@ -2,6 +2,7 @@
 
 ## Now
 
+- Review the local Stripe-hosted branding candidate for Tallyo subscription Checkout, the Customer Portal and connected-business invoice payments. Keep Stripe attribution visible, preserve merchant identity for direct-charge invoice payments and require a separate exact approval before saving any live provider setting.
 - Operate the native Owner-only Growth Studio inside `app.tallyo.co.uk`, with the Access-protected `growth.tallyo.co.uk` Worker retained only as its discovery feed and rollback surface. Enable guarded weekday feed refreshes after production verification. Keep LinkedIn scraping, social credentials, personal profile/contact data, outreach, publishing and paid advertising outside this milestone.
 - Monitor the approved initial UK-business public release across the website, app, Auth, bounded AI Helper, Billing interface and connected-payment interface.
 - Keep preview deployments protected by the retained wildcard Cloudflare Access applications.

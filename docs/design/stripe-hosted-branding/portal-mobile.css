@@ -1,0 +1,14 @@
+@media(max-width:760px){
+  .portal-page{width:390px;height:auto;min-height:844px;padding:24px 16px}
+  .portal-header{margin-bottom:18px}
+  .portal-brand{font-size:21px}
+  .portal-brand img{width:32px;height:32px}
+  .return-link{font-size:12px}
+  .portal-hero{padding:27px 23px 22px}
+  .portal-hero h1{font-size:26px}
+  .portal-body{padding:23px}
+  .detail-grid,.portal-actions{grid-template-columns:1fr}
+  .cancel-row{display:block}
+  .cancel-button{width:100%;margin-top:17px}
+  .portal-footer{margin-top:16px}
+}

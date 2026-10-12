@@ -1,5 +1,23 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-STRIPE-BRAND-001 — Stripe-hosted Tallyo presentation
+
+Task ID: UX-STRIPE-BRAND-001
+Title: Align Stripe-hosted subscription and payment windows with the Tallyo visual system
+Priority: High
+Status: Design candidate complete; no provider value entered or saved
+Phase: Local review before any live provider action
+Owner role: Product owner
+Risk level: High because Stripe branding settings affect live customer-facing payment and subscription pages even though the candidate is presentation-only
+Branch: `codex/stripe-hosted-branding`, from `origin/main` at `c8fc332f0d1fbd2e11ed6203b541b5c87e08c6aa`
+Scope: prepare local review references for Tallyo subscription Checkout, the Tallyo Customer Portal and connected-business invoice-payment Checkout; reuse the official Tallyo mark; retain Stripe attribution; keep the connected business receiving an invoice payment primary rather than presenting Tallyo as merchant
+Security and financial boundary: no Checkout Session, subscription, payment, refund, entitlement, email, webhook, price, trial rule, payment method, Portal feature, secret or provider value may change during the design phase. Card fields are static fictional shapes and Tallyo continues to rely on Stripe-hosted collection.
+Provider inspection: the correct Tallyo account and visible Sandbox banner were verified read only. Stripe hid the branding editor with an explicit notice that the settings affect the live integration. Nothing was entered, uploaded or saved; the initially opened NEXDOMAIN account was recognised as incorrect and left unchanged before navigating to Tallyo.
+Acceptance: three separate references use accessible plain language, preserve Tallyo/subscription versus connected-business/payment responsibility, fit 1440px and 390px without clipped text or horizontal overflow, make no network request and use only the official repository Tallyo mark
+Validation: the focused source harness passes; the isolated Playwright renderer passes all three references at desktop and 390px; visual inspection confirms the official Tallyo mark, restrained app palette, readable trial disclosure and lower-left `Powered by Stripe` attribution
+Approval boundary: the local design candidate is authorised. Reading current live values, uploading imagery, entering live values and selecting **Save changes** remain separate provider steps. The final save requires exact Owner approval after screenshots and rollback values are reviewed.
+Next action: publish the branch for Owner review. After approval, inspect and record the existing live branding values, stage only the approved values, stop before **Save changes**, and request exact approval for the live provider mutation.
+
 ## UX-EMAIL-BRAND-001 — Tallyo email presentation system
 
 Task ID: UX-EMAIL-BRAND-001

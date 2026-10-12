@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Tallyo customer portal — design reference</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="portal-mobile.css">
+</head>
+<body>
+  <main class="portal-page">
+    <header class="portal-header">
+      <div class="portal-brand"><img src="../../../website/public/assets/tallyo-mark.png" alt="">Tallyo</div>
+      <span class="return-link">← Return to Tallyo</span>
+    </header>
+    <section class="portal-shell">
+      <div class="portal-hero">
+        <p class="eyebrow">Your subscription</p>
+        <h1>Manage your Tallyo plan</h1>
+        <p>View your plan, update how you pay or cancel online.</p>
+      </div>
+      <div class="portal-body">
+        <div class="plan-card">
+          <div><h2>Tallyo Pro</h2><p>Every Tallyo feature for your business.</p></div>
+          <span class="status">Active</span>
+        </div>
+        <div class="detail-grid">
+          <div class="detail"><span>Price</span><strong>£8 per month</strong></div>
+          <div class="detail"><span>Next payment</span><strong>3 November 2026</strong></div>
+          <div class="detail"><span>Card</span><strong>•••• 4242</strong></div>
+        </div>
+        <div class="portal-actions">
+          <button class="portal-action primary-action">Update payment method</button>
+          <button class="portal-action">View payment history</button>
+        </div>
+        <div class="cancel-row">
+          <div><strong>Need to stop your subscription?</strong><p>You can cancel online. Access continues until the end of the current period.</p></div>
+          <button class="cancel-button">Cancel subscription</button>
+        </div>
+      </div>
+    </section>
+    <div class="portal-footer">Powered by Stripe</div>
+  </main>
+</body>
+</html>
