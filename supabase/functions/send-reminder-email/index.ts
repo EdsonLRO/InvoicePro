@@ -4,6 +4,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 import { accountAllowsWrite, readOnlyAccountMessage } from "../_shared/account-entitlements.ts";
+import { businessEmailShell } from "../_shared/email-brand.mjs";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 
@@ -98,10 +99,14 @@ function buildEmail(inv: any, company: any, message: string, outstanding: number
     ...(paymentDetails ? ["", "Payment details:", paymentDetails] : []),
   ].join("\n");
 
-  const html = `
-    <div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.5;max-width:640px;margin:0 auto;">
-      <h1 style="font-size:22px;margin:0 0 12px;">Payment reminder</h1>
-      <p>${escapeHtml(message).replaceAll("\n", "<br>")}</p>
+  const html = businessEmailShell({
+    businessName: companyName,
+    brandColour: company?.brand_color,
+    title: `A quick reminder about invoice #${inv.number}`,
+    eyebrow: `From ${companyName}`,
+    preheader: `Invoice #${inv.number} has ${formatMoney(inv.currency || "GBP", outstanding)} left to pay.`,
+    bodyHtml: `
+      <p style="margin:0;color:#334155;font-size:15px;line-height:1.65;">${escapeHtml(message).replaceAll("\n", "<br>")}</p>
       <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:18px 0;">
         <p style="margin:0 0 6px;"><strong>Invoice:</strong> #${escapeHtml(inv.number)}</p>
         <p style="margin:0 0 6px;"><strong>Due date:</strong> ${escapeHtml(inv.due_date || "")}</p>
@@ -109,7 +114,8 @@ function buildEmail(inv: any, company: any, message: string, outstanding: number
         <p style="margin:0;"><strong>Overdue:</strong> ${escapeHtml(overdueDays)} day${overdueDays === 1 ? "" : "s"}</p>
       </div>
       ${paymentDetails ? `<h2 style="font-size:16px;margin-top:20px;">Payment details</h2><p>${escapeHtml(paymentDetails).replaceAll("\n", "<br>")}</p>` : ""}
-    </div>`;
+      <p style="margin:24px 0 0;color:#334155;">Thank you,<br><strong>${escapeHtml(companyName)}</strong></p>`,
+  });
 
   return { subject, text, html };
 }

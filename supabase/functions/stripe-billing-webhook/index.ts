@@ -2,6 +2,7 @@
 // This endpoint is separate from Tallyo's customer invoice-payment webhook.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
+import { emailActionButton, emailNotice, escapeEmailHtml, tallyoEmailShell } from "../_shared/email-brand.mjs";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") ||
   "Tallyo <invoices@mail.tallyo.co.uk>";
@@ -293,14 +294,13 @@ async function sendTrialEndingReminder(
     "",
     "Manage your subscription: https://app.tallyo.co.uk",
   ].join("\n");
-  const html = `
-    <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827;max-width:620px;margin:auto">
-      <h1 style="font-size:24px;margin:0 0 16px">Your Tallyo Pro trial ends in 3 days</h1>
-      <p>Your 7-day Tallyo Pro trial is nearly finished.</p>
-      <p>It ends on <strong>${endsAt}</strong>. Unless you cancel before it ends, your subscription will continue automatically at <strong>£8 per month</strong>.</p>
-      <p>You do not need to do anything to keep using Tallyo. To cancel or manage your subscription, sign in and open Billing.</p>
-      <p><a href="https://app.tallyo.co.uk" style="color:#4059f5;font-weight:700">Manage your subscription</a></p>
-    </div>`;
+  const html = tallyoEmailShell({
+    title: "Your Tallyo Pro trial ends in 3 days",
+    eyebrow: "Subscription reminder",
+    preheader: `Your trial ends on ${endsAt}. You can review or cancel it online.`,
+    bodyHtml: `<p style="margin:0 0 14px;color:#334155;font-size:15px;line-height:1.65;">Your 7-day Tallyo Pro trial is nearly finished.</p><p style="margin:0;color:#334155;font-size:15px;line-height:1.65;">It ends on <strong>${escapeEmailHtml(endsAt)}</strong>. Unless you cancel before it ends, your subscription will continue automatically at <strong>£8 per month</strong>.</p>${emailNotice("You do not need to do anything to keep using Tallyo. To cancel, sign in and open Billing before the trial ends.", "neutral")}${emailActionButton("Manage your subscription", "https://app.tallyo.co.uk")}`,
+    footerNote: "Tallyo Pro subscription reminder.",
+  });
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {

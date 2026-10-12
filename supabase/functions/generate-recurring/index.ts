@@ -4,6 +4,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
 import { accountAllowsWrite } from "../_shared/account-entitlements.ts";
+import { businessEmailShell } from "../_shared/email-brand.mjs";
 
 const FROM_EMAIL = Deno.env.get("FROM_EMAIL") || "Tallyo <invoices@mail.tallyo.co.uk>";
 
@@ -205,11 +206,15 @@ function buildEmail(inv: any, company: any) {
       <td style="padding:6px 0;text-align:right;font-weight:600;">${escapeHtml(prefix)}${escapeHtml(formatMoney(currency, amount))}</td>
     </tr>`).join("");
 
-  const html = `
-    <div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.5;max-width:680px;margin:0 auto;">
-      <h1 style="font-size:22px;margin:0 0 12px;">Invoice #${escapeHtml(inv.number)}</h1>
-      <p>Hi ${escapeHtml(customer.name || "there")},</p>
-      <p>Please find invoice #${escapeHtml(inv.number)} from ${escapeHtml(companyName)}.</p>
+  const html = businessEmailShell({
+    businessName: companyName,
+    brandColour: company?.brand_color,
+    title: `Invoice #${inv.number}`,
+    eyebrow: `Invoice from ${companyName}`,
+    preheader: `Invoice #${inv.number} for ${formatMoney(currency, total)} is ready.`,
+    bodyHtml: `
+      <p style="margin:0 0 12px;color:#334155;font-size:15px;line-height:1.65;">Hi ${escapeHtml(customer.name || "there")},</p>
+      <p style="margin:0 0 18px;color:#334155;font-size:15px;line-height:1.65;">Please find invoice #${escapeHtml(inv.number)} from ${escapeHtml(companyName)}.</p>
       <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:18px 0;">
         <p style="margin:0 0 6px;"><strong>Issue date:</strong> ${escapeHtml(inv.issue_date || "")}</p>
         <p style="margin:0 0 6px;"><strong>Due date:</strong> ${escapeHtml(inv.due_date || "")}</p>
@@ -240,8 +245,8 @@ function buildEmail(inv: any, company: any) {
       ${inv.notes ? `<h2 style="font-size:16px;margin-top:20px;">Notes</h2><p>${escapeHtml(inv.notes).replaceAll("\n", "<br>")}</p>` : ""}
       ${inv.terms ? `<h2 style="font-size:16px;margin-top:20px;">Terms</h2><p>${escapeHtml(inv.terms).replaceAll("\n", "<br>")}</p>` : ""}
       ${company?.payment_details ? `<h2 style="font-size:16px;margin-top:20px;">Payment details</h2><p>${escapeHtml(company.payment_details).replaceAll("\n", "<br>")}</p>` : ""}
-      <p style="margin-top:24px;">Thank you<br>${escapeHtml(companyName)}</p>
-    </div>`;
+      <p style="margin-top:24px;">Thank you<br><strong>${escapeHtml(companyName)}</strong></p>`,
+  });
 
   return { subject, text: textLines.join("\n"), html };
 }
