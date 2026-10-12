@@ -402,7 +402,7 @@ assert.match(headers, /connect-src 'none'/);
 assert.match(headers, /frame-ancestors 'none'/);
 assert.match(headers, /X-Robots-Tag: noindex, nofollow, noarchive/);
 assert.match(headers, /Cross-Origin-Resource-Policy: same-origin/, "website pages and general assets retain same-origin resource isolation");
-assert.match(headers, /\/assets\/tallyo-mark\.png\r?\n\s+Cross-Origin-Resource-Policy: cross-origin/, "the public email logo has the only cross-origin resource exception");
+assert.match(headers, /\/assets\/tallyo-mark\.png\r?\n\s+! Cross-Origin-Resource-Policy\r?\n\s+Cross-Origin-Resource-Policy: cross-origin/, "the public email logo detaches the broader policy before applying the only cross-origin resource exception");
 assert.doesNotMatch(headers, /\/assets\/\*\r?\n\s+Cross-Origin-Resource-Policy: cross-origin/, "the email-logo exception does not weaken the complete assets directory");
 assert.doesNotMatch(headers, /unsafe-inline|unsafe-eval/);
 assert.match(headers, /sha256-/);
