@@ -5,7 +5,7 @@
 Task ID: UX-EMAIL-BRAND-001
 Title: Give Tallyo-owned and business-owned emails a clear, consistent visual identity
 Priority: High
-Status: Candidate complete; awaiting Owner review, with no provider or production change
+Status: Candidate complete in PR #221; protected checks pass; awaiting Owner review, with no provider or production change
 Phase: Repository implementation and visual acceptance
 Owner role: Product owner
 Risk level: High because Auth, security, subscription and customer-document communications are affected, although delivery behaviour is unchanged
@@ -14,9 +14,9 @@ Scope: add one reusable email presentation module; apply Tallyo branding to acco
 Security boundary: presentation and plain-language layout only. Preserve recipients, subjects, plain-text alternatives, send eligibility, reminder timing, Auth/AAL/recovery behaviour, one-time recovery semantics, quote acceptance, invoice/payment links, Stripe webhook verification, subscription state, idempotency, activity history, RLS and tenant isolation; escape untrusted display data and strictly allow only six-digit hexadecimal brand colours
 Excluded: Supabase Auth template activation, Edge Function deployment, Resend/provider settings, real or test customer email, Stripe configuration, payment logic, price, trial terms, database/schema/RLS changes, secrets and public release
 Acceptance: official logo assets are used; business and Tallyo senders remain visually distinct; templates fit desktop and narrow mobile widths without horizontal overflow; Auth links use Supabase's direct template variables without tracking or rewriting; all email-sending functions and the existing marketing overview have focused regression coverage; relevant email, Auth, Billing, recurring, quote and security checks pass
-Validation: all 52 Node application/security harnesses, all four Deno runtime suites and all 21 frozen-lock Edge Function checks pass with repository-pinned Deno 2.2.15; the shared-shell coverage is part of protected CI; fictional local-only browser renders pass at 900px and 390px with official logo interception, no external request and no message delivery; diff hygiene and scoped secret-pattern checks pass. Protected pull-request checks remain pending.
+Validation: all 52 Node application/security harnesses, all four Deno runtime suites and all 21 frozen-lock Edge Function checks pass with repository-pinned Deno 2.2.15; the shared-shell coverage is part of protected CI; fictional local-only browser renders pass at 900px and 390px with official logo interception, no external request and no message delivery; diff hygiene and scoped secret-pattern checks pass. PR #221 Security and both Cloudflare Pages checks pass.
 Approval boundary: repository design work follows the Owner-approved visual direction. Stop before merge, deployment, provider-dashboard mutation, Auth-template activation or any real recipient test; those high-risk release actions require explicit Owner approval after review.
-Next action: open one review pull request with the fictional desktop/mobile evidence, then obtain separate Owner approval before merge or any live email/provider action
+Next action: obtain separate Owner approval for PR #221 before merge; deployment, Supabase Auth-template activation and any real-recipient email test remain later separately approved actions
 
 ## UX-AUTH-BRAND-001 — App-style signed-out experience
 
