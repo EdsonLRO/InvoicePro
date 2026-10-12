@@ -5,17 +5,18 @@
 Task ID: UX-AUTH-BRAND-001
 Title: Align Tallyo account access with the authenticated application
 Priority: Medium
-Status: Implementation complete; local review candidate
-Phase: Sign-in design
+Status: Candidate complete; PR #219 checks pass; awaiting Owner review and merge approval
+Phase: Sign-in design review
 Owner role: Product owner
 Risk level: Medium visual implementation at a high-risk Auth boundary; authentication behaviour is unchanged
 Branch: `codex/app-style-login`, from `origin/main` at `41ac3f027fb5339ca8f95f4c41805943d3e2678e`
 Scope: replace the generic purple signed-out presentation with the real application's navy workspace, light overview cards and calm content styling; keep the official Tallyo wordmark; preserve a prominent, readable account form; use the previously approved “your business” wording; validate desktop and narrow-phone layouts
 Security boundary: presentation and static copy only. Preserve password, Google/Apple, MFA, recovery, Turnstile, session, provider gating, Terms/Privacy links, RLS and tenant-isolation behaviour exactly; make no Supabase, Stripe, payment, email, provider, secret or production change
 Acceptance: the signed-out view resembles the authenticated Tallyo workspace; the app preview is informative without using customer data; narrow phones hide the decorative preview and prioritise account access; the page has no horizontal overflow; official logo assets and accessible structure remain intact; focused Auth, accessibility, branding, session and PWA regressions pass
-Validation: source-level brand, scale/accessibility, social-Auth and CAPTCHA checks pass; the network-blocked fictional browser acceptance renders the actual signed-out app at 1440px and 390px with no external requests or uncaught errors
+Pull request: #219; protected Security verification and both app and website Pages previews pass
+Validation: source-level brand, scale/accessibility, social-Auth, CAPTCHA, MFA recovery, session-expiry, PWA, app/public integration and complete security-workflow checks pass; the network-blocked fictional browser acceptance renders the actual signed-out app at 1440px and 390px with no external requests or uncaught errors; diff hygiene and secret-pattern checks pass
 Approval boundary: repository candidate and fictional local review only. Merge and app publication remain separate Owner decisions. No live Auth, payment, Stripe, Supabase, email or customer communication change is authorised.
-Next action: complete the relevant regression suite, inspect the final diff and open a protected pull request for Owner review
+Next action: Owner reviews PR #219 and decides whether to merge; public app publication remains separately gated
 
 ## AUTH-005 — Google and Apple sign-in
 
