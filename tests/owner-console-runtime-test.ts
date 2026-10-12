@@ -1,4 +1,9 @@
 import assert from "node:assert/strict";
+import {
+  emailActionButton,
+  emailNotice,
+  tallyoEmailShell,
+} from "../supabase/functions/_shared/email-brand.mjs";
 
 // Run the actual handler with local Auth/database/mail doubles. No network,
 // account changes or emails are permitted by this test process.
@@ -68,10 +73,15 @@ async function harness(options: {
     Deno: { env: { get: (name: string) => env[name] }, serve: (fn: typeof handler) => { handler = fn; } },
     createClient: (_url: string, key: string) => key === "server-test-key" ? admin : user,
     fetch: (_url: string, init: RequestInit) => { calls.push("email"); emails.push(JSON.parse(String(init.body))); return Promise.resolve(new Response("{}", { status: 200 })); },
+    emailActionButton,
+    emailNotice,
+    tallyoEmailShell,
   };
   const key = `__ownerTest${++moduleId}`;
   (globalThis as any)[key] = runtime;
-  const testSource = `const { Deno, createClient, fetch } = (globalThis as any)[${JSON.stringify(key)}];\n` + source.replace(/^import \{ createClient \} from .+;\r?\n/m, "");
+  const testSource = `const { Deno, createClient, fetch, emailActionButton, emailNotice, tallyoEmailShell } = (globalThis as any)[${JSON.stringify(key)}];\n` + source
+    .replace(/^import \{ createClient \} from .+;\r?\n/m, "")
+    .replace(/^import \{ emailActionButton, emailNotice, tallyoEmailShell \} from .+;\r?\n/m, "");
   await import(`data:application/typescript;base64,${btoa(testSource)}`);
   delete (globalThis as any)[key];
   return {
@@ -137,10 +147,15 @@ async function recoveryEmailHarness(appBaseUrl: string) {
       emails.push(JSON.parse(String(init.body)));
       return Promise.resolve(new Response("{}", { status: 200 }));
     },
+    emailActionButton,
+    emailNotice,
+    tallyoEmailShell,
   };
   const key = `__recoveryLinkTest${++moduleId}`;
   (globalThis as any)[key] = runtime;
-  const testSource = `const { Deno, createClient, fetch } = (globalThis as any)[${JSON.stringify(key)}];\n` + recoverySource.replace(/^import \{ createClient \} from .+;\r?\n/m, "");
+  const testSource = `const { Deno, createClient, fetch, emailActionButton, emailNotice, tallyoEmailShell } = (globalThis as any)[${JSON.stringify(key)}];\n` + recoverySource
+    .replace(/^import \{ createClient, type SupabaseClient \} from .+;\r?\n/m, "")
+    .replace(/^import \{ emailActionButton, emailNotice, tallyoEmailShell \} from .+;\r?\n/m, "");
   await import(`data:application/typescript;base64,${btoa(testSource)}`);
   delete (globalThis as any)[key];
   const response = await handler!(new Request("https://function.example.invalid", {
@@ -157,7 +172,7 @@ Deno.test("confirmation email uses the canonical app and keeps its one-time toke
     assert.equal(h.response.status, 200);
     assert.deepEqual(await h.response.json(), { sent: true });
     assert.equal(h.emails.length, 1);
-    const link = h.emails[0].html.match(/href="([^"]+)"/)[1];
+    const link = h.emails[0].html.match(/href="(https:\/\/app\.tallyo\.co\.uk\/#mfa-recovery-confirm\?token=[^"]+)"/)[1];
     const url = new URL(link);
     assert.equal(url.origin, "https://app.tallyo.co.uk");
     assert.equal(url.pathname, "/");

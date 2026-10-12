@@ -2,6 +2,7 @@
 // Raw codes are returned once to an AAL2 session and are never stored or logged.
 
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
+import { emailActionButton, emailNotice, tallyoEmailShell } from "../_shared/email-brand.mjs";
 
 const APP_ORIGINS = new Set([
   "https://edsonlro.github.io",
@@ -151,7 +152,13 @@ function securityEmail(action: "generate" | "recover" | "complete"): { subject: 
   return {
     subject: details.subject,
     text: `${details.heading}\n\n${details.message}\n\n${warning}`,
-    html: `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#1e293b;line-height:1.55"><div style="max-width:600px;margin:0 auto;padding:24px"><h1 style="font-size:22px">${details.heading}</h1><p>${details.message}</p><p style="padding:14px;background:#fff7ed;border:1px solid #fed7aa"><strong>${warning}</strong></p><p style="color:#64748b;font-size:13px">This notice never contains your password, authenticator secret, or recovery codes.</p></div></body></html>`,
+    html: tallyoEmailShell({
+      title: details.heading,
+      eyebrow: "Account security",
+      preheader: details.message,
+      bodyHtml: `<p style="margin:0;color:#334155;font-size:15px;line-height:1.65;">${details.message}</p>${emailNotice(`<strong>${warning}</strong>`, "important")}<p style="margin:0;color:#64748b;font-size:13px;line-height:1.55;">This notice never contains your password, authenticator secret or recovery codes.</p>`,
+      footerNote: "Tallyo account security notice.",
+    }),
   };
 }
 
@@ -185,7 +192,6 @@ async function sendOwnerRecoveryConfirmation(
   to: string,
   confirmationUrl: string,
 ): Promise<boolean> {
-  const safeUrl = escapeHtml(confirmationUrl);
   const message = "Confirm that you asked the Tallyo Owner to reset your lost authenticator. This link expires in 30 minutes and does not unlock the account by itself.";
   try {
     const response = await fetch("https://api.resend.com/emails", {
@@ -199,8 +205,13 @@ async function sendOwnerRecoveryConfirmation(
         to: [to],
         subject: "Confirm your Tallyo authenticator recovery request",
         text: `Confirm your recovery request\n\n${message}\n\nConfirm recovery request: ${confirmationUrl}\n\nIf you did not request this, do not open the link. Your account remains protected.`,
-        html:
-          `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#1e293b;line-height:1.55"><div style="max-width:600px;margin:0 auto;padding:24px"><h1 style="font-size:22px">Confirm your recovery request</h1><p>${message}</p><p style="margin:24px 0"><a href="${safeUrl}" style="display:inline-block;background:#4f46e5;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:700">Confirm recovery request</a></p><p style="padding:14px;background:#fff7ed;border:1px solid #fed7aa"><strong>If you did not request this, do not open the link. Your account remains protected.</strong></p></div></body></html>`,
+        html: tallyoEmailShell({
+          title: "Confirm your recovery request",
+          eyebrow: "Account security",
+          preheader: message,
+          bodyHtml: `<p style="margin:0;color:#334155;font-size:15px;line-height:1.65;">${message}</p>${emailActionButton("Confirm recovery request", confirmationUrl)}${emailNotice("<strong>If you did not request this, do not open the link. Your account remains protected.</strong>", "important")}`,
+          footerNote: "Tallyo account security notice.",
+        }),
       }),
     });
     return response.ok;

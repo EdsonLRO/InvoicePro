@@ -3,6 +3,7 @@
 // any customer, invoice, payment, or business data.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.117.2";
+import { emailActionButton, emailNotice, tallyoEmailShell } from "../_shared/email-brand.mjs";
 
 const APP_ORIGINS = new Set([
   "https://edsonlro.github.io",
@@ -175,10 +176,6 @@ async function sendEmail(
   buttonLabel: string,
   buttonUrl: string,
 ): Promise<boolean> {
-  const safeHeading = escapeHtml(heading);
-  const safeMessage = escapeHtml(message);
-  const safeLabel = escapeHtml(buttonLabel);
-  const safeUrl = escapeHtml(buttonUrl);
   try {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -192,8 +189,13 @@ async function sendEmail(
         subject,
         text:
           `${heading}\n\n${message}\n\n${buttonLabel}: ${buttonUrl}\n\nIf you did not request this, you can ignore this email and contact Tallyo support.`,
-        html:
-          `<!doctype html><html><body style="font-family:Arial,sans-serif;color:#1e293b;line-height:1.55"><div style="max-width:600px;margin:0 auto;padding:24px"><h1 style="font-size:22px">${safeHeading}</h1><p>${safeMessage}</p><p style="margin:24px 0"><a href="${safeUrl}" style="display:inline-block;background:#4f46e5;color:#fff;text-decoration:none;padding:12px 18px;border-radius:8px;font-weight:700">${safeLabel}</a></p><p style="padding:14px;background:#fff7ed;border:1px solid #fed7aa"><strong>If you did not request this, ignore this email and contact Tallyo support.</strong></p></div></body></html>`,
+        html: tallyoEmailShell({
+          title: heading,
+          eyebrow: "Tallyo account",
+          preheader: message,
+          bodyHtml: `<p style="margin:0;color:#334155;font-size:15px;line-height:1.65;">${escapeHtml(message)}</p>${emailActionButton(buttonLabel, buttonUrl)}${emailNotice("<strong>If you did not request this, ignore this email and contact Tallyo support.</strong>", "important")}`,
+          footerNote: "Tallyo account support message.",
+        }),
       }),
     });
     return response.ok;

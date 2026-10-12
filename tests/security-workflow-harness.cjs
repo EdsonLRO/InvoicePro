@@ -26,6 +26,7 @@ for (const harness of [
   'auth-captcha-harness.cjs',
   'core-lifecycle-harness.cjs',
   'dispute-lifecycle-visibility-harness.cjs',
+  'email-brand-harness.mjs',
   'email-status-accuracy-harness.cjs',
   'edge-dependency-pin-harness.cjs',
   'financial-action-audit-harness.cjs',

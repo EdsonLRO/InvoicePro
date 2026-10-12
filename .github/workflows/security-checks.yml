@@ -57,6 +57,7 @@ jobs:
           node tests/customer-item-validation-harness.cjs
           node tests/customer-csv-import-harness.cjs
           node tests/dispute-lifecycle-visibility-harness.cjs
+          node tests/email-brand-harness.mjs
           node tests/email-status-accuracy-harness.cjs
           node tests/edge-dependency-pin-harness.cjs
           node tests/financial-action-audit-harness.cjs
