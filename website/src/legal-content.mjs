@@ -1,10 +1,11 @@
-const effectiveDate = "31 July 2026";
+const privacyEffectiveDate = "12 October 2026";
+const existingLegalEffectiveDate = "31 July 2026";
 
 export const privacyNotice = `
   <section class="page-hero legal-hero">
     <p class="eyebrow">Legal</p>
     <h1>Tallyo Privacy Notice</h1>
-    <p>Effective ${effectiveDate}. This notice explains how Tallyo uses personal information.</p>
+    <p>Effective ${privacyEffectiveDate}. This notice explains how Tallyo uses personal information.</p>
   </section>
   <article class="legal-document">
     <section>
@@ -29,6 +30,7 @@ export const privacyNotice = `
       <h2>Information we use</h2>
       <h3>Account and security information</h3>
       <p>We use your email address, account identifier, email-confirmation state, sign-in and session information, optional authenticator-app MFA state, recovery events, security events and device/session controls. One-time recovery codes are shown to you, but Tallyo stores only protected hashes while they are needed.</p>
+      <p>If you choose <strong>Continue with Google</strong>, Google provides Tallyo with the basic identity information needed to sign you in: your Google account identifier, primary email address, email-verification state and basic profile details such as your name and profile image where available. Tallyo does not receive your Google password and does not request access to Gmail, Drive, contacts, calendars or other Google services.</p>
 
       <h3>Business profile and document information</h3>
       <p>A business user may enter their business name, address, contact details, tax identifier, logo, branding, payment instructions, notes and terms. They may also create customer records, saved products or services, invoices, quotes, credit notes and recurring schedules. Those records can include customer contact details, line items, dates, references, amounts, tax, discounts, notes, payment status, reminders and activity history.</p>
@@ -70,6 +72,7 @@ export const privacyNotice = `
       <p>We use providers only for genuine service purposes:</p>
       <ul>
         <li><strong>Supabase:</strong> database, authentication and server functions.</li>
+        <li><strong>Google Identity:</strong> optional Google account sign-in when you choose <strong>Continue with Google</strong>. Google receives the sign-in request and applies its own account, security and privacy controls.</li>
         <li><strong>Resend:</strong> service, document, reminder, security and separately requested one-time overview email delivery.</li>
         <li><strong>Cloudflare:</strong> website/app delivery, access protection, Turnstile, request security and the AI rate limiter.</li>
         <li><strong>Stripe:</strong> Tallyo subscription Billing, connected-account onboarding and customer payments, payment/refund/dispute processing, fraud prevention and regulatory compliance. Stripe's role depends on the activity.</li>
@@ -149,6 +152,7 @@ export const privacyNotice = `
         <li><a href="https://www.cloudflare.com/en-gb/cloudflare-customer-dpa/">Cloudflare privacy and DPA</a></li>
         <li><a href="https://openai.com/en-GB/policies/data-processing-addendum/">OpenAI privacy and DPA</a></li>
         <li><a href="https://workspace.google.com/terms/dpa_terms.html">Google Workspace data-processing terms</a></li>
+        <li><a href="https://policies.google.com/privacy">Google Privacy Policy for optional Google account sign-in</a></li>
         <li><a href="https://business.safety.google/adsprocessorterms/">Google Ads Data Processing Terms, including Google Analytics processor terms</a></li>
       </ul>
     </section>
@@ -158,7 +162,7 @@ export const cookieNotice = `
   <section class="page-hero legal-hero">
     <p class="eyebrow">Legal</p>
     <h1>Tallyo Cookie Notice</h1>
-    <p>Effective ${effectiveDate}. This notice explains the necessary and optional storage used by Tallyo.</p>
+    <p>Effective ${existingLegalEffectiveDate}. This notice explains the necessary and optional storage used by Tallyo.</p>
   </section>
   <article class="legal-document">
     <section>
@@ -209,7 +213,7 @@ export const dataProcessingTerms = `
   <section class="page-hero legal-hero">
     <p class="eyebrow">Legal</p>
     <h1>Tallyo Business-User Data Processing Terms</h1>
-    <p>Effective ${effectiveDate}. These terms form part of the Tallyo account agreement for business users.</p>
+    <p>Effective ${existingLegalEffectiveDate}. These terms form part of the Tallyo account agreement for business users.</p>
   </section>
   <article class="legal-document">
     <section>

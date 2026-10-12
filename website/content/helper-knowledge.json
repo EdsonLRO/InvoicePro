@@ -273,7 +273,7 @@
       "question": "How do I create an account?",
       "triggers": ["how do i create an account", "create account", "sign up", "register for tallyo"],
       "keywords": ["account", "signup", "register", "email confirmation"],
-      "answer": "Choose Create account on the Tallyo website, enter your details in the Tallyo app and complete the email-confirmation step.",
+      "answer": "Choose Create account on the Tallyo website. You can continue with Google, or enter your email and create a password. Email-and-password accounts complete the email-confirmation step before signing in.",
       "links": [{ "label": "Create account", "href": "app:signup" }]
     },
     {
@@ -281,7 +281,7 @@
       "question": "How do I log in?",
       "triggers": ["how do i log in", "log in to tallyo", "sign in to tallyo"],
       "keywords": ["login", "sign in", "account", "authenticator"],
-      "answer": "Choose Log in on the Tallyo website to open the app. Use your confirmed account and complete authenticator verification when you have enabled it.",
+      "answer": "Choose Log in on the Tallyo website to open the app. Continue with Google or use your confirmed email and password, then complete authenticator verification when you have enabled it.",
       "links": [{ "label": "Log in", "href": "app:login" }]
     },
     {

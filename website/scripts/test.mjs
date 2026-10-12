@@ -160,6 +160,12 @@ for (const densityHook of ["home-benefits", "home-how", "home-decision-panel", "
 }
 assert.doesNotMatch(home, /id="industries"|Use Tallyo your way|Built around real invoicing work/, "home avoids duplicate industry, installation and feature inventories");
 
+const privacy = read("privacy/index.html");
+assert.match(privacy, /Continue with Google/, "Privacy Notice explains optional Google account sign-in");
+assert.match(privacy, /does not receive your Google password/, "Privacy Notice states the Google password boundary");
+assert.match(privacy, /does not request access to Gmail, Drive, contacts, calendars or other Google services/, "Privacy Notice limits Google sign-in data access");
+assert.match(privacy, /Google Identity:<\/strong> optional Google account sign-in/, "Privacy Notice names Google Identity as a recipient");
+
 const productTour = read("product-tour/index.html");
 assert.equal((productTour.match(/class="product-demo /g) || []).length, productScenes.length, "product tour covers every supported scene");
 assert.equal((productTour.match(/class="tour-index"/g) || []).length, 1, "product tour provides one compact workflow index");
@@ -326,7 +332,6 @@ assert.match(quoteGenerator, /<title>Free quote generator for your business \| T
 const audiencePositioning = [home, read("about/index.html"), read("faq/index.html"), invoiceGuide, generator, quoteGenerator].join("\n");
 assert.doesNotMatch(audiencePositioning, /UK small[- ]business|small[- ]business(?:es)?/i, "public marketing describes Tallyo around the customer's business rather than a UK small-business segment");
 
-const privacy = read("privacy/index.html");
 const cookies = read("cookies/index.html");
 const dataProcessingTerms = read("data-processing-terms/index.html");
 const terms = read("terms/index.html");
@@ -335,7 +340,7 @@ for (const [name, html] of [["Privacy Notice", privacy], ["Data Processing Terms
   assert.match(html, /87 Coles Green Road, NW2 7JH, London, UK/, `${name} has the approved service address`);
   assert.match(html, /privacy@tallyo\.co\.uk/, `${name} has the approved privacy mailbox`);
 }
-assert.match(privacy, /Effective 31 July 2026/);
+assert.match(privacy, /Effective 12 October 2026/);
 assert.match(privacy, /main@tallyo\.co\.uk/);
 assert.match(privacy, /The public AI Helper answers questions about public Tallyo product information/);
 assert.match(privacy, /up to six recent exchanges from the same open page/);
