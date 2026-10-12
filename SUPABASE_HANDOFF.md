@@ -32,7 +32,10 @@
 
 ## 2. Auth settings
 
-- **Provider:** Supabase Auth with email + password.
+- **Providers:** Supabase Auth with email + password, plus an Owner-approved Google social-login provider. Apple source support exists but has no approved production provider configuration and remains disabled.
+- **Google production configuration (verified 2026-10-12):** the Google Cloud web client uses the exact Supabase callback URL; Supabase Google Auth is enabled with nonce checking retained and users without an email disallowed. The client secret remains masked provider configuration and must never enter source, logs, screenshots or documentation.
+- **Google application release gate:** checked-in Google and Apple flags remain false. A production build may expose Google only when `TALLYO_GOOGLE_AUTH_ENABLED=true` and `TALLYO_SOCIAL_AUTH_PUBLIC_RELEASE_APPROVED=true`; Apple must remain false until a separate release.
+- **Google data boundary:** the normal OpenID sign-in scopes provide the provider account identifier, primary email, email-verification state and basic profile fields. Tallyo does not request Gmail, Drive, contacts or calendar access and does not read or persist Google provider access/refresh tokens.
 - Passwords are hashed server-side by Supabase (bcrypt). The app never stores or sees password hashes.
 - On sign-in, Supabase issues a short-lived signed **JWT** session token held client-side; the raw password is not retained by the app.
 - **Email confirmation is required** before an account is usable (see §3).

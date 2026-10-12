@@ -10,10 +10,11 @@
 - Preserve the documented separation between Tallyo subscriptions and independent-business customer payments.
 - Monitor the released seven-day monthly-plan trial, reminder delivery and trial-to-paid/cancelled lifecycle without inspecting customer content.
 - Monitor the released Income insights and local Income Pack using public/build evidence only. Preserve the income-recorded-in-Tallyo, separate-currency and non-tax/non-HMRC boundaries.
+- Release and monitor Google sign-in through the approved production gate while preserving MFA, email/password access, recovery, RLS and the fail-closed checked-in configuration. Keep Apple disabled.
 
 ## Next
 
-- Complete the Owner-controlled Google and Apple sign-in release: create and review each provider application, keep secrets only in provider/Supabase settings, update provider/privacy records before activation, test one provider at a time with a dedicated account in a protected preview, verify existing-account linking plus new-account backup-password setup, and enable the explicit app release gates only after exact approval. Schedule Apple client-secret rotation at least every six months.
+- Prepare Apple sign-in only as a later separate provider release. It requires its own Apple application, Supabase configuration, privacy/provider review, protected acceptance test, exact activation approval and client-secret rotation at least every six months.
 - After separate Owner approval, evaluate an official LinkedIn company-page API connection for publishing and aggregate analytics, with credential handling, privacy/legal review, explicit per-post approval, audit history, rate limits and an immediate kill switch.
 - Review the first guarded weekday production refresh and continue monitoring candidate quality. Facebook and X remain later channels and require their own provider reviews.
 - Any controlled live account-recovery test requires separate approval.
