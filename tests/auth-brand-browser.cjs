@@ -44,12 +44,21 @@ const path = require('node:path');
     assert.equal(await page.locator('.auth-workspace-preview').isVisible(), true, 'desktop must show the app-style workspace preview');
     assert.equal(await page.getByRole('heading', { name: 'Welcome to your Tallyo workspace.' }).count(), 1);
     assert.equal(await page.getByRole('heading', { name: 'Sign In' }).count(), 1);
+    assert.equal(await page.getByRole('button', { name: 'Continue with Google' }).count(), 1, 'the signed-out preview must represent the approved Google sign-in layout');
+    const signInButton = page.getByRole('button', { name: 'Sign In', exact: true });
+    const signInLegalCopy = page.locator('.auth-submit-stack .auth-legal-copy');
+    assert.equal(await signInLegalCopy.count(), 1, 'the sign-in agreement must be grouped with the email sign-in action');
+    assert.equal(await signInLegalCopy.locator('a').count(), 4, 'the sign-in agreement must retain all four legal links');
+    const [signInButtonBox, signInLegalBox] = await Promise.all([signInButton.boundingBox(), signInLegalCopy.boundingBox()]);
+    assert(signInButtonBox && signInLegalBox, 'the sign-in action and legal agreement must both be visible');
+    assert(signInLegalBox.y >= signInButtonBox.y + signInButtonBox.height, 'the sign-in agreement must appear beneath the Sign In button');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'desktop must not overflow horizontally');
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.screenshot({ path: path.join(evidence, 'mobile-sign-in.png'), fullPage: true });
     assert.equal(await page.locator('.auth-workspace-preview').isVisible(), false, 'mobile must keep the account form primary');
     assert.equal(await page.locator('.auth-form-panel').isVisible(), true, 'mobile account form must stay visible');
+    assert.equal(await signInLegalCopy.isVisible(), true, 'mobile must keep the sign-in agreement visible beneath the action');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'mobile must not overflow horizontally');
 
     assert.deepEqual(outside, [], 'the signed-out preview must not make non-loopback requests');

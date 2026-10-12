@@ -57,6 +57,9 @@
   document.addEventListener('submit', event => event.preventDefault(), true);
   window.SUPABASE_URL = 'http://127.0.0.1';
   window.SUPABASE_ANON_KEY = 'fictional-preview-not-a-key';
+  window.TALLYO_PUBLIC_SITE_URL = 'https://tallyo.example/';
+  window.TALLYO_GOOGLE_AUTH_ENABLED = true;
+  window.TALLYO_APPLE_AUTH_ENABLED = false;
   window.STRIPE_LIVE_MODE = false;
   window.TALLYO_GA4_ENABLED = false;
   window.TALLYO_INCOME_INSIGHTS_ENABLED = true;
