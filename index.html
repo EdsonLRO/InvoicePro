@@ -824,7 +824,7 @@
         .customer-summary > div { padding:20px; background:#fff; border:1px solid #dce4ef; border-radius:12px; }
         .customer-summary dt { color:#64748b; font-size:13px; }
         .customer-summary dd { font-size:26px; font-weight:650; margin-top:6px; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
-        .customer-context-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:20px; align-items:stretch; }
+        .customer-context-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:20px; align-items:start; }
         .customer-context-grid > section { min-width:0; padding:22px; border:1px solid #dce4ef; border-radius:12px; background:#fff; }
         .customer-context-grid h3 { font-size:17px; font-weight:650; margin-bottom:12px; }
         .customer-context-grid > section:last-child { grid-column:1/-1; }
@@ -3231,7 +3231,7 @@
                     <div class="customer-context-grid">
                         <section aria-labelledby="customer-documents-title"><h3 id="customer-documents-title">Recent documents</h3>
                             <p v-if="!customerContextDocuments.length" class="customer-context-note">No linked documents yet.</p>
-                            <ul v-else class="customer-context-list" tabindex="0" aria-label="Customer documents"><li v-for="inv in customerContextDocuments" :key="inv.id"><button class="customer-document" @click="loadInvoice(inv)"><span><strong>{{ inv.number }}</strong><small>{{ docTypeNoun(inv.docType) }} · {{ inv.date }}</small></span><span>{{ overviewMoney(inv.totals.grandTotal, inv.currency) }} {{ inv.currency || 'GBP' }}<small>{{ effectiveStatus(inv) }}</small></span></button></li></ul>
+                            <ul v-else ref="customerDocumentsList" class="customer-context-list" tabindex="0" aria-label="Customer documents"><li v-for="inv in customerContextDocuments" :key="inv.id"><button class="customer-document" @click="loadInvoice(inv)"><span><strong>{{ inv.number }}</strong><small>{{ docTypeNoun(inv.docType) }} · {{ inv.date }}</small></span><span>{{ overviewMoney(inv.totals.grandTotal, inv.currency) }} {{ inv.currency || 'GBP' }}<small>{{ effectiveStatus(inv) }}</small></span></button></li></ul>
                             <p class="customer-context-note">Documents keep their original customer details. Older, unlinked records can still be found in Invoices.</p>
                         </section>
                         <section aria-labelledby="customer-recurring-title"><h3 id="customer-recurring-title">Recurring schedules</h3><p v-if="!customerContextSchedules.length" class="customer-context-note">No linked recurring schedules.</p>
@@ -3940,7 +3940,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.10.11.4';
+    const APP_BUILD = '2026.10.12.1';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -5457,7 +5457,10 @@
                 }
                 this.applyRoute(this.tabFromRouteKey(routeKey), routeKey);
                 this.$nextTick(() => {
-                    if (routeKey === 'customers-detail') this.$refs.customerContextHeading?.focus();
+                    if (routeKey === 'customers-detail') {
+                        this.resetCustomerDocumentScroll();
+                        this.$refs.customerContextHeading?.focus();
+                    }
                     if (routeKey === 'customers') this.$refs.customerListHeading?.focus();
                 });
             },
@@ -5513,7 +5516,13 @@
                 this.customerView = 'list';
                 this.customerContextId = customer?.id || '';
                 this.setRouteKey('customers-detail');
-                this.$nextTick(() => this.$refs.customerContextHeading?.focus());
+                this.$nextTick(() => {
+                    this.resetCustomerDocumentScroll();
+                    this.$refs.customerContextHeading?.focus();
+                });
+            },
+            resetCustomerDocumentScroll() {
+                if (this.$refs.customerDocumentsList) this.$refs.customerDocumentsList.scrollTop = 0;
             },
             openRecurringTemplate(template) {
                 this.recurringForm = JSON.parse(JSON.stringify(template));

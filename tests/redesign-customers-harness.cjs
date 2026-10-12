@@ -38,6 +38,10 @@ assert.equal(vm.customerContext, null); assert.deepEqual(vm.customerContextDocum
 assert.deepEqual(vm.customerContextSummary, { outstanding: 0, paid: 0 });
 assert.match(app, /customer-name[^>]*@click="openCustomerContext\(customer\)"/);
 assert.match(app, /openCustomerContext\(customer\)[\s\S]*?setRouteKey\('customers-detail'\)/);
+assert.match(app, /\.customer-context-grid \{[^}]*align-items:start/);
+assert.match(app, /ref="customerDocumentsList" class="customer-context-list"/);
+assert.match(app, /resetCustomerDocumentScroll\(\) \{[\s\S]*?customerDocumentsList\.scrollTop = 0/);
+assert.match(app, /routeKey === 'customers-detail'[\s\S]*?resetCustomerDocumentScroll\(\)[\s\S]*?customerContextHeading/);
 assert.match(app, /openRecurringTemplate\(template\)[\s\S]*?setRouteKey\('recurring-form'\)/);
 assert.doesNotMatch(app, /activeTab\(\) \{ this\.editorPreview = false; this\.customerContextId = '';/);
 assert.match(app, /class="schedule-table" aria-label="Recurring schedules"/);
