@@ -52,19 +52,50 @@ const path = require('node:path');
     const [signInButtonBox, signInLegalBox] = await Promise.all([signInButton.boundingBox(), signInLegalCopy.boundingBox()]);
     assert(signInButtonBox && signInLegalBox, 'the sign-in action and legal agreement must both be visible');
     assert(signInLegalBox.y >= signInButtonBox.y + signInButtonBox.height, 'the sign-in agreement must appear beneath the Sign In button');
+    const desktopPanelStyles = await page.locator('.auth-form-panel').evaluate(element => {
+      const styles = getComputedStyle(element);
+      return { background: styles.backgroundColor, borderWidth: styles.borderTopWidth, padding: styles.paddingTop };
+    });
+    assert.deepEqual(desktopPanelStyles, { background: 'rgba(0, 0, 0, 0)', borderWidth: '0px', padding: '0px' },
+      'the sign-in card must not sit inside a second visible panel');
+    const [desktopPanelBox, desktopCardBox] = await Promise.all([
+      page.locator('.auth-form-panel').boundingBox(),
+      page.locator('.auth-scroll-card').boundingBox()
+    ]);
+    assert(desktopPanelBox && desktopCardBox, 'the desktop account panel and card must be measurable');
+    assert(Math.abs(desktopPanelBox.width - desktopCardBox.width) < 1,
+      'the sign-in card must fill its desktop column');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'desktop must not overflow horizontally');
+
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.screenshot({ path: path.join(evidence, 'tablet-sign-in.png'), fullPage: true });
+    const [tabletIntroBox, tabletCardBox] = await Promise.all([
+      page.locator('.auth-intro').boundingBox(),
+      page.locator('.auth-scroll-card').boundingBox()
+    ]);
+    assert(tabletIntroBox && tabletCardBox, 'the tablet welcome and sign-in cards must be measurable');
+    assert(Math.abs(tabletIntroBox.width - tabletCardBox.width) < 1,
+      'the stacked sign-in card must match the welcome card width on tablets');
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'tablet must not overflow horizontally');
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.screenshot({ path: path.join(evidence, 'mobile-sign-in.png'), fullPage: true });
     assert.equal(await page.locator('.auth-workspace-preview').isVisible(), false, 'mobile must keep the account form primary');
     assert.equal(await page.locator('.auth-form-panel').isVisible(), true, 'mobile account form must stay visible');
     assert.equal(await signInLegalCopy.isVisible(), true, 'mobile must keep the sign-in agreement visible beneath the action');
+    const [mobileIntroBox, mobileCardBox] = await Promise.all([
+      page.locator('.auth-intro').boundingBox(),
+      page.locator('.auth-scroll-card').boundingBox()
+    ]);
+    assert(mobileIntroBox && mobileCardBox, 'the mobile welcome and sign-in cards must be measurable');
+    assert(Math.abs(mobileIntroBox.width - mobileCardBox.width) < 1,
+      'the stacked sign-in card must match the welcome card width');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'mobile must not overflow horizontally');
 
     assert.deepEqual(outside, [], 'the signed-out preview must not make non-loopback requests');
     assert.deepEqual(errors, [], 'the signed-out preview must mount without uncaught errors');
     await context.close();
-    console.log('Auth brand browser acceptance passed at 1440px and 390px with no external requests.');
+    console.log('Auth brand browser acceptance passed at 1440px, 768px and 390px with no external requests.');
   } finally {
     await browser.close();
     await new Promise(done => server.close(done));
