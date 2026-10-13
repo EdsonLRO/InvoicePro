@@ -1,5 +1,13 @@
 # Tallyo Release Readiness Checklist
 
+## Signed-out account card layout — released and verified, 2026-10-13
+
+The Owner approved PR #234 for merge and production publication. PR #234 merged through the protected workflow as `d7b6389c029ae071a1ed0d33a3d0cd53cc9aefac`; post-merge Security run `38326266411` and Pages run `38326265006` passed. Cloudflare production deployment `696f68fa-84c5-4a3a-8afd-dd30e1fc82ca` was triggered from that exact clean `main` commit, completed successfully and is aliased to `https://app.tallyo.co.uk`.
+
+App build `2026.10.13.2` removes the second visible panel around signed-out account access. The actual sign-in card now fills its desktop column and matches the welcome card width when stacked. Automated isolated-browser checks passed at 1440, 768 and 390 pixels with external requests blocked, alongside the focused accessibility, application-integration and PWA lifecycle harnesses. Public HTTP readback returned 200 for the app shell and service worker and confirmed the exact build marker, single-card layout rules and `tallyo-shell-2026-10-13-2` cache marker.
+
+This release changes presentation and PWA cache versioning only. Google/password sign-in, registration, recovery, MFA, Turnstile, Auth provider settings, sessions, RLS, tenant isolation, Stripe, subscriptions, payments, entitlements, database schema, Edge Functions, secrets and legal wording are unchanged. If rollback is required, restore Cloudflare deployment `bf46700f-789f-4fc6-b6d0-af948d445d0d`, which serves the preceding merged production source; no backend or provider rollback is needed.
+
 ## Tallyo email presentation system — released with bounded delivery follow-up, 2026-10-12
 
 The Owner explicitly approved the production Edge Function rollout, Supabase Auth-template activation and one controlled recipient test. Exact merged main revision `bd2156d8be5ad7a1d864e9a1bdefc81e0cf93307` is deployed as `mfa-recovery` v37, `owner-account-admin` v5, `stripe-billing-webhook` v31, `send-document-email` v62, `send-reminder-email` v44, `generate-recurring` v50 and `send-overdue-reminders` v45. Downloaded production source matches all seven approved entrypoints and `_shared/email-brand.mjs`. JWT verification remains enabled for the two account/security and two user-triggered functions; the scheduler functions retain JWT-off custom-secret ingress; the Stripe Billing webhook retains JWT-off raw-signature verification. Every bounded missing-auth, missing-automation-secret or invalid-signature probe returned HTTP 401.
