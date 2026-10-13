@@ -2,6 +2,7 @@ import { copyFile, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { assertCloudflareAccessConfirmed } from "./cloudflare-access-build-guard.mjs";
+import { brandAssets } from "../growth-studio/src/data.js";
 
 assertCloudflareAccessConfirmed();
 
@@ -137,14 +138,7 @@ await mkdir(join(outputRoot, "growth-studio", "src"), { recursive: true });
 await mkdir(join(outputRoot, "website", "public", "assets", "social", "linkedin"), { recursive: true });
 for (const asset of appAssets) await copyFile(join(repositoryRoot, asset), join(outputRoot, asset));
 await copyFile(join(repositoryRoot, "growth-studio", "src", "discovery.json"), join(outputRoot, "growth-studio", "src", "discovery.json"));
-for (const asset of [
-  "01-free-invoice-maker.png",
-  "02-dashboard-clarity.png",
-  "03-create-invoices.png",
-  "05-recurring-invoices.png",
-  "30-overdue-with-context.png",
-  "32-after-the-invoice-is-sent.png"
-]) {
+for (const asset of [...new Set(brandAssets.map((item) => item.file))]) {
   await copyFile(join(repositoryRoot, "website", "public", "assets", "social", "linkedin", asset), join(outputRoot, "website", "public", "assets", "social", "linkedin", asset));
 }
 for (const sharedAsset of ["analytics-consent.css", "analytics-consent.mjs", "analytics-app.js"]) {

@@ -136,6 +136,13 @@ label { color: #3e4762; font-size: 11px; font-weight: 700; }
 textarea, select, input { width: 100%; margin-top: 6px; border: 1px solid #dfe3eb; border-radius: 9px; padding: 10px 11px; color: var(--ink); background: white; }
 textarea { resize: vertical; min-height: 150px; line-height: 1.5; }
 .form-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.asset-recommendation { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px; border: 1px solid #d9d5ff; border-radius: 10px; background: var(--indigo-soft); }
+.asset-recommendation span, .asset-recommendation strong { display: block; }
+.asset-recommendation span { margin-bottom: 4px; color: #69618e; font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.asset-recommendation strong { color: #302886; font-size: 12px; }
+.brand-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.brand-filter .chip { cursor: pointer; }
+.brand-filter .chip.active { border-color: var(--indigo); color: white; background: var(--indigo); }
 .check-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
 .check-list li { font-size: 11px; color: var(--muted); display: flex; gap: 8px; align-items: flex-start; }
 .check-list li::before { content: "✓"; color: #087b59; font-weight: 900; }
@@ -149,6 +156,7 @@ textarea { resize: vertical; min-height: 150px; line-height: 1.5; }
 .asset-card { overflow: hidden; padding: 0; }
 .asset-card img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; background: var(--navy); }
 .asset-meta { padding: 14px; }
+.asset-tags { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; color: var(--muted); font-size: 9px; }
 .asset-meta h3 { margin-bottom: 4px; }
 .asset-meta p { color: var(--muted); font-size: 10px; margin-bottom: 0; }
 .bar-chart { height: 220px; display: flex; align-items: end; gap: 14px; padding: 20px 5px 0; border-bottom: 1px solid var(--line); }
@@ -207,4 +215,5 @@ textarea { resize: vertical; min-height: 150px; line-height: 1.5; }
   .topbar-actions .secondary { display: none; }
   .channel-button { padding: 7px 8px; }
   .page-heading { align-items: flex-start; flex-direction: column; }
+  .asset-recommendation { align-items: stretch; flex-direction: column; }
 }
