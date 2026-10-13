@@ -1,7 +1,7 @@
-import { audienceSegments, brandAssets, channelDefinitions, claimGuardrails, contentTemplates, initialState } from "./data.js";
+import { audienceSegments, brandAssets, brandCategories, channelDefinitions, claimGuardrails, contentTemplates, initialState, recommendAsset, recommendSegment } from "./data.js";
 import { emptyDiscovery, normaliseDiscovery } from "./discovery.js";
 
-const storageKey = "tallyo-growth-studio-v1";
+const storageKey = "tallyo-growth-studio-v2";
 const workspace = document.querySelector("#workspace");
 const toast = document.querySelector("#toast");
 let view = "overview";
@@ -25,6 +25,7 @@ function escapeHtml(value = "") {
 function assetFor(id) { return brandAssets.find((asset) => asset.id === id) || brandAssets[0]; }
 function segmentFor(id) { return audienceSegments.find((segment) => segment.id === id) || audienceSegments[0]; }
 function selectedPost() { return state.posts.find((post) => post.id === state.selectedPostId) || state.posts[0]; }
+function recommendedAssetFor(post) { return recommendAsset([post?.title, post?.caption, segmentFor(post?.segmentId).name], post?.assetId); }
 function candidateFor(id) { return discovery.candidates.find((candidate) => candidate.id === id); }
 function formattedResearchTime() {
   if (!discovery.generatedAt) return "Awaiting first automated run";
@@ -124,6 +125,7 @@ function renderDiscover() {
 function renderContent() {
   const post = selectedPost();
   const asset = assetFor(post.assetId);
+  const recommendation = recommendedAssetFor(post);
   return `${pageHeading("Content Studio", "Draft, review, and prepare every post.", "Write against a specific audience need, preview the LinkedIn layout, and keep publishing behind explicit owner approval.")}
     <div class="studio-grid">
       <article class="card"><div class="section-head"><div><h2>Drafts</h2><p>${state.posts.length} in workspace</p></div></div><div class="post-list">${state.posts.map((item) => `<button class="post-list-item ${item.id === post.id ? "active" : ""}" data-post="${item.id}"><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.status)} · ${escapeHtml(item.scheduledFor)}</small></button>`).join("")}</div><button class="button ghost" data-action="generate-pack">+ Generate a new draft</button></article>
@@ -131,7 +133,8 @@ function renderContent() {
       <article class="card editor-card"><div class="section-head"><div><h2>Review</h2><p>Changes save in this browser only.</p></div><span class="pill ${post.status === "Approved" ? "mint" : "amber"}">${escapeHtml(post.status)}</span></div><form id="post-form" class="form-grid">
         <label>Post title<input name="title" value="${escapeHtml(post.title)}"></label>
         <label>Audience<select name="segmentId">${audienceSegments.map((segment) => `<option value="${segment.id}" ${segment.id === post.segmentId ? "selected" : ""}>${escapeHtml(segment.name)}</option>`).join("")}</select></label>
-        <label>Brand visual<select name="assetId">${brandAssets.map((item) => `<option value="${item.id}" ${item.id === post.assetId ? "selected" : ""}>${escapeHtml(item.label)}</option>`).join("")}</select></label>
+        <label>Brand visual<select name="assetId">${brandCategories.filter((category) => category.id !== "all").map((category) => `<optgroup label="${escapeHtml(category.label)}">${brandAssets.filter((item) => item.category === category.id).map((item) => `<option value="${item.id}" ${item.id === post.assetId ? "selected" : ""}>${escapeHtml(item.label)}</option>`).join("")}</optgroup>`).join("")}</select></label>
+        <div class="asset-recommendation"><div><span>Recommended for this draft</span><strong>${escapeHtml(recommendation.label)}</strong></div><button class="button secondary" type="button" data-action="use-recommended-asset" data-asset="${recommendation.id}" ${recommendation.id === asset.id ? "disabled" : ""}>${recommendation.id === asset.id ? "Using recommendation" : "Use visual"}</button></div>
         <label>Caption<textarea name="caption">${escapeHtml(post.caption)}</textarea></label>
         <label>Image alt text<input name="alt" value="${escapeHtml(post.alt)}"></label>
         <label>Planned time<input name="scheduledFor" value="${escapeHtml(post.scheduledFor)}"></label>
@@ -162,8 +165,11 @@ function renderAnalytics() {
 }
 
 function renderBrand() {
+  const category = brandCategories.some((item) => item.id === state.brandCategory) ? state.brandCategory : "all";
+  const visibleAssets = category === "all" ? brandAssets : brandAssets.filter((asset) => asset.category === category);
   return `${pageHeading("Brand Library", "One recognisable Tallyo system.", "Use the approved logo, visual language, tone, and product-grounded claims already established for Tallyo.")}
-    <div class="grid asset-grid">${brandAssets.map((asset) => `<article class="card asset-card"><img src="assets/linkedin/${escapeHtml(asset.file)}" alt="${escapeHtml(asset.alt)}"><div class="asset-meta"><span class="pill">${escapeHtml(asset.tone)}</span><h3>${escapeHtml(asset.label)}</h3><p>${escapeHtml(asset.alt)}</p></div></article>`).join("")}</div><article class="card top-spaced"><div class="section-head"><div><h2>Claim guardrails</h2><p>Applied to every content review.</p></div></div><ul class="check-list">${claimGuardrails.map((rule) => `<li>${escapeHtml(rule)}</li>`).join("")}</ul></article>`;
+    <div class="brand-filter" role="group" aria-label="Filter brand visuals">${brandCategories.map((item) => `<button class="chip ${item.id === category ? "active" : ""}" data-action="filter-brand" data-category="${item.id}">${escapeHtml(item.label)}</button>`).join("")}</div>
+    <div class="grid asset-grid">${visibleAssets.map((asset) => `<article class="card asset-card"><img src="assets/linkedin/${escapeHtml(asset.file)}" alt="${escapeHtml(asset.alt)}"><div class="asset-meta"><div class="asset-tags"><span class="pill">${escapeHtml(asset.tone)}</span><span>${escapeHtml(brandCategories.find((item) => item.id === asset.category)?.label || asset.category)}</span></div><h3>${escapeHtml(asset.label)}</h3><p>${escapeHtml(asset.alt)}</p></div></article>`).join("")}</div><article class="card top-spaced"><div class="section-head"><div><h2>Claim guardrails</h2><p>Applied to every content review.</p></div></div><ul class="check-list">${claimGuardrails.map((rule) => `<li>${escapeHtml(rule)}</li>`).join("")}</ul></article>`;
 }
 
 function renderAutomations() {
@@ -211,6 +217,11 @@ document.addEventListener("click", async (event) => {
     state.posts.push({ id, title: template.label, status: "Draft", scheduledFor: "Unscheduled", templateId: template.id, segmentId: segment.id, assetId: asset.id, caption: `${template.hook}\n\n${template.body}\n\n${template.cta}\n\n#SmallBusiness #Tallyo`, alt: asset.alt });
     state.selectedPostId = id; saveState("New draft saved locally"); view = "content"; showToast("A new draft is ready for review."); render();
   }
+  if (action === "use-recommended-asset") {
+    const post = selectedPost(); const asset = assetFor(actionTarget.dataset.asset);
+    post.assetId = asset.id; post.alt = asset.alt; saveState("Recommended visual applied"); showToast("Recommended visual applied to the draft."); render();
+  }
+  if (action === "filter-brand") { state.brandCategory = actionTarget.dataset.category; saveState(); render(); }
   if (action === "toggle-save-candidate") {
     const candidateId = actionTarget.dataset.candidate;
     state.savedCandidateIds = state.savedCandidateIds.includes(candidateId) ? state.savedCandidateIds.filter((id) => id !== candidateId) : [...state.savedCandidateIds, candidateId];
@@ -225,10 +236,9 @@ document.addEventListener("click", async (event) => {
   if (action === "draft-from-candidate") {
     const candidate = candidateFor(actionTarget.dataset.candidate);
     if (!candidate) return;
-    const sector = candidate.sector.toLowerCase();
-    const segment = sector.includes("agency") ? segmentFor("agencies") : sector.includes("assistant") ? segmentFor("consultants") : sector.includes("web") ? segmentFor("creatives") : segmentFor("contractors");
-    const template = contentTemplates[0]; const asset = assetFor(template.assetId); const id = `post-${Date.now()}`;
-    const caption = `${candidate.contentAngle}\n\nService businesses often balance project work, recurring work, and follow-up at the same time. Tallyo brings quotes, invoices, expenses, recurring billing, and income visibility into one focused workspace.\n\nHow do you keep recurring and one-off work organised?\n\n#SmallBusiness #ServiceBusiness #Tallyo`;
+    const segment = recommendSegment([candidate.sector, candidate.signal, candidate.fitReason].join(" "));
+    const template = contentTemplates[0]; const asset = recommendAsset([candidate.sector, candidate.contentAngle, candidate.signal, candidate.fitReason]); const id = `post-${Date.now()}`;
+    const caption = `${candidate.contentAngle}\n\n${candidate.signal}\n\nTallyo helps small service businesses keep quotes, invoices, customer records, recurring work and payment status in one focused workspace.\n\nWhich part of this workflow takes the most time today?\n\n#SoleTrader #UKTrades #Tallyo`;
     state.posts.push({ id, title: `${candidate.sector}: ${candidate.contentAngle}`, status: "Draft", scheduledFor: "Unscheduled", templateId: template.id, segmentId: segment.id, assetId: asset.id, caption, alt: asset.alt, researchCandidateId: candidate.id });
     if (!state.savedCandidateIds.includes(candidate.id)) state.savedCandidateIds.push(candidate.id);
     state.selectedPostId = id; saveState("Campaign draft saved locally"); navigate("content"); showToast("Research-backed campaign draft created.");

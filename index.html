@@ -2041,7 +2041,8 @@
                     </aside>
                     <article v-if="growthSelectedPost" class="growth-content-editor rounded-xl border border-slate-200 bg-white p-5 sm:p-7 shadow-sm">
                         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Content Studio</p><h3 class="text-2xl font-semibold text-slate-900">Edit LinkedIn draft</h3></div><span class="self-start rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">{{ growthSelectedPost.status }}</span></div>
-                        <div class="mt-6 grid md:grid-cols-2 gap-4"><label class="text-sm font-semibold text-slate-700">Audience<select v-model="growthSelectedPost.segmentId" @change="growthUpdateSelectedPost" class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal"><option v-for="segment in growthStudioConfig.audienceSegments" :key="segment.id" :value="segment.id">{{ segment.name }}</option></select></label><label class="text-sm font-semibold text-slate-700">Brand visual<select v-model="growthSelectedPost.assetId" @change="growthUpdateSelectedPost" class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal"><option v-for="asset in growthStudioConfig.brandAssets" :key="asset.id" :value="asset.id">{{ asset.label }}</option></select></label></div>
+                        <div class="mt-6 grid md:grid-cols-2 gap-4"><label class="text-sm font-semibold text-slate-700">Audience<select v-model="growthSelectedPost.segmentId" @change="growthUpdateSelectedPost" class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal"><option v-for="segment in growthStudioConfig.audienceSegments" :key="segment.id" :value="segment.id">{{ segment.name }}</option></select></label><label class="text-sm font-semibold text-slate-700">Brand visual<select v-model="growthSelectedPost.assetId" @change="growthUpdateSelectedPost" class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal"><optgroup v-for="category in growthStudioConfig.brandCategories.filter(item => item.id !== 'all')" :key="category.id" :label="category.label"><option v-for="asset in growthStudioConfig.brandAssets.filter(item => item.category === category.id)" :key="asset.id" :value="asset.id">{{ asset.label }}</option></optgroup></select></label></div>
+                        <div class="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50 p-4"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-700">Recommended for this draft</p><p class="mt-1 text-sm font-semibold text-slate-900">{{ growthSelectedRecommendation.label }}</p><p class="mt-1 text-xs text-slate-600">Matched from the draft topic and selected audience.</p></div><button type="button" @click="growthApplyRecommendedAsset" :disabled="growthSelectedRecommendation.id === growthSelectedPost.assetId" class="self-start rounded-lg border border-indigo-300 bg-white px-4 py-2 text-sm font-semibold text-indigo-700 disabled:cursor-default disabled:opacity-60">{{ growthSelectedRecommendation.id === growthSelectedPost.assetId ? 'Using recommendation' : 'Use this visual' }}</button></div>
                         <div class="mt-5 grid lg:grid-cols-[minmax(0,1fr)_280px] gap-5"><div><label class="block text-sm font-semibold text-slate-700">Post copy<textarea v-model="growthSelectedPost.caption" rows="13" class="mt-2 w-full rounded-lg border border-slate-300 p-3 text-sm leading-6 focus:ring-2 focus:ring-indigo-500 outline-none"></textarea></label><label class="mt-4 block text-sm font-semibold text-slate-700">Image description<input v-model="growthSelectedPost.alt" class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2.5 font-normal"></label></div><figure class="rounded-xl border border-slate-200 bg-slate-50 p-3"><img :src="growthAssetUrl(growthSelectedPost.assetId)" :alt="growthSelectedPost.alt" class="w-full rounded-lg border border-slate-200 bg-white"><figcaption class="mt-3 text-xs text-slate-500">{{ growthSelectedAsset.label }} · {{ growthSelectedAsset.tone }} tone</figcaption></figure></div>
                         <div class="mt-6 flex flex-wrap gap-3"><button type="button" @click="growthUpdateSelectedPost" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Save changes</button><button type="button" @click="growthApprovePost" class="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700">{{ growthSelectedPost.status === 'Approved' ? 'Return to review' : 'Approve for manual publishing' }}</button></div>
                         <p class="mt-4 text-xs text-slate-500">Growth Studio does not publish, message, connect, or react on LinkedIn. Approval records your decision in this browser only.</p>
@@ -2054,7 +2055,7 @@
 
                 <div v-show="growthStudio.section === 'analytics'" class="space-y-5"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Analytics</p><h3 class="text-2xl font-semibold">Performance workspace</h3></div><div class="grid sm:grid-cols-3 gap-4"><article v-for="metric in [{label:'Profile views',value:growthStudio.metrics.profileViews},{label:'Follower growth',value:'+' + growthStudio.metrics.followerGrowth},{label:'Engagement rate',value:growthStudio.metrics.engagementRate + '%'}]" :key="metric.label" class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"><p class="text-sm text-slate-500">{{ metric.label }}</p><p class="mt-2 text-3xl font-semibold">{{ metric.value }}</p></article></div><div class="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900"><strong>Demo planning data.</strong> Live LinkedIn analytics are not connected. These figures stay clearly labelled until Tallyo receives approved analytics access.</div></div>
 
-                <div v-show="growthStudio.section === 'brand'" class="space-y-5"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Brand Library</p><h3 class="text-2xl font-semibold">Approved Tallyo campaign visuals</h3><p class="mt-1 text-sm text-slate-600">Original Tallyo artwork and visual direction, ready to pair with reviewed copy.</p></div><div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4"><figure v-for="asset in growthStudioConfig.brandAssets" :key="asset.id" class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"><img :src="growthAssetUrl(asset.id)" :alt="asset.alt" class="w-full rounded-lg border border-slate-100"><figcaption class="px-2 pb-2 pt-4"><p class="font-semibold text-slate-900">{{ asset.label }}</p><p class="mt-1 text-sm text-slate-500">{{ asset.tone }} tone</p></figcaption></figure></div></div>
+                <div v-show="growthStudio.section === 'brand'" class="space-y-5"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Brand Library</p><h3 class="text-2xl font-semibold">Approved Tallyo campaign visuals</h3><p class="mt-1 text-sm text-slate-600">Current product visuals with fictional data, grouped by the story each image can tell.</p></div><div class="flex gap-2 overflow-x-auto pb-2" role="group" aria-label="Filter brand visuals"><button v-for="category in growthStudioConfig.brandCategories" :key="category.id" type="button" @click="growthStudio.brandCategory = category.id; saveGrowthStudio()" :aria-pressed="growthStudio.brandCategory === category.id" :class="growthStudio.brandCategory === category.id ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300 bg-white text-slate-700'" class="shrink-0 rounded-full border px-3 py-2 text-xs font-semibold">{{ category.label }}</button></div><div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4"><figure v-for="asset in growthBrandAssets" :key="asset.id" class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm"><img :src="growthAssetUrl(asset.id)" :alt="asset.alt" class="w-full rounded-lg border border-slate-100"><figcaption class="px-2 pb-2 pt-4"><div class="flex items-center justify-between gap-3"><p class="font-semibold text-slate-900">{{ asset.label }}</p><span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">{{ growthBrandCategoryLabel(asset.category) }}</span></div><p class="mt-1 text-sm text-slate-500">{{ asset.tone }} tone</p></figcaption></figure></div></div>
 
                 <div v-show="growthStudio.section === 'automations'" class="space-y-5"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Automations</p><h3 class="text-2xl font-semibold">Controlled growth workflows</h3><p class="mt-1 text-sm text-slate-600">Research can refresh the workspace. Account actions remain off until supported by approved APIs and an owner decision.</p></div><div class="space-y-3"><article v-for="automation in growthStudio.automations" :key="automation.id" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div><div class="flex flex-wrap items-center gap-2"><h4 class="font-semibold text-slate-900">{{ automation.name }}</h4><span :class="automation.enabled ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-600'" class="rounded-full px-2.5 py-1 text-xs font-bold">{{ automation.enabled ? 'Enabled' : 'Off' }}</span></div><p class="mt-1 text-sm text-slate-600">{{ automation.mode }}</p><p class="mt-1 text-xs text-slate-500">{{ automation.cadence }}</p></div><button v-if="automation.id !== 'research'" type="button" @click="growthToggleAutomation(automation)" class="self-start rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">{{ automation.enabled ? 'Pause' : 'Enable' }}</button><span v-else class="text-xs font-semibold text-slate-500">Managed research feed</span></article></div></div>
 
@@ -3976,7 +3977,7 @@
     </section>
 </div>
 
-<script src="./growth-studio-app.js?v=2026.10.11.2"></script>
+<script src="./growth-studio-app.js?v=2026.10.14.1"></script>
 <script src="./app-help-install.js"></script>
 <script>
     // =========================================================================
@@ -4052,7 +4053,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.10.13.3';
+    const APP_BUILD = '2026.10.14.1';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -4536,7 +4537,7 @@
                 return { dashboard: 'Overview', finances: 'Finances', invoices: 'Invoices', create: 'Create document', edit: 'Edit document', customers: 'Customers', items: 'Products & services', recurring: 'Recurring', settings: 'Business settings', branding: 'Branding', account: 'Account', owner: 'Owner Console', growth: 'Growth Studio' }[this.activeTab] || 'Tallyo';
             },
             growthStudioConfig() {
-                return window.TallyoGrowthStudio || { sections: [], audienceSegments: [], brandAssets: [], templates: [], claimGuardrails: [] };
+                return window.TallyoGrowthStudio || { sections: [], audienceSegments: [], brandCategories: [], brandAssets: [], templates: [], claimGuardrails: [], recommendAsset: () => ({}), recommendSegment: () => ({ id: '' }) };
             },
             growthCandidates() {
                 const dismissed = new Set(this.growthStudio.dismissedCandidateIds || []);
@@ -4556,6 +4557,14 @@
             },
             growthSelectedAsset() {
                 return this.growthAssetFor(this.growthSelectedPost?.assetId);
+            },
+            growthSelectedRecommendation() {
+                if (!this.growthSelectedPost) return this.growthStudioConfig.brandAssets[0] || {};
+                return this.growthStudioConfig.recommendAsset([this.growthSelectedPost.title, this.growthSelectedPost.caption, this.growthSelectedSegment?.name], this.growthSelectedPost.assetId);
+            },
+            growthBrandAssets() {
+                const category = this.growthStudio.brandCategory || 'all';
+                return category === 'all' ? this.growthStudioConfig.brandAssets : this.growthStudioConfig.brandAssets.filter(asset => asset.category === category);
             },
             growthSelectedSegment() {
                 return this.growthSegmentFor(this.growthSelectedPost?.segmentId);
@@ -6187,6 +6196,9 @@
             growthAssetUrl(id) {
                 return `./website/public/assets/social/linkedin/${this.growthAssetFor(id).file}`;
             },
+            growthBrandCategoryLabel(id) {
+                return this.growthStudioConfig.brandCategories.find(category => category.id === id)?.label || id;
+            },
             growthSegmentFor(id) {
                 return this.growthStudioConfig.audienceSegments.find(segment => segment.id === id) || this.growthStudioConfig.audienceSegments[0];
             },
@@ -6204,15 +6216,18 @@
                 this.saveGrowthStudio('Business dismissed from this workspace.');
             },
             growthDraftFromCandidate(candidate) {
+                const context = [candidate.sector, candidate.contentAngle, candidate.signal, candidate.fitReason].join(' ');
+                const segment = this.growthStudioConfig.recommendSegment(context);
+                const asset = this.growthStudioConfig.recommendAsset(context);
                 const post = {
                     id: `post-${Date.now()}`,
                     title: candidate.contentAngle || `A useful workflow for ${candidate.sector}`,
                     status: 'Draft',
                     scheduledFor: 'Unscheduled',
-                    segmentId: 'agencies',
-                    assetId: 'system',
-                    caption: `${candidate.contentAngle || candidate.fitReason}\n\n${candidate.signal}\n\nTallyo helps small service businesses keep quotes, invoices, recurring work, expenses, and income visibility in one focused workspace.\n\n#SmallBusiness #BusinessAdmin #Tallyo`,
-                    alt: this.growthAssetFor('system').alt
+                    segmentId: segment.id,
+                    assetId: asset.id,
+                    caption: `${candidate.contentAngle || candidate.fitReason}\n\n${candidate.signal}\n\nTallyo helps small service businesses keep quotes, invoices, customer records, recurring work and payment status in one focused workspace.\n\nWhich part of this workflow takes the most time today?\n\n#SoleTrader #UKTrades #Tallyo`,
+                    alt: asset.alt
                 };
                 this.growthStudio.posts.unshift(post);
                 this.growthStudio.selectedPostId = post.id;
@@ -6242,6 +6257,12 @@
                 if (!this.growthSelectedPost) return;
                 this.growthSelectedPost.status = this.growthSelectedPost.status === 'Approved' ? 'In review' : 'Approved';
                 this.saveGrowthStudio(this.growthSelectedPost.status === 'Approved' ? 'Draft approved for manual publishing.' : 'Draft returned to review.');
+            },
+            growthApplyRecommendedAsset() {
+                if (!this.growthSelectedPost || !this.growthSelectedRecommendation?.id) return;
+                this.growthSelectedPost.assetId = this.growthSelectedRecommendation.id;
+                this.growthSelectedPost.alt = this.growthSelectedRecommendation.alt;
+                this.saveGrowthStudio('Recommended visual applied to this draft.');
             },
             growthUpdateSelectedPost() {
                 if (!this.growthSelectedPost) return;

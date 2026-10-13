@@ -51,6 +51,10 @@ const path = require('node:path');
         const queueLayout = await queue.evaluate(element => ({ display: getComputedStyle(element).display, scrolls: element.scrollWidth > element.clientWidth }));
         assert.deepEqual(queueLayout, { display: 'grid', scrolls: true }, 'content queue must be a compact horizontal rail');
         await page.getByRole('heading', { name: 'Edit LinkedIn draft', exact: true }).waitFor();
+        await page.getByText('Recommended for this draft', { exact: true }).waitFor();
+        assert.ok(await page.getByLabel('Brand visual').locator('option').count() >= 20, 'content editor must expose the expanded visual library');
+        const contentImage = page.locator('.growth-content-editor figure img');
+        assert.equal(await contentImage.evaluate(image => image.complete && image.naturalWidth > 0), true, 'recommended content image must load');
         await page.waitForTimeout(200);
 
         const privacy = await page.locator('.app-cookie-settings').evaluate(element => {
@@ -111,6 +115,15 @@ const path = require('node:path');
         assert.equal(activeStyle.backgroundColor, 'rgb(255, 255, 255)', 'selected destination must use the quiet white surface');
         assert.equal(activeStyle.color, 'rgb(55, 48, 163)', 'selected destination must use the Tallyo indigo accent');
         assert.notEqual(activeStyle.boxShadow, 'none', 'selected destination must remain visibly elevated');
+
+        if (viewport.width === 1440) {
+          await tabs.getByRole('button', { name: 'Brand Library', exact: true }).click();
+          await page.getByRole('group', { name: 'Filter brand visuals' }).waitFor();
+          assert.equal(await page.locator('.growth-studio figure:visible').count(), 23, 'brand library must show every approved visual');
+          assert.equal(await page.locator('.growth-studio figure:visible img').evaluateAll(images => images.every(image => image.complete && image.naturalWidth > 0)), true, 'every brand visual must load');
+          await page.getByRole('button', { name: 'Jobs & quotes', exact: true }).click();
+          assert.ok(await page.locator('.growth-studio figure:visible').count() < 23, 'brand category filter must narrow the library');
+        }
 
         await mkdir(path.join(root, 'tmp/growth-studio-navigation'), { recursive: true });
         await page.screenshot({ path: path.join(root, `tmp/growth-studio-navigation/${viewport.width}px.png`), fullPage: true });

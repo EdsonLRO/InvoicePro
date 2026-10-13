@@ -3,7 +3,7 @@ import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { audienceSegments, brandAssets, channelDefinitions, claimGuardrails, initialState } from "../src/data.js";
+import { audienceSegments, brandAssets, brandCategories, channelDefinitions, claimGuardrails, initialState, recommendAsset, recommendSegment } from "../src/data.js";
 import { emptyDiscovery, normaliseDiscovery, validateDiscoveryPayload } from "../src/discovery.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -29,6 +29,28 @@ test("audience strategy stores no personal profile fields", () => {
     for (const field of Object.keys(segment)) assert.equal(prohibited.has(field), false);
     assert.ok(segment.signals.length >= 3);
   }
+});
+
+test("audience strategy prioritises trades and self-employed service businesses", () => {
+  assert.deepEqual(audienceSegments.slice(0, 3).map((segment) => segment.id), ["trades", "property-services", "mobile-services"]);
+  assert.equal(recommendSegment("Local plumber offering bathroom installations").id, "trades");
+  assert.equal(recommendSegment("Garden maintenance packages").id, "property-services");
+});
+
+test("brand library is current, categorised, and topic-aware", () => {
+  assert.ok(brandAssets.length >= 20);
+  assert.ok(brandCategories.length >= 7);
+  assert.equal(new Set(brandAssets.map((asset) => asset.id)).size, brandAssets.length);
+  assert.equal(new Set(brandAssets.map((asset) => asset.file)).size, brandAssets.length);
+  for (const asset of brandAssets) {
+    assert.ok(brandCategories.some((category) => category.id === asset.category));
+    assert.ok(asset.topics.length >= 3);
+    assert.ok(asset.alt.length > 20);
+  }
+  assert.equal(recommendAsset("The customer accepted our quote").id, "quote-to-invoice");
+  assert.equal(recommendAsset("A deposit with the remaining balance visible").id, "deposit");
+  assert.equal(recommendAsset("Prepare records for the accountant handover").id, "income-pack");
+  assert.equal(recommendAsset("Regular monthly garden maintenance").id, "recurring");
 });
 
 test("public-business discovery is enabled while LinkedIn people automation remains disabled", () => {
@@ -83,6 +105,12 @@ test("every post has review state, audience, asset, caption, and alt text", () =
     assert.ok(post.alt.length > 20);
   }
   assert.ok(claimGuardrails.length >= 4);
+});
+
+test("income content states the verified product boundary", () => {
+  const corpus = JSON.stringify({ initialState, templates: initialState.posts, claimGuardrails });
+  assert.doesNotMatch(corpus, /invoices,? payment status,? and expenses/i);
+  assert.match(corpus, /excludes expenses, profit and tax due/i);
 });
 
 test("application CSP allows same-origin discovery only and contains no external request URLs", async () => {

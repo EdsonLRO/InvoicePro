@@ -2,20 +2,14 @@ import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateDiscoveryPayload } from "../src/discovery.js";
+import { brandAssets } from "../src/data.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repository = path.resolve(root, "..");
 const source = path.join(root, "src");
 const destination = path.join(root, "dist");
 const runtimeDiscovery = path.join(root, "runtime", "discovery.json");
-const linkedInAssets = [
-  "01-free-invoice-maker.png",
-  "02-dashboard-clarity.png",
-  "03-create-invoices.png",
-  "05-recurring-invoices.png",
-  "30-overdue-with-context.png",
-  "32-after-the-invoice-is-sent.png"
-];
+const linkedInAssets = [...new Set(brandAssets.map((asset) => asset.file))];
 
 await rm(destination, { recursive: true, force: true });
 await mkdir(path.join(destination, "assets", "linkedin"), { recursive: true });
