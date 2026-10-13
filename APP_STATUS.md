@@ -1,5 +1,9 @@
 # Tallyo current status
 
+## Signed-out account card layout — production active 2026-10-13
+
+PR #234 merged through the protected workflow as `d7b6389c029ae071a1ed0d33a3d0cd53cc9aefac`. Cloudflare production deployment `696f68fa-84c5-4a3a-8afd-dd30e1fc82ca` completed successfully from that exact clean `main` commit and is aliased to `https://app.tallyo.co.uk`. App build `2026.10.13.2` removes the second visible panel around account access: the actual sign-in card fills its desktop column and matches the welcome card when stacked. Public readback confirms the new build, single-card layout and `tallyo-shell-2026-10-13-2` service-worker cache marker. Google/password sign-in, registration, recovery, MFA, Turnstile, RLS, Stripe, subscriptions and entitlements are unchanged.
+
 ## Tallyo email presentation system — production activated 2026-10-12
 
 The Owner approved and completed the staged production rollout of the source-controlled Tallyo email presentation system from merged main revision `bd2156d8be5ad7a1d864e9a1bdefc81e0cf93307`. Seven Edge Functions are active with exact source read-back: `mfa-recovery` v37, `owner-account-admin` v5, `stripe-billing-webhook` v31, `send-document-email` v62, `send-reminder-email` v44, `generate-recurring` v50 and `send-overdue-reminders` v45. Their JWT, custom automation-secret and Stripe-signature boundaries are unchanged; unauthenticated or invalid-signature probes returned HTTP 401. The billing webhook change remains presentation-only apart from the previously approved and fully tested Supabase client pin, with no payment, price, trial, subscription or entitlement behaviour changed.
