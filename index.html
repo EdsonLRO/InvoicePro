@@ -660,12 +660,16 @@
         .growth-hero-button-secondary:hover { background:#334155; }
         .growth-hero-button-primary { border:1px solid #6366f1; color:#fff; background:#6366f1; }
         .growth-hero-button-primary:hover { background:#4f46e5; }
-        .growth-section-tabs { display:flex; gap:8px; overflow-x:auto; padding:8px; border:1px solid #e2e8f0; border-radius:12px; background:#fff; box-shadow:0 4px 12px rgb(15 23 42 / .06); scrollbar-width:thin; }
-        .growth-section-tabs button { min-height:40px; flex:0 0 auto; color:#475569; }
-        .growth-section-tabs button[aria-current="page"] { color:#fff; background:#0f172a; }
+        .growth-section-tabs { display:grid; grid-template-columns:repeat(9,minmax(0,1fr)); gap:4px; overflow:visible; padding:5px; border:1px solid #dbe3ee; border-radius:14px; background:#eef2f7; box-shadow:0 4px 14px rgb(15 23 42 / .06); }
+        .growth-section-tabs button { position:relative; min-width:0; min-height:44px; padding:10px 8px; border:1px solid transparent; border-radius:9px; color:#64748b; background:transparent; font-size:13px; font-weight:700; line-height:1.2; text-align:center; white-space:nowrap; transition:color .15s,background .15s,border-color .15s,box-shadow .15s,transform .15s; }
+        .growth-section-tabs button:hover { color:#0f172a; background:rgb(255 255 255 / .72); }
+        .growth-section-tabs button:focus-visible { z-index:1; outline:3px solid rgb(99 102 241 / .3); outline-offset:1px; }
+        .growth-section-tabs button[aria-current="page"] { color:#3730a3; border-color:#c7d2fe; background:#fff; box-shadow:0 3px 10px rgb(15 23 42 / .1); }
+        .growth-section-tabs button[aria-current="page"]::after { position:absolute; right:calc(50% - 10px); bottom:5px; width:20px; height:3px; border-radius:999px; background:#6366f1; content:''; }
         .growth-content-layout { display:grid; grid-template-columns:minmax(0,1fr); gap:24px; min-width:0; }
         .growth-content-queue,.growth-content-editor { min-width:0; }
         @media (min-width:1280px) { .growth-content-layout { grid-template-columns:320px minmax(0,1fr); } }
+        @media (min-width:700px) and (max-width:1279px) { .growth-section-tabs { grid-template-columns:repeat(5,minmax(0,1fr)); } }
         @media (min-width: 1100px) {
             .shell-topbar { margin-left: 224px; }
             .shell-main { margin-left: 224px; margin-right: 0; width: calc(100% - 224px); max-width: none; }
@@ -4048,7 +4052,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.10.13.2';
+    const APP_BUILD = '2026.10.13.3';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {

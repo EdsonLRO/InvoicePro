@@ -68,9 +68,59 @@ const path = require('node:path');
         await context.close();
       }
     }
-    assert.deepEqual(outside, [], 'mobile preview must not attempt non-loopback requests');
-    assert.deepEqual(errors, [], 'mobile preview must mount without uncaught errors');
-    console.log('Growth Studio mobile browser acceptance passed at 360px and 430px.');
+
+    for (const viewport of [{ width: 1024, height: 900, columns: 5 }, { width: 1440, height: 900, columns: 9 }]) {
+      const context = await browser.newContext({ viewport, serviceWorkers: 'block' });
+      try {
+        await context.route('**/*', route => {
+          const url = route.request().url();
+          if (url.startsWith(`${origin}/`)) return route.continue();
+          outside.push(url);
+          return route.abort();
+        });
+        const page = await context.newPage();
+        page.setDefaultTimeout(10000);
+        page.on('pageerror', error => errors.push(error.message));
+        await page.goto(`${origin}/#growth`);
+        await page.getByRole('heading', { name: 'Tallyo Growth Studio', exact: true }).waitFor();
+
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${viewport.width}px page must not overflow horizontally`);
+        const tabs = page.locator('.growth-section-tabs');
+        assert.equal(await tabs.getByRole('button').count(), 9, 'all Growth Studio destinations must remain visible');
+        const layout = await tabs.evaluate(element => {
+          const buttons = [...element.querySelectorAll('button')];
+          const widths = buttons.map(button => button.getBoundingClientRect().width);
+          return {
+            columns: getComputedStyle(element).gridTemplateColumns.split(' ').filter(Boolean).length,
+            widthSpread: Math.max(...widths) - Math.min(...widths),
+            scrolls: element.scrollWidth > element.clientWidth,
+          };
+        });
+        assert.equal(layout.columns, viewport.columns, `${viewport.width}px switcher must use ${viewport.columns} columns`);
+        assert.ok(layout.widthSpread < 1, `${viewport.width}px switcher destinations must have equal width`);
+        assert.equal(layout.scrolls, false, `${viewport.width}px switcher must not scroll horizontally`);
+
+        const automations = tabs.getByRole('button', { name: 'Automations', exact: true });
+        await automations.click();
+        assert.equal(await automations.getAttribute('aria-current'), 'page', 'selected destination must expose its current state');
+        await page.waitForTimeout(200);
+        const activeStyle = await automations.evaluate(element => {
+          const style = getComputedStyle(element);
+          return { backgroundColor: style.backgroundColor, color: style.color, boxShadow: style.boxShadow };
+        });
+        assert.equal(activeStyle.backgroundColor, 'rgb(255, 255, 255)', 'selected destination must use the quiet white surface');
+        assert.equal(activeStyle.color, 'rgb(55, 48, 163)', 'selected destination must use the Tallyo indigo accent');
+        assert.notEqual(activeStyle.boxShadow, 'none', 'selected destination must remain visibly elevated');
+
+        await mkdir(path.join(root, 'tmp/growth-studio-navigation'), { recursive: true });
+        await page.screenshot({ path: path.join(root, `tmp/growth-studio-navigation/${viewport.width}px.png`), fullPage: true });
+      } finally {
+        await context.close();
+      }
+    }
+    assert.deepEqual(outside, [], 'responsive preview must not attempt non-loopback requests');
+    assert.deepEqual(errors, [], 'responsive preview must mount without uncaught errors');
+    console.log('Growth Studio responsive navigation acceptance passed from 360px to 1440px.');
   } finally {
     await browser.close();
     await new Promise(done => server.close(done));
