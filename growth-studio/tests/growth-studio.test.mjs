@@ -53,6 +53,52 @@ test("brand library is current, categorised, and topic-aware", () => {
   assert.equal(recommendAsset("Regular monthly garden maintenance").id, "recurring");
 });
 
+test("Growth Studio visuals use real current interface captures and the official wordmark", async () => {
+  const repoRoot = path.resolve(root, "..");
+  const [capture, renderer, libraryRenderer] = await Promise.all([
+    readFile(path.join(repoRoot, "marketing", "growth-studio", "capture-real-screenshots.mjs"), "utf8"),
+    readFile(path.join(repoRoot, "marketing", "growth-studio", "render.mjs"), "utf8"),
+    readFile(path.join(repoRoot, "marketing", "linkedin", "render.mjs"), "utf8"),
+  ]);
+  assert.match(capture, /dev\/redesign\/preview\.mjs/);
+  assert.match(capture, /outsideRequests\.length/);
+  assert.doesNotMatch(capture, /https:\/\/app\.tallyo\.co\.uk/);
+  assert.doesNotMatch(renderer, /screenMarkup|<div class="mark">T<\/div>|interface preview/i);
+  assert.match(renderer, /assets", "tallyo-wordmark-white\.png"/);
+  assert.match(renderer, /product", "growth-studio"/);
+  assert.doesNotMatch(libraryRenderer, /tallyo-(dashboard|invoice-editor|customers|recurring|overdue|payments|activity|branding|security)\.(jpg|png)/i);
+  assert.ok(brandAssets.some((asset) => asset.file === "37-review-before-sending.png"));
+  assert.equal(brandAssets.some((asset) => asset.file === "37-branded-emails.png"), false);
+  await Promise.all([
+    "dashboard-overview.png",
+    "products-services.png",
+    "recurring-invoices.png",
+    "recurring-edit.png",
+    "recurring-history.png",
+    "customer-record.png",
+    "customer-details.png",
+    "invoice-editor.png",
+    "automatic-reminders.png",
+    "overdue-invoices.png",
+    "invoice-list-actions.png",
+    "activity-history.png",
+    "deposit-request.png",
+    "document-layouts.png",
+    "business-settings.png",
+    "business-defaults.png",
+    "account-subscription.png",
+    "account-security.png",
+    "account-data-sessions.png",
+    "accepted-quote-invoice.png",
+    "income-insights.png",
+    "income-pack.png",
+    "document-layouts.png",
+    "quote-email-review.png",
+    "google-sign-in.png",
+    "growth-studio.png",
+  ].map((file) => access(path.join(repoRoot, "website", "public", "assets", "product", "growth-studio", file))));
+});
+
 test("public-business discovery is enabled while LinkedIn people automation remains disabled", () => {
   const capabilities = channelDefinitions.linkedin.capabilities;
   assert.equal(capabilities.discoverPublicBusinesses, true);

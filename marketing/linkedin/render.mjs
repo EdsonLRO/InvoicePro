@@ -31,7 +31,7 @@ const campaigns = [
     eyebrow: "A CLEARER START TO THE DAY",
     headline: "Know what needs attention",
     supporting: "Outstanding, overdue and paid - at a glance.",
-    screenshot: "tallyo-dashboard.jpg",
+    screenshot: "growth-studio/dashboard-overview.png",
     fit: "wide",
   },
   {
@@ -39,7 +39,7 @@ const campaigns = [
     eyebrow: "PROFESSIONAL DOCUMENTS",
     headline: "Create invoices without starting over",
     supporting: "Saved details. Clear totals. Professional PDFs.",
-    screenshot: "tallyo-invoice-editor.jpg",
+    screenshot: "growth-studio/invoice-editor.png",
     fit: "tall",
   },
   {
@@ -47,7 +47,7 @@ const campaigns = [
     eyebrow: "LESS REPEATED TYPING",
     headline: "Save it once. Reuse it next time.",
     supporting: "Keep commonly used products and services ready for the next invoice.",
-    screenshot: "tallyo-customers.jpg",
+    screenshot: "growth-studio/products-services.png",
     fit: "wide",
   },
   {
@@ -55,7 +55,7 @@ const campaigns = [
     eyebrow: "REPEAT WORK, LESS ADMIN",
     headline: "Plan recurring invoices",
     supporting: "Choose the schedule and decide whether generated invoices are emailed.",
-    screenshot: "tallyo-recurring.jpg",
+    screenshot: "growth-studio/recurring-invoices.png",
     fit: "standard",
   },
   {
@@ -63,7 +63,7 @@ const campaigns = [
     eyebrow: "PAYMENT OPTIONS YOU CONTROL",
     headline: "Offer card payment when it suits the invoice",
     supporting: "Request the full balance or a predefined deposit. Stripe fees may apply.",
-    screenshot: "tallyo-payments.jpg",
+    screenshot: "growth-studio/deposit-request.png",
     fit: "tall",
   },
   {
@@ -71,7 +71,7 @@ const campaigns = [
     eyebrow: "CUSTOMER DETAILS, READY",
     headline: "Save customer details for next time",
     supporting: "Keep repeat customer information organised and ready for the next document.",
-    screenshot: "tallyo-customers.jpg",
+    screenshot: "growth-studio/customer-details.png",
     fit: "wide",
   },
   {
@@ -79,7 +79,7 @@ const campaigns = [
     eyebrow: "KEEP RECORDS CURRENT",
     headline: "Update customer details in one place",
     supporting: "Edit the contact information used across future invoices and quotes.",
-    screenshot: "tallyo-customers.jpg",
+    screenshot: "growth-studio/customer-details.png",
     fit: "standard",
   },
   {
@@ -87,7 +87,7 @@ const campaigns = [
     eyebrow: "EVERY DOCUMENT, ONE VIEW",
     headline: "See invoice status without the guesswork",
     supporting: "Filter invoices, quotes and credit notes and see what is due, paid or overdue.",
-    screenshot: "tallyo-overdue.jpg",
+    screenshot: "growth-studio/overdue-invoices.png",
     fit: "landscape",
   },
   {
@@ -95,7 +95,7 @@ const campaigns = [
     eyebrow: "LESS REPETITIVE ADMIN",
     headline: "Handle several documents together",
     supporting: "Select multiple records when you need to duplicate, email, export or delete them.",
-    screenshot: "tallyo-overdue.jpg",
+    screenshot: "growth-studio/invoice-list-actions.png",
     fit: "landscape",
   },
   {
@@ -103,7 +103,7 @@ const campaigns = [
     eyebrow: "A CLEAR RECORD",
     headline: "Understand what happened",
     supporting: "Email, payment, refund and document activity stays attached to the relevant record.",
-    screenshot: "tallyo-activity.jpg",
+    screenshot: "growth-studio/activity-history.png",
     fit: "wide",
   },
   {
@@ -111,7 +111,7 @@ const campaigns = [
     eyebrow: "FLEXIBLE PAYMENT REQUESTS",
     headline: "Offer a predefined deposit",
     supporting: "Choose the deposit amount before sending and keep the remaining balance visible.",
-    screenshot: "tallyo-payments.jpg",
+    screenshot: "growth-studio/deposit-request.png",
     fit: "tall",
   },
   {
@@ -119,7 +119,7 @@ const campaigns = [
     eyebrow: "RECURRING WORK, ORGANISED",
     headline: "Manage recurring schedules together",
     supporting: "See the next invoice date, email choice and schedule status in one place.",
-    screenshot: "tallyo-recurring.jpg",
+    screenshot: "growth-studio/recurring-invoices.png",
     fit: "wide",
   },
   {
@@ -127,7 +127,7 @@ const campaigns = [
     eyebrow: "STAY IN CONTROL",
     headline: "Change a recurring schedule when needed",
     supporting: "Adjust timing, email delivery or the next run without rebuilding the invoice.",
-    screenshot: "tallyo-recurring.jpg",
+    screenshot: "growth-studio/recurring-edit.png",
     fit: "standard",
   },
   {
@@ -135,7 +135,7 @@ const campaigns = [
     eyebrow: "SEE WHAT WAS CREATED",
     headline: "Review recurring invoice history",
     supporting: "Keep each generated invoice and schedule result easy to trace.",
-    screenshot: "tallyo-recurring.jpg",
+    screenshot: "growth-studio/recurring-history.png",
     fit: "wide",
   },
   {
@@ -143,7 +143,7 @@ const campaigns = [
     eyebrow: "FOLLOW UP BY CHOICE",
     headline: "Set automatic overdue reminders",
     supporting: "Choose when reminders start, how often they repeat and when they stop.",
-    screenshot: "tallyo-overdue.jpg",
+    screenshot: "growth-studio/automatic-reminders.png",
     fit: "wide",
   },
   {
@@ -151,7 +151,7 @@ const campaigns = [
     eyebrow: "YOUR BUSINESS, YOUR LOOK",
     headline: "Keep invoices recognisably yours",
     supporting: "Choose a brand colour and logo position, then preview the result before saving.",
-    screenshot: "tallyo-branding.jpg",
+    screenshot: "growth-studio/document-layouts.png",
     fit: "landscape",
   },
   {
@@ -159,7 +159,7 @@ const campaigns = [
     eyebrow: "BUSINESS DETAILS, READY",
     headline: "Keep company details in one place",
     supporting: "Save the information and logo you use across customer documents.",
-    screenshot: "tallyo-branding.jpg",
+    screenshot: "growth-studio/business-settings.png",
     fit: "standard",
   },
   {
@@ -167,7 +167,7 @@ const campaigns = [
     eyebrow: "SET IT ONCE",
     headline: "Start each invoice with sensible defaults",
     supporting: "Choose common currency, tax, payment terms and document settings for faster setup.",
-    screenshot: "tallyo-invoice-editor.jpg",
+    screenshot: "growth-studio/business-defaults.png",
     fit: "standard",
   },
   {
@@ -175,7 +175,7 @@ const campaigns = [
     eyebrow: "ACCOUNT CONTROLS",
     headline: "Manage your plan and card-payment setup",
     supporting: "See subscription access and connected Stripe payment readiness from your account.",
-    screenshot: "tallyo-security.jpg",
+    screenshot: "growth-studio/account-subscription.png",
     fit: "landscape",
   },
   {
@@ -183,7 +183,7 @@ const campaigns = [
     eyebrow: "ACCOUNT SECURITY",
     headline: "Choose stronger sign-in protection",
     supporting: "Manage your password, authenticator app and account recovery controls.",
-    screenshot: "tallyo-security.jpg",
+    screenshot: "growth-studio/account-security.png",
     fit: "standard",
   },
   {
@@ -191,7 +191,7 @@ const campaigns = [
     eyebrow: "YOUR DATA, YOUR SESSIONS",
     headline: "Export account data and manage sign-outs",
     supporting: "Download your records or sign out this device or every signed-in device.",
-    screenshot: "tallyo-security.jpg",
+    screenshot: "growth-studio/account-data-sessions.png",
     fit: "standard",
   },
   {
@@ -223,7 +223,7 @@ const campaigns = [
     eyebrow: "WORK IN BATCHES",
     headline: "Keep busy invoice lists manageable",
     supporting: "Select the records you need and take the next action without losing context.",
-    screenshot: "tallyo-overdue.jpg",
+    screenshot: "growth-studio/invoice-list-actions.png",
     fit: "landscape",
   },
   {
@@ -231,7 +231,7 @@ const campaigns = [
     eyebrow: "WHEN THE WORK IS ALREADY DONE",
     headline: "The invoice should not be the difficult part",
     supporting: "Bring the customer, line items, tax and total together before you send.",
-    screenshot: "tallyo-invoice-editor.jpg",
+    screenshot: "growth-studio/invoice-editor.png",
     fit: "tall",
   },
   {
@@ -239,7 +239,7 @@ const campaigns = [
     eyebrow: "FOR THE CUSTOMERS WHO COME BACK",
     headline: "The next invoice can start with what you already know",
     supporting: "Keep familiar customer details ready instead of typing them again.",
-    screenshot: "tallyo-customers.jpg",
+    screenshot: "growth-studio/customer-details.png",
     fit: "wide",
   },
   {
@@ -247,7 +247,7 @@ const campaigns = [
     eyebrow: "WHEN THE WORK REPEATS",
     headline: "Put the next invoice on the schedule",
     supporting: "Set the timing once, then review, change or pause it whenever needed.",
-    screenshot: "tallyo-recurring.jpg",
+    screenshot: "growth-studio/recurring-invoices.png",
     fit: "wide",
   },
   {
@@ -255,7 +255,7 @@ const campaigns = [
     eyebrow: "WHEN PAYMENT IS LATE",
     headline: "Follow up without rebuilding the context",
     supporting: "Choose if and when reminders are sent, while the invoice history stays together.",
-    screenshot: "tallyo-overdue.jpg",
+    screenshot: "growth-studio/overdue-invoices.png",
     fit: "wide",
   },
   {
@@ -263,7 +263,7 @@ const campaigns = [
     eyebrow: "WHEN A JOB NEEDS A DEPOSIT",
     headline: "Ask for a deposit without losing sight of the balance",
     supporting: "Set the amount before sending and keep the remaining balance visible.",
-    screenshot: "tallyo-payments.jpg",
+    screenshot: "growth-studio/deposit-request.png",
     fit: "tall",
   },
   {
@@ -271,7 +271,7 @@ const campaigns = [
     eyebrow: "AFTER THE INVOICE IS SENT",
     headline: "Keep the invoice story in one place",
     supporting: "Email, payment, refund and document activity stays with the relevant record.",
-    screenshot: "tallyo-activity.jpg",
+    screenshot: "growth-studio/activity-history.png",
     fit: "wide",
   },
 ];
