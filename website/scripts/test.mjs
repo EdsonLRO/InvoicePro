@@ -193,6 +193,25 @@ assert.match(featuresPage, /data-horizontal-flow/, "features page includes the s
 assert.equal((featuresPage.match(/class="workflow-outcome-step"/g) || []).length, 5, "quote-to-payment workflow renders all five focused steps");
 assert.match(featuresPage, /Send the quote[\s\S]*Quote accepted[\s\S]*Invoice created[\s\S]*Payment tracked[\s\S]*Follow-up stays clear/, "quote-to-payment workflow follows the real order");
 assert.match(featuresPage, /If you chose automatic sending before emailing the quote/, "automatic invoice email is described as an owner choice");
+assert.equal((featuresPage.match(/class="feature-proof-media"/g) || []).length, 6, "features page presents six current capability groups with product evidence");
+assert.match(featuresPage, /Income Insights with clear charts and written values/, "features page includes the released Income Insights capability");
+assert.match(featuresPage, /Income records, UK period organisation and a downloadable Income Pack/, "features page includes the released Income Pack capability");
+assert.match(featuresPage, /do not include expenses, income received elsewhere, bank balances, tax calculations or HMRC filing/, "income claims retain the reviewed product boundary");
+assert.match(featuresPage, /Google or email-and-password sign-in/, "features page includes released Google sign-in without implying Apple availability");
+assert.match(featuresPage, /Tallyo, Basic, Modern and Professional layouts/, "features page includes the four released document layouts");
+const currentFeatureImages = [
+  "dashboard-overview.png",
+  "quote-email-review.png",
+  "products-services.png",
+  "recurring-edit.png",
+  "income-insights.png",
+  "document-layouts.png",
+  "google-sign-in.png"
+];
+for (const screenshotName of currentFeatureImages) {
+  assert.match(featuresPage, new RegExp(`/assets/product/growth-studio/${screenshotName.replace(".", "\\.")}\\?v=[a-f0-9]{12}`), `features page includes versioned ${screenshotName}`);
+  assert.deepEqual([...readFileSync(join(distRoot, "assets", "product", "growth-studio", screenshotName)).subarray(0, 4)], [137, 80, 78, 71], `${screenshotName} is copied as PNG`);
+}
 
 const invoiceGuide = read("invoice-guide/index.html");
 assert.match(invoiceGuide, /What is an invoice, and how does it work\?/);
@@ -486,7 +505,9 @@ assert.match(styles, /\.section-cta \{[^}]*margin-top: var\(--layout-gap\)/, "fi
 assert.match(styles, /\.section-cta \{[^}]*backdrop-filter: blur\(24px\) saturate\(155%\)/, "final CTA uses the liquid-glass treatment");
 assert.match(styles, /\.section-cta \{[^}]*box-shadow: 0 16px 34px -26px/, "blue CTA cards use a contained rounded shadow without a square bottom strip");
 assert.match(styles, /\.workflow-outcome \.section-heading \{ max-width: none; \}/, "feature workflow uses the available panel width");
-assert.match(styles, /\.feature-hero-summary p::before \{[^}]*translateX\(-102%\)/, "feature summary rows include the reference-style hover wash");
+assert.match(styles, /\.feature-hero-screen > div \{[^}]*box-shadow: 0 24px 64px/, "feature hero presents the current app screen in a contained visual frame");
+assert.match(styles, /\.feature-proof-media > div \{[^}]*box-shadow: 0 14px 38px/, "feature evidence screenshots use contained rounded frames");
+assert.match(styles, /@media \(min-width: 72rem\) \{[\s\S]*?\.feature-detail-list article \{ grid-template-columns: auto minmax\(19rem,0\.78fr\) minmax\(32rem,1\.22fr\); \}/, "feature evidence uses a balanced desktop text-and-screen layout");
 assert.match(styles, /\.workflow-outcome-step \{[^}]*box-shadow: 0 6px 16px/, "connected workflow cards keep an individual soft shadow");
 assert.match(styles, /@media \(max-width: 71\.99rem\) \{[\s\S]*?\.workflow-outcome \{ min-height: 0 !important;/, "connected workflow switches to manual scrolling below the full desktop layout");
 assert.match(styles, /\.tour-index \{ position: relative;/, "product tour index scrolls away with the page");
