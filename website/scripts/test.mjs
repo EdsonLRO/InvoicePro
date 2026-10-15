@@ -309,6 +309,11 @@ assert.ok(findRelevantHelperEntries(helperKnowledge, "What happens after a clien
   .some((entry) => entry.id === "quote-acceptance"));
 assert.ok(findRelevantHelperEntries(helperKnowledge, "Can I schedule invoices and email them automatically?")
   .some((entry) => entry.id === "recurring-invoices"));
+assert.equal(findHelperAnswer(helperKnowledge, "What does Income Insights show?").id, "income-insights");
+assert.equal(findHelperAnswer(helperKnowledge, "What is included in my Income Pack?").id, "income-pack");
+assert.equal(findHelperAnswer(helperKnowledge, "Can I log in with my Google account?").id, "google-sign-in");
+assert.match(helperKnowledge.entries.find((entry) => entry.id === "income-pack").answer, /not an HMRC submission/);
+assert.match(helperKnowledge.entries.find((entry) => entry.id === "accounting-boundary").answer, /do not include expenses/);
 for (const recurringQuestion of [
   "how does recurrinng invoices work with tallyo",
   "how do recurring invoice work",
@@ -404,7 +409,15 @@ assert.match(terms, /href="\/data-processing-terms\/">Tallyo Business-User Data 
 assert.match(home, /<h2>Legal<\/h2>\s*<a href="\/terms\/">Terms of Service<\/a><a href="\/privacy\/">Privacy Notice<\/a><a href="\/cookies\/">Cookie Notice<\/a><a href="\/data-processing-terms\/">Data Processing Terms<\/a>/, "footer publishes all legal links");
 assert.match(read("pricing/index.html"), /By choosing Tallyo Pro, you agree to the <a href="\/terms\/">Terms of Service<\/a>/);
 assert.match(read("help/index.html"), /mailto:main@tallyo\.co\.uk/);
+assert.match(read("help/index.html"), /Review income recorded in Tallyo/);
+assert.match(read("help/income-insights-and-income-pack/index.html"), /They do not include expenses, income received elsewhere, bank balances, profit, tax calculations, VAT liability or HMRC submission/);
+assert.match(read("help/document-layouts-and-branding/index.html"), /Tallyo, Basic, Modern or Professional/);
+assert.match(read("help/account-security/index.html"), /Continue with Google or use your confirmed email and password/);
 assert.match(read("faq/index.html"), /email main@tallyo\.co\.uk for help/);
+assert.match(read("faq/index.html"), /What does Income Insights show\?/);
+assert.match(read("faq/index.html"), /What is the Income Pack\?/);
+assert.match(read("faq/index.html"), /Can I sign in with Google\?/);
+assert.match(read("faq/index.html"), /does not include expenses, income received elsewhere, profit, tax calculations, VAT liability or HMRC filing/);
 assert.doesNotMatch(home, /Product preview\./, "production-ready footer must not describe the website as a preview");
 
 assert.equal(parseMoney("12.34"), 1234n);

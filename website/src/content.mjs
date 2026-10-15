@@ -118,14 +118,14 @@ export const helpArticles = Object.freeze([
   {
     slug: "create-invoices-quotes-and-credit-notes",
     title: "Create invoices, quotes and credit notes",
-    description: "Choose the right document, add customer and line-item details, then send or download it.",
+    description: "Choose the right document, add customer and line-item details, then send, download or share a quote for acceptance.",
     steps: [
       ["Choose the document type", "Use a quote before work is agreed, an invoice when payment is due, or a credit note to reduce an issued invoice."],
       ["Add the customer and dates", "Select a saved customer or enter the details needed on the document, then set the issue and due dates."],
       ["Add products or services", "Use saved items or enter a clear description, quantity, unit price and applicable tax."],
-      ["Review and share", "Save the document, check its PDF, then email or download it when it is ready for the customer."]
+      ["Review and share", "Save the document and check its PDF. For a quote, review the recipient and choose whether the linked invoice should be emailed automatically after acceptance before you send it."]
     ],
-    note: "A quote can be converted to an invoice when the work is agreed. A credit note records a reduction; it is not the same as deleting the original invoice."
+    note: "When a customer accepts through the secure quote page, Tallyo keeps the accepted quote and creates one linked invoice. A credit note records a reduction; it is not the same as deleting the original invoice."
   },
   {
     slug: "payment-links-and-deposits",
@@ -178,9 +178,10 @@ export const helpArticles = Object.freeze([
   {
     slug: "account-security",
     title: "Protect your Tallyo account",
-    description: "Add authenticator-app protection, keep recovery codes safe and choose the right sign-out option.",
+    description: "Choose Google or email-and-password sign-in, add authenticator-app protection and keep recovery codes safe.",
     steps: [
-      ["Confirm your email", "Email confirmation establishes access to the account before business records are used."],
+      ["Choose how to sign in", "Continue with Google or use your confirmed email and password. Tallyo does not receive your Google password."],
+      ["Confirm your email", "Email-and-password accounts complete email confirmation before business records are used."],
       ["Add an authenticator app", "Optional multi-factor authentication asks for a current authenticator code at protected sign-ins."],
       ["Store recovery codes safely", "Keep the one-time codes away from the device you normally use to sign in."],
       ["Sign out appropriately", "Sign out this device for everyday use, or choose all devices if account access may be at risk."]
@@ -212,6 +213,30 @@ export const helpArticles = Object.freeze([
     note: "Activity history is a useful product record, not a tamper-proof compliance audit log."
   },
   {
+    slug: "income-insights-and-income-pack",
+    title: "Review income recorded in Tallyo",
+    description: "Use Income Insights to understand recorded invoice income, then prepare an Income Pack for a chosen period and currency.",
+    steps: [
+      ["Open Finances", "Choose the business-wide view or open a customer to focus on the income connected to that customer."],
+      ["Choose a period and currency", "Tallyo keeps currencies separate and shows only the records that match your chosen view."],
+      ["Review the figures", "Compare invoiced, received, outstanding and overdue amounts using the charts and the exact written values beside them."],
+      ["Prepare an Income Pack", "Choose the period and currency, review the included record count, then download the reconciled files and readable PDF summary."]
+    ],
+    note: "These views cover only income recorded in Tallyo. They do not include expenses, income received elsewhere, bank balances, profit, tax calculations, VAT liability or HMRC submission."
+  },
+  {
+    slug: "document-layouts-and-branding",
+    title: "Choose a document layout and branding",
+    description: "Choose how invoices, quotes and credit notes look, then preview your colour, logo and item-row preferences.",
+    steps: [
+      ["Open Branding", "Use the Branding area in Settings to see the document presentation controls and live preview."],
+      ["Choose a layout", "Select Tallyo, Basic, Modern or Professional to find the structure that suits your business."],
+      ["Add your visual details", "Choose the brand colour and logo position, and decide whether item rows should use alternating colours."],
+      ["Preview and save", "Check the sample document at different preview sizes, save your choices and review a final PDF before sending it to a customer."]
+    ],
+    note: "The selected presentation is used consistently for invoices, quotes, credit notes, downloaded PDFs and emailed PDF attachments."
+  },
+  {
     slug: "install-tallyo",
     title: "Install Tallyo on your phone or computer",
     description: "See exactly which browser icon or menu to use, then add Tallyo to your desktop, taskbar or home screen.",
@@ -234,9 +259,13 @@ export const faqs = Object.freeze([
   { question: "What happens when an invoice is overdue?", answer: "An invoice is overdue when its due date has passed and money is still owed. Tallyo shows it in the overdue view, but sends reminders only for invoices where you turned reminders on." },
   { question: "Can I record a deposit or part-payment?", answer: "Yes. Add a deposit, part-payment or final payment to the invoice and Tallyo shows how much is still left to pay." },
   { question: "What does activity history show?", answer: "Activity history shows when a document was created or sent, when reminders went out and when payments were recorded." },
+  { question: "What does Income Insights show?", answer: "Income Insights shows invoiced, received, outstanding and overdue amounts from records in Tallyo, with accessible charts and written values. Currencies remain separate." },
+  { question: "What is the Income Pack?", answer: "The Income Pack prepares reconciled income files and a readable PDF summary for a period and currency you choose. It is not an HMRC submission and does not include expenses or income received elsewhere." },
+  { question: "Can I choose how my documents look?", answer: "Yes. Choose the Tallyo, Basic, Modern or Professional layout, then set your colour, logo position and whether item rows use alternating colours." },
+  { question: "Can I sign in with Google?", answer: "Yes. Continue with Google is available alongside email and password. Google provides the basic identity details needed to sign you in, and Tallyo does not receive your Google password." },
   { question: "Can customers pay an invoice by card?", answer: connectPaymentPlaceholders.faq },
   { question: "Can I export my records?", answer: "Yes. Tallyo can create a structured account export and offers Excel export for document lists." },
-  { question: "Does Tallyo replace accounting software?", answer: "No. Tallyo helps with invoicing and business records, but it is not a full accounting suite and does not prepare tax returns." },
+  { question: "Does Tallyo replace accounting software?", answer: "No. Tallyo helps with invoicing and income records connected to it, but it does not include expenses, income received elsewhere, profit, tax calculations, VAT liability or HMRC filing." },
   { question: "How do I get support?", answer: "Use the Help Centre for step-by-step guidance or email main@tallyo.co.uk for help with your Tallyo account or service." }
 ]);
 

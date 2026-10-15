@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "scope": "public-product-guidance-only",
   "entries": [
     {
@@ -25,7 +25,7 @@
       "question": "What can I do with Tallyo?",
       "triggers": ["what features are available", "tallyo features", "what can tallyo do"],
       "keywords": ["features", "invoices", "quotes", "payments", "customers", "reminders", "recurring", "exports", "everyday", "admin"],
-      "answer": "You can create and email invoices, quotes and credit notes, save customers and items, personalise PDFs, track payments, schedule recurring invoices, choose overdue reminders and review document activity. You can also export your records and use account-protection controls. __TALLYO_CONNECT_PAYMENT_AVAILABILITY__",
+      "answer": "You can create and email invoices, quotes and credit notes, save customers and items, personalise PDFs with four layouts, track payments, schedule recurring invoices and choose overdue reminders. Income Insights explains the income recorded in Tallyo, the Income Pack prepares downloadable records, and you can sign in with Google or email and password. __TALLYO_CONNECT_PAYMENT_AVAILABILITY__",
       "links": [{ "label": "Explore features", "href": "/features/" }, { "label": "Take the product tour", "href": "/product-tour/" }],
       "suggested": true,
       "essential": true
@@ -188,6 +188,23 @@
       "links": [{ "label": "Read the activity guide", "href": "/help/activity-history/" }]
     },
     {
+      "id": "income-insights",
+      "question": "What does Income Insights show?",
+      "triggers": ["income insights", "finances overview", "income dashboard", "invoiced received outstanding overdue"],
+      "keywords": ["income", "finances", "invoiced", "received", "outstanding", "overdue", "charts", "currency"],
+      "answer": "Income Insights helps you understand the income recorded in Tallyo by showing invoiced, received, outstanding and overdue amounts. It includes accessible charts and exact written values, keeps currencies separate and can be viewed across the business or for one customer.",
+      "links": [{ "label": "Review income recorded in Tallyo", "href": "/help/income-insights-and-income-pack/" }],
+      "suggested": true
+    },
+    {
+      "id": "income-pack",
+      "question": "What is the Income Pack?",
+      "triggers": ["income pack", "prepare income records", "download income records", "income pdf", "mtd income"],
+      "keywords": ["income", "pack", "records", "csv", "pdf", "period", "currency", "reconciled"],
+      "answer": "The Income Pack prepares reconciled income files, a manifest and a readable PDF summary for the period and currency you choose. It is prepared from income recorded in Tallyo; it is not an HMRC submission and does not include expenses, income received elsewhere, profit, tax calculations or VAT liability.",
+      "links": [{ "label": "Review Income Insights and the Income Pack", "href": "/help/income-insights-and-income-pack/" }]
+    },
+    {
       "id": "email-delivery",
       "question": "Can I check whether a document email was delivered?",
       "triggers": ["email delivery", "invoice email status", "was email delivered", "sent document"],
@@ -209,7 +226,7 @@
       "triggers": ["invoice templates", "document layouts", "choose template", "basic modern professional tallyo"],
       "keywords": ["template", "layout", "tallyo", "basic", "modern", "professional"],
       "answer": "You can choose from four layouts: Tallyo, Basic, Modern and Professional. Open Branding, select the style you like and use the live preview to see how your details, items and totals will look.",
-      "links": [{ "label": "Explore features", "href": "/features/" }]
+      "links": [{ "label": "Choose a document layout", "href": "/help/document-layouts-and-branding/" }]
     },
     {
       "id": "alternating-rows",
@@ -285,6 +302,14 @@
       "links": [{ "label": "Log in", "href": "app:login" }]
     },
     {
+      "id": "google-sign-in",
+      "question": "How does Google sign-in work?",
+      "triggers": ["google sign in", "continue with google", "log in with google", "google account"],
+      "keywords": ["google", "sign in", "login", "identity", "password", "account"],
+      "answer": "Choose Continue with Google on the Tallyo sign-in screen and complete Google's account check. Google provides the basic identity details needed to sign you in; Tallyo does not receive your Google password or request access to Gmail, Drive, contacts or calendars.",
+      "links": [{ "label": "Protect your account", "href": "/help/account-security/" }]
+    },
+    {
       "id": "account-security",
       "question": "How can I protect my Tallyo account?",
       "triggers": ["protect account", "account security", "two factor authentication", "mfa", "authenticator app", "recovery codes"],
@@ -345,8 +370,8 @@
       "question": "Does Tallyo replace accounting software?",
       "triggers": ["replace accounting software", "is tallyo accounting software", "tax returns", "bookkeeping suite"],
       "keywords": ["accounting", "bookkeeping", "tax return", "limitations"],
-      "answer": "No. Tallyo helps you manage invoicing and the records connected to it, but it is not a full accounting package. It does not prepare tax returns or provide legal, tax or accounting advice.",
-      "links": [{ "label": "Explore features", "href": "/features/" }]
+      "answer": "No. Tallyo helps with invoicing and income records connected to it, but it is not a full accounting package. Income views do not include expenses, income received elsewhere, bank balances, profit, tax calculations, VAT liability or HMRC filing, and Tallyo does not provide legal, tax or accounting advice.",
+      "links": [{ "label": "Review income recorded in Tallyo", "href": "/help/income-insights-and-income-pack/" }]
     },
     {
       "id": "support",
