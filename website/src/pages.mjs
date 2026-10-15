@@ -7,7 +7,7 @@ import {
   workflowSteps
 } from "./content.mjs";
 import { finalCta, helpArticlePage, list, productDemo, workflow } from "./components.mjs";
-import { commercialOffer, connectPaymentPlaceholders, pricingFaqs } from "./commercial-offer.mjs";
+import { applySubscriptionTrialCopy, commercialOffer, connectPaymentPlaceholders, pricingFaqs } from "./commercial-offer.mjs";
 import { siteConfig } from "./config.mjs";
 import { cookieNotice, dataProcessingTerms, privacyNotice } from "./legal-content.mjs";
 import { serviceTerms } from "./service-terms-content.mjs";
@@ -159,7 +159,7 @@ const pricing = `
     <article class="plan-card plan-card-featured"><p class="card-label">${commercialOffer.pro.audience}</p><h2>${commercialOffer.pro.name}</h2><p class="plan-price">${commercialOffer.pro.monthlyPrice}<span> per month</span></p><p class="plan-annual">or ${commercialOffer.pro.annualPrice} per year · ${commercialOffer.pro.annualEquivalent}. ${commercialOffer.pro.annualSaving}</p>${list(commercialOffer.pro.features)}${subscriptionCta}${siteConfig.subscriptionTrialEnabled ? `<p class="plan-note"><strong>7-day monthly-plan trial:</strong> a card is required. After 7 days, the subscription continues automatically at £8 per month unless you cancel online first. We will email you 3 days before it ends. If you cancel during the trial, you keep access until it ends and will not be charged. Cancelling does not delete your Tallyo data.</p>` : ""}<p class="plan-note">By choosing Tallyo Pro, you agree to the <a href="/terms/">Terms of Service</a>. ${commercialOffer.pro.reasonableUse}</p></article>
   </div></section>
   <section class="section section-soft pricing-boundaries" aria-labelledby="pricing-boundaries-title"><div><p class="eyebrow">Before you choose</p><h2 id="pricing-boundaries-title">Straightforward billing, with clear limits.</h2></div>${list([commercialOffer.billing.setupFee, commercialOffer.billing.sameFeatures, siteConfig.subscriptionTrialEnabled ? commercialOffer.billing.trial : commercialOffer.billing.noTrial, commercialOffer.billing.cancellation, commercialOffer.billing.annualRefund, commercialOffer.paymentAvailability])}</section>
-  <section class="section faq-list" aria-labelledby="pricing-faq-title"><div class="section-heading"><p class="eyebrow">Pricing questions</p><h2 id="pricing-faq-title">What to expect.</h2></div>${pricingFaqs.map((item, index) => `<details><summary>${item.question}</summary><p>${index === 0 && siteConfig.subscriptionTrialEnabled ? commercialOffer.billing.trial : item.answer}</p></details>`).join("")}</section>
+  <section class="section faq-list" aria-labelledby="pricing-faq-title"><div class="section-heading"><p class="eyebrow">Pricing questions</p><h2 id="pricing-faq-title">What to expect.</h2></div>${pricingFaqs.map((item) => `<details><summary>${item.question}</summary><p>${applySubscriptionTrialCopy(item.answer, siteConfig.subscriptionTrialEnabled)}</p></details>`).join("")}</section>
   ${finalCta({ title: "Choose the route that fits today.", copy: "Make one document free, or create an account for saved and connected invoicing work.", secondary: false })}`;
 
 const security = `

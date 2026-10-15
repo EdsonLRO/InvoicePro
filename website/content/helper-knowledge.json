@@ -313,7 +313,7 @@
       "question": "Is there a free trial?",
       "triggers": ["free trial", "try tallyo", "trial period"],
       "keywords": ["trial", "free", "monthly", "invoice maker"],
-      "answer": "There is not currently a full-feature free trial. You can try the Free Invoice Maker without an account, or choose monthly billing if you want a lower-commitment way to explore the saved Tallyo workspace.",
+      "answer": "__TALLYO_SUBSCRIPTION_TRIAL_AVAILABILITY__",
       "links": [{ "label": "Compare pricing", "href": "/pricing/" }]
     },
     {

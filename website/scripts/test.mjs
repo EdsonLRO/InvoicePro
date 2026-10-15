@@ -10,9 +10,11 @@ import { APPROVED_ANALYTICS_EVENTS, GA4_MEASUREMENT_ID } from "../../analytics-c
 import { calculateDocument, calculationPolicy, formatMoney, parseMoney, parsePercent, parseQuantity } from "../src/document-calculator.mjs";
 import {
   applyConnectPaymentCopy,
+  applySubscriptionTrialCopy,
   commercialOffer,
   connectPaymentPlaceholders,
-  pricingFaqs
+  pricingFaqs,
+  subscriptionTrialPlaceholder
 } from "../src/commercial-offer.mjs";
 
 const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -72,6 +74,7 @@ assert.match(commercialOffer.pro.annualSaving, /Save £16/);
 assert.match(commercialOffer.pro.audience, /One business · One user/);
 assert.match(commercialOffer.pro.availability, /Subscriptions are being prepared/);
 assert.match(commercialOffer.billing.noTrial, /does not currently offer a full-feature free trial/);
+assert.equal(pricingFaqs[0].answer, subscriptionTrialPlaceholder);
 assert.equal(commercialOffer.paymentAvailability, connectPaymentPlaceholders.availability);
 assert.equal(pricingFaqs.length, 5);
 assert.doesNotMatch(JSON.stringify({ commercialOffer, pricingFaqs }), /two months free|free months|money-back guarantee|lifetime (?:price|access)|risk-free/i);
@@ -123,6 +126,7 @@ for (const page of [...pages, notFoundPage]) {
   assert.doesNotMatch(html, prohibitedClaims, `prohibited claim on ${page.route}`);
   assert.doesNotMatch(html, fakeProof, `fake proof on ${page.route}`);
   assert.doesNotMatch(html, /__TALLYO_CONNECT_PAYMENT_/, `resolved customer-payment copy on ${page.route}`);
+  assert.doesNotMatch(html, /__TALLYO_SUBSCRIPTION_TRIAL_/, `resolved subscription-trial copy on ${page.route}`);
   assert.doesNotMatch(html, /<script[^>]+src="https?:\/\//, `no external script on ${page.route}`);
   assert.doesNotMatch(html, /data-(?:signup|login)-link[^>]+href="#"/, `configured account links for ${page.route}`);
   assert.doesNotMatch(html, /href="[^"]*utm_(?:source|medium|campaign|content|term)/, `campaign parameters never enter links on ${page.route}`);
@@ -255,14 +259,15 @@ assert.match(pricing, /not included in the launch subscription yet/);
 assert.doesNotMatch(pricing, /Essentials|Automate|Teams|two months free|\d+-day trial/i);
 assert.doesNotMatch(pricing, /checkout\.stripe\.com|price_[A-Za-z0-9]+|prod_[A-Za-z0-9]+/);
 
-const helperKnowledge = JSON.parse(applyConnectPaymentCopy(
+const helperKnowledge = JSON.parse(applySubscriptionTrialCopy(applyConnectPaymentCopy(
   readFileSync(join(websiteRoot, "content", "helper-knowledge.json"), "utf8"),
   false
-));
+), false));
 assert.equal(helperKnowledge.scope, "public-product-guidance-only");
 assert.ok(helperKnowledge.entries.length >= 40, "helper covers the released public workflows");
 assert.equal(new Set(helperKnowledge.entries.map((entry) => entry.id)).size, helperKnowledge.entries.length, "helper knowledge IDs are unique");
 assert.ok(helperKnowledge.entries.filter((entry) => entry.suggested).length >= 6, "helper retains a focused suggestion set");
+assert.match(helperKnowledge.entries.find((entry) => entry.id === "free-trial").answer, /does not currently offer a full-feature free trial/);
 for (const entry of helperKnowledge.entries) {
   assert.ok(entry.triggers.length > 0, `helper triggers for ${entry.id}`);
   assert.ok(entry.keywords.length > 0, `helper retrieval keywords for ${entry.id}`);

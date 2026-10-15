@@ -2,9 +2,11 @@
 
 ## Current boundary
 
-This is a design-only website record. It does not enable subscription checkout,
-create a Stripe customer, configure Stripe products or prices, alter secrets,
-grant entitlements or change the existing invoice-payment flow.
+This is a public-content architecture record. It does not itself enable
+subscription checkout, create a Stripe customer, configure Stripe products or
+prices, alter secrets, grant entitlements or change the customer invoice-payment
+flow. Runtime release remains controlled by the existing server and website
+feature gates.
 
 The approved commercial content has two offers:
 
@@ -12,9 +14,12 @@ The approved commercial content has two offers:
 - **Tallyo Pro:** one business and one user, £8 monthly or £80 annually, with
   the same product features for either billing interval.
 
-Tallyo does not currently offer a full-feature free trial. The annual option
-saves £16 compared with twelve monthly payments. These approved display values
-are not Stripe price identifiers and do not activate billing.
+The monthly plan includes one card-required seven-day trial per account. Unless
+the customer cancels online first, it continues automatically at £8 per month.
+Tallyo emails a reminder three days before the trial ends. The annual option
+saves £16 compared with twelve monthly payments and does not include the trial.
+These approved display values are not Stripe price identifiers and do not
+activate billing.
 
 ## Authoritative architecture
 
@@ -26,16 +31,17 @@ Customer invoice payments are a separate commercial and technical system. The
 required multi-business merchant path and Stripe Connect preparation are in
 `docs/architecture/STRIPE_CONNECT.md`.
 
-## Remaining Owner gates
+## Current release boundary
 
-Before any runtime or production work:
+Subscription Checkout, server-enforced entitlements, online cancellation and
+the seven-day monthly-plan trial are released. Stripe-hosted Checkout and the
+Customer Portal remain separate from customer invoice payments through a
+connected business account.
 
-1. approve tax presentation and final contractual cancellation/refund wording;
-2. review the Billing schema, RLS, webhooks and server-enforced entitlements;
-3. approve Stripe products and allowlisted Price IDs;
-4. approve production secrets, webhook destinations and provider changes;
-5. approve controlled test and live acceptance payments;
-6. approve public pricing checkout and production release.
+The checked-in source stays fail-closed. A production website build can publish
+the trial only when subscription Checkout and the separate trial release gates
+are both enabled. Preview builds require their own reviewed preview approvals.
 
-Until those gates are passed, subscription controls must remain non-transactional
-and clearly state that subscriptions are being prepared.
+Any future change to prices, trial length, renewal, cancellation, refunds,
+entitlements, provider configuration or live payment behaviour requires a new
+focused review and the applicable Owner approval.
