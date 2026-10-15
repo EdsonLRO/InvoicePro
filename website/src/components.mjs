@@ -11,7 +11,7 @@ export const list = (items) => `<ul class="check-list">${items.map((item) => `<l
 export const finalCta = ({
   eyebrow = "Ready when you are",
   title = "Bring your invoicing work into one clear workspace.",
-  copy = "Create professional documents, see what has been paid and spend less time repeating the same setup.",
+  copy = "Create professional documents, follow payments, understand the income recorded in Tallyo and spend less time repeating the same setup.",
   primaryLabel = "Create account",
   secondary = true,
   secondaryLabel = "Explore features",

@@ -14,8 +14,8 @@ selection. No event is an advertising conversion.
 
 If paid search is later approved, start with tightly separated high-intent groups:
 
-- simple invoicing software UK → homepage or sole-trader landing page;
-- invoice software for sole traders → `/industries/sole-traders/`;
+- simple invoicing software UK → homepage or Features page;
+- invoice software for sole traders → `/features/` (the retired industry route redirects here);
 - recurring invoice software UK → recurring-invoice guide and product tour;
 - invoice reminder app → overdue-reminder guide;
 - invoice and quote software UK → features and product tour;
@@ -56,7 +56,8 @@ Content pillars are getting paid, professional documents, saving time and stayin
 organised. A useful guide may be adapted into a help article, public Helper answer,
 short social post or later email tip only after channel-specific review.
 
-Every item must be accurate, useful, UK-focused, readable, supported by current
-product behaviour and reviewed before publication. Legal, tax and accounting
-subjects must not be presented as personalised advice. Do not mass-produce thin
-pages or criticise competitors with unsupported claims.
+Every item must be accurate, useful, understandable to English-speaking visitors,
+supported by current product behaviour and reviewed before publication. UK-specific
+legal, tax and accounting subjects must remain clearly labelled and must not be
+presented as personalised advice. Do not mass-produce thin pages or criticise
+competitors with unsupported claims.

@@ -263,6 +263,13 @@ const redirects = read("_redirects");
 for (const slug of ["freelancers", "consultants", "cleaners", "electricians", "photographers", "sole-traders"]) {
   assert.match(redirects, new RegExp(`/industries/${slug}/ /features/ 301`), `retired ${slug} page redirects to the relevant product information`);
 }
+const seoContentMap = JSON.parse(readFileSync(join(websiteRoot, "content", "seo-content-map.json"), "utf8"));
+assert.ok(seoContentMap.topics.filter((item) => item.status === "retired-page-redirects-to-features").length >= 6, "SEO plan records retired industry pages instead of treating them as live");
+assert.ok(seoContentMap.topics.some((item) => item.topic === "Income tracking for invoices" && item.route === "/help/income-insights-and-income-pack/" && item.status === "implemented"), "SEO plan includes the released income guidance");
+assert.ok(seoContentMap.topics.some((item) => item.topic === "Invoice document layouts and branding" && item.route === "/help/document-layouts-and-branding/" && item.status === "implemented"), "SEO plan includes the released layout guidance");
+const growthReadiness = readFileSync(join(websiteRoot, "content", "growth-readiness.md"), "utf8");
+assert.match(growthReadiness, /invoice software for sole traders → `\/features\/` \(the retired industry route redirects here\)/);
+assert.match(growthReadiness, /understandable to English-speaking visitors/);
 
 const installGuide = read("help/install-tallyo/index.html");
 assert.match(installGuide, /data-install-guide/, "installation article includes a visual browser guide");
@@ -418,6 +425,11 @@ assert.match(read("faq/index.html"), /What does Income Insights show\?/);
 assert.match(read("faq/index.html"), /What is the Income Pack\?/);
 assert.match(read("faq/index.html"), /Can I sign in with Google\?/);
 assert.match(read("faq/index.html"), /does not include expenses, income received elsewhere, profit, tax calculations, VAT liability or HMRC filing/);
+assert.match(read("about/index.html"), /agree work, create professional documents, follow payments, repeat regular invoices and understand the income recorded in Tallyo/);
+assert.match(read("security/index.html"), /Continue with Google or use your confirmed email and password/);
+assert.match(read("security/index.html"), /downloaded PDFs, Income Pack files, account exports/);
+assert.match(generator, /Income Insights and a downloadable Income Pack/);
+assert.match(generator, /Four document layouts with your branding/);
 assert.doesNotMatch(home, /Product preview\./, "production-ready footer must not describe the website as a preview");
 
 assert.equal(parseMoney("12.34"), 1234n);
@@ -610,7 +622,7 @@ assert.doesNotMatch(read("assets/growth.js"), /fetch\s*\(|XMLHttpRequest|WebSock
 
 const contentMap = JSON.parse(readFileSync(join(websiteRoot, "content", "seo-content-map.json"), "utf8"));
 assert.equal(contentMap.status, "planning-only");
-assert.equal(contentMap.topics.length, 20, "all master-spec SEO topics are mapped");
+assert.equal(contentMap.topics.length, 23, "all reviewed SEO topics are mapped");
 assert.ok(contentMap.topics.every((topic) => topic.topic && topic.intent && topic.status), "SEO map entries are actionable specifications");
 
 const report = JSON.parse(read("build-report.json"));
