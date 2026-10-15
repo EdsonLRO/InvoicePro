@@ -748,7 +748,7 @@ row was created during activation.
 
 ## Focused task: GROWTH-002 One-off introductory email design
 
-Status: Phase 6 source refresh prepared; production remains on the previously approved template and no live email was sent
+Status: Complete — Phase 6 source refresh deployed as version 10; no live email sent
 Priority: High
 Assigned roles: Growth, Backend/Supabase, Privacy/Legal and QA
 Model/work mode: Sol / High for the consent and server-email boundary; visual
@@ -784,8 +784,15 @@ five-image limit is retained and every visual is a real current-app screenshot
 with fictional data and the official Tallyo logo. Consent wording and version,
 unique-address enforcement, provider idempotency, rate limiting, unsubscribe,
 address minimisation and sender logic are unchanged. Source merge does not
-deploy the Edge Function or send an email; production deployment remains a
-separate Owner-approved action.
+deploy the Edge Function or send an email by itself. PR #245 merged as
+`f61afba59a839f1c49744bd265478d341a23ee7a`. Under exact Owner approval, only
+`send-marketing-overview` was then deployed as version 10 with JWT verification
+still disabled by design for the public form. Production readback reports the
+function Active; an approved-origin preflight returned 204 and an invalid
+empty request returned 400 before any consent record or provider send. No
+promotional email, account, subscription, payment, migration, secret or
+unrelated provider setting changed. Rollback is version 9/source before PR
+#245.
 
 ## Focused task: COMM-001-ENT-003 Complimentary access by email
 
