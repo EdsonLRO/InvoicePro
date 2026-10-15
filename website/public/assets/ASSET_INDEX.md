@@ -57,9 +57,11 @@ captured screenshot of the current application.
 
 ## Email imagery
 
-`email/` contains current-app crops used by the product overview email. Keep
-the existing filenames because the email template references their public
-URLs.
+`email/` contains current-app crops used by the product overview email. The
+current overview combines these focused invoice and recurring-work crops with
+real current-app quote, Income Insights and document-layout screenshots from
+`product/`. Keep the existing filenames because the email template references
+their public URLs.
 
 ## Social campaigns
 

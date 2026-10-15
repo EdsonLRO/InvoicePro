@@ -26,24 +26,24 @@ export const validateOverviewBody = (body) => {
 
 export const OVERVIEW_EMAIL_IMAGES = [
   {
-    src: "https://tallyo.co.uk/assets/product/tallyo-invoice-editor.jpg?v=20260924-overview",
+    src: "https://tallyo.co.uk/assets/email/overview-create-invoice.jpg?v=20261015-overview",
     alt: "Updated Tallyo invoice editor with clear sections, an invoice summary and fictional demonstration data",
   },
   {
-    src: "https://tallyo.co.uk/assets/product/tallyo-quote-editor.jpg?v=20260924-overview",
+    src: "https://tallyo.co.uk/assets/product/tallyo-quote-editor.jpg?v=20261015-overview",
     alt: "Accepted fictional quote in Tallyo with a clearly linked invoice ready to open",
   },
   {
-    src: "https://tallyo.co.uk/assets/product/tallyo-recurring.jpg?v=20260924-overview",
+    src: "https://tallyo.co.uk/assets/email/overview-recurring-reminders.jpg?v=20261015-overview",
     alt: "Tallyo recurring invoice schedules showing automatic and manual email choices with fictional data",
   },
   {
-    src: "https://tallyo.co.uk/assets/product/tallyo-payments.jpg?v=20260924-overview",
-    alt: "Tallyo payment record showing a deposit, remaining payment and a fully paid fictional invoice",
+    src: "https://tallyo.co.uk/assets/product/growth-studio/income-insights.png?v=20261015-overview",
+    alt: "Tallyo Income Insights showing separate invoiced, received, due and overdue figures with fictional data",
   },
   {
-    src: "https://tallyo.co.uk/assets/product/tallyo-branding.jpg?v=20260924-overview",
-    alt: "Tallyo branding controls with document style choices, brand colour, logo position and row options",
+    src: "https://tallyo.co.uk/assets/product/growth-studio/document-layouts.png?v=20261015-overview",
+    alt: "Tallyo document layout choices showing the Tallyo, Basic, Modern and Professional designs",
   },
 ];
 
@@ -67,7 +67,7 @@ export const buildOverviewEmail = ({ unsubscribeUrl }) => {
   }
   const safeUnsubscribeUrl = escapeHtml(unsubscribe.toString());
   const subject = "See how Tallyo keeps invoicing work connected";
-  const preheader = "Create clear documents, turn accepted quotes into invoices, repeat regular work and track every payment.";
+  const preheader = "Create documents, automate repeat work, follow payments and understand income recorded in Tallyo.";
   const text = [
     "THANKS FOR TRYING TALLYO",
     "",
@@ -76,6 +76,7 @@ export const buildOverviewEmail = ({ unsubscribeUrl }) => {
     "You asked for one overview of Tallyo. Here is the current product, with the main tools that help your business spend less time repeating invoice admin.",
     "",
     "Create your Tallyo account: https://app.tallyo.co.uk/",
+    "Continue with Google or use your email and password.",
     "",
     "No account or subscription has been created. This is the one introductory email you requested.",
     "",
@@ -88,8 +89,12 @@ export const buildOverviewEmail = ({ unsubscribeUrl }) => {
     "HANDLE REPEAT WORK AND OVERDUE FOLLOW-UP",
     "Schedule recurring invoices and choose whether each one is emailed automatically. Turn on reminders only for overdue invoices you want Tallyo to follow up.",
     "",
-    "SEE WHAT HAS BEEN PAID AND WHAT IS LEFT",
+    "FOLLOW EVERY PAYMENT",
     "Record deposits, part-payments and final payments. Delivery, reminder and payment activity stays with the document so the next action is easy to see.",
+    "",
+    "UNDERSTAND INCOME RECORDED IN TALLYO",
+    "Income Insights turns invoices and payments recorded in Tallyo into clear charts and separate-currency totals. Download an Income Pack when you want organised records to review or share with your accountant.",
+    "The figures do not include expenses or income recorded elsewhere, do not calculate profit, tax or VAT liability, and are not an HMRC submission.",
     "",
     "MAKE EVERY PDF RECOGNISABLY YOURS",
     "Choose Tallyo, Basic, Modern or Professional, then set your brand colour, logo position and whether item rows alternate in colour. The style follows downloaded and emailed PDFs.",
@@ -98,6 +103,7 @@ export const buildOverviewEmail = ({ unsubscribeUrl }) => {
     "Eligible independent business accounts can connect Stripe and offer a full-balance or set-deposit card payment option. Stripe fees may apply.",
     "",
     "TALLYO PRO",
+    "Try the monthly plan free for 7 days. A card is required. The subscription then continues at £8 per month unless you cancel online first; Tallyo emails a reminder 3 days before the trial ends.",
     "£8 monthly",
     "£80 annually",
     "",
@@ -151,6 +157,7 @@ export const buildOverviewEmail = ({ unsubscribeUrl }) => {
           <h1 class="hero-title" style="margin:0 0 18px;color:#111a31;font-size:38px;line-height:1.1;font-weight:800;letter-spacing:-.02em;">From quote to paid,<br>keep the whole job clear.</h1>
           <p style="margin:0 0 24px;color:#4d5b73;font-size:17px;line-height:1.6;">You asked for one overview of Tallyo. Here is the current product, with the main tools that help your business spend less time repeating invoice admin.</p>
           <a class="button" href="https://app.tallyo.co.uk/" style="display:inline-block;padding:14px 22px;border:1px solid #4658eb;border-radius:9px;background:#4658eb;color:#ffffff;font-size:16px;line-height:1.2;font-weight:700;text-decoration:none;">Create your Tallyo account</a>
+          <p style="margin:12px 0 0;color:#657188;font-size:14px;line-height:1.55;">Continue with Google or use your email and password.</p>
           <p style="margin:18px 0 0;color:#657188;font-size:13px;line-height:1.55;">No account or subscription has been created. This is the one introductory email you requested.</p>
         </td></tr>
 
@@ -174,14 +181,24 @@ export const buildOverviewEmail = ({ unsubscribeUrl }) => {
 
         ${screenshot(
           OVERVIEW_EMAIL_IMAGES[3],
-          "See what has been paid and what is left",
-          "Record deposits, part-payments and final payments. Delivery, reminder and payment activity stays with the document so the next action is easy to see.",
+          "Understand income recorded in Tallyo",
+          "Income Insights turns invoices and payments recorded in Tallyo into clear charts and separate-currency totals. Download an Income Pack when you want organised records to review or share with your accountant.",
         )}
+
+        <tr><td class="email-pad" style="padding:0 32px 28px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border:1px solid #cfd5e1;border-radius:12px;background:#f8f9fc;">
+            <tr><td style="padding:20px 22px;">
+              <h2 style="margin:0 0 7px;color:#111a31;font-size:20px;line-height:1.25;">Follow every payment</h2>
+              <p style="margin:0 0 10px;color:#526078;font-size:14px;line-height:1.6;">Record deposits, part-payments and final payments. Delivery, reminder and payment activity stays with the document so the next action is easy to see.</p>
+              <p style="margin:0;color:#657188;font-size:12px;line-height:1.55;">These figures do not include expenses or income recorded elsewhere, do not calculate profit, tax or VAT liability, and are not an HMRC submission.</p>
+            </td></tr>
+          </table>
+        </td></tr>
 
         ${screenshot(
           OVERVIEW_EMAIL_IMAGES[4],
           "Make every PDF recognisably yours",
-          "Choose Tallyo, Basic, Modern or Professional, then set your brand colour, logo position and whether item rows alternate in colour. The style follows downloaded and emailed PDFs.",
+          "Choose Tallyo, Basic, Modern or Professional, then set your brand colour, logo position and whether item rows alternate in colour. Your chosen style follows downloaded and emailed PDFs.",
         )}
 
         <tr><td class="email-pad" style="padding:0 32px 28px;">
@@ -197,6 +214,7 @@ export const buildOverviewEmail = ({ unsubscribeUrl }) => {
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;border:1px solid #b8c0ff;border-radius:12px;background:#f0edff;">
             <tr><td style="padding:24px;">
               <p style="margin:0 0 4px;color:#4658eb;font-size:13px;line-height:1.4;font-weight:700;letter-spacing:.09em;text-transform:uppercase;">Tallyo Pro</p>
+              <p style="margin:8px 0 12px;color:#526078;font-size:14px;line-height:1.6;">Try the monthly plan free for 7 days. A card is required. It then continues at £8 per month unless you cancel online first, and Tallyo emails a reminder 3 days before the trial ends.</p>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
                   <td class="price-cell" width="50%" style="width:50%;padding:8px 10px 8px 0;color:#111a31;font-size:21px;line-height:1.3;font-weight:800;">£8 monthly</td>

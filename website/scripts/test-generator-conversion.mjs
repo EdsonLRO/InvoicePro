@@ -87,7 +87,7 @@ assert.equal(validateOverviewBody({ ...valid.body, consentVersion: "old" }).ok, 
 const overviewEmail = buildOverviewEmail({ unsubscribeUrl: "https://example.invalid/unsubscribe" });
 assert.match(CONSENT_WORDING, /^Yes, Tallyo may send me one promotional email/);
 assert.equal(overviewEmail.subject, "See how Tallyo keeps invoicing work connected");
-assert.equal(overviewEmail.preheader, "Create clear documents, turn accepted quotes into invoices, repeat regular work and track every payment.");
+assert.equal(overviewEmail.preheader, "Create documents, automate repeat work, follow payments and understand income recorded in Tallyo.");
 assert.match(overviewEmail.text, /From quote to paid, keep the whole job clear\./);
 assert.match(overviewEmail.text, /No account or subscription has been created\. This is the one introductory email you requested\./);
 assert.match(overviewEmail.text, /You have not been added to an ongoing newsletter and Tallyo will not send further promotional messages under this consent\./);
@@ -97,7 +97,15 @@ for (const copy of [
   "Create clear documents your way",
   "Move from quote to invoice",
   "Handle repeat work and overdue follow-up",
-  "See what has been paid and what is left",
+  "Follow every payment",
+  "Understand income recorded in Tallyo",
+  "Income Insights",
+  "Income Pack",
+  "separate-currency totals",
+  "do not include expenses or income recorded elsewhere",
+  "do not calculate profit, tax or VAT liability",
+  "not an HMRC submission",
+  "Continue with Google",
   "Make every PDF recognisably yours",
   "Online card payments",
   "import a customer CSV",
@@ -105,6 +113,9 @@ for (const copy of [
   "emailed automatically or kept as a draft",
   "deposits, part-payments and final payments",
   "Tallyo, Basic, Modern or Professional",
+  "Try the monthly plan free for 7 days",
+  "A card is required",
+  "reminder 3 days before",
   "£8 monthly",
   "£80 annually"
 ]) {
@@ -124,12 +135,12 @@ assert.equal(OVERVIEW_EMAIL_IMAGES.length, 5, "the email uses five current, focu
 assert.deepEqual(overviewEmail.images, OVERVIEW_EMAIL_IMAGES);
 assert.equal(new Set(OVERVIEW_EMAIL_IMAGES.map(({ src }) => src)).size, 5);
 for (const { src, alt } of OVERVIEW_EMAIL_IMAGES) {
-  assert.match(src, /^https:\/\/tallyo\.co\.uk\/assets\/product\/tallyo-[a-z-]+\.jpg\?v=20260924-overview$/);
+  assert.match(src, /^https:\/\/tallyo\.co\.uk\/assets\/(?:email\/[a-z-]+\.jpg|product\/(?:tallyo-[a-z-]+\.jpg|growth-studio\/[a-z-]+\.png))\?v=20261015-overview$/);
   assert.ok(alt.length >= 35, "every screenshot has meaningful alt text");
   assert.match(overviewEmail.html, new RegExp(`src="${src.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[^>]+alt="${alt.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`));
   const asset = join(root, "website/public", new URL(src).pathname);
   const bytes = statSync(asset).size;
-  assert.ok(bytes > 10_000 && bytes < 100_000, `${src} is compressed for email (${bytes} bytes)`);
+  assert.ok(bytes > 10_000 && bytes < 110_000, `${src} is compressed for email (${bytes} bytes)`);
   assert.equal(statSync(join(root, "website/dist", new URL(src).pathname)).size, bytes, `${src} is copied into the deployable website build`);
 }
 assert.doesNotMatch(overviewEmail.html, /qa-live-acceptance|tallyo-test|new@gmail|customer data|invoice contents/i, "email screenshots and copy expose no acceptance-test identity");

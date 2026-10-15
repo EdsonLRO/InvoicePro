@@ -748,7 +748,7 @@ row was created during activation.
 
 ## Focused task: GROWTH-002 One-off introductory email design
 
-Status: Complete — production template refresh deployed; no live email sent
+Status: Phase 6 source refresh prepared; production remains on the previously approved template and no live email was sent
 Priority: High
 Assigned roles: Growth, Backend/Supabase, Privacy/Legal and QA
 Model/work mode: Sol / High for the consent and server-email boundary; visual
@@ -775,6 +775,17 @@ the exact function/version/configuration, approved-origin preflight returned
 the public generator stylesheet contains the invoice-only print rules. No
 promotional email was sent; no database, migration, payment, Auth, secret or
 unrelated provider setting changed.
+
+Phase 6 refresh: `codex/website-final-alignment-phase6` updates the same
+consent-gated email presentation to the current website offer. It adds Google
+sign-in, the seven-day card-required monthly trial and its three-day reminder,
+Income Insights, the Income Pack and the reviewed income-only limitations. The
+five-image limit is retained and every visual is a real current-app screenshot
+with fictional data and the official Tallyo logo. Consent wording and version,
+unique-address enforcement, provider idempotency, rate limiting, unsubscribe,
+address minimisation and sender logic are unchanged. Source merge does not
+deploy the Edge Function or send an email; production deployment remains a
+separate Owner-approved action.
 
 ## Focused task: COMM-001-ENT-003 Complimentary access by email
 
