@@ -128,10 +128,13 @@ const connectedOutcomeSteps = Object.freeze([
 
 const features = `
   <section class="page-hero feature-hero">
-    <div class="feature-hero-copy"><p class="eyebrow">Features</p><h1>Create invoices, follow payments and reduce repeat work.</h1><p>Tallyo keeps quotes, invoices, customers, payments and regular invoicing together, so you can see what to do next.</p><div class="cta-row"><a class="button button-primary" href="/product-tour/">Explore the product tour</a><a class="button button-secondary" href="/free-invoice-generator/">Make a free invoice</a></div></div>
-    <div class="feature-hero-summary" aria-label="Tallyo workflow summary"><p><span>01</span><strong>Create</strong><small>Quotes, invoices and credit notes</small></p><p><span>02</span><strong>Follow</strong><small>Sends, reminders, deposits and payments</small></p><p><span>03</span><strong>Repeat</strong><small>Regular invoices on your chosen schedule</small></p></div>
+    <div class="feature-hero-copy"><p class="eyebrow">Features</p><h1>See your invoicing work clearly, from quote to income.</h1><p>Tallyo keeps documents, customers, recurring work, payment records and income views connected, so the next step is easier to find.</p><div class="cta-row"><a class="button button-primary" href="/product-tour/">Explore the product tour</a><a class="button button-secondary" href="/free-invoice-generator/">Make a free invoice</a></div></div>
+    <figure class="feature-hero-screen"><div><img src="/assets/product/growth-studio/dashboard-overview.png?v=__TALLYO_ASSET_REVISION__" alt="Current Tallyo Overview showing fictional outstanding, overdue, paid and recurring totals with attention and recent-activity panels" decoding="async" fetchpriority="high"></div><figcaption>Current Tallyo Overview using fictional demonstration data.</figcaption></figure>
   </section>
-  <section class="section feature-detail-list" aria-label="Tallyo feature groups">${featureGroups.map((group, index) => `<article id="feature-${index + 1}"><div class="feature-number">${String(index + 1).padStart(2, "0")}</div><div><p class="card-label">${group.label}</p><h2>${group.title}</h2><p>${group.description}</p>${list(group.items)}</div></article>`).join("")}</section>
+  <section class="section feature-detail-list" aria-labelledby="feature-groups-title">
+    <div class="section-heading"><p class="eyebrow">What you can do</p><h2 id="feature-groups-title">One connected place for the work around every invoice.</h2><p>Each section below uses a real Tallyo screen with fictional demonstration data.</p></div>
+    ${featureGroups.map((group, index) => `<article id="feature-${index + 1}"><div class="feature-number">${String(index + 1).padStart(2, "0")}</div><div class="feature-proof-copy"><p class="card-label">${group.label}</p><h2>${group.title}</h2><p>${group.description}</p>${list(group.items)}${group.note ? `<p class="feature-proof-note">${group.note}</p>` : ""}</div><figure class="feature-proof-media"><div><img src="${group.image}?v=__TALLYO_ASSET_REVISION__" alt="${group.imageAlt}" loading="lazy" decoding="async"></div><figcaption>${group.imageCaption}</figcaption></figure></article>`).join("")}
+  </section>
   <section class="section workflow-outcome" aria-labelledby="workflow-title" data-horizontal-flow>
     <div class="workflow-outcome-sticky">
       <div class="section-heading"><p class="eyebrow">From quote to payment</p><h2 id="workflow-title">See what happens at every step.</h2><p>Keep scrolling to follow a quote from sending and customer acceptance through to the invoice, payments and follow-up.</p></div>
@@ -140,7 +143,7 @@ const features = `
       <p class="section-link"><a href="/product-tour/">See each supported workflow →</a></p>
     </div>
   </section>
-  <section class="section limitations" aria-labelledby="limitations-title"><div><p class="eyebrow">Clear boundaries</p><h2 id="limitations-title">Focused invoicing, not full accounting software.</h2></div>${list(productFacts.limitations)}</section>
+  <section class="section limitations" aria-labelledby="limitations-title"><div><p class="eyebrow">Clear boundaries</p><h2 id="limitations-title">Focused invoicing and income records, not full accounting software.</h2></div>${list(productFacts.limitations)}</section>
   ${finalCta({ title: "See how the work fits together.", copy: "Tour the main workflows, then decide whether Tallyo suits the way you invoice.", secondaryLabel: "Open the product tour", secondaryHref: "/product-tour/" })}`;
 
 const productTour = `
@@ -345,7 +348,7 @@ const generatorPage = (defaultType) => {
 
 const foundationPages = [
   { route: "/", output: "index.html", title: "Invoice software built around your business", description: "Create professional invoices and quotes, record deposits and payments, repeat regular invoices and send chosen overdue reminders with Tallyo.", content: home, schema: "software" },
-  { route: "/features/", output: "features/index.html", title: "Invoice, quote and payment tracking features", description: "Explore Tallyo tools for invoices, quotes, recurring invoices, overdue reminders, deposits, payment tracking and activity history.", content: features, schema: "webpage" },
+  { route: "/features/", output: "features/index.html", title: "Tallyo invoicing and income features", description: "Explore Tallyo quotes and invoices, recurring work, payment tracking, Income Insights, document layouts and practical account controls.", content: features, schema: "webpage" },
   { route: "/product-tour/", output: "product-tour/index.html", title: "Tallyo invoice software product tour", description: "See how Tallyo creates invoices and quotes, repeats regular invoices, records deposits and payments, sends reminders and keeps activity history.", content: productTour, schema: "webpage" },
   { route: "/pricing/", output: "pricing/index.html", title: "Tallyo pricing — Free Invoice Maker and Tallyo Pro", description: pricingDescription, content: pricing, schema: "webpage" },
   { route: "/security/", output: "security/index.html", title: "How Tallyo protects account access", description: "Learn about Tallyo account, data-access, payment and browser security controls, with honest limitations.", content: security, schema: "webpage" },

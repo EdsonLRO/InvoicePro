@@ -7,6 +7,7 @@ export const productFacts = Object.freeze({
   limitations: [
     "An internet connection is required to access and update authenticated business records.",
     "Tallyo is not a full accounting suite and does not prepare tax returns.",
+    "Income views cover invoices and payments recorded in Tallyo. They do not include expenses, income received elsewhere, bank balances, tax calculations or HMRC filing.",
     "Tallyo does not provide legal, tax or accounting advice.",
     connectPaymentPlaceholders.availability
   ]
@@ -23,34 +24,59 @@ export const workflowSteps = Object.freeze([
 
 export const featureGroups = Object.freeze([
   {
-    label: "Create and send",
-    title: "Documents that look professional",
-    description: "Create invoices, quotes and credit notes, add your branding, export polished PDFs and send documents from one workspace.",
-    items: ["Invoices, customer-accepted quotes and credit notes", "Branded PDF documents", "Email sending and delivery updates", "Excel list export"]
+    label: "Create and agree",
+    title: "Move from a clear quote to the invoice",
+    description: "Create invoices, quotes and credit notes, review the recipient before sending and give customers a straightforward way to accept a quote.",
+    items: ["Invoices, quotes and credit notes", "Secure customer quote acceptance", "One linked invoice created after acceptance", "Optional automatic invoice email or review first"],
+    image: "/assets/product/growth-studio/quote-email-review.png",
+    imageAlt: "Current Tallyo quote email review showing a fictional recipient, customer-response link and optional automatic invoice email",
+    imageCaption: "Current Tallyo quote review using fictional demonstration data."
   },
   {
-    label: "Track payments",
-    title: "See what has been paid and what is left",
-    description: "Record a deposit, part-payment or final payment on the invoice and Tallyo updates the amount still to pay.",
-    items: ["Deposits, part-payments and final payments", "Amount still to pay", "Payment notes and dates", connectPaymentPlaceholders.feature]
+    label: "Reuse everyday details",
+    title: "Keep customers and services ready for next time",
+    description: "Save the details you use repeatedly, then bring them into a new document without typing the same information again.",
+    items: ["Saved customers", "Reusable products and services", "Default descriptions and prices", "Customer documents, balances and recurring work together"],
+    image: "/assets/product/growth-studio/products-services.png",
+    imageAlt: "Current Tallyo products and services page showing three reusable fictional services and their default prices",
+    imageCaption: "Current Tallyo products and services screen using fictional demonstration data."
   },
   {
-    label: "Save time",
-    title: "Repeat less work",
-    description: "Reuse customers and services, create invoices on a regular schedule and choose which overdue invoices receive reminders.",
-    items: ["Saved customers", "Saved products and services", "Recurring invoices", "Opt-in overdue reminders"]
+    label: "Repeat and follow up",
+    title: "Let regular invoicing follow your schedule",
+    description: "Choose when Tallyo creates each recurring invoice, whether it should be emailed automatically and which overdue invoices receive reminders.",
+    items: ["Weekly, monthly, quarterly or yearly schedules", "Automatic email or review before sending", "Opt-in overdue reminders", "Recurring history and next-run visibility"],
+    image: "/assets/product/growth-studio/recurring-edit.png",
+    imageAlt: "Current Tallyo recurring schedule editor showing a fictional monthly website maintenance invoice and automatic email choice",
+    imageCaption: "Current Tallyo recurring schedule using fictional demonstration data."
   },
   {
-    label: "Stay organised",
-    title: "Know what needs attention",
-    description: "See what is paid, what is still due and what is late, together with a simple history of sends, reminders and payments.",
-    items: ["Amounts still to pay", "Clear document status", "Activity history", "Account export"]
+    label: "Payments and income",
+    title: "Understand the income recorded in Tallyo",
+    description: "Record deposits, part-payments, final payments and refunds, then use accessible summaries to see what was invoiced, received, still due or overdue.",
+    items: ["Manual payment records and amount still to pay", connectPaymentPlaceholders.feature, "Income Insights with clear charts and written values", "Income records, UK period organisation and a downloadable Income Pack"],
+    note: "Income views use only invoices and payments recorded in Tallyo. They do not include expenses, income received elsewhere, bank balances, tax calculations or HMRC filing.",
+    image: "/assets/product/growth-studio/income-insights.png",
+    imageAlt: "Current Tallyo Finances overview showing fictional invoiced, received, outstanding and overdue values with accessible charts",
+    imageCaption: "Current Tallyo Income Insights using fictional demonstration data."
   },
   {
-    label: "Protect access",
-    title: "Practical account controls",
-    description: "Confirm account ownership, add authenticator-app protection and use recovery and sign-out controls when needed.",
-    items: ["Email confirmation", "Optional authenticator-app MFA", "One-time recovery codes", "Device and all-device sign-out"]
+    label: "Brand every document",
+    title: "Choose the document style that suits your business",
+    description: "Apply one consistent presentation to invoices, quotes, credit notes, downloaded PDFs and emailed PDF attachments.",
+    items: ["Tallyo, Basic, Modern and Professional layouts", "Brand colour and logo position", "Optional alternating item-row colours", "Live preview before saving"],
+    image: "/assets/product/growth-studio/document-layouts.png",
+    imageAlt: "Current Tallyo Branding page showing Tallyo, Basic, Modern and Professional document layouts, colours and logo positions",
+    imageCaption: "Current Tallyo branding controls using fictional demonstration data."
+  },
+  {
+    label: "Sign in and stay in control",
+    title: "Use familiar access with practical protection",
+    description: "Sign in with Google or email and password, then add stronger account protection and review your account data when needed.",
+    items: ["Google or email-and-password sign-in", "Optional authenticator-app MFA", "One-time recovery codes and session controls", "Account data export and installable app access"],
+    image: "/assets/product/growth-studio/google-sign-in.png",
+    imageAlt: "Current Tallyo sign-in page with Continue with Google and email-and-password options beside the Tallyo workspace introduction",
+    imageCaption: "Current Tallyo sign-in screen. No customer or account data is shown."
   }
 ]);
 
