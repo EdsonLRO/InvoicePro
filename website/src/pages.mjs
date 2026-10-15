@@ -35,7 +35,7 @@ const home = `
     <div class="hero-copy" data-hero-copy>
       <p class="hero-badge"><span aria-hidden="true"></span>Invoicing built around your business</p>
       <h1 id="home-title"><span>Professional invoices.</span><span class="hero-title-accent">Clearer payment tracking.</span><span>Less admin.</span></h1>
-      <p class="hero-lead">Create, send and follow up from one calm workspace with quotes, repeat invoices, reminders and payment updates kept together.</p>
+      <p class="hero-lead">Create, send and follow up from one calm workspace, then see recurring work, payment updates and income recorded in Tallyo together.</p>
       <div class="cta-row">
         <a class="button button-primary hero-primary-action" id="cta_hero_create_account" data-analytics-placement="hero" data-signup-link href="#">Start with Tallyo <span aria-hidden="true">→</span></a>
         <a class="button button-secondary" id="cta_hero_free_invoice" href="/free-invoice-generator/">Make a free invoice</a>
@@ -73,17 +73,17 @@ const home = `
 
   <section class="home-capability-strip" aria-label="Tallyo workflow highlights">
     <div class="capability-marquee">
-      <div class="capability-marquee-group"><p><span>01</span> Accepted quotes become invoices</p><p><span>02</span> Regular invoices created on schedule</p><p><span>03</span> Deposits and payments recorded</p><p><span>04</span> Reminders you choose to send</p></div>
-      <div class="capability-marquee-group" aria-hidden="true"><p><span>01</span> Accepted quotes become invoices</p><p><span>02</span> Regular invoices created on schedule</p><p><span>03</span> Deposits and payments recorded</p><p><span>04</span> Reminders you choose to send</p></div>
+      <div class="capability-marquee-group"><p><span>01</span> Accepted quotes become invoices</p><p><span>02</span> Regular invoices created on schedule</p><p><span>03</span> Deposits and payments recorded</p><p><span>04</span> Reminders you choose to send</p><p><span>05</span> Income recorded in Tallyo made easier to understand</p></div>
+      <div class="capability-marquee-group" aria-hidden="true"><p><span>01</span> Accepted quotes become invoices</p><p><span>02</span> Regular invoices created on schedule</p><p><span>03</span> Deposits and payments recorded</p><p><span>04</span> Reminders you choose to send</p><p><span>05</span> Income recorded in Tallyo made easier to understand</p></div>
     </div>
   </section>
 
   <section class="section home-benefits" aria-labelledby="benefits-title">
-    <div class="section-heading"><p class="eyebrow">From quote to payment</p><h2 id="benefits-title">See the whole invoicing journey.</h2><p>Keep the customer, document, payments and reminders in one place.</p></div>
+    <div class="section-heading"><p class="eyebrow">From quote to income records</p><h2 id="benefits-title">See the whole invoicing journey.</h2><p>Keep the customer, document, payments, reminders and income records in one place.</p></div>
     <div class="benefit-grid">
-      <article>${icon("01")}<h3>Create with confidence</h3><p>Build branded quotes, invoices and credit notes that are clear for your customers.</p></article>
-      <article>${icon("02")}<h3>Know what is still to pay</h3><p>Record deposits, part-payments and final payments, then see which invoices are late.</p></article>
-      <article>${icon("03")}<h3>Make regular work easier</h3><p>Reuse customers and services, then let Tallyo create new invoices on the schedule you choose.</p></article>
+      <article>${icon("01")}<h3>Create and agree the work</h3><p>Build branded quotes, invoices and credit notes. When a customer accepts a quote, Tallyo keeps it and creates one linked invoice.</p></article>
+      <article>${icon("02")}<h3>Repeat and follow up</h3><p>Reuse customers and services, schedule regular invoices and choose which overdue invoices receive reminders.</p></article>
+      <article>${icon("03")}<h3>Understand recorded income</h3><p>See what was invoiced, received, still due or overdue, with accessible visuals and income records you can prepare when needed.</p></article>
     </div>
   </section>
 
@@ -93,7 +93,7 @@ const home = `
   </section>
 
   <section class="section home-decision-panel" aria-labelledby="home-decision-title">
-    <div><p class="eyebrow">A clear next step</p><h2 id="home-decision-title">Try one document free, or keep the whole workflow together.</h2><p>The Free Invoice Maker works without an account. Tallyo Pro saves customers, products and services, documents, payment records and repeat work.</p></div>
+    <div><p class="eyebrow">A clear next step</p><h2 id="home-decision-title">Try one document free, or keep the whole workflow together.</h2><p>The Free Invoice Maker works without an account. Tallyo Pro saves customers, services, documents, recurring work and payment records, with Income Insights and four document layouts included.</p></div>
     <div class="home-decision-actions"><p><strong>${commercialOffer.free.price}</strong><span>Free Invoice Maker</span><a href="/free-invoice-generator/">Create an invoice</a></p><p><strong>${commercialOffer.pro.monthlyPrice}</strong><span>per month · ${commercialOffer.pro.annualPrice} annually</span><a href="/pricing/">Compare plans</a></p></div>
     <p class="home-decision-trust"><a href="/invoice-guide/">Read the simple invoice guide</a><span aria-hidden="true">·</span><a href="/product-tour/">See the product in use</a></p>
   </section>
@@ -106,8 +106,8 @@ const productTourChapters = Object.freeze([
   { id: "overview", label: "Overview", title: "Know what needs attention", copy: "Start with money still to come in, invoices that are late and the next useful action.", scenes: ["dashboard"] },
   { id: "create", label: "Create & send", title: "Move from customer details to a clear document", copy: "Reuse customers and services, prepare an invoice or quote, then review it before sending.", scenes: ["invoice-editor", "quote", "customers"] },
   { id: "automate", label: "Repeat & remind", title: "Create regular invoices and chosen reminders", copy: "Set when Tallyo creates each new invoice, choose whether it emails automatically and turn reminders on only for the overdue invoices you want followed up.", scenes: ["recurring", "overdue"] },
-  { id: "track", label: "Payments & history", title: "See what has been paid and what happened", copy: "Record deposits, part-payments and final payments, see what is left, and read the document history in one place.", scenes: ["payments", "activity"] },
-  { id: "personalise", label: "Personalise & access", title: "Present your business and protect access", copy: "Apply your branding, manage account protection and use core workflows on a supported phone.", scenes: ["branding", "security", "mobile"] }
+  { id: "track", label: "Payments & income", title: "See what has been paid and prepare clearer records", copy: "Record deposits, part-payments, final payments and refunds, then review the income recorded in Tallyo or prepare an Income Pack.", scenes: ["payments", "activity", "finances", "income-pack"] },
+  { id: "personalise", label: "Personalise & access", title: "Present your business and protect access", copy: "Choose a document layout, apply your branding, sign in with Google or email and add stronger account protection.", scenes: ["branding", "layouts", "security", "google-sign-in", "mobile"] }
 ]);
 
 const productTourChapter = (chapter, chapterIndex) => {
@@ -147,7 +147,7 @@ const features = `
   ${finalCta({ title: "See how the work fits together.", copy: "Tour the main workflows, then decide whether Tallyo suits the way you invoice.", secondaryLabel: "Open the product tour", secondaryHref: "/product-tour/" })}`;
 
 const productTour = `
-  <section class="page-hero tour-hero"><p class="eyebrow">Product tour</p><h1>See how Tallyo connects everyday invoicing work.</h1><p>Choose a workflow to explore. Every screen uses fictional demonstration data and shows currently supported Tallyo features.</p></section>
+  <section class="page-hero tour-hero"><p class="eyebrow">Product tour</p><h1>See how Tallyo connects everyday invoicing work.</h1><p>Choose a workflow to explore documents, recurring work, payment tracking, Income Insights, branding and account access. Every product screen uses fictional demonstration data or contains no account data.</p></section>
   <div class="tour-explorer" data-tour-chapters>
     <div class="tour-index" role="tablist" aria-label="Choose a product workflow">${productTourChapters.map((chapter, index) => `<button id="tour-tab-${chapter.id}" type="button" role="tab" aria-selected="${index === 0}" aria-controls="tour-${chapter.id}" tabindex="${index === 0 ? "0" : "-1"}" data-tour-tab="${chapter.id}">${chapter.label}</button>`).join("")}</div>
     <p class="tour-demo-note"><strong>Safe demonstration:</strong> no real customer, business, payment or account data is shown.</p>
@@ -349,7 +349,7 @@ const generatorPage = (defaultType) => {
 const foundationPages = [
   { route: "/", output: "index.html", title: "Invoice software built around your business", description: "Create professional invoices and quotes, record deposits and payments, repeat regular invoices and send chosen overdue reminders with Tallyo.", content: home, schema: "software" },
   { route: "/features/", output: "features/index.html", title: "Tallyo invoicing and income features", description: "Explore Tallyo quotes and invoices, recurring work, payment tracking, Income Insights, document layouts and practical account controls.", content: features, schema: "webpage" },
-  { route: "/product-tour/", output: "product-tour/index.html", title: "Tallyo invoice software product tour", description: "See how Tallyo creates invoices and quotes, repeats regular invoices, records deposits and payments, sends reminders and keeps activity history.", content: productTour, schema: "webpage" },
+  { route: "/product-tour/", output: "product-tour/index.html", title: "Tallyo invoicing and income product tour", description: "See how Tallyo connects quotes, invoices, recurring work, reminders, payments, Income Insights, document layouts and account access.", content: productTour, schema: "webpage" },
   { route: "/pricing/", output: "pricing/index.html", title: "Tallyo pricing — Free Invoice Maker and Tallyo Pro", description: pricingDescription, content: pricing, schema: "webpage" },
   { route: "/security/", output: "security/index.html", title: "How Tallyo protects account access", description: "Learn about Tallyo account, data-access, payment and browser security controls, with honest limitations.", content: security, schema: "webpage" },
   { route: "/helper/", output: "helper/index.html", title: "Tallyo Helper", description: "Ask Tallyo Helper for reviewed public guidance about current product features, payments, documents, installation and account protection.", content: helper, schema: "webpage", helper: true, scripts: ["/assets/helper.js"] },
