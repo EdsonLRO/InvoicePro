@@ -152,13 +152,15 @@ for (const id of ["cta_header_create_account", "cta_hero_create_account", "cta_h
 }
 assert.match(home, /Northstar Home Services/);
 assert.match(home, /Willow &amp; Pine Studio/);
-assert.match(home, /one calm workspace with quotes, repeat invoices/, "homepage hero uses the approved punctuation-free wording");
+assert.match(home, /one calm workspace, then see recurring work, payment updates and income recorded in Tallyo together/, "homepage hero reflects the current connected workflow");
 assert.doesNotMatch(home, /workspace\s+—/, "homepage hero does not restore the removed dash");
 assert.match(home, /footer-group footer-account[\s\S]*?<h2>Product<\/h2>[\s\S]*?<h2>Learn<\/h2>[\s\S]*?<h2>Legal<\/h2>[\s\S]*?footer-intro/, "footer places the four evenly spaced link groups before the brand block");
 assert.equal((home.match(/class="product-demo /g) || []).length, 0, "home does not duplicate the full product tour");
 assert.match(home, /Set up your business[\s\S]*Repeat regular invoices/, "home shows the complete six-step workflow in plain language");
 assert.equal((home.match(/class="capability-marquee-group"/g) || []).length, 2, "home duplicates the capability set for a seamless running strip");
 assert.match(home, /class="capability-marquee-group" aria-hidden="true"/, "the repeated capability set stays hidden from assistive technology");
+assert.equal((home.match(/Income recorded in Tallyo made easier to understand/g) || []).length, 2, "home adds the income capability to both marquee copies");
+assert.match(home, /Income Insights and four document layouts included/, "home decision copy includes the released finance and document-style capabilities");
 for (const densityHook of ["home-benefits", "home-how", "home-decision-panel", "faq-preview"]) {
   assert.match(home, new RegExp(`class="[^"]*${densityHook}[^"]*"`), `home retains ${densityHook} density hook`);
 }
@@ -185,6 +187,13 @@ for (const screenshotName of ["tallyo-dashboard.jpg", "tallyo-invoice-editor.jpg
   assert.match(productTour, new RegExp(`/assets/product/${screenshotName.replace(".", "\\.")}\\?v=[a-f0-9]{12}`), `product tour includes versioned ${screenshotName}`);
   assert.deepEqual([...readFileSync(join(distRoot, "assets", "product", screenshotName)).subarray(0, 3)], [255, 216, 255], `${screenshotName} is encoded as JPEG`);
 }
+for (const screenshotName of ["income-insights.png", "income-pack.png", "document-layouts.png", "google-sign-in.png"]) {
+  assert.match(productTour, new RegExp(`/assets/product/growth-studio/${screenshotName.replace(".", "\\.")}\\?v=[a-f0-9]{12}`), `product tour includes versioned ${screenshotName}`);
+  assert.deepEqual([...readFileSync(join(distRoot, "assets", "product", "growth-studio", screenshotName)).subarray(0, 4)], [137, 80, 78, 71], `${screenshotName} is copied as PNG`);
+}
+assert.match(productTour, /Payments & income[\s\S]*Income Insights[\s\S]*Income Pack/, "product tour connects payment records to the released income views");
+assert.match(productTour, /Continue with Google or your Tallyo password/, "product tour includes the released Google sign-in choice");
+assert.match(productTour, /does not include expenses or income received elsewhere/, "Income Pack tour copy retains the reviewed scope boundary");
 const productTourVisibleHtml = productTour.replace(/<script type="application\/json" id="helper-knowledge">[\s\S]*?<\/script>/, "");
 assert.doesNotMatch(productTourVisibleHtml, /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|acct_|cs_(?:test|live)_|eyJ[A-Za-z0-9_-]{10,}/, "product tour has no visible emails, provider IDs or JWT-like data");
 

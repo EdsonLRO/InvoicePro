@@ -61,6 +61,7 @@ const featureImageNames = [
   "products-services.png",
   "recurring-edit.png",
   "income-insights.png",
+  "income-pack.png",
   "document-layouts.png",
   "google-sign-in.png"
 ];
