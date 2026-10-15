@@ -127,7 +127,7 @@ export const siteConfig = Object.freeze({
   subscriptionUrl: trimSlash(process.env.TALLYO_SUBSCRIPTION_URL || `${appUrl}/#account`),
   defaultTitle: "Tallyo — Professional invoices. Clear payment updates. Less admin.",
   defaultDescription:
-    "Create quotes and invoices, record deposits and payments, repeat regular invoices and keep every update in one straightforward workspace.",
+    "Create quotes and invoices, manage recurring work, record payments and understand the income recorded in Tallyo from one straightforward workspace.",
   locale: "en_GB",
   themeColor: "#111a31",
   socialImagePath: "/assets/tallyo-social-card.webp",
