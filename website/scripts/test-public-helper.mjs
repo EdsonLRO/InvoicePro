@@ -5,7 +5,11 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import rawKnowledge from "../content/helper-knowledge.json" with { type: "json" };
 import { createPublicAiAdapter } from "../src/helper-core.mjs";
-import { applyConnectPaymentCopy, connectPaymentsPublished } from "../src/commercial-offer.mjs";
+import {
+  applyConnectPaymentCopy,
+  applySubscriptionTrialCopy,
+  connectPaymentsPublished
+} from "../src/commercial-offer.mjs";
 import { handlePublicHelperRequest, publicHelperPolicy } from "../functions/lib/public-helper.mjs";
 import { handleRateLimitRequest } from "../../deployment/cloudflare/ai-helper-rate-limiter/src/index.mjs";
 
@@ -13,10 +17,15 @@ const websiteRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = join(websiteRoot, "dist");
 const buildScript = join(websiteRoot, "scripts", "build.mjs");
 const read = (relative) => readFileSync(join(distRoot, relative), "utf8");
-const knowledge = JSON.parse(applyConnectPaymentCopy(JSON.stringify(rawKnowledge), false));
-const enabledConnectKnowledge = JSON.parse(applyConnectPaymentCopy(JSON.stringify(rawKnowledge), true));
+const knowledge = JSON.parse(applySubscriptionTrialCopy(applyConnectPaymentCopy(JSON.stringify(rawKnowledge), false), false));
+const enabledConnectKnowledge = JSON.parse(applySubscriptionTrialCopy(applyConnectPaymentCopy(JSON.stringify(rawKnowledge), true), false));
+const enabledTrialCatalogue = JSON.parse(applySubscriptionTrialCopy(applyConnectPaymentCopy(JSON.stringify(rawKnowledge), false), true));
 assert.match(enabledConnectKnowledge.entries.find((entry) => entry.id === "stripe-payments").answer, /Connect your own Stripe account/);
 assert.doesNotMatch(JSON.stringify(enabledConnectKnowledge), /__TALLYO_CONNECT_PAYMENT_/);
+assert.match(enabledTrialCatalogue.entries.find((entry) => entry.id === "free-trial").answer, /every Tallyo Pro feature free for 7 days/);
+assert.match(enabledTrialCatalogue.entries.find((entry) => entry.id === "free-trial").answer, /card is required/i);
+assert.match(enabledTrialCatalogue.entries.find((entry) => entry.id === "free-trial").answer, /email you 3 days before/);
+assert.doesNotMatch(JSON.stringify(enabledTrialCatalogue), /__TALLYO_SUBSCRIPTION_TRIAL_/);
 assert.equal(connectPaymentsPublished({ TALLYO_CONNECT_PAYMENTS_ENABLED: "true" }), false);
 assert.equal(connectPaymentsPublished({
   TALLYO_CONNECT_PAYMENTS_ENABLED: "true",
@@ -37,6 +46,9 @@ const cleanBuildEnvironment = {
   TALLYO_SUBSCRIPTIONS_ENABLED: "",
   TALLYO_SUBSCRIPTION_PRIVATE_PREVIEW_APPROVED: "",
   TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED: "",
+  TALLYO_SUBSCRIPTION_TRIAL_ENABLED: "",
+  TALLYO_SUBSCRIPTION_TRIAL_PRIVATE_PREVIEW_APPROVED: "",
+  TALLYO_SUBSCRIPTION_TRIAL_PUBLIC_RELEASE_APPROVED: "",
   TALLYO_PUBLIC_AI_HELPER_ENABLED: "",
   TALLYO_AI_PRIVATE_PREVIEW_APPROVED: "",
   TALLYO_AI_PUBLIC_RELEASE_APPROVED: "",
@@ -134,6 +146,30 @@ assert.match(enabledSubscriptionPricing, /data-subscription-link[^>]+href="https
 assert.doesNotMatch(enabledSubscriptionPricing, /button[^>]+disabled[^>]*>Subscriptions are being prepared/);
 assert.doesNotMatch(enabledSubscriptionPricing, /Subscription checkout is not active yet/);
 assert.doesNotMatch(enabledSubscriptionPricing, /checkout\.stripe\.com|price_[A-Za-z0-9]+|prod_[A-Za-z0-9]+/);
+
+execFileSync(process.execPath, [buildScript], {
+  stdio: "inherit",
+  env: {
+    ...cleanBuildEnvironment,
+    CF_PAGES: "",
+    TALLYO_CLOUDFLARE_ACCESS_CONFIRMED: "",
+    TALLYO_SITE_MODE: "preview",
+    TALLYO_SUBSCRIPTIONS_ENABLED: "true",
+    TALLYO_SUBSCRIPTION_PRIVATE_PREVIEW_APPROVED: "true",
+    TALLYO_SUBSCRIPTION_TRIAL_ENABLED: "true",
+    TALLYO_SUBSCRIPTION_TRIAL_PRIVATE_PREVIEW_APPROVED: "true"
+  }
+});
+const enabledTrialPricing = read("pricing/index.html");
+const enabledTrialHelper = read("helper/index.html");
+const enabledTrialKnowledgeText = enabledTrialHelper.match(/<script type="application\/json" id="helper-knowledge">([^<]+)<\/script>/)?.[1];
+const enabledTrialKnowledge = JSON.parse(enabledTrialKnowledgeText || "{}");
+assert.match(enabledTrialPricing, /Start 7-day free trial/);
+assert.match(enabledTrialPricing, /card is required/i);
+assert.match(enabledTrialPricing, /email you 3 days before/);
+assert.doesNotMatch(enabledTrialPricing, /does not currently offer a full-feature free trial/);
+assert.match(enabledTrialKnowledge.entries.find((entry) => entry.id === "free-trial").answer, /every Tallyo Pro feature free for 7 days/);
+assert.doesNotMatch(JSON.stringify(enabledTrialKnowledge), /__TALLYO_SUBSCRIPTION_TRIAL_/);
 
 const blockedConnectPreviewBuild = spawnSync(process.execPath, [buildScript], {
   encoding: "utf8",
@@ -686,12 +722,13 @@ assert.equal(rateWorkerPackage.scripts.deploy, "wrangler deploy --config wrangle
 assert.match(rateWorkerPnpmConfig, /allowBuilds:\s+[\s\S]*esbuild: true\s+[\s\S]*workerd: true/);
 
 const subscriptionReadiness = JSON.parse(readFileSync(join(websiteRoot, "content", "subscription-readiness.json"), "utf8"));
-assert.equal(subscriptionReadiness.status, "sandbox-billing-and-connect-accepted-public-release-pending");
-assert.equal(subscriptionReadiness.publicCheckoutEnabled, false);
-assert.equal(subscriptionReadiness.publicCustomerPaymentsEnabled, false);
-assert.equal(subscriptionReadiness.liveStripeBillingConfigured, false);
-assert.equal(subscriptionReadiness.pricesPublished, false);
-assert.equal(subscriptionReadiness.trialPublished, false);
+assert.equal(subscriptionReadiness.schemaVersion, 2);
+assert.equal(subscriptionReadiness.status, "production-billing-connect-and-trial-active");
+assert.equal(subscriptionReadiness.publicCheckoutEnabled, true);
+assert.equal(subscriptionReadiness.publicCustomerPaymentsEnabled, true);
+assert.equal(subscriptionReadiness.liveStripeBillingConfigured, true);
+assert.equal(subscriptionReadiness.pricesPublished, true);
+assert.equal(subscriptionReadiness.trialPublished, true);
 assert.equal(subscriptionReadiness.sandboxBillingAccepted, true);
 assert.equal(subscriptionReadiness.sandboxConnectAccepted, true);
 assert.equal(subscriptionReadiness.activationGateImplemented, true);
@@ -702,10 +739,14 @@ assert.equal(subscriptionReadiness.priceDecision, "approved-gbp-8-monthly-80-ann
 assert.equal(subscriptionReadiness.monthlyPriceGbp, 8);
 assert.equal(subscriptionReadiness.annualPriceGbp, 80);
 assert.equal(subscriptionReadiness.annualSavingGbp, 16);
+assert.equal(subscriptionReadiness.trialPlan, "monthly");
+assert.equal(subscriptionReadiness.trialDays, 7);
+assert.equal(subscriptionReadiness.trialReminderDaysBeforeEnd, 3);
+assert.equal(subscriptionReadiness.trialRequiresPaymentMethod, true);
 assert.deepEqual(subscriptionReadiness.currentWebsitePlanLabels, ["Free Invoice Maker", "Tallyo Pro"]);
 assert.equal(subscriptionReadiness.unresolvedNamingConflict, false);
 assert.ok(subscriptionReadiness.requiredServerControls.includes("server-enforced entitlements and usage limits"));
-assert.ok(subscriptionReadiness.ownerGates.includes("public pricing and checkout release"));
+assert.ok(subscriptionReadiness.ownerGates.includes("future price, trial, renewal, cancellation or refund changes"));
 assert.doesNotMatch(JSON.stringify(subscriptionReadiness), /price_[A-Za-z0-9]+|prod_[A-Za-z0-9]+/);
 
 console.log("Public AI helper fail-closed and mock-provider checks passed.");

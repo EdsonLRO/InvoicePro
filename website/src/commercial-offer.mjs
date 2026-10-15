@@ -7,6 +7,18 @@ export const connectPaymentPlaceholders = Object.freeze({
   helpNote: "__TALLYO_CONNECT_PAYMENT_HELP_NOTE__"
 });
 
+export const subscriptionTrialPlaceholder = "__TALLYO_SUBSCRIPTION_TRIAL_AVAILABILITY__";
+
+export const subscriptionTrialCopy = Object.freeze({
+  disabled: "Tallyo does not currently offer a full-feature free trial. You can use the Free Invoice Maker without an account before deciding whether the saved Tallyo Pro workspace is suitable for your business.",
+  enabled: "Start the monthly plan with every Tallyo Pro feature free for 7 days. A card is required. Unless you cancel online before the trial ends, your subscription continues automatically at £8 per month. We will email you 3 days before it ends. If you cancel during the trial, you keep access until it ends and will not be charged."
+});
+
+export const applySubscriptionTrialCopy = (value, enabled = false) => String(value).replaceAll(
+  subscriptionTrialPlaceholder,
+  enabled ? subscriptionTrialCopy.enabled : subscriptionTrialCopy.disabled
+);
+
 export const connectPaymentCopy = Object.freeze({
   disabled: Object.freeze({
     availability: "Online card payments for independent business accounts are being prepared and are not included in the launch subscription yet.",
@@ -90,8 +102,8 @@ export const commercialOffer = Object.freeze({
   billing: Object.freeze({
     setupFee: "No setup fee. No complicated packages.",
     sameFeatures: "Monthly and annual subscriptions include the same Tallyo Pro features.",
-    trial: "Start the monthly plan with every Tallyo Pro feature free for 7 days. A card is required. Unless you cancel online before the trial ends, your subscription continues automatically at £8 per month. We will email you 3 days before it ends. If you cancel during the trial, you keep access until it ends and will not be charged.",
-    noTrial: "Tallyo does not currently offer a full-feature free trial.",
+    trial: subscriptionTrialCopy.enabled,
+    noTrial: subscriptionTrialCopy.disabled,
     evaluation: "Use the Free Invoice Maker without an account, or choose the monthly subscription as the low-commitment evaluation route.",
     cancellation: "You can cancel future renewal at any time. Your paid access will normally continue until the end of the billing period you have already paid for.",
     annualRefund: "Annual subscriptions are paid upfront for twelve months of access. Cancelling future renewal does not normally create an automatic partial refund for unused time. This does not affect rights or refunds required by applicable law."
@@ -102,7 +114,7 @@ export const commercialOffer = Object.freeze({
 export const pricingFaqs = Object.freeze([
   Object.freeze({
     question: "Is there a free trial?",
-    answer: "Tallyo does not currently offer a full-feature free trial. You can use the Free Invoice Maker without an account before deciding whether the saved Tallyo Pro workspace is suitable for your business. The monthly subscription is the low-commitment evaluation route."
+    answer: subscriptionTrialPlaceholder
   }),
   Object.freeze({
     question: "Do monthly and annual plans have different features?",

@@ -338,8 +338,13 @@ assert.match(
   /subscriptionCheckoutRequested[\s\S]*?mode === "production"[\s\S]*?TALLYO_SUBSCRIPTION_PUBLIC_RELEASE_APPROVED !== "true"/,
 );
 assert.match(websiteConfig, /subscriptionCheckoutEnabled: subscriptionCheckoutRequested/);
-assert.equal(readiness.publicCheckoutEnabled, false);
-assert.equal(readiness.liveStripeBillingConfigured, false);
+assert.equal(readiness.publicCheckoutEnabled, true);
+assert.equal(readiness.liveStripeBillingConfigured, true);
+assert.equal(readiness.trialPublished, true);
+assert.equal(readiness.trialPlan, 'monthly');
+assert.equal(readiness.trialDays, 7);
+assert.equal(readiness.trialReminderDaysBeforeEnd, 3);
+assert.equal(readiness.trialRequiresPaymentMethod, true);
 assert.match(acceptanceRunbook, /must not touch the production Supabase project/i);
 assert.match(acceptanceRunbook, /STRIPE_BILLING_ENABLED=false/);
 assert.match(acceptanceRunbook, /separate permission for the controlled test Checkout/i);

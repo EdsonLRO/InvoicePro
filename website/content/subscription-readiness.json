@@ -1,11 +1,11 @@
 {
-  "schemaVersion": 1,
-  "status": "sandbox-billing-and-connect-accepted-public-release-pending",
-  "publicCheckoutEnabled": false,
-  "publicCustomerPaymentsEnabled": false,
-  "liveStripeBillingConfigured": false,
-  "pricesPublished": false,
-  "trialPublished": false,
+  "schemaVersion": 2,
+  "status": "production-billing-connect-and-trial-active",
+  "publicCheckoutEnabled": true,
+  "publicCustomerPaymentsEnabled": true,
+  "liveStripeBillingConfigured": true,
+  "pricesPublished": true,
+  "trialPublished": true,
   "sandboxBillingAccepted": true,
   "sandboxConnectAccepted": true,
   "activationGateImplemented": true,
@@ -16,6 +16,10 @@
   "monthlyPriceGbp": 8,
   "annualPriceGbp": 80,
   "annualSavingGbp": 16,
+  "trialPlan": "monthly",
+  "trialDays": 7,
+  "trialReminderDaysBeforeEnd": 3,
+  "trialRequiresPaymentMethod": true,
   "currentWebsitePlanLabels": ["Free Invoice Maker", "Tallyo Pro"],
   "unresolvedNamingConflict": false,
   "billingBoundary": "Tallyo subscription billing is separate from customer invoice payments",
@@ -43,11 +47,9 @@
     "rollback and provider-outage behaviour"
   ],
   "ownerGates": [
-    "tax-inclusive or tax-exclusive presentation",
-    "final contractual cancellation and refund publication",
-    "Stripe Billing products and prices",
-    "production secrets and webhook destination",
-    "one controlled live subscription acceptance payment",
-    "public pricing and checkout release"
+    "future price, trial, renewal, cancellation or refund changes",
+    "future production provider or secret changes",
+    "future controlled live payment or refund tests",
+    "future public release or legal-scope changes"
   ]
 }
