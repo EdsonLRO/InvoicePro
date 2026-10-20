@@ -16,10 +16,10 @@ If paid search is later approved, start with tightly separated high-intent group
 
 - simple invoicing software UK → homepage or Features page;
 - invoice software for sole traders → `/features/` (the retired industry route redirects here);
-- recurring invoice software UK → recurring-invoice guide and product tour;
-- invoice reminder app → overdue-reminder guide;
-- invoice and quote software UK → features and product tour;
-- Stripe invoice payment software → payment-link guide.
+- recurring invoice software → `/recurring-invoice-software/`;
+- invoice reminder app → `/invoice-reminder-software/`;
+- invoice and quote software → `/quote-to-invoice-software/`;
+- invoice payment tracking → `/invoice-payment-tracking/`.
 
 Do not target broad accounting, payroll, tax-return, free bookkeeping, CRM,
 project-management or team-collaboration intent that Tallyo does not serve. Review
