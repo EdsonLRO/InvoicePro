@@ -1061,7 +1061,7 @@ Desktop navigation refinement, 2026-10-13: candidate build `2026.10.13.3` replac
 
 # SEO-001 — Public website search discovery
 
-Status: Phase 1 implementation candidate prepared on 2026-10-20. Publication remains Owner-gated.
+Status: Phase 1 merged in PR #248 as `422f6065d20d8d1dfff38c088a20b58237118fc9` and verified live on 2026-10-20. Phase 2 implementation is in progress; publication remains Owner-gated.
 
 Objective: make the existing public website easier to discover for accurate, high-intent invoicing searches before creating any new commercial landing pages.
 
@@ -1074,3 +1074,13 @@ Phase 1 scope:
 - retain current product boundaries, pricing, legal wording, Analytics behaviour and deployment gates.
 
 Excluded: new industry pages, new commercial feature pages, provider changes, paid search, Analytics changes, legal publication and production deployment.
+
+Phase 2 scope:
+
+- publish substantial, product-grounded pages for quote-to-invoice, recurring-invoice, overdue-reminder and invoice-payment-tracking intent;
+- use only current real Tallyo screenshots with fictional demonstration data;
+- connect each page to the relevant detailed Help article, product tour and related workflow;
+- keep payment, reminder, recurring-service, income-record and non-accounting boundaries explicit;
+- include every page in the normal canonical, structured-data, sitemap and internal-link validation.
+
+Excluded: new industry pages, comparison claims, invented customer proof, bank integration, accounting or tax claims, provider changes, paid search, Analytics changes and production deployment.

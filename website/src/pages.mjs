@@ -9,6 +9,7 @@ import {
 import { finalCta, helpArticlePage, list, productDemo, workflow } from "./components.mjs";
 import { applySubscriptionTrialCopy, commercialOffer, connectPaymentPlaceholders, pricingFaqs } from "./commercial-offer.mjs";
 import { siteConfig } from "./config.mjs";
+import { intentPages } from "./intent-pages.mjs";
 import { cookieNotice, dataProcessingTerms, privacyNotice } from "./legal-content.mjs";
 import { serviceTerms } from "./service-terms-content.mjs";
 
@@ -95,7 +96,7 @@ const home = `
   <section class="section home-decision-panel" aria-labelledby="home-decision-title">
     <div><p class="eyebrow">A clear next step</p><h2 id="home-decision-title">Try one document free, or keep the whole workflow together.</h2><p>The Free Invoice Maker works without an account. Tallyo Pro saves customers, services, documents, recurring work and payment records, with Income Insights and four document layouts included.</p></div>
     <div class="home-decision-actions"><p><strong>${commercialOffer.free.price}</strong><span>Free Invoice Maker</span><a href="/free-invoice-generator/">Create an invoice</a></p><p><strong>${commercialOffer.pro.monthlyPrice}</strong><span>per month · ${commercialOffer.pro.annualPrice} annually</span><a href="/pricing/">Compare plans</a></p></div>
-    <p class="home-decision-trust"><a href="/free-quote-generator/">Make a free quote</a><span aria-hidden="true">·</span><a href="/help/recurring-invoices/">Explore recurring invoices</a><span aria-hidden="true">·</span><a href="/help/overdue-reminders/">Understand overdue reminders</a><span aria-hidden="true">·</span><a href="/invoice-guide/">Read the simple invoice guide</a><span aria-hidden="true">·</span><a href="/product-tour/">See the product in use</a></p>
+    <p class="home-decision-trust"><a href="/free-quote-generator/">Make a free quote</a><span aria-hidden="true">·</span><a href="/recurring-invoice-software/">Explore recurring invoices</a><span aria-hidden="true">·</span><a href="/invoice-reminder-software/">Understand overdue reminders</a><span aria-hidden="true">·</span><a href="/invoice-guide/">Read the simple invoice guide</a><span aria-hidden="true">·</span><a href="/product-tour/">See the product in use</a></p>
   </section>
 
   <section class="section section-soft faq-preview" aria-labelledby="faq-preview-title"><div class="section-heading"><p class="eyebrow">Before you start</p><h2 id="faq-preview-title">Three useful answers.</h2></div><div class="faq-list home-faq-list">${faqs.slice(0, 3).map((item) => `<details><summary>${item.question}</summary><p>${item.answer}</p></details>`).join("")}</div><p class="section-link"><a href="/faq/">Read all product questions →</a></p></section>
@@ -135,6 +136,7 @@ const features = `
     <div class="section-heading"><p class="eyebrow">What you can do</p><h2 id="feature-groups-title">One connected place for the work around every invoice.</h2><p>Each section below uses a real Tallyo screen with fictional demonstration data.</p></div>
     ${featureGroups.map((group, index) => `<article id="feature-${index + 1}"><div class="feature-number">${String(index + 1).padStart(2, "0")}</div><div class="feature-proof-copy"><p class="card-label">${group.label}</p><h2>${group.title}</h2><p>${group.description}</p>${list(group.items)}${group.note ? `<p class="feature-proof-note">${group.note}</p>` : ""}</div><figure class="feature-proof-media"><div><img src="${group.image}?v=__TALLYO_ASSET_REVISION__" alt="${group.imageAlt}" loading="lazy" decoding="async"></div><figcaption>${group.imageCaption}</figcaption></figure></article>`).join("")}
   </section>
+  <section class="section section-soft" aria-labelledby="feature-workflows-title"><div class="section-heading"><p class="eyebrow">Explore a workflow</p><h2 id="feature-workflows-title">Start with the invoicing task you want to make easier.</h2><p>Each guide explains what Tallyo does, what stays under your control and where the feature fits in the wider workflow.</p></div><div class="benefit-grid"><article><h3><a href="/quote-to-invoice-software/">Quote to invoice</a></h3><p>Record customer acceptance and create one linked invoice without entering the work again.</p></article><article><h3><a href="/recurring-invoice-software/">Recurring invoices</a></h3><p>Create regular invoices on a weekly, monthly, quarterly or yearly schedule.</p></article><article><h3><a href="/invoice-reminder-software/">Overdue reminders</a></h3><p>Choose exactly which overdue invoices receive automatic follow-up.</p></article><article><h3><a href="/invoice-payment-tracking/">Payment tracking</a></h3><p>Record deposits and part-payments, then see the amount still due.</p></article></div></section>
   <section class="section workflow-outcome" aria-labelledby="workflow-title" data-horizontal-flow>
     <div class="workflow-outcome-sticky">
       <div class="section-heading"><p class="eyebrow">From quote to payment</p><h2 id="workflow-title">See what happens at every step.</h2><p>Keep scrolling to follow a quote from sending and customer acceptance through to the invoice, payments and follow-up.</p></div>
@@ -379,7 +381,7 @@ const helpPages = helpArticles.map((article) => ({
   breadcrumbs: [{ name: "Home", path: "/" }, { name: "Help", path: "/help/" }, { name: article.title, path: `/help/${article.slug}/` }]
 }));
 
-export const pages = Object.freeze([...foundationPages, ...helpPages]);
+export const pages = Object.freeze([...foundationPages, ...intentPages, ...helpPages]);
 
 export const notFoundPage = Object.freeze({
   route: "/404/",

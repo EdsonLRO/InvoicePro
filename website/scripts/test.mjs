@@ -161,8 +161,8 @@ assert.match(home, /Willow &amp; Pine Studio/);
 assert.match(home, /Tallyo is online invoicing software/, "homepage leads with the principal product search intent");
 assert.match(home, /one calm workspace\. Keep recurring work, payment updates and the income recorded in Tallyo together/, "homepage hero reflects the current connected workflow");
 assert.match(home, /href="\/free-quote-generator\/">Make a free quote<\/a>/, "homepage links directly to the free quote maker");
-assert.match(home, /href="\/help\/recurring-invoices\/">Explore recurring invoices<\/a>/, "homepage links to recurring-invoice guidance");
-assert.match(home, /href="\/help\/overdue-reminders\/">Understand overdue reminders<\/a>/, "homepage links to reminder guidance");
+assert.match(home, /href="\/recurring-invoice-software\/">Explore recurring invoices<\/a>/, "homepage links to the recurring-invoice landing page");
+assert.match(home, /href="\/invoice-reminder-software\/">Understand overdue reminders<\/a>/, "homepage links to the reminder landing page");
 assert.match(home, /<title>Online invoicing software for your business \| Tallyo<\/title>/, "homepage title targets online invoicing software clearly");
 assert.doesNotMatch(home, /workspace\s+—/, "homepage hero does not restore the removed dash");
 assert.match(home, /footer-group footer-account[\s\S]*?<h2>Product<\/h2>[\s\S]*?<h2>Learn<\/h2>[\s\S]*?<h2>Legal<\/h2>[\s\S]*?footer-intro/, "footer places the four evenly spaced link groups before the brand block");
@@ -219,6 +219,25 @@ assert.match(featuresPage, /Income records, UK period organisation and a downloa
 assert.match(featuresPage, /do not include expenses, income received elsewhere, bank balances, tax calculations or HMRC filing/, "income claims retain the reviewed product boundary");
 assert.match(featuresPage, /Google or email-and-password sign-in/, "features page includes released Google sign-in without implying Apple availability");
 assert.match(featuresPage, /Tallyo, Basic, Modern and Professional layouts/, "features page includes the four released document layouts");
+for (const intentRoute of ["quote-to-invoice-software", "recurring-invoice-software", "invoice-reminder-software", "invoice-payment-tracking"]) {
+  assert.match(featuresPage, new RegExp(`href="/${intentRoute}/"`), `features page links to ${intentRoute}`);
+}
+
+const intentPageExpectations = [
+  ["quote-to-invoice-software", "Quote-to-invoice software", "tallyo-quote-editor.jpg", "customer acceptance"],
+  ["recurring-invoice-software", "Recurring invoice software", "recurring-edit.png", "weekly, monthly, quarterly or yearly"],
+  ["invoice-reminder-software", "Invoice reminder software", "tallyo-overdue.jpg", "reminders are sent only for invoices"],
+  ["invoice-payment-tracking", "Invoice payment tracking", "tallyo-payments.jpg", "does not currently connect to a bank account"]
+];
+for (const [slug, heading, imageName, evidence] of intentPageExpectations) {
+  const html = read(`${slug}/index.html`);
+  const plainText = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  assert.match(html, new RegExp(`<h1>${heading}`), `${slug} uses its principal search intent in the h1`);
+  assert.match(html, new RegExp(`/assets/product/(?:growth-studio/)?${imageName.replace(".", "\\.")}\\?v=[a-f0-9]{12}`), `${slug} uses versioned current product evidence`);
+  assert.match(html, new RegExp(evidence, "i"), `${slug} explains the verified product behaviour`);
+  assert.match(html, /Product screenshot using fictional demonstration data\./, `${slug} identifies fictional screenshot data`);
+  assert.ok(plainText.split(" ").length >= 300, `${slug} provides substantial useful content`);
+}
 const currentFeatureImages = [
   "dashboard-overview.png",
   "quote-email-review.png",
@@ -636,7 +655,7 @@ assert.doesNotMatch(read("assets/growth.js"), /fetch\s*\(|XMLHttpRequest|WebSock
 const contentMap = JSON.parse(readFileSync(join(websiteRoot, "content", "seo-content-map.json"), "utf8"));
 assert.equal(contentMap.status, "planning-only");
 assert.equal(contentMap.discoveryRule, "Every indexable route must receive an internal link from another built page.");
-assert.equal(contentMap.topics.length, 24, "all reviewed SEO topics are mapped");
+assert.equal(contentMap.topics.length, 26, "all reviewed SEO topics are mapped");
 assert.ok(contentMap.topics.every((topic) => topic.topic && topic.intent && topic.status), "SEO map entries are actionable specifications");
 
 const report = JSON.parse(read("build-report.json"));
