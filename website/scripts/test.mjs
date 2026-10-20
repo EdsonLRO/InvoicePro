@@ -103,6 +103,7 @@ for (const page of [...pages, notFoundPage]) {
   assert.match(html, /class="nav-install-link" href="\/help\/install-tallyo\/"/, `prominent installation route for ${page.route}`);
   assert.match(html, /class="nav-install-link"[\s\S]{0,500}<span>Install Tallyo<\/span>/, `installation action is visibly labelled for ${page.route}`);
   assert.match(html, /<div class="nav-links">[\s\S]*>Help<\/a>[\s\S]*<\/div>\s*<a class="nav-install-link"[\s\S]*<\/a>\s*<div class="nav-actions"><a class="login-link"/, `Install Tallyo sits independently between Help and Log in for ${page.route}`);
+  assert.match(html, /<div class="nav-links">[\s\S]*?<a href="\/#workflows">Workflows<\/a>/, `main navigation links directly to the homepage workflow section for ${page.route}`);
   assert.match(html, /type="module" src="\/assets\/helper\.js\?v=[a-f0-9]{12}"/, `Helper behaviour loads for ${page.route}`);
   assert.equal((html.match(/id="helper-knowledge"/g) || []).length, 1, `one reviewed Helper knowledge source for ${page.route}`);
   if (page.helper) {
@@ -163,6 +164,10 @@ assert.match(home, /one calm workspace\. Keep recurring work, payment updates an
 assert.match(home, /href="\/free-quote-generator\/">Make a free quote<\/a>/, "homepage links directly to the free quote maker");
 assert.match(home, /href="\/recurring-invoice-software\/">Explore recurring invoices<\/a>/, "homepage links to the recurring-invoice landing page");
 assert.match(home, /href="\/invoice-reminder-software\/">Understand overdue reminders<\/a>/, "homepage links to the reminder landing page");
+assert.match(home, /class="section section-dark home-workflows" id="workflows"/, "homepage gives workflows a prominent dedicated section");
+for (const workflowRoute of ["quote-to-invoice-software", "recurring-invoice-software", "invoice-reminder-software", "invoice-payment-tracking"]) {
+  assert.match(home, new RegExp(`class="section section-dark home-workflows"[\\s\\S]*?href="/${workflowRoute}/"`), `homepage workflow section links to ${workflowRoute}`);
+}
 assert.match(home, /<title>Online invoicing software for your business \| Tallyo<\/title>/, "homepage title targets online invoicing software clearly");
 assert.doesNotMatch(home, /workspace\s+—/, "homepage hero does not restore the removed dash");
 assert.match(home, /footer-group footer-account[\s\S]*?<h2>Product<\/h2>[\s\S]*?<h2>Learn<\/h2>[\s\S]*?<h2>Legal<\/h2>[\s\S]*?footer-intro/, "footer places the four evenly spaced link groups before the brand block");
@@ -172,7 +177,7 @@ assert.equal((home.match(/class="capability-marquee-group"/g) || []).length, 2, 
 assert.match(home, /class="capability-marquee-group" aria-hidden="true"/, "the repeated capability set stays hidden from assistive technology");
 assert.equal((home.match(/Income recorded in Tallyo made easier to understand/g) || []).length, 2, "home adds the income capability to both marquee copies");
 assert.match(home, /Income Insights and four document layouts included/, "home decision copy includes the released finance and document-style capabilities");
-for (const densityHook of ["home-benefits", "home-how", "home-decision-panel", "faq-preview"]) {
+for (const densityHook of ["home-benefits", "home-workflows", "home-how", "home-decision-panel", "faq-preview"]) {
   assert.match(home, new RegExp(`class="[^"]*${densityHook}[^"]*"`), `home retains ${densityHook} density hook`);
 }
 assert.doesNotMatch(home, /id="industries"|Use Tallyo your way|Built around real invoicing work/, "home avoids duplicate industry, installation and feature inventories");
@@ -583,6 +588,8 @@ assert.match(styles, /\.header-inner \{[^}]*width: min\(80rem, calc\(100% - 2rem
 assert.match(styles, /\.nav-links, \.nav-actions \{[^}]*flex-wrap: nowrap;[^}]*white-space: nowrap;/, "desktop navigation groups cannot wrap while scrolling");
 assert.match(styles, /\.nav-links a,\.nav-install-link,\.login-link\{[^}]*white-space:nowrap/, "desktop navigation labels stay on one line");
 assert.match(styles, /\.nav-install-link\{[^}]*display:inline-flex;[^}]*color:var\(--blue-600\);/, "installation action remains a proportional icon-and-text link");
+assert.match(styles, /\.home-workflows\{[^}]*width:min\(88rem,calc\(100% - 1rem\)\);[^}]*scroll-margin-top:6rem/, "homepage workflow section is wide and clears the sticky navigation anchor");
+assert.match(styles, /@media \(min-width: 72rem\) \{[\s\S]*?\.home-workflows \.benefit-grid \{ grid-template-columns: repeat\(4, minmax\(0, 1fr\)\); \}/, "homepage shows the four workflow cards in one balanced desktop row");
 assert.doesNotMatch(styles, /\.nav-install-link\s*\{[^}]*(?:border|background):/, "installation link has no persistent button treatment");
 assert.match(styles, /#cta_header_create_account\{[^}]*padding:\.78rem \.1rem;[^}]*border:0;[^}]*color:var\(--slate-700\);[^}]*font-size:\.92rem;[^}]*font-weight:680/, "Create account matches the navigation height, typography and colour");
 assert.doesNotMatch(styles, /#cta_header_create_account\{[^}]*border-bottom/, "Create account has no underline treatment");

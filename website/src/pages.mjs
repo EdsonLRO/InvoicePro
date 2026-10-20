@@ -88,6 +88,16 @@ const home = `
     </div>
   </section>
 
+  <section class="section section-dark home-workflows" id="workflows" aria-labelledby="home-workflows-title">
+    <div class="section-heading"><p class="eyebrow">Explore Tallyo workflows</p><h2 id="home-workflows-title">Start with the invoicing task you want to make easier.</h2><p>Choose a workflow to see what happens at each stage, what Tallyo keeps connected and what remains under your control.</p></div>
+    <div class="benefit-grid">
+      <article>${icon("01")}<p class="card-label">Quote to invoice</p><h3>Keep accepted work connected.</h3><p>Send the quote, record customer acceptance and continue with one linked invoice.</p><p class="section-link"><a href="/quote-to-invoice-software/">Explore this workflow →</a></p></article>
+      <article>${icon("02")}<p class="card-label">Recurring invoices</p><h3>Set the schedule once.</h3><p>Choose when invoices repeat and whether each new invoice is emailed or left for review.</p><p class="section-link"><a href="/recurring-invoice-software/">Explore this workflow →</a></p></article>
+      <article>${icon("03")}<p class="card-label">Overdue reminders</p><h3>Follow up deliberately.</h3><p>See what is overdue and choose exactly which invoices receive automatic reminders.</p><p class="section-link"><a href="/invoice-reminder-software/">Explore this workflow →</a></p></article>
+      <article>${icon("04")}<p class="card-label">Payment tracking</p><h3>Keep every balance clear.</h3><p>Record deposits and part-payments, then see what has been paid and what remains due.</p><p class="section-link"><a href="/invoice-payment-tracking/">Explore this workflow →</a></p></article>
+    </div>
+  </section>
+
   <section class="section section-soft home-how" aria-labelledby="how-title">
     <div class="section-heading"><p class="eyebrow">How it works</p><h2 id="how-title">A simple path through the work.</h2></div>
     ${workflow(workflowSteps)}
