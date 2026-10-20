@@ -1058,3 +1058,19 @@ Desktop cache incident, 2026-10-11: one existing desktop session retained an HTM
 Mobile acceptance defect, 2026-10-11: the first native release depended on Growth Studio utility classes absent from the production stylesheet, leaving the hero without contrast and producing an inefficient phone content flow. Build `2026.10.11.3` introduces scoped responsive styles, a complete compact section grid, a horizontally scrollable content queue and a reduced cookie-control footprint; 360 px and representative phone-width visual acceptance are required before release.
 
 Desktop navigation refinement, 2026-10-13: candidate build `2026.10.13.3` replaces the loose, uneven section-link row with an equal-width segmented switcher, a quieter Tallyo-indigo current state, explicit hover and keyboard-focus feedback, and a five-column intermediate layout. Responsive browser acceptance now covers 360 px, 430 px, 1024 px and 1440 px without horizontal navigation overflow.
+
+# SEO-001 — Public website search discovery
+
+Status: Phase 1 implementation candidate prepared on 2026-10-20. Publication remains Owner-gated.
+
+Objective: make the existing public website easier to discover for accurate, high-intent invoicing searches before creating any new commercial landing pages.
+
+Phase 1 scope:
+
+- lead the homepage metadata and visible introduction with online invoicing software for a business, without implying UK-only use;
+- give the existing Free Quote Maker direct paths from the homepage, footer and Free Invoice Maker;
+- add contextual homepage paths to the existing recurring-invoice and overdue-reminder guidance;
+- enforce a build-time rule that every indexable sitemap route receives an internal link from another built page;
+- retain current product boundaries, pricing, legal wording, Analytics behaviour and deployment gates.
+
+Excluded: new industry pages, new commercial feature pages, provider changes, paid search, Analytics changes, legal publication and production deployment.

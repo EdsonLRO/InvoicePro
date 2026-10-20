@@ -125,7 +125,7 @@ export const siteConfig = Object.freeze({
   appUrl,
   signupUrl: trimSlash(process.env.TALLYO_SIGNUP_URL || appUrl),
   subscriptionUrl: trimSlash(process.env.TALLYO_SUBSCRIPTION_URL || `${appUrl}/#account`),
-  defaultTitle: "Tallyo — Professional invoices. Clear payment updates. Less admin.",
+  defaultTitle: "Online invoicing software for your business | Tallyo",
   defaultDescription:
     "Create quotes and invoices, manage recurring work, record payments and understand the income recorded in Tallyo from one straightforward workspace.",
   locale: "en_GB",
@@ -160,6 +160,7 @@ export const footerGroups = Object.freeze([
       { label: "Features", href: "/features/" },
       { label: "Product Tour", href: "/product-tour/" },
       { label: "Free Invoice Maker", href: "/free-invoice-generator/" },
+      { label: "Free Quote Maker", href: "/free-quote-generator/" },
       { label: "Pricing", href: "/pricing/" },
       { label: "Security", href: "/security/" }
     ]
