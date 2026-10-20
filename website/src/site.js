@@ -165,7 +165,7 @@
   measureHorizontalFlow();
   updateScrollState();
 
-  const revealTargets = document.querySelectorAll(".home-capability-strip, .home-benefits .section-heading, .home-benefits article, .home-how .section-heading, .home-product-tour .section-heading, .home-product-tour .product-demo, .feature-hero > *, .feature-detail-list article, .workflow-outcome .section-heading, .workflow-outcome-step, .tour-hero > *, .product-tour .product-demo");
+  const revealTargets = document.querySelectorAll(".home-capability-strip, .home-benefits .section-heading, .home-benefits article, .home-workflows .section-heading, .home-workflows article, .home-how .section-heading, .home-product-tour .section-heading, .home-product-tour .product-demo, .feature-hero > *, .feature-detail-list article, .workflow-outcome .section-heading, .workflow-outcome-step, .tour-hero > *, .product-tour .product-demo");
   if (revealTargets.length && !reduceMotion.matches && "IntersectionObserver" in window) {
     document.documentElement.classList.add("motion-ready");
     revealTargets.forEach((target, index) => {

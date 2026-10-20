@@ -147,6 +147,7 @@ export const siteConfig = Object.freeze({
 
 export const navigation = Object.freeze([
   { label: "Features", href: "/features/" },
+  { label: "Workflows", href: "/#workflows" },
   { label: "Product Tour", href: "/product-tour/" },
   { label: "Free Invoice Maker", href: "/free-invoice-generator/" },
   { label: "Pricing", href: "/pricing/" },

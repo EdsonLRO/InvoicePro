@@ -1061,7 +1061,7 @@ Desktop navigation refinement, 2026-10-13: candidate build `2026.10.13.3` replac
 
 # SEO-001 — Public website search discovery
 
-Status: Phase 1 merged in PR #248 as `422f6065d20d8d1dfff38c088a20b58237118fc9` and verified live on 2026-10-20. Phase 2 implementation is in progress; publication remains Owner-gated.
+Status: Phase 1 merged in PR #248 as `422f6065d20d8d1dfff38c088a20b58237118fc9`. Phase 2 merged in PR #249 as `54e45bb0190dc71dd3a56e1edcb852f1c25494f6`; all four routes were verified live on 2026-10-20. Phase 3 workflow-discovery refinement is in progress; publication remains Owner-gated.
 
 Objective: make the existing public website easier to discover for accurate, high-intent invoicing searches before creating any new commercial landing pages.
 
@@ -1084,3 +1084,12 @@ Phase 2 scope:
 - include every page in the normal canonical, structured-data, sitemap and internal-link validation.
 
 Excluded: new industry pages, comparison claims, invented customer proof, bank integration, accounting or tax claims, provider changes, paid search, Analytics changes and production deployment.
+
+Phase 3 scope:
+
+- add a visible homepage Workflows section that introduces and links all four focused workflow pages;
+- add a permanent Workflows item to the desktop and collapsed mobile navigation without displacing the existing install action;
+- reuse the current design system and keep the stylesheet within its existing performance budget;
+- verify the homepage and navigation at desktop and mobile widths without horizontal overflow.
+
+Excluded: new workflow claims, navigation removal, pricing, legal, Analytics, provider, app-runtime and production changes.
