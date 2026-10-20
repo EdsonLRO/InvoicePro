@@ -64,6 +64,7 @@ const seenTitles = new Set();
 const seenDescriptions = new Set();
 const schemas = new Map();
 const seenAssetRevisions = new Set();
+const inboundInternalLinks = new Map(pages.filter((page) => !page.noindex).map((page) => [page.route, new Set()]));
 const prohibitedClaims = /100% secure|unhackable|bank-grade|fully GDPR compliant|certified compliant|guaranteed payment|guaranteed email delivery|works fully offline|uptime guarantee/i;
 const fakeProof = /\b(?:trusted by|rated|award-winning|five-star|5-star)\b/i;
 
@@ -140,7 +141,12 @@ for (const page of [...pages, notFoundPage]) {
     const route = href.split(/[?#]/)[0] || "/";
     const staticFile = join(distRoot, route.replace(/^\//, ""));
     assert.ok(routeOutput.has(route) || existsSync(staticFile), `broken internal link ${href} on ${page.route}`);
+    if (route !== page.route && inboundInternalLinks.has(route)) inboundInternalLinks.get(route).add(page.route);
   }
+}
+
+for (const [route, sources] of inboundInternalLinks) {
+  assert.ok(sources.size > 0, `indexable route ${route} must have an internal link from another page`);
 }
 
 const home = read("index.html");
@@ -152,7 +158,12 @@ for (const id of ["cta_header_create_account", "cta_hero_create_account", "cta_h
 }
 assert.match(home, /Northstar Home Services/);
 assert.match(home, /Willow &amp; Pine Studio/);
-assert.match(home, /one calm workspace, then see recurring work, payment updates and income recorded in Tallyo together/, "homepage hero reflects the current connected workflow");
+assert.match(home, /Tallyo is online invoicing software/, "homepage leads with the principal product search intent");
+assert.match(home, /one calm workspace\. Keep recurring work, payment updates and the income recorded in Tallyo together/, "homepage hero reflects the current connected workflow");
+assert.match(home, /href="\/free-quote-generator\/">Make a free quote<\/a>/, "homepage links directly to the free quote maker");
+assert.match(home, /href="\/help\/recurring-invoices\/">Explore recurring invoices<\/a>/, "homepage links to recurring-invoice guidance");
+assert.match(home, /href="\/help\/overdue-reminders\/">Understand overdue reminders<\/a>/, "homepage links to reminder guidance");
+assert.match(home, /<title>Online invoicing software for your business \| Tallyo<\/title>/, "homepage title targets online invoicing software clearly");
 assert.doesNotMatch(home, /workspace\s+—/, "homepage hero does not restore the removed dash");
 assert.match(home, /footer-group footer-account[\s\S]*?<h2>Product<\/h2>[\s\S]*?<h2>Learn<\/h2>[\s\S]*?<h2>Legal<\/h2>[\s\S]*?footer-intro/, "footer places the four evenly spaced link groups before the brand block");
 assert.equal((home.match(/class="product-demo /g) || []).length, 0, "home does not duplicate the full product tour");
@@ -360,6 +371,8 @@ const helperHash = createHash("sha256").update(embeddedKnowledge).digest("base64
 
 const generator = read("free-invoice-generator/index.html");
 const quoteGenerator = read("free-quote-generator/index.html");
+assert.match(generator, /href="\/free-quote-generator\/">Create a free quote<\/a>/, "invoice maker links to the quote maker");
+assert.match(quoteGenerator, /href="\/free-invoice-generator\/">Create a free invoice<\/a>/, "quote maker links back to the invoice maker");
 for (const html of [generator, quoteGenerator]) {
   assert.match(html, /data-generator/);
   assert.match(html, /type="module" src="\/assets\/generator\.js\?v=[a-f0-9]{12}"/);
@@ -622,7 +635,8 @@ assert.doesNotMatch(read("assets/growth.js"), /fetch\s*\(|XMLHttpRequest|WebSock
 
 const contentMap = JSON.parse(readFileSync(join(websiteRoot, "content", "seo-content-map.json"), "utf8"));
 assert.equal(contentMap.status, "planning-only");
-assert.equal(contentMap.topics.length, 23, "all reviewed SEO topics are mapped");
+assert.equal(contentMap.discoveryRule, "Every indexable route must receive an internal link from another built page.");
+assert.equal(contentMap.topics.length, 24, "all reviewed SEO topics are mapped");
 assert.ok(contentMap.topics.every((topic) => topic.topic && topic.intent && topic.status), "SEO map entries are actionable specifications");
 
 const report = JSON.parse(read("build-report.json"));

@@ -1,7 +1,9 @@
 {
   "status": "planning-only",
   "publicationRule": "Publish only after factual review, useful original content, and the required release approval.",
+  "discoveryRule": "Every indexable route must receive an internal link from another built page.",
   "topics": [
+    { "topic": "Online invoicing software for your business", "intent": "product", "route": "/", "status": "implemented" },
     { "topic": "Free invoice generator UK", "intent": "tool", "route": "/free-invoice-generator/", "status": "implemented" },
     { "topic": "Free quote generator UK", "intent": "tool", "route": "/free-quote-generator/", "status": "implemented" },
     { "topic": "Invoice template for sole traders", "intent": "template", "route": null, "status": "planned" },
