@@ -1059,6 +1059,8 @@ Mobile acceptance defect, 2026-10-11: the first native release depended on Growt
 
 Desktop navigation refinement, 2026-10-13: candidate build `2026.10.13.3` replaces the loose, uneven section-link row with an equal-width segmented switcher, a quieter Tallyo-indigo current state, explicit hover and keyboard-focus feedback, and a five-column intermediate layout. Responsive browser acceptance now covers 360 px, 430 px, 1024 px and 1440 px without horizontal navigation overflow.
 
+Product-image correction, 2026-10-24: candidate build `2026.10.24.1` makes the three selectable Growth Studio product assets byte-for-byte copies of the approved fictional-data captures and labels them as raw product screenshots. The prior 1200 px branded layouts are retained only as campaign compositions. Focused tests verify the raw source identity, filenames and truthful alternative text; no live account, customer data or social action is in scope.
+
 # SEO-001 — Public website search discovery
 
 Status: Phase 1 merged in PR #248 as `422f6065d20d8d1dfff38c088a20b58237118fc9`. Phase 2 merged in PR #249 as `54e45bb0190dc71dd3a56e1edcb852f1c25494f6`; all four routes were verified live on 2026-10-20. Phase 3 workflow-discovery refinement is in progress; publication remains Owner-gated.
