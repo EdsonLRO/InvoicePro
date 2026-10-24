@@ -10,6 +10,11 @@ The current captures are stored in
 screens inside the 1200 × 1200 Growth Studio additions in
 `website/public/assets/social/linkedin/33-*.png` through `39-*.png`.
 
+Growth Studio also exposes verbatim copies of the accepted-quote, Income
+Insights and Income Pack captures as `40-product-*.png` through
+`42-product-*.png`. Use those entries when a post calls for a raw product
+screenshot rather than a branded campaign composition.
+
 The visuals follow the existing Tallyo LinkedIn system and use only
 `website/public/assets/tallyo-wordmark-white.png` for the public wordmark. The
 product areas are screenshots of the real current app components, not drawn or
