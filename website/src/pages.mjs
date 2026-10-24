@@ -113,14 +113,13 @@ const home = `
     <div class="section-heading">
       <p class="eyebrow">Independent customer reviews</p>
       <h2 id="home-reviews-title">Your experience can help the next business decide.</h2>
-      <p>Tallyo is beginning to collect independent feedback. If you have used the product, share an honest experience — positive or critical — so other businesses can understand whether it suits their work.</p>
-      <p class="feature-proof-note">Please do not include customer names, invoice details, passwords, payment information or other private business data in a public review.</p>
+      <p>Tallyo is preparing an independent place for customer feedback. Once the profile is verified, people who have used Tallyo will be able to share an honest experience — positive or critical — so other businesses can understand whether it suits their work.</p>
+      <p class="feature-proof-note">When public reviews open, please do not include customer names, invoice details, passwords, payment information or other private business data.</p>
     </div>
-    <article class="feature-card review-platform-card" aria-labelledby="trustpilot-review-title">
-      <p class="card-label">Independent review platform</p>
-      <h3 id="trustpilot-review-title">Review Tallyo on Trustpilot</h3>
-      <p>Your review is published under Trustpilot’s policies. Tallyo cannot edit your words or choose which genuine experiences are displayed.</p>
-      <a class="button button-secondary" href="https://uk.trustpilot.com/evaluate/tallyo.co.uk" target="_blank" rel="noopener noreferrer">Share your experience <span aria-hidden="true">↗</span></a>
+    <article class="feature-card" aria-labelledby="trustpilot-review-title">
+      <p class="card-label">Independent review profile</p>
+      <h3 id="trustpilot-review-title">Trustpilot review link coming soon</h3>
+      <p>Tallyo’s Trustpilot business profile needs to be claimed and verified before reviews can be collected there. The direct review link will appear here after that setup is complete.</p>
     </article>
   </section>
 

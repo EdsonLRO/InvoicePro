@@ -277,7 +277,6 @@ main > .section:last-of-type{margin-bottom:var(--layout-gap)}
 .home-decision-actions a, .home-decision-trust a { color: var(--blue-600); font-weight: 750; }
 .home-decision-trust { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0; color: var(--slate-400); }
 .home-reviews .section-heading { margin-bottom: 0; }
-.review-platform-card .button { width: 100%; }
 .home-faq-list { max-width: none; grid-template-columns: repeat(3, minmax(0,1fr)); }
 .home-faq-list details { align-self: start; }
 .home-product-tour { width: min(88rem, calc(100% - 1rem)); padding-block: var(--space-section); }

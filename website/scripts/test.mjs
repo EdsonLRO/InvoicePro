@@ -181,9 +181,10 @@ for (const densityHook of ["home-benefits", "home-workflows", "home-how", "home-
   assert.match(home, new RegExp(`class="[^"]*${densityHook}[^"]*"`), `home retains ${densityHook} density hook`);
 }
 assert.match(home, /<h2 id="home-reviews-title">Your experience can help the next business decide\.<\/h2>/, "homepage invites genuine independent reviews without claiming existing proof");
-assert.match(home, /href="https:\/\/uk\.trustpilot\.com\/evaluate\/tallyo\.co\.uk" target="_blank" rel="noopener noreferrer"/, "homepage review action uses the independent Trustpilot destination safely");
+assert.match(home, /Trustpilot review link coming soon/, "homepage explains that the independent review destination is not ready");
+assert.match(home, /needs to be claimed and verified before reviews can be collected there/, "homepage explains the external setup boundary");
+assert.doesNotMatch(home, /href="https:\/\/uk\.trustpilot\.com\/evaluate\/tallyo\.co\.uk"/, "homepage does not expose an unverified review destination");
 assert.match(home, /positive or critical/, "homepage asks for balanced feedback rather than review gating");
-assert.match(home, /cannot edit your words or choose which genuine experiences are displayed/, "homepage explains the external review boundary");
 assert.match(home, /do not include customer names, invoice details, passwords, payment information or other private business data/, "homepage review invitation protects private business information");
 assert.doesNotMatch(home, /aggregateRating|reviewRating|TrustScore|five-star|5-star/i, "homepage does not invent or mark up an unearned review score");
 assert.doesNotMatch(home, /id="industries"|Use Tallyo your way|Built around real invoicing work/, "home avoids duplicate industry, installation and feature inventories");
