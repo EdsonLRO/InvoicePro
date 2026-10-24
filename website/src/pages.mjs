@@ -109,6 +109,21 @@ const home = `
     <p class="home-decision-trust"><a href="/free-quote-generator/">Make a free quote</a><span aria-hidden="true">·</span><a href="/recurring-invoice-software/">Explore recurring invoices</a><span aria-hidden="true">·</span><a href="/invoice-reminder-software/">Understand overdue reminders</a><span aria-hidden="true">·</span><a href="/invoice-guide/">Read the simple invoice guide</a><span aria-hidden="true">·</span><a href="/product-tour/">See the product in use</a></p>
   </section>
 
+  <section class="section section-soft split home-reviews" aria-labelledby="home-reviews-title">
+    <div class="section-heading">
+      <p class="eyebrow">Independent customer reviews</p>
+      <h2 id="home-reviews-title">Your experience can help the next business decide.</h2>
+      <p>Tallyo is beginning to collect independent feedback. If you have used the product, share an honest experience — positive or critical — so other businesses can understand whether it suits their work.</p>
+      <p class="feature-proof-note">Please do not include customer names, invoice details, passwords, payment information or other private business data in a public review.</p>
+    </div>
+    <article class="feature-card review-platform-card" aria-labelledby="trustpilot-review-title">
+      <p class="card-label">Independent review platform</p>
+      <h3 id="trustpilot-review-title">Review Tallyo on Trustpilot</h3>
+      <p>Your review is published under Trustpilot’s policies. Tallyo cannot edit your words or choose which genuine experiences are displayed.</p>
+      <a class="button button-secondary" href="https://uk.trustpilot.com/evaluate/tallyo.co.uk" target="_blank" rel="noopener noreferrer">Share your experience <span aria-hidden="true">↗</span></a>
+    </article>
+  </section>
+
   <section class="section section-soft faq-preview" aria-labelledby="faq-preview-title"><div class="section-heading"><p class="eyebrow">Before you start</p><h2 id="faq-preview-title">Three useful answers.</h2></div><div class="faq-list home-faq-list">${faqs.slice(0, 3).map((item) => `<details><summary>${item.question}</summary><p>${item.answer}</p></details>`).join("")}</div><p class="section-link"><a href="/faq/">Read all product questions →</a></p></section>
 
   ${finalCta({ title: "Ready to make invoicing feel more manageable?", copy: "Start with the free maker or create a Tallyo account when you want your work saved and connected.", secondaryLabel: "Make a free invoice", secondaryHref: "/free-invoice-generator/" })}`;
