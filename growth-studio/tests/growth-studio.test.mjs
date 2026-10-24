@@ -53,6 +53,25 @@ test("brand library is current, categorised, and topic-aware", () => {
   assert.equal(recommendAsset("Regular monthly garden maintenance").id, "recurring");
 });
 
+test("product screenshots use genuine fictional-data captures rather than recreated interface art", async () => {
+  const screenshots = brandAssets.filter((asset) => asset.format === "Raw product screenshot");
+  assert.deepEqual(screenshots.map((asset) => asset.id), ["quote-to-invoice", "income-insights", "income-pack"]);
+  for (const asset of screenshots) {
+    assert.match(asset.file, /^4[0-2]-product-.+\.png$/);
+    assert.doesNotMatch(asset.alt, /preview|illustration/i);
+  }
+
+  const repository = path.resolve(root, "..");
+  const originals = ["accepted-quote-invoice.png", "income-insights.png", "income-pack.png"];
+  for (const [index, asset] of screenshots.entries()) {
+    const [published, original] = await Promise.all([
+      readFile(path.join(repository, "website", "public", "assets", "social", "linkedin", asset.file)),
+      readFile(path.join(repository, "website", "public", "assets", "product", "growth-studio", originals[index]))
+    ]);
+    assert.deepEqual(published, original, `${asset.file} must remain an unmodified product capture`);
+  }
+});
+
 test("Growth Studio visuals use real current interface captures and the official wordmark", async () => {
   const repoRoot = path.resolve(root, "..");
   const [capture, renderer, libraryRenderer] = await Promise.all([
