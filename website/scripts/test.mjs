@@ -177,9 +177,15 @@ assert.equal((home.match(/class="capability-marquee-group"/g) || []).length, 2, 
 assert.match(home, /class="capability-marquee-group" aria-hidden="true"/, "the repeated capability set stays hidden from assistive technology");
 assert.equal((home.match(/Income recorded in Tallyo made easier to understand/g) || []).length, 2, "home adds the income capability to both marquee copies");
 assert.match(home, /Income Insights and four document layouts included/, "home decision copy includes the released finance and document-style capabilities");
-for (const densityHook of ["home-benefits", "home-workflows", "home-how", "home-decision-panel", "faq-preview"]) {
+for (const densityHook of ["home-benefits", "home-workflows", "home-how", "home-decision-panel", "home-reviews", "faq-preview"]) {
   assert.match(home, new RegExp(`class="[^"]*${densityHook}[^"]*"`), `home retains ${densityHook} density hook`);
 }
+assert.match(home, /<h2 id="home-reviews-title">Your experience can help the next business decide\.<\/h2>/, "homepage invites genuine independent reviews without claiming existing proof");
+assert.match(home, /href="https:\/\/uk\.trustpilot\.com\/evaluate\/tallyo\.co\.uk" target="_blank" rel="noopener noreferrer"/, "homepage review action uses the independent Trustpilot destination safely");
+assert.match(home, /positive or critical/, "homepage asks for balanced feedback rather than review gating");
+assert.match(home, /cannot edit your words or choose which genuine experiences are displayed/, "homepage explains the external review boundary");
+assert.match(home, /do not include customer names, invoice details, passwords, payment information or other private business data/, "homepage review invitation protects private business information");
+assert.doesNotMatch(home, /aggregateRating|reviewRating|TrustScore|five-star|5-star/i, "homepage does not invent or mark up an unearned review score");
 assert.doesNotMatch(home, /id="industries"|Use Tallyo your way|Built around real invoicing work/, "home avoids duplicate industry, installation and feature inventories");
 
 const privacy = read("privacy/index.html");
