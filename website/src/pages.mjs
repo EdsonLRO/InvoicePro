@@ -113,8 +113,8 @@ const home = `
     <div class="section-heading">
       <p class="eyebrow">Independent customer reviews</p>
       <h2 id="home-reviews-title">Your experience can help the next business decide.</h2>
-      <p>Tallyo is beginning to collect independent feedback. If you have used the product, share an honest experience — positive or critical — so other businesses can understand whether it suits their work.</p>
-      <p class="feature-proof-note">Please do not include customer names, invoice details, passwords, payment information or other private business data in a public review.</p>
+      <p>Tallyo collects independent feedback. If you have used the product, share an honest experience so other businesses can understand whether it suits their work.</p>
+      <p class="feature-proof-note">Please do not include any personal or sensitive information.</p>
     </div>
     <article class="feature-card review-platform-card" aria-labelledby="trustpilot-review-title">
       <p class="card-label">Independent review platform</p>
