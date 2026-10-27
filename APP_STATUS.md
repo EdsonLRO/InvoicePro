@@ -44,6 +44,8 @@ Candidate build `2026.10.24.1` corrects the Growth Studio asset classification: 
 
 Candidate build `2026.10.27.1` prevents an empty or malformed live discovery response from masking the populated source-controlled snapshot. The Owner workspace now continues to the approved fallback feed unless a source produces at least one usable evidence-backed business, and its refresh confirmation names the feed that was actually loaded. Owner authorization, public-source privacy restrictions and all social-action prohibitions are unchanged.
 
+Corrective candidate build `2026.10.27.2` distinguishes an exhausted local review state from an empty feed. When every business in the current feed has previously been dismissed in that browser, Discover explains the state and offers a bounded restore action for those current candidate IDs. Saved filters retain their own empty-state wording, and unrelated local draft or approval choices are preserved.
+
 ## Income insights and Income Pack - released 2026-10-06
 
 The Owner approved exact Phase 6 candidate `2910b8d`; PR #209 merged as `f94eea755032dcc709207c3fbeb89024a634076b`. Production app deployment `ebb5a0af-5904-4150-ac2c-5a6ae778c7b1` serves build `2026.10.06.1` with cache `tallyo-shell-2026-10-06-1` and the reviewed Income insights gate enabled. The app now provides accessible customer and business Finances views, a traceable income-record ledger, optional UK income-period organisation and a local Income Pack with reconciled CSV, manifest and PDF files.
