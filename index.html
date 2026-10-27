@@ -2023,7 +2023,10 @@
                 <div v-show="growthStudio.section === 'discover'" class="space-y-5">
                     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"><div><p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Discover</p><h3 class="text-2xl font-semibold text-slate-900">Businesses showing Tallyo-fit signals</h3><p class="mt-1 text-sm text-slate-600">Evidence comes from public business websites. No people scraping, private contact collection, or automated outreach.</p></div><div class="flex rounded-lg border border-slate-200 bg-white p-1"><button v-for="filter in [{id:'all',label:'All'},{id:'high-fit',label:'High fit'},{id:'saved',label:'Saved'}]" :key="filter.id" type="button" @click="growthStudio.discoveryFilter = filter.id; saveGrowthStudio()" :class="growthStudio.discoveryFilter === filter.id ? 'bg-slate-900 text-white' : 'text-slate-600'" class="rounded-md px-3 py-2 text-sm font-semibold">{{ filter.label }}</button></div></div>
                     <p v-if="growthDiscoveryLoading" class="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500">Refreshing the approved discovery feed…</p>
-                    <p v-else-if="!growthFilteredCandidates.length" class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">No businesses match this view yet.</p>
+                    <div v-else-if="!growthFilteredCandidates.length" class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+                        <p>{{ growthEmptyDiscoveryMessage }}</p>
+                        <button v-if="growthCanRestoreDismissed" type="button" @click="growthRestoreDismissed" class="mt-4 rounded-lg border border-slate-300 bg-white px-4 py-2 font-semibold text-slate-700 hover:bg-slate-50">Show dismissed businesses again</button>
+                    </div>
                     <div v-else class="grid xl:grid-cols-2 gap-4">
                         <article v-for="candidate in growthFilteredCandidates" :key="candidate.id" class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                             <div class="flex items-start justify-between gap-4"><div><div class="flex flex-wrap items-center gap-2"><h4 class="text-lg font-semibold text-slate-900">{{ candidate.company }}</h4><span class="rounded-full bg-indigo-50 px-2 py-1 text-xs font-bold text-indigo-700">{{ candidate.fitScore }} fit</span><span class="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">{{ candidate.confidence }}</span></div><p class="mt-1 text-sm text-slate-500">{{ candidate.sector }} · {{ candidate.location }}</p></div><button type="button" @click="growthToggleSave(candidate.id)" class="text-sm font-semibold text-indigo-700">{{ growthStudio.savedCandidateIds.includes(candidate.id) ? 'Saved ✓' : 'Save' }}</button></div>
@@ -3977,7 +3980,7 @@
     </section>
 </div>
 
-<script src="./growth-studio-app.js?v=2026.10.27.1"></script>
+<script src="./growth-studio-app.js?v=2026.10.27.2"></script>
 <script src="./app-help-install.js"></script>
 <script>
     // =========================================================================
@@ -4053,7 +4056,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.10.27.1';
+    const APP_BUILD = '2026.10.27.2';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -4551,6 +4554,14 @@
             },
             growthHighFitCount() {
                 return this.growthCandidates.filter(candidate => candidate.fitScore >= 90).length;
+            },
+            growthCanRestoreDismissed() {
+                return this.growthDiscovery.candidates.length > 0 && this.growthCandidates.length === 0 && this.growthStudio.discoveryFilter !== 'saved';
+            },
+            growthEmptyDiscoveryMessage() {
+                if (this.growthStudio.discoveryFilter === 'saved') return 'No businesses have been saved yet.';
+                if (this.growthCanRestoreDismissed) return 'All businesses in this feed were dismissed from this browser.';
+                return 'No businesses match this view yet.';
             },
             growthSelectedPost() {
                 return this.growthStudio.posts.find(post => post.id === this.growthStudio.selectedPostId) || this.growthStudio.posts[0] || null;
@@ -6216,6 +6227,11 @@
             growthDismiss(candidateId) {
                 if (!this.growthStudio.dismissedCandidateIds.includes(candidateId)) this.growthStudio.dismissedCandidateIds.push(candidateId);
                 this.saveGrowthStudio('Business dismissed from this workspace.');
+            },
+            growthRestoreDismissed() {
+                const currentIds = new Set(this.growthDiscovery.candidates.map(candidate => candidate.id));
+                this.growthStudio.dismissedCandidateIds = (this.growthStudio.dismissedCandidateIds || []).filter(id => !currentIds.has(id));
+                this.saveGrowthStudio('Dismissed businesses restored for review.');
             },
             growthDraftFromCandidate(candidate) {
                 const context = [candidate.sector, candidate.contentAngle, candidate.signal, candidate.fitReason].join(' ');

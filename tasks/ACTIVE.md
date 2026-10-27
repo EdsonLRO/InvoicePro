@@ -1063,6 +1063,8 @@ Product-image correction, 2026-10-24: candidate build `2026.10.24.1` makes the t
 
 Discovery empty-feed correction, 2026-10-27: candidate build `2026.10.27.1` rejects a live discovery response that normalises to zero usable candidates and continues to the approved source-controlled snapshot. The refresh notice identifies the selected feed, and the versioned module plus service-worker namespace advance together so existing sessions receive the correction. No provider, Auth, customer-data or social-action boundary changes.
 
+Live acceptance follow-up, 2026-10-27: build `2026.10.27.1` loaded the approved snapshot but confirmed that a browser which had dismissed every current candidate still received an unexplained empty Discover view. Corrective build `2026.10.27.2` presents that exact state and restores only dismissals matching the current feed, without resetting saved content, draft approvals or unrelated local preferences.
+
 # SEO-001 — Public website search discovery
 
 Status: Phase 1 merged in PR #248 as `422f6065d20d8d1dfff38c088a20b58237118fc9`. Phase 2 merged in PR #249 as `54e45bb0190dc71dd3a56e1edcb852f1c25494f6`; all four routes were verified live on 2026-10-20. Phase 3 workflow-discovery refinement is in progress; publication remains Owner-gated.
