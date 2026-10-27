@@ -1,4 +1,5 @@
 import { installationSteps } from "./content.mjs";
+import { siteConfig } from "./config.mjs";
 
 const escapeHtml = (value) => String(value)
   .replaceAll("&", "&amp;")
@@ -78,7 +79,8 @@ const installDeviceVisuals = Object.freeze([
 
 const installVisualGuide = `
   <section class="install-visual-guide" data-install-guide aria-labelledby="install-device-title">
-    <div class="section-heading"><p class="eyebrow">Where to click</p><h2 id="install-device-title">Choose the browser on your device.</h2><p>The highlighted symbol or menu item is the one to select.</p></div>
+    <div class="install-app-first"><div><p class="eyebrow">First open the app</p><h2>Installation starts at app.tallyo.co.uk.</h2><p>The public website cannot install Tallyo. Open the Tallyo app login page first. You can install from that page without signing into an account.</p></div><a class="button button-primary" data-install-app-link href="${escapeHtml(siteConfig.appUrl)}" target="_blank" rel="noopener">Open Tallyo app</a></div>
+    <div class="section-heading"><p class="eyebrow">Then use your browser</p><h2 id="install-device-title">Choose the instructions for your device.</h2><p>Keep app.tallyo.co.uk open and select the highlighted browser symbol or menu item.</p></div>
     <div class="install-device-grid">${installationSteps.map(([title, copy], index) => `<article class="install-device-card"><p class="card-label">${String(index + 1).padStart(2, "0")}</p><h3>${escapeHtml(title)}</h3>${installDeviceVisuals[index]}<p>${escapeHtml(copy)}</p></article>`).join("")}</div>
     <p class="install-official-links">Browser menus can move after an update. Check the current <a href="https://support.google.com/chrome/answer/9658361?hl=en-GB">Chrome web-app guide</a>, <a href="https://support.microsoft.com/en-us/edge/install-manage-or-uninstall-apps-in-microsoft-edge">Microsoft Edge guide</a> or <a href="https://support.apple.com/guide/iphone/open-as-web-app-iphea86e5236/ios">Apple guide</a> if your screen looks different.</p>
   </section>`;

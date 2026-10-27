@@ -6,6 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { helpArticles, notFoundPage, pages, productScenes } from "../src/pages.mjs";
 import { findHelperAnswer, findRelevantHelperEntries, futurePublicAiAdapter, noAnswer } from "../src/helper-core.mjs";
+import { siteConfig } from "../src/config.mjs";
 import { APPROVED_ANALYTICS_EVENTS, GA4_MEASUREMENT_ID } from "../../analytics-consent.mjs";
 import { calculateDocument, calculationPolicy, formatMoney, parseMoney, parsePercent, parseQuantity } from "../src/document-calculator.mjs";
 import {
@@ -82,6 +83,7 @@ assert.doesNotMatch(JSON.stringify({ commercialOffer, pricingFaqs }), /two month
 
 const hrefsFor = (html) => [...html.matchAll(/href="([^"]+)"/g)].map((match) => match[1]);
 const meta = (html, name) => html.match(new RegExp(`<meta name="${name}" content="([^"]+)"`))?.[1];
+const escapedAppUrl = siteConfig.appUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 for (const page of [...pages, notFoundPage]) {
   assert.ok(existsSync(join(distRoot, page.output)), `missing output for ${page.route}`);
@@ -99,10 +101,11 @@ for (const page of [...pages, notFoundPage]) {
   assert.equal((html.match(/<h1[ >]/g) || []).length, 1, `one h1 for ${page.route}`);
   assert.match(html, /class="skip-link" href="#main-content"/, `skip link for ${page.route}`);
   assert.match(html, /aria-expanded="false" aria-controls="primary-navigation"/, `mobile menu semantics for ${page.route}`);
-  assert.match(html, /class="header-install-shortcut" href="\/help\/install-tallyo\/" aria-label="Install Tallyo"/, `installation shortcut stays visible beside the collapsed navigation for ${page.route}`);
-  assert.match(html, /class="nav-install-link" href="\/help\/install-tallyo\/"/, `prominent installation route for ${page.route}`);
-  assert.match(html, /class="nav-install-link"[\s\S]{0,500}<span>Install Tallyo<\/span>/, `installation action is visibly labelled for ${page.route}`);
-  assert.match(html, /<div class="nav-links">[\s\S]*>Help<\/a>[\s\S]*<\/div>\s*<a class="nav-install-link"[\s\S]*<\/a>\s*<div class="nav-actions"><a class="login-link"/, `Install Tallyo sits independently between Help and Log in for ${page.route}`);
+  assert.match(html, new RegExp(`class="header-install-shortcut" data-install-app-link href="${escapedAppUrl}" aria-label="Open Tallyo app to install"`), `installation shortcut opens the installable app for ${page.route}`);
+  assert.match(html, new RegExp(`class="nav-install-link" data-install-app-link href="${escapedAppUrl}" aria-label="Open Tallyo app to install"`), `prominent installation route opens the installable app for ${page.route}`);
+  assert.match(html, /class="nav-install-link"[\s\S]{0,500}<span>Open app to install<\/span>/, `installation action explains that the app opens first for ${page.route}`);
+  assert.match(html, /<div class="nav-links">[\s\S]*>Help<\/a>[\s\S]*<\/div>\s*<a class="nav-install-link"[\s\S]*<\/a>\s*<div class="nav-actions"><a class="login-link"/, `app installation action sits independently between Help and Log in for ${page.route}`);
+  assert.match(html, new RegExp(`footer-group footer-account[\\s\\S]*data-install-app-link href="${escapedAppUrl}">Open app to install<\\/a>`), `footer installation action opens the installable app for ${page.route}`);
   assert.match(html, /<div class="nav-links">[\s\S]*?<a href="\/#workflows">Workflows<\/a>/, `main navigation links directly to the homepage workflow section for ${page.route}`);
   assert.match(html, /type="module" src="\/assets\/helper\.js\?v=[a-f0-9]{12}"/, `Helper behaviour loads for ${page.route}`);
   assert.equal((html.match(/id="helper-knowledge"/g) || []).length, 1, `one reviewed Helper knowledge source for ${page.route}`);
@@ -315,7 +318,9 @@ assert.match(growthReadiness, /understandable to English-speaking visitors/);
 const installGuide = read("help/install-tallyo/index.html");
 assert.match(installGuide, /data-install-guide/, "installation article includes a visual browser guide");
 assert.equal((installGuide.match(/class="install-device-card"/g) || []).length, 4, "installation guide covers four common browser and device paths");
-assert.match(installGuide, /Chrome on a computer[\s\S]*Microsoft Edge[\s\S]*Android Chrome[\s\S]*iPhone or iPad/, "installation device choices are clearly separated");
+assert.match(installGuide, /The public website cannot install Tallyo[\s\S]*You can install from that page without signing into an account/, "installation guide clearly explains the app-first boundary");
+assert.match(installGuide, new RegExp(`data-install-app-link href="${escapedAppUrl}"[^>]*>Open Tallyo app<\\/a>`), "installation guide opens the actual app before device instructions");
+assert.match(installGuide, /Chrome on a computer[\s\S]*Microsoft Edge on a computer[\s\S]*Chrome on an Android phone or tablet[\s\S]*Safari on an iPhone or iPad/, "installation device choices are clearly separated");
 assert.match(installGuide, /Look at the right end of the address bar\./, "desktop guide points to the install icon location");
 assert.match(installGuide, /Install and create shortcut[\s\S]*Add to Home Screen/, "mobile guide shows the exact browser actions");
 assert.match(installGuide, /support\.google\.com\/chrome[\s\S]*support\.microsoft\.com\/en-us\/edge[\s\S]*support\.apple\.com\/guide\/iphone/, "installation guide links to current browser-owner instructions");
