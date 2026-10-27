@@ -239,14 +239,14 @@ export const helpArticles = Object.freeze([
   {
     slug: "install-tallyo",
     title: "Install Tallyo on your phone or computer",
-    description: "See exactly which browser icon or menu to use, then add Tallyo to your desktop, taskbar or home screen.",
+    description: "Open the Tallyo app first, then use the browser action for your phone, tablet or computer.",
     steps: [
-      ["Open the Tallyo app", "Visit app.tallyo.co.uk in Chrome, Microsoft Edge or Safari. Sign in if you already have an account."],
-      ["Find your device below", "The illustrated cards show the exact install symbol, browser menu and wording to look for."],
+      ["Open the Tallyo app", "Choose Open Tallyo app on this guide, or visit app.tallyo.co.uk. The marketing website cannot be installed as Tallyo, and you do not need to sign in before using the browser's install action."],
+      ["Find your device below", "With app.tallyo.co.uk open, use the illustrated card for your browser and device."],
       ["Choose Install or Add", "Confirm the browser message. Tallyo then appears with your other apps, on the desktop or on the home screen."],
       ["Open Tallyo from its new icon", "Use the installed icon for quicker access. Your saved business records still require an internet connection."]
     ],
-    note: "Installing Tallyo adds a convenient app icon; it does not download your authenticated business records for offline use. Browser menu wording can vary slightly by version."
+    note: "Install Tallyo only while app.tallyo.co.uk is open. Installing adds a convenient app icon; it does not download your authenticated business records for offline use. Browser menu wording can vary slightly by version."
   }
 ]);
 
@@ -270,8 +270,8 @@ export const faqs = Object.freeze([
 ]);
 
 export const installationSteps = Object.freeze([
-  ["Chrome on a computer", "Look at the right end of the address bar for the install symbol, then choose Install. If it is not shown, open the three-dot menu and look for Install Tallyo or Install page as app."],
-  ["Microsoft Edge", "Look for the App available symbol at the right end of the address bar. Or open the three-dot menu, then choose More tools, Apps and Install this site as an app."],
-  ["Android Chrome", "Tap the three-dot menu to the right of the address bar, choose Install and create shortcut, then choose Install."],
-  ["iPhone or iPad Safari", "Tap the Page Menu or Share symbol, choose Share if needed, scroll to Add to Home Screen, turn on Open as Web App and tap Add."]
+  ["Chrome on a computer", "With app.tallyo.co.uk open, look at the right end of the address bar for the install symbol and choose Install. If it is not shown, open the three-dot menu and look for Install Tallyo or Install page as app."],
+  ["Microsoft Edge on a computer", "With app.tallyo.co.uk open, look for the App available symbol at the right end of the address bar. Or open the three-dot menu, choose Apps, then Install Tallyo or Install this site as an app."],
+  ["Chrome on an Android phone or tablet", "With app.tallyo.co.uk open, tap the three-dot menu beside the address bar. Choose Install app, Add to Home screen or Install and create shortcut, then confirm Install."],
+  ["Safari on an iPhone or iPad", "With app.tallyo.co.uk open, tap Share. If Share is inside the Page Menu on your version of Safari, open that menu first. Choose Add to Home Screen, keep Open as Web App turned on if it is shown, then tap Add."]
 ]);

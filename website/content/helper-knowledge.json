@@ -265,7 +265,7 @@
       "question": "Can I install Tallyo?",
       "triggers": ["can i install tallyo", "install tallyo", "add tallyo to home screen", "install icon"],
       "keywords": ["install", "chrome", "edge", "safari", "home screen", "address bar", "icon"],
-      "answer": "Yes. Open the Tallyo app by choosing Log in or Create account. On Chrome or Edge on a computer, look for the install or app symbol at the right end of the address bar. On Android Chrome use the three-dot menu. On iPhone or iPad Safari use the Page or Share menu, then Add to Home Screen.",
+      "answer": "Yes. The public website itself is not the app that gets installed. First open the Tallyo app by choosing Log in, Create account or Open app to install. You do not need to sign in before installing. On Chrome or Edge on a computer, look for the install or app symbol at the right end of the address bar. On Android Chrome use the three-dot menu. On iPhone or iPad Safari use Share, then Add to Home Screen.",
       "links": [{ "label": "Installation guide", "href": "/help/install-tallyo/" }],
       "suggested": true
     },
