@@ -1061,6 +1061,8 @@ Desktop navigation refinement, 2026-10-13: candidate build `2026.10.13.3` replac
 
 Product-image correction, 2026-10-24: candidate build `2026.10.24.1` makes the three selectable Growth Studio product assets byte-for-byte copies of the approved fictional-data captures and labels them as raw product screenshots. The prior 1200 px branded layouts are retained only as campaign compositions. Focused tests verify the raw source identity, filenames and truthful alternative text; no live account, customer data or social action is in scope.
 
+Discovery empty-feed correction, 2026-10-27: candidate build `2026.10.27.1` rejects a live discovery response that normalises to zero usable candidates and continues to the approved source-controlled snapshot. The refresh notice identifies the selected feed, and the versioned module plus service-worker namespace advance together so existing sessions receive the correction. No provider, Auth, customer-data or social-action boundary changes.
+
 # SEO-001 — Public website search discovery
 
 Status: Phase 1 merged in PR #248 as `422f6065d20d8d1dfff38c088a20b58237118fc9`. Phase 2 merged in PR #249 as `54e45bb0190dc71dd3a56e1edcb852f1c25494f6`; all four routes were verified live on 2026-10-20. Phase 3 workflow-discovery refinement is in progress; publication remains Owner-gated.

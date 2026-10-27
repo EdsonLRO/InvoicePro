@@ -3977,7 +3977,7 @@
     </section>
 </div>
 
-<script src="./growth-studio-app.js?v=2026.10.24.1"></script>
+<script src="./growth-studio-app.js?v=2026.10.27.1"></script>
 <script src="./app-help-install.js"></script>
 <script>
     // =========================================================================
@@ -4053,7 +4053,7 @@
         return turnstileApiPromise;
     }
 
-    const APP_BUILD = '2026.10.24.1';
+    const APP_BUILD = '2026.10.27.1';
     const { createApp } = Vue;
     const closeOpenRecordMenus = event => {
         document.querySelectorAll('details.record-menu[open]').forEach(menu => {
@@ -6164,8 +6164,8 @@
                 this.growthDiscoveryLoading = true;
                 this.growthDiscoveryError = '';
                 const sources = [
-                    { url: 'https://growth.tallyo.co.uk/discovery.json', options: { credentials: 'include', cache: 'no-store' } },
-                    { url: './growth-studio/src/discovery.json', options: { cache: 'no-store' } }
+                    { url: 'https://growth.tallyo.co.uk/discovery.json', options: { credentials: 'include', cache: 'no-store' }, label: 'live research feed' },
+                    { url: './growth-studio/src/discovery.json', options: { cache: 'no-store' }, label: 'approved snapshot' }
                 ];
                 let lastError = null;
                 for (const source of sources) {
@@ -6174,8 +6174,10 @@
                         if (!response.ok) throw new Error(`Discovery source returned ${response.status}.`);
                         const contentType = response.headers.get('content-type') || '';
                         if (!contentType.toLowerCase().includes('json')) throw new Error('Discovery source did not return JSON.');
-                        this.growthDiscovery = window.TallyoGrowthStudio.normaliseDiscovery(await response.json());
-                        if (showFeedback) this.growthStudioNotice = 'Discovery list refreshed.';
+                        const discovery = window.TallyoGrowthStudio.normaliseDiscovery(await response.json());
+                        if (!discovery.candidates.length) throw new Error('Discovery source returned no usable candidates.');
+                        this.growthDiscovery = discovery;
+                        if (showFeedback) this.growthStudioNotice = `Discovery list refreshed from the ${source.label}.`;
                         this.growthDiscoveryLoading = false;
                         return;
                     } catch (error) {
