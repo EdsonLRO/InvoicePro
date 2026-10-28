@@ -379,15 +379,12 @@ main > .section:last-of-type{margin-bottom:var(--layout-gap)}
 .article-note h2 { font-size: 1.35rem; }
 .article-note a { color: var(--blue-600); font-weight: 750; }
 .install-visual-guide{margin-bottom:var(--layout-gap);padding:clamp(1.25rem,3vw,2.25rem);border:1px solid rgba(181,190,210,.55);border-radius:2rem;background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(235,238,255,.64));box-shadow:0 18px 48px rgba(26,39,69,.08)}
-.install-app-first{display:flex;align-items:center;justify-content:space-between;gap:var(--layout-gap);margin-bottom:clamp(1.5rem,4vw,2.6rem);padding:clamp(1rem,2.5vw,1.5rem);border:1px solid rgba(70,88,235,.24);border-radius:var(--radius-md);background:var(--white)}
-.install-app-first h2{margin-bottom:.35rem;font-size:clamp(1.35rem,3vw,1.8rem)}
-.install-app-first p:last-child{max-width:46rem;margin-bottom:0}
-.install-app-first .button{flex:0 0 auto;text-align:center}
 .install-visual-guide .section-heading { margin-bottom: var(--layout-gap); }
 .install-device-grid { display: grid; gap: var(--layout-gap); }
 .install-device-card{min-width:0;padding:1.1rem;border:1px solid rgba(181,190,210,.58);border-radius:var(--radius-md);background:rgba(255,255,255,.9);box-shadow:0 10px 26px rgba(26,39,69,.06)}
 .install-device-card h3 { margin-bottom: 0.8rem; font-size: 1.25rem; }
-.install-device-card > p:last-child { margin-bottom: 0; }
+.install-device-card > p:not(.card-label) { margin-bottom: 1rem; }
+.install-device-action{display:flex;width:100%;justify-content:center;text-align:center}
 .browser-install-demo, .phone-install-demo { margin: 0 0 0.9rem; overflow: hidden; border: 1px solid var(--slate-200); border-radius: 1rem; background: var(--slate-100); }
 .browser-install-top,.phone-browser-bar{display:flex;min-width:0;align-items:center;gap:.45rem;padding:.65rem;background:var(--white)}
 .browser-mark { display: grid; width: 1.7rem; height: 1.7rem; flex: 0 0 auto; place-items: center; border-radius: 50%; color: var(--white); background: linear-gradient(135deg, #4f5ee8, #20b98b); font-size: 0.68rem; font-weight: 850; }
@@ -680,7 +677,6 @@ main > .section:last-of-type{margin-bottom:var(--layout-gap)}
   .helper-widget-conversation { min-height: 9rem; max-height: min(18rem, 34dvh); }
   .helper-widget-footer span { max-width: 13rem; }
   .helper-fab { right: 0.7rem; bottom: 0.7rem; }
-  .install-app-first{align-items:stretch;flex-direction:column}
   .hero { padding-top: 1.7rem; padding-bottom: 1.85rem; }
   .home-hero { min-height: auto; padding-top: 2.4rem; padding-bottom: 2.5rem; }
   .home-hero h1 { font-size: clamp(2.55rem, 13vw, 3.55rem); }

@@ -239,10 +239,10 @@ export const helpArticles = Object.freeze([
   {
     slug: "install-tallyo",
     title: "Install Tallyo on your phone or computer",
-    description: "Open the Tallyo app first, then use the browser action for your phone, tablet or computer.",
+    description: "Choose your device, open Tallyo from its card, then follow the matching browser steps.",
     steps: [
-      ["Open the Tallyo app", "Choose Open Tallyo app on this guide, or visit app.tallyo.co.uk. The marketing website cannot be installed as Tallyo, and you do not need to sign in before using the browser's install action."],
-      ["Find your device below", "With app.tallyo.co.uk open, use the illustrated card for your browser and device."],
+      ["Choose your device", "Find the card for your computer, Android device, iPhone or iPad, then select Open Tallyo in that card."],
+      ["Open the Tallyo app", "The button opens app.tallyo.co.uk in a new tab so these instructions remain available. You do not need to sign in before using the browser's install action."],
       ["Choose Install or Add", "Confirm the browser message. Tallyo then appears with your other apps, on the desktop or on the home screen."],
       ["Open Tallyo from its new icon", "Use the installed icon for quicker access. Your saved business records still require an internet connection."]
     ],
