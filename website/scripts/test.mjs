@@ -278,6 +278,10 @@ assert.match(read("help/index.html"), /href="\/invoice-guide\/">Read the invoice
 assert.match(read("free-invoice-generator/index.html"), /href="\/invoice-guide\/">Read the simple invoice guide/);
 
 const generatorPageHtml = read("free-invoice-generator/index.html");
+assert.match(generatorPageHtml, /You&rsquo;re using the Free Invoice Maker\./, "invoice maker clearly distinguishes itself from the full app");
+assert.match(generatorPageHtml, /Information entered here is not saved to a Tallyo workspace\./, "invoice maker explains that work is not saved to an account");
+assert.match(generatorPageHtml, /id="cta_generator_open_full_app"[\s\S]*>Open the full Tallyo app<\/a>/, "invoice maker links visitors to the full Tallyo app");
+assert.match(generatorPageHtml, /href="\/help\/install-tallyo\/">Learn how to install Tallyo<\/a>/, "invoice maker links visitors to installation guidance");
 assert.match(generatorPageHtml, /role="region" aria-label="Live document preview" tabindex="0"/, "document preview is keyboard reachable");
 assert.doesNotMatch(generatorPageHtml, /Swipe sideways/, "mobile document preview no longer requires horizontal navigation");
 assert.equal((generatorPageHtml.match(/class="generator-section"/g) || []).length, 6, "invoice maker groups the open editor into six clear sections");
@@ -286,7 +290,9 @@ assert.match(generatorPageHtml, /href="\/privacy\/">Privacy Notice<\/a>/, "free 
 assert.match(generatorPageHtml, /data-generator-conversion/, "invoice maker includes the pre-download conversion dialog");
 assert.match(generatorPageHtml, /Continue download/, "invoice maker keeps a clear download action");
 assert.doesNotMatch(generatorPageHtml, /cta_generator_start_trial/, "invoice maker hides the trial action while the trial release gate is off");
-assert.doesNotMatch(read("free-quote-generator/index.html"), /data-generator-conversion/, "quote maker keeps its existing direct PDF flow");
+const quoteGeneratorPageHtml = read("free-quote-generator/index.html");
+assert.match(quoteGeneratorPageHtml, /You&rsquo;re using the Free Quote Maker\./, "quote maker clearly distinguishes itself from the full app");
+assert.doesNotMatch(quoteGeneratorPageHtml, /data-generator-conversion/, "quote maker keeps its existing direct PDF flow");
 assert.match(read("assets/styles.css"), /\.generator-preview table \{ display: block; min-width: 0;/, "mobile document preview reflows without a wide fixed table");
 assert.match(read("assets/styles.css"), /content: attr\(data-label\)/, "mobile preview preserves labels when table rows become cards");
 
