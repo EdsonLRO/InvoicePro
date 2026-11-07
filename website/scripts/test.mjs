@@ -278,8 +278,9 @@ assert.match(read("help/index.html"), /href="\/invoice-guide\/">Read the invoice
 assert.match(read("free-invoice-generator/index.html"), /href="\/invoice-guide\/">Read the simple invoice guide/);
 
 const generatorPageHtml = read("free-invoice-generator/index.html");
-assert.match(generatorPageHtml, /You&rsquo;re using the Free Invoice Maker\./, "invoice maker clearly distinguishes itself from the full app");
-assert.match(generatorPageHtml, /Information entered here is not saved to a Tallyo workspace\./, "invoice maker explains that work is not saved to an account");
+assert.match(generatorPageHtml, /This is the Free Invoice Maker\./, "invoice maker clearly distinguishes itself from the full app");
+assert.match(generatorPageHtml, /Nothing entered here is saved to a Tallyo workspace\./, "invoice maker explains that work is not saved to an account");
+assert.match(generatorPageHtml, /class="section section-soft generator-app-callout"/, "invoice maker uses the dedicated compact callout layout");
 assert.match(generatorPageHtml, /id="cta_generator_open_full_app"[\s\S]*>Open the full Tallyo app<\/a>/, "invoice maker links visitors to the full Tallyo app");
 assert.match(generatorPageHtml, /href="\/help\/install-tallyo\/">Learn how to install Tallyo<\/a>/, "invoice maker links visitors to installation guidance");
 assert.match(generatorPageHtml, /role="region" aria-label="Live document preview" tabindex="0"/, "document preview is keyboard reachable");
@@ -291,7 +292,7 @@ assert.match(generatorPageHtml, /data-generator-conversion/, "invoice maker incl
 assert.match(generatorPageHtml, /Continue download/, "invoice maker keeps a clear download action");
 assert.doesNotMatch(generatorPageHtml, /cta_generator_start_trial/, "invoice maker hides the trial action while the trial release gate is off");
 const quoteGeneratorPageHtml = read("free-quote-generator/index.html");
-assert.match(quoteGeneratorPageHtml, /You&rsquo;re using the Free Quote Maker\./, "quote maker clearly distinguishes itself from the full app");
+assert.match(quoteGeneratorPageHtml, /This is the Free Quote Maker\./, "quote maker clearly distinguishes itself from the full app");
 assert.doesNotMatch(quoteGeneratorPageHtml, /data-generator-conversion/, "quote maker keeps its existing direct PDF flow");
 assert.match(read("assets/styles.css"), /\.generator-preview table \{ display: block; min-width: 0;/, "mobile document preview reflows without a wide fixed table");
 assert.match(read("assets/styles.css"), /content: attr\(data-label\)/, "mobile preview preserves labels when table rows become cards");
@@ -585,6 +586,9 @@ assert.match(styles, /\.benefit-grid, \.feature-grid, \.industry-grid, \.securit
 assert.match(styles, /\.faq-list \{ display: grid; gap: var\(--layout-gap\);/, "FAQ cards use the approved 20px gap");
 assert.match(styles, /\.generator-shell \{[^}]*gap: var\(--layout-gap\);/, "generator panels use the approved 20px gap");
 assert.match(styles, /\.generator-shell \{[^}]*margin: 0 auto;/, "the generator does not add a larger page-section gap before its guidance cards");
+assert.match(styles, /\.generator-app-callout\{[^}]*width:min\(92rem,calc\(100% - 1rem\)\);[^}]*margin-bottom:var\(--layout-gap\);/, "free-maker notice spans the generator width and keeps a clear gap below it");
+assert.match(styles, /@media \(min-width: 72rem\) \{[\s\S]*?\.generator-app-callout\{grid-template-columns:\.8fr 1\.2fr 25rem;/, "free-maker notice uses a balanced horizontal desktop layout");
+assert.match(styles, /\.generator-app-callout-actions\{display:grid;gap:\.7rem\}/, "free-maker actions share consistent spacing");
 assert.match(styles, /\.generator-item-list \{ display: grid; gap: var\(--layout-gap\);/, "generator item cards use the approved 20px gap");
 assert.match(styles, /\.generator-explainer > div:last-child \{ display: grid; gap: var\(--layout-gap\); \}/, "generator explainer cards use the approved 20px gap");
 assert.match(styles, /\.section-soft, \.section-dark, \.section-cta \{[^}]*padding: clamp\(1\.5rem, 2\.6vw, 2\.5rem\)/, "large panels retain reduced internal spacing");
