@@ -587,6 +587,7 @@ assert.match(styles, /\.faq-list \{ display: grid; gap: var\(--layout-gap\);/, "
 assert.match(styles, /\.generator-shell \{[^}]*gap: var\(--layout-gap\);/, "generator panels use the approved 20px gap");
 assert.match(styles, /\.generator-shell \{[^}]*margin: 0 auto;/, "the generator does not add a larger page-section gap before its guidance cards");
 assert.match(styles, /\.generator-app-callout\{[^}]*width:min\(92rem,calc\(100% - 1rem\)\);[^}]*margin-bottom:var\(--layout-gap\);/, "free-maker notice spans the generator width and keeps a clear gap below it");
+assert.match(styles, /\.generator-app-callout\{[^}]*align-items:center/, "free-maker actions keep the standard compact button height instead of stretching with the row");
 assert.match(styles, /@media \(min-width: 72rem\) \{[\s\S]*?\.generator-app-callout\{grid-template-columns:\.8fr 1\.2fr 25rem;/, "free-maker notice uses a balanced horizontal desktop layout");
 assert.match(styles, /\.generator-app-callout-actions\{display:grid;gap:\.7rem\}/, "free-maker actions share consistent spacing");
 assert.match(styles, /\.generator-item-list \{ display: grid; gap: var\(--layout-gap\);/, "generator item cards use the approved 20px gap");
