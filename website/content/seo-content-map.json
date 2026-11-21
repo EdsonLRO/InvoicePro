@@ -27,7 +27,6 @@
     { "topic": "Invoice payment-link software", "intent": "product", "route": "/help/payment-links-and-deposits/", "status": "covered-by-help" },
     { "topic": "Income tracking for invoices", "intent": "product", "route": "/help/income-insights-and-income-pack/", "status": "implemented" },
     { "topic": "Income records and Income Pack", "intent": "guide", "route": "/help/income-insights-and-income-pack/", "status": "implemented" },
-    { "topic": "Invoice document layouts and branding", "intent": "product", "route": "/help/document-layouts-and-branding/", "status": "implemented" },
-    { "topic": "How to install Tallyo", "intent": "guide", "route": "/help/install-tallyo/", "status": "implemented" }
+    { "topic": "Invoice document layouts and branding", "intent": "product", "route": "/help/document-layouts-and-branding/", "status": "implemented" }
   ]
 }

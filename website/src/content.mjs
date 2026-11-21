@@ -21,7 +21,6 @@ export const workflowSteps = Object.freeze([
   ["Record payments and follow up", "Add deposits, part-payments or final payments, see what is left, and choose when reminders are sent."],
   ["Repeat regular invoices", "Choose when Tallyo creates the next invoice and whether it should be emailed automatically."]
 ]);
-
 export const featureGroups = Object.freeze([
   {
     label: "Create and agree",
@@ -73,7 +72,7 @@ export const featureGroups = Object.freeze([
     label: "Sign in and stay in control",
     title: "Use familiar access with practical protection",
     description: "Sign in with Google or email and password, then add stronger account protection and review your account data when needed.",
-    items: ["Google or email-and-password sign-in", "Optional authenticator-app MFA", "One-time recovery codes and session controls", "Account data export and installable app access"],
+    items: ["Google or email-and-password sign-in", "Optional authenticator-app MFA", "One-time recovery codes and session controls", "Account data export and browser access"],
     image: "/assets/product/growth-studio/google-sign-in.png",
     imageAlt: "Current Tallyo sign-in page with Continue with Google and email-and-password options beside the Tallyo workspace introduction",
     imageCaption: "Current Tallyo sign-in screen. No customer or account data is shown."
@@ -149,7 +148,7 @@ export const helpArticles = Object.freeze([
       ["Choose whether to send automatically", "Turn automatic email on only when each new invoice can go straight to the customer without another review."],
       ["Review the schedule", "See the next invoice date and pause or change the schedule when the work changes."]
     ],
-    note: "Recurring invoices require a connection to Tallyo's scheduled service. Installing the app does not make recurring work run offline."
+    note: "Recurring invoices require a connection to Tallyo's scheduled service. Your business records also require an internet connection."
   },
   {
     slug: "overdue-reminders",
@@ -235,25 +234,13 @@ export const helpArticles = Object.freeze([
       ["Preview and save", "Check the sample document at different preview sizes, save your choices and review a final PDF before sending it to a customer."]
     ],
     note: "The selected presentation is used consistently for invoices, quotes, credit notes, downloaded PDFs and emailed PDF attachments."
-  },
-  {
-    slug: "install-tallyo",
-    title: "Install Tallyo on your phone or computer",
-    description: "Choose your device, open Tallyo from its card, then follow the matching browser steps.",
-    steps: [
-      ["Choose your device", "Find the card for your computer, Android device, iPhone or iPad, then select Open Tallyo in that card."],
-      ["Open the Tallyo app", "The button opens app.tallyo.co.uk in a new tab so these instructions remain available. You do not need to sign in before using the browser's install action."],
-      ["Choose Install or Add", "Confirm the browser message. Tallyo then appears with your other apps, on the desktop or on the home screen."],
-      ["Open Tallyo from its new icon", "Use the installed icon for quicker access. Your saved business records still require an internet connection."]
-    ],
-    note: "Install Tallyo only while app.tallyo.co.uk is open. Installing adds a convenient app icon; it does not download your authenticated business records for offline use. Browser menu wording can vary slightly by version."
   }
 ]);
 
 export const faqs = Object.freeze([
   { question: "What is Tallyo?", answer: "Tallyo is straightforward invoicing software built around your business. It keeps customers, quotes, invoices, payments and repeat invoicing together." },
   { question: "Who is Tallyo for?", answer: "It is designed for sole traders, freelancers, consultants, tradespeople and service companies that create quotes and invoices." },
-  { question: "Can I use Tallyo on different devices?", answer: "Yes. Tallyo works in supported modern browsers on phone, tablet and computer and can be installed for quick access. Authenticated business records require an internet connection." },
+  { question: "Can I use Tallyo on different devices?", answer: "Yes. Sign in to Tallyo in a supported modern browser on your phone, tablet or computer. You do not need to install anything. Business records require an internet connection." },
   { question: "What documents can I create?", answer: "Tallyo supports invoices, quotes and credit notes. When a customer accepts a quote, Tallyo keeps that quote and creates one linked invoice. It can also email the invoice if you chose that option before sending the quote." },
   { question: "What is a recurring invoice?", answer: "A recurring invoice is a new invoice Tallyo creates on a schedule you choose, such as weekly or monthly. You decide whether each new invoice is emailed automatically or left for review." },
   { question: "What happens when an invoice is overdue?", answer: "An invoice is overdue when its due date has passed and money is still owed. Tallyo shows it in the overdue view, but sends reminders only for invoices where you turned reminders on." },
@@ -267,11 +254,4 @@ export const faqs = Object.freeze([
   { question: "Can I export my records?", answer: "Yes. Tallyo can create a structured account export and offers Excel export for document lists." },
   { question: "Does Tallyo replace accounting software?", answer: "No. Tallyo helps with invoicing and income records connected to it, but it does not include expenses, income received elsewhere, profit, tax calculations, VAT liability or HMRC filing." },
   { question: "How do I get support?", answer: "Use the Help Centre for step-by-step guidance or email main@tallyo.co.uk for help with your Tallyo account or service." }
-]);
-
-export const installationSteps = Object.freeze([
-  ["Chrome on a computer", "With app.tallyo.co.uk open, look at the right end of the address bar for the install symbol and choose Install. If it is not shown, open the three-dot menu and look for Install Tallyo or Install page as app."],
-  ["Microsoft Edge on a computer", "With app.tallyo.co.uk open, look for the App available symbol at the right end of the address bar. Or open the three-dot menu, choose Apps, then Install Tallyo or Install this site as an app."],
-  ["Chrome on an Android phone or tablet", "With app.tallyo.co.uk open, tap the three-dot menu beside the address bar. Choose Install app, Add to Home screen or Install and create shortcut, then confirm Install."],
-  ["Safari on an iPhone or iPad", "With app.tallyo.co.uk open, tap Share. If Share is inside the Page Menu on your version of Safari, open that menu first. Choose Add to Home Screen, keep Open as Web App turned on if it is shown, then tap Add."]
 ]);

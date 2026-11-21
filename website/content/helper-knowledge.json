@@ -261,21 +261,20 @@
       "links": [{ "label": "Compare pricing", "href": "/pricing/" }]
     },
     {
-      "id": "installation",
-      "question": "Can I install Tallyo?",
-      "triggers": ["can i install tallyo", "install tallyo", "add tallyo to home screen", "install icon"],
-      "keywords": ["install", "chrome", "edge", "safari", "home screen", "address bar", "icon"],
-      "answer": "Yes. Choose Install Tallyo on the website to open the installation guide, select the card for your device, then choose Open Tallyo. You do not need to sign in before installing. On Chrome or Edge on a computer, look for the install or app symbol at the right end of the address bar. On Android Chrome use the three-dot menu. On iPhone or iPad Safari use Share, then Add to Home Screen.",
-      "links": [{ "label": "Installation guide", "href": "/help/install-tallyo/" }],
-      "suggested": true
+      "id": "browser-access",
+      "question": "Do I need to install Tallyo?",
+      "triggers": ["do i need to install tallyo", "use tallyo online", "use tallyo in browser", "install tallyo"],
+      "keywords": ["browser", "online", "phone", "computer", "account", "install"],
+      "answer": "No installation is needed. Create an account or sign in to use the full Tallyo workspace in a supported browser on your phone, tablet or computer. Once you are in the app, an optional install action is available in Account.",
+      "links": [{ "label": "Create account", "href": "app:signup" }]
     },
     {
       "id": "devices",
       "question": "Can I use Tallyo on different devices?",
       "triggers": ["different devices", "phone tablet computer", "use on mobile", "supported browser"],
       "keywords": ["devices", "phone", "tablet", "computer", "browser", "mobile"],
-      "answer": "Yes. Tallyo works in supported modern browsers on phone, tablet and computer and can be installed for quicker access. Authenticated business records still require an internet connection.",
-      "links": [{ "label": "Installation guide", "href": "/help/install-tallyo/" }]
+      "answer": "Yes. Sign in through a supported modern browser on your phone, tablet or computer. No installation is required. Authenticated business records need an internet connection.",
+      "links": [{ "label": "Create account", "href": "app:signup" }, { "label": "Log in", "href": "app:login" }]
     },
     {
       "id": "offline",
@@ -283,7 +282,7 @@
       "triggers": ["does tallyo work offline", "use tallyo offline", "no internet"],
       "keywords": ["offline", "internet", "connection", "app shell", "records"],
       "answer": "Partly. The app shell can open offline, but you need an internet connection to sign in or view and update your business records. Recurring schedules and reminders also rely on Tallyo’s connected services.",
-      "links": [{ "label": "Read installation guidance", "href": "/help/install-tallyo/" }]
+      "links": [{ "label": "Read common questions", "href": "/faq/" }]
     },
     {
       "id": "create-account",

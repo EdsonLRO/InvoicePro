@@ -1,5 +1,15 @@
 # Active programme: COMM-001 commercial launch integration
 
+## UX-BROWSER-ACCESS-001 — Browser-first website and optional app installation
+
+Status: implemented and locally validated in `codex/browser-first-onboarding`; awaiting protected pull-request review.
+Owner approval: 2026-11-21 request to remove public installation guidance, make registration and sign-in prominent, and put optional installation inside the app.
+Scope: public website content, navigation, Help guide and redirect, public Helper answers, authenticated Account install action, PWA build marker and focused tests.
+Risk: Medium website/UI work. Existing Auth, MFA, session, payment, provider and installation-prompt behaviour are unchanged.
+Acceptance: public pages state that the full workspace works online without installation, offer clear Create account and Log in paths, and no longer publish or link to the installation guide; the retired URL redirects to Help; signed-in Account opens the existing optional device-specific install panel.
+Validation: the 31-route-plus-404 website suite, public Helper, Analytics and free-generator checks, app/public integration, PWA update, scale/accessibility, security-workflow and local app Pages build with dummy publishable configuration passed. The website route suite and app regressions passed again after the final copy/style changes; a repeat of the whole website suite then hit local ENOSPC while copying generated assets. Only this worktree's generated `website/dist` and `app-dist` folders were removed. Diff hygiene and scoped secret-pattern scan pass.
+Next action: open a protected pull request. Public deployment remains subject to release gates.
+
 ## UX-STRIPE-BRAND-001 — Stripe-hosted Tallyo presentation
 
 Task ID: UX-STRIPE-BRAND-001

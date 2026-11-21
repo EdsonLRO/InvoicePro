@@ -36,9 +36,9 @@ const home = `
     <div class="hero-copy" data-hero-copy>
       <p class="hero-badge"><span aria-hidden="true"></span>Invoicing built around your business</p>
       <h1 id="home-title"><span>Professional invoices.</span><span class="hero-title-accent">Clearer payment tracking.</span><span>Less admin.</span></h1>
-      <p class="hero-lead">Tallyo is online invoicing software for creating, sending and following up from one calm workspace. Keep recurring work, payment updates and the income recorded in Tallyo together.</p>
+      <p class="hero-lead">Tallyo is online invoicing software for creating, sending and following up from one calm workspace. Create an account and use it in your browser on your phone or computer—no installation needed.</p>
       <div class="cta-row">
-        <a class="button button-primary hero-primary-action" id="cta_hero_create_account" data-analytics-placement="hero" data-signup-link href="#">Start with Tallyo <span aria-hidden="true">→</span></a>
+        <a class="button button-primary hero-primary-action" id="cta_hero_create_account" data-analytics-placement="hero" data-signup-link href="#">Create account <span aria-hidden="true">→</span></a>
         <a class="button button-secondary" id="cta_hero_free_invoice" href="/free-invoice-generator/">Make a free invoice</a>
       </div>
       <p class="hero-pricing"><strong>${siteConfig.subscriptionTrialEnabled ? "7 days free · then £8 monthly" : "£8 monthly · £80 annually"}</strong><span>One business, one user. Cancel through your account.</span></p>
@@ -323,8 +323,8 @@ const generatorPage = (defaultType) => {
   <section class="page-hero generator-hero"><p class="eyebrow">Free ${defaultType} Maker</p><h1>Create a professional ${lowerType}, free.</h1><p>No account needed. While you work, this page keeps your document details and selected logo in your browser and does not send them to Tallyo, analytics or another service.</p></section>
   <section class="section section-soft generator-app-callout" aria-labelledby="generator-app-callout-title">
     <div class="generator-app-callout-heading"><p class="eyebrow">Free one-off tool</p><h2 id="generator-app-callout-title">This is the Free ${defaultType} Maker.</h2></div>
-    <div class="generator-app-callout-copy"><p>Create and download one ${lowerType} without an account. Nothing entered here is saved to a Tallyo workspace.</p><p>Need saved customers, payment tracking, recurring invoices, reminders or income summaries? Open the full Tallyo app.</p></div>
-    <div class="generator-app-callout-actions"><a class="button button-primary" id="cta_generator_open_full_app" data-login-link href="#" data-analytics-placement="generator" target="_blank" rel="noopener">Open the full Tallyo app</a><a class="button button-secondary" href="/help/install-tallyo/">Learn how to install Tallyo</a></div>
+    <div class="generator-app-callout-copy"><p>Create and download one ${lowerType} without an account. Nothing entered here is saved to a Tallyo workspace.</p><p>Need saved customers, payment tracking, recurring invoices, reminders or income summaries? Create an account and use the full Tallyo workspace online.</p></div>
+    <div class="generator-app-callout-actions"><a class="button button-primary" id="cta_generator_open_full_app" data-signup-link href="#" data-analytics-placement="generator" target="_blank" rel="noopener">Create account</a><a class="button button-secondary" data-login-link href="#" target="_blank" rel="noopener">Log in online</a></div>
   </section>
   <section class="generator-shell" data-generator data-default-type="${defaultType}">
     <div class="generator-editor">

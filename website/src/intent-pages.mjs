@@ -145,7 +145,7 @@ const definitions = Object.freeze([
       "Automatic email or review before sending",
       "Pause, update and recurring-history controls"
     ],
-    boundary: "Recurring invoices need an internet connection to Tallyo's scheduled service. Installing Tallyo does not make recurring work run offline.",
+    boundary: "Recurring invoices need an internet connection to Tallyo's scheduled service. You can use the workspace in your browser.",
     faqs: [
       { question: "How often can an invoice repeat?", answer: "A recurring schedule can run weekly, monthly, quarterly or yearly." },
       { question: "Does every recurring invoice have to be emailed automatically?", answer: "No. You choose whether each new invoice is emailed automatically or left ready for review." },

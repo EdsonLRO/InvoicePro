@@ -1,6 +1,3 @@
-import { installationSteps } from "./content.mjs";
-import { siteConfig } from "./config.mjs";
-
 const escapeHtml = (value) => String(value)
   .replaceAll("&", "&amp;")
   .replaceAll("<", "&lt;")
@@ -67,28 +64,10 @@ export const productDemo = (scene, index) => `
     <figcaption>${scene.image ? "Product screenshot using fictional demonstration data." : "Illustrated product view using fictional data. The layout is simplified for this tour."}</figcaption>
   </figure>`;
 
-const installSymbol = `<svg class="install-symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v10"></path><path d="m8.5 9.5 3.5 3.5 3.5-3.5"></path><path d="M5 16.5v2A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-2"></path></svg>`;
-const shareSymbol = `<svg class="install-symbol" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3"></path><path d="m8.5 6.5 3.5-3.5 3.5 3.5"></path><path d="M7 10H5.5A1.5 1.5 0 0 0 4 11.5v7A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5H17"></path></svg>`;
-
-const installDeviceVisuals = Object.freeze([
-  `<div class="browser-install-demo" aria-label="Chrome address bar with the install symbol highlighted"><div class="browser-install-top"><span class="browser-mark">C</span><span class="browser-address">app.tallyo.co.uk</span><span class="browser-install-target">${installSymbol}<small>Install</small></span><span class="browser-menu-dots" aria-hidden="true">⋮</span></div><p>Look at the right end of the address bar.</p></div>`,
-  `<div class="browser-install-demo" aria-label="Microsoft Edge address bar with the App available symbol highlighted"><div class="browser-install-top"><span class="browser-mark browser-mark-edge">E</span><span class="browser-address">app.tallyo.co.uk</span><span class="browser-install-target">${installSymbol}<small>App available</small></span><span class="browser-menu-dots" aria-hidden="true">⋯</span></div><p>Use the highlighted symbol, or the three-dot menu.</p></div>`,
-  `<div class="phone-install-demo" aria-label="Android Chrome menu with Install and create shortcut highlighted"><div class="phone-browser-bar"><span class="browser-address">app.tallyo.co.uk</span><span class="browser-menu-target" aria-hidden="true">⋮</span></div><div class="phone-browser-menu"><span>New tab</span><strong>${installSymbol} Install and create shortcut</strong><span>Share</span></div></div>`,
-  `<div class="phone-install-demo safari-install-demo" aria-label="Safari Share button and Add to Home Screen action highlighted"><div class="phone-browser-bar"><span class="browser-address">app.tallyo.co.uk</span><span class="browser-install-target">${shareSymbol}<small>Share</small></span></div><div class="phone-browser-menu"><span>Copy</span><strong><span class="home-screen-plus" aria-hidden="true">＋</span> Add to Home Screen</strong><span>Add Bookmark</span></div></div>`
-]);
-
-const installVisualGuide = `
-  <section class="install-visual-guide" data-install-guide aria-labelledby="install-device-title">
-    <div class="section-heading"><p class="eyebrow">Choose your device</p><h2 id="install-device-title">Follow the instructions for your system.</h2><p>Use the Open Tallyo button in the matching card, then follow the highlighted browser steps while app.tallyo.co.uk is open. You do not need to sign in first.</p></div>
-    <div class="install-device-grid">${installationSteps.map(([title, copy], index) => `<article class="install-device-card"><p class="card-label">${String(index + 1).padStart(2, "0")}</p><h3>${escapeHtml(title)}</h3>${installDeviceVisuals[index]}<p>${escapeHtml(copy)}</p><a class="button button-primary install-device-action" data-open-tallyo-app href="${escapeHtml(siteConfig.appUrl)}" target="_blank" rel="noopener" aria-label="Open Tallyo for ${escapeHtml(title)}">Open Tallyo</a></article>`).join("")}</div>
-    <p class="install-official-links">Browser menus can move after an update. Check the current <a href="https://support.google.com/chrome/answer/9658361?hl=en-GB">Chrome web-app guide</a>, <a href="https://support.microsoft.com/en-us/edge/install-manage-or-uninstall-apps-in-microsoft-edge">Microsoft Edge guide</a> or <a href="https://support.apple.com/guide/iphone/open-as-web-app-iphea86e5236/ios">Apple guide</a> if your screen looks different.</p>
-  </section>`;
-
 export const helpArticlePage = (article) => `
   ${breadcrumbs([{ label: "Home", href: "/" }, { label: "Help", href: "/help/" }, { label: article.title }])}
   <article class="article-shell">
     <header class="article-header"><p class="eyebrow">Tallyo guide</p><h1>${escapeHtml(article.title)}</h1><p>${escapeHtml(article.description)}</p></header>
-    ${article.slug === "install-tallyo" ? installVisualGuide : ""}
     <div class="article-layout">
       <div>
         <h2>Step by step</h2>
