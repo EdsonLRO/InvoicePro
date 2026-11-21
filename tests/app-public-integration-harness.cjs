@@ -38,6 +38,7 @@ assert.match(indexSource, /You need an internet connection to sign in and work w
 assert.match(indexSource, /window\.addEventListener\('beforeinstallprompt'/, 'install prompt must only be captured after the browser offers it');
 assert.match(indexSource, /window\.addEventListener\('appinstalled'/, 'successful app installation must update the UI');
 assert.match(indexSource, /<button v-if="installPromptEvent"[^>]+@click="requestInstall"/, 'installation must require an explicit user click');
+assert.match(indexSource, /activeTab === 'account'[\s\S]*?@click="openHelpPanel"[^>]*>Install on this device<\/button>/, 'optional installation is offered inside the authenticated Account page');
 assert.match(indexSource, /<nav v-if="publicSiteUrl"/, 'public links must stay hidden until a valid website URL is configured');
 assert.match(indexSource, /publicSiteLink\('terms\/'\)/, 'registration and auth footer must link to the Terms of Service');
 assert.match(indexSource, /publicSiteLink\('privacy\/'\)/, 'registration and auth footer must link to the published Privacy Notice');
@@ -59,6 +60,6 @@ assert.match(workerSource, /'\.\/income-insights\.js'/, 'income insights module 
 assert.match(appBuildSource, /"income-insights\.js"/, 'Cloudflare Pages must publish the income insights module');
 assert.match(workerSource, /'\.\/income-pack-export\.js'/, 'Income Pack module must be part of the offline app shell');
 assert.match(appBuildSource, /"income-pack-export\.js"/, 'Cloudflare Pages must publish the Income Pack module');
-assert.match(workerSource, /tallyo-shell-2026-10-27-2/, 'service-worker cache marker must match this build');
+assert.match(workerSource, /tallyo-shell-2026-11-21-1/, 'service-worker cache marker must match this build');
 
 console.log('App public integration harness passed.');

@@ -173,8 +173,7 @@ export const footerGroups = Object.freeze([
       { label: "Help Centre", href: "/help/" },
       { label: "Tallyo Helper", href: "/helper/" },
       { label: "FAQ", href: "/faq/" },
-      { label: "About Tallyo", href: "/about/" },
-      { label: "Installation guide", href: "/help/install-tallyo/" }
+      { label: "About Tallyo", href: "/about/" }
     ]
   },
   {

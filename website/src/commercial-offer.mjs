@@ -92,7 +92,7 @@ export const commercialOffer = Object.freeze({
       "Reminders for the overdue invoices you choose",
       "History of sends, reminders and payments",
       "Spreadsheet and account-data exports",
-      "Installation on supported devices",
+      "Use online on your phone, tablet or computer",
       "Optional authenticator-app MFA",
       connectPaymentPlaceholders.feature,
       "Standard support"

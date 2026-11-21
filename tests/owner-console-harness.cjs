@@ -105,7 +105,7 @@ assert.match(app, /loadOwnerConsoleAccess\(\)/);
 assert.match(app, /ownerConsole\.available/);
 assert.equal((app.match(/@click="navigateTo\('growth'\)[^"]*"[^>]*class="primary-navigation-item">Growth Studio<\/button>/g) || []).length, 2);
 assert.match(app, /v-show="activeTab === 'growth' && ownerConsole\.available && growthStudioReady"/);
-assert.match(app, /<script src="\.\/growth-studio-app\.js\?v=2026\.10\.27\.2"><\/script>/);
+assert.match(app, /<script src="\.\/growth-studio-app\.js\?v=2026\.11\.21\.1"><\/script>/);
 assert.match(app, /connect-src[^;]*https:\/\/growth\.tallyo\.co\.uk/);
 assert.match(app, /if \(!discovery\.candidates\.length\) throw new Error\('Discovery source returned no usable candidates\.'\)/);
 assert.match(app, /Discovery list refreshed from the \$\{source\.label\}/);
