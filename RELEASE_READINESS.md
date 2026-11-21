@@ -1,5 +1,11 @@
 # Tallyo Release Readiness Checklist
 
+## Browser-first onboarding — released and verified, 2026-11-21
+
+The Owner approved PR #262 for merge and production publication. It merged through the protected workflow as `cd1732cec7b62644137b07f51492b5fa6c3e5433`. Main-branch Security run `44946014986`, Pages run `44946014801`, Cloudflare app deployment `284b7f7d-2f3b-4f84-8bfc-04ef836664b5` and Cloudflare website deployment `b4162079-c798-420d-ac73-32d9218ca0b7` all passed. Public HTTP readback confirmed the website's browser-first copy and Create account action, absence of the old installation link, redirect of `/help/install-tallyo/` to `/help/`, app build `2026.11.21.1`, optional signed-in Account installation action, and service-worker cache `tallyo-shell-2026-11-21-1`.
+
+The complete PR website and security checks passed, including app/public integration and PWA update coverage. This is a website-content and app-presentation release only; the existing installation prompt and device guidance remain inside the app. Auth, MFA, sessions, RLS, payments, subscriptions, backend, provider configuration, secrets and legal text were unchanged. If rollback is needed, restore the prior Cloudflare app deployment `4d1d25a2-bc46-406f-9d3a-ba376315a38b` and website deployment `0ac09911-2686-456b-ace5-d9d59956fcdc`, both from preceding main source `a763e0f890db1c85aca91284a8f2e22451fc240e`; no backend or provider rollback is needed.
+
 ## Signed-out account card layout — released and verified, 2026-10-13
 
 The Owner approved PR #234 for merge and production publication. PR #234 merged through the protected workflow as `d7b6389c029ae071a1ed0d33a3d0cd53cc9aefac`; post-merge Security run `38326266411` and Pages run `38326265006` passed. Cloudflare production deployment `696f68fa-84c5-4a3a-8afd-dd30e1fc82ca` was triggered from that exact clean `main` commit, completed successfully and is aliased to `https://app.tallyo.co.uk`.

@@ -1,5 +1,9 @@
 # Tallyo current status
 
+## Browser-first onboarding — production active 2026-11-21
+
+Owner-approved PR #262 merged through the protected workflow as `cd1732cec7b62644137b07f51492b5fa6c3e5433`. Main-branch Security and Pages workflows and both Cloudflare Pages production checks passed. The website now leads with creating an account and using the full workspace online without installing anything; public installation navigation and the guide were removed, and the retired guide URL redirects to Help. The no-account Free Invoice Maker remains separate. The signed-in app Account page now offers optional installation through the existing browser/device guidance. Public readback returned HTTP 200, confirmed the new website copy and app build `2026.11.21.1`, and confirmed the matching `tallyo-shell-2026-11-21-1` service-worker marker. No Auth, MFA, session, payment, provider or backend configuration changed.
+
 ## Signed-out account card layout — production active 2026-10-13
 
 PR #234 merged through the protected workflow as `d7b6389c029ae071a1ed0d33a3d0cd53cc9aefac`. Cloudflare production deployment `696f68fa-84c5-4a3a-8afd-dd30e1fc82ca` completed successfully from that exact clean `main` commit and is aliased to `https://app.tallyo.co.uk`. App build `2026.10.13.2` removes the second visible panel around account access: the actual sign-in card fills its desktop column and matches the welcome card when stacked. Public readback confirms the new build, single-card layout and `tallyo-shell-2026-10-13-2` service-worker cache marker. Google/password sign-in, registration, recovery, MFA, Turnstile, RLS, Stripe, subscriptions and entitlements are unchanged.
