@@ -125,9 +125,9 @@ export const siteConfig = Object.freeze({
   appUrl,
   signupUrl: trimSlash(process.env.TALLYO_SIGNUP_URL || appUrl),
   subscriptionUrl: trimSlash(process.env.TALLYO_SUBSCRIPTION_URL || `${appUrl}/#account`),
-  defaultTitle: "Online invoicing software for your business | Tallyo",
+  defaultTitle: "Online Invoice and Quote Software | Tallyo",
   defaultDescription:
-    "Create quotes and invoices, manage recurring work, record payments and understand the income recorded in Tallyo from one straightforward workspace.",
+    "Create and send invoices and quotes, track payments, schedule recurring invoices and choose overdue reminders. Use Tallyo online without installing it.",
   locale: "en_GB",
   themeColor: "#111a31",
   socialImagePath: "/assets/tallyo-social-card.webp",

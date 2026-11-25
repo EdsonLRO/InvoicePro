@@ -63,7 +63,7 @@ const definitions = Object.freeze([
   {
     route: "/quote-to-invoice-software/",
     output: "quote-to-invoice-software/index.html",
-    pageTitle: "Quote-to-invoice software for clearer customer approval",
+    pageTitle: "Quote-to-invoice software with customer acceptance",
     description: "Create and send a quote, record customer acceptance and let Tallyo create one linked invoice without entering the work again.",
     eyebrow: "Quote-to-invoice software",
     title: "Quote-to-invoice software that keeps accepted work connected.",
@@ -113,7 +113,7 @@ const definitions = Object.freeze([
   {
     route: "/recurring-invoice-software/",
     output: "recurring-invoice-software/index.html",
-    pageTitle: "Recurring invoice software for regular work",
+    pageTitle: "Recurring invoice software for regular customers",
     description: "Schedule weekly, monthly, quarterly or yearly invoices and choose whether each new invoice is emailed automatically or left for review.",
     eyebrow: "Recurring invoice software",
     title: "Recurring invoice software for work that follows a regular schedule.",
@@ -163,7 +163,7 @@ const definitions = Object.freeze([
   {
     route: "/invoice-reminder-software/",
     output: "invoice-reminder-software/index.html",
-    pageTitle: "Invoice reminder software for overdue follow-up",
+    pageTitle: "Overdue invoice reminder software",
     description: "See overdue invoices together and choose exactly which invoices receive automatic reminders, with every sent reminder kept in the activity history.",
     eyebrow: "Invoice reminder software",
     title: "Invoice reminder software that keeps overdue follow-up under your control.",
@@ -213,7 +213,7 @@ const definitions = Object.freeze([
   {
     route: "/invoice-payment-tracking/",
     output: "invoice-payment-tracking/index.html",
-    pageTitle: "Invoice payment tracking for deposits and balances",
+    pageTitle: "Invoice payment tracking for deposits and part-payments",
     description: "Record deposits, part-payments, final payments and refunds, then see what was paid, what remains due and what happened in the invoice history.",
     eyebrow: "Invoice payment tracking",
     title: "Invoice payment tracking for deposits, part-payments and balances.",

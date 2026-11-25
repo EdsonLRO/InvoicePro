@@ -160,8 +160,9 @@ for (const id of ["cta_header_create_account", "cta_hero_create_account", "cta_h
 }
 assert.match(home, /Northstar Home Services/);
 assert.match(home, /Willow &amp; Pine Studio/);
-assert.match(home, /Tallyo is online invoicing software/, "homepage leads with the principal product search intent");
-assert.match(home, /Create an account and use it in your browser on your phone or computer—no installation needed/, "homepage makes browser-first access clear");
+assert.match(home, /Online invoice and quote software/, "homepage leads with the principal product search intent");
+assert.match(home, /Create invoices and quotes\.<\/span><span class="hero-title-accent">Track payments\.<\/span><span>Repeat less work\./, "homepage heading names the core jobs");
+assert.match(home, /Create an account and use Tallyo in your browser on your phone or computer—no installation needed/, "homepage makes browser-first access clear");
 assert.match(home, /href="\/free-quote-generator\/">Make a free quote<\/a>/, "homepage links directly to the free quote maker");
 assert.match(home, /href="\/recurring-invoice-software\/">Explore recurring invoices<\/a>/, "homepage links to the recurring-invoice landing page");
 assert.match(home, /href="\/invoice-reminder-software\/">Understand overdue reminders<\/a>/, "homepage links to the reminder landing page");
@@ -169,7 +170,10 @@ assert.match(home, /class="section section-dark home-workflows" id="workflows"/,
 for (const workflowRoute of ["quote-to-invoice-software", "recurring-invoice-software", "invoice-reminder-software", "invoice-payment-tracking"]) {
   assert.match(home, new RegExp(`class="section section-dark home-workflows"[\\s\\S]*?href="/${workflowRoute}/"`), `homepage workflow section links to ${workflowRoute}`);
 }
-assert.match(home, /<title>Online invoicing software for your business \| Tallyo<\/title>/, "homepage title targets online invoicing software clearly");
+assert.match(home, /<title>Online Invoice and Quote Software \| Tallyo<\/title>/, "homepage title targets invoice and quote software clearly");
+for (const [route, label] of [["quote-to-invoice-software", "See quote-to-invoice software"], ["recurring-invoice-software", "See recurring invoice software"], ["invoice-reminder-software", "See overdue invoice reminders"], ["invoice-payment-tracking", "See invoice payment tracking"]]) {
+  assert.match(home, new RegExp(`href="/${route}/">${label}`), `homepage uses a descriptive link to ${route}`);
+}
 assert.doesNotMatch(home, /workspace\s+—/, "homepage hero does not restore the removed dash");
 assert.match(home, /footer-group footer-account[\s\S]*?<h2>Product<\/h2>[\s\S]*?<h2>Learn<\/h2>[\s\S]*?<h2>Legal<\/h2>[\s\S]*?footer-intro/, "footer places the four evenly spaced link groups before the brand block");
 assert.equal((home.match(/class="product-demo /g) || []).length, 0, "home does not duplicate the full product tour");
@@ -221,6 +225,11 @@ const productTourVisibleHtml = productTour.replace(/<script type="application\/j
 assert.doesNotMatch(productTourVisibleHtml, /[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|acct_|cs_(?:test|live)_|eyJ[A-Za-z0-9_-]{10,}/, "product tour has no visible emails, provider IDs or JWT-like data");
 
 const featuresPage = read("features/index.html");
+assert.match(featuresPage, /<title>Invoice, quote and payment tracking features \| Tallyo<\/title>/, "features title names the main capabilities");
+assert.match(featuresPage, /<h1>Invoices, quotes, payment tracking and recurring work\.<\/h1>/, "features heading matches the actual product tasks");
+for (const heading of ["Create quotes, invoices and credit notes", "Save customers, products and services for invoicing", "Schedule recurring invoices and overdue reminders", "Track invoice payments and recorded income", "Brand your invoices, quotes and PDFs"]) {
+  assert.match(featuresPage, new RegExp(`<h2>${heading}</h2>`), `features page gives ${heading} a visible descriptive heading`);
+}
 assert.match(featuresPage, /data-horizontal-flow/, "features page includes the scroll-driven connected workflow");
 assert.equal((featuresPage.match(/class="workflow-outcome-step"/g) || []).length, 5, "quote-to-payment workflow renders all five focused steps");
 assert.match(featuresPage, /Send the quote[\s\S]*Quote accepted[\s\S]*Invoice created[\s\S]*Payment tracked[\s\S]*Follow-up stays clear/, "quote-to-payment workflow follows the real order");
@@ -417,8 +426,10 @@ assert.match(generator, /does not provide tax, legal or accounting advice/);
 assert.match(generator, /https:\/\/www\.gov\.uk\/invoicing-and-taking-payment-from-customers\/invoices-what-they-must-include/);
 assert.match(generator, /Use a unique number[\s\S]*Make the dates clear[\s\S]*Check tax and payment details/, "invoice guidance matches invoice intent");
 assert.match(quoteGenerator, /Define the scope[\s\S]*Set a validity date[\s\S]*Record what happens next/, "quote guidance matches quote intent");
-assert.match(generator, /<title>Free invoice generator for your business \| Tallyo<\/title>/);
-assert.match(quoteGenerator, /<title>Free quote generator for your business \| Tallyo<\/title>/);
+assert.match(generator, /<title>Free invoice maker online – save as PDF \| Tallyo<\/title>/);
+assert.match(quoteGenerator, /<title>Free quote maker online – save as PDF \| Tallyo<\/title>/);
+assert.match(generator, /<h1>Create a free invoice online and save it as a PDF\.<\/h1>/);
+assert.match(quoteGenerator, /<h1>Create a free quote online and save it as a PDF\.<\/h1>/);
 const audiencePositioning = [home, read("about/index.html"), read("faq/index.html"), invoiceGuide, generator, quoteGenerator].join("\n");
 assert.doesNotMatch(audiencePositioning, /UK small[- ]business|small[- ]business(?:es)?/i, "public marketing describes Tallyo around the customer's business rather than a UK small-business segment");
 

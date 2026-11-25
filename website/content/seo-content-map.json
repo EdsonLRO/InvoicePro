@@ -3,9 +3,9 @@
   "publicationRule": "Publish only after factual review, useful original content, and the required release approval.",
   "discoveryRule": "Every indexable route must receive an internal link from another built page.",
   "topics": [
-    { "topic": "Online invoicing software for your business", "intent": "product", "route": "/", "status": "implemented" },
-    { "topic": "Free invoice generator UK", "intent": "tool", "route": "/free-invoice-generator/", "status": "implemented" },
-    { "topic": "Free quote generator UK", "intent": "tool", "route": "/free-quote-generator/", "status": "implemented" },
+    { "topic": "Online invoice and quote software", "intent": "product", "route": "/", "status": "implemented" },
+    { "topic": "Free invoice maker online", "intent": "tool", "route": "/free-invoice-generator/", "status": "implemented" },
+    { "topic": "Free quote maker online", "intent": "tool", "route": "/free-quote-generator/", "status": "implemented" },
     { "topic": "Invoice template for sole traders", "intent": "template", "route": null, "status": "planned" },
     { "topic": "How to create an invoice UK", "intent": "guide", "route": "/invoice-guide/", "status": "implemented" },
     { "topic": "What an invoice must include", "intent": "guide", "route": null, "status": "legal-review-required" },
