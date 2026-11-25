@@ -2,11 +2,11 @@
 
 ## WEB-SEARCH-INTENT-001 — Clearer search-led website copy
 
-Status: review candidate, not merged or published.
+Status: released and publicly verified 2026-11-25. Owner-approved PR #264 merged through the protected workflow as `05ac3ee42234a91275dc0ed92434e828e66c8c8b`.
 Scope: align the homepage, Features page, existing workflow-page titles and free-maker titles with the invoicing tasks visitors seek; keep visible headings, descriptions and internal link text specific and readable.
 Product boundary: describe only existing quotes, invoices, saved details, payment records, recurring schedules, chosen reminders and income recorded in Tallyo. Keep browser-first access and the free one-off maker distinct from the full workspace. No pricing, trial, legal, provider, Auth or payment behaviour changes.
-Validation: the 31-route-plus-404 website suite, public Helper, analytics-consent and generator-conversion checks pass. Browser-based visual preview could not connect to the local server, so desktop/mobile rendering remains to be checked in the PR preview.
-Next action: review the focused copy and SEO metadata in the protected pull request; merge and production publication remain subject to the standing Owner/release boundary.
+Validation: the 31-route-plus-404 website suite, public Helper, analytics-consent and generator-conversion checks passed. PR Security, main Security and Pages workflows, and both Cloudflare Pages production checks passed. The protected PR preview required Cloudflare Access, but after release public browser readback confirmed the new homepage title, heading and copy; visual checks at 1440 px and 390 px on the homepage and 390 px on Features showed no clipping or horizontal overflow.
+Next action: monitor ordinary search and visitor feedback. Ranking improvement is not assumed; no further production action is authorised by this task.
 
 ## UX-BROWSER-ACCESS-001 — Browser-first website and optional app installation
 

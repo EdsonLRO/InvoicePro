@@ -1,5 +1,9 @@
 # Tallyo current status
 
+## Search-focused website copy — production active 2026-11-25
+
+Owner-approved PR #264 merged through the protected workflow as `05ac3ee42234a91275dc0ed92434e828e66c8c8b`. The homepage, Features page, four existing workflow pages and free-maker metadata now use specific, accurate invoicing search intents in titles, headings, explanations and links. Main Security and Pages workflows and both Cloudflare Pages production checks passed. Public readback confirmed the new homepage title, hero and links, and browser checks at desktop and phone widths found no clipping or horizontal overflow on the homepage and Features page. The change is public website copy and metadata only; Auth, payments, pricing, legal text, provider settings and app behaviour are unchanged. Search rankings remain unverified.
+
 ## Browser-first onboarding — production active 2026-11-21
 
 Owner-approved PR #262 merged through the protected workflow as `cd1732cec7b62644137b07f51492b5fa6c3e5433`. Main-branch Security and Pages workflows and both Cloudflare Pages production checks passed. The website now leads with creating an account and using the full workspace online without installing anything; public installation navigation and the guide were removed, and the retired guide URL redirects to Help. The no-account Free Invoice Maker remains separate. The signed-in app Account page now offers optional installation through the existing browser/device guidance. Public readback returned HTTP 200, confirmed the new website copy and app build `2026.11.21.1`, and confirmed the matching `tallyo-shell-2026-11-21-1` service-worker marker. No Auth, MFA, session, payment, provider or backend configuration changed.

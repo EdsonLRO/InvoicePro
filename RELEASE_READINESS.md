@@ -1,5 +1,9 @@
 # Tallyo Release Readiness Checklist
 
+## Search-focused website copy — released and verified, 2026-11-25
+
+The Owner approved PR #264 after the protected website preview deployed. It merged as `05ac3ee42234a91275dc0ed92434e828e66c8c8b`. Main Security run `45676064768`, Pages run `45676061449`, Cloudflare website deployment `6a93e627-e13b-4939-bcd1-6f83508daa6f` and Cloudflare app deployment `2408a270-20b2-4d8f-b3f0-c415f9cc10cc` passed. The protected PR preview required Cloudflare Access; after release, public browser readback confirmed the new homepage title, hero, browser-first copy and descriptive workflow links. Visual checks at 1440 px and 390 px on the homepage and 390 px on Features showed no clipping or horizontal overflow. The scoped website suite passed before merge; no Auth, financial, provider, pricing, legal or app-runtime source changed. Search ranking impact is not yet known. If rollback is needed, restore the previous website deployment `364203d2-63fa-434d-ae9b-4d5c0c66ea37` from preceding main commit `d1b9ea9e99c5c22fa7b041492057561caee74e39`.
+
 ## Browser-first onboarding — released and verified, 2026-11-21
 
 The Owner approved PR #262 for merge and production publication. It merged through the protected workflow as `cd1732cec7b62644137b07f51492b5fa6c3e5433`. Main-branch Security run `44946014986`, Pages run `44946014801`, Cloudflare app deployment `284b7f7d-2f3b-4f84-8bfc-04ef836664b5` and Cloudflare website deployment `b4162079-c798-420d-ac73-32d9218ca0b7` all passed. Public HTTP readback confirmed the website's browser-first copy and Create account action, absence of the old installation link, redirect of `/help/install-tallyo/` to `/help/`, app build `2026.11.21.1`, optional signed-in Account installation action, and service-worker cache `tallyo-shell-2026-11-21-1`.
