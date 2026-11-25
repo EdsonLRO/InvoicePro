@@ -24,7 +24,7 @@ export const workflowSteps = Object.freeze([
 export const featureGroups = Object.freeze([
   {
     label: "Create and agree",
-    title: "Move from a clear quote to the invoice",
+    title: "Create quotes, invoices and credit notes",
     description: "Create invoices, quotes and credit notes, review the recipient before sending and give customers a straightforward way to accept a quote.",
     items: ["Invoices, quotes and credit notes", "Secure customer quote acceptance", "One linked invoice created after acceptance", "Optional automatic invoice email or review first"],
     image: "/assets/product/growth-studio/quote-email-review.png",
@@ -33,7 +33,7 @@ export const featureGroups = Object.freeze([
   },
   {
     label: "Reuse everyday details",
-    title: "Keep customers and services ready for next time",
+    title: "Save customers, products and services for invoicing",
     description: "Save the details you use repeatedly, then bring them into a new document without typing the same information again.",
     items: ["Saved customers", "Reusable products and services", "Default descriptions and prices", "Customer documents, balances and recurring work together"],
     image: "/assets/product/growth-studio/products-services.png",
@@ -42,7 +42,7 @@ export const featureGroups = Object.freeze([
   },
   {
     label: "Repeat and follow up",
-    title: "Let regular invoicing follow your schedule",
+    title: "Schedule recurring invoices and overdue reminders",
     description: "Choose when Tallyo creates each recurring invoice, whether it should be emailed automatically and which overdue invoices receive reminders.",
     items: ["Weekly, monthly, quarterly or yearly schedules", "Automatic email or review before sending", "Opt-in overdue reminders", "Recurring history and next-run visibility"],
     image: "/assets/product/growth-studio/recurring-edit.png",
@@ -51,7 +51,7 @@ export const featureGroups = Object.freeze([
   },
   {
     label: "Payments and income",
-    title: "Understand the income recorded in Tallyo",
+    title: "Track invoice payments and recorded income",
     description: "Record deposits, part-payments, final payments and refunds, then use accessible summaries to see what was invoiced, received, still due or overdue.",
     items: ["Manual payment records and amount still to pay", connectPaymentPlaceholders.feature, "Income Insights with clear charts and written values", "Income records, UK period organisation and a downloadable Income Pack"],
     note: "Income views use only invoices and payments recorded in Tallyo. They do not include expenses, income received elsewhere, bank balances, tax calculations or HMRC filing.",
@@ -61,7 +61,7 @@ export const featureGroups = Object.freeze([
   },
   {
     label: "Brand every document",
-    title: "Choose the document style that suits your business",
+    title: "Brand your invoices, quotes and PDFs",
     description: "Apply one consistent presentation to invoices, quotes, credit notes, downloaded PDFs and emailed PDF attachments.",
     items: ["Tallyo, Basic, Modern and Professional layouts", "Brand colour and logo position", "Optional alternating item-row colours", "Live preview before saving"],
     image: "/assets/product/growth-studio/document-layouts.png",

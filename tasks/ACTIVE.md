@@ -1,5 +1,13 @@
 # Active programme: COMM-001 commercial launch integration
 
+## WEB-SEARCH-INTENT-001 — Clearer search-led website copy
+
+Status: review candidate, not merged or published.
+Scope: align the homepage, Features page, existing workflow-page titles and free-maker titles with the invoicing tasks visitors seek; keep visible headings, descriptions and internal link text specific and readable.
+Product boundary: describe only existing quotes, invoices, saved details, payment records, recurring schedules, chosen reminders and income recorded in Tallyo. Keep browser-first access and the free one-off maker distinct from the full workspace. No pricing, trial, legal, provider, Auth or payment behaviour changes.
+Validation: the 31-route-plus-404 website suite, public Helper, analytics-consent and generator-conversion checks pass. Browser-based visual preview could not connect to the local server, so desktop/mobile rendering remains to be checked in the PR preview.
+Next action: review the focused copy and SEO metadata in the protected pull request; merge and production publication remain subject to the standing Owner/release boundary.
+
 ## UX-BROWSER-ACCESS-001 — Browser-first website and optional app installation
 
 Status: released and publicly verified 2026-11-21. PR #262 merged through the protected workflow as `cd1732cec7b62644137b07f51492b5fa6c3e5433`.
